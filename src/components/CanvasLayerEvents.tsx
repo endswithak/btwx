@@ -23,12 +23,24 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   const { layerEvent } = props;
   const layerItem = useSelector((state: RootState) =>
     layerEvent && layerEvent.hitResult
-    ? state.layer.present.byId[layerEvent.hitResult.item.data.type === 'Layer'
-        ? layerEvent.hitResult.item.data.id
-        : layerEvent.hitResult.item.parent.data.id === 'textLines'
-          ? layerEvent.hitResult.item.parent.parent.data.id
-          : layerEvent.hitResult.item.parent.data.id
-      ]
+    ? state.layer.present.byId[(() => {
+        switch(layerEvent.hitResult.item.data.type) {
+          case 'LayerContainer':
+            return layerEvent.hitResult.item.children[0].data.id;
+          case 'Layer':
+            return layerEvent.hitResult.item.data.id;
+          case 'LayerChild': {
+            switch(layerEvent.hitResult.item.data.id) {
+              case 'textLines':
+                return layerEvent.hitResult.item.parent.data.id;
+              case 'textLine':
+                return layerEvent.hitResult.item.parent.parent.data.id;
+              default:
+                return layerEvent.hitResult.item.parent.data.id;
+            }
+          }
+        }
+      })()]
     : null
   );
   const nearestScopeAncestor = useSelector((state: RootState) => layerItem ? getNearestScopeAncestor(state.layer.present, layerItem.id) : null);

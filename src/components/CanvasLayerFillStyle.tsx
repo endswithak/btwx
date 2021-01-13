@@ -1,4 +1,5 @@
 import React, { ReactElement, useEffect, useState } from 'react';
+import tinyColor from 'tinycolor2';
 import { colorsMatch, gradientStopsMatch } from '../utils';
 import { uiPaperScope } from '../canvas';
 import CanvasTextLayerFillStyle from './CanvasTextLayerFillStyle';
@@ -12,7 +13,9 @@ interface CanvasLayerFillStyleProps {
 
 const CanvasLayerFillStyle = (props: CanvasLayerFillStyleProps): ReactElement => {
   const { id, layerItem, artboardItem, rendered } = props;
-  const isLine = layerItem ? layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' : null;
+  const isShape = layerItem ? layerItem.type === 'Shape' : null;
+  const isLine = layerItem ? isShape && (layerItem as Btwx.Shape).shapeType === 'Line' : null;
+  // const mask = layerItem && isShape ? (layerItem as Btwx.Shape).mask : null;
   const layerType = layerItem ? layerItem.type : null;
   const projectIndex = layerItem ? layerItem.type === 'Artboard' ? (layerItem as Btwx.Artboard).projectIndex : artboardItem.projectIndex : null;
   const layerFrame = layerItem ? layerItem.frame : null;
@@ -29,6 +32,7 @@ const CanvasLayerFillStyle = (props: CanvasLayerFillStyleProps): ReactElement =>
   const fillGradientDestinationX = layerItem ? layerItem.style.fill.gradient.destination.x : null;
   const fillGradientDestinationY = layerItem ? layerItem.style.fill.gradient.destination.y : null;
   const fillGradientStops = layerItem ? layerItem.style.fill.gradient.stops : null;
+  // const [prevMask, setPrevMask] = useState(mask);
   const [prevInnerWidth, setPrevInnerWidth] = useState(innerWidth);
   const [prevInnerHeight, setPrevInnerHeight] = useState(innerHeight);
   const [prevRotation, setPrevRotation] = useState(rotation);
@@ -99,9 +103,18 @@ const CanvasLayerFillStyle = (props: CanvasLayerFillStyleProps): ReactElement =>
           break;
       }
     } else {
-      paperLayer.fillColor = null;
+      paperLayer.fillColor = tinyColor('#fff').setAlpha(0).toHslString() as any;
     }
   }
+
+  // useEffect(() => {
+  //   if (rendered && prevMask !== mask) {
+  //     if (fillEnabled) {
+  //       applyFill();
+  //     }
+  //     setPrevMask(mask);
+  //   }
+  // }, [mask]);
 
   useEffect(() => {
     if (rendered && prevRotation !== rotation) {

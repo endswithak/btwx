@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { setLayersOblique } from '../store/actions/layer';
+import { setLayersObliqueThunk } from '../store/actions/layer';
 import { getSelectedOblique } from '../store/selectors/layer';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
@@ -21,11 +21,11 @@ const ObliqueInput = (): ReactElement => {
 
   const handleClick = (enabled: boolean): void => {
     if (enabled && oblique !== 14) {
-      dispatch(setLayersOblique({layers: selected, oblique: 14}));
+      dispatch(setLayersObliqueThunk({layers: selected, oblique: 14}));
       setOblique(enabled ? 14 : 0);
     }
     if (!enabled && oblique !== 0) {
-      dispatch(setLayersOblique({layers: selected, oblique: 0}));
+      dispatch(setLayersObliqueThunk({layers: selected, oblique: 0}));
       setOblique(0);
     }
   };

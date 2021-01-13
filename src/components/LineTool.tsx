@@ -5,7 +5,7 @@ import { isBetween } from '../utils';
 import { RootState } from '../store/reducers';
 import { uiPaperScope } from '../canvas';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
-import { setLineFrom, setLineTo, updateSelectionFrame } from '../store/actions/layer';
+import { setLineFromThunk, setLineToThunk, updateSelectionFrame } from '../store/actions/layer';
 import { getPaperLayer, getSelectedProjectIndices } from '../store/selectors/layer';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
@@ -55,7 +55,7 @@ const LineTool = (props: PaperToolProps): ReactElement => {
       setToHandlePosition(toHandle.position);
       setHandle(initialHandle as Btwx.LineHandle);
       setOriginalPaperSelection(selectedPaperLayer.children[0] as paper.Path);
-      updateSelectionFrame(selectedPaperLayer.bounds, initialHandle, selectedPaperLayer);
+      updateSelectionFrame(selectedPaperLayer.bounds, initialHandle, { from: fromHandle.position, to: toHandle.position });
     }
   }, [downEvent])
 
@@ -117,15 +117,13 @@ const LineTool = (props: PaperToolProps): ReactElement => {
 
   useEffect(() => {
     if (downEvent && upEvent && isEnabled && resizing) {
-      const newX = (upEvent.point.x - originalPaperSelection.position.x) / vector.length;
-      const newY = (upEvent.point.y - originalPaperSelection.position.y) / vector.length;
       switch(handle) {
         case 'lineFrom': {
-          dispatch(setLineFrom({id: selected[0], x: newX, y: newY}));
+          dispatch(setLineFromThunk({id: selected[0], x: toBounds.center.x, y: toBounds.center.y}));
           break;
         }
         case 'lineTo': {
-          dispatch(setLineTo({id: selected[0], x: newX, y: newY}));
+          dispatch(setLineToThunk({id: selected[0], x: toBounds.center.x, y: toBounds.center.y}));
           break;
         }
       }
@@ -185,17 +183,20 @@ const LineTool = (props: PaperToolProps): ReactElement => {
     if (toBounds && isEnabled) {
       const nextPosition = new uiPaperScope.Point(toBounds.center.x, toBounds.center.y);
       const selectedPaperLayer = getPaperLayer(selected[0], selectedProjectIndices[selected[0]]);
+      let lineHandles: { from: any; to: any };
       switch(handle) {
         case 'lineTo': {
+          lineHandles = { from: fromHandlePosition, to: nextPosition };
           originalPaperSelection.lastSegment.point = nextPosition;
           break;
         }
         case 'lineFrom': {
+          lineHandles = { from: nextPosition, to: toHandlePosition };
           originalPaperSelection.firstSegment.point = nextPosition;
           break;
         }
       }
-      updateSelectionFrame(selectedPaperLayer.bounds, initialHandle, selectedPaperLayer);
+      updateSelectionFrame(selectedPaperLayer.bounds, initialHandle, lineHandles);
     }
   }, [toBounds]);
 

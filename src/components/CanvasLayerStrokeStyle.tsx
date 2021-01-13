@@ -1,4 +1,5 @@
 import React, { ReactElement, useEffect, useState } from 'react';
+import tinyColor from 'tinycolor2';
 import { colorsMatch, gradientStopsMatch } from '../utils';
 import { uiPaperScope } from '../canvas';
 import CanvasTextLayerStrokeStyle from './CanvasTextLayerStrokeStyle';
@@ -12,7 +13,9 @@ interface CanvasLayerStrokeStyleProps {
 
 const CanvasLayerStrokeStyle = (props: CanvasLayerStrokeStyleProps): ReactElement => {
   const { id, layerItem, artboardItem, rendered } = props;
-  const isLine = layerItem ? layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line' : null;
+  const isShape = layerItem ? layerItem.type === 'Shape' : null;
+  const isLine = layerItem ? isShape && (layerItem as Btwx.Shape).shapeType === 'Line' : null;
+  // const mask = layerItem && isShape ? (layerItem as Btwx.Shape).mask : null;
   const layerType = layerItem ? layerItem.type : null;
   const projectIndex = layerItem ? layerItem.type === 'Artboard' ? (layerItem as Btwx.Artboard).projectIndex : artboardItem.projectIndex : null;
   const layerFrame = layerItem ? layerItem.frame : null;
@@ -27,6 +30,7 @@ const CanvasLayerStrokeStyle = (props: CanvasLayerStrokeStyleProps): ReactElemen
   const strokeGradientDestinationY = layerItem ? layerItem.style.stroke.gradient.destination.y : null;
   const strokeGradientStops = layerItem ? layerItem.style.stroke.gradient.stops : null;
   const strokeWidth = layerItem ? layerItem.style.stroke.width : null;
+  // const [prevMask, setPrevMask] = useState(mask);
   const [prevStrokeEnabled, setPrevStrokeEnabled] = useState(strokeEnabled);
   const [prevStrokeFillType, setPrevStrokeFillType] = useState(strokeFillType);
   const [prevStrokeColor, setPrevStrokeColor] = useState(strokeColor);
@@ -95,9 +99,18 @@ const CanvasLayerStrokeStyle = (props: CanvasLayerStrokeStyleProps): ReactElemen
           break;
       }
     } else {
-      paperLayer.strokeColor = null;
+      paperLayer.strokeColor = tinyColor('#fff').setAlpha(0).toHslString() as any;
     }
   }
+
+  // useEffect(() => {
+  //   if (rendered && prevMask !== mask) {
+  //     if (strokeEnabled) {
+  //       applyStroke();
+  //     }
+  //     setPrevMask(mask);
+  //   }
+  // }, [mask]);
 
   useEffect(() => {
     if (rendered && prevStrokeEnabled !== strokeEnabled) {

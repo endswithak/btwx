@@ -68,6 +68,9 @@ const DragTool = (props: PaperToolProps): ReactElement => {
           const absPosition = ogLayer.position;
           paperLayer.position.x = absPosition.x + vector.x;
           paperLayer.position.y = absPosition.y + vector.y;
+          if (paperLayer.data.layerType === 'Shape' && paperLayer.parent.data.id === 'maskGroup' && paperLayer.index === 1) {
+            paperLayer.parent.children[0].position = paperLayer.position;
+          }
         }
       });
       updateSelectionFrame(toBounds, dragHandle ? 'move' : 'none');
@@ -127,6 +130,9 @@ const DragTool = (props: PaperToolProps): ReactElement => {
             const absPosition = ogLayer.position;
             paperLayer.position.x = absPosition.x;
             paperLayer.position.y = absPosition.y;
+            if (paperLayer.data.layerType === 'Shape' && paperLayer.parent.data.id === 'maskGroup' && paperLayer.index === 1) {
+              paperLayer.parent.children[0].position = paperLayer.position;
+            }
           }
         });
       }

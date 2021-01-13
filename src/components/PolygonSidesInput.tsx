@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
 import { uiPaperScope } from '../canvas';
 import { RootState } from '../store/reducers';
-import { setPolygonsSides } from '../store/actions/layer';
+import { setPolygonsSidesThunk } from '../store/actions/layer';
 import { getPaperLayer, getSelectedProjectIndices, getSelectedPolygonSides, getSelectedById } from '../store/selectors/layer';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
@@ -31,6 +31,7 @@ const PolygonSidesInput = (): ReactElement => {
     handleChange(e);
     Object.keys(selectedById).forEach((key) => {
       const layerItem = selectedById[key];
+      const isMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
       const paperLayerCompound = getPaperLayer(layerItem.id, selectedProjectIndices[layerItem.id]) as paper.CompoundPath;
       const paperLayer = paperLayerCompound.children[0] as paper.Path;
       const startPosition = paperLayer.position;
@@ -46,6 +47,11 @@ const PolygonSidesInput = (): ReactElement => {
       newShape.rotation = layerItem.transform.rotation;
       newShape.position = startPosition;
       paperLayer.pathData = newShape.pathData;
+      if (isMask) {
+        const maskGroup = paperLayerCompound.parent;
+        const mask = maskGroup.children[0] as paper.Path;
+        mask.pathData = newShape.pathData;
+      }
     });
   };
 
@@ -59,7 +65,7 @@ const PolygonSidesInput = (): ReactElement => {
         if (Math.round(nextSides) < 3) {
           nextSides = 3;
         }
-        dispatch(setPolygonsSides({layers: selected, sides: Math.round(nextSides)}));
+        dispatch(setPolygonsSidesThunk({layers: selected, sides: Math.round(nextSides)}));
         setSides(Math.round(nextSides));
       }
     } catch(error) {

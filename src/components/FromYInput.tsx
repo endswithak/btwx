@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
 import { getSelectedFromY } from '../store/selectors/layer';
-import { setLinesFromY } from '../store/actions/layer';
+import { setLinesFromYThunk } from '../store/actions/layer';
 import SidebarInput from './SidebarInput';
 
 const FromYInput = (): ReactElement => {
@@ -25,7 +25,7 @@ const FromYInput = (): ReactElement => {
     try {
       const nextY = mexp.eval(`${y}`) as any;
       if (nextY !== yValue) {
-        dispatch(setLinesFromY({layers: selected, y: Math.round(nextY)}));
+        dispatch(setLinesFromYThunk({layers: selected, y: Math.round(nextY)}));
         setY(Math.round(nextY));
       } else {
         setY(yValue !== 'multi' ? Math.round(yValue as number) : yValue);

@@ -11,6 +11,8 @@ interface CanvasLayerShadowStyleProps {
 
 const CanvasLayerShadowStyle = (props: CanvasLayerShadowStyleProps): ReactElement => {
   const { id, layerItem, artboardItem, rendered } = props;
+  const isShape = layerItem ? layerItem.type === 'Shape' : null;
+  // const mask = layerItem && isShape ? (layerItem as Btwx.Shape).mask : null;
   const projectIndex = layerItem ? layerItem.type === 'Artboard' ? (layerItem as Btwx.Artboard).projectIndex : artboardItem.projectIndex : null;
   const layerType = layerItem ? layerItem.type : null;
   const shadowEnabled = layerItem ? layerItem.style.shadow.enabled : null;
@@ -19,6 +21,7 @@ const CanvasLayerShadowStyle = (props: CanvasLayerShadowStyleProps): ReactElemen
   const shadowBlur = layerItem ? layerItem.style.shadow.blur : null;
   const shadowOffsetX = layerItem ? layerItem.style.shadow.offset.x : null;
   const shadowOffsetY = layerItem ? layerItem.style.shadow.offset.y : null;
+  // const [prevMask, setPrevMask] = useState(mask);
   const [prevShadowEnabled, setPrevShadowEnabled] = useState(shadowEnabled);
   const [prevShadowFillType, setPrevShadowFillType] = useState(shadowFillType);
   const [prevShadowColor, setPrevShadowColor] = useState(shadowColor);
@@ -54,6 +57,15 @@ const CanvasLayerShadowStyle = (props: CanvasLayerShadowStyleProps): ReactElemen
       paperLayer.shadowColor = null;
     }
   }
+
+  // useEffect(() => {
+  //   if (rendered && prevMask !== mask) {
+  //     if (shadowEnabled) {
+  //       applyShadow();
+  //     }
+  //     setPrevMask(mask);
+  //   }
+  // }, [mask]);
 
   useEffect(() => {
     if (rendered && prevShadowEnabled !== shadowEnabled) {

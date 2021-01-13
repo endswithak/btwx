@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
 import { uiPaperScope } from '../canvas';
-import { setStarsPoints } from '../store/actions/layer';
+import { setStarsPointsThunk } from '../store/actions/layer';
 import { getPaperLayer, getSelectedProjectIndices, getSelectedStarPoints, getSelectedById } from '../store/selectors/layer';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
@@ -31,6 +31,7 @@ const StarPointsInput = (): ReactElement => {
     handleChange(e);
     Object.keys(selectedById).forEach((key) => {
       const layerItem = selectedById[key];
+      const isMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
       const paperLayerCompound = getPaperLayer(layerItem.id, selectedProjectIndices[layerItem.id]) as paper.CompoundPath;
       const paperLayer = paperLayerCompound.children[0] as paper.Path;
       const startPosition = paperLayer.position;
@@ -48,6 +49,11 @@ const StarPointsInput = (): ReactElement => {
       newShape.rotation = layerItem.transform.rotation;
       newShape.position = startPosition;
       paperLayer.pathData = newShape.pathData;
+      if (isMask) {
+        const maskGroup = paperLayerCompound.parent;
+        const mask = maskGroup.children[0] as paper.Path;
+        mask.pathData = newShape.pathData;
+      }
     });
   };
 
@@ -61,7 +67,7 @@ const StarPointsInput = (): ReactElement => {
         if (Math.round(nextPoints) < 3) {
           nextPoints = 3;
         }
-        dispatch(setStarsPoints({layers: selected, points: Math.round(nextPoints)}));
+        dispatch(setStarsPointsThunk({layers: selected, points: Math.round(nextPoints)}));
         setPoints(Math.round(nextPoints));
       }
     } catch(error) {

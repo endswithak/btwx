@@ -54,11 +54,13 @@ const CanvasLayerTextStyle = (props: CanvasLayerTextStyleProps): ReactElement =>
   useEffect(() => {
     if (rendered && prevFontFamily !== fontFamily) {
       const { paperLayer, textLinesGroup, textContent, textBackground } = getPaperLayer();
+      paperLayer.rotation = -layerItem.transform.rotation;
       textContent.fontFamily = fontFamily;
       textLinesGroup.children.forEach((line: paper.PointText) => {
         line.fontFamily = fontFamily;
       });
       textBackground.bounds = textLinesGroup.bounds;
+      paperLayer.rotation = layerItem.transform.rotation;
       setPrevFontFamily(fontFamily);
     }
   }, [fontFamily]);
@@ -66,11 +68,13 @@ const CanvasLayerTextStyle = (props: CanvasLayerTextStyleProps): ReactElement =>
   useEffect(() => {
     if (rendered && prevFontWeight !== fontWeight) {
       const { paperLayer, textLinesGroup, textContent, textBackground } = getPaperLayer();
+      paperLayer.rotation = -layerItem.transform.rotation;
       textContent.fontWeight = fontWeight;
       textLinesGroup.children.forEach((line: paper.PointText) => {
         line.fontWeight = fontWeight;
       });
       textBackground.bounds = textLinesGroup.bounds;
+      paperLayer.rotation = layerItem.transform.rotation;
       setPrevFontWeight(fontWeight);
     }
   }, [fontWeight]);
@@ -78,11 +82,13 @@ const CanvasLayerTextStyle = (props: CanvasLayerTextStyleProps): ReactElement =>
   useEffect(() => {
     if (rendered && prevFontSize !== fontSize) {
       const { paperLayer, textLinesGroup, textContent, textBackground } = getPaperLayer();
+      paperLayer.rotation = -layerItem.transform.rotation;
       textContent.fontSize = fontSize;
       textLinesGroup.children.forEach((line: paper.PointText) => {
         line.fontSize = fontSize;
       });
       textBackground.bounds = textLinesGroup.bounds;
+      paperLayer.rotation = layerItem.transform.rotation;
       setPrevFontSize(fontSize);
     }
   }, [fontSize]);
@@ -111,7 +117,7 @@ const CanvasLayerTextStyle = (props: CanvasLayerTextStyleProps): ReactElement =>
       paperLayer.rotation = -layerItem.transform.rotation;
       textLinesGroup.children.forEach((line: paper.PointText) => {
         // leading affects horizontal skew
-        line.leading = line.fontSize;
+        line.leading = layerItem.textStyle.fontSize;
         line.skew(new uiPaperScope.Point(prevOblique, 0));
         line.skew(new uiPaperScope.Point(-oblique, 0));
         line.leading = layerItem.textStyle.leading;

@@ -18,16 +18,26 @@ const CanvasLayerFrame = (props: CanvasLayerFrameProps): ReactElement => {
   const y = layerItem ? layerItem.frame.y : null;
   const innerWidth = layerItem ? layerItem.frame.innerWidth : null;
   const innerHeight = layerItem ? layerItem.frame.innerHeight : null;
-  const pointX = layerItem && layerItem.type === 'Text' ? (layerItem as Btwx.Text).point.x : null;
-  const pointY = layerItem && layerItem.type === 'Text' ? (layerItem as Btwx.Text).point.y : null;
-  const justification = layerItem && layerItem.type === 'Text' ? (layerItem as Btwx.Text).textStyle.justification : null;
+  const isShape = layerItem && layerItem.type === 'Shape';
+  const isText = layerItem && layerItem.type === 'Text';
+  const isMask = isShape && (layerItem as Btwx.Shape).mask;
+  const isLine = isShape && (layerItem as Btwx.Shape).shapeType === 'Line';
+  const pointX = isText ? (layerItem as Btwx.Text).point.x : null;
+  const pointY = isText ? (layerItem as Btwx.Text).point.y : null;
+  const fromX = isLine ? (layerItem as Btwx.Line).from.x : null;
+  const fromY = isLine ? (layerItem as Btwx.Line).from.y : null;
+  const toX = isLine ? (layerItem as Btwx.Line).to.x : null;
+  const toY = isLine ? (layerItem as Btwx.Line).to.y : null;
   const [prevX, setPrevX] = useState(x);
   const [prevY, setPrevY] = useState(y);
   const [prevInnerWidth, setPrevInnerWidth] = useState(innerWidth);
   const [prevInnerHeight, setPrevInnerHeight] = useState(innerHeight);
   const [prevPointX, setPrevPointX] = useState(pointX);
   const [prevPointY, setPrevPointY] = useState(pointY);
-  const [prevJustification, setPrevJustification] = useState(justification);
+  const [prevFromX, setPrevFromX] = useState(fromX);
+  const [prevFromY, setPrevFromY] = useState(fromY);
+  const [prevToX, setPrevToX] = useState(toX);
+  const [prevToY, setPrevToY] = useState(toY);
 
   const getPaperLayer = (): paper.Item => {
     return uiPaperScope.projects[projectIndex].getItem({data: {id}});
@@ -51,18 +61,66 @@ const CanvasLayerFrame = (props: CanvasLayerFrameProps): ReactElement => {
     };
   }
 
+  ////////////////////////////
+  // handle line from position
+  ////////////////////////////
+
   useEffect(() => {
-    if (rendered && prevPointX !== pointX && layerType === 'Text') {
+    if (rendered && prevFromX !== fromX && isLine) {
+      const paperLayer = getPaperLayer() as paper.Path;
+      const paperFromX = artboardItem.frame.x + fromX;
+      paperLayer.firstSegment.point.x = paperFromX;
+      setPrevFromX(fromX);
+    }
+  }, [fromX]);
+
+  useEffect(() => {
+    if (rendered && prevFromY !== fromY && isLine) {
+      const paperLayer = getPaperLayer() as paper.Path;
+      const paperFromY = artboardItem.frame.y + fromY;
+      paperLayer.firstSegment.point.y = paperFromY;
+      setPrevFromY(fromY);
+    }
+  }, [fromY]);
+
+  ////////////////////////////
+  // handle line to position
+  ////////////////////////////
+
+  useEffect(() => {
+    if (rendered && prevToX !== toX && isLine) {
+      const paperLayer = getPaperLayer() as paper.Path;
+      const paperToX = artboardItem.frame.x + toX;
+      paperLayer.lastSegment.point.x = paperToX;
+      setPrevToX(toX);
+    }
+  }, [toX]);
+
+  useEffect(() => {
+    if (rendered && prevToY !== toY && isLine) {
+      const paperLayer = getPaperLayer() as paper.Path;
+      const paperToY = artboardItem.frame.y + toY;
+      paperLayer.lastSegment.point.y = paperToY;
+      setPrevToY(toY);
+    }
+  }, [toY]);
+
+  ////////////////////////////
+  // handle text position
+  ////////////////////////////
+
+  useEffect(() => {
+    if (rendered && prevPointX !== pointX && isText) {
       const { paperLayer, textLinesGroup, textContent, textBackground} = getTextPaperLayers();
       paperLayer.rotation = -layerItem.transform.rotation;
       const absPointX = pointX + artboardItem.frame.x;
       textContent.point.x = absPointX;
       textLinesGroup.children.forEach((line: paper.PointText) => {
-        line.leading = line.fontSize;
+        line.leading = (layerItem as Btwx.Text).textStyle.fontSize;
         line.skew(new uiPaperScope.Point((layerItem as Btwx.Text).textStyle.oblique, 0));
         line.point.x = absPointX;
         line.skew(new uiPaperScope.Point(-(layerItem as Btwx.Text).textStyle.oblique, 0));
-        line.leading = textContent.leading;
+        line.leading = (layerItem as Btwx.Text).textStyle.leading;
       });
       textBackground.bounds = textLinesGroup.bounds;
       paperLayer.rotation = layerItem.transform.rotation;
@@ -71,17 +129,17 @@ const CanvasLayerFrame = (props: CanvasLayerFrameProps): ReactElement => {
   }, [pointX]);
 
   useEffect(() => {
-    if (rendered && prevPointY !== pointY && layerType === 'Text') {
+    if (rendered && prevPointY !== pointY && isText) {
       const { paperLayer, textLinesGroup, textContent, textBackground} = getTextPaperLayers();
       paperLayer.rotation = -layerItem.transform.rotation;
       const absPointY = pointY + artboardItem.frame.y;
       textContent.point.y = absPointY;
       textLinesGroup.children.forEach((line: paper.PointText, index: number) => {
-        line.leading = line.fontSize;
+        line.leading = (layerItem as Btwx.Text).textStyle.fontSize;
         line.skew(new uiPaperScope.Point((layerItem as Btwx.Text).textStyle.oblique, 0));
         line.point.y = absPointY + (index * (layerItem as Btwx.Text).textStyle.leading);
         line.skew(new uiPaperScope.Point(-(layerItem as Btwx.Text).textStyle.oblique, 0));
-        line.leading = textContent.leading;
+        line.leading = (layerItem as Btwx.Text).textStyle.leading;
       });
       textBackground.bounds = textLinesGroup.bounds;
       paperLayer.rotation = layerItem.transform.rotation;
@@ -89,28 +147,45 @@ const CanvasLayerFrame = (props: CanvasLayerFrameProps): ReactElement => {
     }
   }, [pointY]);
 
+  ////////////////////////////
+  // handle rest of positions
+  ////////////////////////////
+
   useEffect(() => {
-    if (rendered && prevX !== x && layerType !== 'Text') {
+    if (rendered && prevX !== x && !isText && !isLine) {
       const paperLayer = getPaperLayer();
       paperLayer.position = getLayerAbsPosition(layerItem.frame, layerType === 'Artboard' ? null : artboardItem.frame);
+      if (isMask) {
+        const maskGroup = paperLayer.parent;
+        const mask = maskGroup.children[0];
+        mask.position = paperLayer.position;
+      }
       setPrevX(x);
     }
   }, [x]);
 
   useEffect(() => {
-    if (rendered && prevY !== y && layerType !== 'Text') {
+    if (rendered && prevY !== y && !isText && !isLine) {
       const paperLayer = getPaperLayer();
       paperLayer.position = getLayerAbsPosition(layerItem.frame, layerType === 'Artboard' ? null : artboardItem.frame);
+      if (isMask) {
+        const maskGroup = paperLayer.parent;
+        const mask = maskGroup.children[0];
+        mask.position = paperLayer.position;
+      }
       setPrevY(y);
     }
   }, [y]);
 
+  ////////////////////////////
+  // handle width
+  ////////////////////////////
+
   useEffect(() => {
-    if (rendered && prevInnerWidth !== innerWidth && layerType !== 'Text') {
+    if (rendered && prevInnerWidth !== innerWidth && !isText && !isShape) {
       const paperLayer = getPaperLayer();
       const startPosition = paperLayer.position;
       switch(layerType) {
-        case 'Shape':
         case 'Image': {
           if (rotation !== 0) {
             paperLayer.rotation = -rotation;
@@ -136,12 +211,15 @@ const CanvasLayerFrame = (props: CanvasLayerFrameProps): ReactElement => {
     }
   }, [innerWidth]);
 
+  ////////////////////////////
+  // handle height
+  ////////////////////////////
+
   useEffect(() => {
-    if (rendered && prevInnerHeight !== innerHeight && layerType !== 'Text') {
+    if (rendered && prevInnerHeight !== innerHeight && !isText && !isShape) {
       const paperLayer = getPaperLayer();
       const startPosition = paperLayer.position;
       switch(layerType) {
-        case 'Shape':
         case 'Image': {
           if (rotation !== 0) {
             paperLayer.rotation = -rotation;

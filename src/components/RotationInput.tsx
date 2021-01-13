@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
 import { getSelectedRotation } from '../store/selectors/layer';
-import { setLayersRotation } from '../store/actions/layer';
+import { setLayersRotationThunk } from '../store/actions/layer';
 import SidebarInput from './SidebarInput';
 
 const RotationInput = (): ReactElement => {
@@ -29,7 +29,7 @@ const RotationInput = (): ReactElement => {
         if (nextRotation >= 360 || nextRotation <= -360) {
           nextRotation = 0;
         }
-        dispatch(setLayersRotation({layers: selected, rotation: Math.round(nextRotation)}));
+        dispatch(setLayersRotationThunk({layers: selected, rotation: Math.round(nextRotation)}));
         setRotation(Math.round(nextRotation));
       } else {
         setRotation(rotationValue !== 'multi' ? Math.round(rotationValue) : rotationValue);

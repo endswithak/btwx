@@ -11,6 +11,7 @@ interface CanvasLayerTransformProps {
 const CanvasLayerTransform = (props: CanvasLayerTransformProps): ReactElement => {
   const { id, layerItem, artboardItem, rendered } = props;
   const projectIndex = layerItem ? layerItem.type === 'Artboard' ? (layerItem as Btwx.Artboard).projectIndex : artboardItem.projectIndex : null;
+  const isShape = layerItem && layerItem.type === 'Shape';
   const rotation =  layerItem ? layerItem.transform.rotation : null;
   const horizontalFlip = layerItem ? layerItem.transform.horizontalFlip : null;
   const verticalFlip = layerItem ? layerItem.transform.verticalFlip : null;
@@ -23,7 +24,7 @@ const CanvasLayerTransform = (props: CanvasLayerTransformProps): ReactElement =>
   }
 
   useEffect(() => {
-    if (rendered && rotation !== prevRotation) {
+    if (rendered && rotation !== prevRotation && !isShape) {
       const paperLayer = getPaperLayer();
       paperLayer.rotation = -prevRotation;
       paperLayer.rotation = rotation;
@@ -32,7 +33,7 @@ const CanvasLayerTransform = (props: CanvasLayerTransformProps): ReactElement =>
   }, [rotation]);
 
   useEffect(() => {
-    if (rendered && horizontalFlip !== prevHorizontalFlip) {
+    if (rendered && horizontalFlip !== prevHorizontalFlip && !isShape) {
       const paperLayer = getPaperLayer();
       paperLayer.scale(-1, 1);
       setPrevHorizontalFlip(horizontalFlip);
@@ -40,7 +41,7 @@ const CanvasLayerTransform = (props: CanvasLayerTransformProps): ReactElement =>
   }, [horizontalFlip]);
 
   useEffect(() => {
-    if (rendered && verticalFlip !== prevVerticalFlip) {
+    if (rendered && verticalFlip !== prevVerticalFlip && !isShape) {
       const paperLayer = getPaperLayer();
       paperLayer.scale(1, -1);
       setPrevVerticalFlip(verticalFlip);

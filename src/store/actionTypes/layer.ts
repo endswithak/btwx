@@ -1311,6 +1311,8 @@ export interface SetLayersBottom {
 export interface SetLayerWidthPayload {
   id: string;
   width: number;
+  pathData?: string;
+  bounds?: Btwx.Frame;
 }
 
 export interface SetLayerWidth {
@@ -1321,6 +1323,8 @@ export interface SetLayerWidth {
 export interface SetLayersWidthPayload {
   layers: string[];
   width: number;
+  pathData?: string[];
+  bounds?: Btwx.Frame[];
 }
 
 export interface SetLayersWidth {
@@ -1331,6 +1335,8 @@ export interface SetLayersWidth {
 export interface SetLayerHeightPayload {
   id: string;
   height: number;
+  pathData?: string;
+  bounds?: Btwx.Frame;
 }
 
 export interface SetLayerHeight {
@@ -1341,6 +1347,8 @@ export interface SetLayerHeight {
 export interface SetLayersHeightPayload {
   layers: string[];
   height: number;
+  pathData?: string[];
+  bounds?: Btwx.Frame[];
 }
 
 export interface SetLayersHeight {
@@ -1351,6 +1359,8 @@ export interface SetLayersHeight {
 export interface SetLayerRotationPayload {
   id: string;
   rotation: number;
+  bounds?: Btwx.Frame;
+  pathData?: string;
 }
 
 export interface SetLayerRotation {
@@ -1361,6 +1371,8 @@ export interface SetLayerRotation {
 export interface SetLayersRotationPayload {
   layers: string[];
   rotation: number;
+  bounds?: Btwx.Frame[];
+  pathData?: string[];
 }
 
 export interface SetLayersRotation {
@@ -2219,7 +2231,6 @@ export interface SetLayersJustification {
 export interface SetLayerObliquePayload {
   id: string;
   oblique: number;
-  lines?: Btwx.TextLine[];
   bounds?: Btwx.Frame;
 }
 
@@ -2231,7 +2242,6 @@ export interface SetLayerOblique {
 export interface SetLayersObliquePayload {
   layers: string[];
   oblique: number;
-  lines?: Btwx.TextLine[][];
   bounds?: Btwx.Frame[];
 }
 
@@ -2654,6 +2664,8 @@ export interface DivideLayers {
 export interface SetRoundedRadiusPayload {
   id: string;
   radius: number;
+  pathData?: string;
+  bounds?: Btwx.Frame;
 }
 
 export interface SetRoundedRadius {
@@ -2664,6 +2676,8 @@ export interface SetRoundedRadius {
 export interface SetRoundedRadiiPayload {
   layers: string[];
   radius: number;
+  pathData?: string[];
+  bounds?: Btwx.Frame[];
 }
 
 export interface SetRoundedRadii {
@@ -2674,6 +2688,8 @@ export interface SetRoundedRadii {
 export interface SetPolygonSidesPayload {
   id: string;
   sides: number;
+  pathData?: string;
+  bounds?: Btwx.Frame;
 }
 
 export interface SetPolygonSides {
@@ -2684,6 +2700,8 @@ export interface SetPolygonSides {
 export interface SetPolygonsSidesPayload {
   layers: string[];
   sides: number;
+  pathData?: string[];
+  bounds?: Btwx.Frame[];
 }
 
 export interface SetPolygonsSides {
@@ -2694,6 +2712,8 @@ export interface SetPolygonsSides {
 export interface SetStarPointsPayload {
   id: string;
   points: number;
+  pathData?: string;
+  bounds?: Btwx.Frame;
 }
 
 export interface SetStarPoints {
@@ -2704,6 +2724,8 @@ export interface SetStarPoints {
 export interface SetStarsPointsPayload {
   layers: string[];
   points: number;
+  pathData?: string[];
+  bounds?: Btwx.Frame[];
 }
 
 export interface SetStarsPoints {
@@ -2714,6 +2736,8 @@ export interface SetStarsPoints {
 export interface SetStarRadiusPayload {
   id: string;
   radius: number;
+  pathData?: string;
+  bounds?: Btwx.Frame;
 }
 
 export interface SetStarRadius {
@@ -2724,6 +2748,8 @@ export interface SetStarRadius {
 export interface SetStarsRadiusPayload {
   layers: string[];
   radius: number;
+  pathData?: string[];
+  bounds?: Btwx.Frame[];
 }
 
 export interface SetStarsRadius {
@@ -2735,6 +2761,9 @@ export interface SetLineFromXPayload {
   id: string;
   x: number;
   setEdit?: boolean;
+  pathData?: string;
+  bounds?: Btwx.Frame;
+  rotation?: number;
 }
 
 export interface SetLineFromX {
@@ -2746,6 +2775,9 @@ export interface SetLinesFromXPayload {
   layers: string[];
   x: number;
   setEdit?: boolean;
+  pathData?: string[];
+  bounds?: Btwx.Frame[];
+  rotation?: number[];
 }
 
 export interface SetLinesFromX {
@@ -2757,6 +2789,9 @@ export interface SetLineFromYPayload {
   id: string;
   y: number;
   setEdit?: boolean;
+  pathData?: string;
+  bounds?: Btwx.Frame;
+  rotation?: number;
 }
 
 export interface SetLineFromY {
@@ -2768,6 +2803,9 @@ export interface SetLinesFromYPayload {
   layers: string[];
   y: number;
   setEdit?: boolean;
+  pathData?: string[];
+  bounds?: Btwx.Frame[];
+  rotation?: number[];
 }
 
 export interface SetLinesFromY {
@@ -2779,6 +2817,9 @@ export interface SetLineFromPayload {
   id: string;
   x: number;
   y: number;
+  pathData?: string;
+  bounds?: Btwx.Frame;
+  rotation?: number;
 }
 
 export interface SetLineFrom {
@@ -2790,6 +2831,9 @@ export interface SetLineToXPayload {
   id: string;
   x: number;
   setEdit?: boolean;
+  pathData?: string;
+  bounds?: Btwx.Frame;
+  rotation?: number;
 }
 
 export interface SetLineToX {
@@ -2801,6 +2845,9 @@ export interface SetLinesToXPayload {
   layers: string[];
   x: number;
   setEdit?: boolean;
+  pathData?: string[];
+  bounds?: Btwx.Frame[];
+  rotation?: number[];
 }
 
 export interface SetLinesToX {
@@ -2812,6 +2859,9 @@ export interface SetLineToYPayload {
   id: string;
   y: number;
   setEdit?: boolean;
+  pathData?: string;
+  bounds?: Btwx.Frame;
+  rotation?: number;
 }
 
 export interface SetLineToY {
@@ -2823,6 +2873,9 @@ export interface SetLinesToYPayload {
   layers: string[];
   y: number;
   setEdit?: boolean;
+  pathData?: string[];
+  bounds?: Btwx.Frame[];
+  rotation?: number[];
 }
 
 export interface SetLinesToY {
@@ -2834,6 +2887,9 @@ export interface SetLineToPayload {
   id: string;
   x: number;
   y: number;
+  pathData?: string;
+  bounds?: Btwx.Frame;
+  rotation?: number;
 }
 
 export interface SetLineTo {

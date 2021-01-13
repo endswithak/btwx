@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
 import { getSelectedFromX } from '../store/selectors/layer';
-import { setLinesFromX } from '../store/actions/layer';
+import { setLinesFromXThunk } from '../store/actions/layer';
 import SidebarInput from './SidebarInput';
 
 const FromXInput = (): ReactElement => {
@@ -25,7 +25,7 @@ const FromXInput = (): ReactElement => {
     try {
       const nextX = mexp.eval(`${x}`) as any;
       if (nextX !== xValue) {
-        dispatch(setLinesFromX({layers: selected, x: Math.round(nextX)}));
+        dispatch(setLinesFromXThunk({layers: selected, x: Math.round(nextX)}));
         setX(Math.round(nextX));
       } else {
         setX(xValue !== 'multi' ? Math.round(xValue as number) : xValue);

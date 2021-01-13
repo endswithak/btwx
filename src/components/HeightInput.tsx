@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
 import { getSelectedInnerHeight } from '../store/selectors/layer';
-import { setLayersHeight } from '../store/actions/layer';
+import { setLayersHeightThunk } from '../store/actions/layer';
 import SidebarInput from './SidebarInput';
 
 const HeightInput = (): ReactElement => {
@@ -29,7 +29,7 @@ const HeightInput = (): ReactElement => {
         if (nextHeight < 1) {
           nextHeight = 1;
         }
-        dispatch(setLayersHeight({layers: selected, height: Math.round(nextHeight)}));
+        dispatch(setLayersHeightThunk({layers: selected, height: Math.round(nextHeight)}));
         setHeight(Math.round(nextHeight));
       } else {
         setHeight(heightValue !== 'multi' ? Math.round(heightValue) : heightValue);

@@ -4,7 +4,7 @@ import mexp from 'math-expression-evaluator';
 import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
 import { getSelectedInnerWidth } from '../store/selectors/layer';
-import { setLayersWidth } from '../store/actions/layer';
+import { setLayersWidthThunk } from '../store/actions/layer';
 
 const WidthInput = (): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
@@ -29,7 +29,7 @@ const WidthInput = (): ReactElement => {
         if (nextWidth < 1) {
           nextWidth = 1;
         }
-        dispatch(setLayersWidth({layers: selected, width: Math.round(nextWidth)}));
+        dispatch(setLayersWidthThunk({layers: selected, width: Math.round(nextWidth)}));
         setWidth(Math.round(nextWidth));
       } else {
         setWidth(widthValue !== 'multi' ? Math.round(widthValue) : widthValue);

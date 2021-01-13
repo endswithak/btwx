@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
 import { uiPaperScope } from '../canvas';
 import { RootState } from '../store/reducers';
-import { setRoundedRadii } from '../store/actions/layer';
+import { setRoundedRadiiThunk } from '../store/actions/layer';
 import { getPaperLayer, getSelectedProjectIndices, getSelectedRoundedRadius, getSelectedById } from '../store/selectors/layer';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
@@ -31,6 +31,7 @@ const RoundedRadiusInput = (): ReactElement => {
     handleChange(e);
     Object.keys(selectedById).forEach((key) => {
       const layerItem = selectedById[key];
+      const isMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
       const paperLayerCompound = getPaperLayer(layerItem.id, selectedProjectIndices[layerItem.id]) as paper.CompoundPath;
       const paperLayer = paperLayerCompound.children[0] as paper.Path;
       const nextRadius = e.target.value / 100;
@@ -44,6 +45,11 @@ const RoundedRadiusInput = (): ReactElement => {
       });
       paperLayer.pathData = newShape.pathData;
       paperLayer.rotation = layerItem.transform.rotation;
+      if (isMask) {
+        const maskGroup = paperLayerCompound.parent;
+        const mask = maskGroup.children[0] as paper.Path;
+        mask.pathData = newShape.pathData;
+      }
     });
   };
 
@@ -57,7 +63,7 @@ const RoundedRadiusInput = (): ReactElement => {
         nextRadius = 0;
       }
       if (nextRadius !== radiusValue) {
-        dispatch(setRoundedRadii({layers: selected, radius: Math.round(nextRadius) / 100}));
+        dispatch(setRoundedRadiiThunk({layers: selected, radius: Math.round(nextRadius) / 100}));
         setRadius(Math.round(nextRadius));
       }
     } catch(error) {
