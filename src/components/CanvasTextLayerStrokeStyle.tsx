@@ -1,78 +1,69 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 
 interface CanvasTextLayerStrokeStyleProps {
-  id: string;
   layerItem: Btwx.Text;
-  artboardItem: Btwx.Artboard;
   rendered: boolean;
   applyStroke(): void;
 }
 
 const CanvasTextLayerStrokeStyle = (props: CanvasTextLayerStrokeStyleProps): ReactElement => {
-  const { id, layerItem, artboardItem, rendered, applyStroke } = props;
-  const text = layerItem ? layerItem.text : null;
-  const fontFamily = layerItem ? layerItem.textStyle.fontFamily : null;
-  const fontWeight = layerItem ? layerItem.textStyle.fontWeight : null;
-  const fontSize = layerItem ? layerItem.textStyle.fontSize : null;
-  const justification = layerItem ? layerItem.textStyle.justification : null;
-  const oblique = layerItem ? layerItem.textStyle.oblique : null;
-  const leading = layerItem ? layerItem.textStyle.leading : null;
-  const [prevText, setPrevText] = useState(text);
-  const [prevFontFamily, setPrevFontFamily] = useState(fontFamily);
-  const [prevFontWeight, setPrevFontWeight] = useState(fontWeight);
-  const [prevFontSize, setPrevFontSize] = useState(fontSize);
-  const [prevJustification, setPrevJustification] = useState(justification);
-  const [prevOblique, setPrevOblique] = useState(oblique);
-  const [prevLeading, setPrevLeading] = useState(leading);
+  const { rendered, layerItem, applyStroke } = props;
+  const [prevText, setPrevText] = useState(layerItem.text);
+  const [prevFontFamily, setPrevFontFamily] = useState(layerItem.textStyle.fontFamily);
+  const [prevFontWeight, setPrevFontWeight] = useState(layerItem.textStyle.fontWeight);
+  const [prevFontSize, setPrevFontSize] = useState(layerItem.textStyle.fontSize);
+  const [prevJustification, setPrevJustification] = useState(layerItem.textStyle.justification);
+  const [prevOblique, setPrevOblique] = useState(layerItem.textStyle.oblique);
+  const [prevLeading, setPrevLeading] = useState(layerItem.textStyle.leading);
 
   useEffect(() => {
-    if (rendered && prevText !== text) {
+    if (rendered && prevText !== layerItem.text) {
       applyStroke();
-      setPrevText(text);
+      setPrevText(layerItem.text);
     }
-  }, [text]);
+  }, [layerItem.text]);
 
   useEffect(() => {
-    if (rendered && prevFontFamily !== fontFamily) {
+    if (rendered && prevFontFamily !== layerItem.textStyle.fontFamily) {
       applyStroke();
-      setPrevFontFamily(fontFamily);
+      setPrevFontFamily(layerItem.textStyle.fontFamily);
     }
-  }, [fontFamily]);
+  }, [layerItem.textStyle.fontFamily]);
 
   useEffect(() => {
-    if (rendered && prevFontWeight !== fontWeight) {
+    if (rendered && prevFontWeight !== layerItem.textStyle.fontWeight) {
       applyStroke();
-      setPrevFontWeight(fontWeight);
+      setPrevFontWeight(layerItem.textStyle.fontWeight);
     }
-  }, [fontWeight]);
+  }, [layerItem.textStyle.fontWeight]);
 
   useEffect(() => {
-    if (rendered && prevFontSize !== fontSize) {
+    if (rendered && prevFontSize !== layerItem.textStyle.fontSize) {
       applyStroke();
-      setPrevFontSize(fontSize);
+      setPrevFontSize(layerItem.textStyle.fontSize);
     }
-  }, [fontSize]);
+  }, [layerItem.textStyle.fontSize]);
 
   useEffect(() => {
-    if (rendered && prevJustification !== justification) {
+    if (rendered && prevJustification !== layerItem.textStyle.justification) {
       applyStroke();
-      setPrevJustification(justification);
+      setPrevJustification(layerItem.textStyle.justification);
     }
-  }, [justification]);
+  }, [layerItem.textStyle.justification]);
 
   useEffect(() => {
-    if (rendered && prevOblique !== oblique) {
+    if (rendered && prevOblique !== layerItem.textStyle.oblique) {
       applyStroke();
-      setPrevOblique(oblique);
+      setPrevOblique(layerItem.textStyle.oblique);
     }
-  }, [oblique]);
+  }, [layerItem.textStyle.oblique]);
 
   useEffect(() => {
-    if (rendered && prevLeading !== leading) {
+    if (rendered && prevLeading !== layerItem.textStyle.leading) {
       applyStroke();
-      setPrevLeading(leading);
+      setPrevLeading(layerItem.textStyle.leading);
     }
-  }, [leading]);
+  }, [layerItem.textStyle.leading]);
 
   return (
     <></>

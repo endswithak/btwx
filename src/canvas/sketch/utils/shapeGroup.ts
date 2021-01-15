@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { uiPaperScope } from '../../';
+import { paperMain } from '../../';
 
 interface ApplyBooleanOperation {
   operation: any;
@@ -47,7 +47,7 @@ export const getNestedPath = (layer: any): paper.PathItem => {
 };
 
 export const renderShapeGroup = (layer: any): any => {
-  const shapeContainer = new uiPaperScope.Layer({insert: false});
+  const shapeContainer = new paperMain.Layer({insert: false});
   const boolResult = layer.layers.reduce((result: any, current: any) => {
     let nextBoolLayer;
     switch(current.type) {
@@ -55,7 +55,7 @@ export const renderShapeGroup = (layer: any): any => {
         nextBoolLayer = getNestedPath(renderShapeGroup(current));
         break;
       case 'ShapePath':
-        nextBoolLayer = new uiPaperScope.CompoundPath({
+        nextBoolLayer = new paperMain.CompoundPath({
           pathData: current.pathData,
           fillColor: 'red',
           closed: current.closed,

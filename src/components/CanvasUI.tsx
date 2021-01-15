@@ -2,7 +2,7 @@
 import React, { ReactElement, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 import ActiveArtboardFrameWrap from './ActiveArtboardFrameWrap';
 import SelectionFrameWrap from './SelectionFrameWrap';
 import GradientFrameWrap from './GradientFrameWrap';
@@ -20,11 +20,11 @@ const CanvasUI = (): ReactElement => {
   useEffect(() => {
     if (ref.current) {
       const canvasWrap = document.getElementById('canvas-container');
-      uiPaperScope.setup(ref.current);
-      uiPaperScope.project.clear();
-      uiPaperScope.project.importJSON(projectJSON);
-      uiPaperScope.view.viewSize = new uiPaperScope.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
-      uiPaperScope.view.matrix.set(matrix);
+      paperMain.setup(ref.current);
+      paperMain.project.clear();
+      paperMain.project.importJSON(projectJSON);
+      paperMain.view.viewSize = new paperMain.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
+      paperMain.view.matrix.set(matrix);
     }
   }, []);
 

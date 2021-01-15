@@ -1,35 +1,31 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { uiPaperScope } from '../canvas';
+import { paperMain, paperPreview } from '../canvas';
 
-interface CanvasLayerStrokeOptionsStyleProps {
-  id: string;
+export interface CanvasLayerStrokeOptionsStyleProps {
   layerItem: Btwx.Layer;
+  parentItem: Btwx.Artboard | Btwx.Group;
   artboardItem: Btwx.Artboard;
+  paperScope: Btwx.PaperScope;
   rendered: boolean;
+  projectIndex: number;
 }
 
 const CanvasLayerStrokeOptionsStyle = (props: CanvasLayerStrokeOptionsStyleProps): ReactElement => {
-  const { id, layerItem, artboardItem, rendered } = props;
-  const layerType = layerItem ? layerItem.type : null;
-  const projectIndex = layerItem ? layerItem.type === 'Artboard' ? (layerItem as Btwx.Artboard).projectIndex : artboardItem.projectIndex : null;
-  const strokeCap = layerItem ? layerItem.style.strokeOptions.cap : null;
-  const strokeJoin = layerItem ? layerItem.style.strokeOptions.join : null;
-  const strokeDashArrayWidth = layerItem ? layerItem.style.strokeOptions.dashArray[0] : null;
-  const strokeDashArrayGap = layerItem ? layerItem.style.strokeOptions.dashArray[1] : null;
-  const strokeDashOffset = layerItem ? layerItem.style.strokeOptions.dashOffset : null;
-  const [prevStrokeCap, setPrevStrokeCap] = useState(strokeCap);
-  const [prevStrokeJoin, setPrevStrokeJoin] = useState(strokeJoin);
-  const [prevStrokeDashArrayWidth, setPrevStrokeDashArrayWidth] = useState(strokeDashArrayWidth);
-  const [prevStrokeDashArrayGap, setPrevStrokeDashArrayGap] = useState(strokeDashArrayGap);
-  const [prevStrokeDashOffset, setPrevStrokeDashOffset] = useState(strokeDashOffset);
+  const { paperScope, rendered, layerItem, parentItem, projectIndex, artboardItem } = props;
+  const [prevStrokeCap, setPrevStrokeCap] = useState(layerItem.style.strokeOptions.cap);
+  const [prevStrokeJoin, setPrevStrokeJoin] = useState(layerItem.style.strokeOptions.join);
+  const [prevStrokeDashArrayWidth, setPrevStrokeDashArrayWidth] = useState(layerItem.style.strokeOptions.dashArray[0]);
+  const [prevStrokeDashArrayGap, setPrevStrokeDashArrayGap] = useState(layerItem.style.strokeOptions.dashArray[1]);
+  const [prevStrokeDashOffset, setPrevStrokeDashOffset] = useState(layerItem.style.strokeOptions.dashOffset);
 
   const getStyleLayer = (): paper.Item => {
-    let paperLayer = uiPaperScope.projects[projectIndex].getItem({data: {id}});
+    const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
+    let paperLayer = paperProject.getItem({data: {id: layerItem.id}});
     if (paperLayer) {
-      if (layerType === 'Text') {
+      if (layerItem.type === 'Text') {
         paperLayer = paperLayer.getItem({data: {id: 'textLines'}});
       }
-      if (layerType === 'Artboard') {
+      if (layerItem.type === 'Artboard') {
         paperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
       }
     }
@@ -37,44 +33,41 @@ const CanvasLayerStrokeOptionsStyle = (props: CanvasLayerStrokeOptionsStyleProps
   }
 
   useEffect(() => {
-    if (rendered && prevStrokeCap !== strokeCap) {
+    if (rendered && prevStrokeCap !== layerItem.style.strokeOptions.cap) {
       const paperLayer = getStyleLayer();
-      paperLayer.strokeCap = strokeCap;
-      setPrevStrokeCap(strokeCap);
+      paperLayer.strokeCap = layerItem.style.strokeOptions.cap;
+      setPrevStrokeCap(layerItem.style.strokeOptions.cap);
     }
-  }, [strokeCap]);
+  }, [layerItem.style.strokeOptions.cap]);
 
   useEffect(() => {
-    if (rendered && prevStrokeJoin !== strokeJoin) {
+    if (rendered && prevStrokeJoin !== layerItem.style.strokeOptions.join) {
       const paperLayer = getStyleLayer();
-      paperLayer.strokeJoin = strokeJoin;
-      setPrevStrokeJoin(strokeJoin);
+      paperLayer.strokeJoin = layerItem.style.strokeOptions.join;
+      setPrevStrokeJoin(layerItem.style.strokeOptions.join);
     }
-  }, [strokeJoin]);
+  }, [layerItem.style.strokeOptions.join]);
 
   useEffect(() => {
-    if (rendered && prevStrokeDashArrayWidth !== strokeDashArrayWidth) {
+    if (rendered && prevStrokeDashArrayWidth !== layerItem.style.strokeOptions.dashArray[0]) {
       const paperLayer = getStyleLayer();
-      paperLayer.dashArray = [strokeDashArrayWidth, strokeDashArrayGap];
-      setPrevStrokeDashArrayWidth(strokeDashArrayWidth);
+      paperLayer.dashArray = [layerItem.style.strokeOptions.dashArray[0], layerItem.style.strokeOptions.dashArray[1]];
+      setPrevStrokeDashArrayWidth(layerItem.style.strokeOptions.dashArray[0]);
     }
-  }, [strokeDashArrayWidth]);
+    if (rendered && prevStrokeDashArrayGap !== layerItem.style.strokeOptions.dashArray[1]) {
+      const paperLayer = getStyleLayer();
+      paperLayer.dashArray = [layerItem.style.strokeOptions.dashArray[0], layerItem.style.strokeOptions.dashArray[1]];
+      setPrevStrokeDashArrayGap(layerItem.style.strokeOptions.dashArray[1]);
+    }
+  }, [layerItem.style.strokeOptions.dashArray]);
 
   useEffect(() => {
-    if (rendered && prevStrokeDashArrayGap !== strokeDashArrayGap) {
+    if (rendered && prevStrokeDashOffset !== layerItem.style.strokeOptions.dashOffset) {
       const paperLayer = getStyleLayer();
-      paperLayer.dashArray = [strokeDashArrayWidth, strokeDashArrayGap];
-      setPrevStrokeDashArrayGap(strokeDashArrayGap);
+      paperLayer.dashOffset = layerItem.style.strokeOptions.dashOffset;
+      setPrevStrokeDashOffset(layerItem.style.strokeOptions.dashOffset);
     }
-  }, [strokeDashArrayGap]);
-
-  useEffect(() => {
-    if (rendered && prevStrokeDashOffset !== strokeDashOffset) {
-      const paperLayer = getStyleLayer();
-      paperLayer.dashOffset = strokeDashOffset;
-      setPrevStrokeDashOffset(strokeDashOffset);
-    }
-  }, [strokeDashOffset]);
+  }, [layerItem.style.strokeOptions.dashOffset]);
 
   return (
     <></>

@@ -5,7 +5,7 @@ import paper from 'paper';
 import isSVG from 'is-svg';
 import { clipboard } from 'electron';
 import { LayerState } from '../reducers/layer';
-import { uiPaperScope } from '../../canvas';
+import { paperMain } from '../../canvas';
 import { bufferToBase64, colorsMatch, gradientsMatch } from '../../utils';
 import { RootState } from '../reducers';
 import { ARTBOARDS_PER_PROJECT } from '../../constants';
@@ -31,7 +31,7 @@ export const getActiveArtboard = (state: RootState): string => state.layer.prese
 export const getDocumentImages = (state: RootState): { allIds: string[]; byId: { [id: string]: Btwx.DocumentImage } } => state.documentSettings.images;
 export const getLayerSearch = (state: RootState): string => state.leftSidebar.search;
 export const getLayerSearching = (state: RootState): boolean => state.leftSidebar.searching;
-export const getTree = (state: RootState): any => state.layer.present.tree;
+export const getTree = (state: RootState): any => state.layer.present.tree.tree;
 
 export const getActiveArtboardTextLayers = createSelector(
   [ getActiveArtboard, getLayersById, getAllTextIds ],
@@ -166,7 +166,7 @@ export const getTreeWalker = createSelector(
   [ getTree ],
   (tree) => {
     const allScopesOpen = (id: string) => {
-      return tree[id].scope.every(scope => tree[scope].showChildren);
+      return tree[id].scope.every((scope: string) => tree[scope].showChildren);
     }
     const getNodeData = (node: any, nestingLevel: number): any => {
       return {
@@ -543,9 +543,9 @@ export const getActiveArtboardBounds = createSelector(
   (activeArtboard, byId) => {
     if (activeArtboard) {
       const artboardItem = byId[activeArtboard];
-      return new uiPaperScope.Rectangle({
-        from: new uiPaperScope.Point(artboardItem.frame.x - (artboardItem.frame.width / 2), artboardItem.frame.y - (artboardItem.frame.height / 2)),
-        to: new uiPaperScope.Point(artboardItem.frame.x + (artboardItem.frame.width / 2), artboardItem.frame.y + (artboardItem.frame.height / 2))
+      return new paperMain.Rectangle({
+        from: new paperMain.Point(artboardItem.frame.x - (artboardItem.frame.width / 2), artboardItem.frame.y - (artboardItem.frame.height / 2)),
+        to: new paperMain.Point(artboardItem.frame.x + (artboardItem.frame.width / 2), artboardItem.frame.y + (artboardItem.frame.height / 2))
       });
     } else {
       return null;
@@ -729,7 +729,7 @@ export const canBringSelectedForward = createSelector(
     return selected.length > 0 && !selected.some((id: string) => {
       const layerItem = selectedWithParentsById[id];
       const parentItem = selectedWithParentsById[layerItem.parent];
-      return layerItem.index === parentItem.children.length - 1;
+      return parentItem.children.indexOf(id) === parentItem.children.length - 1;
     });
   }
 );
@@ -739,7 +739,8 @@ export const canSendSelectedBackward = createSelector(
   (selected, selectedWithParentsById) => {
     return selected.length > 0 && !selected.some((id: string) => {
       const layerItem = selectedWithParentsById[id];
-      return layerItem.index === 0;
+      const parentItem = selectedWithParentsById[layerItem.parent];
+      return parentItem.children.indexOf(id) === 0;
     });
   }
 );
@@ -1648,11 +1649,11 @@ export const getLayerType = (store: LayerState, id: string): Btwx.LayerType => {
 };
 
 export const getPaperLayerByPaperId = (id: string): paper.Item => {
-  return uiPaperScope.project.getItem({ data: { id } });
+  return paperMain.project.getItem({ data: { id } });
 };
 
 export const getSelectedPaperLayers = (): paper.Item[] => {
-  return uiPaperScope.projects.reduce((result, current, index) => {
+  return paperMain.projects.reduce((result, current, index) => {
     if (index !== 1) {
       const selectedItems = current.getItems({data: {selected: true}});
       result = selectedItems ? [...result, ...selectedItems] : result;
@@ -1662,7 +1663,7 @@ export const getSelectedPaperLayers = (): paper.Item[] => {
 };
 
 export const getPaperLayer = (id: string, projectIndex: number): paper.Item => {
-  const project = uiPaperScope.projects[projectIndex];
+  const project = paperMain.projects[projectIndex];
   if (project) {
     return project.getItem({ data: { id } });
   } else {
@@ -1895,7 +1896,7 @@ export const getPaperLayersBounds = (layers: paper.Item[]): paper.Rectangle => {
     } else {
       const topLeft = paper.Point.min(result.topLeft, current.bounds.topLeft);
       const bottomRight = paper.Point.max(result.bottomRight, current.bounds.bottomRight);
-      result = new uiPaperScope.Rectangle({
+      result = new paperMain.Rectangle({
         from: topLeft,
         to: bottomRight
       });
@@ -1922,9 +1923,9 @@ export const getClosestPaperLayer = (point: paper.Point, layers: paper.Item[]): 
 export const getLayerBounds = (store: LayerState, id: string): paper.Rectangle => {
   const layerItem = store.byId[id] as Btwx.Layer;
   const layerPosition = getAbsolutePosition(store, id);
-  const topLeft = new uiPaperScope.Point(layerPosition.x - (layerItem.frame.width / 2), layerPosition.y - (layerItem.frame.height / 2));
-  const bottomRight = new uiPaperScope.Point(layerPosition.x + (layerItem.frame.width / 2), layerPosition.y + (layerItem.frame.height / 2));
-  return new uiPaperScope.Rectangle({
+  const topLeft = new paperMain.Point(layerPosition.x - (layerItem.frame.width / 2), layerPosition.y - (layerItem.frame.height / 2));
+  const bottomRight = new paperMain.Point(layerPosition.x + (layerItem.frame.width / 2), layerPosition.y + (layerItem.frame.height / 2));
+  return new paperMain.Rectangle({
     from: topLeft,
     to: bottomRight
   });
@@ -1942,7 +1943,7 @@ export const getLayersBounds = (store: LayerState, layers: string[]): paper.Rect
       nextTopLeft = paper.Point.min(result.topLeft, layerBounds.topLeft);
       nextBottomRight = paper.Point.max(result.bottomRight, layerBounds.bottomRight);
     }
-    return new uiPaperScope.Rectangle({
+    return new paperMain.Rectangle({
       from: nextTopLeft,
       to: nextBottomRight
     });
@@ -1951,9 +1952,9 @@ export const getLayersBounds = (store: LayerState, layers: string[]): paper.Rect
 
 export const getLayerRelativeBounds = (store: LayerState, id: string): paper.Rectangle => {
   const layerItem = store.byId[id] as Btwx.Layer;
-  const topLeft = new uiPaperScope.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
-  const bottomRight = new uiPaperScope.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
-  return new uiPaperScope.Rectangle({
+  const topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
+  const bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
+  return new paperMain.Rectangle({
     from: topLeft,
     to: bottomRight
   });
@@ -1971,7 +1972,7 @@ export const getLayersRelativeBounds = (store: LayerState, layers: string[]): pa
       nextTopLeft = paper.Point.min(result.topLeft, layerBounds.topLeft);
       nextBottomRight = paper.Point.max(result.bottomRight, layerBounds.bottomRight);
     }
-    return new uiPaperScope.Rectangle({
+    return new paperMain.Rectangle({
       from: nextTopLeft,
       to: nextBottomRight
     });
@@ -1981,7 +1982,7 @@ export const getLayersRelativeBounds = (store: LayerState, layers: string[]): pa
 export const getClipboardTopLeft = (layerItems: Btwx.Layer[]): paper.Point => {
   const paperLayerPoints = layerItems.reduce((result, current) => {
     const layerItem = current;
-    const topLeft = new uiPaperScope.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
+    const topLeft = new paperMain.Point(layerItem.frame.x - (layerItem.frame.width / 2), layerItem.frame.y - (layerItem.frame.height / 2));
     return [...result, topLeft];
   }, []);
   return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.min) : null;
@@ -1990,7 +1991,7 @@ export const getClipboardTopLeft = (layerItems: Btwx.Layer[]): paper.Point => {
 export const getClipboardBottomRight = (layerItems: Btwx.Layer[]): paper.Point => {
   const paperLayerPoints = layerItems.reduce((result, current) => {
     const layerItem = current;
-    const bottomRight = new uiPaperScope.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
+    const bottomRight = new paperMain.Point(layerItem.frame.x + (layerItem.frame.width / 2), layerItem.frame.y + (layerItem.frame.height / 2));
     return [...result, bottomRight];
   }, []);
   return paperLayerPoints.length > 0 ? paperLayerPoints.reduce(paper.Point.max) : null;
@@ -1999,7 +2000,7 @@ export const getClipboardBottomRight = (layerItems: Btwx.Layer[]): paper.Point =
 export const getClipboardCenter = (layerItems: Btwx.Layer[]): paper.Point => {
   const topLeft = getClipboardTopLeft(layerItems);
   const bottomRight = getClipboardBottomRight(layerItems);
-  const bounds = new uiPaperScope.Rectangle({
+  const bounds = new paperMain.Rectangle({
     from: topLeft,
     to: bottomRight
   });
@@ -2023,8 +2024,8 @@ export const getDestinationEquivalent = (store: LayerState, layer: string, desti
         const layerArtboardPosition = getPositionInArtboard(layerItem, layerArtboard);
         const resultArtboardPosition = getPositionInArtboard(result, childArtboard);
         const childArtboardPosition = getPositionInArtboard(childLayer, childArtboard);
-        const resultDistance = new uiPaperScope.Point(resultArtboardPosition.x, resultArtboardPosition.y).subtract(new uiPaperScope.Point(layerArtboardPosition.x, layerArtboardPosition.y));
-        const childDistance = new uiPaperScope.Point(childArtboardPosition.x, childArtboardPosition.y).subtract(new uiPaperScope.Point(layerArtboardPosition.x, layerArtboardPosition.y));
+        const resultDistance = new paperMain.Point(resultArtboardPosition.x, resultArtboardPosition.y).subtract(new paperMain.Point(layerArtboardPosition.x, layerArtboardPosition.y));
+        const childDistance = new paperMain.Point(childArtboardPosition.x, childArtboardPosition.y).subtract(new paperMain.Point(layerArtboardPosition.x, layerArtboardPosition.y));
         if (childDistance.length < resultDistance.length) {
           result = childLayer;
         }
@@ -2498,12 +2499,12 @@ export const getTweenEventLayerTweens = (store: LayerState, eventId: string, lay
 
 export const getAbsolutePosition = (store: LayerState, id: string): paper.Point => {
   const layerItem = store.byId[id];
-  const layerPosition = new uiPaperScope.Point(layerItem.frame.x, layerItem.frame.y);
+  const layerPosition = new paperMain.Point(layerItem.frame.x, layerItem.frame.y);
   if (layerItem.type === 'Artboard') {
     return layerPosition;
   } else {
     const artboardItem = store.byId[layerItem.artboard];
-    const artboardPosition = new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y);
+    const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
     return layerPosition.add(artboardPosition);
   }
 };
@@ -2512,9 +2513,9 @@ export const getGradientOrigin = (store: LayerState, id: string, originPoint: Bt
   const layerItem = store.byId[id];
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const layerPosition = getAbsolutePosition(store, id);
-  const originPaperPoint = new uiPaperScope.Point(originPoint.x, originPoint.y);
+  const originPaperPoint = new paperMain.Point(originPoint.x, originPoint.y);
   const rel = originPaperPoint.subtract(layerPosition);
-  return new uiPaperScope.Point((rel.x / (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)), (rel.y / (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)));
+  return new paperMain.Point((rel.x / (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)), (rel.y / (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)));
 };
 
 export const getGradientOriginPoint = (store: LayerState, id: string, prop: 'fill' | 'stroke'): paper.Point => {
@@ -2523,16 +2524,16 @@ export const getGradientOriginPoint = (store: LayerState, id: string, prop: 'fil
   const origin = gradient.origin;
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const layerPosition = getAbsolutePosition(store, id);
-  return new uiPaperScope.Point((origin.x * (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)) + layerPosition.x, (origin.y * (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)) + layerPosition.y);
+  return new paperMain.Point((origin.x * (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)) + layerPosition.x, (origin.y * (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)) + layerPosition.y);
 };
 
 export const getGradientDestination = (store: LayerState, id: string, destinationPoint: Btwx.Point): paper.Point => {
   const layerItem = store.byId[id];
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const layerPosition = getAbsolutePosition(store, id);
-  const destinationPaperPoint = new uiPaperScope.Point(destinationPoint.x, destinationPoint.y);
+  const destinationPaperPoint = new paperMain.Point(destinationPoint.x, destinationPoint.y);
   const rel = destinationPaperPoint.subtract(layerPosition);
-  return new uiPaperScope.Point((rel.x / (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)), (rel.y / (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)));
+  return new paperMain.Point((rel.x / (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)), (rel.y / (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)));
 };
 
 export const getGradientDestinationPoint = (store: LayerState, id: string, prop: 'fill' | 'stroke'): paper.Point => {
@@ -2541,15 +2542,15 @@ export const getGradientDestinationPoint = (store: LayerState, id: string, prop:
   const destination = gradient.destination;
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const layerPosition = getAbsolutePosition(store, id);
-  return new uiPaperScope.Point((destination.x * (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)) + layerPosition.x, (destination.y * (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)) + layerPosition.y);
+  return new paperMain.Point((destination.x * (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)) + layerPosition.x, (destination.y * (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)) + layerPosition.y);
 };
 
 export const getLineFromPoint = (layerItem: Btwx.Line): paper.Point => {
-  return new uiPaperScope.Point((layerItem.from.x * layerItem.frame.innerWidth) + layerItem.frame.x, (layerItem.from.y * layerItem.frame.innerWidth) + layerItem.frame.y);
+  return new paperMain.Point((layerItem.from.x * layerItem.frame.innerWidth) + layerItem.frame.x, (layerItem.from.y * layerItem.frame.innerWidth) + layerItem.frame.y);
 };
 
 export const getLineToPoint = (layerItem: Btwx.Line): paper.Point => {
-  return new uiPaperScope.Point((layerItem.to.x * layerItem.frame.innerWidth) + layerItem.frame.x, (layerItem.to.y * layerItem.frame.innerWidth) + layerItem.frame.y);
+  return new paperMain.Point((layerItem.to.x * layerItem.frame.innerWidth) + layerItem.frame.x, (layerItem.to.y * layerItem.frame.innerWidth) + layerItem.frame.y);
 };
 
 export const getLineVector = (layerItem: Btwx.Line): paper.Point => {
@@ -2562,7 +2563,7 @@ export const getGradientStops = (stops: Btwx.GradientStop[]): paper.GradientStop
   return stops.reduce((result, current) => {
     result = [
       ...result,
-      new uiPaperScope.GradientStop({ hue: current.color.h, saturation: current.color.s, lightness: current.color.l, alpha: current.color.a } as paper.Color, current.position)
+      new paperMain.GradientStop({ hue: current.color.h, saturation: current.color.s, lightness: current.color.l, alpha: current.color.a } as paper.Color, current.position)
     ];
     return result;
   }, []);

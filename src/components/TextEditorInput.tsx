@@ -8,7 +8,7 @@ import { closeTextEditor } from '../store/actions/textEditor';
 import { setCanvasFocusing } from '../store/actions/canvasSettings';
 import { setLayerTextThunk } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 
 const TextEditorInput = (): ReactElement => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -58,9 +58,9 @@ const TextEditorInput = (): ReactElement => {
       paperLayer.visible = false;
       textAreaRef.current.focus();
       textAreaRef.current.select();
-      const topLeft = uiPaperScope.view.projectToView(paperLayer.bounds.topLeft);
-      const topCenter = uiPaperScope.view.projectToView(paperLayer.bounds.topCenter);
-      const topRight = uiPaperScope.view.projectToView(paperLayer.bounds.topRight);
+      const topLeft = paperMain.view.projectToView(paperLayer.bounds.topLeft);
+      const topCenter = paperMain.view.projectToView(paperLayer.bounds.topCenter);
+      const topRight = paperMain.view.projectToView(paperLayer.bounds.topRight);
       setPos({
         x: (() => {
           switch(justification) {
@@ -128,11 +128,11 @@ const TextEditorInput = (): ReactElement => {
           transform: (() => {
             switch(justification) {
               case 'left':
-                return `scale(${uiPaperScope.view.zoom})`;
+                return `scale(${paperMain.view.zoom})`;
               case 'center':
-                return `scale(${uiPaperScope.view.zoom}) translateX(-50%)`;
+                return `scale(${paperMain.view.zoom}) translateX(-50%)`;
               case 'right':
-                return `scale(${uiPaperScope.view.zoom}) translateX(-100%)`;
+                return `scale(${paperMain.view.zoom}) translateX(-100%)`;
             }
           })()
         }} />

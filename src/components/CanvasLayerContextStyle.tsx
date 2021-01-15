@@ -1,29 +1,28 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { uiPaperScope } from '../canvas';
+import { paperMain, paperPreview } from '../canvas';
 
 interface CanvasLayerContextStyleProps {
-  id: string;
   layerItem: Btwx.Layer;
+  parentItem: Btwx.Artboard | Btwx.Group;
   artboardItem: Btwx.Artboard;
+  paperScope: Btwx.PaperScope;
   rendered: boolean;
+  projectIndex: number;
 }
 
 const CanvasLayerContextStyle = (props: CanvasLayerContextStyleProps): ReactElement => {
-  const { id, layerItem, artboardItem, rendered } = props;
-  const layerType = layerItem ? layerItem.type : null;
-  const projectIndex = layerItem ? layerItem.type === 'Artboard' ? (layerItem as Btwx.Artboard).projectIndex : artboardItem.projectIndex : null;
-  const opacity = layerItem ? layerItem.style.opacity : null;
-  const blendMode = layerItem ? layerItem.style.blendMode : null;
-  const [prevOpacity, setPrevOpacity] = useState(opacity);
-  const [prevBlendMode, setPrevBlendMode] = useState(blendMode);
+  const { paperScope, rendered, layerItem, parentItem, projectIndex, artboardItem } = props;
+  const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
+  const [prevOpacity, setPrevOpacity] = useState(layerItem.style.opacity);
+  const [prevBlendMode, setPrevBlendMode] = useState(layerItem.style.blendMode);
 
   const getStyleLayer = (): paper.Item => {
-    let paperLayer = uiPaperScope.projects[projectIndex].getItem({data: {id}});
+    let paperLayer = paperProject.getItem({data: {id: layerItem.id}});
     if (paperLayer) {
-      if (layerType === 'Text') {
+      if (layerItem.type === 'Text') {
         paperLayer = paperLayer.getItem({data: {id: 'textLines'}});
       }
-      if (layerType === 'Artboard') {
+      if (layerItem.type === 'Artboard') {
         paperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
       }
     }
@@ -31,20 +30,20 @@ const CanvasLayerContextStyle = (props: CanvasLayerContextStyleProps): ReactElem
   }
 
   useEffect(() => {
-    if (rendered && prevOpacity !== opacity) {
+    if (rendered && prevOpacity !== layerItem.style.opacity) {
       const paperLayer = getStyleLayer();
-      paperLayer.opacity = opacity;
-      setPrevOpacity(opacity);
+      paperLayer.opacity = layerItem.style.opacity;
+      setPrevOpacity(layerItem.style.opacity);
     }
-  }, [opacity]);
+  }, [layerItem.style.opacity]);
 
   useEffect(() => {
-    if (rendered && prevBlendMode !== blendMode) {
+    if (rendered && prevBlendMode !== layerItem.style.blendMode) {
       const paperLayer = getStyleLayer();
-      paperLayer.blendMode = blendMode;
-      setPrevBlendMode(blendMode);
+      paperLayer.blendMode = layerItem.style.blendMode;
+      setPrevBlendMode(layerItem.style.blendMode);
     }
-  }, [blendMode]);
+  }, [layerItem.style.blendMode]);
 
   return (
     <></>
@@ -56,7 +55,7 @@ export default CanvasLayerContextStyle;
 // import React, { ReactElement, useEffect } from 'react';
 // import { useSelector } from 'react-redux';
 // import { RootState } from '../store/reducers';
-// import { uiPaperScope } from '../canvas';
+// import { paperMain } from '../canvas';
 
 // interface CanvasLayerContextStyleProps {
 //   id: string;
@@ -72,7 +71,7 @@ export default CanvasLayerContextStyle;
 //   const blendMode = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id].style.blendMode);
 
 //   const getStyleLayer = (): paper.Item => {
-//     let paperLayer = uiPaperScope.projects[projectIndex].getItem({data: {id}});
+//     let paperLayer = paperMain.projects[projectIndex].getItem({data: {id}});
 //     if (paperLayer) {
 //       if (layerType === 'Text') {
 //         paperLayer = paperLayer.getItem({data: {id: 'textLines'}});

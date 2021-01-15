@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useState, useEffect, ReactElement } from 'react';
 import { useSelector } from 'react-redux';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 import { RootState } from '../store/reducers';
 import { updateMeasureGuides } from '../store/actions/layer';
 import { getPaperLayersBounds, getClosestPaperLayer, getLayerProjectIndices } from '../store/selectors/layer';
@@ -52,31 +52,31 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   const getSnapZones = (currentToBounds: paper.Rectangle, scaleOverride?: number): Btwx.SnapZones => {
     const zoneMin = 0.5;
     const zoneMax = 20;
-    const zoneScale = scaleOverride ? scaleOverride : 0.5 * (8 / uiPaperScope.view.zoom);
+    const zoneScale = scaleOverride ? scaleOverride : 0.5 * (8 / paperMain.view.zoom);
     const scale = zoneScale < zoneMin ? zoneMin : zoneScale > zoneMax ? zoneMax : zoneScale;
-    const top = hitTestZones.all || hitTestZones.top ? new uiPaperScope.Rectangle({
-      from: new uiPaperScope.Point(uiPaperScope.view.bounds.left, currentToBounds.top - scale),
-      to: new uiPaperScope.Point(uiPaperScope.view.bounds.right, currentToBounds.top + scale)
+    const top = hitTestZones.all || hitTestZones.top ? new paperMain.Rectangle({
+      from: new paperMain.Point(paperMain.view.bounds.left, currentToBounds.top - scale),
+      to: new paperMain.Point(paperMain.view.bounds.right, currentToBounds.top + scale)
     }) : null;
-    const middle = hitTestZones.all || hitTestZones.middle ? new uiPaperScope.Rectangle({
-      from: new uiPaperScope.Point(uiPaperScope.view.bounds.left, currentToBounds.center.y - scale),
-      to: new uiPaperScope.Point(uiPaperScope.view.bounds.right, currentToBounds.center.y + scale)
+    const middle = hitTestZones.all || hitTestZones.middle ? new paperMain.Rectangle({
+      from: new paperMain.Point(paperMain.view.bounds.left, currentToBounds.center.y - scale),
+      to: new paperMain.Point(paperMain.view.bounds.right, currentToBounds.center.y + scale)
     }) : null;
-    const bottom = hitTestZones.all || hitTestZones.bottom ? new uiPaperScope.Rectangle({
-      from: new uiPaperScope.Point(uiPaperScope.view.bounds.left, currentToBounds.bottom - scale),
-      to: new uiPaperScope.Point(uiPaperScope.view.bounds.right, currentToBounds.bottom + scale)
+    const bottom = hitTestZones.all || hitTestZones.bottom ? new paperMain.Rectangle({
+      from: new paperMain.Point(paperMain.view.bounds.left, currentToBounds.bottom - scale),
+      to: new paperMain.Point(paperMain.view.bounds.right, currentToBounds.bottom + scale)
     }) : null;
-    const left = hitTestZones.all || hitTestZones.left ? new uiPaperScope.Rectangle({
-      from: new uiPaperScope.Point(currentToBounds.left - scale, uiPaperScope.view.bounds.top),
-      to: new uiPaperScope.Point(currentToBounds.left + scale, uiPaperScope.view.bounds.bottom)
+    const left = hitTestZones.all || hitTestZones.left ? new paperMain.Rectangle({
+      from: new paperMain.Point(currentToBounds.left - scale, paperMain.view.bounds.top),
+      to: new paperMain.Point(currentToBounds.left + scale, paperMain.view.bounds.bottom)
     }) : null;
-    const center = hitTestZones.all || hitTestZones.center ? new uiPaperScope.Rectangle({
-      from: new uiPaperScope.Point(currentToBounds.center.x - scale, uiPaperScope.view.bounds.top),
-      to: new uiPaperScope.Point(currentToBounds.center.x + scale, uiPaperScope.view.bounds.bottom)
+    const center = hitTestZones.all || hitTestZones.center ? new paperMain.Rectangle({
+      from: new paperMain.Point(currentToBounds.center.x - scale, paperMain.view.bounds.top),
+      to: new paperMain.Point(currentToBounds.center.x + scale, paperMain.view.bounds.bottom)
     }) : null;
-    const right = hitTestZones.all || hitTestZones.right ? new uiPaperScope.Rectangle({
-      from: new uiPaperScope.Point(currentToBounds.right - scale, uiPaperScope.view.bounds.top),
-      to: new uiPaperScope.Point(currentToBounds.right + scale, uiPaperScope.view.bounds.bottom)
+    const right = hitTestZones.all || hitTestZones.right ? new paperMain.Rectangle({
+      from: new paperMain.Point(currentToBounds.right - scale, paperMain.view.bounds.top),
+      to: new paperMain.Point(currentToBounds.right + scale, paperMain.view.bounds.bottom)
     }) : null;
     return {
       top,
@@ -105,7 +105,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
               return isScopeLayer && !isTopScopeGroup;
             }
           },
-          overlapping: uiPaperScope.view.bounds,
+          overlapping: paperMain.view.bounds,
           bounds: (bounds: paper.Rectangle) => {
             switch(snapZone) {
               case 'top':
@@ -132,7 +132,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
       }
     }
     return layerProjectIndices.reduce((result, current, index) => {
-      const project = uiPaperScope.projects[current];
+      const project = paperMain.projects[current];
       const projectSnapLayers = getProjectSnapLayers(project);
       if (projectSnapLayers && projectSnapLayers.length > 0) {
         result = [...result, ...projectSnapLayers];
@@ -158,7 +158,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
               return isScopeLayer && !isTopScopeGroup;
             }
           },
-          overlapping: uiPaperScope.view.bounds,
+          overlapping: paperMain.view.bounds,
           bounds: (bounds: paper.Rectangle) => {
             return (
               bounds.topCenter.isInside(snapZones.top) ||
@@ -178,7 +178,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
       }
     }
     return layerProjectIndices.reduce((result: paper.Item, current, index) => {
-      const project = uiPaperScope.projects[current];
+      const project = paperMain.projects[current];
       const projectSnapLayer = getProjectSnapLayer(project);
       if (projectSnapLayer) {
         result = projectSnapLayer;
@@ -204,7 +204,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
               return isScopeLayer && !isTopScopeGroup;
             }
           },
-          overlapping: uiPaperScope.view.bounds,
+          overlapping: paperMain.view.bounds,
           bounds: (bounds: paper.Rectangle) => {
             return (
               bounds.leftCenter.isInside(snapZones.left) ||
@@ -224,7 +224,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
       }
     }
     return layerProjectIndices.reduce((result: paper.Item, current, index) => {
-      const project = uiPaperScope.projects[current];
+      const project = paperMain.projects[current];
       const projectSnapLayer = getProjectSnapLayer(project);
       if (projectSnapLayer) {
         result = projectSnapLayer;
@@ -456,7 +456,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   }
 
   const getNextSnapBounds = (nextXSnapState: Btwx.SnapState, nextYSnapState: Btwx.SnapState): paper.Rectangle => {
-    let currentSnapBounds = new uiPaperScope.Rectangle(bounds);
+    let currentSnapBounds = new paperMain.Rectangle(bounds);
     if (nextYSnapState.snapPoint) {
       switch(snapRule) {
         case 'move':
@@ -535,7 +535,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
               break;
             }
           }
-          currentSnapBounds = new uiPaperScope.Rectangle({
+          currentSnapBounds = new paperMain.Rectangle({
             top, left, right, bottom
           });
           break;
@@ -620,7 +620,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
               break;
             }
           }
-          currentSnapBounds = new uiPaperScope.Rectangle({
+          currentSnapBounds = new paperMain.Rectangle({
             top, left, right, bottom
           });
           break;
@@ -656,11 +656,11 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   }, [toolEvent, preserveAspectRatio]);
 
   useEffect(() => {
-    setSnapBreakThreshholdMin(-4 / uiPaperScope.view.zoom);
-    setSnapBreakThreshholdMax(4 / uiPaperScope.view.zoom);
+    setSnapBreakThreshholdMin(-4 / paperMain.view.zoom);
+    setSnapBreakThreshholdMax(4 / paperMain.view.zoom);
     return () => {
-      const measureGuides = uiPaperScope.projects[0].getItem({data: {id: 'measureGuides'}});
-      const snapGuides =  uiPaperScope.projects[0].getItem({data: {id: 'snapGuides'}});
+      const measureGuides = paperMain.projects[0].getItem({data: {id: 'measureGuides'}});
+      const snapGuides =  paperMain.projects[0].getItem({data: {id: 'snapGuides'}});
       measureGuides.removeChildren();
       snapGuides.removeChildren();
     }
@@ -668,8 +668,8 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
 
   useEffect(() => {
     if (snapBounds) {
-      const measureGuides = uiPaperScope.projects[0].getItem({data: {id: 'measureGuides'}});
-      const snapGuides =  uiPaperScope.projects[0].getItem({data: {id: 'snapGuides'}});
+      const measureGuides = paperMain.projects[0].getItem({data: {id: 'measureGuides'}});
+      const snapGuides =  paperMain.projects[0].getItem({data: {id: 'snapGuides'}});
       measureGuides.removeChildren();
       snapGuides.removeChildren();
       const guideSnapZones = getSnapZones(snapBounds, 0.5);
@@ -678,38 +678,38 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
       Object.keys(guideSnapZones).forEach((key: Btwx.SnapZoneType) => {
         const guideLayers = getGuideLayersBySnapZone(guideSnapZones, key);
         if (guideLayers.length > 0) {
-          const paperLayerBounds = getPaperLayersBounds([...guideLayers, new uiPaperScope.Path.Rectangle({rectangle: snapBounds, insert: false})]);
+          const paperLayerBounds = getPaperLayersBounds([...guideLayers, new paperMain.Path.Rectangle({rectangle: snapBounds, insert: false})]);
           let from: paper.Point;
           let to: paper.Point;
           switch(key) {
             case 'top':
-              from = new uiPaperScope.Point(paperLayerBounds.left, snapBounds.top);
-              to = new uiPaperScope.Point(paperLayerBounds.right, snapBounds.top);
+              from = new paperMain.Point(paperLayerBounds.left, snapBounds.top);
+              to = new paperMain.Point(paperLayerBounds.right, snapBounds.top);
               yGuideLayers.push(...guideLayers);
               break;
             case 'middle':
-              from = new uiPaperScope.Point(paperLayerBounds.left, snapBounds.center.y);
-              to = new uiPaperScope.Point(paperLayerBounds.right, snapBounds.center.y);
+              from = new paperMain.Point(paperLayerBounds.left, snapBounds.center.y);
+              to = new paperMain.Point(paperLayerBounds.right, snapBounds.center.y);
               yGuideLayers.push(...guideLayers);
               break;
             case 'bottom':
-              from = new uiPaperScope.Point(paperLayerBounds.left, snapBounds.bottom);
-              to = new uiPaperScope.Point(paperLayerBounds.right, snapBounds.bottom);
+              from = new paperMain.Point(paperLayerBounds.left, snapBounds.bottom);
+              to = new paperMain.Point(paperLayerBounds.right, snapBounds.bottom);
               yGuideLayers.push(...guideLayers);
               break;
             case 'left':
-              from = new uiPaperScope.Point(snapBounds.left, paperLayerBounds.top);
-              to = new uiPaperScope.Point(snapBounds.left, paperLayerBounds.bottom);
+              from = new paperMain.Point(snapBounds.left, paperLayerBounds.top);
+              to = new paperMain.Point(snapBounds.left, paperLayerBounds.bottom);
               xGuideLayers.push(...guideLayers);
               break;
             case 'center':
-              from = new uiPaperScope.Point(snapBounds.center.x, paperLayerBounds.top);
-              to = new uiPaperScope.Point(snapBounds.center.x, paperLayerBounds.bottom);
+              from = new paperMain.Point(snapBounds.center.x, paperLayerBounds.top);
+              to = new paperMain.Point(snapBounds.center.x, paperLayerBounds.bottom);
               xGuideLayers.push(...guideLayers);
               break;
             case 'right':
-              from = new uiPaperScope.Point(snapBounds.right, paperLayerBounds.top);
-              to = new uiPaperScope.Point(snapBounds.right, paperLayerBounds.bottom);
+              from = new paperMain.Point(snapBounds.right, paperLayerBounds.top);
+              to = new paperMain.Point(snapBounds.right, paperLayerBounds.bottom);
               xGuideLayers.push(...guideLayers);
               break;
           }
@@ -753,7 +753,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   //       paperLayer.remove();
   //     }
   //     if (snapZoneTop) {
-  //       new uiPaperScope.Path.Rectangle({
+  //       new paperMain.Path.Rectangle({
   //         rectangle: snapZoneTop,
   //         fillColor: 'magenta',
   //         opacity: 0.25,
@@ -775,7 +775,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   //       paperLayer.remove();
   //     }
   //     if (snapZoneMiddle) {
-  //       new uiPaperScope.Path.Rectangle({
+  //       new paperMain.Path.Rectangle({
   //         rectangle: snapZoneMiddle,
   //         fillColor: 'red',
   //         opacity: 0.25,
@@ -797,7 +797,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   //       paperLayer.remove();
   //     }
   //     if (snapZoneBottom) {
-  //       new uiPaperScope.Path.Rectangle({
+  //       new paperMain.Path.Rectangle({
   //         rectangle: snapZoneBottom,
   //         fillColor: 'yellow',
   //         opacity: 0.25,
@@ -819,7 +819,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   //       paperLayer.remove();
   //     }
   //     if (snapZoneLeft) {
-  //       new uiPaperScope.Path.Rectangle({
+  //       new paperMain.Path.Rectangle({
   //         rectangle: snapZoneLeft,
   //         fillColor: 'cyan',
   //         opacity: 0.25,
@@ -841,7 +841,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   //       paperLayer.remove();
   //     }
   //     if (snapZoneCenter) {
-  //       new uiPaperScope.Path.Rectangle({
+  //       new paperMain.Path.Rectangle({
   //         rectangle: snapZoneCenter,
   //         fillColor: 'orange',
   //         opacity: 0.25,
@@ -863,7 +863,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   //       paperLayer.remove();
   //     }
   //     if (snapZoneRight) {
-  //       new uiPaperScope.Path.Rectangle({
+  //       new paperMain.Path.Rectangle({
   //         rectangle: snapZoneRight,
   //         fillColor: theme.text.lightest,
   //         data: {

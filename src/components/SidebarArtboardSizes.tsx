@@ -4,7 +4,7 @@ import { RootState } from '../store/reducers';
 import { setArtboardPresetDeviceOrientation } from '../store/actions/documentSettings';
 import { addArtboardThunk } from '../store/actions/layer';
 import { toggleArtboardToolThunk } from '../store/actions/artboardTool';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 import SidebarArtboardPlatformSelector from './SidebarArtboardPlatformSelector';
 import SidebarArtboardPlatformOrientation from './SidebarArtboardPlatformOrientation';
 import SidebarArtboardPlatformCategories from './SidebarArtboardPlatformCategories';
@@ -35,9 +35,9 @@ const SidebarArtboardSizes = (): ReactElement => {
   }
 
   const handleDeviceClick = (device: Btwx.Device): void => {
-    const newArtboard = new uiPaperScope.Path.Rectangle({
-      from: new uiPaperScope.Point(uiPaperScope.view.center.x - ((orientation === 'Landscape' ? device.height : device.width) / 2), uiPaperScope.view.center.y - ((orientation === 'Landscape' ? device.width : device.height) / 2)),
-      to: new uiPaperScope.Point(uiPaperScope.view.center.x + ((orientation === 'Landscape' ? device.height : device.width) / 2), uiPaperScope.view.center.y + ((orientation === 'Landscape' ? device.width : device.height) / 2)),
+    const newArtboard = new paperMain.Path.Rectangle({
+      from: new paperMain.Point(paperMain.view.center.x - ((orientation === 'Landscape' ? device.height : device.width) / 2), paperMain.view.center.y - ((orientation === 'Landscape' ? device.width : device.height) / 2)),
+      to: new paperMain.Point(paperMain.view.center.x + ((orientation === 'Landscape' ? device.height : device.width) / 2), paperMain.view.center.y + ((orientation === 'Landscape' ? device.width : device.height) / 2)),
       insert: false
     });
     dispatch(addArtboardThunk({

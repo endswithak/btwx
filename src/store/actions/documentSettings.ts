@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { RootState } from '../reducers';
 import { APP_NAME } from '../../constants';
-import { uiPaperScope } from '../../canvas';
+import { paperMain } from '../../canvas';
 
 import {
   OPEN_DOCUMENT,

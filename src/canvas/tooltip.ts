@@ -1,20 +1,20 @@
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 
 class Tooltip {
   paperLayer: paper.Group;
   text: string;
   point: paper.Point;
   constructor(text: string, point: paper.Point, removeOpts?: any) {
-    if (uiPaperScope.project.activeLayer.data.id !== 'ui') {
-      uiPaperScope.projects[0].activate();
+    if (paperMain.project.activeLayer.data.id !== 'ui') {
+      paperMain.projects[0].activate();
     }
     this.point = point;
     this.text = text;
-    const parent = uiPaperScope.project.getItem({data: { id: 'tooltips' }});
-    const tooltipText = new uiPaperScope.PointText({
+    const parent = paperMain.project.getItem({data: { id: 'tooltips' }});
+    const tooltipText = new paperMain.PointText({
       fillColor: 'white',
       fontFamily: 'Space Mono',
-      fontSize: 12 / uiPaperScope.view.zoom,
+      fontSize: 12 / paperMain.view.zoom,
       content: this.text,
       data: {
         type: 'UIElementChild',
@@ -23,11 +23,11 @@ class Tooltip {
         elementId: 'tooltip'
       }
     });
-    const tooltipBackground = new uiPaperScope.Path.Rectangle({
-      point: [this.point.x + (24 / uiPaperScope.view.zoom), this.point.y + (24 / uiPaperScope.view.zoom)],
-      size: [tooltipText.bounds.width + (12 / uiPaperScope.view.zoom), tooltipText.bounds.height + (12 / uiPaperScope.view.zoom)],
-      fillColor: new uiPaperScope.Color(0,0,0,0.5),
-      radius: (4 / uiPaperScope.view.zoom),
+    const tooltipBackground = new paperMain.Path.Rectangle({
+      point: [this.point.x + (24 / paperMain.view.zoom), this.point.y + (24 / paperMain.view.zoom)],
+      size: [tooltipText.bounds.width + (12 / paperMain.view.zoom), tooltipText.bounds.height + (12 / paperMain.view.zoom)],
+      fillColor: new paperMain.Color(0,0,0,0.5),
+      radius: (4 / paperMain.view.zoom),
       data: {
         type: 'UIElementChild',
         interactive: false,
@@ -36,7 +36,7 @@ class Tooltip {
       }
     });
     tooltipText.position = tooltipBackground.position;
-    const tooltipGroup = new uiPaperScope.Group({
+    const tooltipGroup = new paperMain.Group({
       children: [tooltipBackground, tooltipText],
       data: {
         id: 'tooltip',

@@ -1,6 +1,6 @@
 import React, { useEffect, ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 import { RootState } from '../store/reducers';
 import { getDeepSelectItem, getNearestScopeAncestor, getPaperLayer } from '../store/selectors/layer';
 import { setCanvasActiveTool } from '../store/actions/canvasSettings';
@@ -186,9 +186,9 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
       } else {
         if (layerItem.type === 'Text') {
           const paperLayer = getPaperLayer(layerItem.id, layerEvent.projectIndex);
-          const topLeft = uiPaperScope.view.projectToView(paperLayer.bounds.topLeft);
-          const topCenter = uiPaperScope.view.projectToView(paperLayer.bounds.topCenter);
-          const topRight = uiPaperScope.view.projectToView(paperLayer.bounds.topRight);
+          const topLeft = paperMain.view.projectToView(paperLayer.bounds.topLeft);
+          const topCenter = paperMain.view.projectToView(paperLayer.bounds.topCenter);
+          const topRight = paperMain.view.projectToView(paperLayer.bounds.topRight);
           dispatch(openTextEditor({
             layer: layerItem.id,
             projectIndex: layerEvent.projectIndex,
@@ -220,7 +220,7 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
 
   const handleContextMenu = (): void => {
     let contextMenuId = 'root';
-    const paperPoint = uiPaperScope.view.getEventPoint(layerEvent.event);
+    const paperPoint = paperMain.view.getEventPoint(layerEvent.event);
     if (!layerEvent.empty) {
       if (nearestScopeAncestor.type === 'Artboard') {
         contextMenuId = deepSelectItem.id;

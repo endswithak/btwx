@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect } from 'react';
 import { updateGradientFrame } from '../store/actions/layer';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 import { getGradientOriginPoint, getGradientDestinationPoint } from '../store/selectors/layer';
 
 const GradientFrame = (): ReactElement => {
@@ -35,7 +35,7 @@ const GradientFrame = (): ReactElement => {
   useEffect(() => {
     updateGradientFrame(origin, destination);
     return (): void => {
-      const gradientFrame = uiPaperScope.projects[0].getItem({ data: { id: 'gradientFrame' } });
+      const gradientFrame = paperMain.projects[0].getItem({ data: { id: 'gradientFrame' } });
       gradientFrame.removeChildren();
     }
   }, [origin, destination, zoom]);

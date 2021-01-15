@@ -8,6 +8,8 @@ declare namespace Btwx {
 
   type LineHandle = 'lineFrom' | 'lineTo' | 'lineMove';
 
+  type PaperScope = 'main' | 'preview';
+
   type SelectionFrameHandle = ResizeHandle | LineHandle | 'move' | 'none' | 'all';
 
   type GradientHandle = 'origin' | 'destination';

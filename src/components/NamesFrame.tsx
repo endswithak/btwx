@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { updateNameFrame } from '../store/actions/layer';
 import { getAllArtboardItems } from '../store/selectors/layer';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 
 const NamesFrame = (): ReactElement => {
   const zoom = useSelector((state: RootState) => state.documentSettings.zoom);
@@ -12,7 +12,7 @@ const NamesFrame = (): ReactElement => {
   useEffect(() => {
     updateNameFrame(artboards);
     return (): void => {
-      const activeArtboardFrame = uiPaperScope.projects[0].getItem({ data: { id: 'namesFrame' } });
+      const activeArtboardFrame = paperMain.projects[0].getItem({ data: { id: 'namesFrame' } });
       activeArtboardFrame.removeChildren();
     }
   }, [zoom, artboards]);

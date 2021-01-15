@@ -3,7 +3,7 @@ import React, { useEffect, ReactElement, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getLayerProjectIndex, getPaperLayer, getPaperLayersBounds, getSelectedById, getSelectedProjectIndices } from '../store/selectors/layer';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 import { THEME_PRIMARY_COLOR } from '../constants';
 import { setCanvasDragging } from '../store/actions/canvasSettings';
 import { moveLayersBy, duplicateLayers, updateSelectionFrame } from '../store/actions/layer';
@@ -35,7 +35,7 @@ const DragTool = (props: PaperToolProps): ReactElement => {
   const dispatch = useDispatch();
 
   const resetState = (): void => {
-    const drawingPreview = uiPaperScope.projects[0].getItem({data: {id: 'drawingPreview'}});
+    const drawingPreview = paperMain.projects[0].getItem({data: {id: 'drawingPreview'}});
     drawingPreview.removeChildren();
     setOriginalSelection(null);
     setFromBounds(null);
@@ -47,7 +47,7 @@ const DragTool = (props: PaperToolProps): ReactElement => {
   }
 
   const updateDuplicatePreview = (altModifier: boolean): void => {
-    const drawingPreview = uiPaperScope.projects[0].getItem({data: {id: 'drawingPreview'}});
+    const drawingPreview = paperMain.projects[0].getItem({data: {id: 'drawingPreview'}});
     drawingPreview.removeChildren();
     if (altModifier && selectionOutlines) {
       const newPreview = selectionOutlines.clone({insert: false});
@@ -121,7 +121,7 @@ const DragTool = (props: PaperToolProps): ReactElement => {
     if (keyDownEvent && isEnabled && originalSelection && dragging && toBounds) {
       if (keyDownEvent.key === 'alt') {
         updateDuplicatePreview(true);
-        const selectionFrame = uiPaperScope.project.getItem({ data: { id: 'selectionFrame' } });
+        const selectionFrame = paperMain.project.getItem({ data: { id: 'selectionFrame' } });
         selectionFrame.removeChildren();
         originalSelection.forEach((item, index) => {
           const paperLayer = getPaperLayer(item.id, item.projectIndex);
@@ -150,11 +150,11 @@ const DragTool = (props: PaperToolProps): ReactElement => {
 
   useEffect(() => {
     if (downEvent && isEnabled) {
-      if (uiPaperScope.project.activeLayer.data.id !== 'ui') {
-        uiPaperScope.projects[0].activate();
+      if (paperMain.project.activeLayer.data.id !== 'ui') {
+        paperMain.projects[0].activate();
       }
       const dragLayers = getDragLayers(downEvent);
-      const dragOutlines = new uiPaperScope.Group({insert: false});
+      const dragOutlines = new paperMain.Group({insert: false});
       const dragPaperLayers: paper.Item[] = [];
       dragLayers.forEach((layer, index) => {
         const paperLayer = getPaperLayer(layer.id, layer.projectIndex);
@@ -162,18 +162,18 @@ const DragTool = (props: PaperToolProps): ReactElement => {
         switch(paperLayer.data.layerType) {
           case 'Artboard': {
             const artboardBackground = paperLayer.getItem({ data: { id: 'artboardBackground' } });
-            new uiPaperScope.Path.Rectangle({
+            new paperMain.Path.Rectangle({
               strokeColor: THEME_PRIMARY_COLOR,
-              strokeWidth: 2 / uiPaperScope.view.zoom,
+              strokeWidth: 2 / paperMain.view.zoom,
               rectangle: artboardBackground.bounds,
               parent: dragOutlines
             });
             break;
           }
           case 'Shape':
-            new uiPaperScope.CompoundPath({
+            new paperMain.CompoundPath({
               strokeColor: THEME_PRIMARY_COLOR,
-              strokeWidth: 2 / uiPaperScope.view.zoom,
+              strokeWidth: 2 / paperMain.view.zoom,
               closed: paperLayer.data.shapeType !== 'Line',
               pathData: (paperLayer as paper.Path | paper.CompoundPath).pathData,
               parent: dragOutlines
@@ -185,36 +185,36 @@ const DragTool = (props: PaperToolProps): ReactElement => {
             const textLayer = clone.getItem({data: { id: 'textContent' }}) as paper.PointText;
             const textLines = clone.getItems({data: {id: 'textLine'}}) as paper.PointText[];
             const textBackgroundClone = clone.getItem({data: {id: 'textBackground'}});
-            const linesGroup = new uiPaperScope.Group({
+            const linesGroup = new paperMain.Group({
               parent: dragOutlines,
               children: [textBackgroundClone]
             });
             textLines.forEach((line, index: number) => {
               line.leading = line.fontSize;
-              line.skew(new uiPaperScope.Point((layerItems[paperLayer.data.id] as Btwx.Text).textStyle.oblique, 0));
-              new uiPaperScope.Path.Line({
+              line.skew(new paperMain.Point((layerItems[paperLayer.data.id] as Btwx.Text).textStyle.oblique, 0));
+              new paperMain.Path.Line({
                 from: (() => {
                   switch(textLayer.justification) {
                     case 'left':
                       return line.point;
                     case 'center':
-                      return new uiPaperScope.Point(line.point.x - line.bounds.width / 2, line.point.y);
+                      return new paperMain.Point(line.point.x - line.bounds.width / 2, line.point.y);
                     case 'right':
-                      return new uiPaperScope.Point(line.point.x - line.bounds.width, line.point.y);
+                      return new paperMain.Point(line.point.x - line.bounds.width, line.point.y);
                   }
                 })(),
                 to: (() => {
                   switch(textLayer.justification) {
                     case 'left':
-                      return new uiPaperScope.Point(line.point.x + line.bounds.width, line.point.y);
+                      return new paperMain.Point(line.point.x + line.bounds.width, line.point.y);
                     case 'center':
-                      return new uiPaperScope.Point(line.point.x + line.bounds.width / 2, line.point.y);
+                      return new paperMain.Point(line.point.x + line.bounds.width / 2, line.point.y);
                     case 'right':
                       return line.point;
                   }
                 })(),
                 strokeColor: THEME_PRIMARY_COLOR,
-                strokeWidth: 2 / uiPaperScope.view.zoom,
+                strokeWidth: 2 / paperMain.view.zoom,
                 parent: linesGroup
               });
             });
@@ -222,9 +222,9 @@ const DragTool = (props: PaperToolProps): ReactElement => {
             break;
           }
           default:
-            new uiPaperScope.Path.Rectangle({
+            new paperMain.Path.Rectangle({
               strokeColor: THEME_PRIMARY_COLOR,
-              strokeWidth: 2 / uiPaperScope.view.zoom,
+              strokeWidth: 2 / paperMain.view.zoom,
               from: paperLayer.bounds.topLeft,
               to: paperLayer.bounds.bottomRight,
               parent: dragOutlines
@@ -244,7 +244,7 @@ const DragTool = (props: PaperToolProps): ReactElement => {
     if (dragEvent && isEnabled && fromBounds) {
       if (minDistance > 3) {
         const vector = dragEvent.point.subtract(dragEvent.downPoint);
-        const nextSnapBounds = new uiPaperScope.Rectangle(fromBounds);
+        const nextSnapBounds = new paperMain.Rectangle(fromBounds);
         nextSnapBounds.center.x = fromBounds.center.x + vector.x;
         nextSnapBounds.center.y = fromBounds.center.y + vector.y;
         setSnapBounds(nextSnapBounds);
@@ -285,8 +285,8 @@ const DragTool = (props: PaperToolProps): ReactElement => {
         tool.activate();
       }
     } else {
-      if (tool && uiPaperScope.tool && (uiPaperScope.tool as any)._index === (tool as any)._index) {
-        uiPaperScope.tool = null;
+      if (tool && paperMain.tool && (paperMain.tool as any)._index === (tool as any)._index) {
+        paperMain.tool = null;
       }
     }
   }, [isEnabled]);

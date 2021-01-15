@@ -1,76 +1,67 @@
 import React, { ReactElement, useState, useEffect } from 'react';
-import { uiPaperScope } from '../canvas';
-import  CanvasTextLayer from './CanvasTextLayer';
-import  CanvasShapeLayer from './CanvasShapeLayer';
-import  CanvasImageLayer from './CanvasImageLayer';
-import  CanvasGroupLayer from './CanvasGroupLayer';
+import { paperMain, paperPreview } from '../canvas';
 
-interface CanvasMaskableLayerProps {
-  id: string;
+export interface CanvasMaskableLayerProps {
   layerItem: Btwx.MaskableLayer;
-  layerIndex: number;
+  parentItem: Btwx.Artboard | Btwx.Group;
   artboardItem: Btwx.Artboard;
+  paperScope: Btwx.PaperScope;
   rendered: boolean;
-  underlyingMaskIndex: number;
-  setRendered(rendered: boolean): void;
+  projectIndex: number;
 }
 
 const CanvasMaskableLayer = (props: CanvasMaskableLayerProps): ReactElement => {
-  const { id, layerItem, artboardItem, layerIndex, rendered, underlyingMaskIndex, setRendered } = props;
-  const isShape = layerItem ? layerItem.type === 'Shape' : false;
-  const mask = isShape && (layerItem as Btwx.Shape).mask;
-  const underlyingMask = layerItem ? layerItem.underlyingMask : null;
-  const ignoreUnderlyingMask = layerItem ? layerItem.ignoreUnderlyingMask : null;
-  const masked = layerItem ? layerItem.masked : null;
-  const maskedIndex = masked ? (layerIndex - underlyingMaskIndex) + 1 : null;
-  const scope = layerItem ? layerItem.scope : null;
-  const projectIndex = artboardItem ? artboardItem.projectIndex : null;
+  const { paperScope, rendered, layerItem, parentItem, projectIndex, artboardItem } = props;
+  const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
+  const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
+  const layerIndex = parentItem.children.indexOf(layerItem.id);
+  const underlyingMaskIndex = layerItem.underlyingMask ? parentItem.children.indexOf(layerItem.underlyingMask) : null;
+  const maskedIndex = (layerIndex - underlyingMaskIndex) + 1;
+  const isMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
   const [prevLayerIndex, setPrevLayerIndex] = useState(layerIndex);
-  const [prevScope, setPrevScope] = useState(scope);
-  const [prevMask, setPrevMask] = useState(mask);
-  const [prevUnderlyingMask, setPrevUnderlyingMask] = useState(underlyingMask);
-  const [prevIgnoreUnderlyingMask, setPrevIgnoreUnderlyingMask] = useState(ignoreUnderlyingMask);
-  const [prevMasked, setPrevMasked] = useState(masked);
+  const [prevScope, setPrevScope] = useState(layerItem.scope);
+  const [prevMask, setPrevMask] = useState(isMask);
+  const [prevUnderlyingMask, setPrevUnderlyingMask] = useState(layerItem.underlyingMask);
+  const [prevMasked, setPrevMasked] = useState(layerItem.masked);
 
   useEffect(() => {
-    const scopeLengthMatch = (prevScope && scope) && prevScope.length === scope.length;
-    if (rendered && (!scopeLengthMatch || (scopeLengthMatch && !prevScope.every((s, i) => scope[i] === s)))) {
-      const paperLayer = uiPaperScope.projects[projectIndex].getItem({data: {id}});
-      paperLayer.data.scope = scope;
-      setPrevScope(scope);
+    const scopeLengthMatch = (prevScope && layerItem.scope) && prevScope.length === layerItem.scope.length;
+    if (rendered && (!scopeLengthMatch || (scopeLengthMatch && !prevScope.every((s, i) => layerItem.scope[i] === s)))) {
+      const paperLayer = paperProject.getItem({data: {id: layerItem.id}});
+      paperLayer.data.scope = layerItem.scope;
+      setPrevScope(layerItem.scope);
     }
-  }, [scope]);
+  }, [layerItem.scope]);
 
   useEffect(() => {
     if (rendered && prevLayerIndex !== layerIndex) {
-      let paperLayer = uiPaperScope.projects[projectIndex].getItem({data: {id}});
-      if (mask) {
+      let paperLayer = paperProject.getItem({data: {id: layerItem.id}});
+      if (isMask) {
         const maskGroup = paperLayer.parent;
         // const nonMaskChildren = maskGroup.children.slice(1, maskGroup.children.length);
         // maskGroup.parent.insertChildren(maskGroup.index, nonMaskChildren);
         paperLayer = maskGroup;
       }
-      if (masked) {
-        const maskGroup = uiPaperScope.projects[projectIndex].getItem({data: {id: underlyingMask}}).parent;
+      if (layerItem.masked) {
+        const maskGroup = paperProject.getItem({data: {id: layerItem.underlyingMask}}).parent;
         maskGroup.insertChild(maskedIndex, paperLayer);
       } else {
         paperLayer.parent.insertChild(layerIndex, paperLayer);
       }
-      console.log(paperLayer);
       setPrevLayerIndex(layerIndex);
     }
   }, [layerIndex]);
 
   useEffect(() => {
-    if (rendered && prevMask !== mask) {
-      const paperLayer = uiPaperScope.projects[projectIndex].getItem({data: {id}}) as paper.Path;
-      if (mask && !prevMask) {
+    if (rendered && prevMask !== isMask) {
+      const paperLayer = paperProject.getItem({data: {id: layerItem.id}}) as paper.Path;
+      if (isMask && !prevMask) {
         paperLayer.replaceWith(
-          new uiPaperScope.Group({
+          new paperLayerScope.Group({
             name: 'MaskGroup',
             data: { id: 'maskGroup', type: 'LayerContainer', layerType: 'Shape' },
             children: [
-              new uiPaperScope.CompoundPath({
+              new paperLayerScope.CompoundPath({
                 pathData: paperLayer.pathData,
                 position: paperLayer.position,
                 fillColor: 'black',
@@ -82,90 +73,59 @@ const CanvasMaskableLayer = (props: CanvasMaskableLayerProps): ReactElement => {
           })
         );
       }
-      if (!mask && prevMask) {
+      if (!isMask && prevMask) {
         const maskGroup = paperLayer.parent;
         maskGroup.children[0].remove();
         maskGroup.parent.insertChildren(maskGroup.index, maskGroup.children);
         maskGroup.remove();
       }
-      setPrevMask(mask);
+      setPrevMask(isMask);
     }
-  }, [mask]);
+  }, [isMask]);
 
   useEffect(() => {
-    if (rendered && prevMasked !== masked) {
-      let paperLayer = uiPaperScope.projects[projectIndex].getItem({data: {id}});
-      if (mask) {
+    if (rendered && prevMasked !== layerItem.masked) {
+      let paperLayer = paperProject.getItem({data: {id: layerItem.id}});
+      if (isMask) {
         paperLayer = paperLayer.parent;
       }
-      if (masked && !prevMasked) {
-        const maskGroup = uiPaperScope.projects[projectIndex].getItem({data: {id: underlyingMask}}).parent;
+      if (layerItem.masked && !prevMasked) {
+        const maskGroup = paperProject.getItem({data: {id: layerItem.underlyingMask}}).parent;
         maskGroup.insertChild(maskedIndex, paperLayer);
       }
-      if (!masked && prevMasked) {
-        let parent = uiPaperScope.projects[projectIndex].getItem({data: {id: layerItem.parent}});
-        if (layerItem.parent === artboardItem.id) {
-          parent = parent.getItem({data:{id:'artboardLayers'}});
+      if (!layerItem.masked && prevMasked) {
+        let paperParent = paperProject.getItem({data: {id: parent}});
+        if (layerItem.parent === layerItem.artboard) {
+          paperParent = paperParent.getItem({data:{id:'artboardLayers'}});
         }
-        parent.insertChild(layerIndex, paperLayer);
+        paperParent.insertChild(layerIndex, paperLayer);
       }
-      setPrevMasked(masked);
+      setPrevMasked(layerItem.masked);
     }
-  }, [masked]);
+  }, [layerItem.masked]);
 
   useEffect(() => {
-    if (rendered && prevUnderlyingMask !== underlyingMask) {
-      let paperLayer = uiPaperScope.projects[projectIndex].getItem({data: {id}});
-      if (mask) {
+    if (rendered && prevUnderlyingMask !== layerItem.underlyingMask) {
+      let paperLayer = paperProject.getItem({data: {id: layerItem.id}});
+      if (isMask) {
         paperLayer = paperLayer.parent;
       }
-      if (masked) {
-        const maskGroup = uiPaperScope.projects[projectIndex].getItem({data: {id: underlyingMask}}).parent;
+      if (layerItem.masked) {
+        const maskGroup = paperProject.getItem({data: {id: layerItem.underlyingMask}}).parent;
         maskGroup.insertChild(maskedIndex, paperLayer);
       } else {
-        let parent = uiPaperScope.projects[projectIndex].getItem({data: {id: layerItem.parent}});
-        if (layerItem.parent === artboardItem.id) {
-          parent = parent.getItem({data:{id:'artboardLayers'}});
+        let paperParent = paperProject.getItem({data: {id: parent}});
+        if (layerItem.parent === layerItem.artboard) {
+          paperParent = paperParent.getItem({data:{id:'artboardLayers'}});
         }
-        parent.insertChild(layerIndex, paperLayer);
+        paperParent.insertChild(layerIndex, paperLayer);
       }
-      setPrevUnderlyingMask(underlyingMask);
+      setPrevUnderlyingMask(layerItem.underlyingMask);
     }
-  }, [underlyingMask]);
+  }, [layerItem.underlyingMask]);
 
   return (
-    <>
-      {
-        ((): ReactElement => {
-          switch(layerItem.type) {
-            case 'Text':
-              return (
-                <CanvasTextLayer
-                  {...props}
-                  layerItem={layerItem as Btwx.Text} />
-              )
-            case 'Shape':
-              return (
-                <CanvasShapeLayer
-                  {...props}
-                  layerItem={layerItem as Btwx.Shape} />
-              )
-            case 'Image':
-              return (
-                <CanvasImageLayer
-                  {...props}
-                  layerItem={layerItem as Btwx.Image}/>
-              )
-            case 'Group':
-              return (
-                <CanvasGroupLayer
-                  {...props}
-                  layerItem={layerItem as Btwx.Group} />
-              )
-          }
-        })()
-      }
-    </>
+    <></>
   );
 }
 

@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 import { RootState } from '../store/reducers';
 import { setPolygonsSidesThunk } from '../store/actions/layer';
 import { getPaperLayer, getSelectedProjectIndices, getSelectedPolygonSides, getSelectedById } from '../store/selectors/layer';
@@ -36,7 +36,7 @@ const PolygonSidesInput = (): ReactElement => {
       const paperLayer = paperLayerCompound.children[0] as paper.Path;
       const startPosition = paperLayer.position;
       paperLayer.rotation = -layerItem.transform.rotation;
-      const newShape = new uiPaperScope.Path.RegularPolygon({
+      const newShape = new paperMain.Path.RegularPolygon({
         center: paperLayer.bounds.center,
         radius: Math.max(paperLayer.bounds.width, paperLayer.bounds.height) / 2,
         sides: e.target.value,

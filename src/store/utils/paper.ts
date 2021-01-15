@@ -1,60 +1,133 @@
 import paper from 'paper';
+import tinyColor from 'tinycolor2';
 import { DEFAULT_ROUNDED_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_RADIUS, DEFAULT_STAR_POINTS, DEFAULT_LINE_FROM, DEFAULT_LINE_TO } from '../../constants';
-import { uiPaperScope } from '../../canvas';
+import { paperMain, paperPreview } from '../../canvas';
 
-export const getLayerPaperParent = (paperLayer: paper.Item, layerItem: Btwx.Layer): paper.Item => {
-  const isArtboard = paperLayer.data.layerType === 'Artboard';
-  const nextPaperLayer = isArtboard ? paperLayer.getItem({ data: { id: 'artboardLayers' } }) : paperLayer;
-  const parentChildren = nextPaperLayer.children;
-  const hasChildren = parentChildren.length > 0;
-  const lastChildPaperLayer = hasChildren ? nextPaperLayer.lastChild : null;
-  const isLastChildMask = lastChildPaperLayer && (lastChildPaperLayer.data.id as string).endsWith('maskGroup');
-  const underlyingMask = lastChildPaperLayer ? isLastChildMask ? lastChildPaperLayer : lastChildPaperLayer.parent : null;
-  if (underlyingMask && !(layerItem as Btwx.MaskableLayer).ignoreUnderlyingMask) {
-    return underlyingMask;
-  } else {
-    return nextPaperLayer;
+interface GetPaperParent {
+  paperScope: Btwx.PaperScope;
+  projectIndex: number;
+  parent: string;
+  isParentArtboard: boolean;
+  masked: boolean;
+  underlyingMask: string;
+}
+
+export const getPaperParent = ({ paperScope, projectIndex, parent, isParentArtboard, masked, underlyingMask }: GetPaperParent): paper.Item => {
+  const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
+  let paperParent = paperProject.getItem({data: {id: parent}});
+  if (isParentArtboard) {
+    paperParent = paperParent.getItem({data:{id:'artboardLayers'}});
   }
+  if (masked) {
+    paperParent = paperProject.getItem({data: {id: underlyingMask}}).parent;
+  }
+  return paperParent;
 }
 
 export const getLayerAbsPosition = (layerFrame: Btwx.Frame, artboardFrame: Btwx.Frame): paper.Point => {
-  let position = new uiPaperScope.Point(layerFrame.x, layerFrame.y);
+  let position = new paper.Point(layerFrame.x, layerFrame.y);
   if (artboardFrame) {
-    position = position.add(new uiPaperScope.Point(artboardFrame.x, artboardFrame.y))
+    position = position.add(new paper.Point(artboardFrame.x, artboardFrame.y))
   }
   return position;
 }
 
-export const getPaperFillColor = (fill: Btwx.Fill, frame: Btwx.Frame): any => {
-  return fill.fillType === 'color' ? { hue: fill.color.h, saturation: fill.color.s, lightness: fill.color.l, alpha: fill.color.a } : {
-    gradient: {
-      stops: fill.gradient.stops.reduce((result, current) => {
-        result = [...result, new paper.GradientStop({ hue: current.color.h, saturation: current.color.s, lightness: current.color.l, alpha: current.color.a } as paper.Color, current.position)];
-        return result;
-      }, []),
-      radial: fill.gradient.gradientType === 'radial'
-    },
-    origin: new paper.Point((fill.gradient.origin.x * frame.innerWidth) + frame.x, (fill.gradient.origin.y * frame.innerHeight) + frame.y),
-    destination: new paper.Point((fill.gradient.destination.x * frame.innerWidth) + frame.x, (fill.gradient.destination.y * frame.innerHeight) + frame.y)
+interface GetPaperFSColor {
+  styleProp: 'fill' | 'stroke';
+  style: Btwx.Fill | Btwx.Stroke;
+  isLine: boolean;
+  layerFrame: Btwx.Frame;
+  artboardFrame: Btwx.Frame;
+}
+
+export const getPaperFSColor = ({ style, isLine, layerFrame, artboardFrame }: GetPaperFSColor): any => {
+  const layerAbsPosition = getLayerAbsPosition(layerFrame, artboardFrame ? artboardFrame : null);
+  const gradient = style.gradient;
+  if (style.enabled) {
+    switch(style.fillType) {
+      case 'color':
+        return {
+          hue: style.color.h,
+          saturation: style.color.s,
+          lightness: style.color.l,
+          alpha: style.color.a
+        } as paper.Color;
+      case 'gradient':
+        return {
+          gradient: {
+            stops: gradient.stops.reduce((result, current) => {
+              result = [
+                ...result,
+                new paper.GradientStop({
+                  hue: current.color.h,
+                  saturation: current.color.s,
+                  lightness: current.color.l,
+                  alpha: current.color.a
+                } as paper.Color, current.position)
+              ];
+              return result;
+            }, []) as paper.GradientStop[],
+            radial: gradient.gradientType === 'radial'
+          },
+          origin: new paper.Point(
+            (gradient.origin.x * (isLine ? layerFrame.width : layerFrame.innerWidth)) + layerAbsPosition.x,
+            (gradient.origin.y * (isLine ? layerFrame.height : layerFrame.innerHeight)) + layerAbsPosition.y
+          ),
+          destination: new paper.Point(
+            (gradient.destination.x * (isLine ? layerFrame.width : layerFrame.innerWidth)) + layerAbsPosition.x,
+            (gradient.destination.y * (isLine ? layerFrame.height : layerFrame.innerHeight)) + layerAbsPosition.y
+          )
+        } as Btwx.PaperGradientFill;
+    }
+  } else {
+    tinyColor('#fff').setAlpha(0).toHslString() as any;
   }
 };
 
-export const getPaperStrokeColor = (stroke: Btwx.Stroke, frame: Btwx.Frame): any => {
-  return stroke.fillType === 'color' ? { hue: stroke.color.h, saturation: stroke.color.s, lightness: stroke.color.l, alpha: stroke.color.a } : {
-    gradient: {
-      stops: stroke.gradient.stops.reduce((result, current) => {
-        result = [...result, new paper.GradientStop({ hue: current.color.h, saturation: current.color.s, lightness: current.color.l, alpha: current.color.a } as paper.Color, current.position)];
-        return result;
-      }, []),
-      radial: stroke.gradient.gradientType === 'radial'
-    },
-    origin: new paper.Point((stroke.gradient.origin.x * frame.innerWidth) + frame.x, (stroke.gradient.origin.y * frame.innerHeight) + frame.y),
-    destination: new paper.Point((stroke.gradient.destination.x * frame.innerWidth) + frame.x, (stroke.gradient.destination.y * frame.innerHeight) + frame.y)
-  }
+interface GetPaperFillColor {
+  fill: Btwx.Fill;
+  isLine: boolean;
+  layerFrame: Btwx.Frame;
+  artboardFrame: Btwx.Frame;
+}
+
+export const getPaperFillColor = ({ fill, isLine, layerFrame, artboardFrame }: GetPaperFillColor): any => {
+  return getPaperFSColor({
+    styleProp: 'fill',
+    style: fill,
+    isLine,
+    layerFrame,
+    artboardFrame
+  });
+};
+
+interface GetPaperStrokeColor {
+  stroke: Btwx.Stroke;
+  isLine: boolean;
+  layerFrame: Btwx.Frame;
+  artboardFrame: Btwx.Frame;
+}
+
+export const getPaperStrokeColor = ({ stroke, isLine, layerFrame, artboardFrame }: GetPaperStrokeColor): any => {
+  return getPaperFSColor({
+    styleProp: 'stroke',
+    style: stroke,
+    isLine,
+    layerFrame,
+    artboardFrame
+  });
 };
 
 export const getPaperShadowColor = (shadow: Btwx.Shadow): any => {
-  return { hue: shadow.color.h, saturation: shadow.color.s, lightness: shadow.color.l, alpha: shadow.color.a };
+  return shadow.enabled ? { hue: shadow.color.h, saturation: shadow.color.s, lightness: shadow.color.l, alpha: shadow.color.a } : null;
+};
+
+export const getPaperShadowOffset = (shadow: Btwx.Shadow): any => {
+  return shadow.enabled ? new paper.Point(shadow.offset.x, shadow.offset.y) : null;
+};
+
+export const getPaperShadowBlur = (shadow: Btwx.Shadow): any => {
+  return shadow.enabled ? shadow.blur : null;
 };
 
 export const getPaperShapePathData = (shapeType: Btwx.ShapeType, width?: number, height?: number, x?: number, y?: number, shapeOpts?: { radius?: number; sides?: number; points?: number }): any => {

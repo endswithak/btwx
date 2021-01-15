@@ -3,7 +3,7 @@ import React, { useEffect, ReactElement, useCallback } from 'react';
 import debounce from 'lodash.debounce';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 // import { setCanvasTranslating } from '../store/actions/canvasSettings';
 import { setCanvasMatrix } from '../store/actions/documentSettings';
 import { getAllProjectIndices } from '../store/selectors/layer';
@@ -21,7 +21,7 @@ const TranslateTool = (props: TranslateToolProps): ReactElement => {
   const debounceTranslate = useCallback(
     debounce(() => {
       // dispatch(setCanvasTranslating({translating: false}));
-      dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
+      dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
     }, 100),
     []
   );
@@ -29,16 +29,16 @@ const TranslateTool = (props: TranslateToolProps): ReactElement => {
   useEffect(() => {
     if (translateEvent) {
       allProjectIndices.forEach((current, index) => {
-        const project = uiPaperScope.projects[current];
+        const project = paperMain.projects[current];
         if (index === 0) {
           project.view.translate(
-            new uiPaperScope.Point(
+            new paperMain.Point(
               (translateEvent.deltaX * ( 1 / project.view.zoom)) * -1,
               (translateEvent.deltaY * ( 1 / project.view.zoom)) * -1
             )
           )
         } else {
-          project.view.matrix = uiPaperScope.projects[0].view.matrix;
+          project.view.matrix = paperMain.projects[0].view.matrix;
         }
       });
       debounceTranslate();

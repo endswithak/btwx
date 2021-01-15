@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useEffect, ReactElement, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 import { RootState } from '../store/reducers';
 import { setLayersGradientOD } from '../store/actions/layer';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
@@ -39,8 +39,8 @@ const GradientTool = (props: PaperToolProps): ReactElement => {
 
   useEffect(() => {
     if (downEvent && isEnabled) {
-      const originHandle = uiPaperScope.project.getItem({data: { id: 'gradientFrameOriginHandle' }});
-      const destinationHandle = uiPaperScope.project.getItem({data: { id: 'gradientFrameDestinationHandle' }});
+      const originHandle = paperMain.project.getItem({data: { id: 'gradientFrameOriginHandle' }});
+      const destinationHandle = paperMain.project.getItem({data: { id: 'gradientFrameDestinationHandle' }});
       setOriginHandlePosition(originHandle.position);
       setDestinationHandlePosition(destinationHandle.position);
       setHandle(gradientHandle);
@@ -49,9 +49,9 @@ const GradientTool = (props: PaperToolProps): ReactElement => {
 
   useEffect(() => {
     if (dragEvent && isEnabled) {
-      const nextSnapBounds = new uiPaperScope.Rectangle({
-        from: new uiPaperScope.Point(dragEvent.point.x - 0.5, dragEvent.point.y - 0.5),
-        to: new uiPaperScope.Point(dragEvent.point.x + 0.5, dragEvent.point.y + 0.5)
+      const nextSnapBounds = new paperMain.Rectangle({
+        from: new paperMain.Point(dragEvent.point.x - 0.5, dragEvent.point.y - 0.5),
+        to: new paperMain.Point(dragEvent.point.x + 0.5, dragEvent.point.y + 0.5)
       });
       setSnapBounds(nextSnapBounds);
       if (!resizing) {
@@ -104,9 +104,9 @@ const GradientTool = (props: PaperToolProps): ReactElement => {
   }, [upEvent]);
 
   const updateGradients = (): void => {
-    const originHandle = uiPaperScope.project.getItem({data: { id: 'gradientFrameOriginHandle' }});
-    const destinationHandle = uiPaperScope.project.getItem({data: { id: 'gradientFrameDestinationHandle' }});
-    const lines = uiPaperScope.project.getItems({data: { id: 'gradientFrameLine' }});
+    const originHandle = paperMain.project.getItem({data: { id: 'gradientFrameOriginHandle' }});
+    const destinationHandle = paperMain.project.getItem({data: { id: 'gradientFrameDestinationHandle' }});
+    const lines = paperMain.project.getItems({data: { id: 'gradientFrameLine' }});
     const paperProp = getPaperProp(gradientProp);
     if (handle === 'origin') {
       originHandle.position = toBounds.center;
@@ -164,8 +164,8 @@ const GradientTool = (props: PaperToolProps): ReactElement => {
         tool.activate();
       }
     } else {
-      if (tool && uiPaperScope.tool && (uiPaperScope.tool as any)._index === (tool as any)._index) {
-        uiPaperScope.tool = null;
+      if (tool && paperMain.tool && (paperMain.tool as any)._index === (tool as any)._index) {
+        paperMain.tool = null;
         resetState();
       }
     }

@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getSelectedBounds, getSelectedProjectIndices } from '../store/selectors/layer';
 import { updateSelectionFrame } from '../store/actions/layer';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 
 const SelectionFrame = (): ReactElement => {
   const theme = useSelector((state: RootState) => state.viewSettings.theme);
@@ -26,7 +26,7 @@ const SelectionFrame = (): ReactElement => {
   useEffect(() => {
     updateSelectionFrame(selectedBounds, 'all', singleLineHandles);
     return () => {
-      const selectionFrame = uiPaperScope.projects[0].getItem({ data: { id: 'selectionFrame' } });
+      const selectionFrame = paperMain.projects[0].getItem({ data: { id: 'selectionFrame' } });
       selectionFrame.removeChildren();
     }
   }, [theme, selectedBounds, singleLineHandles, selectedPaperScopes, zoom]);

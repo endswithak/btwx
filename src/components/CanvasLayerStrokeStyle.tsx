@@ -1,54 +1,45 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import tinyColor from 'tinycolor2';
+import { getPaperStrokeColor } from '../store/utils/paper';
 import { colorsMatch, gradientStopsMatch } from '../utils';
-import { uiPaperScope } from '../canvas';
+import { paperMain, paperPreview } from '../canvas';
 import CanvasTextLayerStrokeStyle from './CanvasTextLayerStrokeStyle';
 
-interface CanvasLayerStrokeStyleProps {
-  id: string;
+export interface CanvasLayerStrokeStyleProps {
   layerItem: Btwx.Layer;
+  parentItem: Btwx.Artboard | Btwx.Group;
   artboardItem: Btwx.Artboard;
+  paperScope: Btwx.PaperScope;
   rendered: boolean;
+  projectIndex: number;
 }
 
 const CanvasLayerStrokeStyle = (props: CanvasLayerStrokeStyleProps): ReactElement => {
-  const { id, layerItem, artboardItem, rendered } = props;
-  const isShape = layerItem ? layerItem.type === 'Shape' : null;
-  const isLine = layerItem ? isShape && (layerItem as Btwx.Shape).shapeType === 'Line' : null;
-  // const mask = layerItem && isShape ? (layerItem as Btwx.Shape).mask : null;
-  const layerType = layerItem ? layerItem.type : null;
-  const projectIndex = layerItem ? layerItem.type === 'Artboard' ? (layerItem as Btwx.Artboard).projectIndex : artboardItem.projectIndex : null;
-  const layerFrame = layerItem ? layerItem.frame : null;
-  const artboardFrame = artboardItem ? artboardItem.frame : null;
-  const strokeEnabled = layerItem ? layerItem.style.stroke.enabled : null;
-  const strokeFillType = layerItem ? layerItem.style.stroke.fillType : null;
-  const strokeColor = layerItem ? layerItem.style.stroke.color : null;
-  const strokeGradientType = layerItem ? layerItem.style.stroke.gradient.gradientType : null;
-  const strokeGradientOriginX = layerItem ? layerItem.style.stroke.gradient.origin.x : null;
-  const strokeGradientOriginY = layerItem ? layerItem.style.stroke.gradient.origin.y : null;
-  const strokeGradientDestinationX = layerItem ? layerItem.style.stroke.gradient.destination.x : null;
-  const strokeGradientDestinationY = layerItem ? layerItem.style.stroke.gradient.destination.y : null;
-  const strokeGradientStops = layerItem ? layerItem.style.stroke.gradient.stops : null;
-  const strokeWidth = layerItem ? layerItem.style.stroke.width : null;
-  // const [prevMask, setPrevMask] = useState(mask);
-  const [prevStrokeEnabled, setPrevStrokeEnabled] = useState(strokeEnabled);
-  const [prevStrokeFillType, setPrevStrokeFillType] = useState(strokeFillType);
-  const [prevStrokeColor, setPrevStrokeColor] = useState(strokeColor);
-  const [prevStrokeGradientType, setPrevStrokeGradientType] = useState(strokeGradientType);
-  const [prevStrokeGradientOriginX, setPrevStrokeGradientOriginX] = useState(strokeGradientOriginX);
-  const [prevStrokeGradientOriginY, setPrevStrokeGradientOriginY] = useState(strokeGradientOriginY);
-  const [prevStrokeGradientDestinationX, setPrevStrokeGradientDestinationX] = useState(strokeGradientDestinationX);
-  const [prevStrokeGradientDestinationY, setPrevStrokeGradientDestinationY] = useState(strokeGradientDestinationY);
-  const [prevStrokeGradientStops, setPrevStrokeGradientStops] = useState(strokeGradientStops);
-  const [prevStrokeWidth, setPrevStrokeWidth] = useState(strokeWidth);
+  const { paperScope, rendered, layerItem, parentItem, projectIndex, artboardItem } = props;
+  const isText = layerItem ? layerItem.type === 'Text' : false;
+  const isShape = layerItem ? layerItem.type === 'Shape' : false;
+  const isLine = isShape && (layerItem as Btwx.Shape).shapeType === 'Line';
+  const [prevInnerWidth, setPrevInnerWidth] = useState(layerItem.frame.innerWidth);
+  const [prevInnerHeight, setPrevInnerHeight] = useState(layerItem.frame.innerHeight);
+  const [prevRotation, setPrevRotation] = useState(layerItem.transform.rotation);
+  const [prevStrokeEnabled, setPrevStrokeEnabled] = useState(layerItem.style.stroke.enabled);
+  const [prevStrokeFillType, setPrevStrokeFillType] = useState(layerItem.style.stroke.fillType);
+  const [prevStrokeColor, setPrevStrokeColor] = useState(layerItem.style.stroke.color);
+  const [prevStrokeGradientType, setPrevStrokeGradientType] = useState(layerItem.style.stroke.gradient.gradientType);
+  const [prevStrokeGradientOriginX, setPrevStrokeGradientOriginX] = useState(layerItem.style.stroke.gradient.origin.x);
+  const [prevStrokeGradientOriginY, setPrevStrokeGradientOriginY] = useState(layerItem.style.stroke.gradient.origin.y);
+  const [prevStrokeGradientDestinationX, setPrevStrokeGradientDestinationX] = useState(layerItem.style.stroke.gradient.destination.x);
+  const [prevStrokeGradientDestinationY, setPrevStrokeGradientDestinationY] = useState(layerItem.style.stroke.gradient.destination.y);
+  const [prevStrokeGradientStops, setPrevStrokeGradientStops] = useState(layerItem.style.stroke.gradient.stops);
+  const [prevStrokeWidth, setPrevStrokeWidth] = useState(layerItem.style.stroke.width);
 
   const getStyleLayer = (): paper.Item => {
-    let paperLayer = uiPaperScope.projects[projectIndex].getItem({data: {id}});
+    const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
+    let paperLayer = paperProject.getItem({data: {id: layerItem.id}});
     if (paperLayer) {
-      if (layerType === 'Text') {
+      if (layerItem.type === 'Text') {
         paperLayer = paperLayer.getItem({data: {id: 'textLines'}});
       }
-      if (layerType === 'Artboard') {
+      if (layerItem.type === 'Artboard') {
         paperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
       }
     }
@@ -57,138 +48,112 @@ const CanvasLayerStrokeStyle = (props: CanvasLayerStrokeStyleProps): ReactElemen
 
   const applyStroke = (): void => {
     const paperLayer = getStyleLayer();
-    if (strokeEnabled) {
-      const layerPosition = new uiPaperScope.Point(layerFrame.x, layerFrame.y);
-      const artboardPosition = new uiPaperScope.Point(artboardFrame.x, artboardFrame.y);
-      const layerAbsPosition = layerPosition.add(artboardPosition);
-      switch(strokeFillType) {
-        case 'color':
-          paperLayer.strokeColor = {
-            hue: strokeColor.h,
-            saturation: strokeColor.s,
-            lightness: strokeColor.l,
-            alpha: strokeColor.a
-          } as paper.Color;
-          break;
-        case 'gradient':
-          paperLayer.strokeColor  = {
-            gradient: {
-              stops: strokeGradientStops.reduce((result, current) => {
-                result = [
-                  ...result,
-                  new uiPaperScope.GradientStop({
-                    hue: current.color.h,
-                    saturation: current.color.s,
-                    lightness: current.color.l,
-                    alpha: current.color.a
-                  } as paper.Color, current.position)
-                ];
-                return result;
-              }, []) as paper.GradientStop[],
-              radial: strokeGradientType === 'radial'
-            },
-            origin: new uiPaperScope.Point(
-              (strokeGradientOriginX * (isLine ? layerFrame.width : layerFrame.innerWidth)) + layerAbsPosition.x,
-              (strokeGradientOriginY * (isLine ? layerFrame.height : layerFrame.innerHeight)) + layerAbsPosition.y
-            ),
-            destination: new uiPaperScope.Point(
-              (strokeGradientDestinationX * (isLine ? layerFrame.width : layerFrame.innerWidth)) + layerAbsPosition.x,
-              (strokeGradientDestinationY * (isLine ? layerFrame.height : layerFrame.innerHeight)) + layerAbsPosition.y
-            )
-          } as Btwx.PaperGradientFill;
-          break;
-      }
-    } else {
-      paperLayer.strokeColor = tinyColor('#fff').setAlpha(0).toHslString() as any;
-    }
+    paperLayer.strokeColor = getPaperStrokeColor({
+      stroke: layerItem.style.stroke,
+      layerFrame: layerItem.frame,
+      artboardFrame: layerItem.type !== 'Artboard' ? artboardItem.frame : null,
+      isLine
+    });
   }
 
-  // useEffect(() => {
-  //   if (rendered && prevMask !== mask) {
-  //     if (strokeEnabled) {
-  //       applyStroke();
-  //     }
-  //     setPrevMask(mask);
-  //   }
-  // }, [mask]);
-
   useEffect(() => {
-    if (rendered && prevStrokeEnabled !== strokeEnabled) {
+    if (rendered && prevRotation !== layerItem.transform.rotation) {
       applyStroke();
-      setPrevStrokeEnabled(strokeEnabled);
+      setPrevRotation(layerItem.transform.rotation);
     }
-  }, [strokeEnabled]);
+  }, [layerItem.transform.rotation]);
 
   useEffect(() => {
-    if (rendered && prevStrokeFillType !== strokeFillType) {
+    if (rendered && prevInnerWidth !== layerItem.frame.innerWidth) {
       applyStroke();
-      setPrevStrokeFillType(strokeFillType);
+      setPrevInnerWidth(layerItem.frame.innerWidth);
     }
-  }, [strokeFillType]);
+  }, [layerItem.frame.innerWidth]);
 
   useEffect(() => {
-    if (rendered && !colorsMatch(prevStrokeColor, strokeColor)) {
+    if (rendered && prevInnerHeight !== layerItem.frame.innerHeight) {
       applyStroke();
-      setPrevStrokeColor(strokeColor);
+      setPrevInnerHeight(layerItem.frame.innerHeight);
     }
-  }, [strokeColor]);
+  }, [layerItem.frame.innerHeight]);
 
   useEffect(() => {
-    if (rendered && prevStrokeGradientType !== strokeGradientType) {
+    if (rendered && prevStrokeEnabled !== layerItem.style.stroke.enabled) {
       applyStroke();
-      setPrevStrokeGradientType(strokeGradientType);
+      setPrevStrokeEnabled(layerItem.style.stroke.enabled);
     }
-  }, [strokeGradientType]);
+  }, [layerItem.style.stroke.enabled]);
 
   useEffect(() => {
-    if (rendered && prevStrokeGradientOriginX !== strokeGradientOriginX) {
+    if (rendered && prevStrokeFillType !== layerItem.style.stroke.fillType) {
       applyStroke();
-      setPrevStrokeGradientOriginX(strokeGradientOriginX);
+      setPrevStrokeFillType(layerItem.style.stroke.fillType);
     }
-  }, [strokeGradientOriginX]);
+  }, [layerItem.style.stroke.fillType]);
 
   useEffect(() => {
-    if (rendered && prevStrokeGradientOriginY !== strokeGradientOriginY) {
+    if (rendered && !colorsMatch(prevStrokeColor, layerItem.style.stroke.color)) {
       applyStroke();
-      setPrevStrokeGradientOriginY(strokeGradientOriginY);
+      setPrevStrokeColor(layerItem.style.stroke.color);
     }
-  }, [strokeGradientOriginY]);
+  }, [layerItem.style.stroke.color]);
 
   useEffect(() => {
-    if (rendered && prevStrokeGradientDestinationX !== strokeGradientDestinationX) {
+    if (rendered && prevStrokeGradientType !== layerItem.style.stroke.gradient.gradientType) {
       applyStroke();
-      setPrevStrokeGradientDestinationX(strokeGradientDestinationX);
+      setPrevStrokeGradientType(layerItem.style.stroke.gradient.gradientType);
     }
-  }, [strokeGradientDestinationX]);
+  }, [layerItem.style.stroke.gradient.gradientType]);
 
   useEffect(() => {
-    if (rendered && prevStrokeGradientDestinationY !== strokeGradientDestinationY) {
+    if (rendered && prevStrokeGradientOriginX !== layerItem.style.stroke.gradient.origin.x) {
       applyStroke();
-      setPrevStrokeGradientDestinationY(strokeGradientDestinationY);
+      setPrevStrokeGradientOriginX(layerItem.style.stroke.gradient.origin.x);
     }
-  }, [strokeGradientDestinationY]);
+  }, [layerItem.style.stroke.gradient.origin.x]);
 
   useEffect(() => {
-    if (rendered && !gradientStopsMatch(strokeGradientStops, prevStrokeGradientStops)) {
+    if (rendered && prevStrokeGradientOriginY !== layerItem.style.stroke.gradient.origin.y) {
       applyStroke();
-      setPrevStrokeGradientStops(strokeGradientStops);
+      setPrevStrokeGradientOriginY(layerItem.style.stroke.gradient.origin.y);
     }
-  }, [strokeGradientStops]);
+  }, [layerItem.style.stroke.gradient.origin.y]);
 
   useEffect(() => {
-    if (rendered && prevStrokeWidth !== strokeWidth) {
+    if (rendered && prevStrokeGradientDestinationX !== layerItem.style.stroke.gradient.destination.x) {
+      applyStroke();
+      setPrevStrokeGradientDestinationX(layerItem.style.stroke.gradient.destination.x);
+    }
+  }, [layerItem.style.stroke.gradient.destination.x]);
+
+  useEffect(() => {
+    if (rendered && prevStrokeGradientDestinationY !== layerItem.style.stroke.gradient.destination.y) {
+      applyStroke();
+      setPrevStrokeGradientDestinationY(layerItem.style.stroke.gradient.destination.y);
+    }
+  }, [layerItem.style.stroke.gradient.destination.y]);
+
+  useEffect(() => {
+    if (rendered && !gradientStopsMatch(layerItem.style.stroke.gradient.stops, prevStrokeGradientStops)) {
+      applyStroke();
+      setPrevStrokeGradientStops(layerItem.style.stroke.gradient.stops);
+    }
+  }, [layerItem.style.stroke.gradient.stops]);
+
+  useEffect(() => {
+    if (rendered && prevStrokeWidth !== layerItem.style.stroke.width) {
       const paperLayer = getStyleLayer();
-      paperLayer.strokeWidth = strokeWidth;
-      setPrevStrokeWidth(strokeWidth);
+      paperLayer.strokeWidth = layerItem.style.stroke.width;
+      setPrevStrokeWidth(layerItem.style.stroke.width);
     }
-  }, [strokeWidth]);
+  }, [layerItem.style.stroke.width]);
 
   return (
     <>
       {
-        layerType === 'Text'
+        isText
         ? <CanvasTextLayerStrokeStyle
-            {...props}
+            rendered={rendered}
             layerItem={layerItem as Btwx.Text}
             applyStroke={applyStroke} />
         : null

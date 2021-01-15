@@ -1,65 +1,89 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import tinyColor from 'tinycolor2';
-import { getPaperFillColor, getPaperShadowColor, getPaperStrokeColor, getLayerAbsPosition, getLayerPaperParent } from '../store/utils/paper';
-import { uiPaperScope } from '../canvas';
+import { getPaperFillColor, getPaperShadowColor, getPaperStrokeColor, getLayerAbsPosition, getPaperParent, getPaperShadowOffset, getPaperShadowBlur } from '../store/utils/paper';
+import { paperMain, paperPreview } from '../canvas';
+import CanvasLayerContainer, { CanvasLayerContainerProps } from './CanvasLayerContainer';
+import CanvasLayerFrame from './CanvasLayerFrame';
+import CanvasLayerStyle from './CanvasLayerStyle';
+import CanvasLayerTransform from './CanvasLayerTransform';
+import CanvasMaskableLayer from './CanvasMaskableLayer';
+import CanvasPreviewLayerEvent from './CanvasPreviewLayerEvent';
 
 interface CanvasTextLayerProps {
   id: string;
-  layerItem: Btwx.Text;
-  layerIndex: number;
-  artboardItem: Btwx.Artboard;
-  rendered: boolean;
-  setRendered(rendered: boolean): void;
+  paperScope: Btwx.PaperScope;
 }
 
-const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
-  const { id, layerItem, layerIndex, artboardItem, rendered, setRendered } = props;
-  const text = layerItem ? layerItem.text : null;
-  const lines = layerItem ? layerItem.lines : null;
-  const [prevText, setPrevText] = useState(text);
-  const [prevLines, setPrevLines] = useState(lines);
+const CanvasTextLayer = (props: CanvasLayerContainerProps & CanvasTextLayerProps): ReactElement => {
+  const { id, paperScope, layerItem, parentItem, artboardItem, projectIndex, rendered, setRendered } = props;
+  const textItem = layerItem as Btwx.Text;
+  const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
+  const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
+  const [prevText, setPrevText] = useState(textItem.text);
+  const [prevLines, setPrevLines] = useState(textItem.lines);
 
   const createText = (): void => {
-    const paperShadowColor = layerItem.style.shadow.enabled ? getPaperShadowColor(layerItem.style.shadow as Btwx.Shadow) : null;
-    const paperShadowOffset = layerItem.style.shadow.enabled ? new uiPaperScope.Point(layerItem.style.shadow.offset.x, layerItem.style.shadow.offset.y) : null;
-    const paperShadowBlur = layerItem.style.shadow.enabled ? layerItem.style.shadow.blur : null;
-    const point = new uiPaperScope.Point(layerItem.point.x, layerItem.point.y).add(new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y));
-    const paperParent = getLayerPaperParent(uiPaperScope.projects[artboardItem.projectIndex].getItem({data: {id: layerItem.parent}}), layerItem);
-    const textContainer = new uiPaperScope.Group({
-      name: layerItem.name,
-      data: { id, type: 'Layer', layerType: 'Text', scope: layerItem.scope },
-      insert: false
+    const paperParent = getPaperParent({
+      paperScope,
+      projectIndex,
+      parent: layerItem.parent,
+      isParentArtboard: layerItem.parent === layerItem.artboard,
+      masked: textItem.masked,
+      underlyingMask: textItem.underlyingMask
     });
-    paperParent.insertChild(layerIndex, textContainer);
-    const baseText = new uiPaperScope.PointText({
+    const layerIndex = parentItem.children.indexOf(id);
+    const underlyingMaskIndex = textItem.underlyingMask ? parentItem.children.indexOf(textItem.underlyingMask) : null;
+    const paperLayerIndex = textItem.masked ? (layerIndex - underlyingMaskIndex) + 1 : layerIndex;
+    const point = new paperLayerScope.Point(textItem.point.x, textItem.point.y).add(new paperLayerScope.Point(artboardItem.frame.x, artboardItem.frame.y));
+    const textContainer = new paperLayerScope.Group({
+      name: textItem.name,
+      insert: false,
+      data: {
+        id,
+        type: 'Layer',
+        layerType: 'Text',
+        scope: textItem.scope
+      }
+    });
+    const baseText = new paperLayerScope.PointText({
       point: point,
-      content: layerItem.text,
-      data: { id: 'textContent', type: 'LayerChild', layerType: 'Text' },
-      strokeWidth: layerItem.style.stroke.width,
-      shadowColor: paperShadowColor,
-      shadowOffset: paperShadowOffset,
-      shadowBlur: paperShadowBlur,
-      blendMode: layerItem.style.blendMode,
-      opacity: layerItem.style.opacity,
-      dashArray: layerItem.style.strokeOptions.dashArray,
-      dashOffset: layerItem.style.strokeOptions.dashOffset,
-      strokeCap: layerItem.style.strokeOptions.cap,
-      strokeJoin: layerItem.style.strokeOptions.join,
-      fontSize: layerItem.textStyle.fontSize,
-      leading: layerItem.textStyle.leading,
-      fontWeight: layerItem.textStyle.fontWeight,
-      fontFamily: layerItem.textStyle.fontFamily,
-      justification: layerItem.textStyle.justification,
+      content: textItem.text,
+      fillColor: getPaperFillColor({
+        fill: textItem.style.fill,
+        isLine: false,
+        layerFrame: textItem.frame,
+        artboardFrame: artboardItem.frame
+      }),
+      strokeColor: getPaperStrokeColor({
+        stroke: textItem.style.stroke,
+        isLine: false,
+        layerFrame: textItem.frame,
+        artboardFrame: artboardItem.frame
+      }),
+      strokeWidth: textItem.style.stroke.width,
+      shadowColor: getPaperShadowColor(textItem.style.shadow),
+      shadowOffset: getPaperShadowOffset(textItem.style.shadow),
+      shadowBlur: getPaperShadowBlur(textItem.style.shadow),
+      blendMode: textItem.style.blendMode,
+      opacity: textItem.style.opacity,
+      dashArray: textItem.style.strokeOptions.dashArray,
+      dashOffset: textItem.style.strokeOptions.dashOffset,
+      strokeCap: textItem.style.strokeOptions.cap,
+      strokeJoin: textItem.style.strokeOptions.join,
+      fontSize: textItem.textStyle.fontSize,
+      leading: textItem.textStyle.leading,
+      fontWeight: textItem.textStyle.fontWeight,
+      fontFamily: textItem.textStyle.fontFamily,
+      justification: textItem.textStyle.justification,
       parent: textContainer,
-      visible: false
+      visible: false,
+      data: { id: 'textContent', type: 'LayerChild', layerType: 'Text' },
     });
-    baseText.fillColor = layerItem.style.fill.enabled ? getPaperFillColor(layerItem.style.fill, layerItem.frame) as Btwx.PaperGradientFill : null;
-    baseText.strokeColor = layerItem.style.stroke.enabled ? getPaperStrokeColor(layerItem.style.stroke, layerItem.frame) as Btwx.PaperGradientFill : null;
-    const textLinesGroup = new uiPaperScope.Group({
+    const textLinesGroup = new paperLayerScope.Group({
       data: { id: 'textLines', type: 'LayerChild', layerType: 'Text' },
-      children: layerItem.lines.reduce((result: paper.PointText[], current: Btwx.TextLine, index: number) => {
-        const line = new uiPaperScope.PointText({
-          point: new uiPaperScope.Point(baseText.point.x, baseText.point.y + (index * layerItem.textStyle.leading)),
+      children: textItem.lines.reduce((result: paper.PointText[], current: Btwx.TextLine, index: number) => {
+        const line = new paperLayerScope.PointText({
+          point: new paperLayerScope.Point(baseText.point.x, baseText.point.y + (index * textItem.textStyle.leading)),
           content: current.text,
           style: baseText.style,
           visible: true,
@@ -69,14 +93,15 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
       }, []),
       parent: textContainer
     });
-    const textBackground = new uiPaperScope.Path.Rectangle({
+    const textBackground = new paperLayerScope.Path.Rectangle({
       rectangle: textLinesGroup.bounds,
       fillColor: tinyColor('red').setAlpha(0.25).toHslString(),
       data: { id: 'textBackground', type: 'LayerChild', layerType: 'Text' },
       parent: textContainer
     });
-    textContainer.scale(layerItem.transform.horizontalFlip ? -1 : 1, layerItem.transform.verticalFlip ? -1 : 1);
-    textContainer.rotation = layerItem.transform.rotation;
+    textContainer.scale(textItem.transform.horizontalFlip ? -1 : 1, textItem.transform.verticalFlip ? -1 : 1);
+    textContainer.rotation = textItem.transform.rotation;
+    paperParent.insertChild(paperLayerIndex, textContainer);
   }
 
   useEffect(() => {
@@ -85,7 +110,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
     setRendered(true);
     return (): void => {
       // remove layer
-      const paperLayer = uiPaperScope.projects[artboardItem.projectIndex].getItem({data: {id}});
+      const paperLayer = paperProject.getItem({data: {id}});
       if (paperLayer) {
         paperLayer.remove();
       }
@@ -93,27 +118,27 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   }, []);
 
   useEffect(() => {
-    if (rendered && prevText !== text) {
-      const paperLayer = uiPaperScope.projects[artboardItem.projectIndex].getItem({data: {id}}) as paper.Group;
+    if (rendered && prevText !== textItem.text) {
+      const paperLayer = paperProject.getItem({data: {id}}) as paper.Group;
       const textLinesGroup = paperLayer.getItem({data:{id:'textLines'}}) as paper.Group;
       const textContent = paperLayer.getItem({data:{id:'textContent'}}) as paper.PointText;
       const textBackground = paperLayer.getItem({data:{id:'textBackground'}}) as paper.Path.Rectangle;
-      const newLines = text.split(/\r\n|\r|\n/).reduce((result, current) => {
+      const newLines = textItem.text.split(/\r\n|\r|\n/).reduce((result, current) => {
         return [...result, {
           text: current,
           width: null
         }];
       }, []);
       const maxLines = Math.max(newLines.length, prevLines.length);
-      paperLayer.rotation = -layerItem.transform.rotation;
+      paperLayer.rotation = -textItem.transform.rotation;
       const originalPoint = textContent.point;
-      textContent.content = text;
+      textContent.content = textItem.text;
       textContent.point = originalPoint;
       textLinesGroup.removeChildren();
       for(let i = 0; i < maxLines; i++) {
         if (newLines[i]) {
-          const newLine = new uiPaperScope.PointText({
-            point: new uiPaperScope.Point(originalPoint.x, originalPoint.y + (i * (layerItem as Btwx.Text).textStyle.leading)),
+          const newLine = new paperLayerScope.PointText({
+            point: new paperLayerScope.Point(originalPoint.x, originalPoint.y + (i * (textItem as Btwx.Text).textStyle.leading)),
             content: newLines[i].text,
             style: textContent.style,
             parent: textLinesGroup,
@@ -121,20 +146,59 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
           });
           newLine.leading = newLine.fontSize;
           newLines[i].width = newLine.bounds.width;
-          newLine.skew(new uiPaperScope.Point(-(layerItem as Btwx.Text).textStyle.oblique, 0));
+          newLine.skew(new paperLayerScope.Point(-(textItem as Btwx.Text).textStyle.oblique, 0));
           newLine.leading = textContent.leading;
         }
       }
       textBackground.bounds = textLinesGroup.bounds;
-      paperLayer.rotation = layerItem.transform.rotation;
-      setPrevText(text);
+      paperLayer.rotation = textItem.transform.rotation;
+      setPrevText(textItem.text);
       setPrevLines(newLines);
     }
-  }, [text]);
+  }, [textItem.text]);
 
   return (
-    <></>
+    <>
+      <CanvasMaskableLayer
+        layerItem={layerItem as Btwx.MaskableLayer}
+        artboardItem={artboardItem}
+        parentItem={parentItem}
+        paperScope={paperScope}
+        rendered={rendered}
+        projectIndex={projectIndex} />
+      <CanvasLayerTransform
+        layerItem={layerItem}
+        artboardItem={artboardItem}
+        parentItem={parentItem}
+        paperScope={paperScope}
+        rendered={rendered}
+        projectIndex={projectIndex} />
+      <CanvasLayerFrame
+        layerItem={layerItem}
+        artboardItem={artboardItem}
+        parentItem={parentItem}
+        paperScope={paperScope}
+        rendered={rendered}
+        projectIndex={projectIndex} />
+      <CanvasLayerStyle
+        layerItem={layerItem}
+        artboardItem={artboardItem}
+        parentItem={parentItem}
+        paperScope={paperScope}
+        rendered={rendered}
+        projectIndex={projectIndex} />
+      {
+        paperScope === 'preview' && rendered
+        ? layerItem.events.map((eventId, index) => (
+            <CanvasPreviewLayerEvent
+              key={eventId}
+              id={id}
+              eventId={eventId} />
+          ))
+        : null
+      }
+    </>
   );
 }
 
-export default CanvasTextLayer;
+export default CanvasLayerContainer(CanvasTextLayer);

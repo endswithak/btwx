@@ -1,7 +1,7 @@
 import { RootState } from '../reducers';
 import { setCanvasActiveTool } from './canvasSettings';
 import { setCanvasMatrix } from './documentSettings';
-import { uiPaperScope } from '../../canvas';
+import { paperMain } from '../../canvas';
 import { getActiveArtboardBounds, getAllProjectIndices, getCanvasBounds, getSelectedBounds } from '../selectors/layer';
 
 export const zoomInThunk = () => {
@@ -9,10 +9,10 @@ export const zoomInThunk = () => {
     const state = getState() as RootState;
     const allProjectIndices = getAllProjectIndices(state);
     allProjectIndices.forEach((current, index) => {
-      const project = uiPaperScope.projects[current];
+      const project = paperMain.projects[current];
       project.view.zoom *= 2;
     });
-    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
+    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
   }
 };
 
@@ -21,14 +21,14 @@ export const zoomOutThunk = () => {
     const state = getState() as RootState;
     const allProjectIndices = getAllProjectIndices(state);
     allProjectIndices.forEach((current, index) => {
-      const project = uiPaperScope.projects[current];
+      const project = paperMain.projects[current];
       if (project.view.zoom / 2 >= 0.01) {
         project.view.zoom /= 2;
       } else {
         project.view.zoom = 0.01;
       }
     });
-    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
+    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
   }
 };
 
@@ -37,10 +37,10 @@ export const zoomPercentThunk = (percent: number) => {
     const state = getState() as RootState;
     const allProjectIndices = getAllProjectIndices(state);
     allProjectIndices.forEach((current, index) => {
-      const project = uiPaperScope.projects[current];
+      const project = paperMain.projects[current];
       project.view.zoom = percent;
     });
-    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
+    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
   }
 };
 
@@ -50,8 +50,8 @@ export const zoomFitCanvasThunk = () => {
     const allProjectIndices = getAllProjectIndices(state);
     const canvasBounds = getCanvasBounds(state);
     const canvasCenter = canvasBounds.center;
-    const viewWidth: number = uiPaperScope.view.bounds.width;
-    const viewHeight: number = uiPaperScope.view.bounds.height;
+    const viewWidth: number = paperMain.view.bounds.width;
+    const viewHeight: number = paperMain.view.bounds.height;
     const canvasWidth: number = canvasBounds.width;
     const canvasHeight: number = canvasBounds.height;
     const viewRatio: number = viewWidth / viewHeight;
@@ -65,13 +65,13 @@ export const zoomFitCanvasThunk = () => {
           return viewWidth;
       }
     })();
-    const newZoom = (viewDim / constrainingDim.dim) * uiPaperScope.view.zoom;
+    const newZoom = (viewDim / constrainingDim.dim) * paperMain.view.zoom;
     allProjectIndices.forEach((current, index) => {
-      const project = uiPaperScope.projects[current];
+      const project = paperMain.projects[current];
       project.view.center = canvasCenter;
       project.view.zoom = newZoom;
     });
-    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
+    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
   }
 };
 
@@ -81,8 +81,8 @@ export const zoomFitSelectedThunk = () => {
     const allProjectIndices = getAllProjectIndices(state);
     const selectionBounds = getSelectedBounds(state);
     const selectionCenter = selectionBounds.center;
-    const viewWidth: number = uiPaperScope.view.bounds.width;
-    const viewHeight: number = uiPaperScope.view.bounds.height;
+    const viewWidth: number = paperMain.view.bounds.width;
+    const viewHeight: number = paperMain.view.bounds.height;
     const selectionWidth: number = selectionBounds.width;
     const selectionHeight: number = selectionBounds.height;
     const viewRatio: number = viewWidth / viewHeight;
@@ -96,13 +96,13 @@ export const zoomFitSelectedThunk = () => {
           return viewWidth;
       }
     })();
-    const newZoom = (viewDim / constrainingDim.dim) * uiPaperScope.view.zoom;
+    const newZoom = (viewDim / constrainingDim.dim) * paperMain.view.zoom;
     allProjectIndices.forEach((current, index) => {
-      const project = uiPaperScope.projects[current];
+      const project = paperMain.projects[current];
       project.view.center = selectionCenter;
       project.view.zoom = newZoom;
     });
-    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
+    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
   }
 };
 
@@ -112,8 +112,8 @@ export const zoomFitActiveArtboardThunk = () => {
     const allProjectIndices = getAllProjectIndices(state);
     const activeArtboardBounds = getActiveArtboardBounds(state);
     const activeArtboardCenter = activeArtboardBounds.center;
-    const viewWidth: number = uiPaperScope.view.bounds.width;
-    const viewHeight: number = uiPaperScope.view.bounds.height;
+    const viewWidth: number = paperMain.view.bounds.width;
+    const viewHeight: number = paperMain.view.bounds.height;
     const activeArtboardWidth: number = activeArtboardBounds.width;
     const activeArtboardHeight: number = activeArtboardBounds.height;
     const viewRatio: number = viewWidth / viewHeight;
@@ -127,12 +127,12 @@ export const zoomFitActiveArtboardThunk = () => {
           return viewWidth;
       }
     })();
-    const newZoom = (viewDim / constrainingDim.dim) * uiPaperScope.view.zoom;
+    const newZoom = (viewDim / constrainingDim.dim) * paperMain.view.zoom;
     allProjectIndices.forEach((current, index) => {
-      const project = uiPaperScope.projects[current];
+      const project = paperMain.projects[current];
       project.view.center = activeArtboardCenter;
       project.view.zoom = newZoom;
     });
-    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
+    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
   }
 };

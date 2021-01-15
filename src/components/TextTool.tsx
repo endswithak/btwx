@@ -3,7 +3,7 @@ import React, { useEffect, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
 import paper from 'paper';
 import { RootState } from '../store/reducers';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 import { setCanvasDrawing } from '../store/actions/canvasSettings';
 import { addTextThunk } from '../store/actions/layer';
 import { AddTextPayload } from '../store/actionTypes/layer';
@@ -54,9 +54,9 @@ const TextTool = (props: TextToolProps): ReactElement => {
 
   useEffect(() => {
     if (moveEvent && isEnabled) {
-      const nextSnapBounds = new uiPaperScope.Rectangle({
-        from: new uiPaperScope.Point(moveEvent.point.x - 0.5, moveEvent.point.y - 0.5),
-        to: new uiPaperScope.Point(moveEvent.point.x + 0.5, moveEvent.point.y + 0.5)
+      const nextSnapBounds = new paperMain.Rectangle({
+        from: new paperMain.Point(moveEvent.point.x - 0.5, moveEvent.point.y - 0.5),
+        to: new paperMain.Point(moveEvent.point.x + 0.5, moveEvent.point.y + 0.5)
       });
       setSnapBounds(nextSnapBounds);
     }
@@ -64,14 +64,14 @@ const TextTool = (props: TextToolProps): ReactElement => {
 
   useEffect(() => {
     if (downEvent && isEnabled) {
-      const paperLayer = new uiPaperScope.PointText({
+      const paperLayer = new paperMain.PointText({
         point: toBounds ? toBounds.center : downEvent.point,
         content: DEFAULT_TEXT_VALUE,
         ...textSettings,
         insert: false
       });
       const parentItem = layerProjectIndices.reduce((result, current, index) => {
-        const project = uiPaperScope.projects[current];
+        const project = paperMain.projects[current];
         if (project) {
           const hitTest = project.getItem({
             data: (data: any) => {
@@ -86,7 +86,7 @@ const TextTool = (props: TextToolProps): ReactElement => {
       }, {
         id: activeArtboard,
         projectIndex: activeArtboardProjectIndex,
-        paperLayer: uiPaperScope.projects[activeArtboardProjectIndex].getItem({data: {id: activeArtboard}})
+        paperLayer: paperMain.projects[activeArtboardProjectIndex].getItem({data: {id: activeArtboard}})
       });
       const point = paperLayer.point.subtract(parentItem.paperLayer.position).round();
       const position = paperLayer.position.subtract(parentItem.paperLayer.position).round();
@@ -131,9 +131,9 @@ const TextTool = (props: TextToolProps): ReactElement => {
       }).then((textLayer) => {
         toggleTextToolThunk();
         // get new layer bounds
-        const topLeft = uiPaperScope.view.projectToView(paperLayer.bounds.topLeft);
-        const topCenter = uiPaperScope.view.projectToView(paperLayer.bounds.topCenter);
-        const topRight = uiPaperScope.view.projectToView(paperLayer.bounds.topRight);
+        const topLeft = paperMain.view.projectToView(paperLayer.bounds.topLeft);
+        const topCenter = paperMain.view.projectToView(paperLayer.bounds.topCenter);
+        const topRight = paperMain.view.projectToView(paperLayer.bounds.topRight);
         // open text editor with new text layer props
         openTextEditor({
           layer: textLayer.id,
@@ -170,8 +170,8 @@ const TextTool = (props: TextToolProps): ReactElement => {
         tool.activate();
       }
     } else {
-      if (tool && uiPaperScope.tool && (uiPaperScope.tool as any)._index === (tool as any)._index) {
-        uiPaperScope.tool = null;
+      if (tool && paperMain.tool && (paperMain.tool as any)._index === (tool as any)._index) {
+        paperMain.tool = null;
         resetState();
       }
     }

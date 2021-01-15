@@ -1,52 +1,51 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { uiPaperScope } from '../canvas';
+import { paperMain, paperPreview } from '../canvas';
 
-interface CanvasLayerTransformProps {
-  id: string;
+export interface CanvasLayerTransformProps {
   layerItem: Btwx.Layer;
+  parentItem: Btwx.Artboard | Btwx.Group;
   artboardItem: Btwx.Artboard;
+  paperScope: Btwx.PaperScope;
   rendered: boolean;
+  projectIndex: number;
 }
 
 const CanvasLayerTransform = (props: CanvasLayerTransformProps): ReactElement => {
-  const { id, layerItem, artboardItem, rendered } = props;
-  const projectIndex = layerItem ? layerItem.type === 'Artboard' ? (layerItem as Btwx.Artboard).projectIndex : artboardItem.projectIndex : null;
-  const isShape = layerItem && layerItem.type === 'Shape';
-  const rotation =  layerItem ? layerItem.transform.rotation : null;
-  const horizontalFlip = layerItem ? layerItem.transform.horizontalFlip : null;
-  const verticalFlip = layerItem ? layerItem.transform.verticalFlip : null;
-  const [prevRotation, setPrevRotation] = useState(rotation);
-  const [prevHorizontalFlip, setPrevHorizontalFlip] = useState(horizontalFlip);
-  const [prevVerticalFlip, setPrevVerticalFlip] = useState(verticalFlip);
+  const { paperScope, rendered, layerItem, parentItem, projectIndex, artboardItem } = props;
+  const isShape = layerItem.type === 'Shape';
+  const [prevRotation, setPrevRotation] = useState(layerItem.transform.rotation);
+  const [prevHorizontalFlip, setPrevHorizontalFlip] = useState(layerItem.transform.horizontalFlip);
+  const [prevVerticalFlip, setPrevVerticalFlip] = useState(layerItem.transform.verticalFlip);
 
   const getPaperLayer = (): paper.Item => {
-    return uiPaperScope.projects[projectIndex].getItem({data: {id}});
+    const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
+    return paperProject.getItem({data: {id: layerItem.id}});
   }
 
   useEffect(() => {
-    if (rendered && rotation !== prevRotation && !isShape) {
+    if (rendered && layerItem.transform.rotation !== prevRotation && !isShape) {
       const paperLayer = getPaperLayer();
       paperLayer.rotation = -prevRotation;
-      paperLayer.rotation = rotation;
-      setPrevRotation(rotation);
+      paperLayer.rotation = layerItem.transform.rotation;
+      setPrevRotation(layerItem.transform.rotation);
     }
-  }, [rotation]);
+  }, [layerItem.transform.rotation]);
 
   useEffect(() => {
-    if (rendered && horizontalFlip !== prevHorizontalFlip && !isShape) {
+    if (rendered && layerItem.transform.horizontalFlip !== prevHorizontalFlip && !isShape) {
       const paperLayer = getPaperLayer();
       paperLayer.scale(-1, 1);
-      setPrevHorizontalFlip(horizontalFlip);
+      setPrevHorizontalFlip(layerItem.transform.horizontalFlip);
     }
-  }, [horizontalFlip]);
+  }, [layerItem.transform.horizontalFlip]);
 
   useEffect(() => {
-    if (rendered && verticalFlip !== prevVerticalFlip && !isShape) {
+    if (rendered && layerItem.transform.verticalFlip !== prevVerticalFlip && !isShape) {
       const paperLayer = getPaperLayer();
       paperLayer.scale(1, -1);
-      setPrevVerticalFlip(verticalFlip);
+      setPrevVerticalFlip(layerItem.transform.verticalFlip);
     }
-  }, [verticalFlip]);
+  }, [layerItem.transform.verticalFlip]);
 
   return (
     <></>

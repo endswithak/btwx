@@ -1,71 +1,80 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { getPaperFillColor, getPaperShadowColor, getPaperStrokeColor, getLayerAbsPosition, getLayerPaperParent } from '../store/utils/paper';
-import { uiPaperScope } from '../canvas';
+import { getPaperFillColor, getPaperShadowColor, getPaperShadowOffset, getPaperStrokeColor, getLayerAbsPosition, getPaperParent, getPaperShadowBlur } from '../store/utils/paper';
+import { paperMain, paperPreview } from '../canvas';
+import CanvasLayerContainer, { CanvasLayerContainerProps } from './CanvasLayerContainer';
+import CanvasLayerFrame from './CanvasLayerFrame';
+import CanvasLayerStyle from './CanvasLayerStyle';
+import CanvasLayerTransform from './CanvasLayerTransform';
+import CanvasPreviewLayerEvent from './CanvasPreviewLayerEvent';
+import CanvasMaskableLayer from './CanvasMaskableLayer';
 
 interface CanvasShapeLayerProps {
   id: string;
-  layerItem: Btwx.Shape;
-  layerIndex: number;
-  artboardItem: Btwx.Artboard;
-  rendered: boolean;
-  underlyingMaskIndex: number;
-  setRendered(rendered: boolean): void;
+  paperScope: Btwx.PaperScope;
 }
 
-const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
-  const { id, layerItem, layerIndex, artboardItem, rendered, underlyingMaskIndex, setRendered } = props;
-  const pathData = layerItem ? layerItem.pathData : null;
-  const x = layerItem ? layerItem.frame.x : null;
-  const y = layerItem ? layerItem.frame.y : null;
-  const [prevPathData, setPrevPathData] = useState(pathData);
-  const [prevX, setPrevX] = useState(x);
-  const [prevY, setPrevY] = useState(y);
+const CanvasShapeLayer = (props: CanvasLayerContainerProps & CanvasShapeLayerProps): ReactElement => {
+  const { id, paperScope, layerItem, parentItem, artboardItem, projectIndex, rendered, setRendered } = props;
+  const shapeItem = layerItem as Btwx.Shape;
+  const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
+  const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
+  const [prevPathData, setPrevPathData] = useState(shapeItem.pathData);
 
   const createShape = (): void => {
-    const paperShadowColor = layerItem.style.shadow.enabled ? getPaperShadowColor(layerItem.style.shadow as Btwx.Shadow) : null;
-    const paperShadowOffset = layerItem.style.shadow.enabled ? new uiPaperScope.Point(layerItem.style.shadow.offset.x, layerItem.style.shadow.offset.y) : null;
-    const paperShadowBlur = layerItem.style.shadow.enabled ? layerItem.style.shadow.blur : null;
-    const paperFillColor = layerItem.style.fill.enabled ? getPaperFillColor(layerItem.style.fill, layerItem.frame) as Btwx.PaperGradientFill : null;
-    const paperStrokeColor = layerItem.style.stroke.enabled ? getPaperStrokeColor(layerItem.style.stroke, layerItem.frame) as Btwx.PaperGradientFill : null;
-    const paperParent = (() => {
-      let parent = uiPaperScope.projects[artboardItem.projectIndex].getItem({data: {id: layerItem.parent}});
-      if (layerItem.parent === artboardItem.id) {
-        parent = parent.getItem({data:{id:'artboardLayers'}});
-      }
-      if (layerItem.masked) {
-        parent = uiPaperScope.projects[artboardItem.projectIndex].getItem({data: {id: layerItem.underlyingMask}}).parent;
-      }
-      return parent;
-    })();
-    const paperLayerIndex = layerItem.masked ? (layerIndex - underlyingMaskIndex) + 1 : layerIndex;
-    const shapePaperLayer = new uiPaperScope.CompoundPath({
-      name: layerItem.name,
-      pathData: layerItem.pathData,
-      closed: layerItem.closed,
-      strokeWidth: layerItem.style.stroke.width,
-      shadowColor: paperShadowColor,
-      shadowOffset: paperShadowOffset,
-      shadowBlur: paperShadowBlur,
-      blendMode: layerItem.style.blendMode,
-      opacity: layerItem.style.opacity,
-      dashArray: layerItem.style.strokeOptions.dashArray,
-      dashOffset: layerItem.style.strokeOptions.dashOffset,
-      strokeCap: layerItem.style.strokeOptions.cap,
+    const paperParent = getPaperParent({
+      paperScope,
+      projectIndex,
+      parent: shapeItem.parent,
+      isParentArtboard: shapeItem.parent === shapeItem.artboard,
+      masked: shapeItem.masked,
+      underlyingMask: shapeItem.underlyingMask
+    });
+    const layerIndex = parentItem.children.indexOf(id);
+    const underlyingMaskIndex = shapeItem.underlyingMask ? parentItem.children.indexOf(shapeItem.underlyingMask) : null;
+    const paperLayerIndex = shapeItem.masked ? (layerIndex - underlyingMaskIndex) + 1 : layerIndex;
+    const shapePaperLayer = new paperLayerScope.CompoundPath({
+      name: shapeItem.name,
+      pathData: shapeItem.pathData,
+      closed: shapeItem.closed,
+      position: getLayerAbsPosition(shapeItem.frame, artboardItem.frame),
+      fillColor: getPaperFillColor({
+        fill: shapeItem.style.fill,
+        isLine: shapeItem.shapeType === 'Line',
+        layerFrame: shapeItem.frame,
+        artboardFrame: artboardItem.frame
+      }),
+      strokeColor: getPaperStrokeColor({
+        stroke: shapeItem.style.stroke,
+        isLine: shapeItem.shapeType === 'Line',
+        layerFrame: shapeItem.frame,
+        artboardFrame: artboardItem.frame
+      }),
+      strokeWidth: shapeItem.style.stroke.width,
+      shadowColor: getPaperShadowColor(shapeItem.style.shadow),
+      shadowOffset: getPaperShadowOffset(shapeItem.style.shadow),
+      shadowBlur: getPaperShadowBlur(shapeItem.style.shadow),
+      blendMode: shapeItem.style.blendMode,
+      opacity: shapeItem.style.opacity,
+      dashArray: shapeItem.style.strokeOptions.dashArray,
+      dashOffset: shapeItem.style.strokeOptions.dashOffset,
+      strokeCap: shapeItem.style.strokeOptions.cap,
+      strokeJoin: shapeItem.style.strokeOptions.join,
       insert: false,
-      // clipMask: layerItem.mask,
-      strokeJoin: layerItem.style.strokeOptions.join,
-      data: { id: id, type: 'Layer', layerType: 'Shape', shapeType: layerItem.shapeType, scope: layerItem.scope }
+      data: {
+        id: id,
+        type: 'Layer',
+        layerType: 'Shape',
+        shapeType: shapeItem.shapeType,
+        scope: shapeItem.scope
+      }
     });
     shapePaperLayer.children.forEach((item) => item.data = { id: 'shapePartial', type: 'LayerChild', layerType: 'Shape' });
-    shapePaperLayer.position = getLayerAbsPosition(layerItem.frame, artboardItem.frame);
-    shapePaperLayer.fillColor = paperFillColor;
-    shapePaperLayer.strokeColor = paperStrokeColor;
-    if (layerItem.mask) {
-      paperParent.insertChild(paperLayerIndex, new uiPaperScope.Group({
+    if (shapeItem.mask) {
+      paperParent.insertChild(paperLayerIndex, new paperLayerScope.Group({
         name: 'MaskGroup',
         data: { id: 'maskGroup', type: 'LayerContainer', layerType: 'Shape' },
         children: [
-          new uiPaperScope.CompoundPath({
+          new paperLayerScope.CompoundPath({
             name: 'mask',
             pathData: shapePaperLayer.pathData,
             position: shapePaperLayer.position,
@@ -79,8 +88,6 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
     } else {
       paperParent.insertChild(paperLayerIndex, shapePaperLayer);
     }
-    // paperLayer.scale(layerItem.transform.horizontalFlip ? -1 : 1, layerItem.transform.verticalFlip ? -1 : 1);
-    // paperLayer.rotation = layerItem.transform.rotation;
   }
 
   useEffect(() => {
@@ -89,9 +96,9 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
     setRendered(true);
     return (): void => {
       // remove layer
-      const paperLayer = uiPaperScope.projects[artboardItem.projectIndex].getItem({data: {id}});
+      const paperLayer = paperProject.getItem({data: {id}});
       if (paperLayer) {
-        if (layerItem.mask) {
+        if (shapeItem.mask) {
           const maskGroup = paperLayer.parent;
           maskGroup.children[0].remove();
           maskGroup.parent.insertChildren(maskGroup.index, maskGroup.children);
@@ -103,23 +110,62 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
   }, []);
 
   useEffect(() => {
-    if (rendered && prevPathData !== pathData) {
-      const absPosition = getLayerAbsPosition(layerItem.frame, artboardItem.frame);
-      const paperLayer = uiPaperScope.projects[artboardItem.projectIndex].getItem({data: {id}}) as paper.CompoundPath;
-      paperLayer.pathData = pathData;
+    if (rendered && prevPathData !== shapeItem.pathData) {
+      const absPosition = getLayerAbsPosition(shapeItem.frame, artboardItem.frame);
+      const paperLayer = paperProject.getItem({data: {id}}) as paper.CompoundPath;
+      paperLayer.pathData = shapeItem.pathData;
       paperLayer.position = absPosition;
-      if (layerItem.mask) {
-        const maskGroup = uiPaperScope.projects[artboardItem.projectIndex].getItem({data: {id}}).parent;
+      if (shapeItem.mask) {
+        const maskGroup = paperProject.getItem({data: {id}}).parent;
         (maskGroup.children[0] as paper.CompoundPath).pathData = paperLayer.pathData;
         maskGroup.children[0].position = paperLayer.position;
       }
-      setPrevPathData(pathData);
+      setPrevPathData(shapeItem.pathData);
     }
-  }, [pathData]);
+  }, [shapeItem.pathData]);
 
   return (
-    <></>
+    <>
+      <CanvasMaskableLayer
+        layerItem={layerItem as Btwx.MaskableLayer}
+        artboardItem={artboardItem}
+        parentItem={parentItem}
+        paperScope={paperScope}
+        rendered={rendered}
+        projectIndex={projectIndex} />
+      <CanvasLayerTransform
+        layerItem={layerItem}
+        artboardItem={artboardItem}
+        parentItem={parentItem}
+        paperScope={paperScope}
+        rendered={rendered}
+        projectIndex={projectIndex} />
+      <CanvasLayerFrame
+        layerItem={layerItem}
+        artboardItem={artboardItem}
+        parentItem={parentItem}
+        paperScope={paperScope}
+        rendered={rendered}
+        projectIndex={projectIndex} />
+      <CanvasLayerStyle
+        layerItem={layerItem}
+        artboardItem={artboardItem}
+        parentItem={parentItem}
+        paperScope={paperScope}
+        rendered={rendered}
+        projectIndex={projectIndex} />
+      {
+        paperScope === 'preview' && rendered
+        ? layerItem.events.map((eventId, index) => (
+            <CanvasPreviewLayerEvent
+              key={eventId}
+              id={id}
+              eventId={eventId} />
+          ))
+        : null
+      }
+    </>
   );
 }
 
-export default CanvasShapeLayer;
+export default CanvasLayerContainer(CanvasShapeLayer);

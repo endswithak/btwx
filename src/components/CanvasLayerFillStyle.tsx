@@ -1,58 +1,44 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import tinyColor from 'tinycolor2';
+import { getPaperFillColor } from '../store/utils/paper';
 import { colorsMatch, gradientStopsMatch } from '../utils';
-import { uiPaperScope } from '../canvas';
+import { paperMain, paperPreview } from '../canvas';
 import CanvasTextLayerFillStyle from './CanvasTextLayerFillStyle';
 
-interface CanvasLayerFillStyleProps {
-  id: string;
+export interface CanvasLayerFillStyleProps {
   layerItem: Btwx.Layer;
+  parentItem: Btwx.Artboard | Btwx.Group;
   artboardItem: Btwx.Artboard;
+  paperScope: Btwx.PaperScope;
   rendered: boolean;
+  projectIndex: number;
 }
 
 const CanvasLayerFillStyle = (props: CanvasLayerFillStyleProps): ReactElement => {
-  const { id, layerItem, artboardItem, rendered } = props;
-  const isShape = layerItem ? layerItem.type === 'Shape' : null;
-  const isLine = layerItem ? isShape && (layerItem as Btwx.Shape).shapeType === 'Line' : null;
-  // const mask = layerItem && isShape ? (layerItem as Btwx.Shape).mask : null;
-  const layerType = layerItem ? layerItem.type : null;
-  const projectIndex = layerItem ? layerItem.type === 'Artboard' ? (layerItem as Btwx.Artboard).projectIndex : artboardItem.projectIndex : null;
-  const layerFrame = layerItem ? layerItem.frame : null;
-  const innerWidth = layerItem ? layerItem.frame.innerWidth : null;
-  const innerHeight = layerItem ? layerItem.frame.innerHeight : null;
-  const artboardFrame = artboardItem ? artboardItem.frame : null;
-  const rotation = layerItem ? layerItem.transform.rotation : null;
-  const fillEnabled = layerItem ? layerItem.style.fill.enabled : null;
-  const fillType = layerItem ? layerItem.style.fill.fillType : null;
-  const fillColor = layerItem ? layerItem.style.fill.color : null;
-  const fillGradientType = layerItem ? layerItem.style.fill.gradient.gradientType : null;
-  const fillGradientOriginX = layerItem ? layerItem.style.fill.gradient.origin.x : null;
-  const fillGradientOriginY = layerItem ? layerItem.style.fill.gradient.origin.y : null;
-  const fillGradientDestinationX = layerItem ? layerItem.style.fill.gradient.destination.x : null;
-  const fillGradientDestinationY = layerItem ? layerItem.style.fill.gradient.destination.y : null;
-  const fillGradientStops = layerItem ? layerItem.style.fill.gradient.stops : null;
-  // const [prevMask, setPrevMask] = useState(mask);
-  const [prevInnerWidth, setPrevInnerWidth] = useState(innerWidth);
-  const [prevInnerHeight, setPrevInnerHeight] = useState(innerHeight);
-  const [prevRotation, setPrevRotation] = useState(rotation);
-  const [prevFillEnabled, setPrevFillEnabled] = useState(fillEnabled);
-  const [prevFillType, setPrevFillType] = useState(fillType);
-  const [prevFillColor, setPrevFillColor] = useState(fillColor);
-  const [prevFillGradientType, setPrevFillGradientType] = useState(fillGradientType);
-  const [prevFillGradientOriginX, setPrevFillGradientOriginX] = useState(fillGradientOriginX);
-  const [prevFillGradientOriginY, setPrevFillGradientOriginY] = useState(fillGradientOriginY);
-  const [prevFillGradientDestinationX, setPrevFillGradientDestinationX] = useState(fillGradientDestinationX);
-  const [prevFillGradientDestinationY, setPrevFillGradientDestinationY] = useState(fillGradientDestinationY);
-  const [prevFillGradientStops, setPrevFillGradientStops] = useState(fillGradientStops);
+  const { paperScope, rendered, layerItem, parentItem, projectIndex, artboardItem } = props;
+  const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
+  const isText = layerItem ? layerItem.type === 'Text' : false;
+  const isShape = layerItem ? layerItem.type === 'Shape' : false;
+  const isLine = isShape && (layerItem as Btwx.Shape).shapeType === 'Line';
+  const [prevInnerWidth, setPrevInnerWidth] = useState(layerItem.frame.innerWidth);
+  const [prevInnerHeight, setPrevInnerHeight] = useState(layerItem.frame.innerHeight);
+  const [prevRotation, setPrevRotation] = useState(layerItem.transform.rotation);
+  const [prevFillEnabled, setPrevFillEnabled] = useState(layerItem.style.fill.enabled);
+  const [prevFillType, setPrevFillType] = useState(layerItem.style.fill.fillType);
+  const [prevFillColor, setPrevFillColor] = useState(layerItem.style.fill.color);
+  const [prevFillGradientType, setPrevFillGradientType] = useState(layerItem.style.fill.gradient.gradientType);
+  const [prevFillGradientOriginX, setPrevFillGradientOriginX] = useState(layerItem.style.fill.gradient.origin.x);
+  const [prevFillGradientOriginY, setPrevFillGradientOriginY] = useState(layerItem.style.fill.gradient.origin.y);
+  const [prevFillGradientDestinationX, setPrevFillGradientDestinationX] = useState(layerItem.style.fill.gradient.destination.x);
+  const [prevFillGradientDestinationY, setPrevFillGradientDestinationY] = useState(layerItem.style.fill.gradient.destination.y);
+  const [prevFillGradientStops, setPrevFillGradientStops] = useState(layerItem.style.fill.gradient.stops);
 
   const getStyleLayer = (): paper.Item => {
-    let paperLayer = uiPaperScope.projects[projectIndex].getItem({data: {id}});
+    let paperLayer = paperProject.getItem({data: {id: layerItem.id}});
     if (paperLayer) {
-      if (layerType === 'Text') {
+      if (layerItem.type === 'Text') {
         paperLayer = paperLayer.getItem({data: {id: 'textLines'}});
       }
-      if (layerType === 'Artboard') {
+      if (layerItem.type === 'Artboard') {
         paperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
       }
     }
@@ -61,151 +47,104 @@ const CanvasLayerFillStyle = (props: CanvasLayerFillStyleProps): ReactElement =>
 
   const applyFill = (): void => {
     const paperLayer = getStyleLayer();
-    if (fillEnabled) {
-      const layerPosition = new uiPaperScope.Point(layerFrame.x, layerFrame.y);
-      const artboardPosition = new uiPaperScope.Point(artboardFrame.x, artboardFrame.y);
-      const layerAbsPosition = layerPosition.add(artboardPosition);
-      switch(fillType) {
-        case 'color':
-          paperLayer.fillColor = {
-            hue: fillColor.h,
-            saturation: fillColor.s,
-            lightness: fillColor.l,
-            alpha: fillColor.a
-          } as paper.Color;
-          break;
-        case 'gradient':
-          paperLayer.fillColor  = {
-            gradient: {
-              stops: fillGradientStops.reduce((result, current) => {
-                result = [
-                  ...result,
-                  new uiPaperScope.GradientStop({
-                    hue: current.color.h,
-                    saturation: current.color.s,
-                    lightness: current.color.l,
-                    alpha: current.color.a
-                  } as paper.Color, current.position)
-                ];
-                return result;
-              }, []) as paper.GradientStop[],
-              radial: fillGradientType === 'radial'
-            },
-            origin: new uiPaperScope.Point(
-              (fillGradientOriginX * (isLine ? layerFrame.width : layerFrame.innerWidth)) + layerAbsPosition.x,
-              (fillGradientOriginY * (isLine ? layerFrame.height : layerFrame.innerHeight)) + layerAbsPosition.y
-            ),
-            destination: new uiPaperScope.Point(
-              (fillGradientDestinationX * (isLine ? layerFrame.width : layerFrame.innerWidth)) + layerAbsPosition.x,
-              (fillGradientDestinationY * (isLine ? layerFrame.height : layerFrame.innerHeight)) + layerAbsPosition.y
-            )
-          } as Btwx.PaperGradientFill;
-          break;
-      }
-    } else {
-      paperLayer.fillColor = tinyColor('#fff').setAlpha(0).toHslString() as any;
-    }
+    paperLayer.fillColor = getPaperFillColor({
+      fill: layerItem.style.fill,
+      layerFrame: layerItem.frame,
+      artboardFrame: layerItem.type !== 'Artboard' ? artboardItem.frame : null,
+      isLine
+    });
   }
 
-  // useEffect(() => {
-  //   if (rendered && prevMask !== mask) {
-  //     if (fillEnabled) {
-  //       applyFill();
-  //     }
-  //     setPrevMask(mask);
-  //   }
-  // }, [mask]);
+  useEffect(() => {
+    if (rendered && prevRotation !== layerItem.transform.rotation) {
+      applyFill();
+      setPrevRotation(layerItem.transform.rotation);
+    }
+  }, [layerItem.transform.rotation]);
 
   useEffect(() => {
-    if (rendered && prevRotation !== rotation) {
+    if (rendered && prevInnerWidth !== layerItem.frame.innerWidth) {
       applyFill();
-      setPrevRotation(rotation);
+      setPrevInnerWidth(layerItem.frame.innerWidth);
     }
-  }, [rotation]);
+  }, [layerItem.frame.innerWidth]);
 
   useEffect(() => {
-    if (rendered && prevInnerWidth !== innerWidth) {
+    if (rendered && prevInnerHeight !== layerItem.frame.innerHeight) {
       applyFill();
-      setPrevInnerWidth(innerWidth);
+      setPrevInnerHeight(layerItem.frame.innerHeight);
     }
-  }, [innerWidth]);
+  }, [layerItem.frame.innerHeight]);
 
   useEffect(() => {
-    if (rendered && prevInnerHeight !== innerHeight) {
+    if (rendered && prevFillEnabled !== layerItem.style.fill.enabled) {
       applyFill();
-      setPrevInnerHeight(innerHeight);
+      setPrevFillEnabled(layerItem.style.fill.enabled);
     }
-  }, [innerHeight]);
+  }, [layerItem.style.fill.enabled]);
 
   useEffect(() => {
-    if (rendered && prevFillEnabled !== fillEnabled) {
+    if (rendered && prevFillType !== layerItem.style.fill.fillType) {
       applyFill();
-      setPrevFillEnabled(fillEnabled);
+      setPrevFillType(layerItem.style.fill.fillType);
     }
-  }, [fillEnabled]);
+  }, [layerItem.style.fill.fillType]);
 
   useEffect(() => {
-    if (rendered && prevFillType !== fillType) {
+    if (rendered && !colorsMatch(prevFillColor, layerItem.style.fill.color)) {
       applyFill();
-      setPrevFillType(fillType);
+      setPrevFillColor(layerItem.style.fill.color);
     }
-  }, [fillType]);
+  }, [layerItem.style.fill.color]);
 
   useEffect(() => {
-    if (rendered && !colorsMatch(prevFillColor, fillColor)) {
+    if (rendered && prevFillGradientType !== layerItem.style.fill.gradient.gradientType) {
       applyFill();
-      setPrevFillColor(fillColor);
+      setPrevFillGradientType(layerItem.style.fill.gradient.gradientType);
     }
-  }, [fillColor]);
+  }, [layerItem.style.fill.gradient.gradientType]);
 
   useEffect(() => {
-    if (rendered && prevFillGradientType !== fillGradientType) {
+    if (rendered && prevFillGradientOriginX !== layerItem.style.fill.gradient.origin.x) {
       applyFill();
-      setPrevFillGradientType(fillGradientType);
+      setPrevFillGradientOriginX(layerItem.style.fill.gradient.origin.x);
     }
-  }, [fillGradientType]);
+  }, [layerItem.style.fill.gradient.origin.x]);
 
   useEffect(() => {
-    if (rendered && prevFillGradientOriginX !== fillGradientOriginX) {
+    if (rendered && prevFillGradientOriginY !== layerItem.style.fill.gradient.origin.y) {
       applyFill();
-      setPrevFillGradientOriginX(fillGradientOriginX);
+      setPrevFillGradientOriginY(layerItem.style.fill.gradient.origin.y);
     }
-  }, [fillGradientOriginX]);
+  }, [layerItem.style.fill.gradient.origin.y]);
 
   useEffect(() => {
-    if (rendered && prevFillGradientOriginY !== fillGradientOriginY) {
+    if (rendered && prevFillGradientDestinationX !== layerItem.style.fill.gradient.destination.x) {
       applyFill();
-      setPrevFillGradientOriginY(fillGradientOriginY);
+      setPrevFillGradientDestinationX(layerItem.style.fill.gradient.destination.x);
     }
-  }, [fillGradientOriginY]);
+  }, [layerItem.style.fill.gradient.destination.x]);
 
   useEffect(() => {
-    if (rendered && prevFillGradientDestinationX !== fillGradientDestinationX) {
+    if (rendered && prevFillGradientDestinationY !== layerItem.style.fill.gradient.destination.y) {
       applyFill();
-      setPrevFillGradientDestinationX(fillGradientDestinationX);
+      setPrevFillGradientDestinationY(layerItem.style.fill.gradient.destination.y);
     }
-  }, [fillGradientDestinationX]);
+  }, [layerItem.style.fill.gradient.destination.y]);
 
   useEffect(() => {
-    if (rendered && prevFillGradientDestinationY !== fillGradientDestinationY) {
+    if (rendered && !gradientStopsMatch(layerItem.style.fill.gradient.stops, prevFillGradientStops)) {
       applyFill();
-      setPrevFillGradientDestinationY(fillGradientDestinationY);
+      setPrevFillGradientStops(layerItem.style.fill.gradient.stops);
     }
-  }, [fillGradientDestinationY]);
-
-  useEffect(() => {
-    if (rendered && !gradientStopsMatch(fillGradientStops, prevFillGradientStops)) {
-      applyFill();
-      setPrevFillGradientStops(fillGradientStops);
-    }
-  }, [fillGradientStops]);
+  }, [layerItem.style.fill.gradient.stops]);
 
   return (
     <>
       {
-        layerType === 'Text'
+        isText
         ? <CanvasTextLayerFillStyle
-            {...props}
+            rendered={rendered}
             layerItem={layerItem as Btwx.Text}
             applyFill={applyFill} />
         : null

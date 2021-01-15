@@ -3,7 +3,7 @@ import React, { useEffect, ReactElement, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { isBetween } from '../utils';
 import { RootState } from '../store/reducers';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
 import { setLineFromThunk, setLineToThunk, updateSelectionFrame } from '../store/actions/layer';
 import { getPaperLayer, getSelectedProjectIndices } from '../store/selectors/layer';
@@ -49,8 +49,8 @@ const LineTool = (props: PaperToolProps): ReactElement => {
   useEffect(() => {
     if (downEvent && isEnabled) {
       const selectedPaperLayer = getPaperLayer(selected[0], selectedProjectIndices[selected[0]]);
-      const fromHandle = uiPaperScope.project.getItem({data: { interactiveType: 'lineFrom' }});
-      const toHandle = uiPaperScope.project.getItem({data: { interactiveType: 'lineTo' }});
+      const fromHandle = paperMain.project.getItem({data: { interactiveType: 'lineFrom' }});
+      const toHandle = paperMain.project.getItem({data: { interactiveType: 'lineTo' }});
       setFromHandlePosition(fromHandle.position);
       setToHandlePosition(toHandle.position);
       setHandle(initialHandle as Btwx.LineHandle);
@@ -76,9 +76,9 @@ const LineTool = (props: PaperToolProps): ReactElement => {
       }
       const nextIsHorizontal = (isBetween(nextVector.angle, 0, 45) || isBetween(nextVector.angle, -45, 0) || isBetween(nextVector.angle, 135, 180) || isBetween(nextVector.angle, -180, -135));
       const nextIsVertical = (isBetween(nextVector.angle, -90, -45) || isBetween(nextVector.angle, -135, -90) || isBetween(nextVector.angle, 45, 90) || isBetween(nextVector.angle, 90, 135));
-      const nextSnapBounds = new uiPaperScope.Rectangle({
-        from: new uiPaperScope.Point(dragEvent.point.x - 0.5, dragEvent.point.y - 0.5),
-        to: new uiPaperScope.Point(dragEvent.point.x + 0.5, dragEvent.point.y + 0.5)
+      const nextSnapBounds = new paperMain.Rectangle({
+        from: new paperMain.Point(dragEvent.point.x - 0.5, dragEvent.point.y - 0.5),
+        to: new paperMain.Point(dragEvent.point.x + 0.5, dragEvent.point.y + 0.5)
       });
       if (!resizing) {
         dispatch(setCanvasResizing({resizing: true}));
@@ -136,9 +136,9 @@ const LineTool = (props: PaperToolProps): ReactElement => {
   useEffect(() => {
     if (keyDownEvent && isEnabled && resizing) {
       if (keyDownEvent.key === 'shift') {
-        const nextSnapBounds = new uiPaperScope.Rectangle({
-          from: new uiPaperScope.Point(dragEvent.point.x - 0.5, dragEvent.point.y - 0.5),
-          to: new uiPaperScope.Point(dragEvent.point.x + 0.5, dragEvent.point.y + 0.5)
+        const nextSnapBounds = new paperMain.Rectangle({
+          from: new paperMain.Point(dragEvent.point.x - 0.5, dragEvent.point.y - 0.5),
+          to: new paperMain.Point(dragEvent.point.x + 0.5, dragEvent.point.y + 0.5)
         });
         if (isHorizontal) {
           switch(handle) {
@@ -169,9 +169,9 @@ const LineTool = (props: PaperToolProps): ReactElement => {
   useEffect(() => {
     if (keyUpEvent && isEnabled && resizing) {
       if (keyUpEvent.key === 'shift') {
-        const nextSnapBounds = new uiPaperScope.Rectangle({
-          from: new uiPaperScope.Point(dragEvent.point.x - 0.5, dragEvent.point.y - 0.5),
-          to: new uiPaperScope.Point(dragEvent.point.x + 0.5, dragEvent.point.y + 0.5)
+        const nextSnapBounds = new paperMain.Rectangle({
+          from: new paperMain.Point(dragEvent.point.x - 0.5, dragEvent.point.y - 0.5),
+          to: new paperMain.Point(dragEvent.point.x + 0.5, dragEvent.point.y + 0.5)
         });
         setSnapBounds(nextSnapBounds);
         setShiftModifier(false);
@@ -181,7 +181,7 @@ const LineTool = (props: PaperToolProps): ReactElement => {
 
   useEffect(() => {
     if (toBounds && isEnabled) {
-      const nextPosition = new uiPaperScope.Point(toBounds.center.x, toBounds.center.y);
+      const nextPosition = new paperMain.Point(toBounds.center.x, toBounds.center.y);
       const selectedPaperLayer = getPaperLayer(selected[0], selectedProjectIndices[selected[0]]);
       let lineHandles: { from: any; to: any };
       switch(handle) {
@@ -206,8 +206,8 @@ const LineTool = (props: PaperToolProps): ReactElement => {
         tool.activate();
       }
     } else {
-      if (tool && uiPaperScope.tool && (uiPaperScope.tool as any)._index === (tool as any)._index) {
-        uiPaperScope.tool = null;
+      if (tool && paperMain.tool && (paperMain.tool as any)._index === (tool as any)._index) {
+        paperMain.tool = null;
         resetState();
       }
     }

@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { updateHoverFrame } from '../store/actions/layer';
 import { getHoverBounds } from '../store/selectors/layer';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 
 const HoverFrame = (): ReactElement => {
   const hover = useSelector((state: RootState) => state.layer.present.hover);
@@ -15,7 +15,7 @@ const HoverFrame = (): ReactElement => {
   useEffect(() => {
     updateHoverFrame(hoverItem, artboardItem);
     return (): void => {
-      const hoverFrame = uiPaperScope.projects[0].getItem({ data: { id: 'hoverFrame' } });
+      const hoverFrame = paperMain.projects[0].getItem({ data: { id: 'hoverFrame' } });
       hoverFrame.removeChildren();
     }
   }, [hover, zoom, hoverBounds]);

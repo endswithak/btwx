@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 import { RootState } from '../store/reducers';
 import { setRoundedRadiiThunk } from '../store/actions/layer';
 import { getPaperLayer, getSelectedProjectIndices, getSelectedRoundedRadius, getSelectedById } from '../store/selectors/layer';
@@ -37,7 +37,7 @@ const RoundedRadiusInput = (): ReactElement => {
       const nextRadius = e.target.value / 100;
       paperLayer.rotation = -layerItem.transform.rotation;
       const maxDim = Math.max(paperLayer.bounds.width, paperLayer.bounds.height);
-      const newShape = new uiPaperScope.Path.Rectangle({
+      const newShape = new paperMain.Path.Rectangle({
         from: paperLayer.bounds.topLeft,
         to: paperLayer.bounds.bottomRight,
         radius: (maxDim / 2) * nextRadius,

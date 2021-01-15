@@ -232,7 +232,7 @@ const ContextMenuWrap = (): ReactElement => {
           disabled: !canRename,
           onClick: (): void => {
             dispatch(closeContextMenu());
-            dispatch(setEditing({id: selected[0]}));
+            dispatch(setEditing({editing: selected[0]}));
           }
         },{
           type: 'MenuDivider',

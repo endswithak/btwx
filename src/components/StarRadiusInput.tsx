@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import mexp from 'math-expression-evaluator';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 import { RootState } from '../store/reducers';
 import { setStarsRadiusThunk } from '../store/actions/layer';
 import { getPaperLayer, getSelectedProjectIndices, getSelectedStarRadius, getSelectedById } from '../store/selectors/layer';
@@ -37,7 +37,7 @@ const StarRadiusInput = (): ReactElement => {
       const startPosition = paperLayer.position;
       paperLayer.rotation = -layerItem.transform.rotation;
       const maxDim = Math.max(paperLayer.bounds.width, paperLayer.bounds.height);
-      const newShape = new uiPaperScope.Path.Star({
+      const newShape = new paperMain.Path.Star({
         center: paperLayer.bounds.center,
         radius1: maxDim / 2,
         radius2: (maxDim / 2) * (e.target.value / 100),

@@ -1,113 +1,96 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { colorsMatch } from '../utils';
-import { uiPaperScope } from '../canvas';
+import { paperMain, paperPreview } from '../canvas';
 
-interface CanvasLayerShadowStyleProps {
-  id: string;
+export interface CanvasLayerShadowStyleProps {
   layerItem: Btwx.Layer;
+  parentItem: Btwx.Artboard | Btwx.Group;
   artboardItem: Btwx.Artboard;
+  paperScope: Btwx.PaperScope;
   rendered: boolean;
+  projectIndex: number;
 }
 
 const CanvasLayerShadowStyle = (props: CanvasLayerShadowStyleProps): ReactElement => {
-  const { id, layerItem, artboardItem, rendered } = props;
-  const isShape = layerItem ? layerItem.type === 'Shape' : null;
-  // const mask = layerItem && isShape ? (layerItem as Btwx.Shape).mask : null;
-  const projectIndex = layerItem ? layerItem.type === 'Artboard' ? (layerItem as Btwx.Artboard).projectIndex : artboardItem.projectIndex : null;
-  const layerType = layerItem ? layerItem.type : null;
-  const shadowEnabled = layerItem ? layerItem.style.shadow.enabled : null;
-  const shadowFillType = layerItem ? layerItem.style.shadow.fillType : null;
-  const shadowColor = layerItem ? layerItem.style.shadow.color : null;
-  const shadowBlur = layerItem ? layerItem.style.shadow.blur : null;
-  const shadowOffsetX = layerItem ? layerItem.style.shadow.offset.x : null;
-  const shadowOffsetY = layerItem ? layerItem.style.shadow.offset.y : null;
-  // const [prevMask, setPrevMask] = useState(mask);
-  const [prevShadowEnabled, setPrevShadowEnabled] = useState(shadowEnabled);
-  const [prevShadowFillType, setPrevShadowFillType] = useState(shadowFillType);
-  const [prevShadowColor, setPrevShadowColor] = useState(shadowColor);
-  const [prevShadowBlur, setPrevShadowBlur] = useState(shadowBlur);
-  const [prevShadowOffsetX, setPrevShadowOffsetX] = useState(shadowOffsetX);
-  const [prevShadowOffsetY, setPrevShadowOffsetY] = useState(shadowOffsetY);
+  const { paperScope, rendered, layerItem, parentItem, projectIndex, artboardItem } = props;
+  const [prevShadowEnabled, setPrevShadowEnabled] = useState(layerItem.style.shadow.enabled);
+  const [prevShadowFillType, setPrevShadowFillType] = useState(layerItem.style.shadow.fillType);
+  const [prevShadowColor, setPrevShadowColor] = useState(layerItem.style.shadow.color);
+  const [prevShadowBlur, setPrevShadowBlur] = useState(layerItem.style.shadow.blur);
+  const [prevShadowOffsetX, setPrevShadowOffsetX] = useState(layerItem.style.shadow.offset.x);
+  const [prevShadowOffsetY, setPrevShadowOffsetY] = useState(layerItem.style.shadow.offset.y);
 
   const getStyleLayer = (): paper.Item => {
-    let paperLayer = uiPaperScope.projects[projectIndex].getItem({data: {id}});
+    const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
+    let paperLayer = paperProject.getItem({data: {id: layerItem.id}});
     if (paperLayer) {
-      if (layerType === 'Text') {
+      if (layerItem.type === 'Text') {
         paperLayer = paperLayer.getItem({data: {id: 'textLines'}});
       }
-      if (layerType === 'Artboard') {
+      if (layerItem.type === 'Artboard') {
         paperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
       }
     }
     return paperLayer;
   }
 
-  const applyShadow = () => {
+  const applyShadow = (): void => {
     const paperLayer = getStyleLayer();
-    if (shadowEnabled) {
+    if (layerItem.style.shadow.enabled) {
       paperLayer.shadowColor = {
-        hue: shadowColor.h,
-        saturation: shadowColor.s,
-        lightness: shadowColor.l,
-        alpha: shadowColor.a
+        hue: layerItem.style.shadow.color.h,
+        saturation: layerItem.style.shadow.color.s,
+        lightness: layerItem.style.shadow.color.l,
+        alpha: layerItem.style.shadow.color.a
       } as paper.Color;
-      paperLayer.shadowBlur = shadowBlur;
-      paperLayer.shadowOffset = new uiPaperScope.Point(shadowOffsetX, shadowOffsetY);
+      paperLayer.shadowBlur = layerItem.style.shadow.blur;
+      paperLayer.shadowOffset = new paperMain.Point(layerItem.style.shadow.offset.x, layerItem.style.shadow.offset.y);
     } else {
       paperLayer.shadowColor = null;
     }
   }
 
-  // useEffect(() => {
-  //   if (rendered && prevMask !== mask) {
-  //     if (shadowEnabled) {
-  //       applyShadow();
-  //     }
-  //     setPrevMask(mask);
-  //   }
-  // }, [mask]);
+  useEffect(() => {
+    if (rendered && prevShadowEnabled !== layerItem.style.shadow.enabled) {
+      applyShadow();
+      setPrevShadowEnabled(layerItem.style.shadow.enabled);
+    }
+  }, [layerItem.style.shadow.enabled]);
 
   useEffect(() => {
-    if (rendered && prevShadowEnabled !== shadowEnabled) {
+    if (rendered && prevShadowFillType !== layerItem.style.shadow.fillType) {
       applyShadow();
-      setPrevShadowEnabled(shadowEnabled);
+      setPrevShadowFillType(layerItem.style.shadow.fillType);
     }
-  }, [shadowEnabled]);
+  }, [layerItem.style.shadow.fillType]);
 
   useEffect(() => {
-    if (rendered && prevShadowFillType !== shadowFillType) {
+    if (rendered && !colorsMatch(prevShadowColor, layerItem.style.shadow.color)) {
       applyShadow();
-      setPrevShadowFillType(shadowFillType);
+      setPrevShadowColor(layerItem.style.shadow.color);
     }
-  }, [shadowFillType]);
+  }, [layerItem.style.shadow.color]);
 
   useEffect(() => {
-    if (rendered && !colorsMatch(prevShadowColor, shadowColor)) {
+    if (rendered && prevShadowBlur !== layerItem.style.shadow.blur) {
       applyShadow();
-      setPrevShadowColor(shadowColor);
+      setPrevShadowBlur(layerItem.style.shadow.blur);
     }
-  }, [shadowColor]);
+  }, [layerItem.style.shadow.blur]);
 
   useEffect(() => {
-    if (rendered && prevShadowBlur !== shadowBlur) {
+    if (rendered && prevShadowOffsetX !== layerItem.style.shadow.offset.x) {
       applyShadow();
-      setPrevShadowBlur(shadowBlur);
+      setPrevShadowOffsetX(layerItem.style.shadow.offset.x);
     }
-  }, [shadowBlur]);
+  }, [layerItem.style.shadow.offset.x]);
 
   useEffect(() => {
-    if (rendered && prevShadowOffsetX !== shadowOffsetX) {
+    if (rendered && prevShadowOffsetY !== layerItem.style.shadow.offset.y) {
       applyShadow();
-      setPrevShadowOffsetX(shadowOffsetX);
+      setPrevShadowOffsetY(layerItem.style.shadow.offset.y);
     }
-  }, [shadowOffsetX]);
-
-  useEffect(() => {
-    if (rendered && prevShadowOffsetY !== shadowOffsetY) {
-      applyShadow();
-      setPrevShadowOffsetY(shadowOffsetY);
-    }
-  }, [shadowOffsetY]);
+  }, [layerItem.style.shadow.offset.y]);
 
   return (
     <></>

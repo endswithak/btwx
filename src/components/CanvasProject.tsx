@@ -4,8 +4,8 @@ import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import { ARTBOARDS_PER_PROJECT } from '../constants';
 import { RootState } from '../store/reducers';
-import { uiPaperScope } from '../canvas';
-import CanvasLayer from './CanvasLayer';
+import { paperMain } from '../canvas';
+import CanvasArtboardLayer from './CanvasArtboardLayer';
 
 interface CanvasProjectProps {
   index: number;
@@ -25,10 +25,10 @@ const CanvasProject = (props: CanvasProjectProps): ReactElement => {
 
   useEffect(() => {
     if (ref.current) {
-      uiPaperScope.setup(ref.current);
+      paperMain.setup(ref.current);
     }
     if (isLast) {
-      uiPaperScope.projects[0].activate();
+      paperMain.projects[0].activate();
     }
   }, []);
 
@@ -42,14 +42,15 @@ const CanvasProject = (props: CanvasProjectProps): ReactElement => {
         projectArtboards
         ? projectArtboards.map((id, i) => {
             if (i % ARTBOARDS_PER_PROJECT === 0) {
-              const project = uiPaperScope.projects[index + 1];
-              project.view.viewSize = uiPaperScope.projects[0].view.viewSize;
-              project.view.matrix.set(uiPaperScope.projects[0].view.matrix.values);
+              const project = paperMain.projects[index + 1];
+              project.view.viewSize = paperMain.projects[0].view.viewSize;
+              project.view.matrix.set(paperMain.projects[0].view.matrix.values);
             }
             return (
-              <CanvasLayer
+              <CanvasArtboardLayer
                 key={id}
-                id={id} />
+                id={id}
+                paperScope='main' />
             );
           })
         : null

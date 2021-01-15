@@ -1,6 +1,6 @@
 import React, { useEffect, ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 import { RootState } from '../store/reducers';
 import { setCanvasActiveTool, setCanvasCursor } from '../store/actions/canvasSettings';
 import { setLayerHover, setLayerActiveGradientStop, selectLayers, deselectLayers } from '../store/actions/layer';
@@ -250,7 +250,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
       return;
     } else {
       const interactiveType = uiEvent.hitResult.item.data.interactiveType;
-      const paperPoint = uiPaperScope.view.getEventPoint(uiEvent.event);
+      const paperPoint = paperMain.view.getEventPoint(uiEvent.event);
       switch(uiEvent.hitResult.item.data.elementId) {
         case 'selectionFrame': {
           break;

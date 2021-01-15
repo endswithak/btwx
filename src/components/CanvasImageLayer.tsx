@@ -3,10 +3,11 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { bufferToBase64 } from '../utils';
 import { getPaperShadowColor, getLayerAbsPosition, getLayerPaperParent } from '../store/utils/paper';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 
 interface CanvasImageLayerProps {
   id: string;
+  paperScope: Btwx.PaperScope;
   layerItem: Btwx.Image;
   layerIndex: number;
   artboardItem: Btwx.Artboard;
@@ -15,17 +16,17 @@ interface CanvasImageLayerProps {
 }
 
 const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
-  const { id, layerItem, layerIndex, artboardItem, rendered, setRendered } = props;
+  const { id, paperScope, layerItem, layerIndex, artboardItem, rendered, setRendered } = props;
   const documentImages = useSelector((state: RootState) => state.documentSettings.images.byId);
 
   const createImage = (): void => {
     const paperShadowColor = layerItem.style.shadow.enabled ? getPaperShadowColor(layerItem.style.shadow as Btwx.Shadow) : null;
-    const paperShadowOffset = layerItem.style.shadow.enabled ? new uiPaperScope.Point(layerItem.style.shadow.offset.x, layerItem.style.shadow.offset.y) : null;
+    const paperShadowOffset = layerItem.style.shadow.enabled ? new paperMain.Point(layerItem.style.shadow.offset.x, layerItem.style.shadow.offset.y) : null;
     const paperShadowBlur = layerItem.style.shadow.enabled ? layerItem.style.shadow.blur : null;
-    const paperParent = getLayerPaperParent(uiPaperScope.projects[artboardItem.projectIndex].getItem({data: {id: layerItem.parent}}), layerItem);
+    const paperParent = getLayerPaperParent(paperMain.projects[artboardItem.projectIndex].getItem({data: {id: layerItem.parent}}), layerItem);
     const base64 = bufferToBase64(documentImages[layerItem.imageId].buffer);
-    const paperLayer = new uiPaperScope.Raster(`data:image/webp;base64,${base64}`);
-    const imageContainer = new uiPaperScope.Group({
+    const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
+    const imageContainer = new paperMain.Group({
       name: layerItem.name,
       data: { id: layerItem.id, imageId: layerItem.imageId, type: 'Layer', layerType: 'Image', scope: layerItem.scope },
       children: [paperLayer],
@@ -49,7 +50,7 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
     createImage();
     return (): void => {
       // remove layer
-      const paperLayer = uiPaperScope.projects[artboardItem.projectIndex].getItem({data: {id}});
+      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
       if (paperLayer) {
         paperLayer.remove();
       }

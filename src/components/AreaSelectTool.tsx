@@ -3,7 +3,7 @@ import React, { useContext, useEffect, ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 import { setCanvasSelecting } from '../store/actions/canvasSettings';
 import { areaSelectLayers } from '../store/actions/layer';
 import { getLayerProjectIndices } from '../store/selectors/layer';
@@ -20,13 +20,13 @@ const AreaSelectTool = (props: PaperToolProps): ReactElement => {
   const dispatch = useDispatch();
 
   const updateAreaSelectPreview = (areaSelectBounds: paper.Rectangle): void => {
-    const drawingPreview = uiPaperScope.project.getItem({data: {id: 'drawingPreview'}});
+    const drawingPreview = paperMain.project.getItem({data: {id: 'drawingPreview'}});
     drawingPreview.removeChildren();
     if (areaSelectBounds) {
-      const areaSelectPreview = new uiPaperScope.Path.Rectangle({
+      const areaSelectPreview = new paperMain.Path.Rectangle({
         rectangle: areaSelectBounds,
         fillColor: 'rgba(204,204,204,0.75)',
-        strokeWidth: 1 / uiPaperScope.view.zoom,
+        strokeWidth: 1 / paperMain.view.zoom,
         strokeColor: '#999',
         opacity: 0.2,
         parent: drawingPreview
@@ -39,8 +39,8 @@ const AreaSelectTool = (props: PaperToolProps): ReactElement => {
 
   useEffect(() => {
     if (dragEvent && isEnabled) {
-      if (uiPaperScope.project.activeLayer.data.id !== 'ui') {
-        uiPaperScope.projects[0].activate();
+      if (paperMain.project.activeLayer.data.id !== 'ui') {
+        paperMain.projects[0].activate();
       }
       updateAreaSelectPreview(null);
       dispatch(setCanvasSelecting({selecting: true}));
@@ -50,7 +50,7 @@ const AreaSelectTool = (props: PaperToolProps): ReactElement => {
   useEffect(() => {
     if (dragEvent && isEnabled) {
       updateAreaSelectPreview(
-        new uiPaperScope.Rectangle({
+        new paperMain.Rectangle({
           from: dragEvent.downPoint,
           to: dragEvent.point
         })
@@ -60,7 +60,7 @@ const AreaSelectTool = (props: PaperToolProps): ReactElement => {
 
   useEffect(() => {
     if (upEvent && isEnabled) {
-      const areaSelectBounds = new uiPaperScope.Rectangle({
+      const areaSelectBounds = new paperMain.Rectangle({
         from: upEvent.downPoint,
         to: upEvent.point
       });
@@ -89,7 +89,7 @@ const AreaSelectTool = (props: PaperToolProps): ReactElement => {
           }, []);
         }
         const layers = layerProjectIndices.reduce((result, current, index) => {
-          const scope = uiPaperScope.projects[current];
+          const scope = paperMain.projects[current];
           return [...result, ...getProjectsLayers(scope)]
         }, []);
         if (layers.length > 0) {
@@ -110,8 +110,8 @@ const AreaSelectTool = (props: PaperToolProps): ReactElement => {
         tool.activate();
       }
     } else {
-      if (tool && uiPaperScope.tool && (uiPaperScope.tool as any)._index === (tool as any)._index) {
-        uiPaperScope.tool = null;
+      if (tool && paperMain.tool && (paperMain.tool as any)._index === (tool as any)._index) {
+        paperMain.tool = null;
         updateAreaSelectPreview(null);
       }
     }

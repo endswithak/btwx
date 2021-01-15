@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import styled from 'styled-components';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 import { setEventDrawerHeight } from '../store/actions/viewSettings';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
@@ -41,7 +41,7 @@ const EventDrawerDragHandle = (): ReactElement => {
       onDrag: function() {
         const canvasContainer = document.getElementById('canvas-container');
         gsap.set('#event-drawer', {height: this.y * -1});
-        uiPaperScope.projects.forEach((project) => {
+        paperMain.projects.forEach((project) => {
           if (project.activeLayer.children.length > 0) {
             project.view.viewSize.height = canvasContainer.clientHeight;
           }

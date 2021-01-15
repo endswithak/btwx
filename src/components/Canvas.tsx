@@ -2,7 +2,7 @@
 import React, { useContext, ReactElement, useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { uiPaperScope } from '../canvas';
+import { paperMain } from '../canvas';
 import { setCanvasReady } from '../store/actions/canvasSettings';
 import { getAllProjectIndices } from '../store/selectors/layer';
 import { ThemeContext } from './ThemeProvider';
@@ -37,7 +37,7 @@ const Canvas = (): ReactElement => {
 
   const handleHitResult = (e: any, eventType: 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | 'contextMenu'): void => {
     const { layerHitResult, uiHitResult } = allProjectIndices.reduce((result: { layerHitResult: { hitResult: paper.HitResult; projectIndex: number }; uiHitResult: paper.HitResult }, current, index) => {
-      const project = uiPaperScope.projects[current];
+      const project = paperMain.projects[current];
       if (project) {
         const hitResult = project.hitTest(project.view.getEventPoint(e));
         if (hitResult) {
@@ -118,8 +118,8 @@ const Canvas = (): ReactElement => {
 
   const handleResize = (): void => {
     allProjectIndices.forEach((current, index) => {
-      const project = uiPaperScope.projects[current];
-      project.view.viewSize = new uiPaperScope.Size(ref.current.clientWidth, ref.current.clientHeight);
+      const project = paperMain.projects[current];
+      project.view.viewSize = new paperMain.Size(ref.current.clientWidth, ref.current.clientHeight);
     });
   }
 

@@ -1,28 +1,24 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { uiPaperScope } from '../canvas';
+import { paperMain, paperPreview } from '../canvas';
 
-interface CanvasLayerTextStyleProps {
-  id: string;
+export interface CanvasLayerTextStyleProps {
   layerItem: Btwx.Text;
+  parentItem: Btwx.Artboard | Btwx.Group;
   artboardItem: Btwx.Artboard;
+  paperScope: Btwx.PaperScope;
   rendered: boolean;
+  projectIndex: number;
 }
 
 const CanvasLayerTextStyle = (props: CanvasLayerTextStyleProps): ReactElement => {
-  const { id, layerItem, artboardItem, rendered } = props;
-  const projectIndex = layerItem ? artboardItem.projectIndex : null;
-  const fontFamily = layerItem ? layerItem.textStyle.fontFamily : null;
-  const fontWeight = layerItem ? layerItem.textStyle.fontWeight : null;
-  const fontSize = layerItem ? layerItem.textStyle.fontSize : null;
-  const justification = layerItem ? layerItem.textStyle.justification : null;
-  const oblique = layerItem ? layerItem.textStyle.oblique : null;
-  const leading = layerItem ? layerItem.textStyle.leading : null;
-  const [prevFontFamily, setPrevFontFamily] = useState(fontFamily);
-  const [prevFontWeight, setPrevFontWeight] = useState(fontWeight);
-  const [prevFontSize, setPrevFontSize] = useState(fontSize);
-  const [prevJustification, setPrevJustification] = useState(justification);
-  const [prevOblique, setPrevOblique] = useState(oblique);
-  const [prevLeading, setPrevLeading] = useState(leading);
+  const { paperScope, rendered, layerItem, parentItem, projectIndex, artboardItem } = props;
+  const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
+  const [prevFontFamily, setPrevFontFamily] = useState(layerItem.textStyle.fontFamily);
+  const [prevFontWeight, setPrevFontWeight] = useState(layerItem.textStyle.fontWeight);
+  const [prevFontSize, setPrevFontSize] = useState(layerItem.textStyle.fontSize);
+  const [prevJustification, setPrevJustification] = useState(layerItem.textStyle.justification);
+  const [prevOblique, setPrevOblique] = useState(layerItem.textStyle.oblique);
+  const [prevLeading, setPrevLeading] = useState(layerItem.textStyle.leading);
 
   const getPaperLayer = (): {
     paperLayer: paper.Group;
@@ -30,7 +26,8 @@ const CanvasLayerTextStyle = (props: CanvasLayerTextStyleProps): ReactElement =>
     textContent: paper.PointText;
     textBackground: paper.Path.Rectangle;
   } => {
-    const paperLayer = uiPaperScope.projects[projectIndex].getItem({data: {id}}) as paper.Group;
+    const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
+    const paperLayer = paperProject.getItem({data: {id: layerItem.id}}) as paper.Group;
     if (paperLayer) {
       const textLinesGroup = paperLayer.getItem({data:{id:'textLines'}}) as paper.Group;
       const textContent = paperLayer.getItem({data:{id:'textContent'}}) as paper.PointText;
@@ -52,96 +49,96 @@ const CanvasLayerTextStyle = (props: CanvasLayerTextStyleProps): ReactElement =>
   }
 
   useEffect(() => {
-    if (rendered && prevFontFamily !== fontFamily) {
+    if (rendered && prevFontFamily !== layerItem.textStyle.fontFamily) {
       const { paperLayer, textLinesGroup, textContent, textBackground } = getPaperLayer();
       paperLayer.rotation = -layerItem.transform.rotation;
-      textContent.fontFamily = fontFamily;
+      textContent.fontFamily = layerItem.textStyle.fontFamily;
       textLinesGroup.children.forEach((line: paper.PointText) => {
-        line.fontFamily = fontFamily;
+        line.fontFamily = layerItem.textStyle.fontFamily;
       });
       textBackground.bounds = textLinesGroup.bounds;
       paperLayer.rotation = layerItem.transform.rotation;
-      setPrevFontFamily(fontFamily);
+      setPrevFontFamily(layerItem.textStyle.fontFamily);
     }
-  }, [fontFamily]);
+  }, [layerItem.textStyle.fontFamily]);
 
   useEffect(() => {
-    if (rendered && prevFontWeight !== fontWeight) {
+    if (rendered && prevFontWeight !== layerItem.textStyle.fontWeight) {
       const { paperLayer, textLinesGroup, textContent, textBackground } = getPaperLayer();
       paperLayer.rotation = -layerItem.transform.rotation;
-      textContent.fontWeight = fontWeight;
+      textContent.fontWeight = layerItem.textStyle.fontWeight;
       textLinesGroup.children.forEach((line: paper.PointText) => {
-        line.fontWeight = fontWeight;
+        line.fontWeight = layerItem.textStyle.fontWeight;
       });
       textBackground.bounds = textLinesGroup.bounds;
       paperLayer.rotation = layerItem.transform.rotation;
-      setPrevFontWeight(fontWeight);
+      setPrevFontWeight(layerItem.textStyle.fontWeight);
     }
-  }, [fontWeight]);
+  }, [layerItem.textStyle.fontWeight]);
 
   useEffect(() => {
-    if (rendered && prevFontSize !== fontSize) {
+    if (rendered && prevFontSize !== layerItem.textStyle.fontSize) {
       const { paperLayer, textLinesGroup, textContent, textBackground } = getPaperLayer();
       paperLayer.rotation = -layerItem.transform.rotation;
-      textContent.fontSize = fontSize;
+      textContent.fontSize = layerItem.textStyle.fontSize;
       textLinesGroup.children.forEach((line: paper.PointText) => {
-        line.fontSize = fontSize;
+        line.fontSize = layerItem.textStyle.fontSize;
       });
       textBackground.bounds = textLinesGroup.bounds;
       paperLayer.rotation = layerItem.transform.rotation;
-      setPrevFontSize(fontSize);
+      setPrevFontSize(layerItem.textStyle.fontSize);
     }
-  }, [fontSize]);
+  }, [layerItem.textStyle.fontSize]);
 
   useEffect(() => {
-    if (rendered && prevJustification !== justification) {
+    if (rendered && prevJustification !== layerItem.textStyle.justification) {
       const { paperLayer, textLinesGroup, textContent, textBackground } = getPaperLayer();
       paperLayer.rotation = -layerItem.transform.rotation;
-      textContent.justification = justification;
+      textContent.justification = layerItem.textStyle.justification;
       textLinesGroup.children.forEach((line: paper.PointText) => {
         line.leading = layerItem.textStyle.fontSize;
-        line.justification = justification;
+        line.justification = layerItem.textStyle.justification;
         line.point.x = textContent.point.x;
-        line.skew(new uiPaperScope.Point(-(layerItem as Btwx.Text).textStyle.oblique, 0));
+        line.skew(new paperMain.Point(-layerItem.textStyle.oblique, 0));
         line.leading = layerItem.textStyle.leading;
       });
       textBackground.bounds = textLinesGroup.bounds;
       paperLayer.rotation = layerItem.transform.rotation;
-      setPrevJustification(justification);
+      setPrevJustification(layerItem.textStyle.justification);
     }
-  }, [justification]);
+  }, [layerItem.textStyle.justification]);
 
   useEffect(() => {
-    if (rendered && prevOblique !== oblique) {
+    if (rendered && prevOblique !== layerItem.textStyle.oblique) {
       const { paperLayer, textLinesGroup, textContent, textBackground } = getPaperLayer();
       paperLayer.rotation = -layerItem.transform.rotation;
       textLinesGroup.children.forEach((line: paper.PointText) => {
         // leading affects horizontal skew
         line.leading = layerItem.textStyle.fontSize;
-        line.skew(new uiPaperScope.Point(prevOblique, 0));
-        line.skew(new uiPaperScope.Point(-oblique, 0));
+        line.skew(new paperLayerScope.Point(prevOblique, 0));
+        line.skew(new paperLayerScope.Point(-layerItem.textStyle.oblique, 0));
         line.leading = layerItem.textStyle.leading;
       });
       textBackground.bounds = textLinesGroup.bounds;
       paperLayer.rotation = layerItem.transform.rotation;
-      setPrevOblique(oblique);
+      setPrevOblique(layerItem.textStyle.oblique);
     }
-  }, [oblique]);
+  }, [layerItem.textStyle.oblique]);
 
   useEffect(() => {
-    if (rendered && prevLeading !== leading) {
+    if (rendered && prevLeading !== layerItem.textStyle.leading) {
       const { paperLayer, textLinesGroup, textContent, textBackground } = getPaperLayer();
       paperLayer.rotation = -layerItem.transform.rotation;
-      textContent.leading = leading;
+      textContent.leading = layerItem.textStyle.leading;
       textLinesGroup.children.forEach((line: paper.PointText, index: number) => {
-        line.leading = leading;
-        line.point.y = textContent.point.y + (index * leading);
+        line.leading = layerItem.textStyle.leading;
+        line.point.y = textContent.point.y + (index * layerItem.textStyle.leading);
       });
       textBackground.bounds = textLinesGroup.bounds;
       paperLayer.rotation = layerItem.transform.rotation;
-      setPrevLeading(leading);
+      setPrevLeading(layerItem.textStyle.leading);
     }
-  }, [leading]);
+  }, [layerItem.textStyle.leading]);
 
   return (
     <></>

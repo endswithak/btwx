@@ -1,4 +1,4 @@
-import { uiPaperScope } from '../../canvas';
+import { paperMain } from '../../canvas';
 import { RootState } from '../reducers';
 import { setCanvasMatrix } from './documentSettings';
 import { getAllProjectIndices } from '../selectors/layer';
@@ -57,18 +57,18 @@ export const toggleRightSidebarThunk = () => {
     const allProjectIndices = getAllProjectIndices(state);
     if (state.viewSettings.rightSidebar.isOpen) {
       allProjectIndices.forEach((current, index) => {
-        const project = uiPaperScope.projects[current];
-        project.view.viewSize = new uiPaperScope.Size(project.view.viewSize.width + state.viewSettings.rightSidebar.width, project.view.viewSize.height);
+        const project = paperMain.projects[current];
+        project.view.viewSize = new paperMain.Size(project.view.viewSize.width + state.viewSettings.rightSidebar.width, project.view.viewSize.height);
       });
       dispatch(closeRightSidebar());
     } else {
       allProjectIndices.forEach((current, index) => {
-        const project = uiPaperScope.projects[current];
-        project.view.viewSize = new uiPaperScope.Size(project.view.viewSize.width - state.viewSettings.rightSidebar.width, project.view.viewSize.height);
+        const project = paperMain.projects[current];
+        project.view.viewSize = new paperMain.Size(project.view.viewSize.width - state.viewSettings.rightSidebar.width, project.view.viewSize.height);
       });
       dispatch(openRightSidebar());
     }
-    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
+    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
   }
 };
 
@@ -86,18 +86,18 @@ export const toggleLeftSidebarThunk = () => {
     const allProjectIndices = getAllProjectIndices(state);
     if (state.viewSettings.leftSidebar.isOpen) {
       allProjectIndices.forEach((current, index) => {
-        const project = uiPaperScope.projects[current];
-        project.view.viewSize = new uiPaperScope.Size(project.view.viewSize.width + state.viewSettings.leftSidebar.width, project.view.viewSize.height);
+        const project = paperMain.projects[current];
+        project.view.viewSize = new paperMain.Size(project.view.viewSize.width + state.viewSettings.leftSidebar.width, project.view.viewSize.height);
       });
       dispatch(closeLeftSidebar());
     } else {
       allProjectIndices.forEach((current, index) => {
-        const project = uiPaperScope.projects[current];
-        project.view.viewSize = new uiPaperScope.Size(project.view.viewSize.width - state.viewSettings.leftSidebar.width, project.view.viewSize.height);
+        const project = paperMain.projects[current];
+        project.view.viewSize = new paperMain.Size(project.view.viewSize.width - state.viewSettings.leftSidebar.width, project.view.viewSize.height);
       });
       dispatch(openLeftSidebar());
     }
-    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
+    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
   }
 };
 
@@ -115,18 +115,18 @@ export const toggleEventDrawerThunk = () => {
     const allProjectIndices = getAllProjectIndices(state);
     if (state.viewSettings.eventDrawer.isOpen) {
       allProjectIndices.forEach((current, index) => {
-        const project = uiPaperScope.projects[current];
-        project.view.viewSize = new uiPaperScope.Size(project.view.viewSize.width, project.view.viewSize.height + state.viewSettings.eventDrawer.height);
+        const project = paperMain.projects[current];
+        project.view.viewSize = new paperMain.Size(project.view.viewSize.width, project.view.viewSize.height + state.viewSettings.eventDrawer.height);
       });
       dispatch(closeEventDrawer());
     } else {
       allProjectIndices.forEach((current, index) => {
-        const project = uiPaperScope.projects[current];
-        project.view.viewSize = new uiPaperScope.Size(project.view.viewSize.width, project.view.viewSize.height - state.viewSettings.eventDrawer.height);
+        const project = paperMain.projects[current];
+        project.view.viewSize = new paperMain.Size(project.view.viewSize.width, project.view.viewSize.height - state.viewSettings.eventDrawer.height);
       });
       dispatch(openEventDrawer());
     }
-    dispatch(setCanvasMatrix({matrix: uiPaperScope.view.matrix.values}));
+    dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
   }
 };
 

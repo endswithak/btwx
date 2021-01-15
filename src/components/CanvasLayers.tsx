@@ -4,10 +4,11 @@ import CanvasLayer from './CanvasLayer';
 
 interface CanvasLayersProps {
   layers: string[];
+  paperScope: Btwx.PaperScope;
 }
 
 const CanvasLayers = (props: CanvasLayersProps): ReactElement => {
-  const { layers } = props;
+  const { layers, paperScope } = props;
 
   return (
     <>
@@ -15,7 +16,8 @@ const CanvasLayers = (props: CanvasLayersProps): ReactElement => {
         layers.map((id) => (
           <CanvasLayer
             key={id}
-            id={id} />
+            id={id}
+            paperScope={paperScope} />
         ))
       }
     </>

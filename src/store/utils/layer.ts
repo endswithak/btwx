@@ -6,7 +6,7 @@ import tinyColor from 'tinycolor2';
 import layer, { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
 import { addItem, removeItem, insertItem, moveItemAbove, moveItemBelow } from './general';
-import { uiPaperScope } from '../../canvas';
+import { paperMain } from '../../canvas';
 import {
   ARTBOARDS_PER_PROJECT, TWEEN_PROPS_MAP, DEFAULT_TWEEN_DURATION, DEFAULT_TWEEN_DELAY,
   DEFAULT_TWEEN_EASE, DEFAULT_TWEEN_POWER, DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS, DEFAULT_SCRAMBLE_TEXT_TWEEN_DELIMITER,
@@ -60,7 +60,7 @@ import {
   getLayerIndex, getLayer, isScopeLayer, isScopeGroupLayer, getNearestScopeAncestor, getPaperLayer,
   getClipboardCenter, getLayerAndDescendants, getLayerDescendants, getDestinationEquivalent, getEquivalentTweenProps,
   getDeepSelectItem, getLayersBounds, getLayersRelativeBounds, getGradientOriginPoint, getGradientDestinationPoint, getGradientStops,
-  orderLayersByDepth, orderLayersByLeft, orderLayersByTop, getEquivalentTweenProp, gradientsMatch,
+  orderLayersByDepth, orderLayersByLeft, orderLayersByTop, getEquivalentTweenProp,
   getPaperProp, getArtboardsTopTop, getLineFromPoint, getLineToPoint, getLineVector, getParentPaperLayer,
   getLayerYoungerSiblings, getMaskableSiblings, getSiblingLayersWithUnderlyingMask, getItemLayers,
   getAbsolutePosition, getGradientDestination, getGradientOrigin, getLayerOlderSibling, getLayerYoungestChild,
@@ -686,13 +686,13 @@ export const setLayerHover = (state: LayerState, action: SetLayerHover): LayerSt
 
 export const setShapeIcon = (state: LayerState, id: string, pathData: string): LayerState => {
   let currentState = state;
-  const layerIcon = new uiPaperScope.CompoundPath({
+  const layerIcon = new paperMain.CompoundPath({
     pathData: pathData,
     insert: false
   });
-  layerIcon.fitBounds(new uiPaperScope.Rectangle({
-    point: new uiPaperScope.Point(0,0),
-    size: new uiPaperScope.Size(24,24)
+  layerIcon.fitBounds(new paperMain.Rectangle({
+    point: new paperMain.Point(0,0),
+    size: new paperMain.Size(24,24)
   }));
   currentState = {
     ...currentState,
@@ -1575,7 +1575,7 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
     const lines = (layerItem as Btwx.Text).lines.reduce((result, current, index) => {
       const paperLine = textLines.children[index] as paper.PointText;
       paperLine.leading = (layerItem as Btwx.Text).textStyle.fontSize;
-      paperLine.skew(new uiPaperScope.Point((layerItem as Btwx.Text).textStyle.oblique, 0));
+      paperLine.skew(new paperMain.Point((layerItem as Btwx.Text).textStyle.oblique, 0));
       return [...result, {...current, width: paperLine.bounds.width}];
     }, (layerItem as Btwx.Text).lines);
     // get point
@@ -1584,9 +1584,9 @@ export const updateLayerBounds = (state: LayerState, id: string): LayerState => 
         case 'left':
           return textContent.point.subtract(artboardItems.paperLayer.position);
         case 'center':
-          return new uiPaperScope.Point(textContent.point.x - (textContent.bounds.width / 2), textContent.point.y).subtract(artboardItems.paperLayer.position);
+          return new paperMain.Point(textContent.point.x - (textContent.bounds.width / 2), textContent.point.y).subtract(artboardItems.paperLayer.position);
         case 'right':
-          return new uiPaperScope.Point(textContent.point.x - textContent.bounds.width, textContent.point.y).subtract(artboardItems.paperLayer.position);
+          return new paperMain.Point(textContent.point.x - textContent.bounds.width, textContent.point.y).subtract(artboardItems.paperLayer.position);
       }
     })();
     // get x and y
@@ -1710,7 +1710,7 @@ export const updateChildrenPositions = (state: LayerState, id: string): LayerSta
   const layerItem = currentState.byId[id];
   const layerDescendants = getLayerDescendants(currentState, id);
   const artboardItem = currentState.byId[layerItem.artboard];
-  const artboardPosition = new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y);
+  const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
   currentState = layerDescendants.reduce((result, current) => {
     const { layerItem, paperLayer } = getItemLayers(result, current);
     const position = paperLayer.position.subtract(artboardPosition);
@@ -1742,14 +1742,14 @@ export const updateParentBounds = (state: LayerState, id: string, idAsParent?: b
     if (parentItem.children.length > 0) {
       layerBounds = getLayersBounds(currentState, parentItem.children);
     } else {
-      layerBounds = new uiPaperScope.Rectangle({
-        from: new uiPaperScope.Point(0,0),
-        to: new uiPaperScope.Point(0,0)
+      layerBounds = new paperMain.Rectangle({
+        from: new paperMain.Point(0,0),
+        to: new paperMain.Point(0,0)
       });
     }
     if (parentItem.type === 'Group') {
       const artboardItem = currentState.byId[parentItem.artboard];
-      const artboardPosition = new uiPaperScope.Point(artboardItem.frame.x, artboardItem.frame.y);
+      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       position = layerBounds.center.subtract(artboardPosition);
     } else {
       position = layerBounds.center;
@@ -2077,15 +2077,7 @@ export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent
         [action.payload.layer]: {
           ...currentState.byId[action.payload.layer],
           events: addItem(currentState.byId[action.payload.layer].events, action.payload.id)
-        },
-        [action.payload.artboard]: {
-          ...currentState.byId[action.payload.artboard],
-          originArtboardForEvents: addItem((currentState.byId[action.payload.artboard] as Btwx.Artboard).originArtboardForEvents, action.payload.id)
-        } as Btwx.Artboard,
-        [action.payload.destinationArtboard]: {
-          ...currentState.byId[action.payload.destinationArtboard],
-          destinationArtboardForEvents: addItem((currentState.byId[action.payload.destinationArtboard] as Btwx.Artboard).destinationArtboardForEvents, action.payload.id)
-        } as Btwx.Artboard
+        }
       },
       events: {
         ...currentState.events,
@@ -2094,6 +2086,20 @@ export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent
           ...currentState.events.byId,
           [action.payload.id]: action.payload as Btwx.TweenEvent
         }
+      }
+    }
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.artboard]: {
+          ...currentState.byId[action.payload.artboard],
+          originArtboardForEvents: addItem((currentState.byId[action.payload.artboard] as Btwx.Artboard).originArtboardForEvents, action.payload.id)
+        } as Btwx.Artboard,
+        [action.payload.destinationArtboard]: {
+          ...currentState.byId[action.payload.destinationArtboard],
+          destinationArtboardForEvents: addItem((currentState.byId[action.payload.destinationArtboard] as Btwx.Artboard).destinationArtboardForEvents, action.payload.id)
+        } as Btwx.Artboard
       }
     }
     // add background tween
@@ -2258,15 +2264,7 @@ export const removeLayerTweenEvent = (state: LayerState, action: RemoveLayerTwee
       [animEvent.layer]: {
         ...currentState.byId[animEvent.layer],
         events: removeItem(currentState.byId[animEvent.layer].events, action.payload.id)
-      },
-      [animEvent.artboard]: {
-        ...currentState.byId[animEvent.artboard],
-        originArtboardForEvents: removeItem((currentState.byId[animEvent.artboard] as Btwx.Artboard).originArtboardForEvents, action.payload.id)
-      } as Btwx.Artboard,
-      [animEvent.destinationArtboard]: {
-        ...currentState.byId[animEvent.destinationArtboard],
-        destinationArtboardForEvents: removeItem((currentState.byId[animEvent.destinationArtboard] as Btwx.Artboard).destinationArtboardForEvents, action.payload.id)
-      } as Btwx.Artboard
+      }
     },
     events: {
       ...currentState.events,
@@ -2277,6 +2275,20 @@ export const removeLayerTweenEvent = (state: LayerState, action: RemoveLayerTwee
         }
         return result;
       }, {})
+    }
+  }
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [animEvent.artboard]: {
+        ...currentState.byId[animEvent.artboard],
+        originArtboardForEvents: removeItem((currentState.byId[animEvent.artboard] as Btwx.Artboard).originArtboardForEvents, action.payload.id)
+      } as Btwx.Artboard,
+      [animEvent.destinationArtboard]: {
+        ...currentState.byId[animEvent.destinationArtboard],
+        destinationArtboardForEvents: removeItem((currentState.byId[animEvent.destinationArtboard] as Btwx.Artboard).destinationArtboardForEvents, action.payload.id)
+      } as Btwx.Artboard
     }
   }
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
@@ -5630,25 +5642,6 @@ export const setLayersGradient = (state: LayerState, action: SetLayersGradient):
 
 export const setLayerGradientType = (state: LayerState, action: SetLayerGradientType): LayerState => {
   let currentState = state;
-  // const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
-  // let fillPaperLayer = paperLayer;
-  // if (layerItem.type === 'Artboard') {
-  //   fillPaperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
-  // }
-  // if (layerItem.type === 'Text') {
-  //   fillPaperLayer = paperLayer.getItem({data: {id: 'textLines'}});
-  // }
-  // const paperProp = getPaperProp(action.payload.prop);
-  // if (fillPaperLayer[paperProp].gradient) {
-  //   switch(action.payload.gradientType) {
-  //     case 'linear':
-  //       fillPaperLayer[paperProp].gradient.radial = false;
-  //       break;
-  //     case 'radial':
-  //       fillPaperLayer[paperProp].gradient.radial = true;
-  //       break;
-  //   }
-  // }
   currentState = {
     ...currentState,
     byId: {
@@ -5695,10 +5688,7 @@ export const setLayersGradientType = (state: LayerState, action: SetLayersGradie
 
 export const setLayerGradientOrigin = (state: LayerState, action: SetLayerGradientOrigin): LayerState => {
   let currentState = state;
-  // const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const origin = getGradientOrigin(currentState, action.payload.id, action.payload.origin);
-  // const gradient = layerItem.style[action.payload.prop].gradient;
-  // const paperProp = getPaperProp(action.payload.prop);
   currentState = {
     ...currentState,
     byId: {
@@ -5721,21 +5711,6 @@ export const setLayerGradientOrigin = (state: LayerState, action: SetLayerGradie
       }
     }
   }
-  // let fillPaperLayer = paperLayer;
-  // if (layerItem.type === 'Artboard') {
-  //   fillPaperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
-  // }
-  // if (layerItem.type === 'Text') {
-  //   fillPaperLayer = paperLayer.getItem({data: {id: 'textLines'}});
-  // }
-  // fillPaperLayer[paperProp] = {
-  //   gradient: {
-  //     stops: getGradientStops(gradient.stops),
-  //     radial: gradient.gradientType === 'radial'
-  //   },
-  //   origin: getGradientOriginPoint(currentState, action.payload.id, action.payload.prop),
-  //   destination: getGradientDestinationPoint(currentState, action.payload.id, action.payload.prop)
-  // } as any
   currentState = updateLayerTweensByProps(currentState, action.payload.id, [action.payload.prop, `${action.payload.prop}GradientOriginX`, `${action.payload.prop}GradientOriginY`] as any);
   return currentState;
 };
@@ -6794,7 +6769,7 @@ export const enableLayerShadow = (state: LayerState, action: EnableLayerShadow):
   // const shadow = layerItem.style.shadow;
   // shadowLayer.shadowColor = { hue: shadow.color.h, saturation: shadow.color.s, lightness: shadow.color.l, alpha: shadow.color.a } as paper.Color;
   // shadowLayer.shadowBlur = shadow.blur;
-  // shadowLayer.shadowOffset = new uiPaperScope.Point(shadow.offset.x, shadow.offset.y);
+  // shadowLayer.shadowOffset = new paperMain.Point(shadow.offset.x, shadow.offset.y);
   currentState = {
     ...currentState,
     byId: {
@@ -6992,7 +6967,7 @@ export const setLayerShadowXOffset = (state: LayerState, action: SetLayerShadowX
   // if (layerItem.type === 'Text') {
   //   shadowLayer = paperLayer.getItem({data: {id: 'textLines'}});
   // }
-  // shadowLayer.shadowOffset = new uiPaperScope.Point(action.payload.shadowXOffset, layerItem.style.shadow.offset.y);
+  // shadowLayer.shadowOffset = new paperMain.Point(action.payload.shadowXOffset, layerItem.style.shadow.offset.y);
   currentState = {
     ...currentState,
     byId: {
@@ -7044,7 +7019,7 @@ export const setLayerShadowYOffset = (state: LayerState, action: SetLayerShadowY
   // if (layerItem.type === 'Text') {
   //   shadowLayer = paperLayer.getItem({data: {id: 'textLines'}});
   // }
-  // paperLayer.shadowOffset = new uiPaperScope.Point(layerItem.style.shadow.offset.x, action.payload.shadowYOffset);
+  // paperLayer.shadowOffset = new paperMain.Point(layerItem.style.shadow.offset.x, action.payload.shadowYOffset);
   currentState = {
     ...currentState,
     byId: {
@@ -7766,7 +7741,7 @@ export const toggleLayerMask = (state: LayerState, action: ToggleLayerMask): Lay
   // const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id) as { layerItem: Btwx.MaskableLayer; paperLayer: paper.Item };
   const layerItem = currentState.byId[action.payload.id] as Btwx.MaskableLayer;
   // const parentLayerItem = state.byId[layerItem.parent];
-  // const project = uiPaperScope.projects[state.activeProjectIndex];
+  // const project = paperMain.projects[state.activeProjectIndex];
   const isMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
   const underlyingSiblings = getLayerYoungerSiblings(currentState, action.payload.id);
   const maskableUnderlyingSiblings = getMaskableSiblings(currentState, action.payload.id, underlyingSiblings);
@@ -7804,7 +7779,7 @@ export const toggleLayerMask = (state: LayerState, action: ToggleLayerMask): Lay
   } else {
     // const mask = paperLayer.clone();
     // mask.clipMask = true;
-    // const maskGroup = new uiPaperScope.Group({
+    // const maskGroup = new paperMain.Group({
     //   name: 'MaskGroup',
     //   data: { id: 'maskGroup', type: 'LayerContainer', layerType: 'Shape' },
     //   children: [mask]
@@ -9739,7 +9714,10 @@ export const setLayerEdit = (state: LayerState, action: SetLayerEdit): LayerStat
     // }, []);
     currentState = {
       ...currentState,
-      tree: {...currentState.byId}
+      tree: {
+        ...currentState.tree,
+        tree: currentState.byId
+      }
     }
   }
   return currentState;
@@ -10017,19 +9995,19 @@ export const pasteLayerFromClipboard = (state: LayerState, action: PasteLayersFr
 export const pasteLayersFromClipboard = (state: LayerState, action: PasteLayersFromClipboard): LayerState => {
   let currentState = state;
   const projects: string[] = [];
-  const clipboardBounds = new uiPaperScope.Rectangle(
-    new uiPaperScope.Point(
+  const clipboardBounds = new paperMain.Rectangle(
+    new paperMain.Point(
       (action.payload.clipboardLayers.bounds as number[])[1],
       (action.payload.clipboardLayers.bounds as number[])[2]
     ),
-    new uiPaperScope.Size(
+    new paperMain.Size(
       (action.payload.clipboardLayers.bounds as number[])[3],
       (action.payload.clipboardLayers.bounds as number[])[4]
     )
   );
   // handle if clipboard position is not within viewport
-  if (!clipboardBounds.center.isInside(uiPaperScope.view.bounds)) {
-    const pointDiff = uiPaperScope.view.center.subtract(clipboardBounds.center);
+  if (!clipboardBounds.center.isInside(paperMain.view.bounds)) {
+    const pointDiff = paperMain.view.center.subtract(clipboardBounds.center);
     action.payload.clipboardLayers.main.forEach((id) => {
       const clipboardLayerItem = action.payload.clipboardLayers.byId[id];
       if (clipboardLayerItem.type === 'Artboard') {
@@ -10060,7 +10038,7 @@ export const pasteLayersFromClipboard = (state: LayerState, action: PasteLayersF
   // }
   // // handle paste at point
   // if (action.payload.overPoint && !action.payload.overLayer) {
-  //   const paperPoint = new uiPaperScope.Point(action.payload.overPoint.x, action.payload.overPoint.y);
+  //   const paperPoint = new paperMain.Point(action.payload.overPoint.x, action.payload.overPoint.y);
   //   const pointDiff = paperPoint.subtract(clipboardBounds.center);
   //   action.payload.clipboardLayers.allIds.forEach((id) => {
   //     const clipboardLayerItem = action.payload.clipboardLayers.byId[id];
@@ -10089,7 +10067,7 @@ export const pasteLayersFromClipboard = (state: LayerState, action: PasteLayersF
   // // handle paste over layer and over point
   // if (action.payload.overPoint && action.payload.overLayer) {
   //   const overLayerItem = currentState.byId[action.payload.overLayer];
-  //   const paperPoint = new uiPaperScope.Point(action.payload.overPoint.x, action.payload.overPoint.y);
+  //   const paperPoint = new paperMain.Point(action.payload.overPoint.x, action.payload.overPoint.y);
   //   const pointDiff = paperPoint.subtract(clipboardBounds.center);
   //   action.payload.clipboardLayers.allIds.forEach((id) => {
   //     const clipboardLayerItem = action.payload.clipboardLayers.byId[id];
