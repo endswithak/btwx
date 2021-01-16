@@ -89,6 +89,9 @@ const CanvasTextLayer = (props: CanvasLayerContainerProps & CanvasTextLayerProps
           visible: true,
           data: { id: 'textLine', type: 'LayerChild', layerType: 'Text' }
         });
+        line.leading = textItem.textStyle.fontSize;
+        line.skew(new paperLayerScope.Point(-textItem.textStyle.oblique, 0));
+        line.leading = textItem.textStyle.leading;
         return [...result, line];
       }, []),
       parent: textContainer

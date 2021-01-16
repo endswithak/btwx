@@ -17,7 +17,7 @@ const CanvasMaskableLayer = (props: CanvasMaskableLayerProps): ReactElement => {
   const layerIndex = parentItem.children.indexOf(layerItem.id);
   const underlyingMaskIndex = layerItem.underlyingMask ? parentItem.children.indexOf(layerItem.underlyingMask) : null;
   const maskedIndex = (layerIndex - underlyingMaskIndex) + 1;
-  const isMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
+  const isMask = layerItem.type === 'Shape' ? (layerItem as Btwx.Shape).mask : false;
   const [prevLayerIndex, setPrevLayerIndex] = useState(layerIndex);
   const [prevScope, setPrevScope] = useState(layerItem.scope);
   const [prevMask, setPrevMask] = useState(isMask);
@@ -94,7 +94,7 @@ const CanvasMaskableLayer = (props: CanvasMaskableLayerProps): ReactElement => {
         maskGroup.insertChild(maskedIndex, paperLayer);
       }
       if (!layerItem.masked && prevMasked) {
-        let paperParent = paperProject.getItem({data: {id: parent}});
+        let paperParent = paperProject.getItem({data: {id: layerItem.parent}});
         if (layerItem.parent === layerItem.artboard) {
           paperParent = paperParent.getItem({data:{id:'artboardLayers'}});
         }
@@ -114,7 +114,7 @@ const CanvasMaskableLayer = (props: CanvasMaskableLayerProps): ReactElement => {
         const maskGroup = paperProject.getItem({data: {id: layerItem.underlyingMask}}).parent;
         maskGroup.insertChild(maskedIndex, paperLayer);
       } else {
-        let paperParent = paperProject.getItem({data: {id: parent}});
+        let paperParent = paperProject.getItem({data: {id: layerItem.parent}});
         if (layerItem.parent === layerItem.artboard) {
           paperParent = paperParent.getItem({data:{id:'artboardLayers'}});
         }

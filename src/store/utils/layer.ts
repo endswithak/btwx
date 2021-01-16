@@ -398,7 +398,7 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
       }, cs);
     }
     // if layer has any tween events, remove those events
-    if (li.events.length > 0) {
+    if (li.events.length > 0 && li.type !== 'Artboard') {
       cs = li.events.reduce((tweenResult, tweenCurrent) => {
         return removeLayerTweenEvent(tweenResult, layerActions.removeLayerTweenEvent({id: tweenCurrent}) as RemoveLayerTweenEvent);
       }, cs);
@@ -1946,7 +1946,13 @@ export const moveLayerBy = (state: LayerState, action: MoveLayerBy): LayerState 
       }
     }
     if (li.type !== 'Group' && li.type !== 'Artboard') {
-      cs = updateLayerTweensByProps(cs, id, isLine ? ['fromX', 'fromY', 'toX', 'toY'] : ['x', 'y']);
+      if (isLine) {
+        cs = updateLayerTweensByProps(cs, id, ['fromX', 'fromY', 'toX', 'toY']);
+      } else if (isText) {
+        cs = updateLayerTweensByProps(cs, id, ['pointX', 'pointY']);
+      } else {
+        cs = updateLayerTweensByProps(cs, id, ['x', 'y']);
+      }
     }
     return cs;
   }
@@ -7167,7 +7173,7 @@ export const setLayerText = (state: LayerState, action: SetLayerText): LayerStat
       return result;
     }, currentState);
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y', 'text']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['pointX', 'pointY', 'text']);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
@@ -7223,7 +7229,7 @@ export const setLayerFontSize = (state: LayerState, action: SetLayerFontSize): L
       return result;
     }, currentState);
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fontSize', 'x']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fontSize', 'pointX']);
   return currentState;
 };
 
@@ -7294,7 +7300,7 @@ export const setLayerFontWeight = (state: LayerState, action: SetLayerFontWeight
       return result;
     }, currentState);
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fontWeight', 'x']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fontWeight', 'pointX']);
   return currentState;
 };
 
@@ -7365,7 +7371,7 @@ export const setLayerFontFamily = (state: LayerState, action: SetLayerFontFamily
       return result;
     }, currentState);
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['pointX', 'pointY']);
   return currentState;
 };
 
@@ -7477,7 +7483,7 @@ export const setLayerJustification = (state: LayerState, action: SetLayerJustifi
       } as Btwx.Text
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'justification']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['pointX', 'justification']);
   return currentState;
 };
 
@@ -7619,7 +7625,7 @@ export const setLayerPointX = (state: LayerState, action: SetLayerPointX): Layer
       return result;
     }, currentState);
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['pointX']);
   return currentState;
 };
 
@@ -7691,7 +7697,7 @@ export const setLayerPointY = (state: LayerState, action: SetLayerPointY): Layer
       return result;
     }, currentState);
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['pointY']);
   return currentState;
 };
 

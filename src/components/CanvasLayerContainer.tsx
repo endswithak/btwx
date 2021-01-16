@@ -8,6 +8,7 @@ export interface CanvasLayerContainerStateProps {
   parentItem: Btwx.Artboard | Btwx.Group;
   artboardItem: Btwx.Artboard;
   projectIndex: number;
+  documentImage: Btwx.DocumentImage;
 }
 
 export interface CanvasLayerContainerProps extends CanvasLayerContainerStateProps {
@@ -29,14 +30,16 @@ const CanvasLayerContainerWrap = (Component: any): (props: any) => ReactElement 
 
   const mapStateToProps = (state: RootState, ownProps: any): CanvasLayerContainerStateProps => {
     const layerItem = state.layer.present.byId[ownProps.id];
-    const parentItem = layerItem.type !== 'Artboard' ? state.layer.present.byId[layerItem.parent] as Btwx.Artboard | Btwx.Group : null;
-    const artboardItem = layerItem.type !== 'Artboard' ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null;
-    const projectIndex = layerItem.type !== 'Artboard' ? artboardItem.projectIndex : (layerItem as Btwx.Artboard).projectIndex;
+    const parentItem = layerItem ? layerItem.type !== 'Artboard' ? state.layer.present.byId[layerItem.parent] as Btwx.Artboard | Btwx.Group : null : null;
+    const artboardItem = layerItem ? layerItem.type !== 'Artboard' ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null : null;
+    const projectIndex = layerItem ? layerItem.type !== 'Artboard' ? artboardItem.projectIndex : (layerItem as Btwx.Artboard).projectIndex : null;
+    const documentImage = layerItem ? layerItem.type === 'Image' ? state.documentSettings.images.byId[(layerItem as Btwx.Image).imageId] : null : null;
     return {
       layerItem,
       parentItem,
       artboardItem,
-      projectIndex
+      projectIndex,
+      documentImage
     }
   }
 

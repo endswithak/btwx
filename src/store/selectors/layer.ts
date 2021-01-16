@@ -18,6 +18,7 @@ export const getAllArtboardIds = (state: RootState): string[] => state.layer.pre
 export const getAllTextIds = (state: RootState): string[] => state.layer.present.allTextIds;
 export const getLayersById = (state: RootState): { [id: string]: Btwx.Layer } => state.layer.present.byId;
 export const getAllEventIds = (state: RootState): string[] => state.layer.present.events.allIds;
+export const getEventById = (state: RootState, id: string): Btwx.TweenEvent => state.layer.present.events.byId[id];
 export const getEventsById = (state: RootState): { [id: string]: Btwx.TweenEvent } => state.layer.present.events.byId;
 export const getTweensById = (state: RootState): { [id: string]: Btwx.Tween } => state.layer.present.tweens.byId;
 export const getLayerById = (state: RootState, id: string): Btwx.Layer => state.layer.present.byId[id];
@@ -758,6 +759,19 @@ export const canUngroupSelected = createSelector(
   (selectedById) => {
     const keys = Object.keys(selectedById);
     return keys.length > 0 && keys.some((id) => selectedById[id].type === 'Group');
+  }
+);
+
+export const getEventTweenLayers = createSelector(
+  [ getEventById, getTweensById ],
+  (event, tweensById) => {
+    return event.tweens.reduce((result, current) => {
+      const tween = tweensById[current];
+      if (!result.includes(tween.layer)) {
+        result = [...result, tween.layer];
+      }
+      return result;
+    }, []) as string[];
   }
 );
 
@@ -2112,14 +2126,33 @@ export const hasXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer
   if (validType) {
     return !xMatch;
   } else {
-    if (layerItem.type === 'Text') {
-      const pointMatch = (layerItem as Btwx.Text).point.x.toFixed(2) === (equivalentLayerItem as Btwx.Text).point.x.toFixed(2);
-      const justificationMatch = (layerItem as Btwx.Text).textStyle.justification === (equivalentLayerItem as Btwx.Text).textStyle.justification;
-      const widthMatch = layerItem.frame.innerWidth.toFixed(2) === equivalentLayerItem.frame.innerWidth.toFixed(2);
-      return !pointMatch || (!justificationMatch && !widthMatch);
-    } else {
-      return false;
-    }
+    return false;
+    // if (layerItem.type === 'Text') {
+    //   const pointMatch = (layerItem as Btwx.Text).point.x.toFixed(2) === (equivalentLayerItem as Btwx.Text).point.x.toFixed(2);
+    //   const justificationMatch = (layerItem as Btwx.Text).textStyle.justification === (equivalentLayerItem as Btwx.Text).textStyle.justification;
+    //   const widthMatch = layerItem.frame.innerWidth.toFixed(2) === equivalentLayerItem.frame.innerWidth.toFixed(2);
+    //   return !pointMatch || (!justificationMatch && !widthMatch);
+    // } else {
+    //   return false;
+    // }
+  }
+};
+
+export const hasPointXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const validType = layerItem.type === 'Text';
+  if (validType) {
+    const xPointMatch = (layerItem as Btwx.Text).point.x.toFixed(2) === (equivalentLayerItem as Btwx.Text).point.x.toFixed(2);
+    return !xPointMatch;
+  } else {
+    return false;
+    // if (layerItem.type === 'Text') {
+    //   const pointMatch = (layerItem as Btwx.Text).point.x.toFixed(2) === (equivalentLayerItem as Btwx.Text).point.x.toFixed(2);
+    //   const justificationMatch = (layerItem as Btwx.Text).textStyle.justification === (equivalentLayerItem as Btwx.Text).textStyle.justification;
+    //   const widthMatch = layerItem.frame.innerWidth.toFixed(2) === equivalentLayerItem.frame.innerWidth.toFixed(2);
+    //   return !pointMatch || (!justificationMatch && !widthMatch);
+    // } else {
+    //   return false;
+    // }
   }
 };
 
@@ -2129,11 +2162,30 @@ export const hasYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer
   if (validType) {
     return !yMatch;
   } else {
-    if (layerItem.type === 'Text') {
-      return (layerItem as Btwx.Text).point.y.toFixed(2) !== (equivalentLayerItem as Btwx.Text).point.y.toFixed(2);
-    } else {
-      return false;
-    }
+    return false;
+    // if (layerItem.type === 'Text') {
+    //   return (layerItem as Btwx.Text).point.y.toFixed(2) !== (equivalentLayerItem as Btwx.Text).point.y.toFixed(2);
+    // } else {
+    //   return false;
+    // }
+  }
+};
+
+export const hasPointYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const validType = layerItem.type === 'Text';
+  if (validType) {
+    const yPointMatch = (layerItem as Btwx.Text).point.y.toFixed(2) === (equivalentLayerItem as Btwx.Text).point.y.toFixed(2);
+    return !yPointMatch;
+  } else {
+    return false;
+    // if (layerItem.type === 'Text') {
+    //   const pointMatch = (layerItem as Btwx.Text).point.x.toFixed(2) === (equivalentLayerItem as Btwx.Text).point.x.toFixed(2);
+    //   const justificationMatch = (layerItem as Btwx.Text).textStyle.justification === (equivalentLayerItem as Btwx.Text).textStyle.justification;
+    //   const widthMatch = layerItem.frame.innerWidth.toFixed(2) === equivalentLayerItem.frame.innerWidth.toFixed(2);
+    //   return !pointMatch || (!justificationMatch && !widthMatch);
+    // } else {
+    //   return false;
+    // }
   }
 };
 
@@ -2400,6 +2452,10 @@ export const getEquivalentTweenProp = (layerItem: Btwx.Layer, equivalentLayerIte
       return hasToXTween(layerItem, equivalentLayerItem);
     case 'toY':
       return hasToYTween(layerItem, equivalentLayerItem);
+    case 'pointX':
+      return hasPointXTween(layerItem, equivalentLayerItem);
+    case 'pointY':
+      return hasPointYTween(layerItem, equivalentLayerItem);
   }
 };
 
@@ -2440,7 +2496,9 @@ export const getEquivalentTweenProps = (layerItem: Btwx.Layer, equivalentLayerIt
   fromX: hasFromXTween(layerItem, equivalentLayerItem),
   fromY: hasFromYTween(layerItem, equivalentLayerItem),
   toX: hasToXTween(layerItem, equivalentLayerItem),
-  toY: hasToYTween(layerItem, equivalentLayerItem)
+  toY: hasToYTween(layerItem, equivalentLayerItem),
+  pointX: hasPointXTween(layerItem, equivalentLayerItem),
+  pointY: hasPointYTween(layerItem, equivalentLayerItem)
 });
 
 export const getLongestEventTween = (tweensById: {[id: string]: Btwx.Tween}): Btwx.Tween => {

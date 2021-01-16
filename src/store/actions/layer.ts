@@ -2297,8 +2297,8 @@ export const setLayerTextThunk = (payload: SetLayerTextPayload) => {
       newLine.leading = textContent.leading;
     }, (layerItem as Btwx.Text).lines);
     const positionInArtboard = textLinesGroup.position.subtract(artboardPosition);
-    const innerWidth = textLinesGroup.bounds.width;
-    const innerHeight = textLinesGroup.bounds.height;
+    const innerWidth = parseInt(textContent.bounds.width.toFixed(2));
+    const innerHeight = parseInt(textContent.bounds.height.toFixed(2));
     textBackground.bounds = textLinesGroup.bounds;
     clone.rotation = layerItem.transform.rotation;
     dispatch(
@@ -2355,8 +2355,8 @@ export const setLayersFontSizeThunk = (payload: SetLayersFontSizePayload) => {
         line.leading = (layerItem as Btwx.Text).textStyle.leading;
       });
       const positionInArtboard = textLinesGroup.position.subtract(artboardPosition);
-      const innerWidth = textLinesGroup.bounds.width;
-      const innerHeight = textLinesGroup.bounds.height;
+      const innerWidth = parseInt(textContent.bounds.width.toFixed(2));
+      const innerHeight = parseInt(textContent.bounds.height.toFixed(2));
       textBackground.bounds = textLinesGroup.bounds;
       clone.rotation = layerItem.transform.rotation;
       const newBounds = {
@@ -2410,8 +2410,8 @@ export const setLayersLeadingThunk = (payload: SetLayersLeadingPayload) => {
         line.point.y = textContent.point.y + (index * payload.leading);
       });
       const positionInArtboard = textLinesGroup.position.subtract(artboardPosition);
-      const innerWidth = textLinesGroup.bounds.width;
-      const innerHeight = textLinesGroup.bounds.height;
+      const innerWidth = parseInt(textContent.bounds.width.toFixed(2));
+      const innerHeight = parseInt(textContent.bounds.height.toFixed(2));
       clone.rotation = layerItem.transform.rotation;
       const width = textLinesGroup.bounds.width;
       const height = textLinesGroup.bounds.height;
@@ -2471,8 +2471,8 @@ export const setLayersFontWeightThunk = (payload: SetLayersFontWeightPayload) =>
         line.leading = (layerItem as Btwx.Text).textStyle.leading;
       });
       const positionInArtboard = textLinesGroup.position.subtract(artboardPosition);
-      const innerWidth = textLinesGroup.bounds.width;
-      const innerHeight = textLinesGroup.bounds.height;
+      const innerWidth = parseInt(textContent.bounds.width.toFixed(2));
+      const innerHeight = parseInt(textContent.bounds.height.toFixed(2));
       textBackground.bounds = textLinesGroup.bounds;
       clone.rotation = layerItem.transform.rotation;
       const newBounds = {
@@ -2533,8 +2533,8 @@ export const setLayersFontFamilyThunk = (payload: SetLayersFontFamilyPayload) =>
         line.leading = (layerItem as Btwx.Text).textStyle.leading;
       });
       const positionInArtboard = textLinesGroup.position.subtract(artboardPosition);
-      const innerWidth = textLinesGroup.bounds.width;
-      const innerHeight = textLinesGroup.bounds.height;
+      const innerWidth = parseInt(textContent.bounds.width.toFixed(2));
+      const innerHeight = parseInt(textContent.bounds.height.toFixed(2));
       textBackground.bounds = textLinesGroup.bounds;
       clone.rotation = layerItem.transform.rotation;
       const newBounds = {
@@ -2632,7 +2632,11 @@ export const setLayersJustificationThunk = (payload: SetLayersJustificationPaylo
         line.skew(new paperMain.Point(-(layerItem as Btwx.Text).textStyle.oblique, 0));
         line.leading = layerItem.textStyle.leading;
       });
-      points.push(textContent.point.subtract(artboardPosition));
+      const pointInArtboard = textContent.point.subtract(artboardPosition);
+      points.push({
+        x: parseInt(pointInArtboard.x.toFixed(2)),
+        y: parseInt(pointInArtboard.y.toFixed(2))
+      });
     });
     dispatch(
       setLayersJustification({
@@ -2675,8 +2679,8 @@ export const setLayersObliqueThunk = (payload: SetLayersObliquePayload) => {
         line.leading = textContent.leading;
       });
       const positionInArtboard = textLinesGroup.position.subtract(artboardPosition);
-      const innerWidth = textLinesGroup.bounds.width;
-      const innerHeight = textLinesGroup.bounds.height;
+      const innerWidth = parseInt(textContent.bounds.width.toFixed(2));
+      const innerHeight = parseInt(textContent.bounds.height.toFixed(2));
       textBackground.bounds = textLinesGroup.bounds;
       clone.rotation = layerItem.transform.rotation;
       const newBounds = {

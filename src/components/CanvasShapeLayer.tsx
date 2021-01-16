@@ -159,7 +159,6 @@ const CanvasShapeLayer = (props: CanvasLayerContainerProps & CanvasShapeLayerPro
         ? layerItem.events.map((eventId, index) => (
             <CanvasPreviewLayerEvent
               key={eventId}
-              id={id}
               eventId={eventId} />
           ))
         : null

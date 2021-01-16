@@ -1,46 +1,60 @@
 import React, { ReactElement, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store/reducers';
 import { bufferToBase64 } from '../utils';
-import { getPaperShadowColor, getLayerAbsPosition, getLayerPaperParent } from '../store/utils/paper';
-import { paperMain } from '../canvas';
+import { getPaperShadowColor, getPaperShadowOffset, getLayerAbsPosition, getPaperParent, getPaperShadowBlur } from '../store/utils/paper';
+import { paperMain, paperPreview } from '../canvas';
+import CanvasLayerContainer, { CanvasLayerContainerProps } from './CanvasLayerContainer';
+import CanvasLayerFrame from './CanvasLayerFrame';
+import CanvasLayerStyle from './CanvasLayerStyle';
+import CanvasLayerTransform from './CanvasLayerTransform';
+import CanvasPreviewLayerEvent from './CanvasPreviewLayerEvent';
+import CanvasMaskableLayer from './CanvasMaskableLayer';
 
 interface CanvasImageLayerProps {
   id: string;
   paperScope: Btwx.PaperScope;
-  layerItem: Btwx.Image;
-  layerIndex: number;
-  artboardItem: Btwx.Artboard;
-  rendered: boolean;
-  setRendered(rendered: boolean): void;
 }
 
-const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
-  const { id, paperScope, layerItem, layerIndex, artboardItem, rendered, setRendered } = props;
-  const documentImages = useSelector((state: RootState) => state.documentSettings.images.byId);
+const CanvasImageLayer = (props: CanvasLayerContainerProps & CanvasImageLayerProps): ReactElement => {
+  const { id, paperScope, layerItem, parentItem, artboardItem, projectIndex, documentImage, rendered, setRendered } = props;
+  const imageItem = layerItem as Btwx.Image;
+  const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
+  const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
 
   const createImage = (): void => {
-    const paperShadowColor = layerItem.style.shadow.enabled ? getPaperShadowColor(layerItem.style.shadow as Btwx.Shadow) : null;
-    const paperShadowOffset = layerItem.style.shadow.enabled ? new paperMain.Point(layerItem.style.shadow.offset.x, layerItem.style.shadow.offset.y) : null;
-    const paperShadowBlur = layerItem.style.shadow.enabled ? layerItem.style.shadow.blur : null;
-    const paperParent = getLayerPaperParent(paperMain.projects[artboardItem.projectIndex].getItem({data: {id: layerItem.parent}}), layerItem);
-    const base64 = bufferToBase64(documentImages[layerItem.imageId].buffer);
-    const paperLayer = new paperMain.Raster(`data:image/webp;base64,${base64}`);
-    const imageContainer = new paperMain.Group({
-      name: layerItem.name,
-      data: { id: layerItem.id, imageId: layerItem.imageId, type: 'Layer', layerType: 'Image', scope: layerItem.scope },
-      children: [paperLayer],
+    const paperParent = getPaperParent({
+      paperScope,
+      projectIndex,
+      parent: imageItem.parent,
+      isParentArtboard: imageItem.parent === imageItem.artboard,
+      masked: imageItem.masked,
+      underlyingMask: imageItem.underlyingMask
+    });
+    const layerIndex = parentItem.children.indexOf(id);
+    const underlyingMaskIndex = imageItem.underlyingMask ? parentItem.children.indexOf(imageItem.underlyingMask) : null;
+    const paperLayerIndex = imageItem.masked ? (layerIndex - underlyingMaskIndex) + 1 : layerIndex;
+    const base64 = bufferToBase64(Buffer.from(documentImage.buffer));
+    const raster = new paperLayerScope.Raster(`data:image/webp;base64,${base64}`);
+    const imageContainer = new paperLayerScope.Group({
+      name: imageItem.name,
+      shadowColor: getPaperShadowColor(imageItem.style.shadow),
+      shadowOffset: getPaperShadowOffset(imageItem.style.shadow),
+      shadowBlur: getPaperShadowBlur(imageItem.style.shadow),
+      data: {
+        id: imageItem.id,
+        imageId: imageItem.imageId,
+        type: 'Layer',
+        layerType: 'Image',
+        scope: imageItem.scope
+      },
+      children: [raster],
       insert: false
     });
-    paperParent.insertChild(layerIndex, imageContainer);
-    paperLayer.onLoad = (): void => {
-      paperLayer.data = { id: 'raster', type: 'LayerChild', layerType: 'Image' };
-      imageContainer.bounds.width = layerItem.frame.innerWidth;
-      imageContainer.bounds.height = layerItem.frame.innerHeight;
-      imageContainer.position = getLayerAbsPosition(layerItem.frame, artboardItem.frame);
-      imageContainer.shadowColor = paperShadowColor;
-      imageContainer.shadowOffset = paperShadowOffset;
-      imageContainer.shadowBlur = paperShadowBlur;
+    paperParent.insertChild(paperLayerIndex, imageContainer);
+    raster.onLoad = (): void => {
+      raster.data = { id: 'raster', type: 'LayerChild', layerType: 'Image' };
+      imageContainer.bounds.width = imageItem.frame.innerWidth;
+      imageContainer.bounds.height = imageItem.frame.innerHeight;
+      imageContainer.position = getLayerAbsPosition(imageItem.frame, artboardItem.frame);
       setRendered(true);
     }
   }
@@ -50,7 +64,7 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
     createImage();
     return (): void => {
       // remove layer
-      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
+      const paperLayer = paperProject.getItem({data: {id}});
       if (paperLayer) {
         paperLayer.remove();
       }
@@ -58,8 +72,46 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
   }, []);
 
   return (
-    <></>
+    <>
+      <CanvasMaskableLayer
+        layerItem={layerItem as Btwx.MaskableLayer}
+        artboardItem={artboardItem}
+        parentItem={parentItem}
+        paperScope={paperScope}
+        rendered={rendered}
+        projectIndex={projectIndex} />
+      <CanvasLayerTransform
+        layerItem={layerItem}
+        artboardItem={artboardItem}
+        parentItem={parentItem}
+        paperScope={paperScope}
+        rendered={rendered}
+        projectIndex={projectIndex} />
+      <CanvasLayerFrame
+        layerItem={layerItem}
+        artboardItem={artboardItem}
+        parentItem={parentItem}
+        paperScope={paperScope}
+        rendered={rendered}
+        projectIndex={projectIndex} />
+      <CanvasLayerStyle
+        layerItem={layerItem}
+        artboardItem={artboardItem}
+        parentItem={parentItem}
+        paperScope={paperScope}
+        rendered={rendered}
+        projectIndex={projectIndex} />
+      {
+        paperScope === 'preview' && rendered
+        ? layerItem.events.map((eventId, index) => (
+            <CanvasPreviewLayerEvent
+              key={eventId}
+              eventId={eventId} />
+          ))
+        : null
+      }
+    </>
   );
 }
 
-export default CanvasImageLayer;
+export default CanvasLayerContainer(CanvasImageLayer);

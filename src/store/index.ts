@@ -24,11 +24,11 @@ const configureStore = ({ preloadedState, windowType }: { preloadedState: any; w
   const handleChange = () => {
     const currentState = store.getState() as RootState;
     const previousEdit: string = currentEdit;
-    const previousActiveArtboard: string = currentActiveArtboard;
+    // const previousActiveArtboard: string = currentActiveArtboard;
     const isMainWindow = currentState.preview.documentWindowId === remote.getCurrentWindow().id;
     currentEdit = currentState.layer.present.edit ? currentState.layer.present.edit.id : null;
     currentActiveArtboard = currentState.layer.present.activeArtboard ? currentState.layer.present.activeArtboard : null;
-    if (isMainWindow && (previousEdit !== currentEdit || previousActiveArtboard !== currentActiveArtboard)) {
+    if (isMainWindow && previousEdit !== currentEdit) {
       const previewWindowId = currentState.preview.windowId;
       if (previewWindowId) {
         const minState = getMinState(currentState);

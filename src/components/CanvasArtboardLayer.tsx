@@ -4,7 +4,6 @@ import { paperMain, paperPreview } from '../canvas';
 import CanvasLayerContainer, { CanvasLayerContainerProps } from './CanvasLayerContainer';
 import CanvasLayerFrame from './CanvasLayerFrame';
 import CanvasLayerStyle from './CanvasLayerStyle';
-import CanvasPreviewLayer from './CanvasPreviewLayer';
 import CanvasLayers from './CanvasLayers';
 import CanvasPreviewLayerEvent from './CanvasPreviewLayerEvent';
 
@@ -104,7 +103,6 @@ const CanvasArtboardLayer = (props: CanvasLayerContainerProps & CanvasArtboardLa
         ? layerItem.events.map((eventId, index) => (
             <CanvasPreviewLayerEvent
               key={eventId}
-              id={id}
               eventId={eventId} />
           ))
         : null

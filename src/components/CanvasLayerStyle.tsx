@@ -19,8 +19,12 @@ const CanvasLayerStyle = (props: CanvasLayerStyleProps): ReactElement => (
   <>
     <CanvasLayerContextStyle
       {...props} />
-    <CanvasLayerFillStyle
-      {...props} />
+    {
+      props.layerItem.type !== 'Image'
+      ? <CanvasLayerFillStyle
+          {...props} />
+      : null
+    }
     <CanvasLayerStrokeStyle
       {...props} />
     <CanvasLayerStrokeOptionsStyle

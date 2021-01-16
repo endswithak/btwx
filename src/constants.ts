@@ -91,7 +91,9 @@ export const TWEEN_PROPS_MAP: { [id: string]: string[] } = {
   fromX: [],
   fromY: [],
   toX: [],
-  toY: []
+  toY: [],
+  pointX: [],
+  pointY: []
 }
 
 export const DEFAULT_TWEEN_EVENTS = [

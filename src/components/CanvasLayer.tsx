@@ -4,6 +4,8 @@ import { RootState } from '../store/reducers';
 import CanvasArtboardLayer from './CanvasArtboardLayer';
 import CanvasShapeLayer from './CanvasShapeLayer';
 import CanvasTextLayer from './CanvasTextLayer';
+import CanvasImageLayer from './CanvasImageLayer';
+import CanvasGroupLayer from './CanvasGroupLayer';
 
 interface CanvasLayerProps {
   id: string;
@@ -24,6 +26,16 @@ const CanvasLayer = (props: CanvasLayerProps & CanvasLayerStateProps): ReactElem
               <CanvasArtboardLayer
                 {...props} />
             );
+          case 'Group':
+            return (
+              <CanvasGroupLayer
+                {...props} />
+            );
+          case 'Image':
+            return (
+              <CanvasImageLayer
+                {...props} />
+            );
           case 'Shape':
             return (
               <CanvasShapeLayer
@@ -40,7 +52,6 @@ const CanvasLayer = (props: CanvasLayerProps & CanvasLayerStateProps): ReactElem
   </>
 );
 
-// useSelector makes this super laggy
 const mapStateToProps = (state: RootState, ownProps: CanvasLayerProps): CanvasLayerStateProps => {
   const type = state.layer.present.byId[ownProps.id].type;
   return { type }
