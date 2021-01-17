@@ -2290,9 +2290,8 @@ export const setLayerTextThunk = (payload: SetLayerTextPayload) => {
         parent: textLinesGroup,
         data: { id: 'textLine', type: 'LayerChild', layerType: 'Text' }
       });
-      newLine.leading = newLine.fontSize;
-      newLine.skew(new paperMain.Point((layerItem as Btwx.Text).textStyle.oblique, 0));
       newLines[index].width = newLine.bounds.width;
+      newLine.leading = newLine.fontSize;
       newLine.skew(new paperMain.Point(-(layerItem as Btwx.Text).textStyle.oblique, 0));
       newLine.leading = textContent.leading;
     }, (layerItem as Btwx.Text).lines);

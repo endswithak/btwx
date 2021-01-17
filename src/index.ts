@@ -132,7 +132,8 @@ const createPreviewWindow = ({width, height, documentWindowId}: {width: number; 
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
-  Menu.setApplicationMenu(menu);
+  // Menu.setApplicationMenu(menu);
+  Menu.setApplicationMenu(null);
   createNewDocument({});
 });
 
@@ -261,6 +262,7 @@ app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
+    Menu.setApplicationMenu(null);
     createNewDocument({});
   }
 });
@@ -268,6 +270,7 @@ app.on('activate', () => {
 app.on('open-file', (event, path) => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
+  Menu.setApplicationMenu(null);
   createNewDocument({});
 });
 

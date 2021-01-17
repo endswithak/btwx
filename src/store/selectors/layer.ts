@@ -10,6 +10,7 @@ import { bufferToBase64, colorsMatch, gradientsMatch } from '../../utils';
 import { RootState } from '../reducers';
 import { ARTBOARDS_PER_PROJECT } from '../../constants';
 
+export const getRoot = (state: RootState): Btwx.Layer => state.layer.present.byId.root;
 export const getArtboardEventDestinationIds = (state: RootState, id: string): string[] => (state.layer.present.byId[id] as Btwx.Artboard).destinationArtboardForEvents;
 export const getArtboardEventOriginIds = (state: RootState, id: string): string[] => (state.layer.present.byId[id] as Btwx.Artboard).originArtboardForEvents;
 export const getRootChildren = (state: RootState): string[] => state.layer.present.byId.root.children;
@@ -100,9 +101,9 @@ export const getAllProjectIndices = createSelector(
 );
 
 export const getCanvasBounds = createSelector(
-  [ getLayersById, getAllArtboardIds ],
-  (byId, allArtboardIds) => {
-    return getLayersBounds({byId} as LayerState, allArtboardIds);
+  [ getRoot ],
+  (root) => {
+    return getLayerRelativeBounds({byId: { root } as any} as LayerState, 'root');
   }
 );
 
@@ -2127,14 +2128,6 @@ export const hasXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer
     return !xMatch;
   } else {
     return false;
-    // if (layerItem.type === 'Text') {
-    //   const pointMatch = (layerItem as Btwx.Text).point.x.toFixed(2) === (equivalentLayerItem as Btwx.Text).point.x.toFixed(2);
-    //   const justificationMatch = (layerItem as Btwx.Text).textStyle.justification === (equivalentLayerItem as Btwx.Text).textStyle.justification;
-    //   const widthMatch = layerItem.frame.innerWidth.toFixed(2) === equivalentLayerItem.frame.innerWidth.toFixed(2);
-    //   return !pointMatch || (!justificationMatch && !widthMatch);
-    // } else {
-    //   return false;
-    // }
   }
 };
 
@@ -2145,14 +2138,6 @@ export const hasPointXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.
     return !xPointMatch;
   } else {
     return false;
-    // if (layerItem.type === 'Text') {
-    //   const pointMatch = (layerItem as Btwx.Text).point.x.toFixed(2) === (equivalentLayerItem as Btwx.Text).point.x.toFixed(2);
-    //   const justificationMatch = (layerItem as Btwx.Text).textStyle.justification === (equivalentLayerItem as Btwx.Text).textStyle.justification;
-    //   const widthMatch = layerItem.frame.innerWidth.toFixed(2) === equivalentLayerItem.frame.innerWidth.toFixed(2);
-    //   return !pointMatch || (!justificationMatch && !widthMatch);
-    // } else {
-    //   return false;
-    // }
   }
 };
 
@@ -2163,11 +2148,6 @@ export const hasYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer
     return !yMatch;
   } else {
     return false;
-    // if (layerItem.type === 'Text') {
-    //   return (layerItem as Btwx.Text).point.y.toFixed(2) !== (equivalentLayerItem as Btwx.Text).point.y.toFixed(2);
-    // } else {
-    //   return false;
-    // }
   }
 };
 
@@ -2178,14 +2158,6 @@ export const hasPointYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.
     return !yPointMatch;
   } else {
     return false;
-    // if (layerItem.type === 'Text') {
-    //   const pointMatch = (layerItem as Btwx.Text).point.x.toFixed(2) === (equivalentLayerItem as Btwx.Text).point.x.toFixed(2);
-    //   const justificationMatch = (layerItem as Btwx.Text).textStyle.justification === (equivalentLayerItem as Btwx.Text).textStyle.justification;
-    //   const widthMatch = layerItem.frame.innerWidth.toFixed(2) === equivalentLayerItem.frame.innerWidth.toFixed(2);
-    //   return !pointMatch || (!justificationMatch && !widthMatch);
-    // } else {
-    //   return false;
-    // }
   }
 };
 

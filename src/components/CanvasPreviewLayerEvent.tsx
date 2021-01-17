@@ -21,6 +21,7 @@ interface CanvasPreviewLayerEventStateProps {
 
 export interface EventLayerTimelineData {
   paperLayer: paper.Item;
+  artboardBackground: paper.Path.Rectangle;
   textLinesGroup: paper.Group;
   textContent: paper.PointText;
   textBackground: paper.Path.Rectangle;
@@ -36,12 +37,78 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps & CanvasPre
     data: eventTweenLayers.reduce((result, current) => ({
       ...result,
       [current]: {}
-    }), {}),
+    }), { garbageCollection: [] }),
     onComplete: function() {
+      // set preview view center to destination artboard
       paperPreview.view.center = destinationArtboardPosition;
+      // set main window active artboard to destination artboard
       remote.BrowserWindow.fromId(documentWindowId).webContents.executeJavaScript(`setActiveArtboard(${JSON.stringify(event.destinationArtboard)})`);
+      // reset timeline and pause it
       this.time(0);
       this.pause();
+      // remove any items added during timeline duration
+      if (this.data.garbageCollection.length > 0) {
+        this.data.garbageCollection.forEach((item: any) => {
+          switch(item.type) {
+            case 'FSColor': {
+              item.paperLayer[`${item.style}Color` as 'fillColor' | 'strokeColor'] = item.color;
+              break;
+            }
+            case 'image': {
+              const image = item.paperLayer.getItem({id:item.imageId});
+              image.remove();
+              break;
+            }
+            case 'gradientStop': {
+              switch(item.layerType) {
+                case 'Text': {
+                  const textLinesGroup = item.paperLayer.getItem({data:{id:'textLines'}});
+                  textLinesGroup.children.forEach((line: any) => {
+                    line[`${item.style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.pop();
+                  });
+                  break;
+                }
+                case 'Artboard': {
+                  const artboardBackground = item.paperLayer.getItem({data:{id:'artboardBackground'}});
+                  artboardBackground[`${item.style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.pop();
+                  break;
+                }
+                default:
+                  item.paperLayer[`${item.style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.pop();
+              }
+              break;
+            }
+            case 'textLine': {
+              const textLinesGroup = item.paperLayer.getItem({data:{id:'textLines'}});
+              const textBackground = item.paperLayer.getItem({data:{id:'textBackground'}});
+              const textLine = item.paperLayer.getItem({id:item.lineId});
+              item.paperLayer.rotation = -item.rotation;
+              textLine.remove();
+              textBackground.bounds = textLinesGroup.bounds;
+              item.paperLayer.rotation = item.rotation;
+              break;
+            }
+            case 'justification': {
+              const textContent = item.paperLayer.getItem({data:{id:'textContent'}});
+              const textLinesGroup = item.paperLayer.getItem({data:{id:'textLines'}});
+              item.paperLayer.rotation = -item.rotation;
+              textContent.justification = item.justification;
+              textContent.point.x = item.pointX;
+              textLinesGroup.children.forEach((line: any) => {
+                line.leading = line.fontSize;
+                line.skew(new paperPreview.Point(item.oblique, 0));
+                line.justification = item.justification;
+                line.point.x = item.pointX;
+                line.skew(new paperPreview.Point(-item.oblique, 0));
+                line.leading = textContent.leading;
+              });
+              item.paperLayer.rotation = item.rotation;
+              break;
+            }
+          }
+        });
+        this.data.garbageCollection = [];
+      }
     }
   })
 
@@ -51,6 +118,7 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps & CanvasPre
       id: `${eventId}-${current}`,
       data: {
         paperLayer: null,
+        artboardBackground: null,
         textLinesGroup: null,
         textContent: null,
         textBackground: null
@@ -60,8 +128,12 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps & CanvasPre
         this.data = ((): EventLayerTimelineData => {
           const paperLayer = paperPreview.project.getItem({data:{id: current}});
           let textLinesGroup: paper.Group = null;
+          let artboardBackground: paper.Path.Rectangle = null;
           let textContent: paper.PointText = null;
           let textBackground: paper.Path.Rectangle = null;
+          if (paperLayer.data.layerType === 'Artboard') {
+            artboardBackground = paperLayer.getItem({data:{id:'artboardBackground'}}) as paper.Path.Rectangle;
+          }
           if (paperLayer.data.layerType === 'Text') {
             textLinesGroup = paperLayer.getItem({data:{id:'textLines'}}) as paper.Group;
             textContent = paperLayer.getItem({data:{id:'textContent'}}) as paper.PointText;
@@ -69,6 +141,7 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps & CanvasPre
           }
           return {
             paperLayer,
+            artboardBackground,
             textLinesGroup,
             textContent,
             textBackground

@@ -106,18 +106,6 @@ const SidebarInput = (props: SidebarInputProps): ReactElement => {
         inputRef.current.select();
       }
     }
-    if (event.key === 'c' && event.metaKey) {
-      clipboard.writeText(JSON.stringify(value));
-    }
-    if (event.key === 'v' && event.metaKey) {
-      try {
-        const text = clipboard.readText();
-        inputRef.current.value = JSON.parse(text);
-        handleChange(event);
-      } catch(error) {
-        return;
-      }
-    }
   }
 
   const handleFocus = (e: any) => {

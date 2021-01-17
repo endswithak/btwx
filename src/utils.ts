@@ -93,6 +93,25 @@ export const getFocusedDocument = (focused?: BrowserWindow): Promise<BrowserWind
   })
 };
 
+export const getFocusedDocumentFromRenderer = (focused?: BrowserWindow): Promise<BrowserWindow> => {
+  return new Promise((resolve, reject) => {
+    const focusedWindow = focused ? focused : remote.BrowserWindow.getFocusedWindow();
+    if (focusedWindow) {
+      isPreviewWindow(focusedWindow.id, true).then((previewWindow) => {
+        if (previewWindow) {
+          getDocumentWindow(focusedWindow.id, true).then((documentWindow) => {
+            resolve(documentWindow);
+          });
+        } else {
+          return resolve(focusedWindow);
+        }
+      });
+    } else {
+      return resolve(null);
+    }
+  })
+};
+
 export const isMac = process.platform === 'darwin';
 
 export const getWindowBackground = (themeName?: Btwx.ThemeName): string => {
@@ -163,11 +182,18 @@ export const getPreviewWindow = (documentWindowId: number, fromRenderer?: boolea
   });
 };
 
-export const isPreviewWindow = (id = remote.getCurrentWindow().id): Promise<boolean> => {
-  return BrowserWindow.fromId(id).webContents.executeJavaScript(`getPreviewState()`).then((previewState: string) => {
-    const parsed = JSON.parse(previewState) as PreviewState;
-    return parsed.windowId === id;
-  });
+export const isPreviewWindow = (id = remote.getCurrentWindow().id, fromRenderer?: boolean): Promise<boolean> => {
+  if (fromRenderer) {
+    return remote.BrowserWindow.fromId(id).webContents.executeJavaScript(`getPreviewState()`).then((previewState: string) => {
+      const parsed = JSON.parse(previewState) as PreviewState;
+      return parsed.windowId === id;
+    });
+  } else {
+    return BrowserWindow.fromId(id).webContents.executeJavaScript(`getPreviewState()`).then((previewState: string) => {
+      const parsed = JSON.parse(previewState) as PreviewState;
+      return parsed.windowId === id;
+    });
+  }
 };
 
 export const isDocumentWindow = (id = remote.getCurrentWindow().id): Promise<boolean> => {

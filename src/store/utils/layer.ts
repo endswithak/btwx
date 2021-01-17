@@ -67,10 +67,10 @@ import {
   getLayerYoungerSibling, getCanvasBounds, getLayerBounds, hasFillTween, getSelectedBounds, getLayerProjectIndices,
   savePaperJSON, orderLayersByCenter, orderLayersByRight, orderLayersByMiddle, orderLayersByBottom, getLayerRelativeBounds
 } from '../selectors/layer';
-import { RootState } from '../reducers';
 
 export const addArtboard = (state: LayerState, action: AddArtboard): LayerState => {
   let currentState = state;
+  const groupParents = ['root'];
   currentState = {
     ...currentState,
     allIds: addItem(currentState.allIds, action.payload.layer.id),
@@ -84,7 +84,31 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
       } as Btwx.Root
     }
   }
-  // currentState = updateParentBounds(currentState, action.payload.layer.id);
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: layersBounds.center.x,
+              y: layersBounds.center.y,
+              width: layersBounds.width,
+              height: layersBounds.height,
+              innerWidth: layersBounds.width,
+              innerHeight: layersBounds.height
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
   if (!action.payload.batch) {
     currentState = selectLayers(currentState, layerActions.selectLayers({layers: [action.payload.layer.id], newSelection: true}) as SelectLayers);
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
@@ -103,7 +127,7 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
 export const addShape = (state: LayerState, action: AddShape): LayerState => {
   let currentState = state;
   const parentItem = state.byId[action.payload.layer.parent];
-  // const groupParents = action.payload.layer.scope.filter((id, index) => index !== 0 && index !== 1);
+  const groupParents = action.payload.layer.scope.filter((id, index) => index !== 0 && index !== 1);
   // add shape
   currentState = {
     ...currentState,
@@ -119,14 +143,32 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
     allShapeIds: addItem(state.allShapeIds, action.payload.layer.id)
   }
   currentState = setShapeIcon(currentState, action.payload.layer.id, action.payload.layer.pathData);
-  // currentState = updateLayerBounds(currentState, action.payload.layer.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
-  // if (groupParents.length > 0) {
-  //   currentState = groupParents.reduce((result, current) => {
-  //     result = updateLayerBounds(result, current);
-  //     return result;
-  //   }, currentState);
-  // }
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: layersBounds.center.x,
+              y: layersBounds.center.y,
+              width: layersBounds.width,
+              height: layersBounds.height,
+              innerWidth: layersBounds.width,
+              innerHeight: layersBounds.height
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
   if (!action.payload.batch) {
     if (!(parentItem as Btwx.Group | Btwx.Artboard).showChildren) {
       currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: action.payload.layer.parent}) as ShowLayerChildren);
@@ -148,7 +190,7 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
 export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
   let currentState = state;
   const parentItem = state.byId[action.payload.layer.parent];
-  // const groupParents = action.payload.layer.scope.filter((id, index) => index !== 0 && index !== 1);
+  const groupParents = action.payload.layer.scope.filter((id, index) => index !== 0 && index !== 1);
   currentState = {
     ...currentState,
     allIds: addItem(currentState.allIds, action.payload.layer.id),
@@ -162,13 +204,31 @@ export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
     },
     allGroupIds: addItem(state.allGroupIds, action.payload.layer.id)
   }
-  // currentState = updateLayerBounds(currentState, action.payload.layer.id);
-  // if (groupParents.length > 0) {
-  //   currentState = groupParents.reduce((result, current) => {
-  //     result = updateLayerBounds(result, current);
-  //     return result;
-  //   }, currentState);
-  // }
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: layersBounds.center.x,
+              y: layersBounds.center.y,
+              width: layersBounds.width,
+              height: layersBounds.height,
+              innerWidth: layersBounds.width,
+              innerHeight: layersBounds.height
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
   if (!action.payload.batch) {
     if (!(parentItem as Btwx.Group | Btwx.Artboard).showChildren) {
       currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: action.payload.layer.parent}) as ShowLayerChildren);
@@ -190,7 +250,7 @@ export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
 export const addText = (state: LayerState, action: AddText): LayerState => {
   let currentState = state;
   const parentItem = state.byId[action.payload.layer.parent];
-  // const groupParents = action.payload.layer.scope.filter((id, index) => index !== 0 && index !== 1);
+  const groupParents = action.payload.layer.scope.filter((id, index) => index !== 0 && index !== 1);
   currentState = {
     ...currentState,
     allIds: addItem(currentState.allIds, action.payload.layer.id),
@@ -205,14 +265,32 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
     },
     allTextIds: addItem(state.allTextIds, action.payload.layer.id)
   }
-  // currentState = updateLayerBounds(currentState, action.payload.layer.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
-  // if (groupParents.length > 0) {
-  //   currentState = groupParents.reduce((result, current) => {
-  //     result = updateLayerBounds(result, current);
-  //     return result;
-  //   }, currentState);
-  // }
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: layersBounds.center.x,
+              y: layersBounds.center.y,
+              width: layersBounds.width,
+              height: layersBounds.height,
+              innerWidth: layersBounds.width,
+              innerHeight: layersBounds.height
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
   if (!action.payload.batch) {
     if (!(parentItem as Btwx.Group | Btwx.Artboard).showChildren) {
       currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: action.payload.layer.parent}) as ShowLayerChildren);
@@ -234,7 +312,7 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
 export const addImage = (state: LayerState, action: AddImage): LayerState => {
   let currentState = state;
   const parentItem = state.byId[action.payload.layer.parent];
-  // const groupParents = action.payload.layer.scope.filter((id, index) => index !== 0 && index !== 1);
+  const groupParents = action.payload.layer.scope.filter((id, index) => index !== 0 && index !== 1);
   currentState = {
     ...currentState,
     allIds: addItem(currentState.allIds, action.payload.layer.id),
@@ -248,14 +326,32 @@ export const addImage = (state: LayerState, action: AddImage): LayerState => {
     },
     allImageIds: addItem(state.allImageIds, action.payload.layer.id)
   }
-  // currentState = updateLayerBounds(currentState, action.payload.layer.id);
   currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
-  // if (groupParents.length > 0) {
-  //   currentState = groupParents.reduce((result, current) => {
-  //     result = updateLayerBounds(result, current);
-  //     return result;
-  //   }, currentState);
-  // }
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: layersBounds.center.x,
+              y: layersBounds.center.y,
+              width: layersBounds.width,
+              height: layersBounds.height,
+              innerWidth: layersBounds.width,
+              innerHeight: layersBounds.height
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
   if (!action.payload.batch) {
     if (!(parentItem as Btwx.Group | Btwx.Artboard).showChildren) {
       currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: action.payload.layer.parent}) as ShowLayerChildren);
@@ -343,7 +439,7 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
   let currentState = state;
   // const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const layerItem = currentState.byId[action.payload.id];
-  // const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
+  const groupParents = layerItem.type === 'Artboard' ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const rm = (cs: LayerState, id: string): LayerState => {
     const li = cs.byId[id];
     const isMask = li.type === 'Shape' && (li as Btwx.Shape).mask;
@@ -455,18 +551,36 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
       break;
     }
   }
-  // currentState = updateChildrenIndices(currentState, layerItem.parent);
   if (layerItem.scope.includes(action.payload.id)) {
     currentState = setGlobalScope(currentState, layerActions.setGlobalScope({
       scope: layerItem.scope
     }) as SetGlobalScope);
   }
-  // if (groupParents.length > 0) {
-  //   currentState = groupParents.reduce((result, current) => {
-  //     result = updateLayerBounds(result, current);
-  //     return result;
-  //   }, currentState);
-  // }
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: layersBounds.center.x,
+              y: layersBounds.center.y,
+              width: layersBounds.width,
+              height: layersBounds.height,
+              innerWidth: layersBounds.width,
+              innerHeight: layersBounds.height
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
   return currentState;
 };
 
@@ -1892,7 +2006,7 @@ export const moveLayersTo = (state: LayerState, action: MoveLayersTo): LayerStat
 export const moveLayerBy = (state: LayerState, action: MoveLayerBy): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
-  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
+  const groupParents = layerItem.type === 'Artboard' ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const ml = (cs: LayerState, id: string): LayerState => {
     const li = cs.byId[id];
     const isLine = li.type === 'Shape' && (li as Btwx.Shape).shapeType === 'Line';
@@ -3427,7 +3541,8 @@ export const setLayerCustomWiggleTweenType = (state: LayerState, action: SetLaye
 export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
-  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
+  const isArtboard = layerItem.type === 'Artboard';
+  const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const isText = layerItem.type === 'Text';
   const diff = action.payload.x - layerItem.frame.x;
@@ -3589,7 +3704,8 @@ export const setLayersX = (state: LayerState, action: SetLayersX): LayerState =>
 export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
-  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
+  const isArtboard = layerItem.type === 'Artboard';
+  const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const isText = layerItem.type === 'Text';
   const diff = action.payload.y - layerItem.frame.y;
@@ -3751,7 +3867,8 @@ export const setLayersY = (state: LayerState, action: SetLayersY): LayerState =>
 export const setLayerLeft = (state: LayerState, action: SetLayerLeft): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
-  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
+  const isArtboard = layerItem.type === 'Artboard';
+  const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const isText = layerItem.type === 'Text';
   const x = action.payload.left + (layerItem.frame.width / 2);
@@ -3914,7 +4031,8 @@ export const setLayersLeft = (state: LayerState, action: SetLayersLeft): LayerSt
 export const setLayerCenter = (state: LayerState, action: SetLayerCenter): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
-  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
+  const isArtboard = layerItem.type === 'Artboard';
+  const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const diff = action.payload.center - layerItem.frame.x;
   currentState = {
@@ -4075,7 +4193,8 @@ export const setLayersCenter = (state: LayerState, action: SetLayersCenter): Lay
 export const setLayerRight = (state: LayerState, action: SetLayerRight): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
-  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
+  const isArtboard = layerItem.type === 'Artboard';
+  const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const x = action.payload.right - (layerItem.frame.width / 2);
   const diff = x - layerItem.frame.x;
@@ -4237,7 +4356,8 @@ export const setLayersRight = (state: LayerState, action: SetLayersRight): Layer
 export const setLayerTop = (state: LayerState, action: SetLayerTop): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
-  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
+  const isArtboard = layerItem.type === 'Artboard';
+  const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const y = action.payload.top + (layerItem.frame.height / 2);
   const diff = y - layerItem.frame.y;
@@ -4399,7 +4519,8 @@ export const setLayersTop = (state: LayerState, action: SetLayersTop): LayerStat
 export const setLayerMiddle = (state: LayerState, action: SetLayerMiddle): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
-  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
+  const isArtboard = layerItem.type === 'Artboard';
+  const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const diff = action.payload.middle - layerItem.frame.y;
   currentState = {
@@ -4560,7 +4681,8 @@ export const setLayersMiddle = (state: LayerState, action: SetLayersMiddle): Lay
 export const setLayerBottom = (state: LayerState, action: SetLayerBottom): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
-  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
+  const isArtboard = layerItem.type === 'Artboard';
+  const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const y = action.payload.bottom - (layerItem.frame.height / 2);
   const diff = y - layerItem.frame.y;
@@ -4723,7 +4845,8 @@ export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerSt
   let currentState = state;
   // const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const layerItem = currentState.byId[action.payload.id];
-  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
+  const isArtboard = layerItem.type === 'Artboard';
+  const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   // const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   // const absPosition = getAbsolutePosition(currentState, action.payload.id);
   // if (layerItem.type === 'Artboard') {
@@ -4840,7 +4963,8 @@ export const setLayerHeight = (state: LayerState, action: SetLayerHeight): Layer
   let currentState = state;
   // const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
   const layerItem = currentState.byId[action.payload.id];
-  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
+  const isArtboard = layerItem.type === 'Artboard';
+  const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   // const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   // const absPosition = getAbsolutePosition(currentState, action.payload.id);
   // if (layerItem.type === 'Artboard') {
