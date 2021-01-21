@@ -4,6 +4,7 @@ import {
   SET_TEXT_SETTINGS_FONT_SIZE,
   SET_TEXT_SETTINGS_FONT_WEIGHT,
   SET_TEXT_SETTINGS_FONT_FAMILY,
+  SET_TEXT_SETTINGS_LETTER_SPACING,
   SET_TEXT_SETTINGS_LEADING,
   SET_TEXT_SETTINGS_JUSTIFICATION,
   SET_TEXT_SETTINGS_SYSTEM_FONTS,
@@ -13,6 +14,7 @@ import {
   SetTextSettingsFontSizePayload,
   SetTextSettingsFontWeightPayload,
   SetTextSettingsFontFamilyPayload,
+  SetTextSettingsLetterSpacingPayload,
   SetTextSettingsLeadingPayload,
   SetTextSettingsJustificationPayload,
   SetTextSettingsSystemFontsPayload,
@@ -41,6 +43,11 @@ export const setTextSettingsFontWeight = (payload: SetTextSettingsFontWeightPayl
 
 export const setTextSettingsFontFamily = (payload: SetTextSettingsFontFamilyPayload): TextSettingsTypes => ({
   type: SET_TEXT_SETTINGS_FONT_FAMILY,
+  payload
+});
+
+export const setTextSettingsLetterSpacing = (payload: SetTextSettingsLetterSpacingPayload): TextSettingsTypes => ({
+  type: SET_TEXT_SETTINGS_LETTER_SPACING,
   payload
 });
 

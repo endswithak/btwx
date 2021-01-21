@@ -182,7 +182,6 @@ const DragTool = (props: PaperToolProps): ReactElement => {
           case 'Text': {
             const clone = paperLayer.clone({insert: false});
             clone.rotation = -layerItems[paperLayer.data.id].transform.rotation;
-            const textLayer = clone.getItem({data: { id: 'textContent' }}) as paper.PointText;
             const textLines = clone.getItems({data: {id: 'textLine'}}) as paper.PointText[];
             const textBackgroundClone = clone.getItem({data: {id: 'textBackground'}});
             const linesGroup = new paperMain.Group({
@@ -194,7 +193,7 @@ const DragTool = (props: PaperToolProps): ReactElement => {
               line.skew(new paperMain.Point((layerItems[paperLayer.data.id] as Btwx.Text).textStyle.oblique, 0));
               new paperMain.Path.Line({
                 from: (() => {
-                  switch(textLayer.justification) {
+                  switch(line.justification) {
                     case 'left':
                       return line.point;
                     case 'center':
@@ -204,7 +203,7 @@ const DragTool = (props: PaperToolProps): ReactElement => {
                   }
                 })(),
                 to: (() => {
-                  switch(textLayer.justification) {
+                  switch(line.justification) {
                     case 'left':
                       return new paperMain.Point(line.point.x + line.bounds.width, line.point.y);
                     case 'center':

@@ -1531,6 +1531,22 @@ export const getSelectedLeading = createSelector(
   }
 );
 
+export const getSelectedLetterSpacing = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Text;
+      if (!result) {
+        result = layerItem.textStyle.letterSpacing;
+      }
+      if (result && layerItem.textStyle.letterSpacing !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
 export const getSelectedFontSize = createSelector(
   [ getSelectedById ],
   (selectedById) => {
@@ -2291,6 +2307,12 @@ export const hasFontWeightTween = (layerItem: Btwx.Layer, equivalentLayerItem: B
   return validType && !fontWeightMatch;
 };
 
+export const hasLetterSpacingTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const validType = layerItem.type === 'Text';
+  const fontWeightMatch = validType && (layerItem as Btwx.Text).textStyle.letterSpacing.toFixed(2) === (equivalentLayerItem as Btwx.Text).textStyle.letterSpacing.toFixed(2);
+  return validType && !fontWeightMatch;
+};
+
 export const hasObliqueTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const validType = layerItem.type === 'Text';
   const obliqueMatch = validType && (layerItem as Btwx.Text).textStyle.oblique === (equivalentLayerItem as Btwx.Text).textStyle.oblique;
@@ -2406,6 +2428,8 @@ export const getEquivalentTweenProp = (layerItem: Btwx.Layer, equivalentLayerIte
       return hasOpacityTween(layerItem, equivalentLayerItem);
     case 'fontSize':
       return hasFontSizeTween(layerItem, equivalentLayerItem);
+    case 'letterSpacing':
+      return hasLetterSpacingTween(layerItem, equivalentLayerItem);
     case 'fontWeight':
       return hasFontWeightTween(layerItem, equivalentLayerItem);
     case 'oblique':
@@ -2460,6 +2484,7 @@ export const getEquivalentTweenProps = (layerItem: Btwx.Layer, equivalentLayerIt
   shadowBlur: hasShadowBlurTween(layerItem, equivalentLayerItem),
   opacity: hasOpacityTween(layerItem, equivalentLayerItem),
   fontSize: hasFontSizeTween(layerItem, equivalentLayerItem),
+  letterSpacing: hasLetterSpacingTween(layerItem, equivalentLayerItem),
   fontWeight: hasFontWeightTween(layerItem, equivalentLayerItem),
   oblique: hasObliqueTween(layerItem, equivalentLayerItem),
   lineHeight: hasLineHeightTween(layerItem, equivalentLayerItem),

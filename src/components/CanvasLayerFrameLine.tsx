@@ -15,7 +15,7 @@ const CanvasLayerFrameLine = (props: CanvasLayerFrameLineProps): ReactElement =>
   const [prevFromX, setPrevFromX] = useState(layerItem.from.x);
   const [prevFromY, setPrevFromY] = useState(layerItem.from.y);
   const [prevToX, setPrevToX] = useState(layerItem.to.x);
-  const [prevToY, setPrevToY] = useState(layerItem.to.x);
+  const [prevToY, setPrevToY] = useState(layerItem.to.y);
 
   const getPaperLayer = (): paper.Item => {
     const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;

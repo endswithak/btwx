@@ -7,11 +7,13 @@ import {
   SET_PREVIEW_FOCUSING,
   SET_PREVIEW_WINDOW_ID,
   SET_PREVIEW_DOCUMENT_WINDOW_ID,
+  SET_PREVIEW_TWEENING,
   HydratePreviewPayload,
   OpenPreviewPayload,
   SetPreviewFocusingPayload,
   SetPreviewWindowIdPayload,
   SetPreviewDocumentWindowIdPayload,
+  SetPreviewTweeningPayload,
   PreviewTypes
 } from '../actionTypes/preview';
 
@@ -49,5 +51,10 @@ export const setPreviewWindowId = (payload: SetPreviewWindowIdPayload): PreviewT
 
 export const setPreviewDocumentWindowId = (payload: SetPreviewDocumentWindowIdPayload): PreviewTypes => ({
   type: SET_PREVIEW_DOCUMENT_WINDOW_ID,
+  payload
+});
+
+export const setPreviewTweening = (payload: SetPreviewTweeningPayload): PreviewTypes => ({
+  type: SET_PREVIEW_TWEENING,
   payload
 });

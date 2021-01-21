@@ -6,6 +6,7 @@ import {
   SET_PREVIEW_FOCUSING,
   SET_PREVIEW_WINDOW_ID,
   SET_PREVIEW_DOCUMENT_WINDOW_ID,
+  SET_PREVIEW_TWEENING,
   PreviewTypes
 } from '../actionTypes/preview';
 
@@ -15,6 +16,7 @@ export interface PreviewState {
   focusing: boolean;
   windowId: number;
   documentWindowId: number;
+  tweening: string;
 }
 
 export const initialState: PreviewState = {
@@ -22,7 +24,8 @@ export const initialState: PreviewState = {
   recording: false,
   focusing: false,
   windowId: null,
-  documentWindowId: null
+  documentWindowId: null,
+  tweening: null
 };
 
 export default (state = initialState, action: PreviewTypes): PreviewState => {
@@ -72,6 +75,12 @@ export default (state = initialState, action: PreviewTypes): PreviewState => {
       return {
         ...state,
         documentWindowId: action.payload.documentWindowId
+      };
+    }
+    case SET_PREVIEW_TWEENING: {
+      return {
+        ...state,
+        tweening: action.payload.tweening
       };
     }
     default:

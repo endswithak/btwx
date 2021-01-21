@@ -8,6 +8,7 @@ export const STOP_PREVIEW_RECORDING = 'STOP_PREVIEW_RECORDING';
 export const SET_PREVIEW_FOCUSING = 'SET_PREVIEW_FOCUSING';
 export const SET_PREVIEW_WINDOW_ID = 'SET_PREVIEW_WINDOW_ID';
 export const SET_PREVIEW_DOCUMENT_WINDOW_ID = 'SET_PREVIEW_DOCUMENT_WINDOW_ID';
+export const SET_PREVIEW_TWEENING = 'SET_PREVIEW_TWEENING';
 
 export interface OpenPreviewPayload {
   windowId?: number;
@@ -67,6 +68,15 @@ export interface SetPreviewDocumentWindowId {
   payload: SetPreviewDocumentWindowIdPayload;
 }
 
+export interface SetPreviewTweeningPayload {
+  tweening: string;
+}
+
+export interface SetPreviewTweening {
+  type: typeof SET_PREVIEW_TWEENING;
+  payload: SetPreviewTweeningPayload;
+}
+
 export type PreviewTypes = OpenPreview |
                            HydratePreview |
                            ClosePreview |
@@ -74,4 +84,5 @@ export type PreviewTypes = OpenPreview |
                            StopPreviewRecording |
                            SetPreviewFocusing |
                            SetPreviewWindowId |
-                           SetPreviewDocumentWindowId;
+                           SetPreviewDocumentWindowId |
+                           SetPreviewTweening;

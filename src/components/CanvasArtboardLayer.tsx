@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { getPaperFillColor } from '../store/utils/paper';
 import { paperMain, paperPreview } from '../canvas';
 import CanvasLayerContainer, { CanvasLayerContainerProps } from './CanvasLayerContainer';
@@ -13,9 +13,10 @@ interface CanvasArtboardLayerProps {
 }
 
 const CanvasArtboardLayer = (props: CanvasLayerContainerProps & CanvasArtboardLayerProps): ReactElement => {
-  const { id, paperScope, layerItem, parentItem, artboardItem, projectIndex, rendered, setRendered } = props;
+  const { id, paperScope, layerItem, parentItem, artboardItem, projectIndex, rendered, tweening, setRendered } = props;
   const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
   const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
+  const [prevTweening, setPrevTweening] = useState(tweening);
 
   const createArtboard = () => {
     const artboardBounds = new paperLayerScope.Rectangle({
@@ -75,6 +76,30 @@ const CanvasArtboardLayer = (props: CanvasLayerContainerProps & CanvasArtboardLa
     }
   }, []);
 
+  useEffect(() => {
+    if (prevTweening !== tweening && paperScope === 'preview') {
+      if (!tweening) {
+        const paperLayer = paperProject.getItem({data: {id}});
+        const background = paperLayer.getItem({data:{id:'artboardBackground'}}) as paper.Path.Rectangle;
+        background.replaceWith(new paperLayerScope.Path.Rectangle({
+          name: 'Artboard Background',
+          rectangle: background.bounds,
+          data: { id: 'artboardBackground', type: 'LayerChild', layerType: 'Artboard' },
+          fillColor: getPaperFillColor({
+            fill: layerItem.style.fill,
+            layerFrame: layerItem.frame,
+            artboardFrame: null,
+            isLine: false
+          }),
+          shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.20 },
+          shadowOffset: new paperLayerScope.Point(0, 2),
+          shadowBlur: 10
+        }));
+      }
+      setPrevTweening(tweening);
+    }
+  }, [tweening]);
+
   return (
     <>
       {
@@ -99,7 +124,7 @@ const CanvasArtboardLayer = (props: CanvasLayerContainerProps & CanvasArtboardLa
         rendered={rendered}
         projectIndex={projectIndex} />
       {
-        paperScope === 'preview' && rendered
+        paperScope === 'preview' && rendered && !tweening
         ? layerItem.events.map((eventId, index) => (
             <CanvasPreviewLayerEvent
               key={eventId}

@@ -83,6 +83,7 @@ export const TWEEN_PROPS_MAP: { [id: string]: string[] } = {
   shadowBlur: [],
   opacity: [],
   fontSize: [],
+  letterSpacing: [],
   lineHeight: [],
   fontWeight: [],
   oblique: [],
@@ -242,6 +243,7 @@ export const DEFAULT_FONT_FAMILY = 'Helvetica';
 export const DEFAULT_FONT_WEIGHT = 400;
 export const DEFAULT_OBLIQUE = 0;
 export const DEFAULT_JUSTIFICATION = 'left';
+export const DEFAULT_LETTER_SPACING = 0;
 export const DEFAULT_LEADING = 16;
 export const DEFAULT_TEXT_FILL_COLOR = { h: 0, s: 0, l: 0, v: 0, a: 1 };
 
@@ -251,7 +253,8 @@ export const DEFAULT_TEXT_STYLE: Btwx.TextStyle = {
   fontWeight: DEFAULT_FONT_WEIGHT,
   fontFamily: DEFAULT_FONT_FAMILY,
   oblique: DEFAULT_OBLIQUE,
-  justification: DEFAULT_JUSTIFICATION
+  justification: DEFAULT_JUSTIFICATION,
+  letterSpacing: DEFAULT_LETTER_SPACING
 }
 
 export const APPLE_IPHONE_DEVICES: Btwx.Device[] = [

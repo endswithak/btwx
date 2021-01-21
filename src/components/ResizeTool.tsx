@@ -5,7 +5,7 @@ import { RootState } from '../store/reducers';
 import { getPaperLayer, getSelectedProjectIndices, getSelectedById, getSelectedBounds } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
-import { scaleLayers, updateSelectionFrame } from '../store/actions/layer';
+import { scaleLayersThunk, updateSelectionFrame } from '../store/actions/layer';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
 
@@ -58,11 +58,12 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
         mask.scale(hor, ver);
         break;
       }
-      case 'Text': {
-        const background = paperLayer.getItem({data: { id: 'textBackground' }});
-        background.scale(hor, ver);
-        break;
-      }
+      // case 'Text': {
+      //   // const background = paperLayer.getItem({data: { id: 'textBackground' }});
+      //   // background.scale(hor, ver);
+      //   paperLayer.scale(hor, hor);
+      //   break;
+      // }
       case 'Shape': {
         switch(paperLayer.data.shapeType) {
           case 'Ellipse':
@@ -597,17 +598,25 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
   useEffect(() => {
     if (upEvent && isEnabled) {
       if (selected.length > 0) {
-        selected.forEach((id) => {
-          const paperLayer = getPaperLayer(id, selectedProjectIndices[id]);
+        const totalWidthDiff = toBounds.width / fromBounds.width;
+        const totalHeightDiff = toBounds.height / fromBounds.height;
+        const scaleX = isFinite(totalWidthDiff) && totalWidthDiff > 0 ? totalWidthDiff : 0.01;
+        const scaleY = isFinite(totalHeightDiff) && totalHeightDiff > 0 ? totalHeightDiff : 0.01;
+        const paperLayers = selected.reduce((result, current) => {
+          const paperLayer = getPaperLayer(current, selectedProjectIndices[current]);
           paperLayer.pivot = null;
-        });
+          return {
+            ...result,
+            [current]: paperLayer
+          }
+        }, {}) as { [id: string]: paper.Item };
         dispatch(
-          scaleLayers({
+          scaleLayersThunk({
             layers: selected,
-            scale: { x: 1, y: 1 },
+            scale: { x: scaleX, y: scaleY },
             horizontalFlip,
             verticalFlip
-          })
+          }, paperLayers)
         );
       }
       if (resizing) {

@@ -53,7 +53,7 @@ import {
   SetLayerStyle, SetLayersStyle, EnableLayersHorizontalFlip, DisableLayersHorizontalFlip, DisableLayersVerticalFlip, EnableLayersVerticalFlip,
   SetLayerScope, SetLayersScope, SetGlobalScope, SetLayerUnderlyingMask, SetLayersUnderlyingMask, SetLayerMasked, SetLayersMasked, ToggleLayerMask,
   ToggleLayersMask, ToggleLayersIgnoreUnderlyingMask, ToggleLayerIgnoreUnderlyingMask, AreaSelectLayers, SetLayersGradientOD, ResetImagesDimensions,
-  ResetImageDimensions, ReplaceImage, ReplaceImages, PasteLayersFromClipboard, SetLayerOblique, SetLayersOblique, SetLayerPointX, SetLayersPointX, SetLayerPointY, SetLayersPointY, SetLayerScrambleTextTweenCharacters, SetLayerScrambleTextTweenRevealDelay, SetLayerScrambleTextTweenSpeed, SetLayerScrambleTextTweenDelimiter, SetLayerScrambleTextTweenRightToLeft, SetLayerCustomBounceTweenStrength, SetLayerCustomBounceTweenEndAtStart, SetLayerCustomBounceTweenSquash, SetLayerCustomWiggleTweenWiggles, SetLayerCustomWiggleTweenType, SetLayerStepsTweenSteps, SetLayerRoughTweenClamp, SetLayerRoughTweenPoints, SetLayerRoughTweenRandomize, SetLayerRoughTweenStrength, SetLayerRoughTweenTaper, SetLayerRoughTweenTemplate, SetLayerSlowTweenLinearRatio, SetLayerSlowTweenPower, SetLayerSlowTweenYoYoMode, SetLayerTextTweenDelimiter, SetLayerTextTweenSpeed, SetLayerTextTweenDiff, SetLayerTextTweenScramble, SetLayerLeft, SetLayerCenter, SetLayersLeft, SetLayersCenter, SetLayerRight, SetLayersRight, SetLayerTop, SetLayersTop, SetLayerMiddle, SetLayersMiddle, SetLayerBottom, SetLayersBottom
+  ResetImageDimensions, ReplaceImage, ReplaceImages, PasteLayersFromClipboard, SetLayerOblique, SetLayersOblique, SetLayerPointX, SetLayersPointX, SetLayerPointY, SetLayersPointY, SetLayerScrambleTextTweenCharacters, SetLayerScrambleTextTweenRevealDelay, SetLayerScrambleTextTweenSpeed, SetLayerScrambleTextTweenDelimiter, SetLayerScrambleTextTweenRightToLeft, SetLayerCustomBounceTweenStrength, SetLayerCustomBounceTweenEndAtStart, SetLayerCustomBounceTweenSquash, SetLayerCustomWiggleTweenWiggles, SetLayerCustomWiggleTweenType, SetLayerStepsTweenSteps, SetLayerRoughTweenClamp, SetLayerRoughTweenPoints, SetLayerRoughTweenRandomize, SetLayerRoughTweenStrength, SetLayerRoughTweenTaper, SetLayerRoughTweenTemplate, SetLayerSlowTweenLinearRatio, SetLayerSlowTweenPower, SetLayerSlowTweenYoYoMode, SetLayerTextTweenDelimiter, SetLayerTextTweenSpeed, SetLayerTextTweenDiff, SetLayerTextTweenScramble, SetLayerLeft, SetLayerCenter, SetLayersLeft, SetLayersCenter, SetLayerRight, SetLayersRight, SetLayerTop, SetLayersTop, SetLayerMiddle, SetLayersMiddle, SetLayerBottom, SetLayersBottom, SetLayerLetterSpacing, SetLayersLetterSpacing
 } from '../actionTypes/layer';
 
 import {
@@ -1624,200 +1624,200 @@ export const ungroupLayers = (state: LayerState, action: UngroupLayers): LayerSt
   return currentState;
 };
 
-export const updateLayerBounds = (state: LayerState, id: string): LayerState => {
-  let currentState = state;
-  const { layerItem, paperLayer } = getItemLayers(currentState, id);
-  const artboardItems = getItemLayers(currentState, layerItem.artboard);
-  const isShape = layerItem.type === 'Shape';
-  const isLine = isShape && (layerItem as Btwx.Shape).shapeType === 'Line';
-  const hasRotation = layerItem.transform.rotation !== 0;
-  const isArtboard = layerItem.type === 'Artboard';
-  const isText = layerItem.type === 'Text';
-  const isGroup = layerItem.type === 'Group';
-  if (isShape) {
-    currentState = setShapeIcon(currentState, id, (paperLayer as paper.PathItem).pathData);
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [id]: {
-          ...currentState.byId[id],
-          pathData: (paperLayer as paper.PathItem).pathData
-        } as Btwx.Shape
-      }
-    }
-  }
-  if (isLine) {
-    const fromPoint = (paperLayer as paper.Path).firstSegment.point.round();
-    const toPoint = (paperLayer as paper.Path).lastSegment.point.round();
-    const vector = toPoint.subtract(fromPoint).round();
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [id]: {
-          ...currentState.byId[id],
-          frame: {
-            ...currentState.byId[id].frame,
-            innerWidth: Math.round(vector.length),
-            innerHeight: 0
-          },
-          from: {
-            x: fromPoint.x - artboardItems.paperLayer.position.x,
-            y: fromPoint.y - artboardItems.paperLayer.position.y
-          },
-          to: {
-            x: toPoint.x - artboardItems.paperLayer.position.x,
-            y: toPoint.y - artboardItems.paperLayer.position.y
-          },
-          transform: {
-            ...currentState.byId[id].transform,
-            rotation: vector.angle
-          }
-        } as Btwx.Line
-      }
-    }
-  }
-  if (isText) {
-    const ogTextContent = paperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
-    const clone = paperLayer.clone({insert: false});
-    clone.rotation = -layerItem.transform.rotation;
-    const textContent = clone.getItem({data: {id: 'textContent'}}) as paper.PointText;
-    const textLines = clone.getItem({data: {id: 'textLines'}});
-    const textBackground = clone.getItem({data: {id: 'textBackground'}});
-    // get lines width
-    const lines = (layerItem as Btwx.Text).lines.reduce((result, current, index) => {
-      const paperLine = textLines.children[index] as paper.PointText;
-      paperLine.leading = (layerItem as Btwx.Text).textStyle.fontSize;
-      paperLine.skew(new paperMain.Point((layerItem as Btwx.Text).textStyle.oblique, 0));
-      return [...result, {...current, width: paperLine.bounds.width}];
-    }, (layerItem as Btwx.Text).lines);
-    // get point
-    const pointInArtboard = (() => {
-      switch((layerItem as Btwx.Text).textStyle.justification) {
-        case 'left':
-          return textContent.point.subtract(artboardItems.paperLayer.position);
-        case 'center':
-          return new paperMain.Point(textContent.point.x - (textContent.bounds.width / 2), textContent.point.y).subtract(artboardItems.paperLayer.position);
-        case 'right':
-          return new paperMain.Point(textContent.point.x - textContent.bounds.width, textContent.point.y).subtract(artboardItems.paperLayer.position);
-      }
-    })();
-    // get x and y
-    const positionInArtboard = textContent.position.subtract(artboardItems.paperLayer.position);
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [id]: {
-          ...currentState.byId[id],
-          frame: {
-            ...currentState.byId[id].frame,
-            x: positionInArtboard.x,
-            y: positionInArtboard.y,
-            width: ogTextContent.bounds.width,
-            height: ogTextContent.bounds.height,
-            innerWidth: textBackground.bounds.width, // textContent.bounds.width,
-            innerHeight: textBackground.bounds.height // textContent.bounds.height
-          },
-          point: {
-            x: pointInArtboard.x,
-            y: pointInArtboard.y
-          },
-          lines: lines
-        } as Btwx.Text
-      }
-    }
-  }
-  if (hasRotation && !isLine && !isGroup && !isText) {
-    const clone = paperLayer.clone({insert: false});
-    clone.rotation = -layerItem.transform.rotation;
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [id]: {
-          ...currentState.byId[id],
-          frame: {
-            ...currentState.byId[id].frame,
-            innerWidth: clone.bounds.width,
-            innerHeight: clone.bounds.height
-          }
-        }
-      }
-    }
-  }
-  if ((!hasRotation && !isLine && !isText) || isGroup) {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [id]: {
-          ...currentState.byId[id],
-          frame: {
-            ...currentState.byId[id].frame,
-            innerWidth: paperLayer.bounds.width,
-            innerHeight: paperLayer.bounds.height
-          }
-        }
-      }
-    }
-  }
-  if (isArtboard) {
-    const artboardBackground = paperLayer.getItem({data: {id: 'artboardBackground'}});
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [id]: {
-          ...currentState.byId[id],
-          frame: {
-            ...currentState.byId[id].frame,
-            x: paperLayer.position.x,
-            y: paperLayer.position.y,
-            width: artboardBackground.bounds.width,
-            height: artboardBackground.bounds.height,
-            innerWidth: artboardBackground.bounds.width,
-            innerHeight: artboardBackground.bounds.height
-          }
-        }
-      }
-    }
-  }
-  if (!isArtboard && !isText) {
-    const positionInArtboard = paperLayer.position.subtract(artboardItems.paperLayer.position);
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [id]: {
-          ...currentState.byId[id],
-          frame: {
-            ...currentState.byId[id].frame,
-            x: positionInArtboard.x,
-            y: positionInArtboard.y,
-            width: paperLayer.bounds.width,
-            height: paperLayer.bounds.height
-          }
-        }
-      }
-    }
-  }
-  // if (layerItem.parent !== layerItem.artboard) {
-  //   currentState = updateParentBounds(currentState, id);
-  // }
-  // if (isGroup) {
-  //   currentState = updateChildrenPositions(currentState, id);
-  // }
-  if (isArtboard) {
-    const prevBounds = layerItem.frame;
-    const newBounds = currentState.byId[id].frame;
-    if (prevBounds.width !== newBounds.width || prevBounds.height !== newBounds.height) {
-      currentState = updateChildrenPositions(currentState, id);
-    }
-  }
-  return currentState;
-};
+// export const updateLayerBounds = (state: LayerState, id: string): LayerState => {
+//   let currentState = state;
+//   const { layerItem, paperLayer } = getItemLayers(currentState, id);
+//   const artboardItems = getItemLayers(currentState, layerItem.artboard);
+//   const isShape = layerItem.type === 'Shape';
+//   const isLine = isShape && (layerItem as Btwx.Shape).shapeType === 'Line';
+//   const hasRotation = layerItem.transform.rotation !== 0;
+//   const isArtboard = layerItem.type === 'Artboard';
+//   const isText = layerItem.type === 'Text';
+//   const isGroup = layerItem.type === 'Group';
+//   if (isShape) {
+//     currentState = setShapeIcon(currentState, id, (paperLayer as paper.PathItem).pathData);
+//     currentState = {
+//       ...currentState,
+//       byId: {
+//         ...currentState.byId,
+//         [id]: {
+//           ...currentState.byId[id],
+//           pathData: (paperLayer as paper.PathItem).pathData
+//         } as Btwx.Shape
+//       }
+//     }
+//   }
+//   if (isLine) {
+//     const fromPoint = (paperLayer as paper.Path).firstSegment.point.round();
+//     const toPoint = (paperLayer as paper.Path).lastSegment.point.round();
+//     const vector = toPoint.subtract(fromPoint).round();
+//     currentState = {
+//       ...currentState,
+//       byId: {
+//         ...currentState.byId,
+//         [id]: {
+//           ...currentState.byId[id],
+//           frame: {
+//             ...currentState.byId[id].frame,
+//             innerWidth: Math.round(vector.length),
+//             innerHeight: 0
+//           },
+//           from: {
+//             x: fromPoint.x - artboardItems.paperLayer.position.x,
+//             y: fromPoint.y - artboardItems.paperLayer.position.y
+//           },
+//           to: {
+//             x: toPoint.x - artboardItems.paperLayer.position.x,
+//             y: toPoint.y - artboardItems.paperLayer.position.y
+//           },
+//           transform: {
+//             ...currentState.byId[id].transform,
+//             rotation: vector.angle
+//           }
+//         } as Btwx.Line
+//       }
+//     }
+//   }
+//   if (isText) {
+//     const ogTextContent = paperLayer.getItem({data: {id: 'textContent'}}) as paper.PointText;
+//     const clone = paperLayer.clone({insert: false});
+//     clone.rotation = -layerItem.transform.rotation;
+//     const textContent = clone.getItem({data: {id: 'textContent'}}) as paper.PointText;
+//     const textLines = clone.getItem({data: {id: 'textLines'}});
+//     const textBackground = clone.getItem({data: {id: 'textBackground'}});
+//     // get lines width
+//     const lines = (layerItem as Btwx.Text).lines.reduce((result, current, index) => {
+//       const paperLine = textLines.children[index] as paper.PointText;
+//       paperLine.leading = (layerItem as Btwx.Text).textStyle.fontSize;
+//       paperLine.skew(new paperMain.Point((layerItem as Btwx.Text).textStyle.oblique, 0));
+//       return [...result, {...current, width: paperLine.bounds.width}];
+//     }, (layerItem as Btwx.Text).lines);
+//     // get point
+//     const pointInArtboard = (() => {
+//       switch((layerItem as Btwx.Text).textStyle.justification) {
+//         case 'left':
+//           return textContent.point.subtract(artboardItems.paperLayer.position);
+//         case 'center':
+//           return new paperMain.Point(textContent.point.x - (textContent.bounds.width / 2), textContent.point.y).subtract(artboardItems.paperLayer.position);
+//         case 'right':
+//           return new paperMain.Point(textContent.point.x - textContent.bounds.width, textContent.point.y).subtract(artboardItems.paperLayer.position);
+//       }
+//     })();
+//     // get x and y
+//     const positionInArtboard = textContent.position.subtract(artboardItems.paperLayer.position);
+//     currentState = {
+//       ...currentState,
+//       byId: {
+//         ...currentState.byId,
+//         [id]: {
+//           ...currentState.byId[id],
+//           frame: {
+//             ...currentState.byId[id].frame,
+//             x: positionInArtboard.x,
+//             y: positionInArtboard.y,
+//             width: ogTextContent.bounds.width,
+//             height: ogTextContent.bounds.height,
+//             innerWidth: textBackground.bounds.width, // textContent.bounds.width,
+//             innerHeight: textBackground.bounds.height // textContent.bounds.height
+//           },
+//           point: {
+//             x: pointInArtboard.x,
+//             y: pointInArtboard.y
+//           },
+//           lines: lines
+//         } as Btwx.Text
+//       }
+//     }
+//   }
+//   if (hasRotation && !isLine && !isGroup && !isText) {
+//     const clone = paperLayer.clone({insert: false});
+//     clone.rotation = -layerItem.transform.rotation;
+//     currentState = {
+//       ...currentState,
+//       byId: {
+//         ...currentState.byId,
+//         [id]: {
+//           ...currentState.byId[id],
+//           frame: {
+//             ...currentState.byId[id].frame,
+//             innerWidth: clone.bounds.width,
+//             innerHeight: clone.bounds.height
+//           }
+//         }
+//       }
+//     }
+//   }
+//   if ((!hasRotation && !isLine && !isText) || isGroup) {
+//     currentState = {
+//       ...currentState,
+//       byId: {
+//         ...currentState.byId,
+//         [id]: {
+//           ...currentState.byId[id],
+//           frame: {
+//             ...currentState.byId[id].frame,
+//             innerWidth: paperLayer.bounds.width,
+//             innerHeight: paperLayer.bounds.height
+//           }
+//         }
+//       }
+//     }
+//   }
+//   if (isArtboard) {
+//     const artboardBackground = paperLayer.getItem({data: {id: 'artboardBackground'}});
+//     currentState = {
+//       ...currentState,
+//       byId: {
+//         ...currentState.byId,
+//         [id]: {
+//           ...currentState.byId[id],
+//           frame: {
+//             ...currentState.byId[id].frame,
+//             x: paperLayer.position.x,
+//             y: paperLayer.position.y,
+//             width: artboardBackground.bounds.width,
+//             height: artboardBackground.bounds.height,
+//             innerWidth: artboardBackground.bounds.width,
+//             innerHeight: artboardBackground.bounds.height
+//           }
+//         }
+//       }
+//     }
+//   }
+//   if (!isArtboard && !isText) {
+//     const positionInArtboard = paperLayer.position.subtract(artboardItems.paperLayer.position);
+//     currentState = {
+//       ...currentState,
+//       byId: {
+//         ...currentState.byId,
+//         [id]: {
+//           ...currentState.byId[id],
+//           frame: {
+//             ...currentState.byId[id].frame,
+//             x: positionInArtboard.x,
+//             y: positionInArtboard.y,
+//             width: paperLayer.bounds.width,
+//             height: paperLayer.bounds.height
+//           }
+//         }
+//       }
+//     }
+//   }
+//   // if (layerItem.parent !== layerItem.artboard) {
+//   //   currentState = updateParentBounds(currentState, id);
+//   // }
+//   // if (isGroup) {
+//   //   currentState = updateChildrenPositions(currentState, id);
+//   // }
+//   if (isArtboard) {
+//     const prevBounds = layerItem.frame;
+//     const newBounds = currentState.byId[id].frame;
+//     if (prevBounds.width !== newBounds.width || prevBounds.height !== newBounds.height) {
+//       currentState = updateChildrenPositions(currentState, id);
+//     }
+//   }
+//   return currentState;
+// };
 
 export const updateChildrenPositions = (state: LayerState, id: string): LayerState => {
   let currentState = state;
@@ -5123,14 +5123,8 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
   const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
-  // const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
-  // const startPosition = layerItem.type === 'Text' ? paperLayer.getItem({data: { id: 'textContent' }}).position : paperLayer.position;
   const isShape = layerItem.type === 'Shape';
   const isLine = isShape && (layerItem as Btwx.Shape).shapeType === 'Line';
-  // if (layerItem.type !== 'Group') {
-  //   paperLayer.rotation = -layerItem.transform.rotation;
-  //   paperLayer.rotation = action.payload.rotation;
-  // }
   currentState = {
     ...currentState,
     byId: {
@@ -7197,6 +7191,12 @@ export const setLayersShadowYOffset = (state: LayerState, action: SetLayersShado
 export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState => {
   let currentState = state;
   const layerItem = state.byId[action.payload.id];
+  const pathData = action.payload.pathData;
+  const rotation = action.payload.rotation;
+  const bounds = action.payload.bounds;
+  const from = action.payload.from;
+  const to = action.payload.to;
+  const groupParents = layerItem.type === 'Artboard' ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
   currentState = {
     ...currentState,
     byId: {
@@ -7211,14 +7211,101 @@ export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState =>
       }
     }
   }
-  currentState = updateLayerBounds(currentState, action.payload.id);
-  if (layerItem.type !== 'Group') {
-    if (action.payload.scale.x) {
-      currentState = updateLayerTweensByProps(currentState, action.payload.id, ['width', 'x', 'y']);
+  if (pathData) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          pathData: action.payload.pathData
+        } as Btwx.Shape
+      }
     }
-    if (action.payload.scale.y) {
-      currentState = updateLayerTweensByProps(currentState, action.payload.id, ['height', 'x', 'y']);
+    currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
+  }
+  if (rotation) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          transform: {
+            ...currentState.byId[action.payload.id].transform,
+            rotation: rotation
+          }
+        }
+      }
     }
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['rotation']);
+  }
+  if (from) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          from: from
+        } as Btwx.Line
+      }
+    }
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromX', 'fromY']);
+  }
+  if (to) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          to: to
+        } as Btwx.Line
+      }
+    }
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['toX', 'toY']);
+  }
+  if (bounds) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          frame: {
+            ...currentState.byId[action.payload.id].frame,
+            ...bounds
+          }
+        }
+      }
+    }
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['width', 'height', 'x', 'y']);
+  }
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: layersBounds.center.x,
+              y: layersBounds.center.y,
+              innerWidth: layersBounds.width,
+              innerHeight: layersBounds.height,
+              width: layersBounds.width,
+              height: layersBounds.height,
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
   }
   return currentState;
 };
@@ -7229,16 +7316,33 @@ export const scaleLayers = (state: LayerState, action: ScaleLayers): LayerState 
   currentState = action.payload.layers.reduce((result, current) => {
     const layerItem = currentState.byId[current];
     const layerProject = layerItem.artboard;
+    const pathData = action.payload.pathData ? action.payload.pathData[current] : null;
+    const rotation = action.payload.rotation ? action.payload.rotation[current] : null;
+    const bounds = action.payload.bounds ? action.payload.bounds[current] : null;
+    const from = action.payload.from ? action.payload.from[current] : null;
+    const to = action.payload.to ? action.payload.to[current] : null;
     if (!projects.includes(layerProject)) {
       projects.push(layerProject);
     }
     if (layerItem.type === 'Group') {
       const layerAndDescendants = getLayerAndDescendants(result, current);
       return layerAndDescendants.reduce((lr, lc) => {
-        return scaleLayer(lr, layerActions.scaleLayer({id: lc, scale: action.payload.scale, verticalFlip: action.payload.verticalFlip, horizontalFlip: action.payload.horizontalFlip}) as ScaleLayer);
+        return scaleLayer(lr, layerActions.scaleLayer({
+          id: lc,
+          scale: action.payload.scale,
+          verticalFlip: action.payload.verticalFlip,
+          horizontalFlip: action.payload.horizontalFlip,
+          pathData, rotation, bounds, from, to
+        }) as ScaleLayer);
       }, result);
     } else {
-      return scaleLayer(result, layerActions.scaleLayer({id: current, scale: action.payload.scale, verticalFlip: action.payload.verticalFlip, horizontalFlip: action.payload.horizontalFlip}) as ScaleLayer);
+      return scaleLayer(result, layerActions.scaleLayer({
+        id: current,
+        scale: action.payload.scale,
+        verticalFlip: action.payload.verticalFlip,
+        horizontalFlip: action.payload.horizontalFlip,
+        pathData, rotation, bounds, from, to
+      }) as ScaleLayer);
     }
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
@@ -7262,7 +7366,10 @@ export const setLayerText = (state: LayerState, action: SetLayerText): LayerStat
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        frame: action.payload.bounds ? action.payload.bounds : currentState.byId[action.payload.id].frame,
+        frame: action.payload.bounds ? {
+          ...currentState.byId[action.payload.id].frame,
+          ...action.payload.bounds
+        } : currentState.byId[action.payload.id].frame,
         text: action.payload.text,
         lines: action.payload.lines ? action.payload.lines : action.payload.text.split(/\r\n|\r|\n/).reduce((result, current) => {
           return [...result, {
@@ -7319,7 +7426,10 @@ export const setLayerFontSize = (state: LayerState, action: SetLayerFontSize): L
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        frame: action.payload.bounds ? action.payload.bounds : currentState.byId[action.payload.id].frame,
+        frame: action.payload.bounds ? {
+          ...currentState.byId[action.payload.id].frame,
+          ...action.payload.bounds
+        } : currentState.byId[action.payload.id].frame,
         textStyle: {
           ...(currentState.byId[action.payload.id] as Btwx.Text).textStyle,
           fontSize: action.payload.fontSize
@@ -7390,7 +7500,10 @@ export const setLayerFontWeight = (state: LayerState, action: SetLayerFontWeight
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        frame: action.payload.bounds ? action.payload.bounds : currentState.byId[action.payload.id].frame,
+        frame: action.payload.bounds ? {
+          ...currentState.byId[action.payload.id].frame,
+          ...action.payload.bounds
+        } : currentState.byId[action.payload.id].frame,
         textStyle: {
           ...(currentState.byId[action.payload.id] as Btwx.Text).textStyle,
           fontWeight: action.payload.fontWeight
@@ -7451,6 +7564,80 @@ export const setLayersFontWeight = (state: LayerState, action: SetLayersFontWeig
   return currentState;
 };
 
+export const setLayerLetterSpacing = (state: LayerState, action: SetLayerLetterSpacing): LayerState => {
+  let currentState = state;
+  const layerItem = currentState.byId[action.payload.id];
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        frame: action.payload.bounds ? {
+          ...currentState.byId[action.payload.id].frame,
+          ...action.payload.bounds
+        } : currentState.byId[action.payload.id].frame,
+        textStyle: {
+          ...(currentState.byId[action.payload.id] as Btwx.Text).textStyle,
+          letterSpacing: action.payload.letterSpacing
+        },
+        lines: action.payload.lines ? action.payload.lines : (currentState.byId[action.payload.id] as Btwx.Text).lines
+      } as Btwx.Text
+    }
+  }
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: layersBounds.center.x,
+              y: layersBounds.center.y,
+              width: layersBounds.width,
+              height: layersBounds.height,
+              innerWidth: layersBounds.width,
+              innerHeight: layersBounds.height
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['letterSpacing']);
+  return currentState;
+};
+
+export const setLayersLetterSpacing = (state: LayerState, action: SetLayersLetterSpacing): LayerState => {
+  let currentState = state;
+  const projects: string[] = [];
+  currentState = action.payload.layers.reduce((result, current, index) => {
+    const layerProject = currentState.byId[current].artboard;
+    const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
+    const lines = action.payload.lines ? action.payload.lines[index] : null;
+    if (!projects.includes(layerProject)) {
+      projects.push(layerProject);
+    }
+    return setLayerLetterSpacing(result, layerActions.setLayerLetterSpacing({id: current, letterSpacing: action.payload.letterSpacing, bounds, lines}) as SetLayerLetterSpacing);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layers Letter Spacing',
+      projects
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
 export const setLayerFontFamily = (state: LayerState, action: SetLayerFontFamily): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
@@ -7461,7 +7648,10 @@ export const setLayerFontFamily = (state: LayerState, action: SetLayerFontFamily
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        frame: action.payload.bounds ? action.payload.bounds : currentState.byId[action.payload.id].frame,
+        frame: action.payload.bounds ? {
+          ...currentState.byId[action.payload.id].frame,
+          ...action.payload.bounds
+        } : currentState.byId[action.payload.id].frame,
         textStyle: {
           ...(currentState.byId[action.payload.id] as Btwx.Text).textStyle,
           fontFamily: action.payload.fontFamily
@@ -7532,7 +7722,10 @@ export const setLayerLeading = (state: LayerState, action: SetLayerLeading): Lay
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        frame: action.payload.bounds ? action.payload.bounds : currentState.byId[action.payload.id].frame,
+        frame: action.payload.bounds ? {
+          ...currentState.byId[action.payload.id].frame,
+          ...action.payload.bounds
+        } : currentState.byId[action.payload.id].frame,
         textStyle: {
           ...(currentState.byId[action.payload.id] as Btwx.Text).textStyle,
           leading: action.payload.leading
@@ -7593,6 +7786,10 @@ export const setLayersLeading = (state: LayerState, action: SetLayersLeading): L
 
 export const setLayerJustification = (state: LayerState, action: SetLayerJustification): LayerState => {
   let currentState = state;
+  const layerItem = currentState.byId[action.payload.id] as Btwx.Text;
+  const oldJustification = layerItem.textStyle.justification;
+  const newJustification = action.payload.justification;
+  const oldPointX = layerItem.point.x;
   currentState = {
     ...currentState,
     byId: {
@@ -7603,7 +7800,43 @@ export const setLayerJustification = (state: LayerState, action: SetLayerJustifi
           ...(currentState.byId[action.payload.id] as Btwx.Text).textStyle,
           justification: action.payload.justification
         },
-        point: action.payload.point ? action.payload.point : (currentState.byId[action.payload.id] as Btwx.Text).point
+        point: {
+          ...(currentState.byId[action.payload.id] as Btwx.Text).point,
+          x: (() => {
+            switch(oldJustification) {
+              case 'left':
+                switch(newJustification) {
+                  case 'left':
+                    return oldPointX;
+                  case 'center':
+                    return oldPointX + (layerItem.frame.innerWidth / 2);
+                  case 'right':
+                    return oldPointX + layerItem.frame.innerWidth;
+                }
+                break;
+              case 'center':
+                switch(newJustification) {
+                  case 'left':
+                    return oldPointX - (layerItem.frame.innerWidth / 2);
+                  case 'center':
+                    return oldPointX;
+                  case 'right':
+                    return oldPointX + (layerItem.frame.innerWidth / 2);
+                }
+                break;
+              case 'right':
+                switch(newJustification) {
+                  case 'left':
+                    return oldPointX - layerItem.frame.innerWidth;
+                  case 'center':
+                    return oldPointX - (layerItem.frame.innerWidth / 2);
+                  case 'right':
+                    return oldPointX;
+                }
+                break;
+            }
+          })()
+        }
       } as Btwx.Text
     }
   }
@@ -7616,11 +7849,10 @@ export const setLayersJustification = (state: LayerState, action: SetLayersJusti
   const projects: string[] = [];
   currentState = action.payload.layers.reduce((result, current, index) => {
     const layerProject = currentState.byId[current].artboard;
-    const point = action.payload.points ? action.payload.points[index] : null;
     if (!projects.includes(layerProject)) {
       projects.push(layerProject);
     }
-    return setLayerJustification(result, layerActions.setLayerJustification({id: current, justification: action.payload.justification, point}) as SetLayerJustification);
+    return setLayerJustification(result, layerActions.setLayerJustification({id: current, justification: action.payload.justification}) as SetLayerJustification);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
@@ -7643,7 +7875,10 @@ export const setLayerOblique = (state: LayerState, action: SetLayerOblique): Lay
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        frame: action.payload.bounds ? action.payload.bounds : currentState.byId[action.payload.id].frame,
+        frame: action.payload.bounds ? {
+          ...currentState.byId[action.payload.id].frame,
+          ...action.payload.bounds
+        } : currentState.byId[action.payload.id].frame,
         textStyle: {
           ...(currentState.byId[action.payload.id] as Btwx.Text).textStyle,
           oblique: action.payload.oblique

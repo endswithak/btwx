@@ -12,7 +12,7 @@ import { paperMain } from '../../canvas';
 import paper from 'paper';
 import MeasureGuide from '../../canvas/measureGuide';
 import { ARTBOARDS_PER_PROJECT, DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE, THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS, TWEEN_PROPS_MAP } from '../../constants';
-import { getPaperFillColor, getPaperStrokeColor, getPaperShadowColor } from '../utils/paper';
+import { getPaperFillColor, getPaperStrokeColor, getPaperShadowColor, getTextAbsPoint, getLetterSpacedText } from '../utils/paper';
 import { getClipboardCenter, getLayerAndDescendants, getLayersBounds, getNearestScopeAncestor, getArtboardEventItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getLineFromPoint, getArtboardsTopTop, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint, getPaperLayer, getSelectedPaperLayers, getItemLayers, getSelectedProjectIndices, getAbsolutePosition, getActiveArtboardBounds, getLayerBounds, importProjectJSON, getAllArtboardItems } from '../selectors/layer';
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle, getLayerMasked, getLayerUnderlyingMask } from '../utils/actions';
 
@@ -222,6 +222,8 @@ import {
   SET_LAYERS_POINT_X,
   SET_LAYER_POINT_Y,
   SET_LAYERS_POINT_Y,
+  SET_LAYER_LETTER_SPACING,
+  SET_LAYERS_LETTER_SPACING,
   SET_LAYER_FILL_TYPE,
   SET_LAYERS_FILL_TYPE,
   ADD_LAYERS_MASK,
@@ -471,6 +473,8 @@ import {
   SetLayersPointXPayload,
   SetLayerPointYPayload,
   SetLayersPointYPayload,
+  SetLayerLetterSpacingPayload,
+  SetLayersLetterSpacingPayload,
   SetLayerFillPayload,
   SetLayerFillTypePayload,
   SetLayersFillTypePayload,
@@ -830,13 +834,13 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
   return (dispatch: any, getState: any): Promise<Btwx.Text> => {
     const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
-    const textContent = payload.layer.text ? payload.layer.text : DEFAULT_TEXT_VALUE;
-    const lines = textContent.split(/\r\n|\r|\n/).reduce((result, current) => {
+    const text = payload.layer.text ? payload.layer.text : DEFAULT_TEXT_VALUE;
+    const lines = text.split(/\r\n|\r|\n/).reduce((result, current) => {
       return [...result, {
         text: current
       }];
     }, []);
-    const name = payload.layer.name ? payload.layer.name : textContent;
+    const name = payload.layer.name ? payload.layer.name : text;
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
@@ -875,7 +879,7 @@ export const addTextThunk = (payload: AddTextPayload, providedState?: RootState)
       style: style,
       textStyle: textStyle,
       point: point,
-      text: textContent,
+      text: text,
       lines: lines
     } as Btwx.Text;
     dispatch(addText({
@@ -907,7 +911,7 @@ export const addImageThunk = (payload: AddImagePayload, providedState?: RootStat
       const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
       // const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
       sharp(buffer).metadata().then(({ width, height }) => {
-        sharp(buffer).resize(Math.round(width * 0.5)).webp({quality: 75}).toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
+        sharp(buffer).webp({quality: 75}).toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
           const frame = getLayerFrame(payload);
           // let position = new paperMain.Point(frame.x, frame.y);
           // if (artboard) {
@@ -2256,6 +2260,91 @@ export const scaleLayers = (payload: ScaleLayersPayload): LayerTypes => ({
   payload
 });
 
+export const scaleLayersThunk = (payload: ScaleLayersPayload, paperLayers?: { [id: string]: paper.Item }) => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    let pathData = {} as { [id: string]: string };
+    let rotation = {} as { [id: string]: number };
+    let bounds = {} as { [id: string]: Btwx.Frame };
+    let from = {} as { [id: string]: Btwx.Point };
+    let to = {} as { [id: string]: Btwx.Point };
+    let innerWidth: number;
+    let innerHeight: number;
+    const layersById = payload.layers.reduce((result, current) => ({
+      ...result,
+      [current]: state.layer.present.byId[current]
+    }), {}) as { [id: string]: Btwx.Layer };
+    payload.layers.forEach((id, index) => {
+      const layerItem = layersById[id];
+      const paperLayer = paperLayers[id];
+      const isShape = layerItem.type === 'Shape';
+      const isLine = isShape && (layerItem as Btwx.Shape).shapeType === 'Line';
+      const isArtboard = layerItem.type === 'Artboard';
+      const artboardItem = !isArtboard ? state.layer.present.byId[layerItem.artboard] : null;
+      const artboardPosition = artboardItem ? new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y) : null;
+      const paperPosition = paperLayer.position;
+      if (isShape) {
+        pathData = {
+          ...pathData,
+          [id]: (paperLayer as paper.CompoundPath).pathData
+        }
+      }
+      if (isLine) {
+        const fromPoint = (paperLayer as paper.Path).firstSegment.point.subtract(artboardPosition).round();
+        const toPoint = (paperLayer as paper.Path).lastSegment.point.subtract(artboardPosition).round();
+        const vector = toPoint.subtract(fromPoint).round();
+        innerWidth = Math.round(vector.length);
+        innerHeight = 0;
+        from = {
+          ...from,
+          [id]: {
+            x: fromPoint.x,
+            y: fromPoint.y
+          }
+        }
+        to = {
+          ...to,
+          [id]: {
+            x: toPoint.x,
+            y: toPoint.y
+          }
+        }
+        rotation = {
+          ...rotation,
+          [id]: vector.angle
+        }
+      }
+      paperLayer.rotation = -layerItem.transform.rotation;
+      if (!isLine) {
+        innerWidth = paperLayer.bounds.width;
+        innerHeight = paperLayer.bounds.height;
+      }
+      paperLayer.rotation = layerItem.transform.rotation;
+      bounds = {
+        ...bounds,
+        [id]: {
+          x: isArtboard ? paperPosition.x : paperPosition.x - artboardItem.frame.x,
+          y: isArtboard ? paperPosition.y : paperPosition.y - artboardItem.frame.y,
+          innerWidth: innerWidth,
+          innerHeight: innerHeight,
+          width: paperLayer.bounds.width,
+          height: paperLayer.bounds.height
+        }
+      }
+    });
+    dispatch(
+      scaleLayers({
+        ...payload,
+        pathData,
+        bounds,
+        from,
+        to,
+        rotation
+      })
+    )
+  }
+};
+
 export const setLayerText = (payload: SetLayerTextPayload): LayerTypes => ({
   type: SET_LAYER_TEXT,
   payload
@@ -2264,40 +2353,49 @@ export const setLayerText = (payload: SetLayerTextPayload): LayerTypes => ({
 export const setLayerTextThunk = (payload: SetLayerTextPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
-    const layerItem = state.layer.present.byId[payload.id];
+    const layerItem = state.layer.present.byId[payload.id] as Btwx.Text;
     const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
     const projectIndex = artboardItem.projectIndex;
     const paperLayer = paperMain.projects[projectIndex].getItem({data: {id: payload.id}});
     const clone = paperLayer.clone({insert: false});
-    const textContent = clone.getItem({data:{id:'textContent'}}) as paper.PointText;
     const textBackground = clone.getItem({data:{id:'textBackground'}}) as paper.PointText;
-    const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
     const textLinesGroup = clone.getItem({data: {id: 'textLines'}});
+    const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
     const newLines = payload.text.split(/\r\n|\r|\n/).reduce((result, current) => {
       return [...result, {
         text: current,
         width: null
       }];
     }, []);
+    const textAbsPoint = getTextAbsPoint(layerItem.point, artboardItem.frame);
+    const textStyle = textLinesGroup.children[0].style;
     clone.rotation = -layerItem.transform.rotation;
-    textContent.content = payload.text;
     textLinesGroup.removeChildren();
     newLines.reduce((result, current, index) => {
       const newLine = new paperMain.PointText({
-        point: new paperMain.Point(textContent.point.x, textContent.point.y + (index * (layerItem as Btwx.Text).textStyle.leading)),
+        point: new paperMain.Point(textAbsPoint.x, textAbsPoint.y + (index * layerItem.textStyle.leading)),
         content: newLines[index].text,
-        style: textContent.style,
+        style: textStyle,
         parent: textLinesGroup,
-        data: { id: 'textLine', type: 'LayerChild', layerType: 'Text' }
+        data: {
+          id: 'textLine',
+          type: 'LayerChild',
+          layerType: 'Text'
+        }
       });
       newLines[index].width = newLine.bounds.width;
-      newLine.leading = newLine.fontSize;
-      newLine.skew(new paperMain.Point(-(layerItem as Btwx.Text).textStyle.oblique, 0));
-      newLine.leading = textContent.leading;
+      newLine.leading = layerItem.textStyle.fontSize;
+      newLine.skew(new paperMain.Point(-layerItem.textStyle.oblique, 0));
+      newLine.leading = layerItem.textStyle.leading;
     }, (layerItem as Btwx.Text).lines);
     const positionInArtboard = textLinesGroup.position.subtract(artboardPosition);
-    const innerWidth = parseInt(textContent.bounds.width.toFixed(2));
-    const innerHeight = parseInt(textContent.bounds.height.toFixed(2));
+    const innerWidth = newLines.reduce((result, current) => {
+      if (current.width > result) {
+        result = current.width;
+      }
+      return result;
+    }, 0);
+    const innerHeight = textLinesGroup.bounds.height;
     textBackground.bounds = textLinesGroup.bounds;
     clone.rotation = layerItem.transform.rotation;
     dispatch(
@@ -2339,12 +2437,10 @@ export const setLayersFontSizeThunk = (payload: SetLayersFontSizePayload) => {
       const projectIndex = artboardItem.projectIndex;
       const paperLayer = paperMain.projects[projectIndex].getItem({data: {id: id}});
       const clone = paperLayer.clone({insert: false});
-      const textContent = clone.getItem({data:{id:'textContent'}}) as paper.PointText;
       const textBackground = clone.getItem({data:{id:'textBackground'}});
-      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       const textLinesGroup = clone.getItem({data: {id: 'textLines'}});
+      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       clone.rotation = -layerItem.transform.rotation;
-      textContent.fontSize = payload.fontSize;
       textLinesGroup.children.forEach((line: paper.PointText, index) => {
         line.fontSize = payload.fontSize;
         line.leading = payload.fontSize;
@@ -2354,20 +2450,24 @@ export const setLayersFontSizeThunk = (payload: SetLayersFontSizePayload) => {
         line.leading = (layerItem as Btwx.Text).textStyle.leading;
       });
       const positionInArtboard = textLinesGroup.position.subtract(artboardPosition);
-      const innerWidth = parseInt(textContent.bounds.width.toFixed(2));
-      const innerHeight = parseInt(textContent.bounds.height.toFixed(2));
+      const innerWidth = newLines.reduce((result, current) => {
+        if (current.width > result) {
+          result = current.width;
+        }
+        return result;
+      }, 0);
+      const innerHeight = textLinesGroup.bounds.height;
       textBackground.bounds = textLinesGroup.bounds;
       clone.rotation = layerItem.transform.rotation;
-      const newBounds = {
+      lines.push(newLines);
+      bounds.push({
         x: positionInArtboard.x,
         y: positionInArtboard.y,
         width: textBackground.bounds.width,
         height: textBackground.bounds.height,
         innerWidth: innerWidth,
         innerHeight: innerHeight
-      }
-      lines.push(newLines);
-      bounds.push(newBounds);
+      });
     });
     dispatch(
       setLayersFontSize({
@@ -2399,30 +2499,27 @@ export const setLayersLeadingThunk = (payload: SetLayersLeadingPayload) => {
       const projectIndex = artboardItem.projectIndex;
       const paperLayer = paperMain.projects[projectIndex].getItem({data: {id: id}});
       const clone = paperLayer.clone({insert: false});
-      const textContent = clone.getItem({data:{id:'textContent'}}) as paper.PointText;
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
+      const textBackground = clone.getItem({data: {id: 'textBackground'}});
       const textLinesGroup = clone.getItem({data: {id: 'textLines'}});
+      const absTextPoint = getTextAbsPoint(layerItem.point, artboardItem.frame);
       clone.rotation = -layerItem.transform.rotation;
-      textContent.leading = payload.leading;
       textLinesGroup.children.forEach((line: paper.PointText, index) => {
         line.leading = payload.leading;
-        line.point.y = textContent.point.y + (index * payload.leading);
+        line.point.y = absTextPoint.y + (index * payload.leading);
       });
       const positionInArtboard = textLinesGroup.position.subtract(artboardPosition);
-      const innerWidth = parseInt(textContent.bounds.width.toFixed(2));
-      const innerHeight = parseInt(textContent.bounds.height.toFixed(2));
+      const innerHeight = textLinesGroup.bounds.height;
+      textBackground.bounds = textLinesGroup.bounds;
       clone.rotation = layerItem.transform.rotation;
-      const width = textLinesGroup.bounds.width;
-      const height = textLinesGroup.bounds.height;
-      const newBounds = {
+      bounds.push({
         x: positionInArtboard.x,
         y: positionInArtboard.y,
-        width: width,
-        height: height,
-        innerWidth: innerWidth,
-        innerHeight: innerHeight
-      }
-      bounds.push(newBounds);
+        height: textLinesGroup.bounds.height,
+        width: textLinesGroup.bounds.width,
+        innerHeight: innerHeight,
+        innerWidth: layerItem.frame.innerWidth
+      } as Btwx.Frame);
     });
     dispatch(
       setLayersLeading({
@@ -2455,12 +2552,10 @@ export const setLayersFontWeightThunk = (payload: SetLayersFontWeightPayload) =>
       const projectIndex = artboardItem.projectIndex;
       const paperLayer = paperMain.projects[projectIndex].getItem({data: {id: id}});
       const clone = paperLayer.clone({insert: false});
-      const textContent = clone.getItem({data:{id:'textContent'}}) as paper.PointText;
-      const textBackground = clone.getItem({data:{id:'textBackground'}}) as paper.PointText;
-      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
+      const textBackground = clone.getItem({data:{id:'textBackground'}});
       const textLinesGroup = clone.getItem({data: {id: 'textLines'}});
+      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       clone.rotation = -layerItem.transform.rotation;
-      textContent.fontWeight = payload.fontWeight;
       textLinesGroup.children.forEach((line: paper.PointText, index) => {
         line.leading = (layerItem as Btwx.Text).textStyle.fontSize;
         line.skew(new paperMain.Point((layerItem as Btwx.Text).textStyle.oblique, 0));
@@ -2470,20 +2565,24 @@ export const setLayersFontWeightThunk = (payload: SetLayersFontWeightPayload) =>
         line.leading = (layerItem as Btwx.Text).textStyle.leading;
       });
       const positionInArtboard = textLinesGroup.position.subtract(artboardPosition);
-      const innerWidth = parseInt(textContent.bounds.width.toFixed(2));
-      const innerHeight = parseInt(textContent.bounds.height.toFixed(2));
+      const innerWidth = newLines.reduce((result, current) => {
+        if (current.width > result) {
+          result = current.width;
+        }
+        return result;
+      }, 0);
+      const innerHeight = textLinesGroup.bounds.height;
       textBackground.bounds = textLinesGroup.bounds;
       clone.rotation = layerItem.transform.rotation;
-      const newBounds = {
+      lines.push(newLines);
+      bounds.push({
         x: positionInArtboard.x,
         y: positionInArtboard.y,
         width: textBackground.bounds.width,
         height: textBackground.bounds.height,
         innerWidth: innerWidth,
         innerHeight: innerHeight
-      }
-      lines.push(newLines);
-      bounds.push(newBounds);
+      });
     });
     dispatch(
       setLayersFontWeight({
@@ -2517,12 +2616,10 @@ export const setLayersFontFamilyThunk = (payload: SetLayersFontFamilyPayload) =>
       const projectIndex = artboardItem.projectIndex;
       const paperLayer = paperMain.projects[projectIndex].getItem({data: {id: id}});
       const clone = paperLayer.clone({insert: false});
-      const textContent = clone.getItem({data:{id:'textContent'}}) as paper.PointText;
       const textBackground = clone.getItem({data:{id:'textBackground'}});
-      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       const textLinesGroup = clone.getItem({data: {id: 'textLines'}});
+      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       clone.rotation = -layerItem.transform.rotation;
-      textContent.fontFamily = payload.fontFamily;
       textLinesGroup.children.forEach((line: paper.PointText, index) => {
         line.leading = (layerItem as Btwx.Text).textStyle.fontSize;
         line.skew(new paperMain.Point((layerItem as Btwx.Text).textStyle.oblique, 0));
@@ -2532,20 +2629,24 @@ export const setLayersFontFamilyThunk = (payload: SetLayersFontFamilyPayload) =>
         line.leading = (layerItem as Btwx.Text).textStyle.leading;
       });
       const positionInArtboard = textLinesGroup.position.subtract(artboardPosition);
-      const innerWidth = parseInt(textContent.bounds.width.toFixed(2));
-      const innerHeight = parseInt(textContent.bounds.height.toFixed(2));
+      const innerWidth = newLines.reduce((result, current) => {
+        if (current.width > result) {
+          result = current.width;
+        }
+        return result;
+      }, 0);
+      const innerHeight = textLinesGroup.bounds.height;
       textBackground.bounds = textLinesGroup.bounds;
       clone.rotation = layerItem.transform.rotation;
-      const newBounds = {
+      lines.push(newLines);
+      bounds.push({
         x: positionInArtboard.x,
         y: positionInArtboard.y,
         width: textBackground.bounds.width,
         height: textBackground.bounds.height,
         innerWidth: innerWidth,
         innerHeight: innerHeight
-      }
-      lines.push(newLines);
-      bounds.push(newBounds);
+      });
     });
     dispatch(
       setLayersFontFamily({
@@ -2567,85 +2668,6 @@ export const setLayersJustification = (payload: SetLayersJustificationPayload): 
   payload
 });
 
-export const setLayersJustificationThunk = (payload: SetLayersJustificationPayload) => {
-  return (dispatch: any, getState: any) => {
-    const state = getState() as RootState;
-    const points: Btwx.Point[] = [];
-    payload.layers.forEach((id) => {
-      const layerItem = state.layer.present.byId[id] as Btwx.Text;
-      const newLines = [...layerItem.lines] as Btwx.TextLine[];
-      const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
-      const projectIndex = artboardItem.projectIndex;
-      const paperLayer = paperMain.projects[projectIndex].getItem({data: {id: id}});
-      const clone = paperLayer.clone({insert: false});
-      const textContent = clone.getItem({data:{id:'textContent'}}) as paper.PointText;
-      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
-      const textLinesGroup = clone.getItem({data: {id: 'textLines'}});
-      clone.rotation = -layerItem.transform.rotation;
-      const prevJustification = layerItem.textStyle.justification;
-      textContent.justification = payload.justification;
-      switch(prevJustification) {
-        case 'left':
-          switch(payload.justification) {
-            case 'left':
-              break;
-            case 'center':
-              textContent.position.x += textContent.bounds.width / 2;
-              break;
-            case 'right':
-              textContent.position.x += textContent.bounds.width;
-              break;
-          }
-          break;
-        case 'center':
-          switch(payload.justification) {
-            case 'left':
-              textContent.position.x -= textContent.bounds.width / 2;
-              break;
-            case 'center':
-              break;
-            case 'right':
-              textContent.position.x += textContent.bounds.width / 2;
-              break;
-          }
-          break;
-        case 'right':
-          switch(payload.justification) {
-            case 'left':
-              textContent.position.x -= textContent.bounds.width;
-              break;
-            case 'center':
-              textContent.position.x -= textContent.bounds.width / 2;
-              break;
-            case 'right':
-              break;
-          }
-          break;
-      }
-      textLinesGroup.children.forEach((line: paper.PointText) => {
-        // leading affects skew
-        line.leading = (layerItem as Btwx.Text).textStyle.fontSize;
-        line.skew(new paperMain.Point((layerItem as Btwx.Text).textStyle.oblique, 0));
-        line.justification = payload.justification;
-        line.point.x = textContent.point.x;
-        line.skew(new paperMain.Point(-(layerItem as Btwx.Text).textStyle.oblique, 0));
-        line.leading = layerItem.textStyle.leading;
-      });
-      const pointInArtboard = textContent.point.subtract(artboardPosition);
-      points.push({
-        x: parseInt(pointInArtboard.x.toFixed(2)),
-        y: parseInt(pointInArtboard.y.toFixed(2))
-      });
-    });
-    dispatch(
-      setLayersJustification({
-        ...payload,
-        points
-      })
-    )
-  }
-};
-
 export const setLayerOblique = (payload: SetLayerObliquePayload): LayerTypes => ({
   type: SET_LAYER_OBLIQUE,
   payload
@@ -2666,31 +2688,28 @@ export const setLayersObliqueThunk = (payload: SetLayersObliquePayload) => {
       const projectIndex = artboardItem.projectIndex;
       const paperLayer = paperMain.projects[projectIndex].getItem({data: {id: id}});
       const clone = paperLayer.clone({insert: false});
-      const textContent = clone.getItem({data:{id:'textContent'}}) as paper.PointText;
       const textBackground = clone.getItem({data:{id:'textBackground'}});
-      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       const textLinesGroup = clone.getItem({data: {id: 'textLines'}});
+      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
+      clone.pivot = textBackground.bounds.center;
       clone.rotation = -layerItem.transform.rotation;
       textLinesGroup.children.forEach((line: paper.PointText, index) => {
-        line.leading = line.fontSize;
+        line.leading = layerItem.textStyle.fontSize;
         line.skew(new paperMain.Point((layerItem as Btwx.Text).textStyle.oblique, 0));
         line.skew(new paperMain.Point(-payload.oblique, 0));
-        line.leading = textContent.leading;
+        line.leading = layerItem.textStyle.leading;
       });
       const positionInArtboard = textLinesGroup.position.subtract(artboardPosition);
-      const innerWidth = parseInt(textContent.bounds.width.toFixed(2));
-      const innerHeight = parseInt(textContent.bounds.height.toFixed(2));
       textBackground.bounds = textLinesGroup.bounds;
       clone.rotation = layerItem.transform.rotation;
-      const newBounds = {
+      bounds.push({
         x: positionInArtboard.x,
         y: positionInArtboard.y,
         width: textBackground.bounds.width,
         height: textBackground.bounds.height,
-        innerWidth: innerWidth,
-        innerHeight: innerHeight
-      }
-      bounds.push(newBounds);
+        innerWidth: layerItem.frame.innerWidth,
+        innerHeight: layerItem.frame.innerHeight
+      } as Btwx.Frame);
     });
     dispatch(
       setLayersOblique({
@@ -2720,6 +2739,70 @@ export const setLayersPointY = (payload: SetLayersPointYPayload): LayerTypes => 
   type: SET_LAYERS_POINT_Y,
   payload
 });
+
+export const setLayerLetterSpacing = (payload: SetLayerLetterSpacingPayload): LayerTypes => ({
+  type: SET_LAYER_LETTER_SPACING,
+  payload
+});
+
+export const setLayersLetterSpacing = (payload: SetLayersLetterSpacingPayload): LayerTypes => ({
+  type: SET_LAYERS_LETTER_SPACING,
+  payload
+});
+
+export const setLayersLetterSpacingThunk = (payload: SetLayersLetterSpacingPayload) => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    const lines: Btwx.TextLine[][] = [];
+    const bounds: Btwx.Frame[] = [];
+    payload.layers.forEach((id) => {
+      const layerItem = state.layer.present.byId[id] as Btwx.Text;
+      const newLines = [...layerItem.lines];
+      const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
+      const projectIndex = artboardItem.projectIndex;
+      const paperLayer = paperMain.projects[projectIndex].getItem({data: {id: id}});
+      const clone = paperLayer.clone({insert: false});
+      const textBackground = clone.getItem({data:{id:'textBackground'}});
+      const textLinesGroup = clone.getItem({data: {id: 'textLines'}});
+      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
+      clone.rotation = -layerItem.transform.rotation;
+      textLinesGroup.children.forEach((line: paper.PointText, index) => {
+        line.leading = layerItem.textStyle.fontSize;
+        line.skew(new paperMain.Point(layerItem.textStyle.oblique, 0));
+        line.letterSpacing = payload.letterSpacing;
+        newLines[index].width = line.bounds.width;
+        line.skew(new paperMain.Point(-layerItem.textStyle.oblique, 0));
+        line.leading = layerItem.textStyle.leading;
+      });
+      const positionInArtboard = textLinesGroup.position.subtract(artboardPosition);
+      const innerWidth = newLines.reduce((result, current) => {
+        if (current.width > result) {
+          result = current.width;
+        }
+        return result;
+      }, 0);
+      const innerHeight = textLinesGroup.bounds.height;
+      textBackground.bounds = textLinesGroup.bounds;
+      clone.rotation = layerItem.transform.rotation;
+      lines.push(newLines);
+      bounds.push({
+        x: positionInArtboard.x,
+        y: positionInArtboard.y,
+        width: textBackground.bounds.width,
+        height: textBackground.bounds.height,
+        innerWidth: innerWidth,
+        innerHeight: innerHeight
+      });
+    });
+    dispatch(
+      setLayersLetterSpacing({
+        ...payload,
+        bounds,
+        lines
+      })
+    )
+  }
+};
 
 export const setLayerFill = (payload: SetLayerFillPayload): LayerTypes => ({
   type: SET_LAYER_FILL,
@@ -3712,33 +3795,22 @@ export const replaceSelectedImagesThunk = () => {
         properties: ['openFile']
       }).then(result => {
         if (result.filePaths.length > 0 && !result.canceled) {
-          const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
+          const state = getState() as RootState;
           sharp(result.filePaths[0]).metadata().then(({ width, height }) => {
             const originalDimensions = {width, height};
-            sharp(result.filePaths[0]).resize(Math.round(width * 0.5)).webp({quality: 75}).toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
+            sharp(result.filePaths[0]).webp({quality: 75}).toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
               const newBuffer = Buffer.from(data);
               const exists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(newBuffer));
-              const base64 = bufferToBase64(newBuffer);
               const imageId = exists ? exists : uuidv4();
-              const imageLoader = new paperMain.Raster(`data:image/webp;base64,${base64}`);
-              imageLoader.onLoad = (): void => {
-                state.layer.present.selected.forEach((layer, index) => {
-                  const { layerItem, paperLayer } = getItemLayers(state.layer.present, layer);
-                  const raster = paperLayer.getItem({data: {id: 'raster'}}) as paper.Raster;
-                  paperLayer.data.imageId = imageId;
-                  raster.source = `data:image/webp;base64,${base64}`;
-                });
-                if (!exists) {
-                  dispatch(addDocumentImage({id: imageId, buffer: newBuffer}));
-                }
-                dispatch(replaceImages({
-                  layers: state.layer.present.selected,
-                  imageId,
-                  originalDimensions
-                }));
-                imageLoader.remove();
-                resolve(null);
+              if (!exists) {
+                dispatch(addDocumentImage({id: imageId, buffer: newBuffer}));
               }
+              dispatch(replaceImages({
+                layers: state.layer.present.selected,
+                imageId,
+                originalDimensions
+              }));
+              resolve(null);
             });
           });
         }

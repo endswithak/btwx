@@ -3,6 +3,7 @@ export const SET_TEXT_SETTINGS_FILL_COLOR = 'SET_TEXT_SETTINGS_FILL_COLOR';
 export const SET_TEXT_SETTINGS_FONT_SIZE = 'SET_TEXT_SETTINGS_FONT_SIZE';
 export const SET_TEXT_SETTINGS_FONT_WEIGHT = 'SET_TEXT_SETTINGS_FONT_WEIGHT';
 export const SET_TEXT_SETTINGS_FONT_FAMILY = 'SET_TEXT_SETTINGS_FONT_FAMILY';
+export const SET_TEXT_SETTINGS_LETTER_SPACING = 'SET_TEXT_SETTINGS_LETTER_SPACING';
 export const SET_TEXT_SETTINGS_LEADING = 'SET_TEXT_SETTINGS_LEADING';
 export const SET_TEXT_SETTINGS_JUSTIFICATION = 'SET_TEXT_SETTINGS_JUSTIFICATION';
 export const SET_TEXT_SETTINGS_SYSTEM_FONTS = 'SET_TEXT_SETTINGS_SYSTEM_FONTS';
@@ -53,6 +54,15 @@ export interface SetTextSettingsFontFamily {
   payload: SetTextSettingsFontFamilyPayload;
 }
 
+export interface SetTextSettingsLetterSpacingPayload {
+  letterSpacing: number;
+}
+
+export interface SetTextSettingsLetterSpacing {
+  type: typeof SET_TEXT_SETTINGS_LETTER_SPACING;
+  payload: SetTextSettingsLetterSpacingPayload;
+}
+
 export interface SetTextSettingsLeadingPayload {
   leading: number;
 }
@@ -89,6 +99,7 @@ export type TextSettingsTypes = SetTextSettings |
                                 SetTextSettingsFontSize |
                                 SetTextSettingsFontWeight |
                                 SetTextSettingsFontFamily |
+                                SetTextSettingsLetterSpacing |
                                 SetTextSettingsLeading |
                                 SetTextSettingsJustification |
                                 SetTextSettingsSystemFonts |

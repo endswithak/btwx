@@ -20,28 +20,24 @@ const CanvasLayerFrameText = (props: CanvasLayerFrameTextProps): ReactElement =>
   const getTextPaperLayers = (): {
     paperLayer: paper.Group;
     textLinesGroup: paper.Group;
-    textContent: paper.PointText;
     textBackground: paper.Path.Rectangle;
   } => {
     const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
     const paperLayer = paperProject.getItem({data: {id: layerItem.id}}) as paper.Group;
     const textLinesGroup = paperLayer.getItem({data:{id:'textLines'}}) as paper.Group;
-    const textContent = paperLayer.getItem({data:{id:'textContent'}}) as paper.PointText;
     const textBackground = paperLayer.getItem({data:{id:'textBackground'}}) as paper.Path.Rectangle;
     return {
       paperLayer,
       textLinesGroup,
-      textContent,
       textBackground
     };
   }
 
   useEffect(() => {
     if (rendered && prevPointX !== layerItem.point.x) {
-      const { paperLayer, textLinesGroup, textContent, textBackground} = getTextPaperLayers();
+      const { paperLayer, textLinesGroup, textBackground} = getTextPaperLayers();
       const absolutePointX = layerItem.point.x + artboardItem.frame.x;
       paperLayer.rotation = -layerItem.transform.rotation;
-      textContent.point.x = absolutePointX;
       textLinesGroup.children.forEach((line: paper.PointText) => {
         line.leading = layerItem.textStyle.fontSize;
         line.skew(new paper.Point(layerItem.textStyle.oblique, 0));
@@ -57,10 +53,9 @@ const CanvasLayerFrameText = (props: CanvasLayerFrameTextProps): ReactElement =>
 
   useEffect(() => {
     if (rendered && prevPointY !== layerItem.point.y) {
-      const { paperLayer, textLinesGroup, textContent, textBackground} = getTextPaperLayers();
+      const { paperLayer, textLinesGroup, textBackground} = getTextPaperLayers();
       const absolutePointY = layerItem.point.y + artboardItem.frame.y;
       paperLayer.rotation = -layerItem.transform.rotation;
-      textContent.point.y = absolutePointY;
       textLinesGroup.children.forEach((line: paper.PointText, index: number) => {
         line.leading = layerItem.textStyle.fontSize;
         line.skew(new paper.Point(layerItem.textStyle.oblique, 0));

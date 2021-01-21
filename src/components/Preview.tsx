@@ -7,6 +7,7 @@ import { ThemeContext } from './ThemeProvider';
 import EmptyState from './EmptyState';
 import PreviewCanvas from './PreviewCanvas';
 import PreviewTopbar from './PreviewTopbar';
+import DocumentImages from './DocumentImages';
 
 // if (remote.process.platform === 'darwin') {
 //   remote.getCurrentWindow().addListener('swipe', (event: any, direction: any) => {
@@ -66,6 +67,7 @@ const Preview = (): ReactElement => {
             detail='Add an artboard to preview it.'
             style={{paddingRight: 24, paddingLeft: 24}} />
       }
+      <DocumentImages />
     </div>
   );
 }

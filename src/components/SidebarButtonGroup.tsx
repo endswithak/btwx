@@ -18,7 +18,8 @@ const SidebarButtonGroup = (props: SidebarButtonGroupProps): ReactElement => {
         ? <div
             className='c-sidebar-input__bottom-label'
             style={{
-              color: theme.text.base
+              color: theme.text.base,
+              marginRight: theme.unit
             }}>
             {props.bottomLabel}
           </div>

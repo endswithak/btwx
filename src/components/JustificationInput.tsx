@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch  } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { setLayersJustificationThunk } from '../store/actions/layer';
+import { setLayersJustification } from '../store/actions/layer';
 import { getSelectedJustification } from '../store/selectors/layer';
 import { setTextSettingsJustification } from '../store/actions/textSettings';
 import SidebarSectionRow from './SidebarSectionRow';
@@ -21,7 +21,7 @@ const JustificationInput = (): ReactElement => {
   }, [justificationValue, selected]);
 
   const handleClick = (justificationButtonValue: Btwx.Jusftification): void => {
-    dispatch(setLayersJustificationThunk({layers: selected, justification: justificationButtonValue as Btwx.Jusftification}));
+    dispatch(setLayersJustification({layers: selected, justification: justificationButtonValue as Btwx.Jusftification}));
     setJustification(justificationButtonValue);
     dispatch(setTextSettingsJustification({justification: justificationButtonValue as Btwx.Jusftification}));
   };

@@ -4,6 +4,7 @@ import {
   SET_TEXT_SETTINGS_FONT_SIZE,
   SET_TEXT_SETTINGS_FONT_WEIGHT,
   SET_TEXT_SETTINGS_FONT_FAMILY,
+  SET_TEXT_SETTINGS_LETTER_SPACING,
   SET_TEXT_SETTINGS_LEADING,
   SET_TEXT_SETTINGS_JUSTIFICATION,
   SET_TEXT_SETTINGS_SYSTEM_FONTS,
@@ -59,6 +60,12 @@ export default (state = initialState, action: TextSettingsTypes): TextSettingsSt
       return {
         ...state,
         fontFamily: action.payload.fontFamily
+      };
+    }
+    case SET_TEXT_SETTINGS_LETTER_SPACING: {
+      return {
+        ...state,
+        letterSpacing: action.payload.letterSpacing
       };
     }
     case SET_TEXT_SETTINGS_LEADING: {

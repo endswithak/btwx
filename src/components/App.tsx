@@ -13,6 +13,7 @@ import SidebarLeft from './SidebarLeft';
 import SidebarRight from './SidebarRight';
 import EventDrawer from './EventDrawer';
 import TextEditor from './TextEditor';
+import DocumentImages from './DocumentImages';
 
 const App = (): ReactElement => {
   const ready = useSelector((state: RootState) => state.canvasSettings.ready);
@@ -57,6 +58,7 @@ const App = (): ReactElement => {
             </>
           : null
         }
+        <DocumentImages />
     </div>
   );
 }

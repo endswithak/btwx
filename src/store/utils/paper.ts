@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import paper from 'paper';
 import tinyColor from 'tinycolor2';
 import { DEFAULT_ROUNDED_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_RADIUS, DEFAULT_STAR_POINTS, DEFAULT_LINE_FROM, DEFAULT_LINE_TO } from '../../constants';
@@ -30,6 +31,75 @@ export const getLayerAbsPosition = (layerFrame: Btwx.Frame, artboardFrame: Btwx.
     position = position.add(new paper.Point(artboardFrame.x, artboardFrame.y))
   }
   return position;
+}
+
+interface GetPaperStyle {
+  style: Btwx.Style;
+  textStyle?: Btwx.TextStyle;
+  layerFrame: Btwx.Frame;
+  artboardFrame: Btwx.Frame;
+  isLine: boolean;
+}
+
+export const getPaperStyle = ({ style, textStyle, layerFrame, artboardFrame, isLine }: GetPaperStyle): any => {
+  return {
+    fillColor: getPaperFillColor({
+      fill: style.fill,
+      isLine: isLine,
+      layerFrame: layerFrame,
+      artboardFrame: artboardFrame
+    }),
+    strokeColor: getPaperStrokeColor({
+      stroke: style.stroke,
+      isLine: isLine,
+      layerFrame: layerFrame,
+      artboardFrame: artboardFrame
+    }),
+    strokeWidth: style.stroke.width,
+    shadowColor: getPaperShadowColor(style.shadow),
+    shadowOffset: getPaperShadowOffset(style.shadow),
+    shadowBlur: getPaperShadowBlur(style.shadow),
+    blendMode: style.blendMode,
+    opacity: style.opacity,
+    dashArray: style.strokeOptions.dashArray,
+    dashOffset: style.strokeOptions.dashOffset,
+    strokeCap: style.strokeOptions.cap,
+    strokeJoin: style.strokeOptions.join,
+    ...(() => {
+      if (textStyle) {
+        return {
+          fontSize: textStyle.fontSize,
+          leading: textStyle.leading,
+          fontWeight: textStyle.fontWeight,
+          fontFamily: textStyle.fontFamily,
+          justification: textStyle.justification,
+          letterSpacing: textStyle.letterSpacing
+        }
+      } else {
+        return {};
+      }
+    })()
+  };
+}
+
+export const getPaperLayerIndex = (layerItem: Btwx.Layer, parentItem: Btwx.Artboard | Btwx.Group): number => {
+  const layerIndex = parentItem.children.indexOf(layerItem.id);
+  const underlyingMaskIndex = (layerItem as Btwx.Text).underlyingMask ? parentItem.children.indexOf((layerItem as Btwx.Text).underlyingMask) : null;
+  return (layerItem as Btwx.Text).masked ? (layerIndex - underlyingMaskIndex) + 1 : layerIndex;
+}
+
+export const getLayerAbsBounds = (layerFrame: Btwx.Frame, artboardFrame: Btwx.Frame): paper.Rectangle => {
+  const absPosition = getLayerAbsPosition(layerFrame, artboardFrame);
+  return new paper.Rectangle({
+    from: new paper.Point(absPosition.x - (layerFrame.innerWidth / 2), absPosition.y - (layerFrame.innerHeight / 2)),
+    to: new paper.Point(absPosition.x + (layerFrame.innerWidth / 2), absPosition.y + (layerFrame.innerHeight / 2))
+  });
+}
+
+export const getTextAbsPoint = (textPoint: Btwx.Point, artboardFrame: Btwx.Frame): paper.Point => {
+  const point = new paper.Point(textPoint.x, textPoint.y);
+  const artboardPosition = new paper.Point(artboardFrame.x, artboardFrame.y);
+  return point.add(artboardPosition);
 }
 
 interface GetPaperFSColor {

@@ -229,6 +229,8 @@ export const SET_LAYER_POINT_X = 'SET_LAYER_POINT_X';
 export const SET_LAYERS_POINT_X = 'SET_LAYERS_POINT_X';
 export const SET_LAYER_POINT_Y = 'SET_LAYER_POINT_Y';
 export const SET_LAYERS_POINT_Y = 'SET_LAYERS_POINT_Y';
+export const SET_LAYER_LETTER_SPACING = 'SET_LAYER_LETTER_SPACING';
+export const SET_LAYERS_LETTER_SPACING = 'SET_LAYERSS_LETTER_SPACING';
 
 export const SET_LAYER_UNDERLYING_MASK = 'SET_LAYER_UNDERLYING_MASK';
 export const SET_LAYERS_UNDERLYING_MASK = 'SET_LAYERS_UNDERLYING_MASK';
@@ -2081,6 +2083,11 @@ export interface ScaleLayerPayload {
   scale: Btwx.Point;
   verticalFlip: boolean;
   horizontalFlip: boolean;
+  pathData?: string;
+  bounds?: Btwx.Frame;
+  from?: Btwx.Point;
+  to?: Btwx.Point;
+  rotation?: number;
 }
 
 export interface ScaleLayer {
@@ -2093,6 +2100,21 @@ export interface ScaleLayersPayload {
   scale: Btwx.Point;
   verticalFlip: boolean;
   horizontalFlip: boolean;
+  pathData?: {
+    [id: string]: string;
+  };
+  bounds?: {
+    [id: string]: Btwx.Frame;
+  };
+  from?: {
+    [id: string]: Btwx.Point;
+  };
+  to?: {
+    [id: string]: Btwx.Point;
+  };
+  rotation?: {
+    [id: string]: number;
+  };
 }
 
 export interface ScaleLayers {
@@ -2209,7 +2231,6 @@ export interface SetLayersFontFamily {
 export interface SetLayerJustificationPayload {
   id: string;
   justification: Btwx.Jusftification;
-  point?: Btwx.Point;
 }
 
 export interface SetLayerJustification {
@@ -2220,7 +2241,6 @@ export interface SetLayerJustification {
 export interface SetLayersJustificationPayload {
   layers: string[];
   justification: Btwx.Jusftification;
-  points?: Btwx.Point[];
 }
 
 export interface SetLayersJustification {
@@ -2288,6 +2308,30 @@ export interface SetLayersPointYPayload {
 export interface SetLayersPointY {
   type: typeof SET_LAYERS_POINT_Y;
   payload: SetLayersPointYPayload;
+}
+
+export interface SetLayerLetterSpacingPayload {
+  id: string;
+  letterSpacing: number;
+  lines?: Btwx.TextLine[];
+  bounds?: Btwx.Frame;
+}
+
+export interface SetLayerLetterSpacing {
+  type: typeof SET_LAYER_LETTER_SPACING;
+  payload: SetLayerLetterSpacingPayload;
+}
+
+export interface SetLayersLetterSpacingPayload {
+  layers: string[];
+  letterSpacing: number;
+  lines?: Btwx.TextLine[][];
+  bounds?: Btwx.Frame[];
+}
+
+export interface SetLayersLetterSpacing {
+  type: typeof SET_LAYERS_LETTER_SPACING;
+  payload: SetLayersLetterSpacingPayload;
 }
 
 export interface SetLayerFillPayload {
@@ -3159,6 +3203,8 @@ export type LayerTypes = AddArtboard |
                          SetLayersPointX |
                          SetLayerPointY |
                          SetLayersPointY |
+                         SetLayerLetterSpacing |
+                         SetLayersLetterSpacing |
                          SetLayerUnderlyingMask |
                          SetLayersUnderlyingMask |
                          ToggleLayerIgnoreUnderlyingMask |

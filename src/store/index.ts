@@ -3,7 +3,7 @@ import thunk from 'redux-thunk';
 import { remote } from 'electron';
 import logger from 'redux-logger';
 import rootReducer, { RootState } from './reducers';
-import { hydratePreview, closePreview, startPreviewRecording, stopPreviewRecording, setPreviewFocusing, setPreviewWindowId } from './actions/preview';
+import { hydratePreview, closePreview, startPreviewRecording, stopPreviewRecording, setPreviewFocusing, setPreviewWindowId, setPreviewTweening } from './actions/preview';
 import { enableLightTheme, enableDarkTheme } from './actions/viewSettings';
 import { setActiveArtboard } from './actions/layer';
 
@@ -73,6 +73,9 @@ const configureStore = ({ preloadedState, windowType }: { preloadedState: any; w
     };
     (window as any).setPreviewWindowId = (windowId: number): void => {
       store.dispatch(setPreviewWindowId({windowId}));
+    };
+    (window as any).setPreviewTweening = (tweening: string): void => {
+      store.dispatch(setPreviewTweening({tweening}));
     };
   }
   // preview window specific functions

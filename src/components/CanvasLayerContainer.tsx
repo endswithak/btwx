@@ -8,7 +8,7 @@ export interface CanvasLayerContainerStateProps {
   parentItem: Btwx.Artboard | Btwx.Group;
   artboardItem: Btwx.Artboard;
   projectIndex: number;
-  documentImage: Btwx.DocumentImage;
+  tweening: boolean;
 }
 
 export interface CanvasLayerContainerProps extends CanvasLayerContainerStateProps {
@@ -33,13 +33,13 @@ const CanvasLayerContainerWrap = (Component: any): (props: any) => ReactElement 
     const parentItem = layerItem ? layerItem.type !== 'Artboard' ? state.layer.present.byId[layerItem.parent] as Btwx.Artboard | Btwx.Group : null : null;
     const artboardItem = layerItem ? layerItem.type !== 'Artboard' ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null : null;
     const projectIndex = layerItem ? layerItem.type !== 'Artboard' ? artboardItem.projectIndex : (layerItem as Btwx.Artboard).projectIndex : null;
-    const documentImage = layerItem ? layerItem.type === 'Image' ? state.documentSettings.images.byId[(layerItem as Btwx.Image).imageId] : null : null;
+    const tweening = layerItem ? layerItem.type === 'Artboard' ? state.preview.tweening === ownProps.id : state.preview.tweening === artboardItem.id : false;
     return {
       layerItem,
       parentItem,
       artboardItem,
       projectIndex,
-      documentImage
+      tweening
     }
   }
 

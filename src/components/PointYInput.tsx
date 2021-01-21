@@ -41,7 +41,8 @@ const PointYInput = (): ReactElement => {
       onChange={handleChange}
       onSubmit={handleSubmit}
       submitOnBlur
-      bottomLabel='Y' />
+      label='Y'
+      bottomLabel='Point' />
   );
 }
 
