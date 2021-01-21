@@ -182,7 +182,7 @@ const ArtboardPresetEditor = (): ReactElement => {
           <CancelButton
             className='c-artboard-preset-editor__button c-artboard-preset-editor__button--cancel'
             theme={theme}
-            onClick={closeArtboardPresetEditor}>
+            onClick={() => dispatch(closeArtboardPresetEditor())}>
             Cancel
           </CancelButton>
           <SaveButton

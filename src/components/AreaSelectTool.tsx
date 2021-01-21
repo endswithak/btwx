@@ -99,8 +99,8 @@ const AreaSelectTool = (props: PaperToolProps): ReactElement => {
           }));
         }
       }
-      dispatch(setCanvasSelecting({selecting: false}));
       updateAreaSelectPreview(null);
+      dispatch(setCanvasSelecting({selecting: false}));
     }
   }, [upEvent]);
 

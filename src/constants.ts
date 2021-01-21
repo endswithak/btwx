@@ -97,7 +97,7 @@ export const TWEEN_PROPS_MAP: { [id: string]: string[] } = {
   pointY: []
 }
 
-export const DEFAULT_TWEEN_EVENTS = [
+export const DEFAULT_TWEEN_EVENTS: { event: Btwx.TweenEventType; titleCase: string }[] = [
   { event: 'mousedown', titleCase: 'Mouse Down' },
   { event: 'mouseup', titleCase: 'Mouse Up' },
   { event: 'mousedrag', titleCase: 'Mouse Drag' },

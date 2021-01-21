@@ -87,7 +87,7 @@ const SidebarArtboardPlatformDevice = (props: SidebarArtboardPlatformDeviceProps
         }
       }));
       if (!active) {
-        setActive(true);
+        // setActive(true);
         document.addEventListener('mousedown', handleMouseDown);
         document.addEventListener('keydown', handleKeyDown);
       }

@@ -14,6 +14,13 @@ import ContextMenu from './ContextMenu';
 
 const ContextMenuWrapLayerEdit = (): ReactElement => {
   const contextMenu = useSelector((state: RootState) => state.contextMenu);
+  const artboards = useSelector((state: RootState) => ({
+    allIds: state.layer.present.allArtboardIds,
+    byId: state.layer.present.allArtboardIds.reduce((result, current) => ({
+      ...result,
+      [current]: state.layer.present.byId[current]
+    }), {})
+  })) as { allIds: string[]; byId: { [id: string]: Btwx.Artboard } };
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const layerItem = useSelector((state: RootState) => Object.prototype.hasOwnProperty.call(state.layer.present.byId, state.contextMenu.id) && state.contextMenu.id !== 'root' ? state.layer.present.byId[state.contextMenu.id] : null);
   const tweenEventLayerScope = layerItem ? layerItem.scope : null;
@@ -30,6 +37,14 @@ const ContextMenuWrapLayerEdit = (): ReactElement => {
   const canDuplicate = selected.length > 0 || layerItem !== null;
   const canRename = selected.length === 1;
   const canReplaceImage = useSelector((state: RootState) => canReplaceSelectedImages(state));
+  const hasArtboardParent = useSelector((state: RootState) => layerItem ? tweenEventLayerScope[1] && state.layer.present.byId[tweenEventLayerScope[1]].type === 'Artboard' : false);
+  const isArtboard = layerItem ? layerItem.type === 'Artboard' : false;
+  const artboardParent = isArtboard ? layerItem.id : hasArtboardParent ? tweenEventLayerScope[1] : null;
+  const tweenEvents = useSelector((state: RootState) => layerItem && canAddTweenEvent ? state.layer.present.events.allIds.filter((id) => state.layer.present.events.byId[id].layer === state.contextMenu.id && state.layer.present.events.byId[id].artboard === artboardParent) : null);
+  const tweenEventItems = useSelector((state: RootState) => tweenEvents ? tweenEvents.reduce((result, current) => {
+    result = [...result, state.layer.present.events.byId[current]];
+    return result;
+   }, []) : null);
   const clipboardType: Btwx.ClipboardType = ((): Btwx.ClipboardType => {
     try {
       const text = clipboard.readText();
@@ -42,18 +57,44 @@ const ContextMenuWrapLayerEdit = (): ReactElement => {
   const dispatch = useDispatch();
 
   const options = [{
-    label: 'Add Event...',
+    label: 'Add Event Listener...',
     visible: contextMenu.id && contextMenu.id !== 'root',
     enabled: canAddTweenEvent,
-    click: (): void => {
-      // dispatch(closeContextMenu());
-      // dispatch(openContextMenu({
-      //   ...contextMenu,
-      //   x: currentX,
-      //   y: currentY,
-      //   type: 'TweenEvent'
-      // }));
-    }
+    submenu: [...DEFAULT_TWEEN_EVENTS.reduce((eventResult, eventCurrent) => {
+      const isDisabled = tweenEventItems && tweenEventItems.some((tweenEvent) => tweenEvent.layer === contextMenu.id && tweenEvent.event === eventCurrent.event);
+      return [
+        ...eventResult,
+        {
+          label: `On ${eventCurrent.titleCase}...`,
+          enabled: !isDisabled,
+          submenu: [...artboards.allIds.reduce((destinationResult, destinationCurrent) => {
+            const artboardItem = artboards.byId[destinationCurrent];
+            const disabled = tweenEventItems && tweenEventItems.some((tweenEvent) => tweenEvent.layer === contextMenu.id && tweenEvent.event === eventCurrent.event && tweenEvent.destinationArtboard === artboardItem.id );
+            if (artboardItem.id !== artboardParent && artboardItem.id !== contextMenu.id) {
+              destinationResult = [
+                ...destinationResult,
+                {
+                  label: `Go to ${artboardItem.name}`,
+                  enabled: !disabled,
+                  click: (): void => {
+                    dispatch(addLayerTweenEvent({
+                      name: 'Tween Event',
+                      artboard: artboardParent,
+                      destinationArtboard: artboardItem.id,
+                      event: eventCurrent.event,
+                      layer: contextMenu.id,
+                      tweens: []
+                    }));
+                    dispatch(closeContextMenu());
+                  }
+                }
+              ]
+            }
+            return destinationResult;
+          }, [])]
+        }
+      ]
+    }, [])]
   },{
     type: 'separator',
     visible: contextMenu.id && contextMenu.id !== 'root'
@@ -195,6 +236,7 @@ const ContextMenuWrapLayerEdit = (): ReactElement => {
     label: 'Mask',
     visible: contextMenu.id && contextMenu.id !== 'root',
     enabled: canMask,
+    type: 'checkbox',
     checked: useAsMaskChecked,
     click: (): void => {
       dispatch(toggleSelectedMaskThunk());
@@ -203,6 +245,7 @@ const ContextMenuWrapLayerEdit = (): ReactElement => {
     label: 'Ignore Underlying Mask',
     visible: contextMenu.id && contextMenu.id !== 'root',
     enabled: canIgnoreUnderlyingMask,
+    type: 'checkbox',
     checked: ignoreUnderlyingMaskChecked,
     click: (): void => {
       dispatch(toggleSelectionIgnoreUnderlyingMask());
