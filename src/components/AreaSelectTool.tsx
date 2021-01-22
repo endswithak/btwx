@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, useEffect, ReactElement } from 'react';
+import React, { useContext, useEffect, ReactElement, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import tinyColor from 'tinycolor2';
+import { setCanvasActiveTool } from '../store/actions/canvasSettings';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
 import { setCanvasSelecting } from '../store/actions/canvasSettings';
@@ -17,6 +18,7 @@ const AreaSelectTool = (props: PaperToolProps): ReactElement => {
   const scope = useSelector((state: RootState) => state.layer.present.scope);
   const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
   const layerProjectIndices = useSelector((state: RootState) => getLayerProjectIndices(state));
+  const [from, setFrom] = useState(null);
   const dispatch = useDispatch();
 
   const updateAreaSelectPreview = (areaSelectBounds: paper.Rectangle): void => {
@@ -39,16 +41,19 @@ const AreaSelectTool = (props: PaperToolProps): ReactElement => {
 
   useEffect(() => {
     if (downEvent && isEnabled) {
-      if (paperMain.project.activeLayer.data.id !== 'ui') {
-        paperMain.projects[0].activate();
+      if ((downEvent as any).event.which !== 3) {
+        if (paperMain.project.activeLayer.data.id !== 'ui') {
+          paperMain.projects[0].activate();
+        }
+        updateAreaSelectPreview(null);
+        dispatch(setCanvasSelecting({selecting: true}));
+        setFrom(downEvent);
       }
-      updateAreaSelectPreview(null);
-      dispatch(setCanvasSelecting({selecting: true}));
     }
   }, [downEvent]);
 
   useEffect(() => {
-    if (dragEvent && isEnabled) {
+    if (dragEvent && from && isEnabled) {
       updateAreaSelectPreview(
         new paperMain.Rectangle({
           from: dragEvent.downPoint,
@@ -59,7 +64,7 @@ const AreaSelectTool = (props: PaperToolProps): ReactElement => {
   }, [dragEvent]);
 
   useEffect(() => {
-    if (upEvent && isEnabled) {
+    if (upEvent && from && isEnabled) {
       const areaSelectBounds = new paperMain.Rectangle({
         from: upEvent.downPoint,
         to: upEvent.point
@@ -100,6 +105,7 @@ const AreaSelectTool = (props: PaperToolProps): ReactElement => {
         }
       }
       updateAreaSelectPreview(null);
+      setFrom(null);
       dispatch(setCanvasSelecting({selecting: false}));
     }
   }, [upEvent]);
@@ -113,6 +119,7 @@ const AreaSelectTool = (props: PaperToolProps): ReactElement => {
       if (tool && paperMain.tool && (paperMain.tool as any)._index === (tool as any)._index) {
         paperMain.tool = null;
         updateAreaSelectPreview(null);
+        setFrom(null);
       }
     }
   }, [isEnabled]);

@@ -26,7 +26,7 @@ const PreviewTopbar = (props: PreviewTopbarProps): ReactElement => {
       <PreviewTouchCursorButton
         touchCursor={touchCursor}
         setTouchCursor={setTouchCursor} />
-      <PreviewRecordButton />
+      {/* <PreviewRecordButton /> */}
     </div>
   );
 }

@@ -11,13 +11,14 @@ const MenuInsertArtboard = (props: MenuItemProps): ReactElement => {
   const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
   const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
   const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
+  const isSelecting = useSelector((state: RootState) => state.canvasSettings.selecting);
   const isFocusing = useSelector((state: RootState) => state.canvasSettings.focusing);
   const isChecked = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Artboard');
   const dispatch = useDispatch();
 
   useEffect(() => {
-    menuItem.enabled = isFocusing && !isResizing && !isDragging && !isDrawing;
-  }, [isFocusing, isDragging, isResizing, isDrawing]);
+    menuItem.enabled = isFocusing && !isResizing && !isDragging && !isDrawing && !isSelecting;
+  }, [isFocusing, isDragging, isResizing, isDrawing, isSelecting]);
 
   useEffect(() => {
     menuItem.checked = isChecked;

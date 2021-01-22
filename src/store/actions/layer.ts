@@ -12,7 +12,7 @@ import { paperMain } from '../../canvas';
 import paper from 'paper';
 import MeasureGuide from '../../canvas/measureGuide';
 import { ARTBOARDS_PER_PROJECT, DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_VALUE, THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS, TWEEN_PROPS_MAP } from '../../constants';
-import { getPaperFillColor, getPaperStrokeColor, getPaperShadowColor, getTextAbsPoint, getLetterSpacedText } from '../utils/paper';
+import { getPaperFillColor, getPaperStrokeColor, getPaperShadowColor, getTextAbsPoint } from '../utils/paper';
 import { getClipboardCenter, getLayerAndDescendants, getLayersBounds, getNearestScopeAncestor, getArtboardEventItems, orderLayersByDepth, canMaskLayers, canMaskSelection, canPasteSVG, getLineToPoint, getLineFromPoint, getArtboardsTopTop, getSelectedBounds, getParentPaperLayer, getGradientOriginPoint, getGradientDestinationPoint, getPaperLayer, getSelectedPaperLayers, getItemLayers, getSelectedProjectIndices, getAbsolutePosition, getActiveArtboardBounds, getLayerBounds, importProjectJSON, getAllArtboardItems } from '../selectors/layer';
 import { getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle, getLayerMasked, getLayerUnderlyingMask } from '../utils/actions';
 
@@ -717,111 +717,111 @@ export const addShapeThunk = (payload: AddShapePayload, providedState?: RootStat
   }
 };
 
-export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: RootState) => {
-  return (dispatch: any, getState: any): Promise<Btwx.Shape> => {
-    const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
-    const id = payload.layer.id ? payload.layer.id : uuidv4();
-    const parent = payload.layer.parent ? payload.layer.parent : state.layer.present.activeArtboard;
-    const parentItem = state.layer.present.byId[parent];
-    const scope = [...parentItem.scope, parent];
-    const artboard = scope[1];
-    const artboardItem = state.layer.present.byId[artboard] as Btwx.Artboard;
-    const index = artboardItem.children.length;
-    const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
-    const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
-    const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-    const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
-    const shapeType = payload.layer.shapeType ? payload.layer.shapeType : 'Rectangle';
-    const name = payload.layer.name ? payload.layer.name : shapeType;
-    const frame = getLayerFrame(payload);
-    let position = new paperMain.Point(frame.x, frame.y);
-    if (artboard) {
-      position = position.add(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y))
-    }
-    const shapeOpts = getLayerShapeOpts(payload);
-    const style = getLayerStyle(payload);
-    const transform = getLayerTransform(payload);
-    const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as Btwx.Shadow) : null;
-    const paperShadowOffset = style.shadow.enabled ? new paperMain.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
-    const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
-    const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as Btwx.PaperGradientFill : null;
-    const paperStrokeColor = style.stroke.enabled ? getPaperStrokeColor(style.stroke, frame) as Btwx.PaperGradientFill : null;
-    const mask = payload.layer.mask ? payload.layer.mask : false;
-    const shapeContainer = renderShapeGroup((payload.layer as any).sketchLayer);
-    const paperLayer = new paperMain.CompoundPath({
-      name: name,
-      pathData: shapeContainer.lastChild.pathData,
-      closed: payload.layer.closed,
-      strokeWidth: style.stroke.width,
-      shadowColor: paperShadowColor,
-      shadowOffset: paperShadowOffset,
-      shadowBlur: paperShadowBlur,
-      blendMode: style.blendMode,
-      opacity: style.opacity,
-      dashArray: style.strokeOptions.dashArray,
-      dashOffset: style.strokeOptions.dashOffset,
-      strokeCap: style.strokeOptions.cap,
-      strokeJoin: style.strokeOptions.join,
-      clipMask: mask,
-      data: { id, type: 'Layer', layerType: 'Shape', shapeType: 'Custom', scope: scope },
-      parent: parentPaperLayer
-    });
-    paperLayer.children.forEach((item) => item.data = { id: 'shapePartial', type: 'LayerChild', layerType: 'Shape' });
-    paperLayer.position = position;
-    // wonky fix to make sure gradient destination and origin are in correct place
-    paperLayer.rotation = -transform.rotation;
-    paperLayer.scale(transform.horizontalFlip ? -1 : 1, transform.verticalFlip ? -1 : 1);
-    paperLayer.fillColor = paperFillColor;
-    paperLayer.strokeColor = paperStrokeColor;
-    paperLayer.rotation = transform.rotation;
-    paperLayer.scale(transform.horizontalFlip ? -1 : 1, transform.verticalFlip ? -1 : 1);
-    //
-    if (mask) {
-      const maskGroup = new paperMain.Group({
-        name: 'MaskGroup',
-        data: { id: 'maskGroup', type: 'LayerContainer', layerType: 'Shape' },
-        children: [paperLayer.clone()]
-      });
-      paperLayer.replaceWith(maskGroup);
-    }
-    //
-    const newLayer = {
-      type: 'Shape',
-      id: id,
-      name: name,
-      artboard: artboard,
-      parent: parent,
-      children: null,
-      scope: scope,
-      frame: frame,
-      underlyingMask: underlyingMask,
-      ignoreUnderlyingMask: ignoreUnderlyingMask,
-      masked: masked,
-      showChildren: null,
-      selected: false,
-      hover: false,
-      events: [],
-      tweens: {
-        allIds: [],
-        asOrigin: [],
-        asDestination: [],
-        byProp: TWEEN_PROPS_MAP
-      },
-      transform: transform,
-      style: style,
-      closed: true,
-      mask: mask,
-      shapeType: 'Custom',
-      pathData: shapeContainer.lastChild.pathData,
-      ...shapeOpts
-    } as Btwx.Shape;
-    dispatch(addShape({
-      layer: newLayer,
-      batch: payload.batch
-    }));
-    return Promise.resolve(newLayer);
-  }
-};
+// export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: RootState) => {
+//   return (dispatch: any, getState: any): Promise<Btwx.Shape> => {
+//     const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
+//     const id = payload.layer.id ? payload.layer.id : uuidv4();
+//     const parent = payload.layer.parent ? payload.layer.parent : state.layer.present.activeArtboard;
+//     const parentItem = state.layer.present.byId[parent];
+//     const scope = [...parentItem.scope, parent];
+//     const artboard = scope[1];
+//     const artboardItem = state.layer.present.byId[artboard] as Btwx.Artboard;
+//     const index = artboardItem.children.length;
+//     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
+//     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
+//     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
+//     const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
+//     const shapeType = payload.layer.shapeType ? payload.layer.shapeType : 'Rectangle';
+//     const name = payload.layer.name ? payload.layer.name : shapeType;
+//     const frame = getLayerFrame(payload);
+//     let position = new paperMain.Point(frame.x, frame.y);
+//     if (artboard) {
+//       position = position.add(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y))
+//     }
+//     const shapeOpts = getLayerShapeOpts(payload);
+//     const style = getLayerStyle(payload);
+//     const transform = getLayerTransform(payload);
+//     const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as Btwx.Shadow) : null;
+//     const paperShadowOffset = style.shadow.enabled ? new paperMain.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
+//     const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
+//     const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as Btwx.PaperGradientFill : null;
+//     const paperStrokeColor = style.stroke.enabled ? getPaperStrokeColor(style.stroke, frame) as Btwx.PaperGradientFill : null;
+//     const mask = payload.layer.mask ? payload.layer.mask : false;
+//     const shapeContainer = renderShapeGroup((payload.layer as any).sketchLayer);
+//     const paperLayer = new paperMain.CompoundPath({
+//       name: name,
+//       pathData: shapeContainer.lastChild.pathData,
+//       closed: payload.layer.closed,
+//       strokeWidth: style.stroke.width,
+//       shadowColor: paperShadowColor,
+//       shadowOffset: paperShadowOffset,
+//       shadowBlur: paperShadowBlur,
+//       blendMode: style.blendMode,
+//       opacity: style.opacity,
+//       dashArray: style.strokeOptions.dashArray,
+//       dashOffset: style.strokeOptions.dashOffset,
+//       strokeCap: style.strokeOptions.cap,
+//       strokeJoin: style.strokeOptions.join,
+//       clipMask: mask,
+//       data: { id, type: 'Layer', layerType: 'Shape', shapeType: 'Custom', scope: scope },
+//       parent: parentPaperLayer
+//     });
+//     paperLayer.children.forEach((item) => item.data = { id: 'shapePartial', type: 'LayerChild', layerType: 'Shape' });
+//     paperLayer.position = position;
+//     // wonky fix to make sure gradient destination and origin are in correct place
+//     paperLayer.rotation = -transform.rotation;
+//     paperLayer.scale(transform.horizontalFlip ? -1 : 1, transform.verticalFlip ? -1 : 1);
+//     paperLayer.fillColor = paperFillColor;
+//     paperLayer.strokeColor = paperStrokeColor;
+//     paperLayer.rotation = transform.rotation;
+//     paperLayer.scale(transform.horizontalFlip ? -1 : 1, transform.verticalFlip ? -1 : 1);
+//     //
+//     if (mask) {
+//       const maskGroup = new paperMain.Group({
+//         name: 'MaskGroup',
+//         data: { id: 'maskGroup', type: 'LayerContainer', layerType: 'Shape' },
+//         children: [paperLayer.clone()]
+//       });
+//       paperLayer.replaceWith(maskGroup);
+//     }
+//     //
+//     const newLayer = {
+//       type: 'Shape',
+//       id: id,
+//       name: name,
+//       artboard: artboard,
+//       parent: parent,
+//       children: null,
+//       scope: scope,
+//       frame: frame,
+//       underlyingMask: underlyingMask,
+//       ignoreUnderlyingMask: ignoreUnderlyingMask,
+//       masked: masked,
+//       showChildren: null,
+//       selected: false,
+//       hover: false,
+//       events: [],
+//       tweens: {
+//         allIds: [],
+//         asOrigin: [],
+//         asDestination: [],
+//         byProp: TWEEN_PROPS_MAP
+//       },
+//       transform: transform,
+//       style: style,
+//       closed: true,
+//       mask: mask,
+//       shapeType: 'Custom',
+//       pathData: shapeContainer.lastChild.pathData,
+//       ...shapeOpts
+//     } as Btwx.Shape;
+//     dispatch(addShape({
+//       layer: newLayer,
+//       batch: payload.batch
+//     }));
+//     return Promise.resolve(newLayer);
+//   }
+// };
 
 // Text
 
@@ -1043,9 +1043,9 @@ export const addLayersThunk = (payload: AddLayersPayload) => {
           case 'Shape':
             promises.push(dispatch(addShapeThunk({layer: layer as Btwx.Shape, batch: true})));
             break;
-          case 'ShapeGroup':
-            promises.push(dispatch(addShapeGroupThunk({layer: layer as Btwx.Shape, batch: true})));
-            break;
+          // case 'ShapeGroup':
+          //   promises.push(dispatch(addShapeGroupThunk({layer: layer as Btwx.Shape, batch: true})));
+          //   break;
           case 'Image':
             promises.push(dispatch(addImageThunk({layer: layer as Btwx.Image, batch: true, buffer: payload.buffers[(layer as Btwx.Image).imageId].buffer})));
             break;

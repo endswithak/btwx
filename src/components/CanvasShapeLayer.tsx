@@ -68,7 +68,6 @@ const CanvasShapeLayer = (props: CanvasLayerContainerProps & CanvasShapeLayerPro
   }
 
   useEffect(() => {
-    // build layer
     getPaperParent({
       paperScope,
       projectIndex,
@@ -82,7 +81,6 @@ const CanvasShapeLayer = (props: CanvasLayerContainerProps & CanvasShapeLayerPro
     );
     setRendered(true);
     return (): void => {
-      // remove layer
       const paperLayer = paperProject.getItem({data: {id}});
       if (paperLayer) {
         if (layerItem.mask) {
@@ -158,7 +156,7 @@ const CanvasShapeLayer = (props: CanvasLayerContainerProps & CanvasShapeLayerPro
         rendered={rendered}
         projectIndex={projectIndex} />
       {
-        paperScope === 'preview' && rendered && !tweening
+        paperScope === 'preview' && rendered && !tweening && !prevTweening
         ? layerItem.events.map((eventId, index) => (
             <CanvasPreviewLayerEvent
               key={eventId}

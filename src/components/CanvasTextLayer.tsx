@@ -193,7 +193,7 @@ const CanvasTextLayer = (props: CanvasLayerContainerProps & CanvasTextLayerProps
         rendered={rendered}
         projectIndex={projectIndex} />
       {
-        paperScope === 'preview' && rendered && !tweening
+        paperScope === 'preview' && rendered && !tweening && !prevTweening
         ? layerItem.events.map((eventId) => (
             <CanvasPreviewLayerEvent
               key={eventId}

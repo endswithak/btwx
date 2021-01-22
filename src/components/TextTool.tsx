@@ -121,7 +121,8 @@ const TextTool = (props: TextToolProps): ReactElement => {
             fontWeight: textSettings.fontWeight,
             fontFamily: textSettings.fontFamily,
             oblique: 0,
-            justification: textSettings.justification
+            justification: textSettings.justification,
+            letterSpacing: textSettings.letterSpacing
           },
           point: {
             x: point.x,

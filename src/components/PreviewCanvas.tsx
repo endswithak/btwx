@@ -17,7 +17,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
   const theme = useContext(ThemeContext);
   const edit = useSelector((state: RootState) => state.layer.present.edit.id);
   const artboards = useSelector((state: RootState) => state.layer.present.byId.root.children);
-  const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
+  // const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
   const activeArtboardItem = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.activeArtboard]);
   const [ready, setReady] = useState(false);
   const [prevEdit, setPrevEdit] = useState(edit);

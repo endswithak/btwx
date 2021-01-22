@@ -10,11 +10,9 @@ import { CustomBounce } from 'gsap/CustomBounce';
 import { CustomWiggle } from 'gsap/CustomWiggle';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
-import { bufferToBase64 } from '../utils';
 import { RootState } from '../store/reducers';
 import { paperPreview } from '../canvas';
 import { EventLayerTimelineData } from './CanvasPreviewLayerEvent';
-import { getLetterSpacedText } from '../store/utils/paper';
 
 gsap.registerPlugin(MorphSVGPlugin, RoughEase, SlowMo, CustomBounce, CustomWiggle, ScrambleTextPlugin, TextPlugin);
 
@@ -36,7 +34,7 @@ interface CanvasPreviewLayerTweenStateProps {
 
 const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps & CanvasPreviewLayerTweenStateProps): ReactElement => {
   const { eventTimeline, tween, tweenId, originLayerItem, destinationLayerItem, originArtboardItem, destinationArtboardItem, originImage, destinationImage, maxTextLineCount } = props;
-  const eventLayerTimeline = (eventTimeline as any).getById(`${tween.event}-${tween.layer}`) as gsap.core.Timeline;
+  const [eventLayerTimeline, setEventLayerTimeline] = useState((eventTimeline as any).getById(`${tween.event}-${tween.layer}`) as gsap.core.Timeline)
 
   const getEaseString = (tween: Btwx.Tween): string => {
     switch(tween.ease) {
@@ -1570,6 +1568,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps & CanvasPre
   };
 
   useEffect(() => {
+    if (gsap.getById(tweenId)) {
+      eventLayerTimeline.remove(gsap.getById(tweenId));
+    }
     switch(tween.prop) {
       case 'image':
       addImageTween();
@@ -1689,7 +1690,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps & CanvasPre
       addPointYTween();
       break;
     }
-  }, []);
+  }, [tween]);
 
   return (
     <>

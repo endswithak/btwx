@@ -64,7 +64,10 @@ const rootReducer = (state: RootState, action: RootAction): RootState => {
       };
     }
     case HYDRATE_PREVIEW: {
-      return action.payload.state;
+      return {
+        ...state,
+        ...action.payload.state
+      };
     }
     default: {
       return appReducer(state, action);

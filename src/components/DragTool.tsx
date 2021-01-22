@@ -149,7 +149,7 @@ const DragTool = (props: PaperToolProps): ReactElement => {
   }, [keyUpEvent]);
 
   useEffect(() => {
-    if (downEvent && isEnabled) {
+    if (downEvent && (downEvent as any).event.which !== 3 && isEnabled) {
       if (paperMain.project.activeLayer.data.id !== 'ui') {
         paperMain.projects[0].activate();
       }
@@ -257,7 +257,7 @@ const DragTool = (props: PaperToolProps): ReactElement => {
   }, [dragEvent]);
 
   useEffect(() => {
-    if (upEvent && isEnabled) {
+    if (upEvent && isEnabled && fromBounds) {
       if (selected.length > 0 && minDistance > 3) {
         const offset = toBounds.center.subtract(fromBounds.center).round();
         if (upEvent.modifiers.alt) {

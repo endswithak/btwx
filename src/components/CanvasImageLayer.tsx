@@ -148,7 +148,7 @@ const CanvasImageLayer = (props: CanvasLayerContainerProps & CanvasImageLayerPro
         rendered={rendered}
         projectIndex={projectIndex} />
       {
-        paperScope === 'preview' && rendered
+        paperScope === 'preview' && rendered && !tweening && !prevTweening
         ? layerItem.events.map((eventId, index) => (
             <CanvasPreviewLayerEvent
               key={eventId}

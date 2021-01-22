@@ -25,7 +25,7 @@ const CanvasArtboardLayer = (props: CanvasLayerContainerProps & CanvasArtboardLa
     });
     new paperLayerScope.Group({
       name: layerItem.name,
-      data: { id: id, type: 'Layer', layerType: 'Artboard', scope: ['root'] },
+      data: { id, type: 'Layer', layerType: 'Artboard', scope: ['root'] },
       children: [
         new paperLayerScope.Path.Rectangle({
           name: 'Artboard Background',
@@ -81,6 +81,7 @@ const CanvasArtboardLayer = (props: CanvasLayerContainerProps & CanvasArtboardLa
       if (!tweening) {
         const paperLayer = paperProject.getItem({data: {id}});
         const background = paperLayer.getItem({data:{id:'artboardBackground'}}) as paper.Path.Rectangle;
+        paperLayer.data = { id, type: 'Layer', layerType: 'Artboard', scope: ['root'] };
         background.replaceWith(new paperLayerScope.Path.Rectangle({
           name: 'Artboard Background',
           rectangle: background.bounds,
@@ -124,7 +125,7 @@ const CanvasArtboardLayer = (props: CanvasLayerContainerProps & CanvasArtboardLa
         rendered={rendered}
         projectIndex={projectIndex} />
       {
-        paperScope === 'preview' && rendered && !tweening
+        paperScope === 'preview' && rendered && !tweening && !prevTweening
         ? layerItem.events.map((eventId, index) => (
             <CanvasPreviewLayerEvent
               key={eventId}

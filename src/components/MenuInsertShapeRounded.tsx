@@ -11,13 +11,14 @@ const MenuInsertShapeRounded = (props: MenuItemProps): ReactElement => {
   const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
   const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
   const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
+  const isSelecting = useSelector((state: RootState) => state.canvasSettings.selecting);
   const canInsert = useSelector((state: RootState) => state.canvasSettings.focusing && state.layer.present.activeArtboard !== null);
   const insertingRounded = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Shape' && state.shapeTool.shapeType === 'Rounded');
   const dispatch = useDispatch();
 
   useEffect(() => {
-    menuItem.enabled = canInsert && !isResizing && !isDragging && !isDrawing;
-  }, [canInsert, isDragging, isResizing, isDrawing]);
+    menuItem.enabled = canInsert && !isResizing && !isDragging && !isDrawing && !isSelecting;
+  }, [canInsert, isDragging, isResizing, isDrawing, isSelecting]);
 
   useEffect(() => {
     menuItem.checked = insertingRounded;

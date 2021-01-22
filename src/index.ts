@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import electron, { app, BrowserWindow, ipcMain, systemPreferences, Menu, dialog, nativeTheme } from 'electron';
-import menu from './menu';
+// import menu from './menu';
 import { handleDocumentClose, getFocusedDocument, getWindowBackground, isMac, getAllDocumentWindows } from './utils';
 import { initialState as initialPreviewState } from './store/reducers/preview';
+import path from 'path';
 
 import {
   PREVIEW_TOPBAR_HEIGHT,
@@ -44,6 +45,7 @@ export const createNewDocument = ({width, height, document}: {width?: number; he
       minWidth: 1024,
       minHeight: 768,
       frame: false,
+      icon: path.join(__dirname, 'assets', 'icon-32x32.png'),
       titleBarStyle: 'hidden',
       backgroundColor: getWindowBackground(),
       webPreferences: {
@@ -94,7 +96,8 @@ const createPreviewWindow = ({width, height, documentWindowId}: {width: number; 
     titleBarStyle: 'hidden',
     backgroundColor: getWindowBackground(),
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      backgroundThrottling: false
     }
   });
 
@@ -105,6 +108,10 @@ const createPreviewWindow = ({width, height, documentWindowId}: {width: number; 
       BrowserWindow.fromId(documentWindowId).webContents.executeJavaScript(`setPreviewWindowId(${JSON.stringify(previewWindow.id)})`).then(() => {
         BrowserWindow.fromId(documentWindowId).webContents.executeJavaScript(`setPreviewFocusing(${JSON.stringify(true)})`).then(() => {
           BrowserWindow.fromId(documentWindowId).webContents.executeJavaScript(`getState()`).then((documentJSON) => {
+            const json = JSON.parse(documentJSON);
+            if (json.eventDrawer.event) {
+              previewWindow.setParentWindow(BrowserWindow.fromId(documentWindowId));
+            }
             previewWindow.webContents.executeJavaScript(`hydratePreview(${documentJSON})`);
             previewWindow.on('focus', () => {
               previewWindow.webContents.executeJavaScript(`setPreviewFocusing(${JSON.stringify(true)})`);

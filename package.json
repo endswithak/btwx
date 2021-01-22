@@ -17,7 +17,7 @@
   "config": {
     "forge": {
       "packagerConfig": {
-        "icon": "./src/assets/icon.icns"
+        "icon": "./src/assets/icon-512x512.png"
       },
       "makers": [
         {
@@ -109,7 +109,6 @@
   },
   "dependencies": {
     "chroma-js": "^2.1.0",
-    "custom-electron-titlebar": "^3.2.2-hotfix62",
     "electron-squirrel-startup": "^1.0.0",
     "font-finder": "^1.1.0",
     "gsap": "file:gsap-bonus.tgz",

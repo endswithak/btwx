@@ -44,6 +44,11 @@ export const setEventDrawerEventThunk = (payload: SetEventDrawerEventPayload) =>
       const previewWindow = state.preview.windowId ? remote.BrowserWindow.fromId(state.preview.windowId) : null;
       if (previewWindow) {
         previewWindow.webContents.executeJavaScript(`setEventDrawerEvent(${payload.id})`);
+        if (payload.id) {
+          previewWindow.setParentWindow(remote.BrowserWindow.fromId(state.preview.documentWindowId));
+        } else {
+          previewWindow.setParentWindow(null);
+        }
       }
     }
     dispatch(setEventDrawerEvent(payload));

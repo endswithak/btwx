@@ -1116,7 +1116,7 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
 }
 
 export default undoable(baseReducer, {
-  limit: false,
+  limit: 64,
   filter: (action: any) => {
     return (action.payload && action.payload.includeInHistory) || [
       ADD_ARTBOARD,
