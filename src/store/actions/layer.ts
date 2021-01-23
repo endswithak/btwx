@@ -224,6 +224,8 @@ import {
   SET_LAYERS_POINT_Y,
   SET_LAYER_LETTER_SPACING,
   SET_LAYERS_LETTER_SPACING,
+  SET_LAYER_TEXT_TRANSFORM,
+  SET_LAYERS_TEXT_TRANSFORM,
   SET_LAYER_FILL_TYPE,
   SET_LAYERS_FILL_TYPE,
   ADD_LAYERS_MASK,
@@ -475,6 +477,8 @@ import {
   SetLayersPointYPayload,
   SetLayerLetterSpacingPayload,
   SetLayersLetterSpacingPayload,
+  SetLayerTextTransformPayload,
+  SetLayersTextTransformPayload,
   SetLayerFillPayload,
   SetLayerFillTypePayload,
   SetLayersFillTypePayload,
@@ -2796,6 +2800,79 @@ export const setLayersLetterSpacingThunk = (payload: SetLayersLetterSpacingPaylo
     });
     dispatch(
       setLayersLetterSpacing({
+        ...payload,
+        bounds,
+        lines
+      })
+    )
+  }
+};
+
+export const setLayerTextTransform = (payload: SetLayerTextTransformPayload): LayerTypes => ({
+  type: SET_LAYER_TEXT_TRANSFORM,
+  payload
+});
+
+export const setLayersTextTransform = (payload: SetLayersTextTransformPayload): LayerTypes => ({
+  type: SET_LAYERS_TEXT_TRANSFORM,
+  payload
+});
+
+export const setLayersTextTransformThunk = (payload: SetLayersTextTransformPayload) => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    const lines: Btwx.TextLine[][] = [];
+    const bounds: Btwx.Frame[] = [];
+    payload.layers.forEach((id) => {
+      const layerItem = state.layer.present.byId[id] as Btwx.Text;
+      const newLines = [...layerItem.lines];
+      const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
+      const projectIndex = artboardItem.projectIndex;
+      const paperLayer = paperMain.projects[projectIndex].getItem({data: {id: id}});
+      const clone = paperLayer.clone({insert: false});
+      const textBackground = clone.getItem({data:{id:'textBackground'}});
+      const textLinesGroup = clone.getItem({data: {id: 'textLines'}});
+      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
+      clone.rotation = -layerItem.transform.rotation;
+      textLinesGroup.children.forEach((line: paper.PointText, index) => {
+        line.leading = layerItem.textStyle.fontSize;
+        line.skew(new paperMain.Point(layerItem.textStyle.oblique, 0));
+        line.content = (() => {
+          switch(payload.textTransform) {
+            case 'none':
+              return newLines[index].text;
+            case 'uppercase':
+              return newLines[index].text.toUpperCase();
+            case 'lowercase':
+              return newLines[index].text.toLowerCase();
+          }
+        })();
+        newLines[index].width = line.bounds.width;
+        line.skew(new paperMain.Point(-layerItem.textStyle.oblique, 0));
+        line.leading = layerItem.textStyle.leading;
+      });
+      const positionInArtboard = textLinesGroup.position.subtract(artboardPosition);
+      const innerWidth = newLines.reduce((result, current) => {
+        if (current.width > result) {
+          result = current.width;
+        }
+        return result;
+      }, 0);
+      const innerHeight = textLinesGroup.bounds.height;
+      textBackground.bounds = textLinesGroup.bounds;
+      clone.rotation = layerItem.transform.rotation;
+      lines.push(newLines);
+      bounds.push({
+        x: positionInArtboard.x,
+        y: positionInArtboard.y,
+        width: textBackground.bounds.width,
+        height: textBackground.bounds.height,
+        innerWidth: innerWidth,
+        innerHeight: innerHeight
+      });
+    });
+    dispatch(
+      setLayersTextTransform({
         ...payload,
         bounds,
         lines

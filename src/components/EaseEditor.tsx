@@ -45,7 +45,8 @@ const EaseEditor = (): ReactElement => {
   const dispatch = useDispatch();
 
   const onMouseDown = (event: any): void => {
-    if (editorRef.current && !editorRef.current.contains(event.target)) {
+    const previewButton = document.getElementById('preview-button');
+    if (editorRef.current && !editorRef.current.contains(event.target) && !previewButton.contains(event.target)) {
       dispatch(setEventDrawerTweenEditing({id: null}));
       dispatch(closeEaseEditor());
     }

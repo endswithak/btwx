@@ -33,6 +33,17 @@ export const getLayerAbsPosition = (layerFrame: Btwx.Frame, artboardFrame: Btwx.
   return position;
 }
 
+export const getLayerTextContent = (text: string, textTransform: Btwx.TextTransform): string => {
+  switch(textTransform) {
+    case 'none':
+      return text;
+    case 'uppercase':
+      return text.toUpperCase();
+    case 'lowercase':
+      return text.toLowerCase();
+  }
+}
+
 interface GetPaperStyle {
   style: Btwx.Style;
   textStyle?: Btwx.TextStyle;

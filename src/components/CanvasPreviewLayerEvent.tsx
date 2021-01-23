@@ -24,6 +24,7 @@ interface CanvasPreviewLayerEventStateProps {
   destinationArtboardPosition: paper.Point;
   editingEvent: boolean;
   edit: string;
+  tweenEdit: boolean;
   setPreviewTweening?(payload: SetPreviewTweeningPayload): PreviewTypes;
   setActiveArtboard?(payload: SetActiveArtboardPayload): LayerTypes;
 }
@@ -36,7 +37,7 @@ export interface EventLayerTimelineData {
 }
 
 const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps & CanvasPreviewLayerEventStateProps): ReactElement => {
-  const { edit, event, eventId, documentWindowId, destinationArtboardPosition, originArtboardPosition, eventTweenLayers, editingEvent, setPreviewTweening, setActiveArtboard } = props;
+  const { tweenEdit, edit, event, eventId, documentWindowId, destinationArtboardPosition, originArtboardPosition, eventTweenLayers, editingEvent, setPreviewTweening, setActiveArtboard } = props;
   const [prevEdit, setPrevEdit] = useState(null);
   const [eventTimeline, setEventTimeline] = useState(
     // create event timeline
@@ -114,7 +115,7 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps & CanvasPre
   }, []);
 
   useEffect(() => {
-    if (editingEvent && prevEdit) {
+    if (tweenEdit && prevEdit) {
       paperPreview.view.center = originArtboardPosition;
       setActiveArtboard({id: event.artboard});
       remote.BrowserWindow.fromId(documentWindowId).webContents.executeJavaScript(`setActiveArtboard(${JSON.stringify(event.artboard)})`);
@@ -145,9 +146,11 @@ const mapStateToProps = (state: RootState, ownProps: CanvasPreviewLayerEventProp
   const destinationArtboardItem = state.layer.present.byId[event.destinationArtboard] as Btwx.Artboard;
   const destinationArtboardPosition = new paperPreview.Point(destinationArtboardItem.frame.x, destinationArtboardItem.frame.y);
   const eventTweenLayers = getEventTweenLayers(state, ownProps.eventId);
-  const easeEditor = state.easeEditor;
-  const editingEvent = easeEditor.tween && event.tweens.includes(easeEditor.tween);
+  // const easeEditor = state.easeEditor;
+  const editingEvent = state.eventDrawer.event === ownProps.eventId; // easeEditor.tween && event.tweens.includes(easeEditor.tween);
   const edit = state.layer.present.edit.id;
+  const payloadString = JSON.stringify(state.layer.present.edit.payload);
+  const tweenEdit = event.tweens.some((id) => payloadString.includes(id));
   return {
     event,
     eventTweenLayers,
@@ -155,7 +158,8 @@ const mapStateToProps = (state: RootState, ownProps: CanvasPreviewLayerEventProp
     destinationArtboardPosition,
     originArtboardPosition,
     editingEvent,
-    edit
+    edit,
+    tweenEdit
   }
 }
 

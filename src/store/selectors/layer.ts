@@ -1627,6 +1627,22 @@ export const getSelectedJustification = createSelector(
   }
 );
 
+export const getSelectedTextTransform = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: Btwx.TextTransform | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Text;
+      if (!result) {
+        result = layerItem.textStyle.textTransform;
+      }
+      if (result && layerItem.textStyle.textTransform !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as Btwx.TextTransform | 'multi';
+  }
+);
+
 export const getSelectedPointX = createSelector(
   [ getSelectedById ],
   (selectedById) => {

@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import tinyColor from 'tinycolor2';
-import { getPaperStyle, getPaperParent, getTextAbsPoint, getLayerAbsBounds, getPaperLayerIndex } from '../store/utils/paper';
+import { getPaperStyle, getPaperParent, getTextAbsPoint, getLayerAbsBounds, getPaperLayerIndex, getLayerTextContent } from '../store/utils/paper';
 import { paperMain, paperPreview } from '../canvas';
 import CanvasLayerContainer, { CanvasLayerContainerProps } from './CanvasLayerContainer';
 import CanvasLayerFrame from './CanvasLayerFrame';
@@ -68,7 +68,7 @@ const CanvasTextLayer = (props: CanvasLayerContainerProps & CanvasTextLayerProps
           children: layerItem.lines.reduce((result: paper.PointText[], current: Btwx.TextLine, index: number) => {
             const line = new paperLayerScope.PointText({
               point: new paperLayerScope.Point(absPoint.x, absPoint.y + (index * layerItem.textStyle.leading)),
-              content: current.text,
+              content: getLayerTextContent(current.text, layerItem.textStyle.textTransform),
               data: {
                 id: 'textLine',
                 type: 'LayerChild',
@@ -138,7 +138,7 @@ const CanvasTextLayer = (props: CanvasLayerContainerProps & CanvasTextLayerProps
         const linePaperLayer = new paperLayerScope.PointText({
           parent: textLinesGroup,
           point: new paperLayerScope.Point(absPoint.x, absPoint.y + (i * layerItem.textStyle.leading)),
-          content: lineItem.text,
+          content: getLayerTextContent(lineItem.text, layerItem.textStyle.textTransform),
           data: {
             id: 'textLine',
             type: 'LayerChild',

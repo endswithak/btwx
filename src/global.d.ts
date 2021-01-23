@@ -263,6 +263,8 @@ declare namespace Btwx {
     blendMode: BlendMode;
   }
 
+  type TextTransform = 'uppercase' | 'lowercase' | 'none';
+
   interface TextStyle {
     fontSize: number;
     leading: number;
@@ -271,6 +273,7 @@ declare namespace Btwx {
     oblique: number;
     justification: Jusftification;
     letterSpacing: number;
+    textTransform: TextTransform;
   }
 
   type FillType = 'color' | 'gradient';
@@ -484,6 +487,13 @@ declare namespace Btwx {
     rough: RoughTween;
     slow: SlowTween;
   }
+
+  // type ShapeTweenType = 'linear' | 'rotational';
+
+  // interface ShapeTween {
+  //   type: ShapeTweenType;
+  //   origin: string;
+  // }
 
   interface TextTween {
     delimiter: string;

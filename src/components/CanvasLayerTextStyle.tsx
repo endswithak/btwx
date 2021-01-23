@@ -1,5 +1,5 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { getTextAbsPoint } from '../store/utils/paper';
+import { getLayerTextContent, getTextAbsPoint } from '../store/utils/paper';
 import { paperMain, paperPreview } from '../canvas';
 
 export interface CanvasLayerTextStyleProps {
@@ -22,6 +22,7 @@ const CanvasLayerTextStyle = (props: CanvasLayerTextStyleProps): ReactElement =>
   const [prevOblique, setPrevOblique] = useState(layerItem.textStyle.oblique);
   const [prevLeading, setPrevLeading] = useState(layerItem.textStyle.leading);
   const [prevLetterSpacing, setPrevLetterSpacing] = useState(layerItem.textStyle.letterSpacing);
+  const [prevTextTransform, setPrevTextTransform] = useState(layerItem.textStyle.textTransform);
 
   const getPaperLayer = (): {
     paperLayer: paper.Group;
@@ -84,6 +85,19 @@ const CanvasLayerTextStyle = (props: CanvasLayerTextStyleProps): ReactElement =>
       setPrevLetterSpacing(layerItem.textStyle.letterSpacing);
     }
   }, [layerItem.textStyle.letterSpacing]);
+
+  useEffect(() => {
+    if (rendered && prevTextTransform !== layerItem.textStyle.textTransform) {
+      const { paperLayer, textLinesGroup, textBackground } = getPaperLayer();
+      paperLayer.rotation = -layerItem.transform.rotation;
+      textLinesGroup.children.forEach((line: paper.PointText, index) => {
+        line.content = getLayerTextContent(layerItem.lines[index].text, layerItem.textStyle.textTransform);
+      });
+      textBackground.bounds = textLinesGroup.bounds;
+      paperLayer.rotation = layerItem.transform.rotation;
+      setPrevTextTransform(layerItem.textStyle.textTransform);
+    }
+  }, [layerItem.textStyle.textTransform]);
 
   useEffect(() => {
     if (rendered && prevFontSize !== layerItem.textStyle.fontSize) {

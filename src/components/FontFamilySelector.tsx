@@ -71,7 +71,9 @@ const FontFamilySelector = (): ReactElement => {
         searching={searching}
         setSearching={setSearching} />
       <FontFamilySelectorItems
-        itemData={itemData} />
+        itemData={itemData}
+        search={search}
+        searching={searching} />
     </div>
   );
 }

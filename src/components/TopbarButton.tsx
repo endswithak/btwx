@@ -13,6 +13,7 @@ interface TopbarButtonProps {
   hideLabel?: boolean;
   recording?: boolean;
   isRecord?: boolean;
+  id?: string;
 }
 
 interface ButtonWrapProps {
@@ -59,10 +60,11 @@ const ButtonWrap = styled.div<ButtonWrapProps>`
 
 const TopbarButton = (props: TopbarButtonProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { onClick, text, hideLabel, isActive, disabled, label, icon, recording, isRecord } = props;
+  const { onClick, text, hideLabel, isActive, disabled, label, icon, recording, isRecord, id } = props;
 
   return (
     <ButtonWrap
+      id={id ? id : null}
       className={`c-topbar-button ${disabled ? 'c-topbar-button--disabled' : null}`}
       theme={theme}
       isRecord={isRecord}

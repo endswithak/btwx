@@ -177,6 +177,8 @@ import {
   SET_LAYERS_FONT_SIZE,
   SET_LAYER_LETTER_SPACING,
   SET_LAYERS_LETTER_SPACING,
+  SET_LAYER_TEXT_TRANSFORM,
+  SET_LAYERS_TEXT_TRANSFORM,
   SET_LAYER_LEADING,
   SET_LAYERS_LEADING,
   SET_LAYER_FONT_WEIGHT,
@@ -418,6 +420,8 @@ import {
   setLayersFontSize,
   setLayerLetterSpacing,
   setLayersLetterSpacing,
+  setLayerTextTransform,
+  setLayersTextTransform,
   setLayerLeading,
   setLayersLeading,
   setLayerFontWeight,
@@ -926,6 +930,10 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayerLetterSpacing(state, action);
     case SET_LAYERS_LETTER_SPACING:
       return setLayersLetterSpacing(state, action);
+    case SET_LAYER_TEXT_TRANSFORM:
+      return setLayerTextTransform(state, action);
+    case SET_LAYERS_TEXT_TRANSFORM:
+      return setLayersTextTransform(state, action);
     case SET_LAYER_FONT_WEIGHT:
       return setLayerFontWeight(state, action);
     case SET_LAYERS_FONT_WEIGHT:
@@ -1272,6 +1280,8 @@ export default undoable(baseReducer, {
       SET_LAYERS_FONT_SIZE,
       SET_LAYER_LETTER_SPACING,
       SET_LAYERS_LETTER_SPACING,
+      SET_LAYER_TEXT_TRANSFORM,
+      SET_LAYERS_TEXT_TRANSFORM,
       SET_LAYER_LEADING,
       SET_LAYERS_LEADING,
       SET_LAYER_FONT_WEIGHT,

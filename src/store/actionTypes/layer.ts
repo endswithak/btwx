@@ -231,6 +231,8 @@ export const SET_LAYER_POINT_Y = 'SET_LAYER_POINT_Y';
 export const SET_LAYERS_POINT_Y = 'SET_LAYERS_POINT_Y';
 export const SET_LAYER_LETTER_SPACING = 'SET_LAYER_LETTER_SPACING';
 export const SET_LAYERS_LETTER_SPACING = 'SET_LAYERSS_LETTER_SPACING';
+export const SET_LAYER_TEXT_TRANSFORM = 'SET_LAYER_TEXT_TRANSFORM';
+export const SET_LAYERS_TEXT_TRANSFORM = 'SET_LAYERS_TEXT_TRANSFORM';
 
 export const SET_LAYER_UNDERLYING_MASK = 'SET_LAYER_UNDERLYING_MASK';
 export const SET_LAYERS_UNDERLYING_MASK = 'SET_LAYERS_UNDERLYING_MASK';
@@ -2334,6 +2336,30 @@ export interface SetLayersLetterSpacing {
   payload: SetLayersLetterSpacingPayload;
 }
 
+export interface SetLayerTextTransformPayload {
+  id: string;
+  textTransform: Btwx.TextTransform;
+  lines?: Btwx.TextLine[];
+  bounds?: Btwx.Frame;
+}
+
+export interface SetLayerTextTransform {
+  type: typeof SET_LAYER_TEXT_TRANSFORM;
+  payload: SetLayerTextTransformPayload;
+}
+
+export interface SetLayersTextTransformPayload {
+  layers: string[];
+  textTransform: Btwx.TextTransform;
+  lines?: Btwx.TextLine[][];
+  bounds?: Btwx.Frame[];
+}
+
+export interface SetLayersTextTransform {
+  type: typeof SET_LAYERS_TEXT_TRANSFORM;
+  payload: SetLayersTextTransformPayload;
+}
+
 export interface SetLayerFillPayload {
   id: string;
   fill: Btwx.Fill;
@@ -3205,6 +3231,8 @@ export type LayerTypes = AddArtboard |
                          SetLayersPointY |
                          SetLayerLetterSpacing |
                          SetLayersLetterSpacing |
+                         SetLayerTextTransform |
+                         SetLayersTextTransform |
                          SetLayerUnderlyingMask |
                          SetLayersUnderlyingMask |
                          ToggleLayerIgnoreUnderlyingMask |

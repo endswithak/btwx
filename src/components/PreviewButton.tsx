@@ -60,6 +60,7 @@ const PreviewButton = (): ReactElement => {
 
   return (
     <TopbarButton
+      id='preview-button'
       label='Preview'
       onClick={handlePreviewClick}
       icon={buttonIcon()}

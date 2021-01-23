@@ -244,6 +244,7 @@ export const DEFAULT_FONT_WEIGHT = 400;
 export const DEFAULT_OBLIQUE = 0;
 export const DEFAULT_JUSTIFICATION = 'left';
 export const DEFAULT_LETTER_SPACING = 0;
+export const DEFAULT_TEXT_TRANSFORM = 'none';
 export const DEFAULT_LEADING = 16;
 export const DEFAULT_TEXT_FILL_COLOR = { h: 0, s: 0, l: 0, v: 0, a: 1 };
 
@@ -254,7 +255,8 @@ export const DEFAULT_TEXT_STYLE: Btwx.TextStyle = {
   fontFamily: DEFAULT_FONT_FAMILY,
   oblique: DEFAULT_OBLIQUE,
   justification: DEFAULT_JUSTIFICATION,
-  letterSpacing: DEFAULT_LETTER_SPACING
+  letterSpacing: DEFAULT_LETTER_SPACING,
+  textTransform: DEFAULT_TEXT_TRANSFORM
 }
 
 export const APPLE_IPHONE_DEVICES: Btwx.Device[] = [

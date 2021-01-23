@@ -53,7 +53,7 @@ import {
   SetLayerStyle, SetLayersStyle, EnableLayersHorizontalFlip, DisableLayersHorizontalFlip, DisableLayersVerticalFlip, EnableLayersVerticalFlip,
   SetLayerScope, SetLayersScope, SetGlobalScope, SetLayerUnderlyingMask, SetLayersUnderlyingMask, SetLayerMasked, SetLayersMasked, ToggleLayerMask,
   ToggleLayersMask, ToggleLayersIgnoreUnderlyingMask, ToggleLayerIgnoreUnderlyingMask, AreaSelectLayers, SetLayersGradientOD, ResetImagesDimensions,
-  ResetImageDimensions, ReplaceImage, ReplaceImages, PasteLayersFromClipboard, SetLayerOblique, SetLayersOblique, SetLayerPointX, SetLayersPointX, SetLayerPointY, SetLayersPointY, SetLayerScrambleTextTweenCharacters, SetLayerScrambleTextTweenRevealDelay, SetLayerScrambleTextTweenSpeed, SetLayerScrambleTextTweenDelimiter, SetLayerScrambleTextTweenRightToLeft, SetLayerCustomBounceTweenStrength, SetLayerCustomBounceTweenEndAtStart, SetLayerCustomBounceTweenSquash, SetLayerCustomWiggleTweenWiggles, SetLayerCustomWiggleTweenType, SetLayerStepsTweenSteps, SetLayerRoughTweenClamp, SetLayerRoughTweenPoints, SetLayerRoughTweenRandomize, SetLayerRoughTweenStrength, SetLayerRoughTweenTaper, SetLayerRoughTweenTemplate, SetLayerSlowTweenLinearRatio, SetLayerSlowTweenPower, SetLayerSlowTweenYoYoMode, SetLayerTextTweenDelimiter, SetLayerTextTweenSpeed, SetLayerTextTweenDiff, SetLayerTextTweenScramble, SetLayerLeft, SetLayerCenter, SetLayersLeft, SetLayersCenter, SetLayerRight, SetLayersRight, SetLayerTop, SetLayersTop, SetLayerMiddle, SetLayersMiddle, SetLayerBottom, SetLayersBottom, SetLayerLetterSpacing, SetLayersLetterSpacing
+  ResetImageDimensions, ReplaceImage, ReplaceImages, PasteLayersFromClipboard, SetLayerOblique, SetLayersOblique, SetLayerPointX, SetLayersPointX, SetLayerPointY, SetLayersPointY, SetLayerScrambleTextTweenCharacters, SetLayerScrambleTextTweenRevealDelay, SetLayerScrambleTextTweenSpeed, SetLayerScrambleTextTweenDelimiter, SetLayerScrambleTextTweenRightToLeft, SetLayerCustomBounceTweenStrength, SetLayerCustomBounceTweenEndAtStart, SetLayerCustomBounceTweenSquash, SetLayerCustomWiggleTweenWiggles, SetLayerCustomWiggleTweenType, SetLayerStepsTweenSteps, SetLayerRoughTweenClamp, SetLayerRoughTweenPoints, SetLayerRoughTweenRandomize, SetLayerRoughTweenStrength, SetLayerRoughTweenTaper, SetLayerRoughTweenTemplate, SetLayerSlowTweenLinearRatio, SetLayerSlowTweenPower, SetLayerSlowTweenYoYoMode, SetLayerTextTweenDelimiter, SetLayerTextTweenSpeed, SetLayerTextTweenDiff, SetLayerTextTweenScramble, SetLayerLeft, SetLayerCenter, SetLayersLeft, SetLayersCenter, SetLayerRight, SetLayersRight, SetLayerTop, SetLayersTop, SetLayerMiddle, SetLayersMiddle, SetLayerBottom, SetLayersBottom, SetLayerLetterSpacing, SetLayersLetterSpacing, SetLayerTextTransform, SetLayersTextTransform
 } from '../actionTypes/layer';
 
 import {
@@ -2811,7 +2811,6 @@ export const setLayerTweenTiming = (state: LayerState, action: SetLayerTweenTimi
 
 export const setLayerTweenEase = (state: LayerState, action: SetLayerTweenEase): LayerState => {
   let currentState = state;
-  const prevEase = currentState.tweens.byId[action.payload.id].ease;
   currentState = {
     ...currentState,
     tweens: {
@@ -7612,6 +7611,79 @@ export const setLayersLetterSpacing = (state: LayerState, action: SetLayersLette
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Letter Spacing',
+      projects
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerTextTransform = (state: LayerState, action: SetLayerTextTransform): LayerState => {
+  let currentState = state;
+  const layerItem = currentState.byId[action.payload.id];
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        frame: action.payload.bounds ? {
+          ...currentState.byId[action.payload.id].frame,
+          ...action.payload.bounds
+        } : currentState.byId[action.payload.id].frame,
+        textStyle: {
+          ...(currentState.byId[action.payload.id] as Btwx.Text).textStyle,
+          textTransform: action.payload.textTransform
+        },
+        lines: action.payload.lines ? action.payload.lines : (currentState.byId[action.payload.id] as Btwx.Text).lines
+      } as Btwx.Text
+    }
+  }
+  if (groupParents.length > 0) {
+    currentState = groupParents.reduce((result, current) => {
+      const groupItem = result.byId[current];
+      const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      result = {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: {
+            ...result.byId[current],
+            frame: {
+              ...result.byId[current].frame,
+              x: layersBounds.center.x,
+              y: layersBounds.center.y,
+              width: layersBounds.width,
+              height: layersBounds.height,
+              innerWidth: layersBounds.width,
+              innerHeight: layersBounds.height
+            }
+          }
+        }
+      }
+      return result;
+    }, currentState);
+  }
+  return currentState;
+};
+
+export const setLayersTextTransform = (state: LayerState, action: SetLayersTextTransform): LayerState => {
+  let currentState = state;
+  const projects: string[] = [];
+  currentState = action.payload.layers.reduce((result, current, index) => {
+    const layerProject = currentState.byId[current].artboard;
+    const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
+    const lines = action.payload.lines ? action.payload.lines[index] : null;
+    if (!projects.includes(layerProject)) {
+      projects.push(layerProject);
+    }
+    return setLayerTextTransform(result, layerActions.setLayerTextTransform({id: current, textTransform: action.payload.textTransform, bounds, lines}) as SetLayerTextTransform);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layers Text Transform',
       projects
     }
   }) as SetLayerEdit);
