@@ -18,7 +18,7 @@
   display: flex
   flex-direction: column
   padding: $unit * 4
-  padding-right: 0
+  padding-left: 0
 
 .c-ease-editor-visualizer__top
   display: flex
@@ -122,3 +122,160 @@
   text-transform: uppercase
   cursor: default
   font-weight: $fontWeightBold
+
+.c-ease-editor__main
+  display: flex
+  flex-direction: column
+  height: 100%
+  width: 100%
+  flex-grow: 2
+  padding: $unit * 4
+
+.c-ease-editor-main__section
+  display: flex
+
+.c-ease-editor-main__section--body
+  flex-grow: 2
+  flex-direction: column
+
+.c-ease-editor-main__section--head
+  height: $unit * 16
+  display: flex
+  justify-content: space-between
+
+.c-ease-editor__tabs
+  width: 66.66%
+  height: $unit * 8
+  display: flex
+
+.c-ease-editor__tab
+  width: $unit * 10
+  height: $unit * 10
+  border-radius: 50%
+  display: flex
+  justify-content: center
+  align-items: center
+  margin-right: $unit * 2
+
+.c-ease-editor__tab--close
+  margin-right: 0
+
+.c-ease-editor-main__section--foot
+  height: $unit * 18
+  padding-top: $unit * 4
+
+.c-ease-editor__selector
+  position: relative
+  padding-bottom: $unit * 6
+  padding-top: $unit * 6
+
+.c-ease-editor-body__inputs
+  min-height: $unit * 28
+  padding-bottom: $unit * 2
+
+.c-ease-editor-body__powers
+  display: flex
+  width: 100%
+  height: 100%
+
+.c-ease-editor-body__power
+  display: flex
+  flex-direction: column
+  justify-content: center
+  width: 33.33%
+  padding: 0 $unit
+
+  &:first-child
+    padding-left: 0
+
+  &:last-child
+    padding-right: 0
+
+  button
+    display: flex
+    align-items: center
+    justify-content: center
+    height: 122px
+    border-radius: $unit
+
+  span
+    font-size: $fontSizeSm
+    font-family: $fontFamily
+    text-align: center
+    line-height: $unit * 6
+    padding-top: $unit * 2
+
+.c-ease-editor-body__input-description
+  display: flex
+  width: 100%
+  font-size: $fontSizeSm
+  line-height: $unit * 6
+  font-family: $fontFamily
+  flex-wrap: nowrap
+
+.c-ease-editor-body-input-description__type,
+.c-ease-editor-body-input-description__info
+  padding-top: $unit * 4
+
+.c-ease-editor-body-input-description__type
+  width: 33.33%
+  font-weight: $fontWeightBold
+  text-transform: uppercase
+  margin-right: $unit * 2
+
+.c-ease-editor-body-input-description__info
+  width: 66.66%
+
+.c-ease-editor-selector__input
+  font-size: $fontSizeLg
+  font-family: $fontFamily
+  height: $unit * 8
+  display: flex
+  justify-content: center
+
+.c-ease-editor-selector__dropdown
+  position: absolute
+  width: 200px
+  top: $unit * 8
+  left: 0
+  display: flex
+  padding: $unit
+  flex-direction: column
+  max-height: ($unit * 8) * 8
+  overflow: scroll
+  border-radius: $unit
+  backdrop-filter: blur(17px)
+  z-index: 99
+
+.c-ease-editor-selector__item
+  position: relative
+  display: flex
+  align-items: center
+  justify-content: center
+  height: $unit * 8
+  width: 100%
+  padding: 0 $unit
+  border-radius: $unit
+
+.c-ease-editor-selector-item__icon
+  flex-grow: 0
+  flex-shrink: 0
+  width: $unit * 10
+  height $unit * 10
+  display: flex
+  align-items: center
+  justify-content: center
+
+.c-ease-editor-selector-item__label
+  flex-grow: 2
+  font-family: $fontFamily
+  font-size: $fontSizeSm
+  line-height: $unit * 8
+  padding: 0
+  text-align: left
+
+.c-ease-editor__body
+  display: flex
+  flex-direction: column
+  justify-content: space-between
+  flex-grow: 2

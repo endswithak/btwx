@@ -4,7 +4,12 @@ import { RootState } from '../store/reducers';
 import { setLayerStepsTweenSteps } from '../store/actions/layer';
 import SidebarInput from './SidebarInput';
 
-const EaseEditorStepsInput = (): ReactElement => {
+interface EaseEditorStepsInputProps {
+  setInputInfo(inputInfo: { type: string; description: string }): void;
+}
+
+const EaseEditorStepsInput = (props: EaseEditorStepsInputProps): ReactElement => {
+  const { setInputInfo } = props;
   const id = useSelector((state: RootState) => state.easeEditor.tween);
   const stepsValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].steps.steps : null);
   const disabled = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].ease !== 'steps' : true);
@@ -34,6 +39,17 @@ const EaseEditorStepsInput = (): ReactElement => {
     }
   }
 
+  const handleFocus = () => {
+    setInputInfo({
+      type: 'Number',
+      description: 'Ammount of steps the transition should take.'
+    });
+  }
+
+  const handleBlur = () => {
+    setInputInfo(null);
+  }
+
   useEffect(() => {
     setSteps(stepsValue);
   }, [stepsValue]);
@@ -42,6 +58,8 @@ const EaseEditorStepsInput = (): ReactElement => {
     <SidebarInput
       value={steps}
       disabled={disabled}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
       onChange={handleStepsChange}
       onSubmit={handleStepsSubmit}
       submitOnBlur

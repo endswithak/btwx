@@ -5,7 +5,12 @@ import { RootState } from '../store/reducers';
 import { setLayerRoughTweenStrength } from '../store/actions/layer';
 import SidebarInput from './SidebarInput';
 
-const EaseEditorRoughStrengthInput = (): ReactElement => {
+interface EaseEditorRoughStrengthInputProps {
+  setInputInfo(inputInfo: { type: string; description: string }): void;
+}
+
+const EaseEditorRoughStrengthInput = (props: EaseEditorRoughStrengthInputProps): ReactElement => {
+  const { setInputInfo } = props;
   const id = useSelector((state: RootState) => state.easeEditor.tween);
   const strengthValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].rough.strength : null);
   const disabled = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].ease !== 'rough' : true);
@@ -35,6 +40,17 @@ const EaseEditorRoughStrengthInput = (): ReactElement => {
     }
   }
 
+  const handleFocus = () => {
+    setInputInfo({
+      type: 'Number',
+      description: 'Controls how far from the template ease the points are allowed to wander (a small number like 0.1 keeps it very close to the template ease whereas a larger number like 5 creates much bigger variations).'
+    });
+  }
+
+  const handleBlur = () => {
+    setInputInfo(null);
+  }
+
   useEffect(() => {
     setStrength(strengthValue);
   }, [strengthValue]);
@@ -43,6 +59,8 @@ const EaseEditorRoughStrengthInput = (): ReactElement => {
     <SidebarInput
       value={strength}
       disabled={disabled}
+      onBlur={handleBlur}
+      onFocus={handleFocus}
       onChange={handleStrengthChange}
       onSubmit={handleStrengthSubmit}
       submitOnBlur

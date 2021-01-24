@@ -1,6 +1,7 @@
 import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import gsap from 'gsap';
+import tinyColor from 'tinycolor2';
 import { CustomEase } from 'gsap/CustomEase';
 import { RoughEase, SlowMo } from 'gsap/EasePack';
 import { CustomBounce } from 'gsap/CustomBounce';
@@ -73,35 +74,14 @@ const EaseEditor = (): ReactElement => {
       ref={visualizerRef}
       className='c-ease-editor__visualizer'
       style={{
-        background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
-        boxShadow: `-1px 0 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
+        background: tinyColor(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).setAlpha(0.77).toRgbString(),
+        // background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
+        boxShadow: `-1px 0 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`,
+        backdropFilter: 'blur(17px)',
+        borderRadius: `${theme.unit}px 0 0 ${theme.unit}px`,
+        overflow: 'hidden'
       }}>
       <div className='c-ease-editor-visualizer__top'>
-        <div
-          className='c-ease-editor__graph'
-          style={{
-            position: 'relative',
-            //background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
-            width: 400,
-            height: 536
-          }}>
-          <svg
-            viewBox='0 0 400 400'
-            preserveAspectRatio='xMidYMid meet'
-            style={{
-              width: '100%',
-              height: '100%',
-              position: 'absolute',
-              overflow: 'visible',
-              maxHeight: 400,
-              bottom: 72
-            }}>
-            <line x1="0" y1="0" x2="400" y2="0" stroke={theme.text.lightest} opacity='0.5'></line>
-            <path ref={pathRef} d={pathData} strokeWidth='1' stroke={theme.text.lightest} opacity='0.5' fill='none'></path>
-            <path ref={pathRevealRef} d={pathData} strokeWidth='1' stroke={theme.text.base} fill='none'></path>
-            <line x1="0" y1="400" x2="400" y2="400" stroke={theme.text.lightest} opacity='0.5'></line>
-          </svg>
-        </div>
         <div
           className='c-ease-editor__value'
           style={{
@@ -129,6 +109,31 @@ const EaseEditor = (): ReactElement => {
               background: theme.palette.primary,
               bottom: 72
             }} />
+        </div>
+        <div
+          className='c-ease-editor__graph'
+          style={{
+            position: 'relative',
+            //background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
+            width: 400,
+            height: 536
+          }}>
+          <svg
+            viewBox='0 0 400 400'
+            preserveAspectRatio='xMidYMid meet'
+            style={{
+              width: '100%',
+              height: '100%',
+              position: 'absolute',
+              overflow: 'visible',
+              maxHeight: 400,
+              bottom: 72
+            }}>
+            <line x1="0" y1="0" x2="400" y2="0" stroke={theme.text.lightest} opacity='0.5'></line>
+            <path ref={pathRef} d={pathData} strokeWidth='1' stroke={theme.text.lightest} opacity='0.5' fill='none'></path>
+            <path ref={pathRevealRef} d={pathData} strokeWidth='1' stroke={theme.text.base} fill='none'></path>
+            <line x1="0" y1="400" x2="400" y2="400" stroke={theme.text.lightest} opacity='0.5'></line>
+          </svg>
         </div>
       </div>
     </div>

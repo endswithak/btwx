@@ -5,7 +5,12 @@ import { RootState } from '../store/reducers';
 import { setLayerCustomBounceTweenStrength } from '../store/actions/layer';
 import SidebarInput from './SidebarInput';
 
-const EaseEditorBounceStrengthInput = (): ReactElement => {
+interface EaseEditorBounceStrengthInputProps {
+  setInputInfo(inputInfo: { type: string; description: string }): void;
+}
+
+const EaseEditorBounceStrengthInput = (props: EaseEditorBounceStrengthInputProps): ReactElement => {
+  const { setInputInfo } = props;
   const id = useSelector((state: RootState) => state.easeEditor.tween);
   const strengthValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].customBounce.strength : null);
   const disabled = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].ease !== 'customBounce' : true);
@@ -38,6 +43,17 @@ const EaseEditorBounceStrengthInput = (): ReactElement => {
     }
   }
 
+  const handleFocus = () => {
+    setInputInfo({
+      type: 'Number',
+      description: 'A number between 0 and 1 that determines how “bouncy” the ease is.'
+    });
+  }
+
+  const handleBlur = () => {
+    setInputInfo(null);
+  }
+
   useEffect(() => {
     setStrength(strengthValue);
   }, [strengthValue]);
@@ -46,6 +62,8 @@ const EaseEditorBounceStrengthInput = (): ReactElement => {
     <SidebarInput
       value={strength}
       disabled={disabled}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
       onChange={handleStrengthChange}
       onSubmit={handleStrengthSubmit}
       submitOnBlur

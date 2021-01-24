@@ -5,7 +5,12 @@ import { RootState } from '../store/reducers';
 import { setLayerSlowTweenPower } from '../store/actions/layer';
 import SidebarInput from './SidebarInput';
 
-const EaseEditorSlowPowerInput = (): ReactElement => {
+interface EaseEditorSlowPowerInputProps {
+  setInputInfo(inputInfo: { type: string; description: string }): void;
+}
+
+const EaseEditorSlowPowerInput = (props: EaseEditorSlowPowerInputProps): ReactElement => {
+  const { setInputInfo } = props;
   const id = useSelector((state: RootState) => state.easeEditor.tween);
   const powerValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].slow.power : null);
   const disabled = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].ease !== 'slow' : true);
@@ -35,6 +40,17 @@ const EaseEditorSlowPowerInput = (): ReactElement => {
     }
   }
 
+  const handleFocus = () => {
+    setInputInfo({
+      type: 'Number',
+      description: 'Determines the strength of the ease at each end.'
+    });
+  }
+
+  const handleBlur = () => {
+    setInputInfo(null);
+  }
+
   useEffect(() => {
     setPower(powerValue);
   }, [powerValue]);
@@ -43,6 +59,8 @@ const EaseEditorSlowPowerInput = (): ReactElement => {
     <SidebarInput
       value={power}
       disabled={disabled}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
       onChange={handlePowerChange}
       onSubmit={handlePowerSubmit}
       submitOnBlur

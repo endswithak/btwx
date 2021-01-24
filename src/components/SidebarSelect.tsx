@@ -9,6 +9,8 @@ interface SidebarSelectProps {
   placeholder: string;
   options: { value: string | number; label: string | number }[];
   onChange(selectedOption: { value: string | number; label: string | number }): void;
+  onFocus?(): void;
+  onBlur?(): void;
   type?: 'fontFamily' | 'fontWeight';
   data?: {
     fontFamily: string;
@@ -55,6 +57,8 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
       <Select
         value={props.value}
         onChange={props.onChange}
+        onFocus={props.onFocus}
+        onBlur={props.onBlur}
         components={{ DropdownIndicator, IndicatorSeparator: null }}
         options={props.options}
         placeholder={props.placeholder}

@@ -8,7 +8,12 @@ import SidebarInput from './SidebarInput';
 
 gsap.registerPlugin(CustomEase);
 
-const EaseEditorRoughTemplateInput = (): ReactElement => {
+interface EaseEditorRoughTemplateInputProps {
+  setInputInfo(inputInfo: { type: string; description: string }): void;
+}
+
+const EaseEditorRoughTemplateInput = (props: EaseEditorRoughTemplateInputProps): ReactElement => {
+  const { setInputInfo } = props;
   const id = useSelector((state: RootState) => state.easeEditor.tween);
   const templateValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].rough.template : null);
   const disabled = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].ease !== 'rough' : true);
@@ -21,13 +26,26 @@ const EaseEditorRoughTemplateInput = (): ReactElement => {
   };
 
   const handleStrengthSubmit = (e: any): void => {
-    try {
-      CustomEase.getSVGData(template, {width: 100, height: 100});
-      dispatch(setLayerRoughTweenTemplate({id: id, template: template}));
-      setTemplate(template);
-    } catch(error) {
-      setTemplate(templateValue);
+    if (e.target.value !== 'none') {
+      try {
+        CustomEase.getSVGData(template, {width: 100, height: 100});
+        dispatch(setLayerRoughTweenTemplate({id: id, template: template}));
+        setTemplate(template);
+      } catch(error) {
+        setTemplate(templateValue);
+      }
     }
+  }
+
+  const handleFocus = () => {
+    setInputInfo({
+      type: 'String',
+      description: 'An ease that should be used as a template, like a general guide. The RoughEase will plot points that wander from that template. You can use this to influence the general shape of the RoughEase.'
+    });
+  }
+
+  const handleBlur = () => {
+    setInputInfo(null);
   }
 
   useEffect(() => {
@@ -38,6 +56,8 @@ const EaseEditorRoughTemplateInput = (): ReactElement => {
     <SidebarInput
       value={template}
       disabled={disabled}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
       onChange={handleStrengthChange}
       onSubmit={handleStrengthSubmit}
       submitOnBlur

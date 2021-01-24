@@ -4,7 +4,12 @@ import { RootState } from '../store/reducers';
 import { setLayerRoughTweenPoints } from '../store/actions/layer';
 import SidebarInput from './SidebarInput';
 
-const EaseEditorRoughPointsInput = (): ReactElement => {
+interface EaseEditorRoughPointsInputProps {
+  setInputInfo(inputInfo: { type: string; description: string }): void;
+}
+
+const EaseEditorRoughPointsInput = (props: EaseEditorRoughPointsInputProps): ReactElement => {
+  const { setInputInfo } = props;
   const id = useSelector((state: RootState) => state.easeEditor.tween);
   const pointsValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].rough.points : null);
   const disabled = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].ease !== 'rough' : true);
@@ -34,6 +39,17 @@ const EaseEditorRoughPointsInput = (): ReactElement => {
     }
   }
 
+  const handleFocus = () => {
+    setInputInfo({
+      type: 'Number',
+      description: 'The number of points to be plotted along the ease, making it jerk more or less frequently.'
+    });
+  }
+
+  const handleBlur = () => {
+    setInputInfo(null);
+  }
+
   useEffect(() => {
     setPoints(pointsValue);
   }, [pointsValue]);
@@ -42,6 +58,8 @@ const EaseEditorRoughPointsInput = (): ReactElement => {
     <SidebarInput
       value={points}
       disabled={disabled}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
       onChange={handlePointsChange}
       onSubmit={handlePointsSubmit}
       submitOnBlur

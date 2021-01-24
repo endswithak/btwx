@@ -5,7 +5,12 @@ import { RootState } from '../store/reducers';
 import { setLayerSlowTweenLinearRatio } from '../store/actions/layer';
 import SidebarInput from './SidebarInput';
 
-const EaseEditorSlowLinearRatioInput = (): ReactElement => {
+interface EaseEditorSlowLinearRatioInputProps {
+  setInputInfo(inputInfo: { type: string; description: string }): void;
+}
+
+const EaseEditorSlowLinearRatioInput = (props: EaseEditorSlowLinearRatioInputProps): ReactElement => {
+  const { setInputInfo } = props;
   const id = useSelector((state: RootState) => state.easeEditor.tween);
   const linearRatioValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].slow.linearRatio : null);
   const disabled = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].ease !== 'slow' : true);
@@ -38,6 +43,17 @@ const EaseEditorSlowLinearRatioInput = (): ReactElement => {
     }
   }
 
+  const handleFocus = () => {
+    setInputInfo({
+      type: 'Number',
+      description: 'Determines the proportion of the ease during which the rate of change will be linear (steady pace). This should be a number between 0 and 1.'
+    });
+  }
+
+  const handleBlur = () => {
+    setInputInfo(null);
+  }
+
   useEffect(() => {
     setLinearRatio(linearRatioValue);
   }, [linearRatioValue]);
@@ -46,6 +62,8 @@ const EaseEditorSlowLinearRatioInput = (): ReactElement => {
     <SidebarInput
       value={linearRatio}
       disabled={disabled}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
       onChange={handleLinearRatioChange}
       onSubmit={handleLinearRatioSubmit}
       submitOnBlur
