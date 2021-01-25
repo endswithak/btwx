@@ -1,15 +1,13 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { ReactElement, useEffect, useState, useContext } from 'react';
+import React, { ReactElement, useContext } from 'react';
 import gsap from 'gsap';
 import { CustomEase } from 'gsap/CustomEase';
 import styled from 'styled-components';
 import { useSelector, useDispatch } from 'react-redux';
-import capitalize from 'lodash.capitalize'
 import { RootState } from '../store/reducers';
 import { setLayerTweenPower } from '../store/actions/layer';
-import { DEFAULT_TWEEN_POWER_OPTIONS, DEFAULT_EASE_CURVES } from '../constants';
+import { DEFAULT_EASE_CURVES } from '../constants';
 import { ThemeContext } from './ThemeProvider';
-import SidebarSelect from './SidebarSelect';
 
 gsap.registerPlugin(CustomEase);
 
@@ -44,14 +42,14 @@ const EaseEditorPowerInput = (): ReactElement => {
   const powerValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].power : null);
   const dispatch = useDispatch();
 
-  const handleClick = (power: any) => {
+  const handleClick = (power: any): void => {
     dispatch(setLayerTweenPower({id: easeId, power: power}))
   }
 
   return (
     <div className='c-ease-editor-body__powers'>
       {
-        Object.keys(DEFAULT_EASE_CURVES[easeValue]).map((key, index) => (
+        Object.keys((DEFAULT_EASE_CURVES as any)[easeValue]).map((key, index) => (
           <div
             key={index}
             className='c-ease-editor-body__power'>
@@ -68,7 +66,7 @@ const EaseEditorPowerInput = (): ReactElement => {
                   fill: 'none',
                   overflow: 'visible'
                 }}>
-                <path d={CustomEase.getSVGData(DEFAULT_EASE_CURVES[easeValue][key], {width: 64, height: 64})} />
+                <path d={CustomEase.getSVGData((DEFAULT_EASE_CURVES as any)[easeValue][key], {width: 64, height: 64})} />
               </svg>
             </Button>
             <span style={{
@@ -84,48 +82,3 @@ const EaseEditorPowerInput = (): ReactElement => {
 }
 
 export default EaseEditorPowerInput;
-// /* eslint-disable @typescript-eslint/no-use-before-define */
-// import React, { ReactElement, useEffect, useState } from 'react';
-// import { useSelector, useDispatch } from 'react-redux';
-// import capitalize from 'lodash.capitalize'
-// import { RootState } from '../store/reducers';
-// import { setLayerTweenPower } from '../store/actions/layer';
-// import { DEFAULT_TWEEN_POWER_OPTIONS } from '../constants';
-// import SidebarSelect from './SidebarSelect';
-
-// const EaseEditorPowerInput = (): ReactElement => {
-//   const id = useSelector((state: RootState) => state.easeEditor.tween);
-//   const powerValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].power : null);
-//   const disabled = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].ease === 'customBounce' || state.layer.present.tweens.byId[state.easeEditor.tween].ease === 'customWiggle' : true);
-//   const dispatch = useDispatch();
-
-//   const powerOptions = DEFAULT_TWEEN_POWER_OPTIONS.map((option) => ({
-//     value: option,
-//     label: option === 'inOut'
-//     ? 'In Out'
-//     : capitalize(option)
-//   }));
-
-//   const [power, setPower] = useState(powerValue ? powerOptions.find((option) => option.value === powerValue) : null);
-
-//   useEffect(() => {
-//     setPower(powerValue ? powerOptions.find((option) => option.value === powerValue) : null);
-//   }, [powerValue]);
-
-//   const handleSelectorChange = (selectedOption: { value: Btwx.CubicBezierType; label: string }): void => {
-//     setPower(selectedOption);
-//     dispatch(setLayerTweenPower({id: id, power: selectedOption.value}));
-//   }
-
-//   return (
-//     <SidebarSelect
-//       value={power}
-//       onChange={handleSelectorChange}
-//       disabled={disabled}
-//       options={powerOptions}
-//       placeholder='multi'
-//       bottomLabel='Power' />
-//   );
-// }
-
-// export default EaseEditorPowerInput;

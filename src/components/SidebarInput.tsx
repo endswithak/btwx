@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { clipboard } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
