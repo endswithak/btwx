@@ -5,11 +5,11 @@ import { setLayerCustomBounceTweenSquash } from '../store/actions/layer';
 import SidebarInput from './SidebarInput';
 
 interface EaseEditorBounceSquashInputProps {
-  setInputInfo(inputInfo: { type: string; description: string }): void;
+  setParamInfo(paramInfo: Btwx.ParamInfo): void;
 }
 
 const EaseEditorBounceSquashInput = (props: EaseEditorBounceSquashInputProps): ReactElement => {
-  const { setInputInfo } = props;
+  const { setParamInfo } = props;
   const id = useSelector((state: RootState) => state.easeEditor.tween);
   const squashValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].customBounce.squash : null);
   const disabled = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].ease !== 'customBounce' : true);
@@ -39,15 +39,15 @@ const EaseEditorBounceSquashInput = (props: EaseEditorBounceSquashInputProps): R
     }
   }
 
-  const handleFocus = () => {
-    setInputInfo({
+  const handleFocus = (): void => {
+    setParamInfo({
       type: 'Number',
       description: 'Controls how long the squash should last (the gap between bounces, when it appears “stuck”).'
     });
   }
 
-  const handleBlur = () => {
-    setInputInfo(null);
+  const handleBlur = (): void => {
+    setParamInfo(null);
   }
 
   useEffect(() => {
@@ -63,6 +63,7 @@ const EaseEditorBounceSquashInput = (props: EaseEditorBounceSquashInputProps): R
       onChange={handleSquashChange}
       onSubmit={handleSquashSubmit}
       submitOnBlur
+      manualCanvasFocus
       bottomLabel='Squash' />
   );
 }

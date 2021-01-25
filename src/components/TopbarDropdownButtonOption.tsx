@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement } from 'react';
+import tinyColor from 'tinycolor2';
 import styled from 'styled-components';
 import { ThemeContext } from './ThemeProvider';
 import Icon from './Icon';
@@ -16,10 +17,10 @@ export interface TopbarDropdownButtonOptionProps {
 }
 
 const Button = styled.button<TopbarDropdownButtonOptionProps>`
-  background: ${props => !props.checkbox && props.isActive ? props.theme.palette.primary : 'none'};
+  background: ${props => !props.checkbox && props.isActive ? tinyColor(props.theme.text.lightest).setAlpha(0.15).toHslString() : 'none'};
   .c-topbar-dropdown-button__icon {
     svg {
-      fill: ${props => props.isActive && !props.checkbox ? props.theme.text.onPrimary : props.theme.text.lighter};
+      fill: ${props => props.theme.text.lighter};
     }
   }
   .c-topbar-dropdown-button__icon--checkbox {
@@ -28,7 +29,7 @@ const Button = styled.button<TopbarDropdownButtonOptionProps>`
     }
   }
   .c-topbar-dropdown-button__label {
-    color: ${props => props.checkbox ? props.theme.text.base : props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
+    color: ${props => props.theme.text.base};
   }
   :after {
     background: ${props => props.theme.text.lightest};
@@ -47,7 +48,7 @@ const Button = styled.button<TopbarDropdownButtonOptionProps>`
     }
   }
   :hover {
-    background: ${props => props.isActive && !props.checkbox ? props.theme.palette.primaryHover : props.theme.palette.primary};
+    background: ${props => props.theme.palette.primary};
     .c-topbar-dropdown-button__icon {
       svg {
         fill: ${props => props.theme.text.onPrimary};

@@ -517,6 +517,13 @@ declare namespace Btwx {
     steps: number;
   }
 
+  type EaseEditorTab = 'ease' | 'text';
+
+  interface ParamInfo {
+    type: string;
+    description: string;
+  }
+
   type RoughTweenTaper = 'in' | 'out' | 'both' | 'none';
 
   interface RoughTween {
@@ -526,6 +533,7 @@ declare namespace Btwx {
     strength: number;
     taper: RoughTweenTaper;
     template: string;
+    ref: string;
   }
 
   interface SlowTween {

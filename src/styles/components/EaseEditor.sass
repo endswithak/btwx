@@ -15,10 +15,13 @@
     background: none
 
 .c-ease-editor__visualizer
+  +background-blur
   display: flex
   flex-direction: column
   padding: $unit * 4
   padding-left: 0
+  borderRadius: $unit 0 0 $unit
+  overflow: hidden
 
 .c-ease-editor-visualizer__top
   display: flex
@@ -164,12 +167,16 @@
   height: $unit * 18
   padding-top: $unit * 4
 
+.c-ease-editor__param-selector
+  display: flex
+
 .c-ease-editor__selector
   position: relative
   padding-bottom: $unit * 6
   padding-top: $unit * 6
+  flex-grow: 0
 
-.c-ease-editor-body__inputs
+.c-ease-editor__params
   min-height: $unit * 28
   padding-bottom: $unit * 2
 
@@ -195,7 +202,7 @@
     display: flex
     align-items: center
     justify-content: center
-    height: 122px
+    height: 88px
     border-radius: $unit
 
   span
@@ -211,20 +218,16 @@
   font-size: $fontSizeSm
   line-height: $unit * 6
   font-family: $fontFamily
-  flex-wrap: nowrap
-
-.c-ease-editor-body-input-description__type,
-.c-ease-editor-body-input-description__info
-  padding-top: $unit * 4
+  flex-direction: column
 
 .c-ease-editor-body-input-description__type
-  width: 33.33%
   font-weight: $fontWeightBold
   text-transform: uppercase
-  margin-right: $unit * 2
+  padding-top: $unit * 4
+  line-height: $unit * 4
 
 .c-ease-editor-body-input-description__info
-  width: 66.66%
+  padding-top: $unit * 2
 
 .c-ease-editor-selector__input
   font-size: $fontSizeLg
@@ -234,9 +237,10 @@
   justify-content: center
 
 .c-ease-editor-selector__dropdown
+  +background-blur
   position: absolute
   width: 200px
-  top: $unit * 8
+  top: $unit * 6
   left: 0
   display: flex
   padding: $unit
@@ -244,7 +248,6 @@
   max-height: ($unit * 8) * 8
   overflow: scroll
   border-radius: $unit
-  backdrop-filter: blur(17px)
   z-index: 99
 
 .c-ease-editor-selector__item
@@ -279,3 +282,25 @@
   flex-direction: column
   justify-content: space-between
   flex-grow: 2
+
+.c-ease-editor__copy-ease
+  font-family: $fontFamily
+  font-size: $fontSizeMd
+  font-weight: $fontWeightBold
+  line-height: $unit * 6
+  text-align: right
+  padding: 0
+  position: absolute
+  bottom: 28px
+  right: 0
+
+.c-ease-editor__copied-indicator
+  font-family: $fontFamily
+  font-size: $fontSizeXs
+  line-height: $unit * 6
+  text-transform: uppercase
+  text-align: right
+  padding: 0
+  position: absolute
+  bottom: 0
+  right: 0

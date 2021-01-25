@@ -17,7 +17,7 @@ const EaseEditorEaseInput = (): ReactElement => {
   const dispatch = useDispatch();
 
   const selectorOptions = Object.keys(DEFAULT_EASE_CURVES).map((key, index) => {
-    const easeCurves = DEFAULT_EASE_CURVES[key];
+    const easeCurves = (DEFAULT_EASE_CURVES as any)[key];
     const icon = CustomEase.getSVGData(easeCurves.out, {width: 24, height: 24});
     return {
       value: key,
@@ -26,7 +26,7 @@ const EaseEditorEaseInput = (): ReactElement => {
         : capitalize(key),
       icon: icon,
       onClick: () => {
-        dispatch(setLayerTweenEase({id: id, ease: key}));
+        dispatch(setLayerTweenEase({id: id, ease: key as any}));
       }
     }
   });

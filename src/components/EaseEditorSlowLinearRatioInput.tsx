@@ -6,11 +6,11 @@ import { setLayerSlowTweenLinearRatio } from '../store/actions/layer';
 import SidebarInput from './SidebarInput';
 
 interface EaseEditorSlowLinearRatioInputProps {
-  setInputInfo(inputInfo: { type: string; description: string }): void;
+  setParamInfo(paramInfo: Btwx.ParamInfo): void;
 }
 
 const EaseEditorSlowLinearRatioInput = (props: EaseEditorSlowLinearRatioInputProps): ReactElement => {
-  const { setInputInfo } = props;
+  const { setParamInfo } = props;
   const id = useSelector((state: RootState) => state.easeEditor.tween);
   const linearRatioValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].slow.linearRatio : null);
   const disabled = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].ease !== 'slow' : true);
@@ -43,15 +43,15 @@ const EaseEditorSlowLinearRatioInput = (props: EaseEditorSlowLinearRatioInputPro
     }
   }
 
-  const handleFocus = () => {
-    setInputInfo({
+  const handleFocus = (): void => {
+    setParamInfo({
       type: 'Number',
       description: 'Determines the proportion of the ease during which the rate of change will be linear (steady pace). This should be a number between 0 and 1.'
     });
   }
 
-  const handleBlur = () => {
-    setInputInfo(null);
+  const handleBlur = (): void => {
+    setParamInfo(null);
   }
 
   useEffect(() => {
@@ -66,7 +66,9 @@ const EaseEditorSlowLinearRatioInput = (props: EaseEditorSlowLinearRatioInputPro
       onBlur={handleBlur}
       onChange={handleLinearRatioChange}
       onSubmit={handleLinearRatioSubmit}
+      selectOnMount
       submitOnBlur
+      manualCanvasFocus
       bottomLabel='Ratio' />
   );
 }

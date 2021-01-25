@@ -1,13 +1,8 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { ReactElement, useEffect, useState, useContext } from 'react';
+import React, { ReactElement, useContext } from 'react';
+import tinyColor from 'tinycolor2';
 import styled from 'styled-components';
-import { useSelector, useDispatch } from 'react-redux';
-import capitalize from 'lodash.capitalize';
-import { RootState } from '../store/reducers';
-import { setLayerTweenEase } from '../store/actions/layer';
-import { DEFAULT_TWEEN_EASE_OPTIONS } from '../constants';
 import { ThemeContext } from './ThemeProvider';
-import Icon from './Icon';
 
 export interface TopbarDropdownButtonOptionProps {
   onClick(event: React.SyntheticEvent): void;
@@ -18,20 +13,17 @@ export interface TopbarDropdownButtonOptionProps {
 }
 
 const Button = styled.button<TopbarDropdownButtonOptionProps>`
-  background: ${props => props.isActive ? props.theme.palette.primary : 'none'};
+  background: ${props => props.isActive ? tinyColor(props.theme.text.lightest).setAlpha(0.15).toHslString() : 'none'};
   .c-ease-editor-selector-item__icon {
     svg {
-      stroke: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.lighter};
+      stroke: ${props => props.theme.text.lighter};
     }
   }
   .c-ease-editor-selector-item__label {
-    color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
-  }
-  :after {
-    background: ${props => props.theme.text.lightest};
+    color: ${props => props.theme.text.base};
   }
   :hover {
-    background: ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.palette.primary};
+    background: ${props => props.theme.palette.primary};
     .c-ease-editor-selector-item__icon {
       svg {
         stroke: ${props => props.theme.text.onPrimary};

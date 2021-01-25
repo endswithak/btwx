@@ -924,6 +924,7 @@ export interface SetLayerStepsTweenSteps {
 export interface SetLayerRoughTweenClampPayload {
   id: string;
   clamp: boolean;
+  ref: string;
 }
 
 export interface SetLayerRoughTweenClamp {
@@ -934,6 +935,7 @@ export interface SetLayerRoughTweenClamp {
 export interface SetLayerRoughTweenPointsPayload {
   id: string;
   points: number;
+  ref: string;
 }
 
 export interface SetLayerRoughTweenPoints {
@@ -944,6 +946,7 @@ export interface SetLayerRoughTweenPoints {
 export interface SetLayerRoughTweenRandomizePayload {
   id: string;
   randomize: boolean;
+  ref: string;
 }
 
 export interface SetLayerRoughTweenRandomize {
@@ -954,6 +957,7 @@ export interface SetLayerRoughTweenRandomize {
 export interface SetLayerRoughTweenStrengthPayload {
   id: string;
   strength: number;
+  ref: string;
 }
 
 export interface SetLayerRoughTweenStrength {
@@ -964,6 +968,7 @@ export interface SetLayerRoughTweenStrength {
 export interface SetLayerRoughTweenTaperPayload {
   id: string;
   taper: Btwx.RoughTweenTaper;
+  ref: string;
 }
 
 export interface SetLayerRoughTweenTaper {
@@ -974,6 +979,7 @@ export interface SetLayerRoughTweenTaper {
 export interface SetLayerRoughTweenTemplatePayload {
   id: string;
   template: string;
+  ref: string;
 }
 
 export interface SetLayerRoughTweenTemplate {

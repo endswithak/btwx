@@ -15,7 +15,7 @@ import {
   DEFAULT_CUSTOM_WIGGLE_TWEEN_TYPE, DEFAULT_CUSTOM_WIGGLE_TWEEN_WIGGLES, DEFAULT_STEPS_TWEEN_STEPS, DEFAULT_ROUGH_TWEEN_CLAMP,
   DEFAULT_ROUGH_TWEEN_POINTS, DEFAULT_ROUGH_TWEEN_RANDOMIZE, DEFAULT_ROUGH_TWEEN_STRENGTH, DEFAULT_ROUGH_TWEEN_TAPER,
   DEFAULT_ROUGH_TWEEN_TEMPLATE, DEFAULT_SLOW_TWEEN_LINEAR_POWER, DEFAULT_SLOW_TWEEN_LINEAR_RATIO, DEFAULT_SLOW_TWEEN_LINEAR_YOYO_MODE,
-  DEFAULT_TEXT_TWEEN_DELIMITER, DEFAULT_TEXT_TWEEN_SPEED, DEFAULT_TEXT_TWEEN_DIFF, DEFAULT_TEXT_TWEEN_SCRAMBLE
+  DEFAULT_TEXT_TWEEN_DELIMITER, DEFAULT_TEXT_TWEEN_SPEED, DEFAULT_TEXT_TWEEN_DIFF, DEFAULT_TEXT_TWEEN_SCRAMBLE, DEFAULT_ROUGH_TWEEN_REF
 } from '../../constants';
 
 import {
@@ -2266,7 +2266,7 @@ export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent
             },
             scrambleText: {
               characters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
-              customCharacters: null,
+              customCharacters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
               revealDelay: DEFAULT_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY,
               speed: DEFAULT_SCRAMBLE_TEXT_TWEEN_SPEED,
               delimiter: DEFAULT_SCRAMBLE_TEXT_TWEEN_DELIMITER,
@@ -2290,7 +2290,8 @@ export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent
               randomize: DEFAULT_ROUGH_TWEEN_RANDOMIZE,
               strength: DEFAULT_ROUGH_TWEEN_STRENGTH,
               taper: DEFAULT_ROUGH_TWEEN_TAPER,
-              template: DEFAULT_ROUGH_TWEEN_TEMPLATE
+              template: DEFAULT_ROUGH_TWEEN_TEMPLATE,
+              ref: DEFAULT_ROUGH_TWEEN_REF
             },
             slow: {
               linearRatio: DEFAULT_SLOW_TWEEN_LINEAR_RATIO,
@@ -2351,7 +2352,7 @@ export const addTweenEventLayerTweens = (state: LayerState, eventId: string, lay
           },
           scrambleText: {
             characters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
-            customCharacters: null,
+            customCharacters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
             revealDelay: DEFAULT_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY,
             speed: DEFAULT_SCRAMBLE_TEXT_TWEEN_SPEED,
             delimiter: DEFAULT_SCRAMBLE_TEXT_TWEEN_DELIMITER,
@@ -2375,7 +2376,8 @@ export const addTweenEventLayerTweens = (state: LayerState, eventId: string, lay
             randomize: DEFAULT_ROUGH_TWEEN_RANDOMIZE,
             strength: DEFAULT_ROUGH_TWEEN_STRENGTH,
             taper: DEFAULT_ROUGH_TWEEN_TAPER,
-            template: DEFAULT_ROUGH_TWEEN_TEMPLATE
+            template: DEFAULT_ROUGH_TWEEN_TEMPLATE,
+            ref: DEFAULT_ROUGH_TWEEN_REF
           },
           slow: {
             linearRatio: DEFAULT_SLOW_TWEEN_LINEAR_RATIO,
@@ -2625,7 +2627,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
             },
             scrambleText: {
               characters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
-              customCharacters: null,
+              customCharacters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
               revealDelay: DEFAULT_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY,
               speed: DEFAULT_SCRAMBLE_TEXT_TWEEN_SPEED,
               delimiter: DEFAULT_SCRAMBLE_TEXT_TWEEN_DELIMITER,
@@ -2649,7 +2651,8 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
               randomize: DEFAULT_ROUGH_TWEEN_RANDOMIZE,
               strength: DEFAULT_ROUGH_TWEEN_STRENGTH,
               taper: DEFAULT_ROUGH_TWEEN_TAPER,
-              template: DEFAULT_ROUGH_TWEEN_TEMPLATE
+              template: DEFAULT_ROUGH_TWEEN_TEMPLATE,
+              ref: DEFAULT_ROUGH_TWEEN_REF
             },
             slow: {
               linearRatio: DEFAULT_SLOW_TWEEN_LINEAR_RATIO,
@@ -2694,7 +2697,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
             },
             scrambleText: {
               characters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
-              customCharacters: null,
+              customCharacters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
               revealDelay: DEFAULT_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY,
               speed: DEFAULT_SCRAMBLE_TEXT_TWEEN_SPEED,
               delimiter: DEFAULT_SCRAMBLE_TEXT_TWEEN_DELIMITER,
@@ -2718,7 +2721,8 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
               randomize: DEFAULT_ROUGH_TWEEN_RANDOMIZE,
               strength: DEFAULT_ROUGH_TWEEN_STRENGTH,
               taper: DEFAULT_ROUGH_TWEEN_TAPER,
-              template: DEFAULT_ROUGH_TWEEN_TEMPLATE
+              template: DEFAULT_ROUGH_TWEEN_TEMPLATE,
+              ref: DEFAULT_ROUGH_TWEEN_REF
             },
             slow: {
               linearRatio: DEFAULT_SLOW_TWEEN_LINEAR_RATIO,
@@ -2903,6 +2907,7 @@ export const setLayerRoughTweenClamp = (state: LayerState, action: SetLayerRough
           rough: {
             ...currentState.tweens.byId[action.payload.id].rough,
             clamp: action.payload.clamp,
+            ref: action.payload.ref
           }
         }
       }
@@ -2932,6 +2937,7 @@ export const setLayerRoughTweenPoints = (state: LayerState, action: SetLayerRoug
           rough: {
             ...currentState.tweens.byId[action.payload.id].rough,
             points: action.payload.points,
+            ref: action.payload.ref
           }
         }
       }
@@ -2961,6 +2967,7 @@ export const setLayerRoughTweenRandomize = (state: LayerState, action: SetLayerR
           rough: {
             ...currentState.tweens.byId[action.payload.id].rough,
             randomize: action.payload.randomize,
+            ref: action.payload.ref
           }
         }
       }
@@ -2990,6 +2997,7 @@ export const setLayerRoughTweenStrength = (state: LayerState, action: SetLayerRo
           rough: {
             ...currentState.tweens.byId[action.payload.id].rough,
             strength: action.payload.strength,
+            ref: action.payload.ref
           }
         }
       }
@@ -3019,6 +3027,7 @@ export const setLayerRoughTweenTaper = (state: LayerState, action: SetLayerRough
           rough: {
             ...currentState.tweens.byId[action.payload.id].rough,
             taper: action.payload.taper,
+            ref: action.payload.ref
           }
         }
       }
@@ -3048,6 +3057,7 @@ export const setLayerRoughTweenTemplate = (state: LayerState, action: SetLayerRo
           rough: {
             ...currentState.tweens.byId[action.payload.id].rough,
             template: action.payload.template,
+            ref: action.payload.ref
           }
         }
       }

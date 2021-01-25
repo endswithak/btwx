@@ -29,7 +29,7 @@ const EventDrawerEventLayers = (props: EventDrawerEventLayersProps): ReactElemen
   }
 
   return (
-    scrollLayer
+    scrollLayerItem
     ? <EventDrawerEventLayersHeader
         text={scrollLayerItem.name}
         icon={{

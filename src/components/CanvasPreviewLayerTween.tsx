@@ -45,7 +45,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps & CanvasPre
       case 'slow':
         return `slow(${tween.slow.linearRatio}, ${tween.slow.power}, ${tween.slow.yoyoMode})`;
       case 'rough':
-        return `rough({clamp: ${tween.rough.clamp}, points: ${tween.rough.points}, randomize: ${tween.rough.randomize}, strength: ${tween.rough.strength}, taper: ${tween.rough.taper}, template: ${tween.rough.template}})`;
+        return tween.rough.ref; // `rough({clamp: ${tween.rough.clamp}, points: ${tween.rough.points}, randomize: ${tween.rough.randomize}, strength: ${tween.rough.strength}, taper: ${tween.rough.taper}, template: ${tween.rough.template}})`;
       case 'steps':
         return `steps(${tween.steps.steps})`;
       default:

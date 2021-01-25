@@ -34,8 +34,8 @@ const Button = styled.button<ButtonProps>`
 `;
 
 interface EaseEditorMainHeadProps {
-  tab: 'ease' | 'text';
-  setTab(tab: 'ease' | 'text'): void;
+  tab: Btwx.EaseEditorTab;
+  setTab(tab: Btwx.EaseEditorTab): void;
 }
 
 const EaseEditorMainHead = (props: EaseEditorMainHeadProps): ReactElement => {
@@ -54,7 +54,7 @@ const EaseEditorMainHead = (props: EaseEditorMainHeadProps): ReactElement => {
           ease = `slow(${tween.slow.linearRatio}, ${tween.slow.power}, ${tween.slow.yoyoMode})`;
           break;
         case 'rough':
-          ease = `rough({clamp: ${tween.rough.clamp}, points: ${tween.rough.points}, randomize: ${tween.rough.randomize}, strength: ${tween.rough.strength}, taper: ${tween.rough.taper}, template: ${tween.rough.template}})`;
+          ease = tween.rough.ref; // `rough({clamp: ${tween.rough.clamp}, points: ${tween.rough.points}, randomize: ${tween.rough.randomize}, strength: ${tween.rough.strength}, taper: ${tween.rough.taper}, template: ${tween.rough.template}})`;
           break;
         case 'steps':
           ease = `steps(${tween.steps.steps})`;

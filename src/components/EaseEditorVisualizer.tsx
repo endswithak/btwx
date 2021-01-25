@@ -11,10 +11,11 @@ import { MotionPathHelper } from 'gsap/MotionPathHelper';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
+import EaseEditorCopyPathButton from './EaseEditorCopyPathButton';
 
 gsap.registerPlugin(CustomEase, RoughEase, SlowMo, MotionPathPlugin, MotionPathHelper, DrawSVGPlugin, CustomBounce, CustomWiggle);
 
-const EaseEditor = (): ReactElement => {
+const EaseEditorVisualizer = (): ReactElement => {
   const pathRef = useRef<SVGPathElement>(null);
   const pathRevealRef = useRef<SVGPathElement>(null);
   const valueBarRef = useRef<HTMLDivElement>(null);
@@ -34,7 +35,7 @@ const EaseEditor = (): ReactElement => {
         case 'slow':
           return `slow(${tween.slow.linearRatio}, ${tween.slow.power}, ${tween.slow.yoyoMode})`;
         case 'rough':
-          return `rough({clamp: ${tween.rough.clamp}, points: ${tween.rough.points}, randomize: ${tween.rough.randomize}, strength: ${tween.rough.strength}, taper: ${tween.rough.taper}, template: ${tween.rough.template}})`;
+          return tween.rough.ref;
         case 'steps':
           return `steps(${tween.steps.steps})`;
         default:
@@ -75,11 +76,7 @@ const EaseEditor = (): ReactElement => {
       className='c-ease-editor__visualizer'
       style={{
         background: tinyColor(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).setAlpha(0.77).toRgbString(),
-        // background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
-        boxShadow: `-1px 0 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`,
-        backdropFilter: 'blur(17px)',
-        borderRadius: `${theme.unit}px 0 0 ${theme.unit}px`,
-        overflow: 'hidden'
+        boxShadow: `-1px 0 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
       }}>
       <div className='c-ease-editor-visualizer__top'>
         <div
@@ -135,9 +132,11 @@ const EaseEditor = (): ReactElement => {
             <line x1="0" y1="400" x2="400" y2="400" stroke={theme.text.lightest} opacity='0.5'></line>
           </svg>
         </div>
+        <EaseEditorCopyPathButton
+          pathData={pathData} />
       </div>
     </div>
   );
 }
 
-export default EaseEditor;
+export default EaseEditorVisualizer;

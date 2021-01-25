@@ -5,14 +5,14 @@ import { setLayerTextTweenDelimiter } from '../store/actions/layer';
 import SidebarInput from './SidebarInput';
 
 interface EaseEditorTextDelimiterInputProps {
-  setInputInfo(inputInfo: { type: string; description: string }): void;
+  setParamInfo(paramInfo: Btwx.ParamInfo): void;
 }
 
 const EaseEditorTextDelimiterInput = (props: EaseEditorTextDelimiterInputProps): ReactElement => {
-  const { setInputInfo } = props;
+  const { setParamInfo } = props;
   const id = useSelector((state: RootState) => state.easeEditor.tween);
   const delimiterValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].text.delimiter : null);
-  const [delimiter, setDelimiter] = useState(delimiterValue);
+  const [delimiter, setDelimiter] = useState(delimiterValue.length === 0 ? `""` : delimiterValue === ' ' ? `" "` : delimiterValue);
   const dispatch = useDispatch();
 
   const handlePointsChange = (e: any): void => {
@@ -21,27 +21,38 @@ const EaseEditorTextDelimiterInput = (props: EaseEditorTextDelimiterInputProps):
   };
 
   const handleDelimiterSubmit = (e: any): void => {
-    if (typeof delimiter === 'string') {
-      dispatch(setLayerTextTweenDelimiter({id: id, delimiter: delimiter}));
-      setDelimiter(delimiter);
-    } else {
-      setDelimiter(delimiterValue);
+    let newDelimiter = delimiter;
+    if (newDelimiter === `""` || newDelimiter === `''`) {
+      newDelimiter = '';
+    }
+    if (newDelimiter === `" "` || newDelimiter === `' '`) {
+      newDelimiter = ' ';
+    }
+    if (newDelimiter !== delimiterValue) {
+      dispatch(setLayerTextTweenDelimiter({id: id, delimiter: newDelimiter}));
+      if (newDelimiter === ' ') {
+        newDelimiter = `" "`;
+      }
+      if (newDelimiter === '') {
+        newDelimiter = `""`;
+      }
+      setDelimiter(newDelimiter);
     }
   }
 
-  const handleFocus = () => {
-    setInputInfo({
+  const handleFocus = (): void => {
+    setParamInfo({
       type: 'String',
-      description: `The character that should be used to split the text up. The default is "", so each character is isolated but if you'd prefer to animate in word-by-word instead you can use " "`
+      description: `The character that should be used to split the text up. The default is "", so each character is isolated but if you'd prefer to animate in word-by-word instead you can use " ".`
     });
   }
 
-  const handleBlur = () => {
-    setInputInfo(null);
+  const handleBlur = (): void => {
+    setParamInfo(null);
   }
 
   useEffect(() => {
-    setDelimiter(delimiterValue);
+    setDelimiter(delimiterValue.length === 0 ? `""` : delimiterValue === ' ' ? `" "` : delimiterValue);
   }, [delimiterValue]);
 
   return (
@@ -51,7 +62,9 @@ const EaseEditorTextDelimiterInput = (props: EaseEditorTextDelimiterInputProps):
       onBlur={handleBlur}
       onChange={handlePointsChange}
       onSubmit={handleDelimiterSubmit}
+      selectOnMount
       submitOnBlur
+      manualCanvasFocus
       bottomLabel='Delimiter' />
   );
 }

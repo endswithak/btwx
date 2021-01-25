@@ -5,11 +5,11 @@ import { setLayerStepsTweenSteps } from '../store/actions/layer';
 import SidebarInput from './SidebarInput';
 
 interface EaseEditorStepsInputProps {
-  setInputInfo(inputInfo: { type: string; description: string }): void;
+  setParamInfo(paramInfo: Btwx.ParamInfo): void;
 }
 
 const EaseEditorStepsInput = (props: EaseEditorStepsInputProps): ReactElement => {
-  const { setInputInfo } = props;
+  const { setParamInfo } = props;
   const id = useSelector((state: RootState) => state.easeEditor.tween);
   const stepsValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].steps.steps : null);
   const disabled = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].ease !== 'steps' : true);
@@ -39,15 +39,15 @@ const EaseEditorStepsInput = (props: EaseEditorStepsInputProps): ReactElement =>
     }
   }
 
-  const handleFocus = () => {
-    setInputInfo({
+  const handleFocus = (): void => {
+    setParamInfo({
       type: 'Number',
       description: 'Ammount of steps the transition should take.'
     });
   }
 
-  const handleBlur = () => {
-    setInputInfo(null);
+  const handleBlur = (): void => {
+    setParamInfo(null);
   }
 
   useEffect(() => {
@@ -62,6 +62,7 @@ const EaseEditorStepsInput = (props: EaseEditorStepsInputProps): ReactElement =>
       onBlur={handleBlur}
       onChange={handleStepsChange}
       onSubmit={handleStepsSubmit}
+      selectOnMount
       submitOnBlur
       bottomLabel='Steps' />
   );

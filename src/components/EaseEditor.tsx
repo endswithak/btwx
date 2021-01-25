@@ -26,7 +26,6 @@ const EaseEditor = (): ReactElement => {
   const onMouseDown = (event: any): void => {
     const previewButton = document.getElementById('preview-button');
     if (editorRef.current && !editorRef.current.contains(event.target) && !previewButton.contains(event.target)) {
-      dispatch(setEventDrawerTweenEditing({id: null}));
       dispatch(closeEaseEditor());
     }
   }
@@ -41,6 +40,7 @@ const EaseEditor = (): ReactElement => {
       if (easeEditor.isOpen) {
         dispatch(closeEaseEditor());
       }
+      dispatch(setEventDrawerTweenEditing({id: null}));
       dispatch(setCanvasFocusing({focusing: true}));
       document.removeEventListener('mousedown', onMouseDown);
     }
@@ -52,12 +52,8 @@ const EaseEditor = (): ReactElement => {
         className='c-ease-editor__content'
         ref={editorRef}
         style={{
-          // background: tinyColor(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).setAlpha(0.77).toRgbString(),
-          // background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
-          width: 864,
           boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}, 0 4px 16px 0 rgba(0,0,0,0.16)`,
           borderRadius: theme.unit
-          // backdropFilter: 'blur(17px)'
         }}>
         <EaseEditorVisualizer />
         <EaseEditorMain />
