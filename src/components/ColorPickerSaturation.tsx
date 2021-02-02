@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
+import tinyColor from 'tinycolor2';
 import { ThemeContext } from './ThemeProvider';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
-import tinyColor from 'tinycolor2';
 
 gsap.registerPlugin(Draggable);
 
@@ -12,19 +12,22 @@ interface ColorPickerSaturationProps {
   saturation: number | 'multi';
   value: number | 'multi';
   lightness: number | 'multi';
-  alpha: number | 'multi';
-  setRed(red: number): void;
-  setGreen(green: number): void;
-  setBlue(blue: number): void;
-  setSaturation(saturation: number): void;
-  setValue(value: number): void;
-  setLightness(lightness: number): void;
-  onChange?(color: Btwx.Color): void;
+  colorValues: {
+    [id: string]: Btwx.Color;
+  };
+  setHex(hex: string | 'multi'): void;
+  setSaturation(saturation: number | 'multi'): void;
+  setLightness(lightness: number | 'multi'): void;
+  setValue(value: number | 'multi'): void;
+  setRed(red: number | 'multi'): void;
+  setGreen(green: number | 'multi'): void;
+  setBlue(blue: number | 'multi'): void;
+  onChange(colors: { [id: string]: { [P in keyof Btwx.Color]?: Btwx.Color[P] } }): void;
 }
 
 const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { hue, setRed, setGreen, setBlue, saturation, setSaturation, value, setValue, lightness, setLightness, alpha, onChange } = props;
+  const { hue, saturation, value, lightness, setHex, setSaturation, setLightness, setValue, setRed, setGreen, setBlue, onChange, colorValues } = props;
   const pointerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -48,15 +51,46 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
           const sat = s < 0 ? 0 : s > 1 ? 1 : s;
           const lit = l < 0 ? 0 : l > 1 ? 1 : l;
           const val = v < 0 ? 0 : v > 1 ? 1 : v;
-          const nextColor = tinyColor({h: hue !== 'multi' ? hue : 0, s: sat, l: lit});
-          const rgb = nextColor.toRgb();
-          setRed(rgb.r);
-          setGreen(rgb.g);
-          setBlue(rgb.b);
+          let hex: string | 'multi';
+          let red: number | 'multi';
+          let green: number | 'multi';
+          let blue: number | 'multi';
+          const newColors = Object.keys(colorValues).reduce((result, current, index) => {
+            const colorInstance = tinyColor({h: colorValues[current].h, s: sat, l: lit, v: val});
+            const newHex = colorInstance.toHex();
+            const rgb = colorInstance.toRgb();
+            if (index === 0) {
+              hex = newHex;
+              red = rgb.r;
+              green = rgb.g;
+              blue = rgb.b;
+            } else {
+              if (hex !== 'multi' && hex !== newHex) {
+                hex = 'multi';
+              }
+              if (red !== 'multi' && red !== rgb.r) {
+                red = 'multi';
+              }
+              if (green !== 'multi' && green !== rgb.g) {
+                green = 'multi';
+              }
+              if (blue !== 'multi' && blue !== rgb.b) {
+                blue = 'multi';
+              }
+            }
+            return {
+              ...result,
+              [current]: { s: sat, l: lit, v: val }
+            };
+          }, {});
+          setHex(hex);
           setSaturation(sat);
           setLightness(lit);
           setValue(val);
-          onChange({h: hue !== 'multi' ? hue : 0, s: sat, l: lit, v: val, a: alpha !== 'multi' ? alpha : 1});
+          setRed(red);
+          setGreen(green);
+          setBlue(blue);
+          onChange(newColors);
         },
         onRelease: function() {
           setDragging(false);
@@ -87,16 +121,47 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
       const sat = s < 0 ? 0 : s > 1 ? 1 : s;
       const lit = l < 0 ? 0 : l > 1 ? 1 : l;
       const val = v < 0 ? 0 : v > 1 ? 1 : v;
-      const nextColor = tinyColor({h: hue !== 'multi' ? hue : 0, s: sat, l: lit});
-      const rgb = nextColor.toRgb();
-      setRed(rgb.r);
-      setGreen(rgb.g);
-      setBlue(rgb.b);
+      setDragging(true);
+      let hex: string | 'multi';
+      let red: number | 'multi';
+      let green: number | 'multi';
+      let blue: number | 'multi';
+      const newColors = Object.keys(colorValues).reduce((result, current, index) => {
+        const colorInstance = tinyColor({h: colorValues[current].h, s: sat, l: lit, v: val});
+        const newHex = colorInstance.toHex();
+        const rgb = colorInstance.toRgb();
+        if (index === 0) {
+          hex = newHex;
+          red = rgb.r;
+          green = rgb.g;
+          blue = rgb.b;
+        } else {
+          if (hex !== 'multi' && hex !== newHex) {
+            hex = 'multi';
+          }
+          if (red !== 'multi' && red !== rgb.r) {
+            red = 'multi';
+          }
+          if (green !== 'multi' && green !== rgb.g) {
+            green = 'multi';
+          }
+          if (blue !== 'multi' && blue !== rgb.b) {
+            blue = 'multi';
+          }
+        }
+        return {
+          ...result,
+          [current]: { s: sat, l: lit, v: val }
+        };
+      }, {});
+      setHex(hex);
       setSaturation(sat);
       setLightness(lit);
       setValue(val);
-      setDragging(true);
-      onChange({h: hue !== 'multi' ? hue : 0, s: sat, l: lit, v: val, a: alpha !== 'multi' ? alpha : 1});
+      setRed(red);
+      setGreen(green);
+      setBlue(blue);
+      onChange(newColors);
       gsap.set(pointerRef.current, {x, y});
       Draggable.get(pointerRef.current).update();
       Draggable.get(pointerRef.current).startDrag(event);

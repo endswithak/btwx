@@ -219,11 +219,11 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps & CanvasPre
   const addColorToColorFSTween = (style: 'fill' | 'stroke'): void => {
     const ofc = originLayerItem.style.fill.color;
     const dfc = destinationLayerItem.style.fill.color;
-    eventTimeline.data[tween.layer][tween.prop] = tinyColor({h: ofc.h, s: ofc.s, l: ofc.l, a: ofc.a}).toHslString();
+    eventTimeline.data[tween.layer][tween.prop] = tinyColor({h: ofc.h, s: ofc.s, l: ofc.l, a: ofc.a}).toRgbString();
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
-      [tween.prop]: tinyColor({h: dfc.h, s: dfc.s, l: dfc.l, a: dfc.a}).toHslString(),
+      [tween.prop]: tinyColor({h: dfc.h, s: dfc.s, l: dfc.l, a: dfc.a}).toRgbString(),
       onUpdate: () => {
         const { paperLayer, artboardBackground, textLinesGroup, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
         const nextFS = eventTimeline.data[tween.layer][tween.prop];
@@ -246,11 +246,11 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps & CanvasPre
 
   const addNullToColorFSTween = (style: 'fill' | 'stroke'): void => {
     const dfc = destinationLayerItem.style.fill.color;
-    eventTimeline.data[tween.layer][tween.prop] = tinyColor({h: dfc.h, s: dfc.s, l: dfc.l, a: 0}).toHslString();
+    eventTimeline.data[tween.layer][tween.prop] = tinyColor({h: dfc.h, s: dfc.s, l: dfc.l, a: 0}).toRgbString();
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
-      [tween.prop]: tinyColor({h: dfc.h, s: dfc.s, l: dfc.l, a: dfc.a}).toHslString(),
+      [tween.prop]: tinyColor({h: dfc.h, s: dfc.s, l: dfc.l, a: dfc.a}).toRgbString(),
       onUpdate: () => {
         const { paperLayer, artboardBackground, textLinesGroup, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
         const nextFS = eventTimeline.data[tween.layer][tween.prop];
@@ -469,11 +469,11 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps & CanvasPre
       });
       const dc = dg.stops[index] ? dg.stops[index].color : cds.color;
       const dp = dg.stops[index] ? dg.stops[index].position : cds.position;
-      eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`] = tinyColor({h: sc.h, s: sc.s, l: sc.l, a: sc.a}).toHslString();
+      eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`] = tinyColor({h: sc.h, s: sc.s, l: sc.l, a: sc.a}).toRgbString();
       eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-offset`] = sp;
       stopsTimeline.to(eventTimeline.data[tween.layer], {
         duration: tween.duration,
-        [`${tween.prop}-stop-${index}-color`]: tinyColor({h: dc.h, s: dc.s, l: dc.l, a: dc.a}).toHslString(),
+        [`${tween.prop}-stop-${index}-color`]: tinyColor({h: dc.h, s: dc.s, l: dc.l, a: dc.a}).toRgbString(),
         [`${tween.prop}-stop-${index}-offset`]: dp,
         onUpdate: () => {
           const { paperLayer, artboardBackground, textLinesGroup, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -513,10 +513,10 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps & CanvasPre
     const dc = destinationLayerItem.style[style].color;
     og.stops.forEach((stop, index) => {
       const sc = stop.color;
-      eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`] = tinyColor({h: sc.h, s: sc.s, l: sc.l, a: sc.a}).toHslString();
+      eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`] = tinyColor({h: sc.h, s: sc.s, l: sc.l, a: sc.a}).toRgbString();
       stopsTimeline.to(eventTimeline.data[tween.layer], {
         duration: tween.duration,
-        [`${tween.prop}-stop-${index}-color`]: tinyColor({h: dc.h, s: dc.s, l: dc.l, a: dc.a}).toHslString(),
+        [`${tween.prop}-stop-${index}-color`]: tinyColor({h: dc.h, s: dc.s, l: dc.l, a: dc.a}).toRgbString(),
         onUpdate: () => {
           const { paperLayer, artboardBackground, textLinesGroup, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
           const nextFS = eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`];
@@ -565,7 +565,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps & CanvasPre
           gradient: {
             stops: destinationLayerItem.style[style].gradient.stops.map((stop) => {
               return new paperPreview.GradientStop(
-                new paperPreview.Color(tinyColor({h: oc.h, s: oc.s, l: oc.l, a: oc.a}).toHslString()),
+                new paperPreview.Color(tinyColor({h: oc.h, s: oc.s, l: oc.l, a: oc.a}).toRgbString()),
                 stop.position
               );
             }),
@@ -578,10 +578,10 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps & CanvasPre
     });
     dg.stops.forEach((stop, index) => {
       const sc = stop.color;
-      eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`] = tinyColor({h: oc.h, s: oc.s, l: oc.l, a: oc.a}).toHslString();
+      eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`] = tinyColor({h: oc.h, s: oc.s, l: oc.l, a: oc.a}).toRgbString();
       stopsTimeline.to(eventTimeline.data[tween.layer], {
         duration: tween.duration,
-        [`${tween.prop}-stop-${index}-color`]: tinyColor({h: sc.h, s: sc.s, l: sc.l, a: sc.a}).toHslString(),
+        [`${tween.prop}-stop-${index}-color`]: tinyColor({h: sc.h, s: sc.s, l: sc.l, a: sc.a}).toRgbString(),
         onUpdate: () => {
           const { paperLayer, artboardBackground, textLinesGroup, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
           const nextFS = eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`];
@@ -898,11 +898,11 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps & CanvasPre
     if (!originShadow.enabled && destinationShadow.enabled) {
       osc = {h: osc.h, s: osc.s, l: osc.l, a: 0} as Btwx.Color;
     }
-    eventTimeline.data[tween.layer][tween.prop] = tinyColor({h: osc.h, s: osc.s, l: osc.l, a: osc.a}).toHslString();
+    eventTimeline.data[tween.layer][tween.prop] = tinyColor({h: osc.h, s: osc.s, l: osc.l, a: osc.a}).toRgbString();
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
-      [tween.prop]: tinyColor({h: dsc.h, s: dsc.s, l: dsc.l, a: dsc.a}).toHslString(),
+      [tween.prop]: tinyColor({h: dsc.h, s: dsc.s, l: dsc.l, a: dsc.a}).toRgbString(),
       onUpdate: () => {
         const { paperLayer, artboardBackground, textLinesGroup, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
         const paperLayerRef = isText ? textLinesGroup : paperLayer;

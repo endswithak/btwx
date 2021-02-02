@@ -7,7 +7,7 @@ interface EventDrawerEventLayersHeaderProps {
   icon?: {
     name?: string;
     shapeId?: string;
-    small?: boolean;
+    size?: Btwx.SizeVariant;
     style?: any;
   };
   layerItem?: Btwx.Layer;
@@ -56,7 +56,7 @@ const EventDrawerEventLayersHeader = (props: EventDrawerEventLayersHeaderProps):
           <Icon
             name={icon.name}
             shapeId={icon.shapeId}
-            small={icon.small}
+            size={icon.size}
             style={{
               fill: hover
               ? sticky

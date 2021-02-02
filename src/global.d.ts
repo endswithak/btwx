@@ -4,6 +4,17 @@ declare module 'string.prototype.replaceall';
 
 declare namespace Btwx {
 
+  type UserDefaultKey = 'artboardPresetDevicePlatform' | 'artboardPresetDeviceOrientation' | 'colorFormat' | 'theme';
+
+  interface UserDefaults {
+    artboardPresetDevicePlatform: DevicePlatformType;
+    artboardPresetDeviceOrientation: Orientation;
+    colorFormat: ColorFormat;
+    theme: ThemeName;
+  }
+
+  type SizeVariant = 'small' | 'large';
+
   type ResizeHandle = 'topLeft' | 'topCenter' | 'topRight' | 'bottomLeft' | 'bottomCenter' | 'bottomRight' | 'leftCenter' | 'rightCenter';
 
   type LineHandle = 'lineFrom' | 'lineTo' | 'lineMove';
@@ -587,6 +598,12 @@ declare namespace Btwx {
     accentHover: string;
     recording: string;
     recordingHover: string;
+    error: string;
+    errorHover: string;
+    warn: string;
+    warnHover: string;
+    success: string;
+    successHover: string;
   }
 
   interface BackgroundScale {
@@ -606,6 +623,9 @@ declare namespace Btwx {
     lightest: string;
     onPrimary: string;
     onAccent: string;
+    onError: string;
+    onWarn: string;
+    onSuccess: string;
   }
 
   type ThemeName = 'light' | 'dark';

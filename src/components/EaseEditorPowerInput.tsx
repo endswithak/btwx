@@ -3,6 +3,7 @@ import React, { ReactElement, useContext } from 'react';
 import gsap from 'gsap';
 import { CustomEase } from 'gsap/CustomEase';
 import styled from 'styled-components';
+import capitalize from 'lodash.capitalize';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setLayerTweenPower } from '../store/actions/layer';
@@ -72,7 +73,7 @@ const EaseEditorPowerInput = (): ReactElement => {
             <span style={{
               color: theme.text.light
             }}>
-              { key }
+              { key !== 'inOut' ? capitalize(key) : 'In Out' }
             </span>
           </div>
         ))

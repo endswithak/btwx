@@ -12,8 +12,8 @@ const StyleToggle = (props: StrokeOptionsToggleProps): ReactElement => {
   return (
     <IconButton
       onClick={() => setStyleEnabled(!styleEnabled)}
-      variant='small'
-      isActive={styleEnabled}
+      size='small'
+      active={styleEnabled}
       icon='switch-off'
       activeIcon='switch-on' />
   );

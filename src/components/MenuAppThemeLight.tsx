@@ -22,6 +22,7 @@ const MenuAppThemeLight = (props: MenuItemProps): ReactElement => {
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (updateOtherWindows?: boolean): void => {
+      remote.nativeTheme.themeSource = 'light';
       const currentWindow = remote.getCurrentWindow();
       dispatch(enableLightTheme());
       currentWindow.setBackgroundColor(THEME_LIGHT_BACKGROUND_MIN);

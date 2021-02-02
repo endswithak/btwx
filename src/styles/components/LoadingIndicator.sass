@@ -1,0 +1,25 @@
+.c-loading-indicator
+  +absolute-full
+  display: flex
+  align-items: center
+  justify-content: center
+
+.c-loading-indicator__circ
+  opacity: 1
+  width: $unit * 8
+  height: $unit * 8
+  position: absolute
+  display: flex
+  align-self: center
+  justify-self: center
+  border-radius: 50%
+
+.c-loading-indicator__circ--inner
+  transform: scale(1,1)
+  opacity: 1
+  animation: waveAnimBf 0.6s infinite linear
+
+.c-loading-indicator__circ--outer
+  transform: scale(0,0)
+  opacity: 0
+  animation: waveAnimAf 0.6s infinite linear

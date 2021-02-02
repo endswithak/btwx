@@ -22,6 +22,7 @@ const MenuAppThemeDark = (props: MenuItemProps): ReactElement => {
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (updateOtherWindows?: boolean): void => {
+      remote.nativeTheme.themeSource = 'dark';
       const currentWindow = remote.getCurrentWindow();
       dispatch(enableDarkTheme());
       currentWindow.setBackgroundColor(THEME_DARK_BACKGROUND_MIN);

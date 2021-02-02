@@ -3,15 +3,14 @@ import { ThemeContext } from './ThemeProvider';
 
 interface SidebarSectionHeadProps {
   text: string;
-  extraPadding?: boolean;
 }
 
 const SidebarSectionHead = (props: SidebarSectionHeadProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { extraPadding, text } = props;
+  const { text } = props;
   return (
     <div
-      className={`c-sidebar-section__head ${extraPadding ? 'c-sidebar-section__head--extra' : null}`}
+      className='c-sidebar-section__head'
       style={{
         color: theme.text.lighter,
       }}>

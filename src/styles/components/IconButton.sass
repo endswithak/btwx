@@ -1,18 +1,13 @@
 .c-icon-button
   display: flex
-  width: $unit * 6
-  height: $unit * 6
+  width: $unit * 8
+  height: $unit * 8
   align-items: center
   justify-content: center
 
-.c-icon-button--medium
-  width: $unit * 8
-  height: $unit * 8
+  span
+    +screen-reader
 
 .c-icon-button--small
   width: $unit * 6
   height: $unit * 6
-
-  svg
-    width: 18px
-    height: 18px

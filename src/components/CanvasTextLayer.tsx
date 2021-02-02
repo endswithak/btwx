@@ -58,9 +58,9 @@ const CanvasTextLayer = (props: CanvasLayerContainerProps & CanvasTextLayerProps
       children: [
         new paperLayerScope.Path.Rectangle({
           rectangle: getLayerAbsBounds(layerItem.frame, artboardItem.frame),
-          // fillColor: tinyColor('#fff').setAlpha(0.01).toHslString(),
+          // fillColor: tinyColor('#fff').setAlpha(0.01).toRgbString(),
           // blendMode: 'multiply',
-          fillColor: tinyColor('red').setAlpha(0.25).toHslString(),
+          fillColor: tinyColor('red').setAlpha(0.25).toRgbString(),
           data: { id: 'textBackground', type: 'LayerChild', layerType: 'Text' }
         }),
         new paperLayerScope.Group({

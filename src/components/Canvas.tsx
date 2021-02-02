@@ -3,7 +3,7 @@ import React, { useContext, ReactElement, useEffect, useState, useRef } from 're
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
-import { setCanvasReady } from '../store/actions/canvasSettings';
+import { setCanvasReady, setCanvasFocusing } from '../store/actions/canvasSettings';
 import { getAllProjectIndices } from '../store/selectors/layer';
 import { ThemeContext } from './ThemeProvider';
 import CanvasLayerEvents from './CanvasLayerEvents';
@@ -27,6 +27,7 @@ const Canvas = (): ReactElement => {
   const ref = useRef<HTMLDivElement>(null);
   const ready = useSelector((state: RootState) => state.canvasSettings.ready);
   const interactionEnabled = useSelector((state: RootState) => state.canvasSettings.focusing && !state.canvasSettings.selecting && !state.canvasSettings.resizing && !state.canvasSettings.drawing && !state.canvasSettings.zooming && !state.canvasSettings.translating && !state.canvasSettings.dragging);
+  const focusing = useSelector((state: RootState) => state.canvasSettings.focusing);
   const allProjectIndices = useSelector((state: RootState) => getAllProjectIndices(state));
   const cursor = useSelector((state: RootState) => state.canvasSettings.cursor);
   const [layerEvent, setLayerEvent] = useState(null);
@@ -93,6 +94,9 @@ const Canvas = (): ReactElement => {
   }
 
   const handleMouseDown = (e: any): void => {
+    if (!focusing) {
+      dispatch(setCanvasFocusing({focusing: true}));
+    }
     handleHitResult(e, 'mouseDown');
   }
 
@@ -136,46 +140,48 @@ const Canvas = (): ReactElement => {
   }, []);
 
   return (
-    <div
-      id='canvas-container'
-      className='c-canvas'
-      ref={ref}
-      onMouseMove={ready && interactionEnabled ? handleMouseMove : null}
-      onMouseDown={ready ? handleMouseDown : null}
-      onMouseUp={ready ? handleMouseUp : null}
-      onDoubleClick={ready ? handleDoubleClick : null}
-      onContextMenu={ready ? handleContextMenu : null}
-      onWheel={ready ? handleWheel : null}
-      style={{
-        background: theme.background.z0,
-        cursor: cursor[0]
-      }}>
-      <CanvasUI />
-      <CanvasProjects />
-      {
-        ready
-        ? <>
-            <CanvasLayerEvents
-              layerEvent={layerEvent} />
-            <CanvasUIEvents
-              uiEvent={uiEvent} />
-            <ZoomTool
-              zoomEvent={zoomEvent} />
-            <TranslateTool
-              translateEvent={translateEvent} />
-            <ArtboardTool />
-            <ShapeTool />
-            <DragTool />
-            <AreaSelectTool />
-            <ResizeTool />
-            <LineTool />
-            <TextTool />
-            <GradientTool />
-            <CanvasToast />
-          </>
-        : null
-      }
-    </div>
+    <>
+      <div
+        id='canvas-container'
+        className='c-canvas'
+        ref={ref}
+        onMouseMove={ready && interactionEnabled ? handleMouseMove : null}
+        onMouseDown={ready ? handleMouseDown : null}
+        onMouseUp={ready ? handleMouseUp : null}
+        onDoubleClick={ready ? handleDoubleClick : null}
+        onContextMenu={ready ? handleContextMenu : null}
+        onWheel={ready ? handleWheel : null}
+        style={{
+          background: theme.background.z0,
+          cursor: cursor[0]
+        }}>
+        <CanvasUI />
+        <CanvasProjects />
+        {
+          ready
+          ? <>
+              <CanvasLayerEvents
+                layerEvent={layerEvent} />
+              <CanvasUIEvents
+                uiEvent={uiEvent} />
+              <ZoomTool
+                zoomEvent={zoomEvent} />
+              <TranslateTool
+                translateEvent={translateEvent} />
+              <ArtboardTool />
+              <ShapeTool />
+              <DragTool />
+              <AreaSelectTool />
+              <ResizeTool />
+              <LineTool />
+              <TextTool />
+              <GradientTool />
+              <CanvasToast />
+            </>
+          : null
+        }
+      </div>
+    </>
   );
 }
 

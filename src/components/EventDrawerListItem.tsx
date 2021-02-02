@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement } from 'react';
+import React, { useContext, ReactElement, useRef } from 'react';
 import styled from 'styled-components';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -27,6 +27,7 @@ const Item = styled.div<ItemProps>`
 
 const EventDrawerListItem = (props: EventDrawerListItemProps): ReactElement => {
   const theme = useContext(ThemeContext);
+  const actionsContainerRef = useRef<HTMLDivElement>(null);
   const { id } = props;
   // const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
   const tweenEvent = useSelector((state: RootState) => state.layer.present.events.byId[id]);
@@ -52,7 +53,7 @@ const EventDrawerListItem = (props: EventDrawerListItemProps): ReactElement => {
 
   const handleDoubleClick = (e: any): void => {
     // ignore clicks on edit / remove buttons
-    if (e.target.nodeName !== 'path' && e.target.nodeName !== 'svg') {
+    if (!actionsContainerRef.current.contains(e.target)) {
       dispatch(setEventDrawerEventThunk({id}));
       dispatch(setLayerHover({id: null}));
     }
@@ -95,7 +96,9 @@ const EventDrawerListItem = (props: EventDrawerListItemProps): ReactElement => {
       <div className='c-event-drawer-list-item__module'>
         <span>{destinationName}</span>
       </div>
-      <div className='c-event-drawer-list-item__module'>
+      <div
+        ref={actionsContainerRef}
+        className='c-event-drawer-list-item__module'>
         <EventDrawerListItemEdit id={id} />
         <EventDrawerListItemRemove id={id} />
       </div>

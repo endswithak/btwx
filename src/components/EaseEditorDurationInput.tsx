@@ -1,56 +1,39 @@
-import React, { ReactElement, useEffect, useState } from 'react';
-import mexp from 'math-expression-evaluator';
+import React, { ReactElement, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setLayerTweenDuration } from '../store/actions/layer';
-import SidebarInput from './SidebarInput';
-
+import Form from './Form';
+import MathFormGroup from './MathFormGroup';
 
 const EaseEditorDurationInput = (): ReactElement => {
+  const formControlRef = useRef(null);
   const id = useSelector((state: RootState) => state.easeEditor.tween);
-  const durationValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].duration : null);
-  const delayValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].delay : null);
-  const [duration, setDuration] = useState(durationValue);
+  const duration = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].duration : null);
+  const delay = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].delay : null);
   const dispatch = useDispatch();
 
-  const handleDurationChange = (e: any): void => {
-    const target = e.target;
-    setDuration(target.value);
-  };
-
-  const handleDurationSubmit = (e: any): void => {
-    try {
-      const durationRounded = Math.round((mexp.eval(`${duration}`) as any + Number.EPSILON) * 100) / 100;
-      if (durationRounded !== durationValue) {
-        let newDuration = durationRounded;
-        if (durationRounded + delayValue > 10) {
-          const diff = (durationRounded + delayValue) - 10;
-          newDuration = durationRounded - diff;
-        }
-        if (durationRounded < 0.04) {
-          newDuration = 0.04;
-        }
-        dispatch(setLayerTweenDuration({id: id, duration: newDuration}));
-        setDuration(newDuration);
-      } else {
-        setDuration(durationValue);
-      }
-    } catch(error) {
-      setDuration(durationValue);
+  const handleSubmitSuccess = (newDuration: any): void => {
+    if (newDuration + delay > 10) {
+      const diff = (newDuration + delay) - 10;
+      newDuration = newDuration - diff;
     }
+    if (newDuration < 0.04) {
+      newDuration = 0.04;
+    }
+    dispatch(setLayerTweenDuration({id: id, duration: newDuration}));
   }
 
-  useEffect(() => {
-    setDuration(durationValue);
-  }, [durationValue]);
-
   return (
-    <SidebarInput
+    <MathFormGroup
+      ref={formControlRef}
+      controlId='control-ee-duration'
       value={duration}
-      onChange={handleDurationChange}
-      onSubmit={handleDurationSubmit}
-      submitOnBlur
-      bottomLabel='Duration' />
+      size='small'
+      label='Duration'
+      min={0.04}
+      max={10 - delay}
+      onSubmitSuccess={handleSubmitSuccess}
+      submitOnBlur />
   );
 }
 

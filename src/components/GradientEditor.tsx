@@ -7,12 +7,12 @@ import { paperMain } from '../canvas';
 import { RootState } from '../store/reducers';
 import { openColorEditor } from '../store/actions/colorEditor';
 import { closeGradientEditor } from '../store/actions/gradientEditor';
+import { setCanvasFocusing } from '../store/actions/canvasSettings';
 import { setLayersFillType, setLayersGradientType, setLayersGradientStopColor, setLayerActiveGradientStop, setLayersGradientStopPosition, addLayersGradientStop, setLayersStrokeFillType } from '../store/actions/layer';
 import { ThemeContext } from './ThemeProvider';
 import ColorPicker from './ColorPicker';
 import GradientSlider from './GradientSlider';
 import FillTypeSelector from './FillTypeSelector';
-import GradientFrame from './GradientFrame';
 
 const GradientEditor = (): ReactElement => {
   const theme = useContext(ThemeContext);
@@ -20,7 +20,6 @@ const GradientEditor = (): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const gradientValue = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.selected[0]].style[state.gradientEditor.prop].gradient);
   const activeStopValue = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.selected[0]].style[state.gradientEditor.prop].gradient.stops.find((stop, index) => index === gradientValue.activeStopIndex));
-  const colorFormat = useSelector((state: RootState) => state.documentSettings.colorFormat);
   const gradientEditor = useSelector((state: RootState) => state.gradientEditor);
   const dispatch = useDispatch();
 
@@ -44,6 +43,7 @@ const GradientEditor = (): ReactElement => {
       if (gradientEditor.isOpen) {
         dispatch(closeGradientEditor());
       }
+      dispatch(setCanvasFocusing({focusing: true}));
       document.removeEventListener('mousedown', onMouseDown);
     }
   }, []);
@@ -62,47 +62,16 @@ const GradientEditor = (): ReactElement => {
     }
   }
 
-  const handleActiveStopColorChange = (stopColor: Btwx.Color): void => {
-    // const paperLayer = getPaperLayer(gradientEditor.layer);
-    // const newStopsById = Object.keys(gradient.stops.byId).reduce((result: { [id: string]: Btwx.GradientStop }, current) => {
-    //   if (current === activeStopValue.id) {
-    //     result[current] = {
-    //       ...gradient.stops.byId[current],
-    //       color: stopColor
-    //     }
-    //   } else {
-    //     result[current] = gradient.stops.byId[current];
-    //   }
-    //   return result;
-    // }, {});
-    // switch(gradientEditor.prop) {
-    //   case 'fill': {
-    //     paperLayer.fillColor = {
-    //       gradient: {
-    //         stops: getGradientStops(newStopsById),
-    //         radial: gradient.gradientType === 'radial'
-    //       },
-    //       origin: getGradientOriginPoint(gradientEditor.layer, gradient.origin),
-    //       destination: getGradientDestinationPoint(gradientEditor.layer, gradient.destination)
-    //     } as any
-    //     break;
-    //   }
-    //   case 'stroke':
-    //     paperLayer.strokeColor = {
-    //       gradient: {
-    //         stops: getGradientStops(newStopsById),
-    //         radial: gradient.gradientType === 'radial'
-    //       },
-    //       origin: getGradientOriginPoint(gradientEditor.layer, gradient.origin),
-    //       destination: getGradientDestinationPoint(gradientEditor.layer, gradient.destination)
-    //     } as any
-    //     break;
-    // }
-    debounceStopColorChange(gradientValue.activeStopIndex, stopColor);
+  const handleActiveStopColorChange = (colors: { [id: string]: { [P in keyof Btwx.Color]?: Btwx.Color[P] } }): void => {
+    debounceStopColorChange(gradientValue.activeStopIndex, colors[selected[0]]);
   }
 
   const handleStopPress = (stopIndex: number): void => {
-    dispatch(setLayerActiveGradientStop({id: selected[0], prop: gradientEditor.prop as 'fill' | 'stroke', stopIndex}));
+    dispatch(setLayerActiveGradientStop({
+      id: selected[0],
+      prop: gradientEditor.prop as 'fill' | 'stroke',
+      stopIndex
+    }));
   }
 
   const handleStopDrag = (stopIndex: number, position: number): void => {
@@ -110,16 +79,26 @@ const GradientEditor = (): ReactElement => {
   }
 
   const handleSliderClick = (newStop: Btwx.GradientStop): void => {
-    dispatch(addLayersGradientStop({layers: selected, prop: gradientEditor.prop as 'fill' | 'stroke', gradientStop: newStop}));
+    dispatch(addLayersGradientStop({
+      layers: selected,
+      prop: gradientEditor.prop as 'fill' | 'stroke',
+      gradientStop: newStop
+    }));
   }
 
   const handleColorClick = (): void => {
     switch(gradientEditor.prop) {
       case 'fill':
-        dispatch(setLayersFillType({layers: selected, fillType: 'color'}));
+        dispatch(setLayersFillType({
+          layers: selected,
+          fillType: 'color'
+        }));
         break;
       case 'stroke':
-        dispatch(setLayersStrokeFillType({layers: selected, fillType: 'color'}));
+        dispatch(setLayersStrokeFillType({
+          layers: selected,
+          fillType: 'color'
+        }));
         break;
     }
     dispatch(closeGradientEditor());
@@ -132,13 +111,21 @@ const GradientEditor = (): ReactElement => {
 
   const handleLinearGradientClick = (): void => {
     if (gradientValue.gradientType !== 'linear') {
-      dispatch(setLayersGradientType({layers: selected, prop: gradientEditor.prop as 'fill' | 'stroke', gradientType: 'linear'}));
+      dispatch(setLayersGradientType({
+        layers: selected,
+        prop: gradientEditor.prop as 'fill' | 'stroke',
+        gradientType: 'linear'
+      }));
     }
   }
 
   const handleRadialGradientClick = (): void => {
     if (gradientValue.gradientType !== 'radial') {
-      dispatch(setLayersGradientType({layers: selected, prop: gradientEditor.prop as 'fill' | 'stroke', gradientType: 'radial'}));
+      dispatch(setLayersGradientType({
+        layers: selected,
+        prop: gradientEditor.prop as 'fill' | 'stroke',
+        gradientType: 'radial'
+      }));
     }
   }
 
@@ -174,11 +161,9 @@ const GradientEditor = (): ReactElement => {
           activeStopIndex={gradientValue.activeStopIndex}
           onStopPress={handleStopPress}
           onStopDrag={handleStopDrag}
-          onSliderClick={handleSliderClick}
-        />
+          onSliderClick={handleSliderClick} />
         <ColorPicker
-          colorValue={activeStopValue.color}
-          colorType={colorFormat}
+          colorValues={{[`${selected[0]}`]: activeStopValue.color}}
           onChange={handleActiveStopColorChange} />
       </div>
     </div>

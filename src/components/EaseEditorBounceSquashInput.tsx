@@ -1,70 +1,52 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setLayerCustomBounceTweenSquash } from '../store/actions/layer';
-import SidebarInput from './SidebarInput';
+import MathFormGroup from './MathFormGroup';
 
 interface EaseEditorBounceSquashInputProps {
   setParamInfo(paramInfo: Btwx.ParamInfo): void;
 }
 
 const EaseEditorBounceSquashInput = (props: EaseEditorBounceSquashInputProps): ReactElement => {
+  const formControlRef = useRef(null);
   const { setParamInfo } = props;
   const id = useSelector((state: RootState) => state.easeEditor.tween);
-  const squashValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].customBounce.squash : null);
+  const squash = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].customBounce.squash : null);
   const disabled = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].ease !== 'customBounce' : true);
-  const [squash, setSquash] = useState(squashValue);
   const dispatch = useDispatch();
 
-  const handleSquashChange = (e: any): void => {
-    const target = e.target;
-    setSquash(target.value);
-  };
-
-  const handleSquashSubmit = (e: any): void => {
-    try {
-      const squashRounded = Math.round(squash);
-      if (squashRounded !== squashValue) {
-        let newSquash = squashRounded;
-        if (squashRounded < 0) {
-          newSquash = 0;
-        }
-        dispatch(setLayerCustomBounceTweenSquash({id: id, squash: newSquash}));
-        setSquash(newSquash);
-      } else {
-        setSquash(squashValue);
-      }
-    } catch(error) {
-      setSquash(squashValue);
+  const handleSubmitSuccess = (newSquash: any): void => {
+    if (newSquash < 0) {
+      newSquash = 0;
     }
+    dispatch(setLayerCustomBounceTweenSquash({id: id, squash: newSquash}));
   }
 
-  const handleFocus = (): void => {
+  const handleFocus = (e: any): void => {
     setParamInfo({
       type: 'Number',
       description: 'Controls how long the squash should last (the gap between bounces, when it appears “stuck”).'
     });
   }
 
-  const handleBlur = (): void => {
+  const handleBlur = (e: any): void => {
     setParamInfo(null);
   }
 
-  useEffect(() => {
-    setSquash(squashValue);
-  }, [squashValue]);
-
   return (
-    <SidebarInput
+    <MathFormGroup
+      ref={formControlRef}
+      controlId='control-ee-bounce-squash'
       value={squash}
       disabled={disabled}
-      onFocus={handleFocus}
+      size='small'
+      label='Squash'
+      min={0}
+      onSubmitSuccess={handleSubmitSuccess}
       onBlur={handleBlur}
-      onChange={handleSquashChange}
-      onSubmit={handleSquashSubmit}
-      submitOnBlur
-      manualCanvasFocus
-      bottomLabel='Squash' />
+      onFocus={handleFocus}
+      submitOnBlur />
   );
 }
 

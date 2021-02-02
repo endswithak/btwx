@@ -161,7 +161,7 @@ export const getPaperFSColor = ({ style, isLine, layerFrame, artboardFrame }: Ge
         } as Btwx.PaperGradientFill;
     }
   } else {
-    tinyColor('#fff').setAlpha(0).toHslString() as any;
+    tinyColor('#fff').setAlpha(0).toRgbString() as any;
   }
 };
 

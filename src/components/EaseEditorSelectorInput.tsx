@@ -47,7 +47,7 @@ const EaseEditorSelectorInput = (props: EaseEditorSelectorInputProps): ReactElem
       <span>{ text }</span>
       <span>
         <Icon
-          small
+          size='small'
           name='thicc-chevron-down' />
       </span>
     </Button>

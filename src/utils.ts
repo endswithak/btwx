@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { BrowserWindow, remote, systemPreferences, ipcRenderer } from 'electron';
+import tinyColor from 'tinycolor2';
+import mexp from 'math-expression-evaluator';
 import { gsap } from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { FixedSizeTree as Tree } from '../react-vtree';
@@ -7,6 +9,41 @@ import { PreviewState } from './store/reducers/preview';
 import getTheme from './store/theme';
 
 gsap.registerPlugin(ScrollToPlugin);
+
+export type Omit<T, U> = Pick<T, Exclude<keyof T, keyof U>>;
+
+export type ReplaceProps<Inner extends React.ElementType, P> = Omit<React.ComponentPropsWithRef<Inner>, P> & P;
+
+export interface AsProp<As extends React.ElementType = React.ElementType> {
+  as?: As;
+}
+
+export type PropWithChildren<As extends React.ElementType = React.ElementType> = React.PropsWithChildren<AsProp<As>>;
+
+export interface RefForwardingComponent<TInitial extends React.ElementType, P = unknown> {
+  <As extends React.ElementType = TInitial>(props: React.PropsWithChildren<ReplaceProps<As, AsProp<As> & P>>): React.ReactElement | null;
+}
+
+export const evaluateExp = (expression: any): any => {
+  if (expression === 'multi') {
+    return expression;
+  } else {
+    try {
+      const value = mexp.eval(`${expression}`);
+      return value;
+    } catch(error) {
+      return null;
+    }
+  }
+}
+
+export const evaluateHex = (hex: string): string => {
+  if (hex === 'multi') {
+    return hex;
+  } else {
+    return tinyColor(hex).toHex();
+  }
+}
 
 export const gradientStopsMatch = (gradient1Stops: Btwx.GradientStop[], gradient2Stops: Btwx.GradientStop[]): boolean => {
   const g1SortedStops = [...gradient1Stops].sort((a,b) => { return a.position - b.position });
@@ -45,7 +82,17 @@ export const bufferToBase64 = (buffer: Buffer) => {
 };
 
 export const isBetween = (x: number, min: number, max: number): boolean => {
-  return x >= min && x <= max;
+  if (min && max) {
+    return x >= min && x <= max;
+  } else {
+    if (min) {
+      return x >= min;
+    }
+    if (max) {
+      return x <= max;
+    }
+    return true;
+  }
 };
 
 export const layerInScrollView = (id: string) => {

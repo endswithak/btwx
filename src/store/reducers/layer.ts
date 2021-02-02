@@ -118,12 +118,14 @@ import {
   SET_LAYER_FILL,
   SET_LAYER_FILL_COLOR,
   SET_LAYERS_FILL_COLOR,
+  SET_LAYERS_FILL_COLORS,
   ENABLE_LAYER_STROKE,
   ENABLE_LAYERS_STROKE,
   DISABLE_LAYER_STROKE,
   DISABLE_LAYERS_STROKE,
   SET_LAYER_STROKE_COLOR,
   SET_LAYERS_STROKE_COLOR,
+  SET_LAYERS_STROKE_COLORS,
   SET_LAYER_STROKE_FILL_TYPE,
   SET_LAYERS_STROKE_FILL_TYPE,
   SET_LAYER_GRADIENT,
@@ -164,6 +166,7 @@ import {
   DISABLE_LAYERS_SHADOW,
   SET_LAYER_SHADOW_COLOR,
   SET_LAYERS_SHADOW_COLOR,
+  SET_LAYERS_SHADOW_COLORS,
   SET_LAYER_SHADOW_BLUR,
   SET_LAYERS_SHADOW_BLUR,
   SET_LAYER_SHADOW_X_OFFSET,
@@ -376,12 +379,14 @@ import {
   disableLayersFill,
   setLayerFillColor,
   setLayersFillColor,
+  setLayersFillColors,
   enableLayerStroke,
   enableLayersStroke,
   disableLayerStroke,
   disableLayersStroke,
   setLayerStrokeColor,
   setLayersStrokeColor,
+  setLayersStrokeColors,
   setLayerStrokeFillType,
   setLayersStrokeFillType,
   setLayerGradient,
@@ -408,6 +413,7 @@ import {
   disableLayersShadow,
   setLayerShadowColor,
   setLayersShadowColor,
+  setLayersShadowColors,
   setLayerShadowBlur,
   setLayersShadowBlur,
   setLayerShadowXOffset,
@@ -840,6 +846,8 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayerFillColor(state, action);
     case SET_LAYERS_FILL_COLOR:
       return setLayersFillColor(state, action);
+    case SET_LAYERS_FILL_COLORS:
+      return setLayersFillColors(state, action);
     case ENABLE_LAYER_STROKE:
       return enableLayerStroke(state, action);
     case ENABLE_LAYERS_STROKE:
@@ -852,6 +860,8 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayerStrokeColor(state, action);
     case SET_LAYERS_STROKE_COLOR:
       return setLayersStrokeColor(state, action);
+    case SET_LAYERS_STROKE_COLORS:
+      return setLayersStrokeColors(state, action);
     case SET_LAYER_STROKE_FILL_TYPE:
       return setLayerStrokeFillType(state, action);
     case SET_LAYERS_STROKE_FILL_TYPE:
@@ -904,6 +914,8 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayerShadowColor(state, action);
     case SET_LAYERS_SHADOW_COLOR:
       return setLayersShadowColor(state, action);
+    case SET_LAYERS_SHADOW_COLORS:
+      return setLayersShadowColors(state, action);
     case SET_LAYER_SHADOW_BLUR:
       return setLayerShadowBlur(state, action);
     case SET_LAYERS_SHADOW_BLUR:
@@ -1224,6 +1236,7 @@ export default undoable(baseReducer, {
       SET_LAYER_FILL,
       SET_LAYER_FILL_COLOR,
       SET_LAYERS_FILL_COLOR,
+      SET_LAYERS_FILL_COLORS,
       SET_LAYER_FILL_TYPE,
       SET_LAYERS_FILL_TYPE,
       ENABLE_LAYER_STROKE,
@@ -1232,6 +1245,7 @@ export default undoable(baseReducer, {
       DISABLE_LAYERS_STROKE,
       SET_LAYER_STROKE_COLOR,
       SET_LAYERS_STROKE_COLOR,
+      SET_LAYERS_STROKE_COLORS,
       SET_LAYER_STROKE_FILL_TYPE,
       SET_LAYERS_STROKE_FILL_TYPE,
       SET_LAYER_GRADIENT,
@@ -1267,6 +1281,7 @@ export default undoable(baseReducer, {
       DISABLE_LAYERS_SHADOW,
       SET_LAYER_SHADOW_COLOR,
       SET_LAYERS_SHADOW_COLOR,
+      SET_LAYERS_SHADOW_COLORS,
       SET_LAYER_SHADOW_BLUR,
       SET_LAYERS_SHADOW_BLUR,
       SET_LAYER_SHADOW_X_OFFSET,

@@ -1,0 +1,91 @@
+.c-form-control
+  display: flex
+  flex-wrap: nowrap
+  position: relative
+  width: 100%
+  align-items: center
+
+.c-form-control__control
+  // +background-blur
+  display: block
+  height: $controlSize
+  font-family: $fontFamily
+  font-size: $fontSize
+  width: 100%
+  line-height: $controlSize
+  border: none
+  outline: none
+  padding: 0 $unit
+  border-radius: $borderRadius
+
+.c-form-control--small
+  .c-form-control__control
+    height: $controlSizeSm
+    font-size: $fontSizeSm
+    line-height: $controlSizeSm
+
+.c-form-control--large
+  .c-form-control__control
+    height: $controlSizeLg
+    font-size: $fontSizeLg
+    line-height: $controlSizeLg
+
+.c-form-control--left
+  .c-form-control__control
+    padding-left: $controlAddonWidth
+
+  &.c-form-control--small
+    .c-form-control__control
+      padding-left: $controlAddonWidthSm
+
+  &.c-form-control--large
+    .c-form-control__control
+      padding-left: $controlAddonWidthLg
+
+.c-form-control--right
+  .c-form-control__control
+    padding-right: $controlAddonWidth
+
+  &.c-form-control--small
+    .c-form-control__control
+      padding-right: $controlAddonWidthSm
+
+  &.c-form-control--large
+    .c-form-control__control
+      padding-right: $controlAddonWidthLg
+
+.c-form-control__addon
+  flex-shrink: 0
+  position: absolute
+  display: flex
+  align-items: center
+  justify-content: center
+  width: $controlAddonWidth
+  height: $controlSize
+  overflow: hidden
+
+  .c-form-text
+    display: flex
+    align-items: center
+    justify-content: center
+    text-align: center
+
+  &::selection
+    background: none
+
+.c-form-control__addon--read-only
+  pointer-events: none
+
+.c-form-control__addon--small
+  width: $controlAddonWidthSm
+  height: $controlSizeSm
+
+.c-form-control__addon--large
+  width: $controlAddonWidthLg
+  height: $controlSizeLg
+
+.c-form-control__addon--left
+  left: 0
+
+.c-form-control__addon--right
+  right: 0

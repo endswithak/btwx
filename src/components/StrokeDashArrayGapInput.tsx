@@ -1,49 +1,33 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
 import { getSelectedStrokeDashArrayGap, selectedStrokeEnabled } from '../store/selectors/layer';
 import { setLayersStrokeDashArrayGap } from '../store/actions/layer';
-import SidebarInput from './SidebarInput';
+import MathFormGroup from './MathFormGroup';
 
 const StrokeDashArrayGapInput = (): ReactElement => {
+  const formControlRef = useRef(null);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
-  const strokeDashArrayGapValue = useSelector((state: RootState) => getSelectedStrokeDashArrayGap(state));
+  const gap = useSelector((state: RootState) => getSelectedStrokeDashArrayGap(state));
   const disabled = useSelector((state: RootState) => !selectedStrokeEnabled(state));
-  const [dashArrayGap, setDashArrayGap] = useState(strokeDashArrayGapValue !== 'multi' ? Math.round(strokeDashArrayGapValue) : strokeDashArrayGapValue);
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    setDashArrayGap(strokeDashArrayGapValue !== 'multi' ? Math.round(strokeDashArrayGapValue) : strokeDashArrayGapValue);
-  }, [strokeDashArrayGapValue, selected]);
-
-  const handleChange = (e: any) => {
-    const target = e.target;
-    setDashArrayGap(target.value);
-  };
-
-  const handleSubmit = (e: any) => {
-    try {
-      const nextGap = mexp.eval(`${dashArrayGap}`) as any;
-      if (nextGap !== strokeDashArrayGapValue) {
-        dispatch(setLayersStrokeDashArrayGap({layers: selected, strokeDashArrayGap: Math.round(nextGap)}));
-        setDashArrayGap(Math.round(nextGap));
-      } else {
-        setDashArrayGap(strokeDashArrayGapValue !== 'multi' ? Math.round(strokeDashArrayGapValue) : strokeDashArrayGapValue);
-      }
-    } catch(error) {
-      setDashArrayGap(strokeDashArrayGapValue !== 'multi' ? Math.round(strokeDashArrayGapValue) : strokeDashArrayGapValue);
-    }
+  const handleSubmitSuccess = (newGap: any): void => {
+    dispatch(setLayersStrokeDashArrayGap({layers: selected, strokeDashArrayGap: newGap}));
   }
 
   return (
-    <SidebarInput
-      value={dashArrayGap}
-      onChange={handleChange}
-      onSubmit={handleSubmit}
-      submitOnBlur
+    <MathFormGroup
+      ref={formControlRef}
+      controlId='control-stroke-dash-array-gap'
+      value={gap}
       disabled={disabled}
-      bottomLabel={'Gap'} />
+      size='small'
+      min={0}
+      label='Gap'
+      onSubmitSuccess={handleSubmitSuccess}
+      submitOnBlur
+      canvasAutoFocus />
   );
 }
 

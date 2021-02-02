@@ -8,6 +8,7 @@ import EmptyState from './EmptyState';
 import PreviewCanvas from './PreviewCanvas';
 import PreviewTopbar from './PreviewTopbar';
 import DocumentImages from './DocumentImages';
+import Titlebar from './Titlebar';
 
 // if (remote.process.platform === 'darwin') {
 //   remote.getCurrentWindow().addListener('swipe', (event: any, direction: any) => {
@@ -42,11 +43,8 @@ const Preview = (): ReactElement => {
   }, [activeArtboard]);
 
   return (
-    <div
-      className='c-app'
-      style={{
-        background: theme.background.z0
-      }}>
+    <div className='c-app'>
+      <Titlebar previewWindow />
       {
         activeArtboard
         ? <>

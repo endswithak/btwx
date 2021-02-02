@@ -1,16 +1,20 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import SidebarSelect from './SidebarSelect';
 import { RootState } from '../store/reducers';
 import { getSelectedBlendMode } from '../store/selectors/layer';
 import { setLayersBlendMode } from '../store/actions/layer';
+import Form from './Form';
+import Icon from './Icon';
 
 const BlendModeSelector = (): ReactElement => {
+  const formControlRef = useRef<HTMLSelectElement>(null);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const blendModeValue = useSelector((state: RootState) => getSelectedBlendMode(state));
+  const [blendMode, setBlendMode] = useState(blendModeValue);
   const dispatch = useDispatch();
 
-  const options: { value: Btwx.BlendMode; label: string }[] = [
+  const options: ReactElement[] = [
+    ...(blendModeValue === 'multi' ? [{ value: 'multi', label: 'multi' }] : []),
     { value: 'normal', label: 'Normal' },
     { value: 'darken', label: 'Darken' },
     { value: 'multiply', label: 'Multiply' },
@@ -27,48 +31,50 @@ const BlendModeSelector = (): ReactElement => {
     { value: 'saturation', label: 'Saturation' },
     { value: 'color', label: 'Color' },
     { value: 'luminosity', label: 'Luminosity' }
-    // { value: 'add', label: 'Add' },
-    // { value: 'subtract', label: 'Subtract' },
-    // { value: 'average', label: 'Average' },
-    // { value: 'pin-light', label: 'Pin Light' },
-    // { value: 'negation', label: 'Negation' },
-    // { value: 'source-over', label: 'Source Over' },
-    // { value: 'source-in', label: 'Source In' },
-    // { value: 'source-out', label: 'Source Out' },
-    // { value: 'source-atop', label: 'Source Atop' },
-    // { value: 'destination-over', label: 'Destination Over' },
-    // { value: 'destination-in', label: 'Destination In' },
-    // { value: 'destination-out', label: 'Destination Out' },
-    // { value: 'destination-atop', label: 'Destination Atop' },
-    // { value: 'lighter', label: 'Lighter' },
-    // { value: 'darker', label: 'Darker' },
-    // { value: 'copy', label: 'Copy' },
-    // { value: 'xor', label: 'Xor' }
-  ];
-
-  const [blendMode, setBlendMode] = useState(blendModeValue !== 'multi' ? options.find((option) => option.value === blendModeValue) : null);
+  ].map((option, index) => (
+    <option
+      key={index}
+      value={option.value}>
+      { option.label }
+    </option>
+  ));
 
   useEffect(() => {
-    if (blendModeValue === 'multi') {
-      setBlendMode(null);
-    } else {
-      setBlendMode(options.find((option) => option.value === blendModeValue));
-    }
+    setBlendMode(blendModeValue);
   }, [blendModeValue, selected]);
 
-  const handleChange = (selectedOption: { value: Btwx.BlendMode; label: string }): void => {
-    setBlendMode(selectedOption);
-    dispatch(setLayersBlendMode({layers: selected, blendMode: selectedOption.value}));
+  const handleChange = (e: any): void => {
+    if (e.target.value !== 'multi') {
+      setBlendMode(e.target.value);
+      dispatch(setLayersBlendMode({layers: selected, blendMode: e.target.value}));
+    }
   }
 
   return (
-    <SidebarSelect
-      value={blendMode}
-      onChange={handleChange}
-      options={options}
-      placeholder='multi'
-      bottomLabel='Blend'
-    />
+    <Form inline>
+      <Form.Group controlId='control-blend-mode'>
+        <Form.Control
+          ref={formControlRef}
+          as='select'
+          value={blendMode}
+          size='small'
+          onChange={handleChange}
+          required
+          rightReadOnly
+          right={
+            <Form.Text>
+              <Icon
+                name='list-toggle'
+                size='small' />
+            </Form.Text>
+          }>
+          { options }
+        </Form.Control>
+        <Form.Label>
+          Blend Mode
+        </Form.Label>
+      </Form.Group>
+    </Form>
   );
 }
 

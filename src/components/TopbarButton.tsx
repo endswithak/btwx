@@ -78,7 +78,7 @@ const TopbarButton = (props: TopbarButtonProps): ReactElement => {
           icon
           ? <Icon
               name={icon}
-              small />
+              size='small' />
           : null
         }
         {

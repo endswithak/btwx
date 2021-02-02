@@ -1,11 +1,14 @@
-import React, { ReactElement, useState, useEffect } from 'react';
+import React, { ReactElement, useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setArtboardPresetDevicePlatform } from '../store/actions/documentSettings';
 import { DEVICES } from '../constants';
-import SidebarSelect from './SidebarSelect';
+import Form from './Form';
+import Icon from './Icon';
 
 const SidebarArtboardPlatformSelector = (): ReactElement => {
+  const formRef = useRef<HTMLFormElement>(null);
+  const formControlRef = useRef<HTMLSelectElement>(null);
   const platformValue = useSelector((state: RootState) => state.documentSettings.artboardPresets.platform);
   const optionValues = useSelector((state: RootState) => [
     ...DEVICES,
@@ -20,31 +23,56 @@ const SidebarArtboardPlatformSelector = (): ReactElement => {
       }]
     }
   ]);
+  const [platform, setPlatform] = useState(platformValue);
   const dispatch = useDispatch();
 
   const options = optionValues.map((device) => ({
     value: device.type,
     label: device.type
-  }));
+  })).map((option, index) => (
+    <option
+      key={index}
+      value={option.value}>
+      { option.label }
+    </option>
+  ));
 
-  const [platform, setPlatform] = useState(options.find((option) => option.value === platformValue));
-
-  const handleChange = (selectedOption: { value: Btwx.DevicePlatformType; label: Btwx.DevicePlatformType }): void => {
-    setPlatform(selectedOption);
-    dispatch(setArtboardPresetDevicePlatform({platform: selectedOption.value}));
+  const handleChange = (e: any): void => {
+    if (e.target.value !== 'multi') {
+      setPlatform(e.target.value);
+      dispatch(setArtboardPresetDevicePlatform({platform: e.target.value}));
+    }
   }
 
   useEffect(() => {
-    setPlatform(options.find((option) => option.value === platformValue));
+    setPlatform(platformValue);
   }, [platformValue]);
 
   return (
-    <SidebarSelect
-      value={platform}
-      onChange={handleChange}
-      options={options}
-      placeholder={'Platform'}
-    />
+    <Form
+      ref={formRef}
+      inline
+      validated={true}>
+      <Form.Group controlId='blend-mode'>
+        <Form.Control
+          ref={formControlRef}
+          as='select'
+          value={platform}
+          size='small'
+          onChange={handleChange}
+          required
+          rightReadOnly
+          right={
+            <Form.Text>
+              <Icon
+                name='list-toggle'
+                size='small' />
+            </Form.Text>
+          }>
+          { options }
+        </Form.Control>
+      </Form.Group>
+    </Form>
   );
 }
 

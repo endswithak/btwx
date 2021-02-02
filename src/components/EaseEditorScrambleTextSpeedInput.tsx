@@ -1,71 +1,50 @@
-import React, { ReactElement, useEffect, useState } from 'react';
-import mexp from 'math-expression-evaluator';
+import React, { ReactElement, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setLayerScrambleTextTweenSpeed } from '../store/actions/layer';
-import SidebarInput from './SidebarInput';
+import MathFormGroup from './MathFormGroup';
 
 interface EaseEditorScrambleTextSpeedInputProps {
   setParamInfo(paramInfo: Btwx.ParamInfo): void;
 }
 
 const EaseEditorScrambleTextSpeedInput = (props: EaseEditorScrambleTextSpeedInputProps): ReactElement => {
+  const formControlRef = useRef(null);
   const { setParamInfo } = props;
   const id = useSelector((state: RootState) => state.easeEditor.tween);
-  const speedValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].scrambleText.speed : null);
-  const [speed, setSpeed] = useState(speedValue);
+  const speed = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].scrambleText.speed : null);
   const dispatch = useDispatch();
 
-  const handlePowerChange = (e: any): void => {
-    const target = e.target;
-    if (!isNaN(target.value)) {
-      setSpeed(target.value);
+  const handleSubmitSuccess = (newSpeed: any): void => {
+    if (newSpeed < 0) {
+      newSpeed = 0;
     }
-  };
-
-  const handlePowerSubmit = (e: any): void => {
-    try {
-      const evaluatedSpeed = mexp.eval(`${speed}`) as any;
-      if (evaluatedSpeed !== speedValue) {
-        let newSpeed = evaluatedSpeed;
-        if (newSpeed < 0) {
-          newSpeed = 0;
-        }
-        dispatch(setLayerScrambleTextTweenSpeed({id: id, speed: newSpeed}));
-        setSpeed(speedValue);
-      } else {
-        setSpeed(speedValue);
-      }
-    } catch(error) {
-      setSpeed(speedValue);
-    }
+    dispatch(setLayerScrambleTextTweenSpeed({id: id, speed: newSpeed}));
   }
 
-  const handleFocus = (): void => {
+  const handleFocus = (e: any): void => {
     setParamInfo({
       type: 'Number',
       description: 'Controls how frequently the scrambled characters are refreshed. The default is 1 but you could slow things down by using 0.2 for example.'
     });
   }
 
-  const handleBlur = (): void => {
+  const handleBlur = (e: any): void => {
     setParamInfo(null);
   }
 
-  useEffect(() => {
-    setSpeed(speedValue);
-  }, [speedValue]);
-
   return (
-    <SidebarInput
+    <MathFormGroup
+      ref={formControlRef}
+      controlId='control-ee-st-speed'
       value={speed}
-      onFocus={handleFocus}
+      size='small'
+      label='Speed'
+      min={0}
+      onSubmitSuccess={handleSubmitSuccess}
       onBlur={handleBlur}
-      onChange={handlePowerChange}
-      onSubmit={handlePowerSubmit}
-      submitOnBlur
-      manualCanvasFocus
-      bottomLabel='Power' />
+      onFocus={handleFocus}
+      submitOnBlur />
   );
 }
 

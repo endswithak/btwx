@@ -1,69 +1,85 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useState, useEffect } from 'react';
-import mexp from 'math-expression-evaluator';
+import React, { ReactElement, useRef } from 'react';
 import tinyColor from 'tinycolor2';
-import { ThemeContext } from './ThemeProvider';
-import SidebarInput from './SidebarInput';
+import Form from './Form';
+import MathFormGroup from './MathFormGroup';
 
 interface ColorPickerLighnessInputProps {
-  hue: number | 'multi';
-  saturation: number | 'multi';
   lightness: number | 'multi';
-  value: number | 'multi';
-  alpha: number | 'multi';
-  setRed(red: number): void;
-  setGreen(green: number): void;
-  setBlue(blue: number): void;
-  setLightness(lightness: number): void;
-  onChange(color: Btwx.Color): void;
+  colorValues: {
+    [id: string]: Btwx.Color;
+  };
+  setLightness(lightness: number | 'multi'): void;
+  setHex(hue: string | 'multi'): void;
+  setRed(red: number | 'multi'): void;
+  setGreen(green: number | 'multi'): void;
+  setBlue(blue: number | 'multi'): void;
+  onChange(colors: { [id: string]: { [P in keyof Btwx.Color]?: Btwx.Color[P] } }): void;
 }
 
 const ColorPickerLighnessInput = (props: ColorPickerLighnessInputProps): ReactElement => {
-  const theme = useContext(ThemeContext);
-  const { hue, saturation, lightness, value, alpha, setRed, setGreen, setBlue, setLightness, onChange } = props;
-  const [lightnessValue, setLightnessValue] = useState<number>(lightness !== 'multi' ? Math.round(lightness * 100) : 0);
+  const formControlRef = useRef(null);
+  const { lightness, colorValues, setLightness, setHex, setRed, setGreen, setBlue, onChange } = props;
 
-  useEffect(() => {
-    setLightnessValue(lightness !== 'multi' ? Math.round(lightness * 100) : 0);
-  }, [lightness]);
-
-  const handleChange = (e: any) => {
-    const target = e.target;
-    setLightnessValue(target.value);
-  };
-
-  const handleSubmit = (e: React.SyntheticEvent<HTMLInputElement>): void => {
-    try {
-      let nextLightness = mexp.eval(`${lightnessValue}`) as any;
-      if (nextLightness > 100) {
-        nextLightness = 100;
-      }
-      if (nextLightness < 0) {
-        nextLightness = 0;
-      }
-      if (nextLightness !== (lightness !== 'multi' ? Math.round(lightness * 100) : 0)) {
-        const nextColor = tinyColor({h: hue !== 'multi' ? hue : 0, s: saturation !== 'multi' ? saturation : 0, l: Math.round(nextLightness) / 100});
-        const rgb = nextColor.toRgb();
-        setLightness(Math.round(nextLightness) / 100);
-        setRed(rgb.r);
-        setGreen(rgb.g);
-        setBlue(rgb.b);
-        onChange({h: hue !== 'multi' ? hue : 0, s: saturation !== 'multi' ? saturation : 0, l: Math.round(nextLightness) / 100, v: value !== 'multi' ? value : 0, a: alpha !== 'multi' ? alpha : 1});
-      } else {
-        setLightnessValue(lightness !== 'multi' ? Math.round(lightness * 100) : 0);
-      }
-    } catch(error) {
-      setLightnessValue(lightness !== 'multi' ? Math.round(lightness * 100) : 0);
+  const handleSubmitSuccess = (nextLightness: any): void => {
+    if (nextLightness > 100) {
+      nextLightness = 100;
     }
+    if (nextLightness < 0) {
+      nextLightness = 0;
+    }
+    let hex: string | 'multi';
+    let red: number | 'multi';
+    let green: number | 'multi';
+    let blue: number | 'multi';
+    const newColors = Object.keys(colorValues).reduce((result, current, index) => {
+      const colorInstance = tinyColor({h: colorValues[current].h, s: colorValues[current].s, l: nextLightness / 100, v: colorValues[current].v});
+      const newHex = colorInstance.toHex();
+      const rgb = colorInstance.toRgb();
+      if (index === 0) {
+        hex = newHex;
+        red = rgb.r;
+        green = rgb.g;
+        blue = rgb.b;
+      } else {
+        if (hex !== 'multi' && hex !== newHex) {
+          hex = 'multi';
+        }
+        if (red !== 'multi' && red !== rgb.r) {
+          red = 'multi';
+        }
+        if (green !== 'multi' && green !== rgb.g) {
+          green = 'multi';
+        }
+        if (blue !== 'multi' && blue !== rgb.b) {
+          blue = 'multi';
+        }
+      }
+      return {
+        ...result,
+        [current]: { l: nextLightness / 100 }
+      };
+    }, {});
+    setLightness(nextLightness / 100);
+    setHex(hex);
+    setRed(red);
+    setGreen(green);
+    setBlue(blue);
+    onChange(newColors);
   };
 
   return (
-    <SidebarInput
-      value={lightnessValue}
-      onChange={handleChange}
-      onSubmit={handleSubmit}
+    <MathFormGroup
+      ref={formControlRef}
+      controlId='control-cp-hsl-lightness'
+      value={lightness !== 'multi' ? Math.round(lightness * 100) : lightness}
+      size='small'
+      right={<Form.Text>L</Form.Text>}
+      min={0}
+      max={100}
+      onSubmitSuccess={handleSubmitSuccess}
       submitOnBlur
-      label='L' />
+      canvasAutoFocus />
   );
 }
 

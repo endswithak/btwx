@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setLayerScrambleTextTweenRightToLeft } from '../store/actions/layer';
-import SidebarSelect from './SidebarSelect';
+import Form from './Form';
+import Icon from './Icon';
 
 interface EaseEditorScrambleTextRTLInputProps {
   setParamInfo(paramInfo: Btwx.ParamInfo): void;
@@ -11,35 +12,41 @@ interface EaseEditorScrambleTextRTLInputProps {
 
 const EaseEditorScrambleTextRTLInput = (props: EaseEditorScrambleTextRTLInputProps): ReactElement => {
   const { setParamInfo } = props;
+  const formControlRef = useRef(null);
   const id = useSelector((state: RootState) => state.easeEditor.tween);
   const rtlValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].scrambleText.rightToLeft : null);
+  const [rtl, setRTL] = useState(rtlValue ? 'RTL' : 'LTR');
   const dispatch = useDispatch();
 
-  const rtlOptions = [{
-    value: 'enabled',
-    label: 'Enabled'
+  const options = [{
+    value: 'LTR',
+    label: 'LTR'
   },{
-    value: 'disabled',
-    label: 'Disabled'
-  }];
-
-  const [rtl, setRTL] = useState(rtlValue !== null ? rtlValue ? rtlOptions.find((option) => option.value === 'enabled') : rtlOptions.find((option) => option.value === 'disabled') : null);
+    value: 'RTL',
+    label: 'RTL'
+  }].map((option, index) => (
+    <option
+      key={index}
+      value={option.value}>
+      { option.label }
+    </option>
+  ));
 
   useEffect(() => {
-    setRTL(rtlValue !== null ? rtlValue ? rtlOptions.find((option) => option.value === 'enabled') : rtlOptions.find((option) => option.value === 'disabled') : null);
+    setRTL(rtlValue ? 'RTL' : 'LTR');
   }, [rtlValue]);
 
-  const handleSelectorChange = (selectedOption: { value: string; label: string }): void => {
-    if ((selectedOption.value === 'enabled' && !rtlValue) || (selectedOption.value === 'disabled' && rtlValue)) {
-      setRTL(selectedOption);
-      dispatch(setLayerScrambleTextTweenRightToLeft({id: id, rightToLeft: selectedOption.value === 'enabled'}));
+  const handleChange = (e): void => {
+    if ((e.target.value === 'RTL' && !rtlValue) || (e.target.value === 'LTR' && rtlValue)) {
+      setRTL(e.target.value);
+      dispatch(setLayerScrambleTextTweenRightToLeft({id: id, rightToLeft: e.target.value === 'RTL'}));
     }
   }
 
   const handleFocus = (): void => {
     setParamInfo({
-      type: 'Boolean',
-      description: 'If enabled, the text will be revealed from right to left'
+      type: 'String',
+      description: 'Direction the text will be revealed.'
     });
   }
 
@@ -48,14 +55,34 @@ const EaseEditorScrambleTextRTLInput = (props: EaseEditorScrambleTextRTLInputPro
   }
 
   return (
-    <SidebarSelect
-      value={rtl}
-      onChange={handleSelectorChange}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-      options={rtlOptions}
-      placeholder='multi'
-      bottomLabel='RTL' />
+    <Form
+      inline
+      validated={true}>
+      <Form.Group controlId='control-ee-sc-rtl'>
+        <Form.Control
+          ref={formControlRef}
+          as='select'
+          value={rtl}
+          size='small'
+          onChange={handleChange}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
+          required
+          rightReadOnly
+          right={
+            <Form.Text>
+              <Icon
+                name='list-toggle'
+                size='small' />
+            </Form.Text>
+          }>
+          { options }
+        </Form.Control>
+        <Form.Label>
+          Reveal
+        </Form.Label>
+      </Form.Group>
+    </Form>
   );
 }
 

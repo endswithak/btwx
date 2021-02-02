@@ -14,8 +14,7 @@ const AlignBottomToggle = (): ReactElement => {
     <IconButton
       onClick={() => dispatch(alignLayersToBottom({layers: selected}))}
       icon='align-bottom'
-      disabled={selected.length <= 1 || selectedBottom !== 'multi'}
-      variant='medium' />
+      disabled={selected.length <= 1 || selectedBottom !== 'multi'} />
   );
 }
 

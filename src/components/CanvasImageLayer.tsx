@@ -45,7 +45,7 @@ const CanvasImageLayer = (props: CanvasLayerContainerProps & CanvasImageLayerPro
             from: new paperLayerScope.Point(imageAbsPosition.x - (imageItem.frame.innerWidth / 2), imageAbsPosition.y - (imageItem.frame.innerHeight / 2)),
             to: new paperLayerScope.Point(imageAbsPosition.x + (imageItem.frame.innerWidth / 2), imageAbsPosition.y + (imageItem.frame.innerHeight / 2)),
             data: { id: 'imageScrim', type: 'LayerChild', layerType: 'Image' },
-            fillColor: tinyColor('blue').setAlpha(0.20).toHslString(),
+            fillColor: tinyColor('blue').setAlpha(0.20).toRgbString(),
             // blendMode: 'multiply'
           })
         ],

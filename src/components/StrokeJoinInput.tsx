@@ -1,16 +1,12 @@
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { selectedStrokeEnabled, getSelectedStrokeJoin } from '../store/selectors/layer';
 import { setLayersStrokeJoin } from '../store/actions/layer';
-import { ThemeContext } from './ThemeProvider';
-import SidebarSectionRow from './SidebarSectionRow';
-import SidebarSectionColumn from './SidebarSectionColumn';
-import SidebarToggleButton from './SidebarToggleButton';
-import Icon from './Icon';
+import { DEFAULT_STROKE_JOIN_OPTIONS } from '../constants';
+import ButtonGroupInput from './ButtonGroupInput';
 
 const StrokeJoinInput = (): ReactElement => {
-  const theme = useContext(ThemeContext);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const strokeJoinValue = useSelector((state: RootState) => getSelectedStrokeJoin(state));
   const disabled = useSelector((state: RootState) => !selectedStrokeEnabled(state) || (state.layer.present.selected.every((id) => state.layer.present.byId[id].type === 'Shape' && (state.layer.present.byId[id] as Btwx.Shape).shapeType === 'Line')));
@@ -26,46 +22,17 @@ const StrokeJoinInput = (): ReactElement => {
     setStrokeJoin(strokeJoinType);
   };
 
+  const options = DEFAULT_STROKE_JOIN_OPTIONS.map((option, index) => ({
+    icon: `stroke-join-${option}`,
+    active: strokeJoin === option,
+    onClick: () => handleClick(option)
+  }));
+
   return (
-    <>
-      <SidebarSectionRow>
-        <SidebarSectionColumn>
-          <SidebarToggleButton
-            onClick={() => handleClick('miter')}
-            active={'miter' === strokeJoin && !disabled}
-            disabled={disabled}>
-            <Icon name='stroke-join-miter' small />
-          </SidebarToggleButton>
-        </SidebarSectionColumn>
-        <SidebarSectionColumn>
-          <SidebarToggleButton
-            onClick={() => handleClick('round')}
-            active={'round' === strokeJoin && !disabled}
-            disabled={disabled}>
-            <Icon name='stroke-join-round' small />
-          </SidebarToggleButton>
-        </SidebarSectionColumn>
-        <SidebarSectionColumn>
-          <SidebarToggleButton
-            onClick={() => handleClick('bevel')}
-            active={'bevel' === strokeJoin && !disabled}
-            disabled={disabled}>
-            <Icon name='stroke-join-bevel' small />
-          </SidebarToggleButton>
-        </SidebarSectionColumn>
-      </SidebarSectionRow>
-      <SidebarSectionRow>
-        <div
-          className='c-sidebar-input__bottom-label'
-          style={{
-            marginTop: 0,
-            paddingRight: theme.unit,
-            color: theme.text.base
-          }}>
-          Join
-        </div>
-      </SidebarSectionRow>
-    </>
+    <ButtonGroupInput
+      buttons={options}
+      label='Join'
+      disabled={disabled} />
   );
 }
 

@@ -1,49 +1,33 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import mexp from 'math-expression-evaluator';
-import SidebarInput from './SidebarInput';
 import { RootState } from '../store/reducers';
 import { getSelectedStrokeWidth, selectedStrokeEnabled } from '../store/selectors/layer';
 import { setLayersStrokeWidth } from '../store/actions/layer';
+import MathFormGroup from './MathFormGroup';
 
 const StrokeWidthInput = (): ReactElement => {
+  const formControlRef = useRef(null);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
-  const strokeWidthValue = useSelector((state: RootState) => getSelectedStrokeWidth(state));
+  const strokeWidth = useSelector((state: RootState) => getSelectedStrokeWidth(state));
   const disabled = useSelector((state: RootState) => !selectedStrokeEnabled(state));
-  const [strokeWidth, setStrokeWidth] = useState(strokeWidthValue !== 'multi' ? Math.round(strokeWidthValue) : strokeWidthValue);
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    setStrokeWidth(strokeWidthValue !== 'multi' ? Math.round(strokeWidthValue) : strokeWidthValue);
-  }, [strokeWidthValue, selected]);
-
-  const handleStrokeWidthChange = (e: any): void => {
-    const target = e.target;
-    setStrokeWidth(target.value);
-  };
-
-  const handleStrokeWidthSubmit = (e: any): void => {
-    try {
-      const nextStrokeWidth = mexp.eval(`${strokeWidth}`) as any;
-      if (nextStrokeWidth !== strokeWidthValue) {
-        dispatch(setLayersStrokeWidth({layers: selected, strokeWidth: Math.round(nextStrokeWidth)}));
-        setStrokeWidth(Math.round(nextStrokeWidth));
-      } else {
-        setStrokeWidth(strokeWidthValue !== 'multi' ? Math.round(strokeWidthValue) : strokeWidthValue);
-      }
-    } catch(error) {
-      setStrokeWidth(strokeWidthValue !== 'multi' ? Math.round(strokeWidthValue) : strokeWidthValue);
-    }
+  const handleSubmitSuccess = (newStrokeWidth: any): void => {
+    dispatch(setLayersStrokeWidth({layers: selected, strokeWidth: newStrokeWidth}));
   };
 
   return (
-    <SidebarInput
+    <MathFormGroup
+      ref={formControlRef}
+      controlId='control-stroke-width'
       value={strokeWidth}
-      onChange={handleStrokeWidthChange}
-      onSubmit={handleStrokeWidthSubmit}
-      submitOnBlur
       disabled={disabled}
-      bottomLabel={'Width'} />
+      size='small'
+      min={0}
+      label='Width'
+      onSubmitSuccess={handleSubmitSuccess}
+      submitOnBlur
+      canvasAutoFocus />
   );
 }
 

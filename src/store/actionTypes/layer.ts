@@ -149,6 +149,7 @@ export const DISABLE_LAYERS_FILL = 'DISABLE_LAYERS_FILL';
 export const SET_LAYER_FILL = 'SET_LAYER_FILL';
 export const SET_LAYER_FILL_COLOR = 'SET_LAYER_FILL_COLOR';
 export const SET_LAYERS_FILL_COLOR = 'SET_LAYERS_FILL_COLOR';
+export const SET_LAYERS_FILL_COLORS = 'SET_LAYERS_FILL_COLORS';
 export const SET_LAYER_FILL_TYPE = 'SET_LAYER_FILL_TYPE';
 export const SET_LAYERS_FILL_TYPE = 'SET_LAYERS_FILL_TYPE';
 
@@ -177,6 +178,7 @@ export const DISABLE_LAYER_STROKE = 'DISABLE_LAYER_STROKE';
 export const DISABLE_LAYERS_STROKE = 'DISABLE_LAYERS_STROKE';
 export const SET_LAYER_STROKE_COLOR = 'SET_LAYER_STROKE_COLOR';
 export const SET_LAYERS_STROKE_COLOR = 'SET_LAYERS_STROKE_COLOR';
+export const SET_LAYERS_STROKE_COLORS = 'SET_LAYERS_STROKE_COLORS';
 export const SET_LAYER_STROKE_FILL_TYPE = 'SET_LAYER_STROKE_FILL_TYPE';
 export const SET_LAYERS_STROKE_FILL_TYPE = 'SET_LAYERS_STROKE_FILL_TYPE';
 export const SET_LAYER_STROKE_WIDTH = 'SET_LAYER_STROKE_WIDTH';
@@ -202,6 +204,7 @@ export const DISABLE_LAYER_SHADOW = 'DISABLE_LAYER_SHADOW';
 export const DISABLE_LAYERS_SHADOW = 'DISABLE_LAYERS_SHADOW';
 export const SET_LAYER_SHADOW_COLOR = 'SET_LAYER_SHADOW_COLOR';
 export const SET_LAYERS_SHADOW_COLOR = 'SET_LAYERS_SHADOW_COLOR';
+export const SET_LAYERS_SHADOW_COLORS = 'SET_LAYERS_SHADOW_COLORS';
 export const SET_LAYER_SHADOW_BLUR = 'SET_LAYER_SHADOW_BLUR';
 export const SET_LAYERS_SHADOW_BLUR = 'SET_LAYERS_SHADOW_BLUR';
 export const SET_LAYER_SHADOW_X_OFFSET = 'SET_LAYER_SHADOW_X_OFFSET';
@@ -1520,7 +1523,7 @@ export interface DisableLayersFill {
 
 export interface SetLayerFillColorPayload {
   id: string;
-  fillColor: Btwx.Color;
+  fillColor: { [P in keyof Btwx.Color]?: Btwx.Color[P] };
 }
 
 export interface SetLayerFillColor {
@@ -1530,12 +1533,24 @@ export interface SetLayerFillColor {
 
 export interface SetLayersFillColorPayload {
   layers: string[];
-  fillColor: Btwx.Color;
+  fillColor: { [P in keyof Btwx.Color]?: Btwx.Color[P] };
 }
 
 export interface SetLayersFillColor {
   type: typeof SET_LAYERS_FILL_COLOR;
   payload: SetLayersFillColorPayload;
+}
+
+export interface SetLayersFillColorsPayload {
+  layers: string[];
+  fillColors: {
+    [id: string]: { [P in keyof Btwx.Color]?: Btwx.Color[P] };
+  };
+}
+
+export interface SetLayersFillColors {
+  type: typeof SET_LAYERS_FILL_COLORS;
+  payload: SetLayersFillColorsPayload;
 }
 
 export interface EnableLayerStrokePayload {
@@ -1576,7 +1591,7 @@ export interface DisableLayersStroke {
 
 export interface SetLayerStrokeColorPayload {
   id: string;
-  strokeColor: Btwx.Color;
+  strokeColor: { [P in keyof Btwx.Color]?: Btwx.Color[P] };
 }
 
 export interface SetLayerStrokeColor {
@@ -1586,12 +1601,24 @@ export interface SetLayerStrokeColor {
 
 export interface SetLayersStrokeColorPayload {
   layers: string[];
-  strokeColor: Btwx.Color;
+  strokeColor: { [P in keyof Btwx.Color]?: Btwx.Color[P] };
 }
 
 export interface SetLayersStrokeColor {
   type: typeof SET_LAYERS_STROKE_COLOR;
   payload: SetLayersStrokeColorPayload;
+}
+
+export interface SetLayersStrokeColorsPayload {
+  layers: string[];
+  strokeColors: {
+    [id: string]: { [P in keyof Btwx.Color]?: Btwx.Color[P] };
+  };
+}
+
+export interface SetLayersStrokeColors {
+  type: typeof SET_LAYERS_STROKE_COLORS;
+  payload: SetLayersStrokeColorsPayload;
 }
 
 export interface SetLayerStrokeFillTypePayload {
@@ -1721,7 +1748,7 @@ export interface SetLayerGradientStopColorPayload {
   id: string;
   stopIndex: number;
   prop: 'fill' | 'stroke';
-  color: Btwx.Color;
+  color: { [P in keyof Btwx.Color]?: Btwx.Color[P] };
 }
 
 export interface SetLayerGradientStopColor {
@@ -1733,7 +1760,7 @@ export interface SetLayersGradientStopColorPayload {
   layers: string[];
   stopIndex: number;
   prop: 'fill' | 'stroke';
-  color: Btwx.Color;
+  color: { [P in keyof Btwx.Color]?: Btwx.Color[P] };
 }
 
 export interface SetLayersGradientStopColor {
@@ -2008,7 +2035,7 @@ export interface DisableLayersShadow {
 
 export interface SetLayerShadowColorPayload {
   id: string;
-  shadowColor: Btwx.Color;
+  shadowColor: { [P in keyof Btwx.Color]?: Btwx.Color[P] };
 }
 
 export interface SetLayerShadowColor {
@@ -2018,12 +2045,24 @@ export interface SetLayerShadowColor {
 
 export interface SetLayersShadowColorPayload {
   layers: string[];
-  shadowColor: Btwx.Color;
+  shadowColor: { [P in keyof Btwx.Color]?: Btwx.Color[P] };
 }
 
 export interface SetLayersShadowColor {
   type: typeof SET_LAYERS_SHADOW_COLOR;
   payload: SetLayersShadowColorPayload;
+}
+
+export interface SetLayersShadowColorsPayload {
+  layers: string[];
+  shadowColors: {
+    [id: string]: { [P in keyof Btwx.Color]?: Btwx.Color[P] };
+  };
+}
+
+export interface SetLayersShadowColors {
+  type: typeof SET_LAYERS_SHADOW_COLORS;
+  payload: SetLayersShadowColorsPayload;
 }
 
 export interface SetLayerShadowBlurPayload {
@@ -3160,6 +3199,7 @@ export type LayerTypes = AddArtboard |
                          DisableLayersFill |
                          SetLayerFillColor |
                          SetLayersFillColor |
+                         SetLayersFillColors |
                          SetLayerFill |
                          SetLayerFillType |
                          SetLayersFillType |
@@ -3187,6 +3227,7 @@ export type LayerTypes = AddArtboard |
                          DisableLayersStroke |
                          SetLayerStrokeColor |
                          SetLayersStrokeColor |
+                         SetLayersStrokeColors |
                          SetLayerStrokeFillType |
                          SetLayersStrokeFillType |
                          SetLayerStrokeWidth |
@@ -3210,6 +3251,7 @@ export type LayerTypes = AddArtboard |
                          DisableLayersShadow |
                          SetLayerShadowColor |
                          SetLayersShadowColor |
+                         SetLayersShadowColors |
                          SetLayerShadowBlur |
                          SetLayersShadowBlur |
                          SetLayerShadowXOffset |

@@ -1,52 +1,34 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
 import { setLayersObliqueThunk } from '../store/actions/layer';
 import { getSelectedOblique } from '../store/selectors/layer';
-import SidebarInput from './SidebarInput';
+import Form from './Form';
+import MathFormGroup from './MathFormGroup';
 
 const ObliqueInput = (): ReactElement => {
+  const formControlRef = useRef(null);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
-  const obliqueValue = useSelector((state: RootState) => getSelectedOblique(state));
-  const [oblique, setOblique] = useState(obliqueValue);
+  const oblique = useSelector((state: RootState) => getSelectedOblique(state));
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    setOblique(obliqueValue);
-  }, [obliqueValue, selected]);
-
-  const handleChange = (e: any): void => {
-    const target = e.target;
-    setOblique(target.value);
-  };
-
-  const handleSubmit = (e: any): void => {
-    try {
-      let nextOblique = mexp.eval(`${oblique}`) as any;
-      if (nextOblique !== obliqueValue) {
-        if (nextOblique > 14) {
-          nextOblique = 14;
-        }
-        if (nextOblique < 0) {
-          nextOblique = 0;
-        }
-        dispatch(setLayersObliqueThunk({layers: selected, oblique: nextOblique}));
-        setOblique(nextOblique as any);
-      }
-    } catch(error) {
-      setOblique(obliqueValue);
-    }
+  const handleSubmitSuccess = (newOblique: any): void => {
+    dispatch(setLayersObliqueThunk({layers: selected, oblique: newOblique}));
   }
 
   return (
-    <SidebarInput
+    <MathFormGroup
+      ref={formControlRef}
+      controlId='control-oblique'
       value={oblique}
-      onChange={handleChange}
-      onSubmit={handleSubmit}
+      size='small'
+      max={14}
+      min={0}
+      label='Oblique'
+      right={<Form.Text>°</Form.Text>}
+      onSubmitSuccess={handleSubmitSuccess}
       submitOnBlur
-      label='°'
-      bottomLabel='Oblique' />
+      canvasAutoFocus />
   );
 }
 

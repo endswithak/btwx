@@ -1,60 +1,37 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useState, useEffect } from 'react';
-import mexp from 'math-expression-evaluator';
-import { ThemeContext } from './ThemeProvider';
-import SidebarInput from './SidebarInput';
+import React, { ReactElement, useRef } from 'react';
+import PercentageFormGroup from './PercentageFormGroup';
 
 interface ColorPickerAlphaInputProps {
-  hue: number | 'multi';
-  saturation: number | 'multi';
-  lightness: number | 'multi';
-  value: number | 'multi';
   alpha: number | 'multi';
+  colorValues: {
+    [id: string]: Btwx.Color;
+  };
   setAlpha(alpha: number): void;
-  onChange(color: Btwx.Color): void;
+  onChange(colors: { [id: string]: { [P in keyof Btwx.Color]?: Btwx.Color[P] } }): void;
 }
 
 const ColorPickerAlphaInput = (props: ColorPickerAlphaInputProps): ReactElement => {
-  const theme = useContext(ThemeContext);
-  const { hue, saturation, lightness, value, alpha, setAlpha, onChange } = props;
-  const [opacity, setOpacity] = useState<number>(alpha !== 'multi' ? Math.round(alpha * 100) : 100);
+  const inputControlRef = useRef(null);
+  const { alpha, colorValues, setAlpha, onChange } = props;
 
-  useEffect(() => {
-    setOpacity(alpha !== 'multi' ? Math.round(alpha * 100) : 100);
-  }, [alpha]);
-
-  const handleChange = (e: any) => {
-    const target = e.target;
-    setOpacity(target.value);
-  };
-
-  const handleSubmit = (e: any): void => {
-    try {
-      let nextOpacity = mexp.eval(`${opacity}`) as any;
-      if (nextOpacity > 100) {
-        nextOpacity = 100;
-      }
-      if (nextOpacity < 0) {
-        nextOpacity = 0;
-      }
-      if (nextOpacity !== alpha) {
-        setAlpha(Math.round(nextOpacity) / 100);
-        onChange({h: hue !== 'multi' ? hue : 0, s: saturation !== 'multi' ? saturation : 0, l: lightness !== 'multi' ? lightness : 0, v: value !== 'multi' ? value : 0, a: Math.round(nextOpacity) / 100});
-      } else {
-        setOpacity(alpha !== 'multi' ? Math.round(alpha * 100) : 100);
-      }
-    } catch(error) {
-      setOpacity(alpha !== 'multi' ? Math.round(alpha * 100) : 100);
-    }
+  const handleSubmitSuccess = (nextOpacity: any): void => {
+    setAlpha(nextOpacity);
+    onChange(Object.keys(colorValues).reduce((result, current) => ({
+      ...result,
+      [current]: { a: nextOpacity }
+    }), {}));
   };
 
   return (
-    <SidebarInput
-      value={opacity}
-      onChange={handleChange}
-      onSubmit={handleSubmit}
+    <PercentageFormGroup
+      controlId='control-cp-alpha'
+      value={alpha}
+      ref={inputControlRef}
       submitOnBlur
-      label='%' />
+      canvasAutoFocus
+      size='small'
+      onSubmitSuccess={handleSubmitSuccess} />
   );
 }
 

@@ -11,22 +11,27 @@ interface EventDrawerEventLayersProps {
 const EventDrawerEventLayers = (props: EventDrawerEventLayersProps): ReactElement => {
   const { scrollLayer } = props;
   const scrollLayerItem = useSelector((state: RootState) => scrollLayer ? state.layer.present.byId[scrollLayer] : null);
+  const tweenEditing = useSelector((state: RootState) => state.eventDrawer.tweenEditing);
   const dispatch = useDispatch();
 
   const handleMouseEnter = (id: string): void => {
-    dispatch(setLayerHover({id}));
+    if (!tweenEditing) {
+      dispatch(setLayerHover({id}));
+    }
   }
 
   const handleMouseLeave = (): void => {
-    dispatch(setLayerHover({id: null}));
+    if (!tweenEditing) {
+      dispatch(setLayerHover({id: null}));
+    }
   }
 
-  const handleClick = (id: string): void => {
-    dispatch(selectLayers({
-      layers: [id],
-      newSelection: true
-    }));
-  }
+  // const handleClick = (id: string): void => {
+  //   dispatch(selectLayers({
+  //     layers: [id],
+  //     newSelection: true
+  //   }));
+  // }
 
   return (
     scrollLayerItem
@@ -53,7 +58,7 @@ const EventDrawerEventLayers = (props: EventDrawerEventLayersProps): ReactElemen
           : null
         }}
         layerItem={scrollLayerItem}
-        onClick={(): void => handleClick(scrollLayerItem.id)}
+        // onClick={(): void => handleClick(scrollLayerItem.id)}
         onMouseEnter={(): void => handleMouseEnter(scrollLayerItem.id)}
         onMouseLeave={handleMouseLeave}
         sticky />

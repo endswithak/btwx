@@ -32,7 +32,7 @@ const DropdownIndicator = (
     <components.DropdownIndicator {...props}>
       <Icon
         name='thicc-chevron-down'
-        small />
+        size='small' />
     </components.DropdownIndicator>
   );
 };
@@ -44,7 +44,7 @@ const SearchDropdownIndicator = (
     <components.DropdownIndicator {...props}>
       <Icon
         name='search'
-        small />
+        size='small' />
     </components.DropdownIndicator>
   );
 };
@@ -106,29 +106,9 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
           },
           option: (provided, { data, isDisabled, isFocused, isSelected }) => {
             const fontFamily = props.type === 'fontFamily' ? data.value : props.type === 'fontWeight' ? props.data.fontFamily : 'inherit';
-            const fontWeight = props.type === 'fontWeight' ? (() => {
-              switch(data.value) {
-                case 'normal':
-                  return data.value;
-                case 'bold':
-                case 'bold italic':
-                  return 'bold';
-                case 'italic':
-                  return 'normal';
-              }
-            })() : 'inherit';
-            const fontStyle = props.type === 'fontWeight' ? (() => {
-              switch(data.value) {
-                case 'normal':
-                case 'bold':
-                  return data.value;
-                case 'bold italic':
-                case 'italic':
-                  return 'italic';
-              }
-            })() : 'inherit';
+            const fontWeight = props.type === 'fontWeight' ? data.value : 'inherit';
             const fontSize = 12;
-            const background = isFocused ? theme.palette.primary : isSelected ? tinyColor(theme.text.lightest).setAlpha(0.15).toHslString() : 'none';
+            const background = isFocused ? theme.palette.primary : isSelected ? tinyColor(theme.text.lightest).setAlpha(0.15).toRgbString() : 'none';
             const color = isFocused ? theme.text.onPrimary : theme.text.base;
             const cursor = 'pointer';
             const borderRadius = theme.unit;
@@ -138,7 +118,7 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
             const whiteSpace = props.truncateOptions ?'nowrap' : 'initial';
             const textOverflow = props.truncateOptions ? 'ellipsis' : 'initial';
             return {
-              ...provided, overflow, whiteSpace, textOverflow, paddingLeft, paddingRight, fontFamily, fontSize, background, color, cursor, fontWeight, fontStyle, borderRadius,
+              ...provided, overflow, whiteSpace, textOverflow, paddingLeft, paddingRight, fontFamily, fontSize, background, color, cursor, fontWeight, borderRadius,
               ':active': {
                 background: theme.palette.primary
               }
@@ -148,9 +128,9 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
             const paddingLeft = 4;
             const paddingRight = 4;
             const height = 24;
-            const fontWeight = state.selectProps.value && props.type === 'fontWeight' ? state.selectProps.value.value : 'inherit';
+            // const fontWeight = state.selectProps.value && props.type === 'fontWeight' ? state.selectProps.value.value : 'inherit';
             //const fontFamily = props.type === 'fontFamily' ? state.selectProps.value.value : 'inherit';
-            return { ...provided, paddingLeft, paddingRight, height, fontWeight };
+            return { ...provided, paddingLeft, paddingRight, height };
           },
           indicatorsContainer: (provided, state) => {
             const justifyContent = 'center';

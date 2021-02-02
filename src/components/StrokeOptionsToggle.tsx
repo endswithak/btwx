@@ -1,5 +1,4 @@
-import React, { useContext, ReactElement } from 'react';
-import { ThemeContext } from './ThemeProvider';
+import React, { ReactElement } from 'react';
 import IconButton from './IconButton';
 
 interface StrokeOptionsToggleProps {
@@ -8,15 +7,15 @@ interface StrokeOptionsToggleProps {
 }
 
 const StrokeOptionsToggle = (props: StrokeOptionsToggleProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { showOptions, onClick } = props;
 
   return (
     <IconButton
       onClick={onClick}
       icon='more'
-      isActive={showOptions}
-      variant='small' />
+      active={showOptions}
+      description={showOptions ? 'hide stroke options' : 'show stroke options'}
+      size='small' />
   );
 }
 

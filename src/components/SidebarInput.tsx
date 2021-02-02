@@ -33,12 +33,14 @@ interface InputProps {
 const Input = styled.div<InputProps>`
   .c-sidebar-input__field {
     background: ${props => props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
-    color: ${props => props.theme.text.base};
+    color: ${props => props.theme.text.light};
     box-shadow: 0 0 0 1px ${props => props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset;
     :focus {
+      color: ${props => props.theme.text.base};
       box-shadow: ${props => props.isSearch ? `0 0 0 0` : `0 0 0 1px`} ${props => props.theme.palette.primary} inset;
     }
     :hover {
+      color: ${props => props.theme.text.base};
       box-shadow:  ${props => props.isSearch ? `0 0 0 0` : `0 0 0 1px`} ${props => props.isSearch ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z5 : props.theme.background.z6} inset;
       :focus {
         box-shadow: ${props => props.isSearch ? `0 0 0 0` : `0 0 0 1px`} ${props => props.theme.palette.primary} inset;

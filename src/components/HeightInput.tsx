@@ -1,52 +1,33 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
 import { getSelectedInnerHeight } from '../store/selectors/layer';
 import { setLayersHeightThunk } from '../store/actions/layer';
-import SidebarInput from './SidebarInput';
+import Form from './Form';
+import MathFormGroup from './MathFormGroup';
 
 const HeightInput = (): ReactElement => {
+  const formControlRef = useRef<HTMLInputElement>(null);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
-  const heightValue = useSelector((state: RootState) => getSelectedInnerHeight(state));
+  const height = useSelector((state: RootState) => getSelectedInnerHeight(state));
   const disabled = useSelector((state: RootState) => state.layer.present.selected.some((id) => state.layer.present.byId[id].type === 'Shape' && (state.layer.present.byId[id] as Btwx.Shape).shapeType === 'Line' || state.layer.present.byId[id].type === 'Text'));
-  const [height, setHeight] = useState(heightValue !== 'multi' ? Math.round(heightValue) : heightValue);
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    setHeight(heightValue !== 'multi' ? Math.round(heightValue) : heightValue);
-  }, [heightValue, selected]);
-
-  const handleChange = (e: any) => {
-    const target = e.target;
-    setHeight(target.value);
-  };
-
-  const handleSubmit = (e: any) => {
-    try {
-      let nextHeight = mexp.eval(`${height}`) as any;
-      if (height !== heightValue) {
-        if (nextHeight < 1) {
-          nextHeight = 1;
-        }
-        dispatch(setLayersHeightThunk({layers: selected, height: Math.round(nextHeight)}));
-        setHeight(Math.round(nextHeight));
-      } else {
-        setHeight(heightValue !== 'multi' ? Math.round(heightValue) : heightValue);
-      }
-    } catch(error) {
-      setHeight(heightValue !== 'multi' ? Math.round(heightValue) : heightValue);
-    }
+  const handleSubmitSuccess = (evaluation: any): void => {
+    dispatch(setLayersHeightThunk({layers: selected, height: evaluation}));
   }
 
   return (
-    <SidebarInput
+    <MathFormGroup
+      ref={formControlRef}
+      controlId='control-y'
       value={height}
-      onChange={handleChange}
-      onSubmit={handleSubmit}
-      disabled={disabled}
+      size='small'
+      right={<Form.Text>H</Form.Text>}
+      onSubmitSuccess={handleSubmitSuccess}
       submitOnBlur
-      label={'H'} />
+      canvasAutoFocus
+      disabled={disabled} />
   );
 }
 

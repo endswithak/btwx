@@ -13,7 +13,7 @@ export interface TopbarDropdownButtonOptionProps {
 }
 
 const Button = styled.button<TopbarDropdownButtonOptionProps>`
-  background: ${props => props.isActive ? tinyColor(props.theme.text.lightest).setAlpha(0.15).toHslString() : 'none'};
+  background: ${props => props.isActive ? tinyColor(props.theme.text.lightest).setAlpha(0.15).toRgbString() : 'none'};
   .c-ease-editor-selector-item__icon {
     svg {
       stroke: ${props => props.theme.text.lighter};

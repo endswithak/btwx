@@ -5,6 +5,7 @@ interface SidebarSectionColumnProps {
   width?: number | string;
   justifyContent?: string;
   alignItems?: string;
+  padded?: boolean;
 }
 
 const SidebarSectionColumn = (props: SidebarSectionColumnProps): ReactElement => {
@@ -14,7 +15,8 @@ const SidebarSectionColumn = (props: SidebarSectionColumnProps): ReactElement =>
       style={{
         width: props.width,
         justifyContent: props.justifyContent,
-        alignItems: props.alignItems
+        alignItems: props.alignItems,
+        padding: props.padded ? 4 : 0
       }}>
       { props.children }
     </div>

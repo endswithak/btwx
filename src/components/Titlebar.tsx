@@ -6,29 +6,29 @@ import { MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT, PREVIEW_PREFIX } from '..
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 
-interface TitlebarProps {
-  isPreview?: boolean;
-}
-
-interface TitleProps {
+interface StyledTitlebarProps {
   recording: boolean;
 }
 
-const Title = styled.div<TitleProps>`
+const StyledTitlebar = styled.div<StyledTitlebarProps>`
   height: ${remote.process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT}px;
   color: ${props => props.recording ? '#fff' : props.theme.text.base};
   line-height: ${remote.process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT}px;
   background: ${props => props.recording ? props.theme.palette.recording : props.theme.name === 'dark' ? props.theme.background.z1 : props.theme.background.z2};
-  .c-topbar-title__unsaved-indicator {
+  -webkit-app-region: drag;
+  .c-titlebar__unsaved-indicator {
     color: ${props => props.recording ? 'rgba(255, 255, 255, 0.5)' : props.theme.text.lighter};
     margin-left: ${props => props.theme.unit}px;
   }
-  -webkit-app-region: drag;
 `;
+
+interface TitlebarProps {
+  previewWindow?: boolean;
+}
 
 const Titlebar = (props: TitlebarProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { isPreview } = props;
+  const { previewWindow } = props;
   const unsavedEdits = useSelector((state: RootState) => state.layer.present.edit && state.layer.present.edit.id !== state.documentSettings.edit);
   const documentName = useSelector((state: RootState) => state.documentSettings.name);
   const documentPath = useSelector((state: RootState) => state.documentSettings.path);
@@ -41,7 +41,7 @@ const Titlebar = (props: TitlebarProps): ReactElement => {
   }
 
   useEffect(() => {
-    if (!isPreview) {
+    if (!previewWindow) {
       if (unsavedEdits) {
         remote.getCurrentWindow().setDocumentEdited(true);
       } else {
@@ -51,7 +51,7 @@ const Titlebar = (props: TitlebarProps): ReactElement => {
   }, [unsavedEdits]);
 
   useEffect(() => {
-    if (!isPreview) {
+    if (!previewWindow) {
       if (documentPath) {
         remote.getCurrentWindow().setRepresentedFilename(documentPath);
       }
@@ -59,28 +59,28 @@ const Titlebar = (props: TitlebarProps): ReactElement => {
   }, [documentPath]);
 
   return (
-    <Title
-      className='c-topbar-title'
+    <StyledTitlebar
+      className='c-titlebar'
       theme={theme}
       recording={recording}
       onDoubleClick={handleDoubleClick}>
       <span>
-        <span className='c-topbar-title__title'>
+        <span className='c-titlebar__title'>
           {
-            isPreview
+            previewWindow
             ? ''
             : documentName
           }
         </span>
         {
-          unsavedEdits && !isPreview
-          ? <span className='c-topbar-title__unsaved-indicator'>
+          unsavedEdits && !previewWindow
+          ? <span className='c-titlebar__unsaved-indicator'>
               (unsaved changes)
             </span>
           : null
         }
       </span>
-    </Title>
+    </StyledTitlebar>
   );
 }
 

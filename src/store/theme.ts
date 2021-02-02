@@ -1,5 +1,5 @@
 import chroma, { Color } from 'chroma-js';
-import { THEME_PRIMARY_COLOR, THEME_UNIT_SIZE, THEME_RECORDING_COLOR, THEME_DARK_BACKGROUND_MIN, THEME_LIGHT_BACKGROUND_MIN, THEME_DARK_BACKGROUND_MAX, THEME_LIGHT_BACKGROUND_MAX } from '../constants';
+import { THEME_PRIMARY_COLOR, THEME_GREEN, THEME_RED, THEME_ORANGE, THEME_UNIT_SIZE, THEME_RECORDING_COLOR, THEME_DARK_BACKGROUND_MIN, THEME_LIGHT_BACKGROUND_MIN, THEME_DARK_BACKGROUND_MAX, THEME_LIGHT_BACKGROUND_MAX } from '../constants';
 
 const createScale = (min: string, max: string, count: number) => {
   return chroma.scale([min, max]).mode('lch').colors(count);
@@ -33,8 +33,14 @@ const createPalette = (theme: Btwx.ThemeName): Btwx.Palette => ({
   primaryHover: theme === 'dark' ? chroma(THEME_PRIMARY_COLOR).brighten(0.5).css() : chroma(THEME_PRIMARY_COLOR).darken(0.5).css(),
   accent: chroma(accent).css(),
   accentHover: chroma(accent).darken().css(),
-  recording: chroma(THEME_RECORDING_COLOR).css(),
-  recordingHover: theme === 'dark' ? chroma(THEME_RECORDING_COLOR).brighten(0.5).css() : chroma(THEME_RECORDING_COLOR).darken(0.5).css()
+  recording: THEME_RED,
+  recordingHover: theme === 'dark' ? chroma(THEME_RED).brighten(0.5).css() : chroma(THEME_RED).darken(0.5).css(),
+  error: THEME_RED,
+  errorHover: theme === 'dark' ? chroma(THEME_RED).brighten(0.5).css() : chroma(THEME_RED).darken(0.5).css(),
+  warn: THEME_ORANGE,
+  warnHover: theme === 'dark' ? chroma(THEME_ORANGE).brighten(0.5).css() : chroma(THEME_ORANGE).darken(0.5).css(),
+  success: THEME_GREEN,
+  successHover: theme === 'dark' ? chroma(THEME_GREEN).brighten(0.5).css() : chroma(THEME_GREEN).darken(0.5).css()
 });
 
 const createDarkBackgrounds = (scale: string[]): Btwx.BackgroundScale => ({
@@ -64,6 +70,9 @@ const createText = (scale: string[], palette: Btwx.Palette): Btwx.TextScale => (
   lightest: scale[0],
   onPrimary: textOnColor(palette.primary),
   onAccent: textOnColor(palette.accent),
+  onError: textOnColor(palette.error),
+  onWarn: textOnColor(palette.warn),
+  onSuccess: textOnColor(palette.success),
 });
 
 export const darkTheme: Btwx.Theme = {

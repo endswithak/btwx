@@ -14,6 +14,7 @@ import SidebarRight from './SidebarRight';
 import EventDrawer from './EventDrawer';
 import TextEditor from './TextEditor';
 import DocumentImages from './DocumentImages';
+import Titlebar from './Titlebar';
 
 const App = (): ReactElement => {
   const ready = useSelector((state: RootState) => state.canvasSettings.ready);
@@ -38,6 +39,7 @@ const App = (): ReactElement => {
       id='app'
       className='c-app'>
         {/* flex items */}
+        <Titlebar />
         <Topbar />
         <div id='main' className='c-app__main'>
           <SidebarLeft />

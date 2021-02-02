@@ -7,10 +7,10 @@ import HorizontalFlipInput from './HorizontalFlipInput';
 const SidebarFlippedStyles = (): ReactElement => {
   return (
     <SidebarSectionRow>
-      <SidebarSectionColumn>
+      <SidebarSectionColumn padded>
         <HorizontalFlipInput />
       </SidebarSectionColumn>
-      <SidebarSectionColumn>
+      <SidebarSectionColumn padded>
         <VerticalFlipInput />
       </SidebarSectionColumn>
     </SidebarSectionRow>

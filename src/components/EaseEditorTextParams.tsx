@@ -38,11 +38,11 @@ const EaseEditorTextParams = (props: EaseEditorTextParamsProps): ReactElement =>
               </SidebarSectionColumn>
             </SidebarSectionRow>
             <SidebarSectionRow>
-              <SidebarSectionColumn width='50%'>
+              <SidebarSectionColumn width='66.66%'>
                 <EaseEditorScrambleTextCharsInput
                   setParamInfo={setParamInfo} />
               </SidebarSectionColumn>
-              <SidebarSectionColumn width='50%'>
+              <SidebarSectionColumn width='33.33%'>
                 <EaseEditorScrambleTextCustomCharsInput
                   setParamInfo={setParamInfo} />
               </SidebarSectionColumn>

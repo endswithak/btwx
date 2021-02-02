@@ -53,7 +53,7 @@ const GradientSliderGradient = (props: GradientSliderGradientProps): ReactElemen
       style={{
         background: (() => {
           return [...stops].sort((a,b) => { return a.position - b.position }).reduce((result, current, index) => {
-            const stopColor = tinyColor({h: current.color.h, s: current.color.s, l: current.color.l, a: current.color.a}).toHslString();
+            const stopColor = tinyColor({h: current.color.h, s: current.color.s, l: current.color.l, a: current.color.a}).toRgbString();
             result = result + `${stopColor} ${current.position * 100}%`;
             if (index !== stops.length - 1) {
               result = result + ',';

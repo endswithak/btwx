@@ -1,81 +1,30 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
 import { getSelectedOpacity } from '../store/selectors/layer';
 import { setLayersOpacity } from '../store/actions/layer';
-import SidebarSectionRow from './SidebarSectionRow';
-import SidebarSectionColumn from './SidebarSectionColumn';
-import SidebarInput from './SidebarInput';
-import SidebarSlider from './SidebarSlider';
-import BlendModeSelector from './BlendModeSelector';
+import PercentageFormGroup from './PercentageFormGroup';
 
 const OpacityInput = (): ReactElement => {
+  const inputControlRef = useRef(null);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
-  const opacityValue = useSelector((state: RootState) => getSelectedOpacity(state));
-  const [opacity, setOpacity] = useState(opacityValue !== 'multi' ? Math.round(opacityValue * 100) : opacityValue);
+  const opacity = useSelector((state: RootState) => getSelectedOpacity(state));
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    setOpacity(opacityValue !== 'multi' ? Math.round(opacityValue * 100) : opacityValue);
-  }, [opacityValue, selected]);
-
-  const handleChange = (e: any) => {
-    const target = e.target;
-    setOpacity(target.value);
-  };
-
-  // const handleSliderChange = (e: any) => {
-  //   handleChange(e);
-  //   const paperLayer = getPaperLayer(selected[0]);
-  //   let nextOpacity = mexp.eval(`${opacity}`);
-  //   if (nextOpacity > 100) {
-  //     nextOpacity = 100;
-  //   }
-  //   if (nextOpacity < 0) {
-  //     nextOpacity = 0;
-  //   }
-  //   paperLayer.opacity = mexp.eval(`${nextOpacity} / 100`);
-  // };
-
-  const handleSubmit = (e: any) => {
-    try {
-      let nextOpacity = mexp.eval(`${opacity}`) as any;
-      if (nextOpacity !== opacityValue) {
-        if (nextOpacity > 100) {
-          nextOpacity = 100;
-        }
-        if (nextOpacity < 0) {
-          nextOpacity = 0;
-        }
-        dispatch(setLayersOpacity({layers: selected, opacity: Math.round(nextOpacity) / 100}));
-        setOpacity(Math.round(nextOpacity));
-      }
-    } catch(error) {
-      setOpacity(opacityValue !== 'multi' ? Math.round(opacityValue * 100) : opacityValue);
-    }
+  const handleSubmitSuccess = (nextOpacity: any): void => {
+    dispatch(setLayersOpacity({layers: selected, opacity: nextOpacity}));
   }
 
   return (
-    <SidebarSectionRow>
-      <SidebarSectionColumn width={'66.66%'}>
-        {/* <SidebarSlider
-          value={disabled ? 0 : opacity}
-          onChange={handleSliderChange}
-          onMouseUp={handleSubmit}
-          disabled={disabled} /> */}
-        <BlendModeSelector />
-      </SidebarSectionColumn>
-      <SidebarSectionColumn width={'33.33%'}>
-        <SidebarInput
-          value={opacity}
-          onChange={handleChange}
-          onSubmit={handleSubmit}
-          submitOnBlur
-          label={'%'}
-          bottomLabel='Opacity' />
-      </SidebarSectionColumn>
-    </SidebarSectionRow>
+    <PercentageFormGroup
+      controlId='control-opacity'
+      value={opacity}
+      ref={inputControlRef}
+      submitOnBlur
+      canvasAutoFocus
+      size='small'
+      onSubmitSuccess={handleSubmitSuccess}
+      label='Opacity' />
   );
 }
 

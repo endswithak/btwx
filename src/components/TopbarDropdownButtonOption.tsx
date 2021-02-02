@@ -10,14 +10,14 @@ export interface TopbarDropdownButtonOptionProps {
   isActive?: boolean;
   disabled?: boolean;
   icon?: string;
-  iconSmall?: boolean;
+  size?: Btwx.SizeVariant;
   bottomDivider?: boolean;
   checkbox?: boolean;
   label: string;
 }
 
 const Button = styled.button<TopbarDropdownButtonOptionProps>`
-  background: ${props => !props.checkbox && props.isActive ? tinyColor(props.theme.text.lightest).setAlpha(0.15).toHslString() : 'none'};
+  background: ${props => !props.checkbox && props.isActive ? tinyColor(props.theme.text.lightest).setAlpha(0.15).toRgbString() : 'none'};
   .c-topbar-dropdown-button__icon {
     svg {
       fill: ${props => props.theme.text.lighter};
@@ -73,7 +73,7 @@ const Button = styled.button<TopbarDropdownButtonOptionProps>`
 
 const TopbarDropdownButtonOption = (props: TopbarDropdownButtonOptionProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { label, icon, bottomDivider, checkbox, isActive, iconSmall } = props;
+  const { label, icon, bottomDivider, checkbox, isActive, size } = props;
 
   return (
     <Button
@@ -85,7 +85,7 @@ const TopbarDropdownButtonOption = (props: TopbarDropdownButtonOptionProps): Rea
         ? <span className='c-topbar-dropdown-button__icon'>
             <Icon
               name={icon}
-              small={iconSmall} />
+              size={size} />
           </span>
         : null
       }
@@ -97,7 +97,7 @@ const TopbarDropdownButtonOption = (props: TopbarDropdownButtonOptionProps): Rea
         ? <span className='c-topbar-dropdown-button__icon c-topbar-dropdown-button__icon--checkbox'>
             <Icon
               name={isActive ? 'checkbox-checked' : 'checkbox-unchecked'}
-              small />
+              size='small' />
           </span>
         : null
       }

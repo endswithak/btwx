@@ -1,71 +1,98 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setLayerTextTweenDelimiter } from '../store/actions/layer';
-import SidebarInput from './SidebarInput';
+import Form from './Form';
 
 interface EaseEditorTextDelimiterInputProps {
   setParamInfo(paramInfo: Btwx.ParamInfo): void;
 }
 
 const EaseEditorTextDelimiterInput = (props: EaseEditorTextDelimiterInputProps): ReactElement => {
+  const formControlRef = useRef(null);
   const { setParamInfo } = props;
   const id = useSelector((state: RootState) => state.easeEditor.tween);
-  const delimiterValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].text.delimiter : null);
-  const [delimiter, setDelimiter] = useState(delimiterValue.length === 0 ? `""` : delimiterValue === ' ' ? `" "` : delimiterValue);
+  const delimiter = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].text.delimiter : null);
+  const [currentValue, setCurrentValue] = useState(delimiter.length === 0 ? `""` : delimiter === ' ' ? `" "` : delimiter);
+  const [valid, setValid] = useState(true);
+  const [dirty, setDirty] = useState(false);
+  const [evaluation, setEvaluation] = useState(delimiter);
   const dispatch = useDispatch();
 
-  const handlePointsChange = (e: any): void => {
-    const target = e.target;
-    setDelimiter(target.value);
+  const handleChange = (e: any): void => {
+    const nextValue = e.target.value;
+    let nextEval = nextValue;
+    if (nextValue === `""` || nextValue === `''`) {
+      nextEval = '';
+    }
+    if (nextValue === `" "` || nextValue === `' '`) {
+      nextEval = ' ';
+    }
+    setCurrentValue(nextValue);
+    setEvaluation(nextEval);
+    setDirty(nextEval !== delimiter);
   };
 
-  const handleDelimiterSubmit = (e: any): void => {
-    let newDelimiter = delimiter;
-    if (newDelimiter === `""` || newDelimiter === `''`) {
-      newDelimiter = '';
+  const handleSubmit = (e: any): void => {
+    if (valid && dirty) {
+      dispatch(setLayerTextTweenDelimiter({
+        id: id,
+        delimiter: evaluation
+      }));
+    } else {
+      setCurrentValue(delimiter.length === 0 ? `""` : delimiter === ' ' ? `" "` : delimiter);
+      setEvaluation(delimiter);
     }
-    if (newDelimiter === `" "` || newDelimiter === `' '`) {
-      newDelimiter = ' ';
-    }
-    if (newDelimiter !== delimiterValue) {
-      dispatch(setLayerTextTweenDelimiter({id: id, delimiter: newDelimiter}));
-      if (newDelimiter === ' ') {
-        newDelimiter = `" "`;
-      }
-      if (newDelimiter === '') {
-        newDelimiter = `""`;
-      }
-      setDelimiter(newDelimiter);
-    }
+    setDirty(false);
   }
 
-  const handleFocus = (): void => {
+  const handleFocus = (e: any): void => {
     setParamInfo({
-      type: 'String',
+      type: 'String | Number',
       description: `The character that should be used to split the text up. The default is "", so each character is isolated but if you'd prefer to animate in word-by-word instead you can use " ".`
     });
   }
 
-  const handleBlur = (): void => {
+  const handleBlur = (e: any): void => {
     setParamInfo(null);
   }
 
   useEffect(() => {
-    setDelimiter(delimiterValue.length === 0 ? `""` : delimiterValue === ' ' ? `" "` : delimiterValue);
-  }, [delimiterValue]);
+    setCurrentValue(delimiter.length === 0 ? `""` : delimiter === ' ' ? `" "` : delimiter);
+    setEvaluation(delimiter);
+  }, [delimiter]);
+
+  useEffect(() => {
+    if (formControlRef.current) {
+      formControlRef.current.focus();
+      formControlRef.current.select();
+    }
+  }, []);
 
   return (
-    <SidebarInput
-      value={delimiter}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-      onChange={handlePointsChange}
-      onSubmit={handleDelimiterSubmit}
-      selectOnMount
-      submitOnBlur
-      manualCanvasFocus
-      bottomLabel='Delimiter' />
+    <Form
+      inline
+      onSubmit={handleSubmit}
+      submitOnBlur>
+      <Form.Group controlId='control-ee-text-delimiter'>
+        <Form.Control
+          onBlur={handleBlur}
+          onFocus={handleFocus}
+          ref={formControlRef}
+          as='input'
+          value={currentValue}
+          size='small'
+          type='text'
+          isValid={valid && dirty}
+          onChange={handleChange}
+          required
+          rightReadOnly
+          leftReadOnly />
+        <Form.Label>
+          Delimiter
+        </Form.Label>
+      </Form.Group>
+    </Form>
   );
 }
 

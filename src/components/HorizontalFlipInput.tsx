@@ -3,8 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { enableLayersHorizontalFlip, disableLayersHorizontalFlip } from '../store/actions/layer';
 import { canFlipSeleted } from '../store/selectors/layer';
-import SidebarToggleButton from './SidebarToggleButton';
-import Icon from './Icon';
+import Button from './Button';
 
 const HorizontalFlipInput = (): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
@@ -27,12 +26,11 @@ const HorizontalFlipInput = (): ReactElement => {
   };
 
   return (
-    <SidebarToggleButton
+    <Button
       active={horizontalFlip}
       onClick={handleClick}
-      disabled={disabled}>
-      <Icon name='horizontal-flip' small />
-    </SidebarToggleButton>
+      icon='horizontal-flip'
+      disabled={disabled} />
   );
 }
 

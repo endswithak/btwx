@@ -23,19 +23,24 @@ const EventDrawerEventLayers = (props: EventDrawerEventLayersProps): ReactElemen
   const eventItem = useSelector((state: RootState) => state.layer.present.events.byId[state.eventDrawer.event]);
   const artboardItem = useSelector((state: RootState) => state.layer.present.byId[eventItem.artboard]);
   const eventDrawerEventLayersWidth = useSelector((state: RootState) => state.viewSettings.eventDrawer.layersWidth);
+  const tweenEditing = useSelector((state: RootState) => state.eventDrawer.tweenEditing);
   const dispatch = useDispatch();
 
   const handleMouseEnter = (id: string): void => {
-    dispatch(setLayerHover({id}));
+    if (!tweenEditing) {
+      dispatch(setLayerHover({id}));
+    }
   }
 
   const handleMouseLeave = (): void => {
-    dispatch(setLayerHover({id: null}));
+    if (!tweenEditing) {
+      dispatch(setLayerHover({id: null}));
+    }
   }
 
-  const handleClick = (id: string): void => {
-    dispatch(selectLayers({layers: [id], newSelection: true}));
-  }
+  // const handleClick = (id: string): void => {
+  //   dispatch(selectLayers({layers: [id], newSelection: true}));
+  // }
 
   return (
     <div
@@ -53,7 +58,7 @@ const EventDrawerEventLayers = (props: EventDrawerEventLayersProps): ReactElemen
           name: 'thicc-chevron-left',
           small: true
         }}
-        onClick={(): void => handleClick(artboardItem.id)}
+        // onClick={(): void => handleClick(artboardItem.id)}
         onMouseEnter={(): void => handleMouseEnter(artboardItem.id)}
         onMouseLeave={handleMouseLeave}
         onIconClick={() => dispatch(setEventDrawerEventThunk({id: null}))} />

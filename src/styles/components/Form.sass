@@ -1,0 +1,42 @@
+.c-form
+  display: flex
+  flex-direction: column
+  width: 100%
+  padding: $unit
+
+.c-form--inline
+  flex-direction: row
+
+.c-form-group
+  display: flex
+  flex-direction: column
+  width: 100%
+
+.c-form-label
+  display: flex
+  align-self: flex-end
+  font-family: $fontFamily
+  font-size: $fontSizeXs
+  text-align: right
+  line-height: $unit * 4
+  margin-top: $unit * 2
+  text-transform: uppercase
+
+  &::selection
+    background: none
+
+.c-form-text
+  font-family: $fontFamily
+  font-size: $fontSize
+  line-height: $controlSize
+
+  &::selection
+    background: none
+
+.c-form-text--small
+  font-size: $fontSizeSm
+  line-height: $controlSizeSm
+
+.c-form-text--large
+  font-size: $fontSizeLg
+  line-height: $controlSizeLg

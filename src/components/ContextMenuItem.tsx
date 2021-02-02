@@ -51,7 +51,7 @@ const ContextMenuItem = (props: ContextMenuItemProps): ReactElement => {
           checked
           ? <Icon
               name='check'
-              small />
+              size='small' />
           : null
         }
         <span>{text}</span>

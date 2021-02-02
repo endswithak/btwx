@@ -74,7 +74,7 @@ const EventDrawerListHeader = (): ReactElement => {
                 style={{
                   fill: theme.palette.primary
                 }}
-                small />
+                size='small' />
             : null
           }
         </HeaderItem>
@@ -91,7 +91,7 @@ const EventDrawerListHeader = (): ReactElement => {
                 style={{
                   fill: theme.palette.primary
                 }}
-                small />
+                size='small' />
             : null
           }
         </HeaderItem>
@@ -108,7 +108,7 @@ const EventDrawerListHeader = (): ReactElement => {
                 style={{
                   fill: theme.palette.primary
                 }}
-                small />
+                size='small' />
             : null
           }
         </HeaderItem>
@@ -125,7 +125,7 @@ const EventDrawerListHeader = (): ReactElement => {
                 style={{
                   fill: theme.palette.primary
                 }}
-                small />
+                size='small' />
             : null
           }
         </HeaderItem>

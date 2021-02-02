@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import electron, { app, BrowserWindow, ipcMain, systemPreferences, Menu, dialog, nativeTheme } from 'electron';
-// import menu from './menu';
 import { handleDocumentClose, getFocusedDocument, getWindowBackground, isMac, getAllDocumentWindows } from './utils';
 import { initialState as initialPreviewState } from './store/reducers/preview';
 import path from 'path';
@@ -17,18 +16,31 @@ import {
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
 
 if (isMac) {
-  if (!systemPreferences.getUserDefault('artboardPresetDevicePlatform', 'string')) {
-    systemPreferences.setUserDefault('artboardPresetDevicePlatform', 'string', 'Apple' as any);
+  const USER_DEFAULTS: Btwx.UserDefaults = {
+    artboardPresetDevicePlatform: systemPreferences.getUserDefault('artboardPresetDevicePlatform', 'string'),
+    artboardPresetDeviceOrientation: systemPreferences.getUserDefault('artboardPresetDeviceOrientation', 'string'),
+    colorFormat: systemPreferences.getUserDefault('colorFormat', 'string'),
+    theme: systemPreferences.getUserDefault('theme', 'string')
   }
-  if (!systemPreferences.getUserDefault('artboardPresetDeviceOrientation', 'string')) {
-    systemPreferences.setUserDefault('artboardPresetDeviceOrientation', 'string', DEFAULT_DEVICE_ORIENTATION as any);
-  }
-  if (!systemPreferences.getUserDefault('colorFormat', 'string')) {
-    systemPreferences.setUserDefault('colorFormat', 'string', DEFAULT_COLOR_FORMAT as any);
-  }
-  if (!systemPreferences.getUserDefault('theme', 'string')) {
-    systemPreferences.setUserDefault('theme', 'string', nativeTheme.shouldUseDarkColors ? 'dark' : 'light');
-  }
+  Object.keys(USER_DEFAULTS).forEach((key: Btwx.UserDefaultKey) => {
+    const value = USER_DEFAULTS[key];
+    if (!value) {
+      switch(key) {
+        case 'artboardPresetDevicePlatform':
+          systemPreferences.setUserDefault(key, 'string', 'Apple');
+          break;
+        case 'artboardPresetDeviceOrientation':
+          systemPreferences.setUserDefault(key, 'string', DEFAULT_DEVICE_ORIENTATION);
+          break;
+        case 'colorFormat':
+          systemPreferences.setUserDefault(key, 'string', DEFAULT_COLOR_FORMAT);
+          break;
+        case 'theme':
+          systemPreferences.setUserDefault(key, 'string', nativeTheme.shouldUseDarkColors ? 'dark' : 'light');
+          break;
+      }
+    }
+  });
 }
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.

@@ -1,47 +1,31 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
 import { setLayersY } from '../store/actions/layer';
 import { getSelectedY } from '../store/selectors/layer';
-import SidebarInput from './SidebarInput';
+import Form from './Form';
+import MathFormGroup from './MathFormGroup';
 
 const YInput = (): ReactElement => {
+  const formControlRef = useRef<HTMLInputElement>(null);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
-  const yValue = useSelector((state: RootState) => getSelectedY(state));
-  const [y, setY] = useState(yValue !== 'multi' ? Math.round(yValue as number) : yValue);
+  const y = useSelector((state: RootState) => getSelectedY(state));
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    setY(yValue !== 'multi' ? Math.round(yValue as number) : yValue);
-  }, [yValue, selected]);
-
-  const handleChange = (e: any) => {
-    const target = e.target;
-    setY(target.value);
-  };
-
-  const handleSubmit = (e: any) => {
-    try {
-      const nextY = mexp.eval(`${y}`) as any;
-      if (nextY !== yValue) {
-        dispatch(setLayersY({layers: selected, y: Math.round(nextY)}));
-        setY(Math.round(nextY));
-      } else {
-        setY(yValue !== 'multi' ? Math.round(yValue as number) : yValue);
-      }
-    } catch(error) {
-      setY(yValue !== 'multi' ? Math.round(yValue as number) : yValue);
-    }
+  const handleSubmitSuccess = (evaluation: any): void => {
+    dispatch(setLayersY({layers: selected, y: evaluation}));
   }
 
   return (
-    <SidebarInput
+    <MathFormGroup
+      ref={formControlRef}
+      controlId='control-y'
       value={y}
-      onChange={handleChange}
-      onSubmit={handleSubmit}
+      size='small'
+      right={<Form.Text>Y</Form.Text>}
+      onSubmitSuccess={handleSubmitSuccess}
       submitOnBlur
-      label={'Y'} />
+      canvasAutoFocus />
   );
 }
 

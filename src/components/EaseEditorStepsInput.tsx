@@ -1,70 +1,59 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setLayerStepsTweenSteps } from '../store/actions/layer';
-import SidebarInput from './SidebarInput';
+import MathFormGroup from './MathFormGroup';
 
 interface EaseEditorStepsInputProps {
   setParamInfo(paramInfo: Btwx.ParamInfo): void;
 }
 
 const EaseEditorStepsInput = (props: EaseEditorStepsInputProps): ReactElement => {
+  const formControlRef = useRef(null);
   const { setParamInfo } = props;
   const id = useSelector((state: RootState) => state.easeEditor.tween);
-  const stepsValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].steps.steps : null);
+  const steps = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].steps.steps : null);
   const disabled = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].ease !== 'steps' : true);
-  const [steps, setSteps] = useState(stepsValue);
   const dispatch = useDispatch();
 
-  const handleStepsChange = (e: any): void => {
-    const target = e.target;
-    setSteps(target.value);
-  };
-
-  const handleStepsSubmit = (e: any): void => {
-    try {
-      const stepsRounded = Math.round(steps);
-      if (stepsRounded !== stepsValue) {
-        let newSteps = stepsRounded;
-        if (stepsRounded < 0) {
-          newSteps = 0;
-        }
-        dispatch(setLayerStepsTweenSteps({id: id, steps: newSteps}));
-        setSteps(newSteps);
-      } else {
-        setSteps(stepsValue);
-      }
-    } catch(error) {
-      setSteps(stepsValue);
+  const handleSubmitSuccess = (newSteps: any): void => {
+    if (newSteps < 0) {
+      newSteps = 0;
     }
+    dispatch(setLayerStepsTweenSteps({id: id, steps: newSteps}));
   }
 
-  const handleFocus = (): void => {
+  const handleFocus = (e: any): void => {
     setParamInfo({
       type: 'Number',
       description: 'Ammount of steps the transition should take.'
     });
   }
 
-  const handleBlur = (): void => {
+  const handleBlur = (e: any): void => {
     setParamInfo(null);
   }
 
   useEffect(() => {
-    setSteps(stepsValue);
-  }, [stepsValue]);
+    if (formControlRef.current) {
+      formControlRef.current.focus();
+      formControlRef.current.select();
+    }
+  }, []);
 
   return (
-    <SidebarInput
+    <MathFormGroup
+      ref={formControlRef}
+      controlId='control-ee-steps'
       value={steps}
       disabled={disabled}
-      onFocus={handleFocus}
+      size='small'
+      label='Points'
+      min={0}
+      onSubmitSuccess={handleSubmitSuccess}
       onBlur={handleBlur}
-      onChange={handleStepsChange}
-      onSubmit={handleStepsSubmit}
-      selectOnMount
-      submitOnBlur
-      bottomLabel='Steps' />
+      onFocus={handleFocus}
+      submitOnBlur />
   );
 }
 

@@ -49,7 +49,7 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
         canOpen
         ? <Icon
             name={isOpen ? 'thicc-chevron-down' : 'thicc-chevron-right'}
-            small
+            size='small'
             style={{
               fill: isSelected
               ? theme.text.onPrimary

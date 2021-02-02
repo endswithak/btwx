@@ -7,7 +7,7 @@ import { MotionPathHelper } from 'gsap/MotionPathHelper';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import { RootState } from '../store/reducers';
 import { closeEaseEditor } from '../store/actions/easeEditor';
-import { setEventDrawerTweenEditing } from '../store/actions/eventDrawer';
+import { setEventDrawerTweenEditing, setEventDrawerTweenHoverThunk } from '../store/actions/eventDrawer';
 import { setCanvasFocusing } from '../store/actions/canvasSettings';
 import { ThemeContext } from './ThemeProvider';
 import EaseEditorVisualizer from './EaseEditorVisualizer';
@@ -35,6 +35,7 @@ const EaseEditor = (): ReactElement => {
       dispatch(setCanvasFocusing({focusing: false}));
     }
     document.addEventListener('mousedown', onMouseDown, false);
+    dispatch(setEventDrawerTweenHoverThunk({id: tween.id}));
     dispatch(setEventDrawerTweenEditing({id: tween.id}));
     return (): void => {
       if (easeEditor.isOpen) {
@@ -42,6 +43,7 @@ const EaseEditor = (): ReactElement => {
       }
       dispatch(setEventDrawerTweenEditing({id: null}));
       dispatch(setCanvasFocusing({focusing: true}));
+      dispatch(setEventDrawerTweenHoverThunk({id: null}));
       document.removeEventListener('mousedown', onMouseDown);
     }
   }, []);

@@ -122,7 +122,7 @@ const TextEditorInput = (): ReactElement => {
             s: fillColor.s,
             l: fillColor.l,
             a: fillColor.a
-          }).toHslString(),
+          }).toRgbString(),
           textAlign: justification,
           transformOrigin: 'left top',
           transform: (() => {

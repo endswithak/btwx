@@ -15,7 +15,8 @@ import {
   DEFAULT_CUSTOM_WIGGLE_TWEEN_TYPE, DEFAULT_CUSTOM_WIGGLE_TWEEN_WIGGLES, DEFAULT_STEPS_TWEEN_STEPS, DEFAULT_ROUGH_TWEEN_CLAMP,
   DEFAULT_ROUGH_TWEEN_POINTS, DEFAULT_ROUGH_TWEEN_RANDOMIZE, DEFAULT_ROUGH_TWEEN_STRENGTH, DEFAULT_ROUGH_TWEEN_TAPER,
   DEFAULT_ROUGH_TWEEN_TEMPLATE, DEFAULT_SLOW_TWEEN_LINEAR_POWER, DEFAULT_SLOW_TWEEN_LINEAR_RATIO, DEFAULT_SLOW_TWEEN_LINEAR_YOYO_MODE,
-  DEFAULT_TEXT_TWEEN_DELIMITER, DEFAULT_TEXT_TWEEN_SPEED, DEFAULT_TEXT_TWEEN_DIFF, DEFAULT_TEXT_TWEEN_SCRAMBLE, DEFAULT_ROUGH_TWEEN_REF
+  DEFAULT_TEXT_TWEEN_DELIMITER, DEFAULT_TEXT_TWEEN_SPEED, DEFAULT_TEXT_TWEEN_DIFF, DEFAULT_TEXT_TWEEN_SCRAMBLE, DEFAULT_ROUGH_TWEEN_REF,
+  DEFAULT_SCRAMBLE_TEXT_TWEEN_CUSTOM_CHARACTERS
 } from '../../constants';
 
 import {
@@ -53,7 +54,7 @@ import {
   SetLayerStyle, SetLayersStyle, EnableLayersHorizontalFlip, DisableLayersHorizontalFlip, DisableLayersVerticalFlip, EnableLayersVerticalFlip,
   SetLayerScope, SetLayersScope, SetGlobalScope, SetLayerUnderlyingMask, SetLayersUnderlyingMask, SetLayerMasked, SetLayersMasked, ToggleLayerMask,
   ToggleLayersMask, ToggleLayersIgnoreUnderlyingMask, ToggleLayerIgnoreUnderlyingMask, AreaSelectLayers, SetLayersGradientOD, ResetImagesDimensions,
-  ResetImageDimensions, ReplaceImage, ReplaceImages, PasteLayersFromClipboard, SetLayerOblique, SetLayersOblique, SetLayerPointX, SetLayersPointX, SetLayerPointY, SetLayersPointY, SetLayerScrambleTextTweenCharacters, SetLayerScrambleTextTweenRevealDelay, SetLayerScrambleTextTweenSpeed, SetLayerScrambleTextTweenDelimiter, SetLayerScrambleTextTweenRightToLeft, SetLayerCustomBounceTweenStrength, SetLayerCustomBounceTweenEndAtStart, SetLayerCustomBounceTweenSquash, SetLayerCustomWiggleTweenWiggles, SetLayerCustomWiggleTweenType, SetLayerStepsTweenSteps, SetLayerRoughTweenClamp, SetLayerRoughTweenPoints, SetLayerRoughTweenRandomize, SetLayerRoughTweenStrength, SetLayerRoughTweenTaper, SetLayerRoughTweenTemplate, SetLayerSlowTweenLinearRatio, SetLayerSlowTweenPower, SetLayerSlowTweenYoYoMode, SetLayerTextTweenDelimiter, SetLayerTextTweenSpeed, SetLayerTextTweenDiff, SetLayerTextTweenScramble, SetLayerLeft, SetLayerCenter, SetLayersLeft, SetLayersCenter, SetLayerRight, SetLayersRight, SetLayerTop, SetLayersTop, SetLayerMiddle, SetLayersMiddle, SetLayerBottom, SetLayersBottom, SetLayerLetterSpacing, SetLayersLetterSpacing, SetLayerTextTransform, SetLayersTextTransform
+  ResetImageDimensions, ReplaceImage, ReplaceImages, PasteLayersFromClipboard, SetLayerOblique, SetLayersOblique, SetLayerPointX, SetLayersPointX, SetLayerPointY, SetLayersPointY, SetLayerScrambleTextTweenCharacters, SetLayerScrambleTextTweenRevealDelay, SetLayerScrambleTextTweenSpeed, SetLayerScrambleTextTweenDelimiter, SetLayerScrambleTextTweenRightToLeft, SetLayerCustomBounceTweenStrength, SetLayerCustomBounceTweenEndAtStart, SetLayerCustomBounceTweenSquash, SetLayerCustomWiggleTweenWiggles, SetLayerCustomWiggleTweenType, SetLayerStepsTweenSteps, SetLayerRoughTweenClamp, SetLayerRoughTweenPoints, SetLayerRoughTweenRandomize, SetLayerRoughTweenStrength, SetLayerRoughTweenTaper, SetLayerRoughTweenTemplate, SetLayerSlowTweenLinearRatio, SetLayerSlowTweenPower, SetLayerSlowTweenYoYoMode, SetLayerTextTweenDelimiter, SetLayerTextTweenSpeed, SetLayerTextTweenDiff, SetLayerTextTweenScramble, SetLayerLeft, SetLayerCenter, SetLayersLeft, SetLayersCenter, SetLayerRight, SetLayersRight, SetLayerTop, SetLayersTop, SetLayerMiddle, SetLayersMiddle, SetLayerBottom, SetLayersBottom, SetLayerLetterSpacing, SetLayersLetterSpacing, SetLayerTextTransform, SetLayersTextTransform, SetLayersFillColors, SetLayersStrokeColors, SetLayersShadowColors
 } from '../actionTypes/layer';
 
 import {
@@ -2266,7 +2267,7 @@ export const addLayerTweenEvent = (state: LayerState, action: AddLayerTweenEvent
             },
             scrambleText: {
               characters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
-              customCharacters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
+              customCharacters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CUSTOM_CHARACTERS,
               revealDelay: DEFAULT_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY,
               speed: DEFAULT_SCRAMBLE_TEXT_TWEEN_SPEED,
               delimiter: DEFAULT_SCRAMBLE_TEXT_TWEEN_DELIMITER,
@@ -2352,7 +2353,7 @@ export const addTweenEventLayerTweens = (state: LayerState, eventId: string, lay
           },
           scrambleText: {
             characters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
-            customCharacters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
+            customCharacters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CUSTOM_CHARACTERS,
             revealDelay: DEFAULT_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY,
             speed: DEFAULT_SCRAMBLE_TEXT_TWEEN_SPEED,
             delimiter: DEFAULT_SCRAMBLE_TEXT_TWEEN_DELIMITER,
@@ -2627,7 +2628,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
             },
             scrambleText: {
               characters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
-              customCharacters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
+              customCharacters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CUSTOM_CHARACTERS,
               revealDelay: DEFAULT_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY,
               speed: DEFAULT_SCRAMBLE_TEXT_TWEEN_SPEED,
               delimiter: DEFAULT_SCRAMBLE_TEXT_TWEEN_DELIMITER,
@@ -2697,7 +2698,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
             },
             scrambleText: {
               characters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
-              customCharacters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS,
+              customCharacters: DEFAULT_SCRAMBLE_TEXT_TWEEN_CUSTOM_CHARACTERS,
               revealDelay: DEFAULT_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY,
               speed: DEFAULT_SCRAMBLE_TEXT_TWEEN_SPEED,
               delimiter: DEFAULT_SCRAMBLE_TEXT_TWEEN_DELIMITER,
@@ -5594,6 +5595,27 @@ export const setLayersFillColor = (state: LayerState, action: SetLayersFillColor
   return currentState;
 };
 
+export const setLayersFillColors = (state: LayerState, action: SetLayersFillColors): LayerState => {
+  let currentState = state;
+  const projects: string[] = [];
+  currentState = action.payload.layers.reduce((result, current) => {
+    const layerProject = currentState.byId[current].artboard;
+    if (!projects.includes(layerProject)) {
+      projects.push(layerProject);
+    }
+    return setLayerFillColor(result, layerActions.setLayerFillColor({id: current, fillColor: action.payload.fillColors[current]}) as SetLayerFillColor);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layers Fill Colors',
+      projects
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
 export const setLayerFill = (state: LayerState, action: SetLayerFill): LayerState => {
   let currentState = state;
   // const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
@@ -6482,6 +6504,27 @@ export const setLayersStrokeColor = (state: LayerState, action: SetLayersStrokeC
   return currentState;
 };
 
+export const setLayersStrokeColors = (state: LayerState, action: SetLayersStrokeColors): LayerState => {
+  let currentState = state;
+  const projects: string[] = [];
+  currentState = action.payload.layers.reduce((result, current) => {
+    const layerProject = currentState.byId[current].artboard;
+    if (!projects.includes(layerProject)) {
+      projects.push(layerProject);
+    }
+    return setLayerStrokeColor(result, layerActions.setLayerStrokeColor({id: current, strokeColor: action.payload.strokeColors[current]}) as SetLayerStrokeColor);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layers Stroke Color',
+      projects
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
 export const setLayerStrokeFillType = (state: LayerState, action: SetLayerStrokeFillType): LayerState => {
   let currentState = state;
   // const { layerItem, paperLayer } = getItemLayers(currentState, action.payload.id);
@@ -7011,7 +7054,10 @@ export const setLayerShadowColor = (state: LayerState, action: SetLayerShadowCol
           ...currentState.byId[action.payload.id].style,
           shadow: {
             ...currentState.byId[action.payload.id].style.shadow,
-            color: action.payload.shadowColor
+            color: {
+              ...currentState.byId[action.payload.id].style.shadow.color,
+              ...action.payload.shadowColor
+            }
           }
         }
       }
@@ -7030,6 +7076,27 @@ export const setLayersShadowColor = (state: LayerState, action: SetLayersShadowC
       projects.push(layerProject);
     }
     return setLayerShadowColor(result, layerActions.setLayerShadowColor({id: current, shadowColor: action.payload.shadowColor}) as SetLayerShadowColor);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layers Shadow Color',
+      projects
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayersShadowColors = (state: LayerState, action: SetLayersShadowColors): LayerState => {
+  let currentState = state;
+  const projects: string[] = [];
+  currentState = action.payload.layers.reduce((result, current) => {
+    const layerProject = currentState.byId[current].artboard;
+    if (!projects.includes(layerProject)) {
+      projects.push(layerProject);
+    }
+    return setLayerShadowColor(result, layerActions.setLayerShadowColor({id: current, shadowColor: action.payload.shadowColors[current]}) as SetLayerShadowColor);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {

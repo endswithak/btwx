@@ -1,65 +1,63 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useState, useEffect } from 'react';
-import { ThemeContext } from './ThemeProvider';
-import SidebarInput from './SidebarInput';
+import React, { ReactElement, useEffect, useRef } from 'react';
 import tinyColor from 'tinycolor2';
+import HexFormGroup from './HexFormGroup';
 
 interface ColorPickerHexInputProps {
-  hue: number | 'multi';
-  saturation: number | 'multi';
-  lightness: number | 'multi';
-  value: number | 'multi';
-  alpha: number | 'multi';
-  setRed(red: number): void;
-  setGreen(green: number): void;
-  setBlue(blue: number): void;
+  autoFocus?: boolean;
+  hex: 'multi' | string;
+  colorValues: {
+    [id: string]: Btwx.Color;
+  };
+  setHex(hex: string): void;
   setHue(hue: number): void;
   setSaturation(saturation: number): void;
   setLightness(lightness: number): void;
   setValue(value: number): void;
-  onChange(color: Btwx.Color): void;
+  setRed(red: number): void;
+  setGreen(green: number): void;
+  setBlue(blue: number): void;
+  onChange(colors: { [id: string]: { [P in keyof Btwx.Color]?: Btwx.Color[P] } }): void;
 }
 
 const ColorPickerHexInput = (props: ColorPickerHexInputProps): ReactElement => {
-  const theme = useContext(ThemeContext);
-  const { hue, setHue, setRed, setGreen, setBlue, saturation, setSaturation, lightness, setLightness, value, setValue, alpha, onChange } = props;
-  const [hex, setHex] = useState<string>(hue !== 'multi' ? tinyColor({h: hue, s: saturation as number, l: lightness as number}).toHex() : 'multi');
+  const formControlRef = useRef(null);
+  const { autoFocus, hex, colorValues, setHex, setHue, setSaturation, setLightness, setValue, setRed, setGreen, setBlue, onChange } = props;
+
+  const handleSubmitSuccess = (nextHex: any): void => {
+    const hsl = tinyColor(nextHex).toHsl();
+    const hsv = tinyColor(nextHex).toHsv();
+    const rgb = tinyColor(nextHex).toRgb();
+    setHex(nextHex);
+    setHue(hsl.h);
+    setSaturation(hsl.s);
+    setLightness(hsl.l);
+    setValue(hsv.v);
+    setRed(rgb.r);
+    setGreen(rgb.g);
+    setBlue(rgb.b);
+    onChange(Object.keys(colorValues).reduce((result, current) => ({
+      ...result,
+      [current]: { h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v }
+    }), {}));
+  };
 
   useEffect(() => {
-    setHex(hue !== 'multi' ? tinyColor({h: hue, s: saturation as number, l: lightness as number}).toHex() : 'multi');
-  }, [hue, saturation, lightness, value]);
-
-  const handleChange = (e: any) => {
-    const target = e.target as HTMLInputElement;
-    setHex(target.value);
-  };
-
-  const handleSubmit = (e: any): void => {
-    const nextHex = tinyColor(hex);
-    if (nextHex.isValid()) {
-      const rgb = nextHex.toRgb();
-      const hsl = nextHex.toHsl();
-      const hsv = nextHex.toHsv();
-      setRed(rgb.r);
-      setGreen(rgb.g);
-      setBlue(rgb.b);
-      setHue(hsl.h);
-      setSaturation(hsl.s);
-      setLightness(hsl.l);
-      setValue(hsv.v);
-      onChange({ h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v, a: alpha !== 'multi' ? alpha : 1 });
-    } else {
-      setHex(hue !== 'multi' ? tinyColor({h: hue, s: saturation as number, l: lightness as number}).toHex() : 'multi');
+    if (formControlRef.current && autoFocus) {
+      formControlRef.current.focus();
+      formControlRef.current.select();
     }
-  };
+  }, []);
 
   return (
-    <SidebarInput
+    <HexFormGroup
+      ref={formControlRef}
+      controlId='control-cp-hex'
       value={hex}
-      onChange={handleChange}
-      onSubmit={handleSubmit}
+      onSubmitSuccess={handleSubmitSuccess}
+      canvasAutoFocus
       submitOnBlur
-      leftLabel='#' />
+      size='small' />
   );
 }
 

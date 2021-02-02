@@ -150,12 +150,14 @@ import {
   SET_LAYER_FILL,
   SET_LAYER_FILL_COLOR,
   SET_LAYERS_FILL_COLOR,
+  SET_LAYERS_FILL_COLORS,
   ENABLE_LAYER_STROKE,
   ENABLE_LAYERS_STROKE,
   DISABLE_LAYER_STROKE,
   DISABLE_LAYERS_STROKE,
   SET_LAYER_STROKE_COLOR,
   SET_LAYERS_STROKE_COLOR,
+  SET_LAYERS_STROKE_COLORS,
   SET_LAYER_STROKE_FILL_TYPE,
   SET_LAYERS_STROKE_FILL_TYPE,
   SET_LAYER_GRADIENT,
@@ -197,6 +199,7 @@ import {
   DISABLE_LAYERS_SHADOW,
   SET_LAYER_SHADOW_COLOR,
   SET_LAYERS_SHADOW_COLOR,
+  SET_LAYERS_SHADOW_COLORS,
   SET_LAYER_SHADOW_BLUR,
   SET_LAYERS_SHADOW_BLUR,
   SET_LAYER_SHADOW_X_OFFSET,
@@ -403,12 +406,14 @@ import {
   DisableLayersFillPayload,
   SetLayerFillColorPayload,
   SetLayersFillColorPayload,
+  SetLayersFillColorsPayload,
   EnableLayerStrokePayload,
   EnableLayersStrokePayload,
   DisableLayerStrokePayload,
   DisableLayersStrokePayload,
   SetLayerStrokeColorPayload,
   SetLayersStrokeColorPayload,
+  SetLayersStrokeColorsPayload,
   SetLayerStrokeFillTypePayload,
   SetLayersStrokeFillTypePayload,
   SetLayerGradientPayload,
@@ -450,6 +455,7 @@ import {
   DisableLayersShadowPayload,
   SetLayerShadowColorPayload,
   SetLayersShadowColorPayload,
+  SetLayersShadowColorsPayload,
   SetLayerShadowBlurPayload,
   SetLayersShadowBlurPayload,
   SetLayerShadowXOffsetPayload,
@@ -1953,6 +1959,11 @@ export const setLayersFillColor = (payload: SetLayersFillColorPayload): LayerTyp
   payload
 });
 
+export const setLayersFillColors = (payload: SetLayersFillColorsPayload): LayerTypes => ({
+  type: SET_LAYERS_FILL_COLORS,
+  payload
+});
+
 export const enableLayerStroke = (payload: EnableLayerStrokePayload): LayerTypes => ({
   type: ENABLE_LAYER_STROKE,
   payload
@@ -1998,6 +2009,11 @@ export const setLayerStrokeColor = (payload: SetLayerStrokeColorPayload): LayerT
 
 export const setLayersStrokeColor = (payload: SetLayersStrokeColorPayload): LayerTypes => ({
   type: SET_LAYERS_STROKE_COLOR,
+  payload
+});
+
+export const setLayersStrokeColors = (payload: SetLayersStrokeColorsPayload): LayerTypes => ({
+  type: SET_LAYERS_STROKE_COLORS,
   payload
 });
 
@@ -2221,6 +2237,11 @@ export const setLayerShadowColor = (payload: SetLayerShadowColorPayload): LayerT
 
 export const setLayersShadowColor = (payload: SetLayersShadowColorPayload): LayerTypes => ({
   type: SET_LAYERS_SHADOW_COLOR,
+  payload
+});
+
+export const setLayersShadowColors = (payload: SetLayersShadowColorsPayload): LayerTypes => ({
+  type: SET_LAYERS_SHADOW_COLORS,
   payload
 });
 
@@ -4939,7 +4960,7 @@ export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artb
           children: [
             new paperMain.Path.Rectangle({
               rectangle: hoverItemInnerBounds,
-              fillColor: tinyColor('#fff').setAlpha(0).toHslString()
+              fillColor: tinyColor('#fff').setAlpha(0).toRgbString()
             })
           ],
           insert: false
@@ -5340,7 +5361,7 @@ export const updateEventsFrame = (state: RootState): void => {
       const eventFrameBackground = new paperMain.Path.Rectangle({
         from: eventFrame.bounds.topLeft.subtract(new paperMain.Point(0, margin)),
         to: eventFrame.bounds.bottomRight.add(new paperMain.Point(0, margin / 2)),
-        fillColor: tinyColor(theme.background.z0).setAlpha(0.01).toHslString(),
+        fillColor: tinyColor(theme.background.z0).setAlpha(0.01).toRgbString(),
         strokeColor: !state.eventDrawer.event && state.eventDrawer.eventHover === event.id ? THEME_PRIMARY_COLOR : null,
         strokeWidth: 1 / paperMain.view.zoom,
         radius: 2 / paperMain.view.zoom,

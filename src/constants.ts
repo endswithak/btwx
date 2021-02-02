@@ -3,9 +3,12 @@ export const MAX_PROJECT_COUNT = 11;
 export const ARTBOARDS_PER_PROJECT = 3;
 export const APP_NAME = 'btwx';
 export const PREVIEW_PREFIX = '**preview**';
-export const THEME_PRIMARY_COLOR = '#3C88FD';
-export const THEME_GUIDE_COLOR = 'red';
-export const THEME_RECORDING_COLOR = 'red';
+export const THEME_PRIMARY_COLOR = '#007AFF'; // '#3C88FD';
+export const THEME_RED = '#FF3B30';
+export const THEME_GUIDE_COLOR = THEME_RED;
+export const THEME_RECORDING_COLOR = THEME_RED;
+export const THEME_ORANGE = '#FF9500';
+export const THEME_GREEN = '#28CD41';
 export const THEME_UNIT_SIZE = 4;
 export const DEFAULT_ARTBOARD_BACKGROUND_COLOR = { h: 0, s: 0, l: 1, v: 1, a: 1 };
 export const DEFAULT_THEME = 'dark';
@@ -26,6 +29,7 @@ export const DEFAULT_TEXT_TWEEN_SPEED: number = null;
 export const DEFAULT_TEXT_TWEEN_SCRAMBLE = false;
 // Scramble Text Tween
 export const DEFAULT_SCRAMBLE_TEXT_TWEEN_CHARACTERS: Btwx.ScrambleTextTweenCharacters = 'upperCase';
+export const DEFAULT_SCRAMBLE_TEXT_TWEEN_CUSTOM_CHARACTERS = '!#?%$&';
 export const DEFAULT_SCRAMBLE_TEXT_TWEEN_REVEAL_DELAY = 0;
 export const DEFAULT_SCRAMBLE_TEXT_TWEEN_SPEED = 1;
 export const DEFAULT_SCRAMBLE_TEXT_TWEEN_DELIMITER = '';
@@ -259,7 +263,9 @@ export const DEFAULT_STROKE_STYLE: Btwx.Stroke = {
 }
 
 export const DEFAULT_STROKE_CAP = 'butt';
+export const DEFAULT_STROKE_CAP_OPTIONS: Btwx.StrokeCap[] = ['butt', 'round', 'square'];
 export const DEFAULT_STROKE_JOIN = 'miter';
+export const DEFAULT_STROKE_JOIN_OPTIONS: Btwx.StrokeJoin[] = ['miter', 'round', 'bevel'];
 export const DEFAULT_STROKE_DASH_ARRAY_WIDTH = 0;
 export const DEFAULT_STROKE_DASH_ARRAY_GAP = 0;
 export const DEFAULT_STROKE_DASH_ARRAY = [DEFAULT_STROKE_DASH_ARRAY_WIDTH, DEFAULT_STROKE_DASH_ARRAY_GAP];
@@ -315,8 +321,10 @@ export const DEFAULT_FONT_FAMILY = 'Helvetica';
 export const DEFAULT_FONT_WEIGHT = 400;
 export const DEFAULT_OBLIQUE = 0;
 export const DEFAULT_JUSTIFICATION = 'left';
+export const DEFAULT_JUSTIFICATION_OPTIONS: Btwx.Jusftification[] = ['left', 'center', 'right'];
 export const DEFAULT_LETTER_SPACING = 0;
 export const DEFAULT_TEXT_TRANSFORM = 'none';
+export const DEFAULT_TEXT_TRANSFORM_OPTIONS: Btwx.TextTransform[] = ['none', 'uppercase', 'lowercase'];
 export const DEFAULT_LEADING = 16;
 export const DEFAULT_TEXT_FILL_COLOR = { h: 0, s: 0, l: 0, v: 0, a: 1 };
 

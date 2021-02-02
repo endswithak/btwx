@@ -9,7 +9,6 @@ interface SidebarButtonGroupProps {
 const SidebarButtonGroup = (props: SidebarButtonGroupProps): ReactElement => {
   const theme = useContext(ThemeContext);
 
-
   return (
     <div className='c-sidebar-button-group'>
       {props.children}

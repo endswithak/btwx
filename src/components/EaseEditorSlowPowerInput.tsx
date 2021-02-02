@@ -1,71 +1,53 @@
-import React, { ReactElement, useEffect, useState } from 'react';
-import mexp from 'math-expression-evaluator';
+import React, { ReactElement, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setLayerSlowTweenPower } from '../store/actions/layer';
-import SidebarInput from './SidebarInput';
+import Form from './Form';
+import MathFormGroup from './MathFormGroup';
 
 interface EaseEditorSlowPowerInputProps {
   setParamInfo(paramInfo: Btwx.ParamInfo): void;
 }
 
 const EaseEditorSlowPowerInput = (props: EaseEditorSlowPowerInputProps): ReactElement => {
+  const formControlRef = useRef(null);
   const { setParamInfo } = props;
   const id = useSelector((state: RootState) => state.easeEditor.tween);
-  const powerValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].slow.power : null);
+  const power = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].slow.power : null);
   const disabled = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].ease !== 'slow' : true);
-  const [power, setPower] = useState(powerValue);
   const dispatch = useDispatch();
 
-  const handlePowerChange = (e: any): void => {
-    const target = e.target;
-    setPower(target.value);
-  };
-
-  const handlePowerSubmit = (e: any): void => {
-    try {
-      const powerRounded = Math.round((mexp.eval(`${power}`) as any + Number.EPSILON) * 100) / 100;
-      if (powerRounded !== powerValue) {
-        let newPower = powerRounded;
-        if (powerRounded < 0) {
-          newPower = 0;
-        }
-        dispatch(setLayerSlowTweenPower({id: id, power: newPower}));
-        setPower(newPower);
-      } else {
-        setPower(powerValue);
-      }
-    } catch(error) {
-      setPower(powerValue);
+  const handleSubmitSuccess = (newPower: any): void => {
+    if (newPower < 0) {
+      newPower = 0;
     }
+    dispatch(setLayerSlowTweenPower({id: id, power: newPower}));
   }
 
-  const handleFocus = (): void => {
+  const handleFocus = (e: any): void => {
     setParamInfo({
       type: 'Number',
       description: 'Determines the strength of the ease at each end.'
     });
   }
 
-  const handleBlur = (): void => {
+  const handleBlur = (e: any): void => {
     setParamInfo(null);
   }
 
-  useEffect(() => {
-    setPower(powerValue);
-  }, [powerValue]);
-
   return (
-    <SidebarInput
+    <MathFormGroup
+      ref={formControlRef}
+      controlId='control-ee-slow-power'
       value={power}
       disabled={disabled}
-      onFocus={handleFocus}
+      size='small'
+      label='Power'
+      min={0}
+      onSubmitSuccess={handleSubmitSuccess}
       onBlur={handleBlur}
-      onChange={handlePowerChange}
-      onSubmit={handlePowerSubmit}
-      submitOnBlur
-      manualCanvasFocus
-      bottomLabel='Power' />
+      onFocus={handleFocus}
+      submitOnBlur />
   );
 }
 

@@ -15,19 +15,24 @@ const EventDrawerEventLayer = (props: EventDrawerEventLayerProps): ReactElement 
   const theme = useContext(ThemeContext);
   const { id, index } = props;
   const layerName = useSelector((state: RootState) => state.layer.present.byId[id].name);
+  const tweenEditing = useSelector((state: RootState) => state.eventDrawer.tweenEditing);
   const dispatch = useDispatch();
 
   const handleMouseEnter = (): void => {
-    dispatch(setLayerHover({ id }));
+    if (!tweenEditing) {
+      dispatch(setLayerHover({ id }));
+    }
   }
 
   const handleMouseLeave = (): void => {
-    dispatch(setLayerHover({ id: null }));
+    if (!tweenEditing) {
+      dispatch(setLayerHover({ id: null }));
+    }
   }
 
-  const handleClick = (): void => {
-    dispatch(selectLayers({layers: [id], newSelection: true}));
-  }
+  // const handleClick = (): void => {
+  //   dispatch(selectLayers({layers: [id], newSelection: true}));
+  // }
 
   return (
     <div
@@ -52,7 +57,8 @@ const EventDrawerEventLayer = (props: EventDrawerEventLayerProps): ReactElement 
           style={{
             color: theme.text.base
           }}
-          onClick={handleClick}>
+          // onClick={handleClick}
+          >
           {layerName}
         </div>
       </div>

@@ -9,8 +9,11 @@ interface ColorPickerAlphaProps {
   lightness: number | 'multi';
   value: number | 'multi';
   alpha: number | 'multi';
+  colorValues: {
+    [id: string]: Btwx.Color;
+  };
   setAlpha(alpha: number): void;
-  onChange(color: Btwx.Color): void;
+  onChange(colors: { [id: string]: { [P in keyof Btwx.Color]?: Btwx.Color[P] } }): void;
 }
 
 interface SliderProps {
@@ -44,7 +47,7 @@ const Slider = styled.input<SliderProps>`
 
 const ColorPickerAlpha = (props: ColorPickerAlphaProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { hue, saturation, lightness, value, alpha, setAlpha, onChange } = props;
+  const { hue, saturation, lightness, value, alpha, colorValues, setAlpha, onChange } = props;
   const [alphaValue, setAlphaValue] = useState(alpha !== 'multi' ? alpha : 1);
   const [grabbing, setGrabbing] = useState(false);
 
@@ -56,7 +59,10 @@ const ColorPickerAlpha = (props: ColorPickerAlphaProps): ReactElement => {
     const target = e.target;
     setAlphaValue(target.value);
     setAlpha(target.value);
-    onChange({h: hue !== 'multi' ? hue : 0, s: saturation !== 'multi' ? saturation : 0, l: lightness !== 'multi' ? lightness : 0, v: value !== 'multi' ? value : 0, a: target.value});
+    onChange(Object.keys(colorValues).reduce((result, current) => ({
+      ...result,
+      [current]: { a: target.value }
+    }), {}));
   };
 
   const handleMouseDown = () => {

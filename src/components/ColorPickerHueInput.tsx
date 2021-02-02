@@ -1,69 +1,85 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useState, useEffect } from 'react';
-import mexp from 'math-expression-evaluator';
+import React, { ReactElement, useRef } from 'react';
 import tinyColor from 'tinycolor2';
-import { ThemeContext } from './ThemeProvider';
-import SidebarInput from './SidebarInput';
+import Form from './Form';
+import MathFormGroup from './MathFormGroup';
 
 interface ColorPickerHueInputProps {
   hue: number | 'multi';
-  saturation: number | 'multi';
-  lightness: number | 'multi';
-  value: number | 'multi';
-  alpha: number | 'multi';
-  setRed(red: number): void;
-  setGreen(green: number): void;
-  setBlue(blue: number): void;
-  setHue(hue: number): void;
-  onChange(color: Btwx.Color): void;
+  colorValues: {
+    [id: string]: Btwx.Color;
+  };
+  setHue(hue: number | 'multi'): void;
+  setHex(hue: string | 'multi'): void;
+  setRed(red: number | 'multi'): void;
+  setGreen(green: number | 'multi'): void;
+  setBlue(blue: number | 'multi'): void;
+  onChange(colors: { [id: string]: { [P in keyof Btwx.Color]?: Btwx.Color[P] } }): void;
 }
 
 const ColorPickerHueInput = (props: ColorPickerHueInputProps): ReactElement => {
-  const theme = useContext(ThemeContext);
-  const { hue, saturation, lightness, value, alpha, setRed, setGreen, setBlue, setHue, onChange } = props;
-  const [hueValue, setHueValue] = useState<number>(hue !== 'multi' ? Math.round(hue) : 0);
+  const formControlRef = useRef(null);
+  const { hue, colorValues, setHue, setHex, setRed, setGreen, setBlue, onChange } = props;
 
-  useEffect(() => {
-    setHueValue(hue !== 'multi' ? Math.round(hue) : 0);
-  }, [hue]);
-
-  const handleChange = (e: any) => {
-    const target = e.target;
-    setHueValue(target.value);
-  };
-
-  const handleSubmit = (e: any): void => {
-    try {
-      let nextHue = mexp.eval(`${hueValue}`) as any;
-      if (nextHue > 360) {
-        nextHue = 360;
-      }
-      if (nextHue < 0) {
-        nextHue = 0;
-      }
-      if (nextHue !== hue) {
-        const nextColor = tinyColor({h: Math.round(nextHue), s: saturation !== 'multi' ? saturation : 0, l: lightness !== 'multi' ? lightness : 0});
-        const rgb = nextColor.toRgb();
-        setHue(Math.round(nextHue));
-        setRed(rgb.r);
-        setGreen(rgb.g);
-        setBlue(rgb.b);
-        onChange({h: Math.round(nextHue), s: saturation !== 'multi' ? saturation : 0, l: lightness !== 'multi' ? lightness : 0, v: value !== 'multi' ? value : 0, a: alpha !== 'multi' ? alpha : 1});
-      } else {
-        setHueValue(hue !== 'multi' ? Math.round(hue) : 0);
-      }
-    } catch(error) {
-      setHueValue(hue !== 'multi' ? Math.round(hue) : 0);
+  const handleSubmitSuccess = (nextHue: any): void => {
+    if (nextHue > 360) {
+      nextHue = 360;
     }
+    if (nextHue < 0) {
+      nextHue = 0;
+    }
+    let hex: string | 'multi';
+    let red: number | 'multi';
+    let green: number | 'multi';
+    let blue: number | 'multi';
+    const newColors = Object.keys(colorValues).reduce((result, current, index) => {
+      const colorInstance = tinyColor({h: nextHue, s: colorValues[current].s, l: colorValues[current].l, v: colorValues[current].v});
+      const newHex = colorInstance.toHex();
+      const rgb = colorInstance.toRgb();
+      if (index === 0) {
+        hex = newHex;
+        red = rgb.r;
+        green = rgb.g;
+        blue = rgb.b;
+      } else {
+        if (hex !== 'multi' && hex !== newHex) {
+          hex = 'multi';
+        }
+        if (red !== 'multi' && red !== rgb.r) {
+          red = 'multi';
+        }
+        if (green !== 'multi' && green !== rgb.g) {
+          green = 'multi';
+        }
+        if (blue !== 'multi' && blue !== rgb.b) {
+          blue = 'multi';
+        }
+      }
+      return {
+        ...result,
+        [current]: { h: nextHue }
+      };
+    }, {});
+    setHue(nextHue);
+    setHex(hex);
+    setRed(red);
+    setGreen(green);
+    setBlue(blue);
+    onChange(newColors);
   };
 
   return (
-    <SidebarInput
-      value={hueValue}
-      onChange={handleChange}
-      onSubmit={handleSubmit}
+    <MathFormGroup
+      ref={formControlRef}
+      controlId='control-cp-hsl-hue'
+      min={0}
+      max={360}
+      value={hue}
+      size='small'
+      right={<Form.Text>H</Form.Text>}
+      onSubmitSuccess={handleSubmitSuccess}
       submitOnBlur
-      label='H' />
+      canvasAutoFocus />
   );
 }
 

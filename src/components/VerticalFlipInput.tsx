@@ -3,8 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { enableLayersVerticalFlip, disableLayersVerticalFlip } from '../store/actions/layer';
 import { canFlipSeleted } from '../store/selectors/layer';
-import SidebarToggleButton from './SidebarToggleButton';
-import Icon from './Icon';
+import Button from './Button';
 
 const VerticalFlipInput = (): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
@@ -27,12 +26,11 @@ const VerticalFlipInput = (): ReactElement => {
   };
 
   return (
-    <SidebarToggleButton
+    <Button
       active={verticalFlip}
       onClick={handleClick}
-      disabled={disabled}>
-      <Icon name='vertical-flip' small />
-    </SidebarToggleButton>
+      icon='vertical-flip'
+      disabled={disabled} />
   );
 }
 

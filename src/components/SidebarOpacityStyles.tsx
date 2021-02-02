@@ -4,6 +4,9 @@ import { RootState } from '../store/reducers';
 import { expandOpacityStyles, collapseOpacityStyles } from '../store/actions/rightSidebar';
 import SidebarCollapseSection from './SidebarCollapseSection';
 import OpacityInput from './OpacityInput';
+import SidebarSectionRow from './SidebarSectionRow';
+import SidebarSectionColumn from './SidebarSectionColumn';
+import BlendModeSelector from './BlendModeSelector';
 
 const SidebarOpacityStyles = (): ReactElement => {
   const opacityStylesCollapsed = useSelector((state: RootState) => state.rightSidebar.opacityStylesCollapsed);
@@ -24,7 +27,14 @@ const SidebarOpacityStyles = (): ReactElement => {
         onClick={handleClick}
         collapsed={opacityStylesCollapsed}
         header='opacity'>
-        <OpacityInput />
+        <SidebarSectionRow>
+          <SidebarSectionColumn width={'66.66%'}>
+            <BlendModeSelector />
+          </SidebarSectionColumn>
+          <SidebarSectionColumn width={'33.33%'}>
+            <OpacityInput />
+          </SidebarSectionColumn>
+        </SidebarSectionRow>
       </SidebarCollapseSection>
     : null
   );

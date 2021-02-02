@@ -1,11 +1,11 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { CustomEase } from 'gsap/CustomEase';
 import { RoughEase } from 'gsap/EasePack';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setLayerRoughTweenPoints } from '../store/actions/layer';
-import SidebarInput from './SidebarInput';
+import MathFormGroup from './MathFormGroup';
 
 gsap.registerPlugin(CustomEase, RoughEase);
 
@@ -14,65 +14,53 @@ interface EaseEditorRoughPointsInputProps {
 }
 
 const EaseEditorRoughPointsInput = (props: EaseEditorRoughPointsInputProps): ReactElement => {
+  const formControlRef = useRef(null);
   const { setParamInfo } = props;
   const id = useSelector((state: RootState) => state.easeEditor.tween);
-  const pointsValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].rough.points : null);
+  const points = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].rough.points : null);
   const disabled = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].ease !== 'rough' : true);
   const roughTween = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].rough : null);
-  const [points, setPoints] = useState(pointsValue);
   const dispatch = useDispatch();
 
-  const handlePointsChange = (e: any): void => {
-    const target = e.target;
-    setPoints(target.value);
-  };
-
-  const handlePointsSubmit = (e: any): void => {
-    try {
-      const pointsRounded = Math.round(points);
-      if (pointsRounded !== pointsValue) {
-        let newPoints = pointsRounded;
-        if (pointsRounded < 0) {
-          newPoints = 0;
-        }
-        const ref = CustomEase.getSVGData(`rough({clamp: ${roughTween.clamp}, points: ${newPoints}, randomize: ${roughTween.randomize}, strength: ${roughTween.strength}, taper: ${roughTween.taper}, template: ${roughTween.template}})`, {width: 400, height: 400});
-        dispatch(setLayerRoughTweenPoints({id: id, points: newPoints, ref: ref}));
-        setPoints(newPoints);
-      } else {
-        setPoints(pointsValue);
-      }
-    } catch(error) {
-      setPoints(pointsValue);
+  const handleSubmitSuccess = (newPoints: any): void => {
+    if (newPoints < 0) {
+      newPoints = 0;
     }
+    const ref = CustomEase.getSVGData(`rough({clamp: ${roughTween.clamp}, points: ${newPoints}, randomize: ${roughTween.randomize}, strength: ${roughTween.strength}, taper: ${roughTween.taper}, template: ${roughTween.template}})`, {width: 400, height: 400});
+    dispatch(setLayerRoughTweenPoints({id: id, points: newPoints, ref: ref}));
   }
 
-  const handleFocus = (): void => {
+  const handleFocus = (e: any): void => {
     setParamInfo({
       type: 'Number',
       description: 'The number of points to be plotted along the ease, making it jerk more or less frequently.'
     });
   }
 
-  const handleBlur = (): void => {
+  const handleBlur = (e: any): void => {
     setParamInfo(null);
   }
 
   useEffect(() => {
-    setPoints(pointsValue);
-  }, [pointsValue]);
+    if (formControlRef.current) {
+      formControlRef.current.focus();
+      formControlRef.current.select();
+    }
+  }, []);
 
   return (
-    <SidebarInput
+    <MathFormGroup
+      ref={formControlRef}
+      controlId='control-ee-rough-points'
       value={points}
       disabled={disabled}
-      onFocus={handleFocus}
+      size='small'
+      label='Points'
+      min={0}
+      onSubmitSuccess={handleSubmitSuccess}
       onBlur={handleBlur}
-      onChange={handlePointsChange}
-      onSubmit={handlePointsSubmit}
-      selectOnMount
-      manualCanvasFocus
-      submitOnBlur
-      bottomLabel='Points' />
+      onFocus={handleFocus}
+      submitOnBlur />
   );
 }
 

@@ -2,16 +2,16 @@ import React, { ReactElement, useEffect, useState, useContext, useRef } from 're
 import { useSelector, useDispatch } from 'react-redux';
 import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
-import { getSelectedFontFamily } from '../store/selectors/layer';
 import { closeFontFamilySelector } from '../store/actions/fontFamilySelector';
 import FontFamilySelectorSearch from './FontFamilySelectorSearch';
 import FontFamilySelectorItems from './FontFamilySelectorItems';
 import { ThemeContext } from './ThemeProvider';
 
+
 const FontFamilySelector = (): ReactElement => {
+  const searchTextFieldRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const theme = useContext(ThemeContext);
-  const fontFamily = useSelector((state: RootState) => getSelectedFontFamily(state));
   const systemFonts = useSelector((state: RootState) => state.textSettings.systemFonts);
   const y = useSelector((state: RootState) => state.fontFamilySelector.y);
   const [itemData, setItemData] = useState([]);
@@ -20,27 +20,31 @@ const FontFamilySelector = (): ReactElement => {
   const dispatch = useDispatch();
 
   const onMouseDown = (event: any): void => {
-    if (listRef.current && !listRef.current.contains(event.target) && !document.getElementById('font-family-input').contains(event.target)) {
+    if (!listRef.current.contains(event.target) && !searchTextFieldRef.current.contains(event.target)) {
       dispatch(closeFontFamilySelector());
     }
   }
 
-  const getItemData = (family: string, search?: string): { family: string; selected: boolean }[] => {
+  const getItemData = (search?: string): { value: string; label: boolean }[] => {
     if (search.replace(/\s/g, '').length > 0) {
       return systemFonts.reduce((result, current) => {
         if (current.toUpperCase().includes(search.replace(/\s/g, '').toUpperCase())) {
-          result = [...result, { family: current, selected: family && family !== 'multi' && current === family }];
+          result = [...result, { value: current, label: current }];
         }
         return result;
       }, []);
     } else {
       return systemFonts.reduce((result, current) => {
-        return [...result, { family: current, selected: family && family !== 'multi'  && current === family }];
+        return [...result, { value: current, label: current }];
       }, []);
     }
   }
 
   useEffect(() => {
+    if (searchTextFieldRef.current) {
+      searchTextFieldRef.current.focus();
+      searchTextFieldRef.current.select();
+    }
     document.addEventListener('mousedown', onMouseDown);
     return (): void => {
       document.removeEventListener('mousedown', onMouseDown);
@@ -48,8 +52,8 @@ const FontFamilySelector = (): ReactElement => {
   }, []);
 
   useEffect(() => {
-    setItemData(getItemData(fontFamily, search));
-  }, [fontFamily, search]);
+    setItemData(getItemData(search));
+  }, [search]);
 
   return (
     <div
@@ -66,6 +70,7 @@ const FontFamilySelector = (): ReactElement => {
         }, 0 4px 16px 0 rgba(0,0,0,0.16)`
       }}>
       <FontFamilySelectorSearch
+        ref={searchTextFieldRef}
         search={search}
         setSearch={setSearch}
         searching={searching}

@@ -2,39 +2,37 @@
 import React, { ReactElement } from 'react';
 import { useDispatch } from 'react-redux';
 import { setCanvasColorFormat } from '../store/actions/documentSettings';
-import SidebarToggleButton from './SidebarToggleButton';
-import Icon from './Icon';
+// import SidebarToggleButton from './SidebarToggleButton';
+import Button from './Button';
 
 interface ColorPickerTypeToggleProps {
   type: Btwx.ColorFormat;
-  setType: any;
 }
 
 const ColorPickerTypeToggle = (props: ColorPickerTypeToggleProps): ReactElement => {
-  const { type, setType } = props;
+  const { type } = props;
   const dispatch = useDispatch();
 
   const handleClick = () => {
     switch(type) {
       case 'rgb':
-        setType('hsl');
+        // setType('hsl');
         dispatch(setCanvasColorFormat({colorFormat: 'hsl'}));
         break;
       case 'hsl':
-        setType('rgb');
+        // setType('rgb');
         dispatch(setCanvasColorFormat({colorFormat: 'rgb'}));
         break;
     }
   }
 
   return (
-    <SidebarToggleButton
-      onClick={handleClick}
-      active={false}>
-      <Icon
-        name='list-toggle'
-        small />
-    </SidebarToggleButton>
+    <div className='c-input'>
+      <Button
+        onClick={handleClick}
+        active={false}
+        icon='list-toggle' />
+    </div>
   );
 }
 

@@ -9,21 +9,17 @@ import StrokeWidthInput from './StrokeWidthInput';
 const StrokeParamsInput = (): ReactElement => {
   return (
     <SidebarSectionRow>
-      <SidebarSectionColumn width='33.33%'>
+      <SidebarSectionColumn width='25%'>
         <StrokeWidthInput />
       </SidebarSectionColumn>
-      <SidebarSectionColumn width='33.33%'>
+      <SidebarSectionColumn width='25%'>
         <StrokeDashOffsetInput />
       </SidebarSectionColumn>
-      <SidebarSectionColumn width='33.33%'>
-        <SidebarSectionRow>
-          <SidebarSectionColumn width='50%'>
-            <StrokeDashArrayWidthInput />
-          </SidebarSectionColumn>
-          <SidebarSectionColumn width='50%'>
-            <StrokeDashArrayGapInput />
-          </SidebarSectionColumn>
-        </SidebarSectionRow>
+      <SidebarSectionColumn width='25%'>
+        <StrokeDashArrayWidthInput />
+      </SidebarSectionColumn>
+      <SidebarSectionColumn width='25%'>
+        <StrokeDashArrayGapInput />
       </SidebarSectionColumn>
     </SidebarSectionRow>
   );

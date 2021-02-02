@@ -1,10 +1,10 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { enableLayersFill, setLayersFillType, enableLayersStroke, setLayersStrokeFillType } from '../store/actions/layer';
 import { getSelectedFillColor, getSelectedFillEnabled, getSelectedShadowColor, getSelectedShadowEnabled, getSelectedStrokeColor, getSelectedStrokeEnabled } from '../store/selectors/layer';
 import { openColorEditor } from '../store/actions/colorEditor';
-import SidebarInput from './SidebarInput';
+import PercentageFormGroup from './PercentageFormGroup';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import SidebarSwatch from './SidebarSwatch';
@@ -15,6 +15,7 @@ interface ColorInputProps {
 }
 
 const ColorInput = (props: ColorInputProps): ReactElement => {
+  const opacityFormControlRef = useRef(null);
   const { prop } = props;
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const colorValue = (() => {
@@ -94,14 +95,16 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
           prop='fill' />
       </SidebarSectionColumn>
       <SidebarSectionColumn width={'33.33%'}>
-        <SidebarInput
-          value={'multi'}
-          onChange={null}
-          onSubmit={null}
+        <PercentageFormGroup
+          controlId={`control-multi-opacity`}
+          value='multi'
+          ref={opacityFormControlRef}
+          disabled
+          canvasAutoFocus
           submitOnBlur
-          label={'%'}
-          disabled={true}
-          bottomLabel={'Opacity'} />
+          size='small'
+          onSubmitSuccess={null}
+          label='Opacity' />
       </SidebarSectionColumn>
     </SidebarSectionRow>
   );

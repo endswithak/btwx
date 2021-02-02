@@ -1,49 +1,33 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import mexp from 'math-expression-evaluator';
 import { RootState } from '../store/reducers';
 import { setLayersFontSizeThunk } from '../store/actions/layer';
 import { getSelectedFontSize } from '../store/selectors/layer';
 import { setTextSettingsFontSize } from '../store/actions/textSettings';
-import SidebarInput from './SidebarInput';
+import MathFormGroup from './MathFormGroup';
 
 const FontSizeInput = (): ReactElement => {
+  const formControlRef = useRef<HTMLInputElement>(null);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
-  const fontSizeValue = useSelector((state: RootState) => getSelectedFontSize(state));
-  const [fontSize, setFontSize] = useState(fontSizeValue);
+  const fontSize = useSelector((state: RootState) => getSelectedFontSize(state));
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    setFontSize(fontSizeValue);
-  }, [fontSizeValue, selected]);
-
-  const handleChange = (e: any) => {
-    const target = e.target;
-    setFontSize(target.value);
-  };
-
-  const handleSubmit = (e: any) => {
-    try {
-      const nextFontSize = mexp.eval(`${fontSize}`) as any;
-      if (nextFontSize !== fontSizeValue) {
-        dispatch(setLayersFontSizeThunk({layers: selected, fontSize: Math.round(nextFontSize)}));
-        dispatch(setTextSettingsFontSize({fontSize: Math.round(nextFontSize)}));
-        setFontSize(Math.round(nextFontSize));
-      } else {
-        setFontSize(fontSizeValue);
-      }
-    } catch(error) {
-      setFontSize(fontSizeValue);
-    }
+  const handleSubmitSuccess = (newFontSize: any): void => {
+    dispatch(setLayersFontSizeThunk({layers: selected, fontSize: newFontSize}));
+    dispatch(setTextSettingsFontSize({fontSize: newFontSize}));
   }
 
   return (
-    <SidebarInput
+    <MathFormGroup
+      ref={formControlRef}
+      controlId='control-font-size'
       value={fontSize}
-      onChange={handleChange}
-      onSubmit={handleSubmit}
+      size='small'
+      min={1}
+      onSubmitSuccess={handleSubmitSuccess}
+      canvasAutoFocus
       submitOnBlur
-      bottomLabel={'Size'} />
+      label='Size' />
   );
 }
 

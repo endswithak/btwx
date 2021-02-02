@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { createSelector } from 'reselect';
 import replaceAll from 'string.prototype.replaceall';
+import tinyColor from 'tinycolor2';
 import paper from 'paper';
 import isSVG from 'is-svg';
 import { clipboard } from 'electron';
@@ -260,6 +261,39 @@ export const getSelectedFillColor = createSelector(
   }
 );
 
+export const getSelectedFillColors = createSelector(
+  [ getSelectedFill ],
+  (selectedFills) => {
+    return Object.keys(selectedFills).reduce((result, current) => {
+      result = {
+        ...result,
+        [current]: selectedFills[current].color
+      }
+      return result;
+    }, {}) as { [id: string]: Btwx.Color };
+  }
+);
+
+export const getSelectedFillHex = createSelector(
+  [ getSelectedFill ],
+  (selectedFills) => {
+    const firstItem = selectedFills[Object.keys(selectedFills)[0]];
+    const firstItemColor = firstItem.color;
+    const firstItemHex = tinyColor({h: firstItemColor.h, s: firstItemColor.s, l: firstItemColor.l}).toHex();
+    const hexMatch = Object.keys(selectedFills).every((id) => {
+      const fill = selectedFills[id];
+      const fillColor = fill.color;
+      const fillHex = tinyColor({h: fillColor.h, s: fillColor.s, l: fillColor.l}).toHex();
+      return fillHex === firstItemHex;
+    });
+    if (hexMatch) {
+      return firstItemHex;
+    } else {
+      return 'multi';
+    }
+  }
+);
+
 export const getSelectedFillOpacity = createSelector(
   [ getSelectedFill ],
   (selectedFills) => {
@@ -333,6 +367,39 @@ export const getSelectedStrokeColor = createSelector(
   }
 );
 
+export const getSelectedStrokeColors = createSelector(
+  [ getSelectedStroke ],
+  (selectedStrokes) => {
+    return Object.keys(selectedStrokes).reduce((result, current) => {
+      result = {
+        ...result,
+        [current]: selectedStrokes[current].color
+      }
+      return result;
+    }, {}) as { [id: string]: Btwx.Color };
+  }
+);
+
+export const getSelectedStrokeHex = createSelector(
+  [ getSelectedStroke ],
+  (selectedStrokes) => {
+    const firstItem = selectedStrokes[Object.keys(selectedStrokes)[0]];
+    const firstItemColor = firstItem.color;
+    const firstItemHex = tinyColor({h: firstItemColor.h, s: firstItemColor.s, l: firstItemColor.l}).toHex();
+    const hexMatch = Object.keys(selectedStrokes).every((id) => {
+      const stroke = selectedStrokes[id];
+      const strokeColor = stroke.color;
+      const strokeHex = tinyColor({h: strokeColor.h, s: strokeColor.s, l: strokeColor.l}).toHex();
+      return strokeHex === firstItemHex;
+    });
+    if (hexMatch) {
+      return firstItemHex;
+    } else {
+      return 'multi';
+    }
+  }
+);
+
 export const getSelectedStrokeOpacity = createSelector(
   [ getSelectedStroke ],
   (selectedStrokes) => {
@@ -400,6 +467,39 @@ export const getSelectedShadowColor = createSelector(
     const firstItem = selectedShadows[Object.keys(selectedShadows)[0]];
     if (Object.keys(selectedShadows).every((id) => colorsMatch(selectedShadows[id].color, firstItem.color))) {
       return firstItem.color;
+    } else {
+      return 'multi';
+    }
+  }
+);
+
+export const getSelectedShadowColors = createSelector(
+  [ getSelectedShadow ],
+  (selectedShadows) => {
+    return Object.keys(selectedShadows).reduce((result, current) => {
+      result = {
+        ...result,
+        [current]: selectedShadows[current].color
+      }
+      return result;
+    }, {}) as { [id: string]: Btwx.Color };
+  }
+);
+
+export const getSelectedShadowHex = createSelector(
+  [ getSelectedShadow ],
+  (selectedShadows) => {
+    const firstItem = selectedShadows[Object.keys(selectedShadows)[0]];
+    const firstItemColor = firstItem.color;
+    const firstItemHex = tinyColor({h: firstItemColor.h, s: firstItemColor.s, l: firstItemColor.l}).toHex();
+    const hexMatch = Object.keys(selectedShadows).every((id) => {
+      const shadow = selectedShadows[id];
+      const shadowColor = shadow.color;
+      const shadowHex = tinyColor({h: shadowColor.h, s: shadowColor.s, l: shadowColor.l}).toHex();
+      return shadowHex === firstItemHex;
+    });
+    if (hexMatch) {
+      return firstItemHex;
     } else {
       return 'multi';
     }

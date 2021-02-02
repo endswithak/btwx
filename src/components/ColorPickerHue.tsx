@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement, useState, useEffect } from 'react';
+import tinyColor from 'tinycolor2';
 import { ThemeContext } from './ThemeProvider';
 import styled from 'styled-components';
-import tinyColor from 'tinycolor2';
 
 interface ColorPickerHueProps {
   hue: number | 'multi';
-  saturation: number | 'multi';
-  lightness: number | 'multi';
-  value: number | 'multi';
-  alpha: number | 'multi';
-  setHue(hue: number): void;
-  setRed(red: number): void;
-  setGreen(green: number): void;
-  setBlue(blue: number): void;
-  onChange?(color: Btwx.Color): void;
+  colorValues: {
+    [id: string]: Btwx.Color;
+  };
+  setHue(hue: number | 'multi'): void;
+  setHex(hue: string | 'multi'): void;
+  setRed(red: number | 'multi'): void;
+  setGreen(green: number | 'multi'): void;
+  setBlue(blue: number | 'multi'): void;
+  onChange(colors: { [id: string]: { [P in keyof Btwx.Color]?: Btwx.Color[P] } }): void;
 }
 
 interface SliderProps {
@@ -56,7 +56,7 @@ const Slider = styled.input<SliderProps>`
 
 const ColorPickerHue = (props: ColorPickerHueProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { hue, setHue, saturation, lightness, value, alpha, setRed, setGreen, setBlue, onChange } = props;
+  const { hue, colorValues, setHue, setHex, setRed, setGreen, setBlue, onChange } = props;
   const [hueValue, setHueValue] = useState(hue !== 'multi' ? hue : 0);
   const [grabbing, setGrabbing] = useState(false);
 
@@ -66,14 +66,45 @@ const ColorPickerHue = (props: ColorPickerHueProps): ReactElement => {
 
   const handleChange = (e: any) => {
     const target = e.target;
-    const nextColor = tinyColor({h: target.value, s: saturation !== 'multi' ? saturation : 0, l: lightness !== 'multi' ? lightness : 0});
-    const rgb = nextColor.toRgb();
-    setRed(rgb.r);
-    setGreen(rgb.g);
-    setBlue(rgb.b);
+    let hex: string | 'multi';
+    let red: number | 'multi';
+    let green: number | 'multi';
+    let blue: number | 'multi';
+    const newColors = Object.keys(colorValues).reduce((result, current, index) => {
+      const colorInstance = tinyColor({h: target.value, s: colorValues[current].s, l: colorValues[current].l, v: colorValues[current].v});
+      const newHex = colorInstance.toHex();
+      const rgb = colorInstance.toRgb();
+      if (index === 0) {
+        hex = newHex;
+        red = rgb.r;
+        green = rgb.g;
+        blue = rgb.b;
+      } else {
+        if (hex !== 'multi' && hex !== newHex) {
+          hex = 'multi';
+        }
+        if (red !== 'multi' && red !== rgb.r) {
+          red = 'multi';
+        }
+        if (green !== 'multi' && green !== rgb.g) {
+          green = 'multi';
+        }
+        if (blue !== 'multi' && blue !== rgb.b) {
+          blue = 'multi';
+        }
+      }
+      return {
+        ...result,
+        [current]: { h: target.value }
+      };
+    }, {});
     setHueValue(target.value);
     setHue(target.value);
-    onChange({h: target.value, s: saturation !== 'multi' ? saturation : 0, l: lightness !== 'multi' ? lightness : 0, v: value !== 'multi' ? value : 0, a: alpha  !== 'multi' ? alpha : 1});
+    setHex(hex);
+    setRed(red);
+    setGreen(green);
+    setBlue(blue);
+    onChange(newColors);
   };
 
   const handleMouseDown = () => {

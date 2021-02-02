@@ -11,19 +11,20 @@ const EventDrawerEventTimeline = (props: EventDrawerEventTimelineProps): ReactEl
   const { id } = props;
   const dispatch = useDispatch();
 
-  const handleMouseEnter = (): void => {
-    dispatch(setLayerHover({ id }));
-  }
+  // const handleMouseEnter = (): void => {
+  //   dispatch(setLayerHover({ id }));
+  // }
 
-  const handleMouseLeave = (): void => {
-    dispatch(setLayerHover({ id: null }));
-  }
+  // const handleMouseLeave = (): void => {
+  //   dispatch(setLayerHover({ id: null }));
+  // }
 
   return (
     <div
       className='c-event-drawer-event__layer-timeline'
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}>
+      // onMouseEnter={handleMouseEnter}
+      // onMouseLeave={handleMouseLeave}
+      >
       <div className='c-event-drawer-event-layer__tween-timeline' />
       <EventDrawerEventTimelineTweens layerId={id} />
     </div>
