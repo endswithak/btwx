@@ -38,7 +38,7 @@ const StyledComponent = styled.input<StyledComponentProps>`
   /* background: ${props => tinyColor(props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0).setAlpha(0.77).toRgbString()}; */
   -webkit-appearance: none;
   background: ${props => props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
-  color: ${props => props.theme.text.light};
+  color: ${props => props.theme.text.base};
   box-shadow: 0 0 0 1px ${props => props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset;
   height: ${props => props.htmlSize ? props.htmlSize * props.height : props.height }px;
   ~ span {
@@ -48,14 +48,14 @@ const StyledComponent = styled.input<StyledComponentProps>`
     }
   }
   :hover {
-    color: ${props => props.theme.text.base};
-    box-shadow: 0 0 0 1px ${props => props.theme.name === 'dark' ? props.theme.background.z5 : props.theme.background.z6} inset;
-    ~ span {
+    /* color: ${props => props.theme.text.base};
+    box-shadow: 0 0 0 1px ${props => props.theme.name === 'dark' ? props.theme.background.z5 : props.theme.background.z6} inset; */
+    /* ~ span {
       .c-form-text {
         color: ${props => props.theme.text.light};
         fill: ${props => props.theme.text.light};
       }
-    }
+    } */
     ::-webkit-slider-runnable-track {
       background: linear-gradient(to right, ${props => props.theme.palette.primaryHover} ${props => props.max ? ((props.min ? props.value - props.min : props.value) / (props.min ? props.max - props.min : props.max)) * 100 : props.value}%, ${props => props.theme.background.z4} ${props => props.max ? ((props.min ? props.value - props.min : props.value) / (props.min ? props.max - props.min : props.max)) * 100 : props.value}%);
     }
