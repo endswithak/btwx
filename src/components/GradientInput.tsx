@@ -8,14 +8,15 @@ import { getSelectedFillEnabled, getSelectedStrokeEnabled, getSelectedFillGradie
 import PercentageFormGroup from './PercentageFormGroup';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
-import SidebarSwatch from './SidebarSwatch';
 import GradientTypeSelector from './GradientTypeSelector';
+import Form from './Form';
 
 interface GradientInputProps {
   prop: 'fill' | 'stroke';
 }
 
 const GradientInput = (props: GradientInputProps): ReactElement => {
+  const colorFormControlRef = useRef(null);
   const opacityFormControlRef = useRef(null);
   const { prop } = props;
   const selected = useSelector((state: RootState) => state.layer.present.selected);
@@ -84,7 +85,12 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
     }}));
   }
 
-  const handleSwatchClick = (bounding: DOMRect): void => {
+  const handleSwatchClick = (e: any): void => {
+    e.preventDefault();
+    const sidebarRightScroll = document.getElementById('sidebar-scroll-right');
+    const controlBox = colorFormControlRef.current.getBoundingClientRect();
+    const sidebarBox = sidebarRightScroll.getBoundingClientRect();
+    const scrollTop = sidebarRightScroll.scrollTop;
     if (!enabled) {
       switch(prop) {
         case 'fill':
@@ -98,8 +104,8 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
     if (!gradientEditorOpen) {
       dispatch(openGradientEditor({
         prop: prop,
-        x: bounding.x,
-        y: bounding.y - (bounding.height - 10) // 2 (swatch drop shadow) + 8 (top-padding)
+        x: controlBox.x,
+        y: (controlBox.y + scrollTop + controlBox.height) - sidebarBox.top
       }));
     }
   };
@@ -107,14 +113,23 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
   return (
     <SidebarSectionRow>
       <SidebarSectionColumn width={'33.33%'}>
-        <SidebarSwatch
-          isActive={gradientEditorOpen && prop === gradientEditorProp}
-          style={{
-            background: displayGradient !== 'multi' ? cssGradient : 'none'
-          }}
-          onClick={handleSwatchClick}
-          bottomLabel='Gradient'
-          multi={displayGradient === 'multi'} />
+        <Form inline>
+          <Form.Group controlId={`control-${prop}-gradient-swatch`}>
+            <Form.Control
+              ref={colorFormControlRef}
+              type='color'
+              size='small'
+              isActive={gradientEditorOpen && gradientEditorProp === prop}
+              multiColor={displayGradient === 'multi'}
+              colorGradient={displayGradient !== 'multi' ? cssGradient : null}
+              value='#000000'
+              onChange={() => {}}
+              onClick={handleSwatchClick} />
+            <Form.Label>
+              Gradient
+            </Form.Label>
+          </Form.Group>
+        </Form>
       </SidebarSectionColumn>
       <SidebarSectionColumn width={'33.33%'}>
         <GradientTypeSelector

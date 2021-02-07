@@ -1,0 +1,34 @@
+.c-canvas {
+  @include themed() {
+    background: theme-prop(background-z0);
+  }
+  display: flex;
+  flex-grow: 2;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.c-canvas__layer {
+  @include absolute-full;
+
+  &--page {
+    z-index: 1;
+  }
+
+  &--project {
+    z-index: 2;
+  }
+
+  &--ui {
+    z-index: 3;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}

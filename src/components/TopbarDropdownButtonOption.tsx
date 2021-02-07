@@ -51,11 +51,11 @@ const Button = styled.button<TopbarDropdownButtonOptionProps>`
     background: ${props => props.theme.palette.primary};
     .c-topbar-dropdown-button__icon {
       svg {
-        fill: ${props => props.theme.text.onPrimary};
+        fill: ${props => props.theme.text.onPalette.primary};
       }
     }
     .c-topbar-dropdown-button__label {
-      color: ${props => props.theme.text.onPrimary};
+      color: ${props => props.theme.text.onPalette.primary};
     }
     :disabled {
       background: none;

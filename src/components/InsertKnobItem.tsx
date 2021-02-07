@@ -24,10 +24,10 @@ interface ItemProps {
 const Item = styled.li<ItemProps>`
   cursor: pointer;
   background: ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z2};
-  color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
+  color: ${props => props.isActive ? props.theme.text.onPalette.primary : props.theme.text.base};
   box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset, 0 4px 16px 0 rgba(0,0,0,0.16);
   svg {
-    fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
+    fill: ${props => props.isActive ? props.theme.text.onPalette.primary : props.theme.text.base};
   }
 `;
 

@@ -1,14 +1,12 @@
-import React, { useContext, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { ThemeContext } from './ThemeProvider';
 import EventDrawerList from './EventDrawerList';
 import EventDrawerEvent from './EventDrawerEvent';
 import EventDrawerDragHandle from './EventDrawerDragHandle';
 import EmptyState from './EmptyState';
 
 const EventDrawer = (): ReactElement => {
-  const theme = useContext(ThemeContext);
   const ready = useSelector((state: RootState) => state.canvasSettings.ready);
   const event = useSelector((state: RootState) => state.layer.present.events.byId[state.eventDrawer.event]);
   const eventDrawerHeight = useSelector((state: RootState) => state.viewSettings.eventDrawer.height);
@@ -23,9 +21,7 @@ const EventDrawer = (): ReactElement => {
           id='event-drawer'
           className='c-event-drawer'
           style={{
-            height: eventDrawerHeight,
-            background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
-            boxShadow: `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
+            height: eventDrawerHeight
           }}>
           {
             isEmpty

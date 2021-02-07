@@ -1,33 +1,15 @@
 import React, { ReactElement, useEffect, useContext } from 'react';
 import { remote } from 'electron';
-import styled from 'styled-components';
 import { useSelector } from 'react-redux';
-import { MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT, PREVIEW_PREFIX } from '../constants';
+import { MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT } from '../constants';
 import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
-
-interface StyledTitlebarProps {
-  recording: boolean;
-}
-
-const StyledTitlebar = styled.div<StyledTitlebarProps>`
-  height: ${remote.process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT}px;
-  color: ${props => props.recording ? '#fff' : props.theme.text.base};
-  line-height: ${remote.process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT}px;
-  background: ${props => props.recording ? props.theme.palette.recording : props.theme.name === 'dark' ? props.theme.background.z1 : props.theme.background.z2};
-  -webkit-app-region: drag;
-  .c-titlebar__unsaved-indicator {
-    color: ${props => props.recording ? 'rgba(255, 255, 255, 0.5)' : props.theme.text.lighter};
-    margin-left: ${props => props.theme.unit}px;
-  }
-`;
 
 interface TitlebarProps {
   previewWindow?: boolean;
 }
 
 const Titlebar = (props: TitlebarProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { previewWindow } = props;
   const unsavedEdits = useSelector((state: RootState) => state.layer.present.edit && state.layer.present.edit.id !== state.documentSettings.edit);
   const documentName = useSelector((state: RootState) => state.documentSettings.name);
@@ -59,11 +41,17 @@ const Titlebar = (props: TitlebarProps): ReactElement => {
   }, [documentPath]);
 
   return (
-    <StyledTitlebar
-      className='c-titlebar'
-      theme={theme}
-      recording={recording}
-      onDoubleClick={handleDoubleClick}>
+    <div
+      className={`c-titlebar${
+        recording
+        ? `${' '}c-titlebar--recording`
+        : ''
+      }`}
+      onDoubleClick={handleDoubleClick}
+      style={{
+        height: remote.process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT,
+        lineHeight: remote.process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT
+      }}>
       <span>
         <span className='c-titlebar__title'>
           {
@@ -80,7 +68,7 @@ const Titlebar = (props: TitlebarProps): ReactElement => {
           : null
         }
       </span>
-    </StyledTitlebar>
+    </div>
   );
 }
 

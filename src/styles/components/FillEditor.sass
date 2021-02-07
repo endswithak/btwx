@@ -1,13 +1,16 @@
-.c-fill-editor__picker
-  +background-blur
-  transform-origin: left top
+.c-fill-editor
+  @include background-blur
+  @include themed()
+    background: theme-prop(glass-background)
+    box-shadow: 0 0 0 1px theme-prop(modal-border), 0 4px 16px 0 rgba(0,0,0,0.16)
+  transform-origin: center top
   position: absolute
   width: 248px
   display: flex
   flex-direction: column
   border-radius: $unit
   z-index: 99999999999
-  left: $unit * 2
+  margin: $unit * 2
 
 .c-fill-editor__type-selector
   position: relative

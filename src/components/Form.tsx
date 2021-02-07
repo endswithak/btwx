@@ -8,6 +8,7 @@ import FormText from './FormText';
 import FormLabel from './FormLabel';
 import FormControl from './FormControl';
 import FormGroup from './FormGroup';
+import FormRow from './FormRow';
 
 export interface FormProps extends React.HTMLAttributes<HTMLFormElement> {
   inline?: boolean;
@@ -21,6 +22,7 @@ type Form = RefForwardingComponent<'form', FormProps> & {
   Control: typeof FormControl;
   Label: typeof FormLabel;
   Text: typeof FormText;
+  Row: typeof FormRow;
 }
 
 const Form: Form = (forwardRef(function Form(props: FormProps, ref) {
@@ -72,5 +74,6 @@ Form.Control = FormControl;
 Form.Group = FormGroup;
 Form.Label = FormLabel;
 Form.Text = FormText;
+Form.Row = FormRow;
 
 export default Form;

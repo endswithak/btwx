@@ -1,25 +1,24 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, ReactElement } from 'react';
 import { PropWithChildren } from '../utils';
-import FormControlContext from './FormControlContext';
 import FormGroupContext from './FormGroupContext';
 
 export interface FormControlAddonProps extends PropWithChildren {
   type: 'left' | 'right';
   readOnly?: boolean;
+  size?: Btwx.SizeVariant;
 }
 
 const FormControlAddon = (props: FormControlAddonProps): ReactElement => {
   const fg = useContext(FormGroupContext);
-  const fc = useContext(FormControlContext);
-  const { type, children, readOnly } = props;
+  const { type, children, readOnly, size } = props;
 
   return (
     <span
       id={`${fg.controlId}-addon-${type}`}
       className={`c-form-control__addon c-form-control__addon--${type} ${
-        fc.size
-        ? `c-form-control__addon--${fc.size}`
+        size
+        ? `c-form-control__addon--${size}`
         : ''
       } ${
         readOnly

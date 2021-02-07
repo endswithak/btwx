@@ -63,7 +63,7 @@ const SidebarLayerMaskedIcon = (props: SidebarLayerMaskedIconProps): ReactElemen
             style={{
               fill: underlyingMaskHover
               ? isSelected || editing
-                ? theme.text.onPrimary
+                ? theme.text.onPalette.primary
                 : theme.palette.primary
               : theme.text.lighter
             }} />

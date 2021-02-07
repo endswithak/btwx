@@ -27,9 +27,9 @@ const Item = styled.div<ItemProps>`
     }
     :hover {
       background: ${props => props.isDisabled ? 'none' : props.theme.palette.primary};
-      color: ${props => props.isDisabled ? props.theme.text.base : props.theme.text.onPrimary};
+      color: ${props => props.isDisabled ? props.theme.text.base : props.theme.text.onPalette.primary};
       svg {
-        fill: ${props => props.isDisabled ? props.theme.text.base : props.theme.text.onPrimary};
+        fill: ${props => props.isDisabled ? props.theme.text.base : props.theme.text.onPalette.primary};
       }
     }
   }

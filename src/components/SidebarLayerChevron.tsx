@@ -52,7 +52,7 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
             size='small'
             style={{
               fill: isSelected
-              ? theme.text.onPrimary
+              ? theme.text.onPalette.primary
               : hover
                 ? theme.text.base
                 : theme.text.lighter

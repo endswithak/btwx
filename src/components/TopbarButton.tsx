@@ -25,11 +25,11 @@ interface ButtonWrapProps {
 
 const ButtonWrap = styled.div<ButtonWrapProps>`
   .c-topbar-button__button {
-    background: ${props => props.isActive ? props.recording ? props.theme.palette.recording : props.theme.palette.primary : 'none' };// props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
-    box-shadow: none; // 0 0 0 1px ${props => props.isActive ? props.recording ? props.theme.palette.recording : props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset;
-    color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.lighter};
+    background: ${props => props.isActive ? props.recording ? props.theme.palette.error : props.theme.palette.primary : 'none' };// props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
+    box-shadow: none; // 0 0 0 1px ${props => props.isActive ? props.recording ? props.theme.palette.error : props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset;
+    color: ${props => props.isActive ? props.theme.text.onPalette.primary : props.theme.text.lighter};
     svg {
-      fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.lighter};
+      fill: ${props => props.isActive ? props.theme.text.onPalette.primary : props.theme.text.lighter};
     }
     :disabled {
       svg {
@@ -37,16 +37,16 @@ const ButtonWrap = styled.div<ButtonWrapProps>`
       }
     }
     :hover {
-      // background: none; // ${props => props.isActive ? props.recording ? props.theme.palette.recordingHover : props.theme.palette.primaryHover : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
-      box-shadow: none;  // 0 0 0 1px ${props => props.recording ? props.theme.palette.recordingHover : props.isRecord ? props.theme.palette.recording : props.theme.palette.primary} inset;
-      color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
+      // background: none; // ${props => props.isActive ? props.recording ? props.theme.palette.errorHover : props.theme.palette.primaryHover : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
+      box-shadow: none;  // 0 0 0 1px ${props => props.recording ? props.theme.palette.errorHover : props.isRecord ? props.theme.palette.error : props.theme.palette.primary} inset;
+      color: ${props => props.isActive ? props.theme.text.onPalette.primary : props.theme.text.base};
       svg {
-        fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base };
+        fill: ${props => props.isActive ? props.theme.text.onPalette.primary : props.theme.text.base };
       }
       :disabled {
         background: ${props => props.isActive ? props.theme.palette.primary : 'none' }; // props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
         box-shadow: none;
-        color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.light};
+        color: ${props => props.isActive ? props.theme.text.onPalette.primary : props.theme.text.light};
         svg {
           fill: ${props => props.theme.text.lighter};
         }

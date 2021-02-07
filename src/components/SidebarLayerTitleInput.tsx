@@ -17,7 +17,7 @@ const SidebarLayerTitleInput = (props: SidebarLayerTitleInputProps): ReactElemen
   const dispatch = useDispatch();
 
   const handleMouseDown = (event: any): void => {
-    if (event.target !== formControlRef.current) {
+    if (formControlRef.current && event.target !== formControlRef.current) {
       if (formControlRef.current) {
         formControlRef.current.blur();
       }

@@ -1,0 +1,247 @@
+.c-form-control-wrap {
+  display: flex;
+  flex-wrap: nowrap;
+  position: relative;
+  width: 100%;
+  align-items: center;
+}
+
+.c-form-control {
+  @include themed() {
+    color: theme-prop(text-light);
+    fill: theme-prop(text-light);
+    background: theme-prop(control-background);
+    box-shadow: 0 0 0 1px theme-prop(control-border) inset;
+
+    &:hover {
+      color: theme-prop(text-base);
+      fill: theme-prop(text-base);
+      box-shadow: 0 0 0 1px theme-prop(control-border-active) inset;
+      & ~ div svg {
+        fill: theme-prop(text-base);
+      }
+    }
+
+    &:focus,
+    &:focus &:hover {
+      color: theme-prop(text-base);
+      fill: theme-prop(text-base);
+      box-shadow: 0 0 0 1px theme-prop(primary) inset;
+      & ~ span .c-form-text {
+        color: theme-prop(primary);
+        fill: theme-prop(primary);
+      }
+      & ~ div svg {
+        fill: theme-prop(primary);
+      }
+    }
+
+    &:disabled,
+    &.c-form-control--disabled {
+      opacity: 50%;
+      color: theme-prop(text-lighter);
+      fill: theme-prop(text-lighter);
+      box-shadow: 0 0 0 1px theme-prop(control-border) inset;
+
+      &:hover,
+      &:focus,
+      &:focus &:hover  {
+        color: theme-prop(text-lighter);
+        fill: theme-prop(text-lighter);
+        box-shadow: 0 0 0 1px theme-prop(control-border) inset;
+      }
+
+      & ~ span .c-form-text {
+        opacity: 50%;
+      }
+    }
+
+    &::selection {
+      background: theme-prop(primary);
+    }
+
+    & ~ span .c-form-text {
+      color: theme-prop(text-lighter);
+      fill: theme-prop(text-lighter);
+    }
+
+    & ~ div svg {
+      fill: theme-prop(text-lighter);
+    }
+  }
+  display: block;
+  font-family: $font-family;
+  font-size: $font-size;
+  width: 100%;
+  line-height: $control-size;
+  border: none;
+  outline: none;
+  padding: 0 $padding;
+  border-radius: $border-radius;
+  height: $control-size;
+
+  &.c-form-control--left {
+    padding-left: $addon-size;
+  }
+
+  &.c-form-control--right {
+    padding-right: $addon-size;
+  }
+
+  &.c-form-control--small {
+    font-size: $font-size-small;
+    line-height: $control-size-small;
+    padding: 0 $padding-small;
+    height: $control-size-small;
+
+    &.c-form-control--left {
+      padding-left: $addon-size-small;
+    }
+
+    &.c-form-control--right {
+      padding-right: $addon-size-small;
+    }
+  }
+
+  &.c-form-control--large {
+    font-size: $font-size-large;
+    line-height: $control-size-large;
+    padding: 0 $padding-large;
+    height: $control-size-large;
+
+    &.c-form-control--left {
+      padding-left: $addon-size-large;
+    }
+
+    &.c-form-control--right {
+      padding-right: $addon-size-large;
+    }
+  }
+
+  &.c-form-control--valid {
+    @include form-verification(success);
+  }
+
+  &.c-form-control--invalid {
+    @include form-verification(error);
+  }
+
+  &.c-form-control--active {
+    @include themed() {
+      box-shadow: 0 0 0 1px theme-prop(primary) inset;
+    }
+    & ~ span .c-form-text {
+      @include themed() {
+        color: theme-prop(primary);
+      }
+    }
+    & ~ div svg {
+      @include themed() {
+        fill: theme-prop(primary);
+      }
+    }
+  }
+
+  &.c-form-control--thicc-slider {
+    @include themed() {
+      &::-webkit-slider-runnable-track {
+        box-shadow: 0 0 0 1px theme-prop(control-border) inset !important;
+      }
+      &:hover {
+        &::-webkit-slider-runnable-track {
+          box-shadow: 0 0 0 1px theme-prop(control-border-active) inset !important;
+        }
+      }
+      &:focus,
+      &:focus &:hover {
+        &::-webkit-slider-runnable-track {
+          box-shadow: 0 0 0 1px theme-prop(primary) inset !important;
+        }
+      }
+    }
+    background: none !important;
+    box-shadow: none !important;
+    height: $unit * 4 !important;
+
+    &::-webkit-slider-runnable-track {
+      height: $unit * 2;
+      border-radius: $border-radius;
+    }
+
+    &::-webkit-slider-thumb {
+      @include themed() {
+        box-shadow: 0 0 0 2px theme-prop(slider-thumb-background), 0 0 0 1px rgba(0, 0, 0, 0.3) inset, 0 0 0 3px rgba(0, 0, 0, 0.3) !important;
+      }
+      background: none !important;
+      height: $unit * 2;
+      width: $unit * 2;
+    }
+  }
+}
+
+.c-form-control__addon {
+  flex-shrink: 0;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $addon-size;
+  height: $control-size;
+  overflow: hidden;
+
+  &.c-form-control__addon--read-only {
+    pointer-events: none;
+  }
+
+  &.c-form-control__addon--small {
+    width: $addon-size-small;
+    height: $control-size-small;
+  }
+
+  &.c-form-control__addon--large {
+    width: $addon-size-large;
+    height: $control-size-large;
+  }
+
+  &.c-form-control__addon--left {
+    left: 0;
+  }
+
+  &.c-form-control__addon--right {
+    right: 0;
+  }
+
+  .c-form-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  &::selection {
+    background: none;
+  }
+}
+
+.c-form-control__gradient {
+  @include absolute-full;
+  pointer-events: none;
+}
+
+.c-form-control__color-overlay {
+  @include themed() {
+    background: theme-prop(control-background);
+  }
+  @include absolute-full;
+  pointer-events: none;
+  margin: 1px;
+  border-radius: $border-radius - 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  div {
+    @include absolute-full;
+    border-radius: $border-radius - 1px;
+  }
+}

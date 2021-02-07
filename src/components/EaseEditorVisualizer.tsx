@@ -1,7 +1,6 @@
-import React, { useContext, ReactElement, useRef, useEffect, useState } from 'react';
+import React, { ReactElement, useRef, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import gsap from 'gsap';
-import tinyColor from 'tinycolor2';
 import { CustomEase } from 'gsap/CustomEase';
 import { RoughEase, SlowMo } from 'gsap/EasePack';
 import { CustomBounce } from 'gsap/CustomBounce';
@@ -10,7 +9,6 @@ import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 import { MotionPathHelper } from 'gsap/MotionPathHelper';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import { RootState } from '../store/reducers';
-import { ThemeContext } from './ThemeProvider';
 import EaseEditorCopyPathButton from './EaseEditorCopyPathButton';
 
 gsap.registerPlugin(CustomEase, RoughEase, SlowMo, MotionPathPlugin, MotionPathHelper, DrawSVGPlugin, CustomBounce, CustomWiggle);
@@ -21,7 +19,6 @@ const EaseEditorVisualizer = (): ReactElement => {
   const valueBarRef = useRef<HTMLDivElement>(null);
   const valueHeadRef = useRef<HTMLDivElement>(null);
   const visualizerRef = useRef<HTMLDivElement>(null);
-  const theme = useContext(ThemeContext);
   const tween = useSelector((state: RootState) => state.layer.present.tweens.byId[state.easeEditor.tween]);
   const [pathData, setPathData] = useState();
   const easeString = useSelector((state: RootState) => {
@@ -73,11 +70,7 @@ const EaseEditorVisualizer = (): ReactElement => {
   return (
     <div
       ref={visualizerRef}
-      className='c-ease-editor__visualizer'
-      style={{
-        background: tinyColor(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).setAlpha(0.77).toRgbString(),
-        boxShadow: `-1px 0 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
-      }}>
+      className='c-ease-editor__visualizer'>
       <div className='c-ease-editor-visualizer__top'>
         <div
           className='c-ease-editor__value'
@@ -87,7 +80,6 @@ const EaseEditorVisualizer = (): ReactElement => {
           <div
             className='c-ease-editor-value__bar'
             style={{
-              background: theme.text.lightest,
               opacity: 0.5,
               height: 536
             }} />
@@ -95,7 +87,6 @@ const EaseEditorVisualizer = (): ReactElement => {
             ref={valueBarRef}
             className='c-ease-editor-value__progress'
             style={{
-              background: theme.palette.primary,
               height: 400,
               bottom: 72
             }} />
@@ -103,7 +94,6 @@ const EaseEditorVisualizer = (): ReactElement => {
             ref={valueHeadRef}
             className='c-ease-editor-value__progress-head'
             style={{
-              background: theme.palette.primary,
               bottom: 72
             }} />
         </div>
@@ -111,7 +101,6 @@ const EaseEditorVisualizer = (): ReactElement => {
           className='c-ease-editor__graph'
           style={{
             position: 'relative',
-            //background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
             width: 400,
             height: 536
           }}>
@@ -126,10 +115,10 @@ const EaseEditorVisualizer = (): ReactElement => {
               maxHeight: 400,
               bottom: 72
             }}>
-            <line x1="0" y1="0" x2="400" y2="0" stroke={theme.text.lightest} opacity='0.5'></line>
-            <path ref={pathRef} d={pathData} strokeWidth='1' stroke={theme.text.lightest} opacity='0.5' fill='none'></path>
-            <path ref={pathRevealRef} d={pathData} strokeWidth='1' stroke={theme.text.base} fill='none'></path>
-            <line x1="0" y1="400" x2="400" y2="400" stroke={theme.text.lightest} opacity='0.5'></line>
+            <line className='c-ease-editor-graph__line' x1="0" y1="0" x2="400" y2="0" />
+            <path className='c-ease-editor-graph__line' ref={pathRef} d={pathData} strokeWidth='1' fill='none' />
+            <path className='c-ease-editor-graph__ease' ref={pathRevealRef} d={pathData} strokeWidth='1' fill='none' />
+            <line className='c-ease-editor-graph__line' x1="0" y1="400" x2="400" y2="400" />
           </svg>
         </div>
         <EaseEditorCopyPathButton

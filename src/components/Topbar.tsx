@@ -1,5 +1,4 @@
-import React, { useContext, ReactElement } from 'react';
-import { ThemeContext } from './ThemeProvider';
+import React, { ReactElement } from 'react';
 import InsertButton from './InsertButton';
 import MaskButton from './MaskButton';
 import PreviewButton from './PreviewButton';
@@ -14,41 +13,32 @@ import IntersectButton from './IntersectButton';
 import ExcludeButton from './ExcludeButton';
 import ViewButton from './ViewButton';
 
-const Topbar = (): ReactElement => {
-  const theme = useContext(ThemeContext);
-
-  return (
-    <div
-      className='c-topbar'
-      style={{
-        background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
-        boxShadow: `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
-      }}>
-      <div className='c-topbar__button-group'>
-        <InsertButton />
-      </div>
-      <div className='c-topbar__button-group'>
-        <UniteButton />
-        <SubtractButton />
-        <IntersectButton />
-        <ExcludeButton />
-      </div>
-      <div className='c-topbar__button-group'>
-        <MaskButton />
-        <MoveForwardButton />
-        <MoveBackwardButton />
-        <GroupButton />
-        <UngroupButton />
-      </div>
-      <div className='c-topbar__button-group'>
-        <ZoomButton />
-        <ViewButton />
-      </div>
-      <div className='c-topbar__button-group'>
-        <PreviewButton />
-      </div>
+const Topbar = (): ReactElement => (
+  <div className='c-topbar'>
+    <div className='c-topbar__button-group'>
+      <InsertButton />
     </div>
-  );
-}
+    <div className='c-topbar__button-group'>
+      <UniteButton />
+      <SubtractButton />
+      <IntersectButton />
+      <ExcludeButton />
+    </div>
+    <div className='c-topbar__button-group'>
+      <MaskButton />
+      <MoveForwardButton />
+      <MoveBackwardButton />
+      <GroupButton />
+      <UngroupButton />
+    </div>
+    <div className='c-topbar__button-group'>
+      <ZoomButton />
+      <ViewButton />
+    </div>
+    <div className='c-topbar__button-group'>
+      <PreviewButton />
+    </div>
+  </div>
+);
 
 export default Topbar;

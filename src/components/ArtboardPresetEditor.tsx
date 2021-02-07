@@ -1,40 +1,18 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useEffect, useState, useRef } from 'react';
-import styled from 'styled-components';
+import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
 import { closeArtboardPresetEditor } from '../store/actions/artboardPresetEditor';
 import { addArtboardPreset, updateArtboardPreset, setArtboardPresetDevicePlatform } from '../store/actions/documentSettings';
 import { setCanvasFocusing } from '../store/actions/canvasSettings';
-import { ThemeContext } from './ThemeProvider';
-import SidebarInput from './SidebarInput';
-
-const CancelButton = styled.button`
-  background: ${props => props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
-  box-shadow: 0 0 0 1px ${props => props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset;
-  color: ${props => props.theme.text.light};
-  :hover {
-    background: ${props => props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
-    box-shadow: 0 0 0 1px ${props => props.theme.name === 'dark' ? props.theme.background.z5 : props.theme.background.z6} inset;
-    color: ${props => props.theme.text.base};
-  }
-`;
-
-const SaveButton = styled.button`
-  background: ${props => props.theme.palette.primary};
-  box-shadow: 0 0 0 1px ${props => props.theme.palette.primary} inset;
-  color: ${props => props.theme.text.onPrimary};
-  :hover {
-    background: ${props => props.theme.palette.primaryHover};
-    box-shadow: 0 0 0 1px ${props => props.theme.palette.primaryHover} inset;
-    color: ${props => props.theme.text.onPrimary};
-  }
-`;
+import Form from './Form';
+import Button from './Button';
 
 const ArtboardPresetEditor = (): ReactElement => {
-  const ref = useRef(null);
-  const theme = useContext(ThemeContext);
+  const editorRef = useRef(null);
+  const nameControlRef = useRef(null);
+  const widthControlRef = useRef(null);
+  const heightControlRef = useRef(null);
   const artboardPresetEditor = useSelector((state: RootState) => state.artboardPresetEditor);
   // const platformType = useSelector((state: RootState) => state.documentSettings.artboardPresets.platform);
   const exists = useSelector((state: RootState) => state.documentSettings.artboardPresets.allIds.includes(state.artboardPresetEditor.id));
@@ -45,22 +23,15 @@ const ArtboardPresetEditor = (): ReactElement => {
   const dispatch = useDispatch();
 
   const handleNameChange = (e: any): void => {
-    const target = e.target;
-    setName(target.value);
+    setName(e.target.value);
   };
 
   const handleWidthChange = (e: any): void => {
-    const target = e.target;
-    if (!isNaN(target.value)) {
-      setWidth(target.value);
-    }
+    setWidth(e.target.value);
   };
 
   const handleHeightChange = (e: any): void => {
-    const target = e.target;
-    if (!isNaN(target.value)) {
-      setHeight(target.value);
-    }
+    setHeight(e.target.value);
   };
 
   const handleKeyDown = (e: any): void => {
@@ -70,7 +41,7 @@ const ArtboardPresetEditor = (): ReactElement => {
   };
 
   const handleMouseDown = (e: any): void => {
-    if (!ref.current.contains(e.target)) {
+    if (!editorRef.current.contains(e.target)) {
       dispatch(closeArtboardPresetEditor());
     }
   };
@@ -101,6 +72,10 @@ const ArtboardPresetEditor = (): ReactElement => {
     dispatch(setCanvasFocusing({focusing: false}));
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('mousedown', handleMouseDown);
+    if (nameControlRef.current) {
+      nameControlRef.current.focus();
+      nameControlRef.current.select();
+    }
     return () => {
       dispatch(setCanvasFocusing({focusing: true}));
       document.removeEventListener('keydown', handleKeyDown);
@@ -111,47 +86,78 @@ const ArtboardPresetEditor = (): ReactElement => {
   return (
     <div
       className='c-artboard-preset-editor'
-      ref={ref}
-      style={{
-        background: tinyColor(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).setAlpha(0.88).toRgbString(),
-        boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
-      }}>
+      ref={editorRef}>
       <div className='c-artboard-preset-editor__aside'>
         <div className='c-artboard-preset-editor__icon'>
-          <div
-            className='c-artboard-preset-editor-icon__plane c-artboard-preset-editor-icon__plane--bg'
-            style={{
-              background: theme.name === 'dark' ? theme.background.z4 : theme.background.z6
-            }} />
-          <div
-            className='c-artboard-preset-editor-icon__plane c-artboard-preset-editor-icon__plane--fg'
-            style={{
-              background: tinyColor(theme.palette.primary).setAlpha(0.77).toRgbString(),
-              backdropFilter: 'opacity(50%)'
-            }} />
+          <div className='c-artboard-preset-editor-icon__plane c-artboard-preset-editor-icon__plane--bg' />
+          <div className='c-artboard-preset-editor-icon__plane c-artboard-preset-editor-icon__plane--fg' />
         </div>
-        <p
-          className='c-artboard-preset-editor__head'
-          style={{
-            color: theme.text.base
-          }}>
+        <p className='c-artboard-preset-editor__head'>
           Custom Preset
         </p>
-        <p
-          className='c-artboard-preset-editor__body'
-          style={{
-            color: theme.text.lighter
-          }}>
+        <p className='c-artboard-preset-editor__body'>
           Create custom presets for your frequently used artboard sizes.
         </p>
       </div>
-      <div
-        className='c-artboard-preset-editor__main'
-        style={{
-          background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
-          boxShadow: `-1px 0 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
-        }}>
-        <div className='c-artboard-preset-editor__form'>
+      <div className='c-artboard-preset-editor__main'>
+        <Form onSubmit={handleSave}>
+          <Form.Group controlId='control-ape-name'>
+            <Form.Control
+              ref={nameControlRef}
+              as='input'
+              value={name}
+              size='small'
+              type='text'
+              onChange={handleNameChange}
+              required />
+            <Form.Label>
+              Name
+            </Form.Label>
+          </Form.Group>
+          <Form.Row>
+            <Form.Group controlId='control-ape-width'>
+              <Form.Control
+                ref={widthControlRef}
+                as='input'
+                value={width}
+                size='small'
+                type='text'
+                onChange={handleWidthChange}
+                // right={<Form.Text>px</Form.Text>}
+                // rightReadOnly
+                required />
+              <Form.Label>
+                Width
+              </Form.Label>
+            </Form.Group>
+            <Form.Group controlId='control-ape-height'>
+              <Form.Control
+                ref={heightControlRef}
+                as='input'
+                value={height}
+                size='small'
+                type='text'
+                onChange={handleWidthChange}
+                // right={<Form.Text>px</Form.Text>}
+                // rightReadOnly
+                required />
+              <Form.Label>
+                Height
+              </Form.Label>
+            </Form.Group>
+          </Form.Row>
+          <Form.Row>
+            <Button onClick={() => dispatch(closeArtboardPresetEditor())}>
+              Cancel
+            </Button>
+            <Button
+              type='submit'
+              variant='primary'>
+              Save
+            </Button>
+          </Form.Row>
+        </Form>
+        {/* <div className='c-artboard-preset-editor__form'>
           <div className='c-artboard-preset-editor__name-input'>
             <SidebarInput
               value={name}
@@ -191,7 +197,7 @@ const ArtboardPresetEditor = (): ReactElement => {
             onClick={handleSave}>
             Save
           </SaveButton>
-        </div>
+        </div> */}
       </div>
     </div>
   );

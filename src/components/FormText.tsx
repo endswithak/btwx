@@ -2,7 +2,7 @@
 import React, { useContext, ReactElement } from 'react';
 import styled from 'styled-components';
 import { ThemeContext } from './ThemeProvider';
-import FormControlContext from './FormControlContext';
+// import FormControlContext from './FormControlContext';
 
 const StyledSpan = styled.span`
   color: ${props => props.theme.text.base};
@@ -19,35 +19,33 @@ const StyledSpan = styled.span`
     color: ${props => props.theme.palette.error};
     fill: ${props => props.theme.palette.error};
   }
+  &.c-form-text--warn {
+    color: ${props => props.theme.palette.warn};
+    fill: ${props => props.theme.palette.warn};
+  }
 `;
 
 interface FormTextProps {
   children: any;
+  size?: Btwx.SizeVariant;
+  colorVariant?: Btwx.ColorVariant;
 }
 
 const FormText = (props: FormTextProps): ReactElement => {
-  const fc = useContext(FormControlContext);
+  // const fc = useContext(FormControlContext);
   const theme = useContext(ThemeContext);
-  const { children } = props;
+  const { children, size, colorVariant } = props;
 
   return (
     <StyledSpan
       theme={theme}
       className={`c-form-text ${
-        fc.size
-        ? `c-form-text--${fc.size}`
+        size
+        ? `c-form-text--${size}`
         : ''
       } ${
-        fc.isValid
-        ? 'c-form-text--success'
-        : ''
-      } ${
-        fc.isInvalid
-        ? 'c-form-text--error'
-        : ''
-      } ${
-        fc.isActive
-        ? 'c-form-text--active'
+        colorVariant
+        ? `c-form-text--${colorVariant}`
         : ''
       }`}>
       { children }

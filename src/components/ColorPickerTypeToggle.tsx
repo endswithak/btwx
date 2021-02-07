@@ -2,8 +2,9 @@
 import React, { ReactElement } from 'react';
 import { useDispatch } from 'react-redux';
 import { setCanvasColorFormat } from '../store/actions/documentSettings';
-// import SidebarToggleButton from './SidebarToggleButton';
-import Button from './Button';
+import ToggleButton from './ToggleButton';
+import Icon from './Icon';
+import Form from './Form';
 
 interface ColorPickerTypeToggleProps {
   type: Btwx.ColorFormat;
@@ -13,26 +14,33 @@ const ColorPickerTypeToggle = (props: ColorPickerTypeToggleProps): ReactElement 
   const { type } = props;
   const dispatch = useDispatch();
 
-  const handleClick = () => {
+  const handleChange = (): void => {
     switch(type) {
       case 'rgb':
-        // setType('hsl');
         dispatch(setCanvasColorFormat({colorFormat: 'hsl'}));
         break;
       case 'hsl':
-        // setType('rgb');
         dispatch(setCanvasColorFormat({colorFormat: 'rgb'}));
         break;
     }
   }
 
   return (
-    <div className='c-input'>
-      <Button
-        onClick={handleClick}
-        active={false}
-        icon='list-toggle' />
-    </div>
+    <Form>
+      <Form.Group controlId='control-cp-rgb-format'>
+        <ToggleButton
+          name='cp-color-format'
+          type='checkbox'
+          value={type}
+          checked={type === 'rgb'}
+          onChange={handleChange}
+          size='small'>
+          <Icon
+            name='list-toggle'
+            size='small' />
+        </ToggleButton>
+      </Form.Group>
+    </Form>
   );
 }
 

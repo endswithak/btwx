@@ -4,7 +4,9 @@ import { RootState } from '../store/reducers';
 import { selectedStrokeEnabled, getSelectedStrokeJoin } from '../store/selectors/layer';
 import { setLayersStrokeJoin } from '../store/actions/layer';
 import { DEFAULT_STROKE_JOIN_OPTIONS } from '../constants';
-import ButtonGroupInput from './ButtonGroupInput';
+import Form from './Form';
+import ToggleButtonGroup from './ToggleButtonGroup';
+import Icon from './Icon';
 
 const StrokeJoinInput = (): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
@@ -17,22 +19,38 @@ const StrokeJoinInput = (): ReactElement => {
     setStrokeJoin(strokeJoinValue);
   }, [strokeJoinValue, disabled, selected]);
 
-  const handleClick = (strokeJoinType: Btwx.StrokeJoin): void => {
-    dispatch(setLayersStrokeJoin({layers: selected, strokeJoin: strokeJoinType}));
-    setStrokeJoin(strokeJoinType);
+  const handleChange = (e: any): void => {
+    dispatch(setLayersStrokeJoin({layers: selected, strokeJoin: e.target.value}));
+    setStrokeJoin(e.target.value);
   };
 
-  const options = DEFAULT_STROKE_JOIN_OPTIONS.map((option, index) => ({
-    icon: `stroke-join-${option}`,
-    active: strokeJoin === option,
-    onClick: () => handleClick(option)
-  }));
+  const options = DEFAULT_STROKE_JOIN_OPTIONS.map((option) => (
+    <ToggleButtonGroup.Button
+      key={option}
+      value={option}
+      disabled={disabled}>
+      <Icon
+        name={`stroke-join-${option}`}
+        size='small' />
+    </ToggleButtonGroup.Button>
+  ));
 
   return (
-    <ButtonGroupInput
-      buttons={options}
-      label='Join'
-      disabled={disabled} />
+    <Form inline>
+      <Form.Group controlId='control-stroke-join'>
+        <ToggleButtonGroup
+          type='radio'
+          name='stroke-join'
+          size='small'
+          value={strokeJoin}
+          onChange={handleChange}>
+          { options }
+        </ToggleButtonGroup>
+        <Form.Label>
+          Join
+        </Form.Label>
+      </Form.Group>
+    </Form>
   );
 }
 

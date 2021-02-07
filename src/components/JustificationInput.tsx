@@ -5,7 +5,9 @@ import { setLayersJustification } from '../store/actions/layer';
 import { getSelectedJustification } from '../store/selectors/layer';
 import { setTextSettingsJustification } from '../store/actions/textSettings';
 import { DEFAULT_JUSTIFICATION_OPTIONS } from '../constants';
-import ButtonGroupInput from './ButtonGroupInput';
+import Form from './Form';
+import ToggleButtonGroup from './ToggleButtonGroup';
+import Icon from './Icon';
 
 const JustificationInput = (): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
@@ -17,22 +19,38 @@ const JustificationInput = (): ReactElement => {
     setJustification(justificationValue);
   }, [justificationValue, selected]);
 
-  const handleClick = (justificationButtonValue: Btwx.Jusftification): void => {
-    dispatch(setLayersJustification({layers: selected, justification: justificationButtonValue as Btwx.Jusftification}));
-    setJustification(justificationButtonValue);
-    dispatch(setTextSettingsJustification({justification: justificationButtonValue as Btwx.Jusftification}));
+  const handleChange = (e: any): void => {
+    dispatch(setLayersJustification({layers: selected, justification: e.target.value as Btwx.Jusftification}));
+    setJustification(e.target.value);
+    dispatch(setTextSettingsJustification({justification: e.target.value as Btwx.Jusftification}));
   };
 
-  const options = DEFAULT_JUSTIFICATION_OPTIONS.map((option, index) => ({
-    icon: `justify-${option}`,
-    active: justification === option,
-    onClick: () => handleClick(option)
-  }));
+  const options = DEFAULT_JUSTIFICATION_OPTIONS.map((option) => (
+    <ToggleButtonGroup.Button
+      key={option}
+      value={option}>
+      <Icon
+        name={`justify-${option}`}
+        size='small' />
+    </ToggleButtonGroup.Button>
+  ));
 
   return (
-    <ButtonGroupInput
-      buttons={options}
-      label='Alignment' />
+    <Form inline>
+      <Form.Group controlId='control-justification'>
+        <ToggleButtonGroup
+          type='radio'
+          name='justification'
+          size='small'
+          value={justification}
+          onChange={handleChange}>
+          { options }
+        </ToggleButtonGroup>
+        <Form.Label>
+          Alignment
+        </Form.Label>
+      </Form.Group>
+    </Form>
   );
 }
 

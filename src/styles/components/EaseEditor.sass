@@ -6,16 +6,21 @@
   z-index: 4
 
 .c-ease-editor__content
+  @include themed()
+    box-shadow: 0 0 0 1px theme-prop(modal-border), 0 4px 16px 0 rgba(0,0,0,0.16)
   display: flex
   overflow: hidden
   align-items: center
-  //padding: $unit * 4
+  border-radius: $border-radius
 
   &::selection
     background: none
 
 .c-ease-editor__visualizer
-  +background-blur
+  @include background-blur
+  @include themed()
+    background: theme-prop(glass-background)
+    box-shadow: -1px 0 0 0 theme-prop(modal-border)
   display: flex
   flex-direction: column
   padding: $unit * 4
@@ -58,13 +63,22 @@
   height: 100%
   width: $unit * 12
   line-height: $unit * 12
-  font-size: $fontSizeSm
-  font-family: $fontFamily
+  font-size: $font-size-small
+  font-family: $font-family
   text-align: center
 
 .c-ease-editor__graph
   flex-grow: 0
   position: relative
+
+.c-ease-editor-graph__line
+  @include themed()
+    stroke: theme-prop(text-lightest)
+  opacity: 50%
+
+.c-ease-editor-graph__ease
+  @include themed()
+    stroke: theme-prop(text-base)
 
 .c-ease-editor__value
   position: relative
@@ -79,7 +93,14 @@
 .c-ease-editor-value__progress-head
   position: absolute
 
+.c-ease-editor-value__progress,
+.c-ease-editor-value__progress-head
+  @include themed()
+    background: theme-prop(primary)
+
 .c-ease-editor-value__bar
+  @include themed()
+    background: theme-prop(text-lightest)
   height: 100%
   width: 1px
   z-index: 2
@@ -116,17 +137,21 @@
   height: $unit * 8
   align-items: center
   padding: $unit
-  font-size: $fontSizeSm
-  font-family: $fontFamily
+  font-size: $font-size-small
+  font-family: $font-family
   cursor: pointer
   border-radius: $unit
 
 .c-ease-editor__preset--label
   text-transform: uppercase
   cursor: default
-  font-weight: $fontWeightBold
+  font-weight: $font-weight-bold
 
 .c-ease-editor__main
+  @include themed()
+    background: theme-prop(modal-background)
+    box-shadow: 1px 0 0 0 theme-prop(modal-border) inset
+  border-radius: 0 $border-radius $border-radius 0
   display: flex
   flex-direction: column
   height: 100%
@@ -206,8 +231,8 @@
     border-radius: $unit
 
   span
-    font-size: $fontSizeSm
-    font-family: $fontFamily
+    font-size: $font-size-small
+    font-family: $font-family
     text-align: center
     line-height: $unit * 6
     padding-top: $unit * 2
@@ -215,13 +240,13 @@
 .c-ease-editor-body__input-description
   display: flex
   width: 100%
-  font-size: $fontSizeSm
+  font-size: $font-size-small
   line-height: $unit * 6
-  font-family: $fontFamily
+  font-family: $font-family
   flex-direction: column
 
 .c-ease-editor-body-input-description__type
-  font-weight: $fontWeightBold
+  font-weight: $font-weight-bold
   text-transform: uppercase
   padding-top: $unit * 4
   line-height: $unit * 4
@@ -230,8 +255,8 @@
   padding-top: $unit * 2
 
 .c-ease-editor-selector__input
-  font-size: $fontSizeLg
-  font-family: $fontFamily
+  font-size: $font-size-large
+  font-family: $font-family
   height: $unit * 8
   display: flex
   justify-content: center
@@ -271,8 +296,8 @@
 
 .c-ease-editor-selector-item__label
   flex-grow: 2
-  font-family: $fontFamily
-  font-size: $fontSizeSm
+  font-family: $font-family
+  font-size: $font-size-small
   line-height: $unit * 8
   padding: 0
   text-align: left
@@ -284,9 +309,9 @@
   flex-grow: 2
 
 .c-ease-editor__copy-ease
-  font-family: $fontFamily
-  font-size: $fontSize
-  font-weight: $fontWeightBold
+  font-family: $font-family
+  font-size: $font-size
+  font-weight: $font-weight-bold
   line-height: $unit * 6
   text-align: right
   padding: 0
@@ -295,8 +320,8 @@
   right: 0
 
 .c-ease-editor__copied-indicator
-  font-family: $fontFamily
-  font-size: $fontSizeXs
+  font-family: $font-family
+  font-size: $font-size-extra-small
   line-height: $unit * 6
   text-transform: uppercase
   text-align: right

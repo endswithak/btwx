@@ -7,7 +7,7 @@ import { openColorEditor } from '../store/actions/colorEditor';
 import PercentageFormGroup from './PercentageFormGroup';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
-import SidebarSwatch from './SidebarSwatch';
+import Form from './Form';
 import GradientTypeSelector from './GradientTypeSelector';
 
 interface ColorInputProps {
@@ -15,6 +15,7 @@ interface ColorInputProps {
 }
 
 const ColorInput = (props: ColorInputProps): ReactElement => {
+  const colorControlRef = useRef(null);
   const opacityFormControlRef = useRef(null);
   const { prop } = props;
   const selected = useSelector((state: RootState) => state.layer.present.selected);
@@ -48,7 +49,12 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
     setColor(colorValue);
   }, [colorValue, selected, enabledValue]);
 
-  const handleSwatchClick = (bounding: DOMRect): void => {
+  const handleSwatchClick = (e: any): void => {
+    e.preventDefault();
+    const sidebarRightScroll = document.getElementById('sidebar-scroll-right');
+    const controlBox = colorControlRef.current.getBoundingClientRect();
+    const sidebarBox = sidebarRightScroll.getBoundingClientRect();
+    const scrollTop = sidebarRightScroll.scrollTop;
     switch(prop) {
       case 'fill':
         dispatch(setLayersFillType({layers: selected, fillType: 'color'}));
@@ -70,8 +76,8 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
     if (!colorEditorOpen) {
       dispatch(openColorEditor({
         prop: prop,
-        x: bounding.x,
-        y: bounding.y - (bounding.height - 10) // 2 (swatch drop shadow) + 8 (top-padding)
+        x: controlBox.x,
+        y: (controlBox.y + scrollTop + controlBox.height) - sidebarBox.top
       }));
     }
   };
@@ -79,14 +85,22 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
   return (
     <SidebarSectionRow>
       <SidebarSectionColumn width={'33.33%'}>
-        <SidebarSwatch
-          isActive={colorEditorOpen}
-          style={{
-            background: 'none'
-          }}
-          onClick={handleSwatchClick}
-          bottomLabel='Multi'
-          multi />
+        <Form inline>
+          <Form.Group controlId={`control-multi-color-swatch`}>
+            <Form.Control
+              ref={colorControlRef}
+              type='color'
+              size='small'
+              isActive={colorEditorOpen}
+              multiColor
+              value=''
+              onChange={() => {}}
+              onClick={handleSwatchClick} />
+            <Form.Label>
+              Multi
+            </Form.Label>
+          </Form.Group>
+        </Form>
       </SidebarSectionColumn>
       <SidebarSectionColumn width={'33.33%'}>
         <GradientTypeSelector

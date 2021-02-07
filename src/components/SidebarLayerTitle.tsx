@@ -36,7 +36,7 @@ const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
       }
       style={{
         color: isSelected && !isDragGhost
-        ? theme.text.onPrimary
+        ? theme.text.onPalette.primary
         : theme.text.base
       }}>
       {

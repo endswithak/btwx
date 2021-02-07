@@ -43,6 +43,21 @@ button
   border: 0
   cursor: pointer
 
-select
-  appearance: none
+select,
+input[type='range'],
+input[type='color']
   -webkit-appearance: none
+
+input[type='range']
+  &::-webkit-slider-thumb
+    -webkit-appearance: none
+
+input[type='color']
+  padding: 0 !important
+
+  &::-webkit-color-swatch
+    border-radius: $border-radius - 1px
+    border: none
+
+  &::-webkit-color-swatch-wrapper
+    padding: 1px

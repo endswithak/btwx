@@ -32,7 +32,7 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
           className='c-sidebar-layer__icon--aa'
           style={{
             background: isSelected
-            ? theme.text.onPrimary
+            ? theme.text.onPalette.primary
             : theme.palette.primary,
             boxShadow: `0 0 0 2px ${
             isSelected
@@ -65,11 +65,11 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
           fill: isOpenShape || isMask
           ? 'none'
           : isSelected && !isDragGhost
-            ? theme.text.onPrimary
+            ? theme.text.onPalette.primary
             : theme.text.lighter,
           stroke: isOpenShape || isMask
           ? isSelected && !isDragGhost
-            ? theme.text.onPrimary
+            ? theme.text.onPalette.primary
             : theme.text.lighter
           : 'none',
           strokeWidth: 1

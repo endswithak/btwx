@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, useEffect, ReactElement, useState } from 'react';
+import React, { useEffect, ReactElement, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import tinyColor from 'tinycolor2';
 import { setCanvasActiveTool } from '../store/actions/canvasSettings';
@@ -12,7 +12,6 @@ import PaperTool, { PaperToolProps } from './PaperTool';
 import { ThemeContext } from './ThemeProvider';
 
 const AreaSelectTool = (props: PaperToolProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { tool, downEvent, dragEvent, upEvent } = props;
   const isEnabled = useSelector((state: RootState) => state.canvasSettings.activeTool === 'AreaSelect');
   const scope = useSelector((state: RootState) => state.layer.present.scope);

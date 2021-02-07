@@ -20,7 +20,7 @@ const Button = styled.button<ButtonProps>`
   background: ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
   box-shadow: 0 0 0 1px ${props => props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5};
   svg {
-    stroke: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.light};
+    stroke: ${props => props.isActive ? props.theme.text.onPalette.primary : props.theme.text.light};
   }
   :focus {
     box-shadow: 0 0 0 1px ${props => props.theme.palette.primary} inset;
@@ -31,7 +31,7 @@ const Button = styled.button<ButtonProps>`
       box-shadow: 0 0 0 1px ${props => props.theme.palette.primary} inset;
     }
     svg {
-      stroke: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
+      stroke: ${props => props.isActive ? props.theme.text.onPalette.primary : props.theme.text.base};
     }
   }
 `;

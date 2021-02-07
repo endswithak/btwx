@@ -136,7 +136,7 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
       <div
         className='c-timeline-handle__ellipse'
         style={{
-          background: theme.text.onPrimary
+          background: theme.text.onPalette.primary
         }} />
       <span
         id={`${tweenId}-tooltip-left`}

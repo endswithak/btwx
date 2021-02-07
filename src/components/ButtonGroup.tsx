@@ -1,53 +1,41 @@
 import React, { useContext, ReactElement } from 'react';
-import styled from 'styled-components';
+import { PropWithChildren } from '../utils';
 import { ThemeContext } from './ThemeProvider';
-import Button from './Button';
 
-interface GroupProps {
-  disabled: boolean;
-}
-
-const StyledDiv = styled.div<GroupProps>`
-  background: ${props => props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
-  box-shadow: 0 0 0 1px ${props => props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset;
-  opacity: ${props => props.disabled ? 0.5 : 1};
-  :hover {
-    box-shadow:  0 0 0 1px ${props => props.theme.name === 'dark' ? props.theme.background.z5 : props.theme.background.z6} inset;
-  }
-`;
-
-export interface ButtonGroupProps {
-  buttons: {
-    text?: string;
-    icon?: string;
-    active?: boolean;
-    onClick?: any;
-  }[];
+export interface ButtonGroupProps extends PropWithChildren {
+  role?: string;
+  size?: Btwx.SizeVariant;
   disabled?: boolean;
-  ariaLabel?: string;
+  toggle?: boolean;
+  vertical?: boolean;
 }
 
 const ButtonGroup = (props: ButtonGroupProps): ReactElement => {
-  const { buttons, disabled, ariaLabel } = props;
+  const { role, size, disabled, toggle, vertical, children } = props;
   const theme = useContext(ThemeContext);
 
   return (
-    <StyledDiv
-      className='c-button-group'
-      theme={theme}
-      disabled={disabled}
-      role='group'
-      aria-label={ariaLabel}>
-      {
-        buttons.map((button, index) => (
-          <Button
-            {...button}
-            key={index}
-            disabled={disabled}
-            groupButton />
-        ))
-      }
-    </StyledDiv>
+    <div
+      className={`c-button-group ${
+        size
+        ? `c-button-group--${size}`
+        : ''
+      } ${
+        toggle
+        ? `c-button-group--toggle`
+        : ''
+      } ${
+        vertical
+        ? `c-button-group--vertical`
+        : ''
+      } ${
+        disabled
+        ? `c-button-group--disabled`
+        : ''
+      }`}
+      role={role ? role : 'group'}>
+      { children }
+    </div>
   );
 }
 

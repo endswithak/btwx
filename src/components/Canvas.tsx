@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useEffect, useState, useRef } from 'react';
+import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
 import { setCanvasReady, setCanvasFocusing } from '../store/actions/canvasSettings';
 import { getAllProjectIndices } from '../store/selectors/layer';
-import { ThemeContext } from './ThemeProvider';
 import CanvasLayerEvents from './CanvasLayerEvents';
 import CanvasUIEvents from './CanvasUIEvents';
 import CanvasToast from './CanvasToast';
@@ -23,7 +22,6 @@ import CanvasUI from './CanvasUI';
 import CanvasProjects from './CanvasProjects';
 
 const Canvas = (): ReactElement => {
-  const theme = useContext(ThemeContext);
   const ref = useRef<HTMLDivElement>(null);
   const ready = useSelector((state: RootState) => state.canvasSettings.ready);
   const interactionEnabled = useSelector((state: RootState) => state.canvasSettings.focusing && !state.canvasSettings.selecting && !state.canvasSettings.resizing && !state.canvasSettings.drawing && !state.canvasSettings.zooming && !state.canvasSettings.translating && !state.canvasSettings.dragging);
@@ -152,7 +150,6 @@ const Canvas = (): ReactElement => {
         onContextMenu={ready ? handleContextMenu : null}
         onWheel={ready ? handleWheel : null}
         style={{
-          background: theme.background.z0,
           cursor: cursor[0]
         }}>
         <CanvasUI />

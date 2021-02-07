@@ -109,7 +109,7 @@ const SidebarSelect = (props: SidebarSelectProps): ReactElement => {
             const fontWeight = props.type === 'fontWeight' ? data.value : 'inherit';
             const fontSize = 12;
             const background = isFocused ? theme.palette.primary : isSelected ? tinyColor(theme.text.lightest).setAlpha(0.15).toRgbString() : 'none';
-            const color = isFocused ? theme.text.onPrimary : theme.text.base;
+            const color = isFocused ? theme.text.onPalette.primary : theme.text.base;
             const cursor = 'pointer';
             const borderRadius = theme.unit;
             const paddingLeft = 4;

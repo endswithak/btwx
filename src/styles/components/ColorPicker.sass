@@ -7,13 +7,15 @@
   padding: $unit * 2
 
 .c-color-picker-saturation
-  +aspect(4,3)
+  @include aspect(4,3)
+  @include themed()
+    box-shadow: 0 0 0 1px theme-prop(modal-border)
   border-radius: $unit
 
 .c-color-picker-saturation__color,
 .c-color-picker-saturation__white,
 .c-color-picker-saturation__black
-  +aspect-fill
+  @include aspect-fill
 
 .c-color-picker-saturation__white
   background: linear-gradient(to right, #fff, rgba(255,255,255,0))
@@ -27,7 +29,7 @@
 .c-color-picker-saturation__circle
   width: $unit * 2
   height: $unit * 2
-  box-shadow: $pickerShadow
+  box-shadow: $picker-shadow
   border-radius: 50%
 
 .c-color-picker__alpha,
@@ -60,7 +62,6 @@
   flex-shrink: 0
   align-items: center
   justify-content: center
-  padding: 0 $unit
   width: 75%
   max-width: 75%
 
@@ -74,8 +75,10 @@
   align-items: center
   justify-content: center
 
-  div
-    width: $unit * 7
-    height: $unit * 7
-    max-height: $unit * 7
-    border-radius: 100%
+.c-color-picker__swatch
+  @include themed()
+    box-shadow: 0 0 0 1px theme-prop(modal-border)
+  width: $unit * 7
+  height: $unit * 7
+  max-height: $unit * 7
+  border-radius: 100%

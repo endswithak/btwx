@@ -1,21 +1,18 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useRef, useEffect, useCallback } from 'react';
+import React, { ReactElement, useRef, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import debounce from 'lodash.debounce';
-import tinyColor from 'tinycolor2';
 import { paperMain } from '../canvas';
 import { RootState } from '../store/reducers';
 import { openColorEditor } from '../store/actions/colorEditor';
 import { closeGradientEditor } from '../store/actions/gradientEditor';
 import { setCanvasFocusing } from '../store/actions/canvasSettings';
 import { setLayersFillType, setLayersGradientType, setLayersGradientStopColor, setLayerActiveGradientStop, setLayersGradientStopPosition, addLayersGradientStop, setLayersStrokeFillType } from '../store/actions/layer';
-import { ThemeContext } from './ThemeProvider';
 import ColorPicker from './ColorPicker';
 import GradientSlider from './GradientSlider';
 import FillTypeSelector from './FillTypeSelector';
 
 const GradientEditor = (): ReactElement => {
-  const theme = useContext(ThemeContext);
   const editorRef = useRef<HTMLDivElement>(null);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const gradientValue = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.selected[0]].style[state.gradientEditor.prop].gradient);
@@ -132,40 +129,35 @@ const GradientEditor = (): ReactElement => {
   return (
     <div
       ref={editorRef}
-      className='c-fill-editor'>
-      <div
-        className='c-fill-editor__picker'
-        style={{
-          top: gradientEditor.y,
-          background: tinyColor(theme.name === 'dark' ? theme.background.z1 : theme.background.z2).setAlpha(0.77).toRgbString(),
-          boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}, 0 4px 16px 0 rgba(0,0,0,0.16)`
-        }}>
-        <FillTypeSelector
-          colorSelector={{
-            enabled: true,
-            onClick: handleColorClick,
-            isActive: false
-          }}
-          linearGradientSelector={{
-            enabled: true,
-            onClick: handleLinearGradientClick,
-            isActive: gradientValue.gradientType === 'linear'
-          }}
-          radialGradientSelector={{
-            enabled: true,
-            onClick: handleRadialGradientClick,
-            isActive: gradientValue.gradientType === 'radial'
-          }} />
-        <GradientSlider
-          gradientStops={gradientValue.stops}
-          activeStopIndex={gradientValue.activeStopIndex}
-          onStopPress={handleStopPress}
-          onStopDrag={handleStopDrag}
-          onSliderClick={handleSliderClick} />
-        <ColorPicker
-          colorValues={{[`${selected[0]}`]: activeStopValue.color}}
-          onChange={handleActiveStopColorChange} />
-      </div>
+      className='c-fill-editor'
+      style={{
+        top: gradientEditor.y
+      }}>
+      <FillTypeSelector
+        colorSelector={{
+          enabled: true,
+          onClick: handleColorClick,
+          isActive: false
+        }}
+        linearGradientSelector={{
+          enabled: true,
+          onClick: handleLinearGradientClick,
+          isActive: gradientValue.gradientType === 'linear'
+        }}
+        radialGradientSelector={{
+          enabled: true,
+          onClick: handleRadialGradientClick,
+          isActive: gradientValue.gradientType === 'radial'
+        }} />
+      <GradientSlider
+        gradientStops={gradientValue.stops}
+        activeStopIndex={gradientValue.activeStopIndex}
+        onStopPress={handleStopPress}
+        onStopDrag={handleStopDrag}
+        onSliderClick={handleSliderClick} />
+      <ColorPicker
+        colorValues={{[`${selected[0]}`]: activeStopValue.color}}
+        onChange={handleActiveStopColorChange} />
     </div>
   );
 }

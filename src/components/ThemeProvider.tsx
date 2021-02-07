@@ -1,5 +1,5 @@
 import React, { createContext, ReactElement } from 'react';
-import getTheme, { lightTheme, darkTheme } from '../store/theme';
+import getTheme, { THEMES } from '../store/theme';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 
@@ -7,7 +7,7 @@ interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
-const ThemeContext = createContext(darkTheme);
+const ThemeContext = createContext(THEMES.dark);
 const { Provider } = ThemeContext;
 
 const ThemeProvider = (props: ThemeProviderProps): ReactElement => {

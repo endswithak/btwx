@@ -1,127 +1,88 @@
-import React, { useContext, ReactElement } from 'react';
-import styled from 'styled-components';
-import { ThemeContext } from './ThemeProvider';
-import Icon from './Icon';
+import React, { ReactElement } from 'react';
+import ButtonAddon from './ButtonAddon';
 
-interface ButtonItemProps {
-  disabled: boolean;
-  active: boolean;
-}
-
-const StyledButton = styled.button<ButtonItemProps>`
-  color: ${props => props.active ? props.theme.text.onPrimary : props.theme.text.light};
-  background: ${props => props.active ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
-  box-shadow: 0 0 0 1px ${props => props.active ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset;
-  svg {
-    fill: ${props => props.active ? props.theme.text.onPrimary : props.theme.text.lighter};
-  }
-  :hover {
-    color: ${props => props.active ? props.theme.text.onPrimary : props.theme.text.base};
-    background: ${props => props.active ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
-    box-shadow:  0 0 0 1px ${props => props.active ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z5 : props.theme.background.z6} inset;
-    svg {
-      fill: ${props => props.active ? props.theme.text.onPrimary : props.theme.text.base};
-    }
-    :disabled {
-      color: ${props => props.active ? props.theme.text.onPrimary : props.theme.text.light};
-      box-shadow:  0 0 0 1px ${props => props.active ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset;
-    }
-  }
-  :disabled {
-    opacity: 50%;
-  }
-  &.c-button--select {
-    color: ${props => props.active ? props.theme.text.base : props.theme.text.light};
-    background: ${props => props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
-    svg {
-      fill: ${props => props.active ? props.theme.palette.primary : props.theme.text.lighter};
-    }
-    :hover {
-      color: ${props => props.theme.text.base};
-      background: ${props => props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
-      svg {
-        fill: ${props => props.active ? props.theme.palette.primary : props.theme.text.base};
-      }
-      :disabled {
-        color: ${props => props.active ? props.theme.text.base : props.theme.text.light};
-      }
-    }
-  }
-  &.c-button--group {
-    background: ${props => props.active ? props.theme.palette.primary : 'none'};
-    box-shadow: none;
-
-    :hover {
-      background: ${props => props.active ? props.theme.palette.primary : 'none'};
-      box-shadow: none;
-    }
-  }
-`;
-
-interface ButtonProps {
-  text?: string;
-  icon?: string;
+export interface ButtonProps {
+  children?: any;
+  as?: keyof JSX.IntrinsicElements;
   disabled?: boolean;
   active?: boolean;
+  type?: Btwx.ButtonType;
+  variant?: Btwx.ColorVariant;
+  size?: Btwx.SizeVariant;
+  left?: ReactElement;
+  right?: ReactElement;
+  leftReadOnly?: boolean;
+  rightReadOnly?: boolean;
   onClick?: any;
-  select?: boolean;
-  groupButton?: boolean;
 }
 
-const Button = (props: ButtonProps): ReactElement => {
-  const { text, icon, disabled, active, onClick, select, groupButton } = props;
-  const theme = useContext(ThemeContext);
+const Button: React.FC<ButtonProps & React.HTMLAttributes<HTMLOrSVGElement>> = ({
+  as: Tag = 'button',
+  children,
+  variant,
+  size,
+  disabled,
+  type,
+  left,
+  right,
+  leftReadOnly,
+  rightReadOnly,
+  active,
+  ...rest
+}: ButtonProps) => {
 
   return (
-    <StyledButton
+    <Tag
+      {...rest}
+      type={type ? type : 'button'}
       className={`c-button ${
-        text && icon
-        ? 'c-button--icon-text'
+        left
+        ? 'c-button--left'
         : ''
       } ${
-        !text && icon
-        ? 'c-button--icon'
+        right
+        ? 'c-button--right'
         : ''
       } ${
-        select
-        ? 'c-button--select'
+        variant
+        ? `c-button--${variant}`
+        : ''
+      }  ${
+        active
+        ? 'c-button--active'
         : ''
       } ${
-        groupButton
-        ? 'c-button--group'
+        size
+        ? `c-button--${size}`
         : ''
-      }`}
-      theme={theme}
-      disabled={disabled}
-      onClick={onClick}
-      active={active}>
+      } ${
+        disabled
+        ? `c-button--disabled`
+        : ''
+      }`}>
+      { children }
       {
-        icon
-        ? <span className='c-button__icon'>
-            <Icon
-              name={icon}
-              size='small' />
-          </span>
+        left
+        ? <ButtonAddon
+            type='left'
+            size={size}
+            readOnly={leftReadOnly}>
+            { left }
+          </ButtonAddon>
         : null
       }
       {
-        text
-        ? <span className='c-button__text'>
-            { text }
-          </span>
+        right
+        ? <ButtonAddon
+            type='right'
+            size={size}
+            readOnly={rightReadOnly}>
+            { right }
+          </ButtonAddon>
         : null
       }
-      {
-        select
-        ? <span className='c-button__icon c-button__icon--chevron'>
-            <Icon
-              name='thicc-chevron-down'
-              size='small' />
-          </span>
-        : null
-      }
-    </StyledButton>
+    </Tag>
   );
-}
+};
 
 export default Button;

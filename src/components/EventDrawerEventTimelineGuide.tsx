@@ -12,7 +12,7 @@ const EventDrawerEventTimelineGuide = (): ReactElement => {
       id='event-drawer-guide'
       className='c-event-drawer-event__guide'
       style={{
-        background: theme.palette.recording,
+        background: theme.palette.error,
         opacity: scrubbing
         ? 1
         : 0

@@ -33,7 +33,7 @@ const CanvasToast = (): ReactElement => {
           right: 4,
           borderRadius: 4,
           background: theme.palette.primary,
-          color: theme.text.onPrimary,
+          color: theme.text.onPalette.primary,
           fontFamily: 'Space Mono',
           fontSize: 12,
           paddingLeft: 8,

@@ -18,6 +18,7 @@ import Titlebar from './Titlebar';
 
 const App = (): ReactElement => {
   const ready = useSelector((state: RootState) => state.canvasSettings.ready);
+  const theme = useSelector((state: RootState) => state.viewSettings.theme);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -37,7 +38,7 @@ const App = (): ReactElement => {
   return (
     <div
       id='app'
-      className='c-app'>
+      className={`c-app theme--${theme}`}>
         {/* flex items */}
         <Titlebar />
         <Topbar />

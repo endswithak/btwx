@@ -1,0 +1,90 @@
+@mixin absolute-full {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+}
+
+@mixin content-block {
+  @include absolute-full;
+  content: '';
+  width: 100%;
+  display: block;
+}
+
+@mixin aspect($width, $height) {
+  display: block;
+  position: relative;
+  padding-bottom: percentage($height / $width);
+  height: 0;
+  overflow: hidden;
+}
+
+@mixin aspect-fill {
+  @include absolute-full;
+  height: 100%;
+  width: 100%;
+  max-height: 100%;
+  max-width: 100%;
+}
+
+@mixin background-blur {
+  backdrop-filter: blur($background-blur);
+}
+
+@mixin screen-reader {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+@mixin container {
+  width: 100%;
+  height: 100%;
+  padding: 0 $padding;
+  margin: 0 auto;
+}
+
+@mixin truncate-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin themed($themes: $themes) {
+  @each $theme, $map in $themes {
+    .theme--#{$theme} & {
+      $theme-map: () !global;
+      @each $key, $submap in $map {
+        $value: map-get(map-get($themes, $theme), '#{$key}');
+        $theme-map: map-merge($theme-map, ($key: $value)) !global;
+      }
+      @content;
+      $theme-map: null !global;
+    }
+  }
+}
+
+@mixin form-verification($validation) {
+  @include themed() {
+    &:focus,
+    &:focus &:hover {
+      box-shadow: 0 0 0 1px theme-prop($validation) inset;
+    }
+    &::selection {
+      background: theme-prop($validation);
+    }
+  }
+  & ~ span .c-form-text {
+    @include themed() {
+      color: theme-prop($validation);
+    }
+  }
+}

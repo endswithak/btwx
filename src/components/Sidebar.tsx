@@ -16,11 +16,9 @@ const Sidebar = (props: SidebarProps): ReactElement => {
   return (
     <aside
       id={`sidebar-${props.position}`}
-      className='c-sidebar'
+      className={`c-sidebar c-sidebar--${position}`}
       style={{
-        width: width,
-        background: theme.name === 'dark' ? theme.background.z1 : theme.background.z2,
-        boxShadow: position === 'left' ? `1px 0 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}` : `-1px 0 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
+        width: width
       }}>
       {
         header

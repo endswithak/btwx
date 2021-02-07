@@ -20,18 +20,18 @@ interface DeviceProps {
 const Device = styled.button<DeviceProps>`
   background: ${props => props.isActive ? props.theme.palette.primary : 'none'};
   .c-sidebar-artboard-platform-device__name {
-    color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
+    color: ${props => props.isActive ? props.theme.text.onPalette.primary : props.theme.text.base};
   }
   .c-sidebar-artboard-platform-device__size {
-    color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.lighter};
+    color: ${props => props.isActive ? props.theme.text.onPalette.primary : props.theme.text.lighter};
   }
   :hover {
     background: ${props => props.theme.palette.primary};
     .c-sidebar-artboard-platform-device__name {
-      color: ${props => props.theme.text.onPrimary};
+      color: ${props => props.theme.text.onPalette.primary};
     }
     .c-sidebar-artboard-platform-device__size {
-      color: ${props => props.theme.text.onPrimary};
+      color: ${props => props.theme.text.onPalette.primary};
     }
   }
 `;

@@ -26,11 +26,11 @@ const Button = styled.button<TopbarDropdownButtonOptionProps>`
     background: ${props => props.theme.palette.primary};
     .c-ease-editor-selector-item__icon {
       svg {
-        stroke: ${props => props.theme.text.onPrimary};
+        stroke: ${props => props.theme.text.onPalette.primary};
       }
     }
     .c-ease-editor-selector-item__label {
-      color: ${props => props.theme.text.onPrimary};
+      color: ${props => props.theme.text.onPalette.primary};
     }
   }
 `;

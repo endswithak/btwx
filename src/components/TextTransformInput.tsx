@@ -4,7 +4,9 @@ import { RootState } from '../store/reducers';
 import { DEFAULT_TEXT_TRANSFORM_OPTIONS } from '../constants';
 import { setLayersTextTransformThunk } from '../store/actions/layer';
 import { getSelectedTextTransform } from '../store/selectors/layer';
-import ButtonGroupInput from './ButtonGroupInput';
+import Form from './Form';
+import ToggleButtonGroup from './ToggleButtonGroup';
+import Icon from './Icon';
 
 const TextTransformInput = (): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
@@ -16,21 +18,37 @@ const TextTransformInput = (): ReactElement => {
     setTextTransform(textTransformValue);
   }, [textTransformValue, selected]);
 
-  const handleClick = (textTransformButtonValue: Btwx.TextTransform): void => {
-    dispatch(setLayersTextTransformThunk({layers: selected, textTransform: textTransformButtonValue as Btwx.TextTransform}));
-    setTextTransform(textTransformButtonValue);
+  const handleChange = (e: any): void => {
+    dispatch(setLayersTextTransformThunk({layers: selected, textTransform: e.target.value as Btwx.TextTransform}));
+    setTextTransform(e.target.value);
   };
 
-  const options = DEFAULT_TEXT_TRANSFORM_OPTIONS.map((option, index) => ({
-    icon: `text-transform-${option}`,
-    active: textTransform === option,
-    onClick: () => handleClick(option)
-  }));
+  const options = DEFAULT_TEXT_TRANSFORM_OPTIONS.map((option) => (
+    <ToggleButtonGroup.Button
+      key={option}
+      value={option}>
+      <Icon
+        name={`text-transform-${option}`}
+        size='small' />
+    </ToggleButtonGroup.Button>
+  ));
 
   return (
-    <ButtonGroupInput
-      buttons={options}
-      label='Transform' />
+    <Form inline>
+      <Form.Group controlId='control-text-transform'>
+        <ToggleButtonGroup
+          type='radio'
+          name='text-transform'
+          size='small'
+          value={textTransform}
+          onChange={handleChange}>
+          { options }
+        </ToggleButtonGroup>
+        <Form.Label>
+          Transform
+        </Form.Label>
+      </Form.Group>
+    </Form>
   );
 }
 

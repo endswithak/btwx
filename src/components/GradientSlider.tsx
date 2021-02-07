@@ -25,10 +25,7 @@ const GradientSlider = (props: GradientSliderProps): ReactElement => {
       }}>
       <div
         id='c-gradient-slider__slider'
-        className='c-gradient-slider__slider'
-        style={{
-          boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
-        }}>
+        className='c-gradient-slider__slider'>
         <GradientSliderGradient
           stops={gradientStops}
           onSliderClick={onSliderClick} />

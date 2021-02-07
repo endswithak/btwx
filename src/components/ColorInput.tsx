@@ -8,15 +8,16 @@ import { openColorEditor } from '../store/actions/colorEditor';
 import { setTextSettingsFillColor } from '../store/actions/textSettings';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
-import SidebarSwatch from './SidebarSwatch';
 import HexFormGroup from './HexFormGroup';
 import PercentageFormGroup from './PercentageFormGroup';
+import Form from './Form';
 
 interface ColorInputProps {
   prop: 'fill' | 'stroke' | 'shadow';
 }
 
 const ColorInput = (props: ColorInputProps): ReactElement => {
+  const colorControlRef = useRef(null);
   const hexFormControlRef = useRef(null);
   const opacityTextInputRef = useRef(null);
   const { prop } = props;
@@ -108,7 +109,12 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
     }
   };
 
-  const handleSwatchClick = (bounding: DOMRect): void => {
+  const handleSwatchClick = (e: any): void => {
+    e.preventDefault();
+    const sidebarRightScroll = document.getElementById('sidebar-scroll-right');
+    const controlBox = colorControlRef.current.getBoundingClientRect();
+    const sidebarBox = sidebarRightScroll.getBoundingClientRect();
+    const scrollTop = sidebarRightScroll.scrollTop;
     if (!enabled || enabled === 'multi') {
       switch(prop) {
         case 'fill':
@@ -125,8 +131,8 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
     if (!colorEditorOpen) {
       dispatch(openColorEditor({
         prop: prop,
-        x: bounding.x,
-        y: bounding.y - (bounding.height - 10) // 2 (swatch drop shadow) + 8 (top-padding)
+        x: controlBox.x,
+        y: (controlBox.y + scrollTop + controlBox.height) - sidebarBox.top
       }));
     }
   };
@@ -134,14 +140,22 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
   return (
     <SidebarSectionRow>
       <SidebarSectionColumn width={'33.33%'}>
-        <SidebarSwatch
-          isActive={colorEditorOpen && colorEditorProp === prop}
-          style={{
-            background: color !== 'multi' ? tinyColor(color).toRgbString() : 'none'
-          }}
-          onClick={handleSwatchClick}
-          bottomLabel='Color'
-          multi={color === 'multi'} />
+        <Form inline>
+          <Form.Group controlId={`control-${prop}-color-swatch`}>
+            <Form.Control
+              ref={colorControlRef}
+              type='color'
+              size='small'
+              isActive={colorEditorOpen && colorEditorProp === prop}
+              multiColor={hexValue === 'multi'}
+              value={`#${hexValue}`}
+              onChange={() => {}}
+              onClick={handleSwatchClick} />
+            <Form.Label>
+              Color
+            </Form.Label>
+          </Form.Group>
+        </Form>
       </SidebarSectionColumn>
       <SidebarSectionColumn width={'33.33%'}>
         <HexFormGroup

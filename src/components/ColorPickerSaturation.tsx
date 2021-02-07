@@ -172,10 +172,7 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
     <div
       ref={containerRef}
       onMouseDown={handleMouseDown}
-      className='c-color-picker-saturation'
-      style={{
-        boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
-      }}>
+      className='c-color-picker-saturation'>
       <div
         className='c-color-picker-saturation__color'
         style={{

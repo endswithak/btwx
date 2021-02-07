@@ -1,0 +1,160 @@
+.c-button {
+  @include truncate-text;
+  @include themed() {
+    color: theme-prop(text-light);
+    fill: theme-prop(text-light);
+    background: theme-prop(button-background);
+    box-shadow: 0 0 0 1px theme-prop(button-border) inset;
+
+    &:hover,
+    &:focus,
+    &:focus &:hover {
+      color: theme-prop(text-base);
+      fill: theme-prop(text-base);
+      box-shadow: 0 0 0 1px theme-prop(button-border-active) inset;
+    }
+
+    &:disabled,
+    &.c-button--disabled {
+      opacity: 50%;
+      color: theme-prop(text-lighter);
+      fill: theme-prop(text-lighter);
+      box-shadow: 0 0 0 1px theme-prop(button-border) inset;
+
+      &:hover,
+      &:focus,
+      &:focus &:hover  {
+        box-shadow: 0 0 0 1px theme-prop(button-border) inset;
+      }
+    }
+  }
+  display: flex;
+  font-family: $font-family;
+  font-size: $font-size;
+  line-height: $button-size;
+  text-align: center;
+  padding: 0 $padding;
+  height: $button-size;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  border-radius: $border-radius;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 100%;
+  position: relative;
+
+  &.c-button--left {
+    padding-left: $addon-size;
+  }
+
+  &.c-button--right {
+    padding-right: $addon-size;
+  }
+
+  &.c-button--small {
+    padding: 0 $padding-small;
+    height: $button-size-small;
+    font-size: $font-size-small;
+    line-height: $button-size-small;
+
+    &.c-button--left {
+      padding-left: $addon-size-small;
+    }
+
+    &.c-button--right {
+      padding-right: $addon-size-small;
+    }
+  }
+
+  &.c-button--large {
+    padding: 0 $padding-large;
+    height: $button-size-large;
+    font-size: $font-size-large;
+    line-height: $button-size-large;
+
+    &.c-button--left {
+      padding-left: $addon-size-large;
+    }
+
+    &.c-button--right {
+      padding-right: $addon-size-large;
+    }
+  }
+
+  &.c-button--active {
+    @include themed() {
+      color: theme-prop(text-on-primary);
+      fill: theme-prop(text-on-primary);
+      background: theme-prop(primary);
+      box-shadow: 0 0 0 1px theme-prop(primary) inset;
+
+      &:hover,
+      &:focus,
+      &:focus &:hover  {
+        color: theme-prop(text-on-primary);
+        fill: theme-prop(text-on-primary);
+        background: theme-prop(primary-active);
+        box-shadow: 0 0 0 1px theme-prop(primary-active) inset;
+      }
+    }
+  }
+
+  @each $theme-color-name in $theme-color-names {
+    &.c-button--#{$theme-color-name} {
+      @include themed() {
+        color: theme-prop(text-on-#{$theme-color-name});
+        background: theme-prop($theme-color-name);
+        box-shadow: 0 0 0 1px theme-prop($theme-color-name) inset;
+
+        &:hover,
+        &:focus,
+        &:focus &:hover  {
+          background: theme-prop(#{$theme-color-name}-active);
+          box-shadow: 0 0 0 1px theme-prop(#{$theme-color-name}-active) inset;
+        }
+      }
+    }
+  }
+
+  input[type='checkbox'],
+  input[type='radio'] {
+    position: absolute;
+    clip: rect(0,0,0,0);
+    pointer-events: none;
+  }
+}
+
+.c-button__addon {
+  flex-shrink: 0;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $addon-size;
+  height: $button-size;
+  overflow: hidden;
+
+  &--read-only {
+    pointer-events: none;
+  }
+
+  &--small {
+    width: $addon-size-small;
+    height: $control-size-small;
+  }
+
+  &--large {
+    width: $addon-size-large;
+    height: $control-size-large;
+  }
+
+  &--left {
+    left: 0;
+  }
+
+  &--right {
+    right: 0;
+  }
+}

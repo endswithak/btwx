@@ -21,7 +21,7 @@ const Button = styled.button<IconButtonProps>`
   }
   :hover {
     svg {
-      fill: ${props => props.remove ? props.theme.palette.recording : props.active ? props.theme.palette.primary : props.theme.text.base};
+      fill: ${props => props.remove ? props.theme.palette.error : props.active ? props.theme.palette.primary : props.theme.text.base};
     }
     :disabled {
       svg {

@@ -3,7 +3,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { enableLayersVerticalFlip, disableLayersVerticalFlip } from '../store/actions/layer';
 import { canFlipSeleted } from '../store/selectors/layer';
-import Button from './Button';
+import Form from './Form';
+import ToggleButton from './ToggleButton';
+import Icon from './Icon';
 
 const VerticalFlipInput = (): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
@@ -16,7 +18,7 @@ const VerticalFlipInput = (): ReactElement => {
     setVerticalFlip(verticalFlipValue);
   }, [verticalFlipValue]);
 
-  const handleClick = (e: any) => {
+  const handleChange = (e: any) => {
     if (verticalFlip) {
       dispatch(disableLayersVerticalFlip({layers: selected}));
     } else {
@@ -26,11 +28,22 @@ const VerticalFlipInput = (): ReactElement => {
   };
 
   return (
-    <Button
-      active={verticalFlip}
-      onClick={handleClick}
-      icon='vertical-flip'
-      disabled={disabled} />
+    <Form inline>
+      <Form.Group controlId='control-vertical-flip'>
+        <ToggleButton
+          type='checkbox'
+          value={verticalFlip}
+          active={verticalFlip}
+          checked={verticalFlip}
+          onChange={handleChange}
+          size='small'
+          disabled={disabled}>
+          <Icon
+            name='vertical-flip'
+            size='small' />
+        </ToggleButton>
+      </Form.Group>
+    </Form>
   );
 }
 

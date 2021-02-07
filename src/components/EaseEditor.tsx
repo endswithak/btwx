@@ -1,4 +1,4 @@
-import React, { useContext, ReactElement, useRef, useEffect } from 'react';
+import React, { ReactElement, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import gsap from 'gsap';
 import { CustomEase } from 'gsap/CustomEase';
@@ -9,7 +9,6 @@ import { RootState } from '../store/reducers';
 import { closeEaseEditor } from '../store/actions/easeEditor';
 import { setEventDrawerTweenEditing, setEventDrawerTweenHoverThunk } from '../store/actions/eventDrawer';
 import { setCanvasFocusing } from '../store/actions/canvasSettings';
-import { ThemeContext } from './ThemeProvider';
 import EaseEditorVisualizer from './EaseEditorVisualizer';
 import EaseEditorMain from './EaseEditorMain';
 
@@ -17,7 +16,6 @@ gsap.registerPlugin(CustomEase, MotionPathPlugin, MotionPathHelper, DrawSVGPlugi
 
 const EaseEditor = (): ReactElement => {
   const editorRef = useRef<HTMLDivElement>(null);
-  const theme = useContext(ThemeContext);
   const tween = useSelector((state: RootState) => state.layer.present.tweens.byId[state.easeEditor.tween]);
   const canvasFocusing = useSelector((state: RootState) => state.canvasSettings.focusing);
   const easeEditor = useSelector((state: RootState) => state.easeEditor);
@@ -52,11 +50,7 @@ const EaseEditor = (): ReactElement => {
     <div className='c-ease-editor'>
       <div
         className='c-ease-editor__content'
-        ref={editorRef}
-        style={{
-          boxShadow: `0 0 0 1px ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}, 0 4px 16px 0 rgba(0,0,0,0.16)`,
-          borderRadius: theme.unit
-        }}>
+        ref={editorRef}>
         <EaseEditorVisualizer />
         <EaseEditorMain />
       </div>

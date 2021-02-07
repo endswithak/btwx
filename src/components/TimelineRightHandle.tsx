@@ -136,7 +136,7 @@ const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
       <div
         className='c-timeline-handle__ellipse'
         style={{
-          background: theme.text.onPrimary
+          background: theme.text.onPalette.primary
         }} />
       <span
         id={`${tweenId}-tooltip-right`}
@@ -149,7 +149,7 @@ const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
       <div
         className='c-timeline-handle__guide'
         style={{
-          background: theme.palette.recording,
+          background: theme.palette.error,
           right: 0
         }} />
     </div>

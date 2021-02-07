@@ -13,7 +13,15 @@ declare namespace Btwx {
     theme: ThemeName;
   }
 
+  type ButtonType = 'submit' | 'reset' | 'button' | 'checkbox' | 'radio';
+
+  type ColorVariant = 'primary' | 'accent' | 'success' | 'error' | 'warn' | 'info';
+
+  type TextColorVariant = ColorVariant | 'base' | 'light' | 'lighter' | 'lightest' | 'on-primary' | 'on-accent' | 'on-success' | 'on-error' | 'on-info' | 'on-warn';
+
   type SizeVariant = 'small' | 'large';
+
+  type TextSizeVariant = 'small' | 'large' | 'extra-small';
 
   type ResizeHandle = 'topLeft' | 'topCenter' | 'topRight' | 'bottomLeft' | 'bottomCenter' | 'bottomRight' | 'leftCenter' | 'rightCenter';
 
@@ -632,10 +640,57 @@ declare namespace Btwx {
 
   interface Theme {
     name: ThemeName;
-    palette: Palette;
-    background: BackgroundScale;
-    backgroundInverse: BackgroundScale;
-    text: TextScale;
+    palette: {
+      primary: string;
+      primaryActive: string;
+      accent: string;
+      accentActive: string;
+      gray: string;
+      grayActive: string;
+      success: string;
+      successActive: string;
+      info: string;
+      infoActive: string;
+      error: string;
+      errroActive: string;
+      warn: string;
+      warnActive: string;
+    };
+    text: {
+      base: string;
+      light: string;
+      lighter: string;
+      lightest: string;
+      onPalette: {
+        primary: string;
+        accent: string;
+        success: string;
+        info: string;
+        error: string;
+        warn: string;
+      };
+    };
+    background: {
+      z0: string;
+      z1: string;
+      z2: string;
+      z3: string;
+      z4: string;
+      z5: string;
+      z6: string;
+      z7: string;
+      z8: string;
+    };
+    buttonBackground: string;
+    buttonBorder: string;
+    buttonBorderActive: string;
+    controlBackground: string;
+    controlBorder: string;
+    controlBorderActive: string;
+    sidebarBackground: string;
+    sidebarBorder: string;
+    topbarBackground: string;
+    topbarBorder: string;
     unit: number;
   }
 

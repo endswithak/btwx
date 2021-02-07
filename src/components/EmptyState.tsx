@@ -24,9 +24,9 @@ const Button = styled.button<ButtonProps>`
   cursor: pointer;
   background: ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
   box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset;
-  color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.light};
+  color: ${props => props.isActive ? props.theme.text.onPalette.primary : props.theme.text.light};
   svg {
-    fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.light};
+    fill: ${props => props.isActive ? props.theme.text.onPalette.primary : props.theme.text.light};
   }
   :disabled {
     svg {
@@ -36,13 +36,13 @@ const Button = styled.button<ButtonProps>`
   :hover {
       background: ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
       box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.name === 'dark' ? props.theme.background.z5 : props.theme.background.z6} inset;
-      color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
+      color: ${props => props.isActive ? props.theme.text.onPalette.primary : props.theme.text.base};
       svg {
-        fill: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.base};
+        fill: ${props => props.isActive ? props.theme.text.onPalette.primary : props.theme.text.base};
       }
       :disabled {
         background: ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
-        color: ${props => props.isActive ? props.theme.text.onPrimary : props.theme.text.light};
+        color: ${props => props.isActive ? props.theme.text.onPalette.primary : props.theme.text.light};
         svg {
           fill: ${props => props.theme.text.light};
         }

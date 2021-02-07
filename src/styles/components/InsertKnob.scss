@@ -49,8 +49,8 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  font-family: $fontFamily;
-  font-size: $fontSizeSm;
+  font-family: $font-family;
+  font-size: $font-size-small;
   line-height: $unit * 5;
   border-radius: 50%;
 }
