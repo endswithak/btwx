@@ -19,8 +19,8 @@ const EventDrawerListItemRemove = (props: EventDrawerListItemRemoveProps): React
     <div className='c-event-drawer-list-item__action c-event-drawer-list-item__action--remove'>
       <IconButton
         onClick={handleClick}
-        icon='trash-can'
-        remove />
+        iconName='trash-can'
+        variant='error' />
     </div>
   );
 }

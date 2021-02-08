@@ -26,7 +26,11 @@ const EventDrawerEventLayersHeader = (props: EventDrawerEventLayersHeaderProps):
 
   return (
     <div
-      className={`c-event-drawer-event-layers__header ${sticky ? 'c-event-drawer-event-layers__header--sticky' : null}`}
+      className={`c-event-drawer-event-layers__header${
+        sticky
+        ? `${' '}c-event-drawer-event-layers__header--sticky`
+        : ''
+      }`}
       style={{
         background: sticky
         ? (theme.name === 'dark'

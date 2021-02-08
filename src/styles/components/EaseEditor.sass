@@ -238,12 +238,19 @@
     padding-top: $unit * 2
 
 .c-ease-editor-body__input-description
+  @include themed()
+    box-shadow: 0 -1px 0 0 theme-prop(modal-border)
   display: flex
   width: 100%
   font-size: $font-size-small
   line-height: $unit * 6
   font-family: $font-family
   flex-direction: column
+
+.c-ease-editor-body-input-description__type,
+.c-ease-editor-body-input-description__info
+  @include themed()
+    color: theme-prop(text-light)
 
 .c-ease-editor-body-input-description__type
   font-weight: $font-weight-bold

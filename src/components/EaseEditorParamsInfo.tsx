@@ -1,12 +1,10 @@
-import React, { ReactElement, useContext } from 'react';
-import { ThemeContext } from './ThemeProvider';
+import React, { ReactElement } from 'react';
 
 interface EaseEditorParamsInfoProps {
   paramInfo: Btwx.ParamInfo;
 }
 
 const EaseEditorParamsInfo = (props: EaseEditorParamsInfoProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { paramInfo } = props;
 
   return (
@@ -14,22 +12,11 @@ const EaseEditorParamsInfo = (props: EaseEditorParamsInfoProps): ReactElement =>
       {
         paramInfo
         ? <div
-            className='c-ease-editor-body__input-description'
-            style={{
-              boxShadow: `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5}`
-            }}>
-            <div
-              className='c-ease-editor-body-input-description__type'
-              style={{
-                color: theme.text.light
-              }}>
+            className='c-ease-editor-body__input-description'>
+            <div className='c-ease-editor-body-input-description__type'>
               { paramInfo.type }
             </div>
-            <div
-              className='c-ease-editor-body-input-description__info'
-              style={{
-                color: theme.text.light,
-              }}>
+            <div className='c-ease-editor-body-input-description__info'>
               { paramInfo.description }
             </div>
           </div>

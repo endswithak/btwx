@@ -10,12 +10,8 @@ $layersSidebarCellHeight: $unit * 8 // 32
   cursor: pointer
   border-radius: $border-radius
 
-.c-sidebar-layer__background
-  +absolute-full
-  border-radius: $border-radius
-  z-index: -1
-
 .c-sidebar-layer__name
+  font-family: $font-family
   font-size: $font-size-small
   line-height: $layersSidebarCellHeight
   flex-grow: 2
@@ -25,6 +21,7 @@ $layersSidebarCellHeight: $unit * 8 // 32
   overflow: hidden
   white-space: nowrap
   text-overflow: ellipsis
+  text-align: left
 
 .c-sidebar-layer__name--editing
   padding-left: 0
@@ -34,14 +31,7 @@ $layersSidebarCellHeight: $unit * 8 // 32
 
 .c-sidebar-layer__icon
   position: relative
-  display: flex
-  align-items: center
-  justify-content: center
-  height: $layersSidebarCellHeight
   width: $unit * 6 // 24
-  cursor: pointer
-  flex-grow: 0
-  flex-shrink: 0
   z-index: 1
 
 .c-sidebar-layer__icon--aa
@@ -57,9 +47,6 @@ $layersSidebarCellHeight: $unit * 8 // 32
 
 .c-sidebar-layer__icon--chevron
   z-index: 1
-
-  svg
-    position: absolute
 
 .c-sidebar-layer--ghost
   position: absolute

@@ -6,6 +6,7 @@ import {
 
 export interface ArtboardPresetEditorState extends Btwx.ArtboardPreset {
   isOpen: boolean;
+  new: boolean;
 }
 
 const initialState: ArtboardPresetEditorState = {
@@ -14,7 +15,8 @@ const initialState: ArtboardPresetEditorState = {
   type: 'Custom',
   category: 'Custom',
   width: 100,
-  height: 100
+  height: 100,
+  new: false
 };
 
 export default (state = initialState, action: ArtboardPresetEditorTypes): ArtboardPresetEditorState => {

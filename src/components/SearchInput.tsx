@@ -112,7 +112,7 @@ const SearchInput = forwardRef(function SearchInput(props: SearchInputProps, ref
         currentValue.length > 0
         ? <div className='c-sidebar-search__clear'>
             <IconButton
-              icon='close-small'
+              iconName='close-small'
               size='small'
               onClick={handleClear} />
           </div>

@@ -1,10 +1,11 @@
 import {
   OPEN_ARTBOARD_PRESET_EDITOR,
   CLOSE_ARTBOARD_PRESET_EDITOR,
+  OpenArtboardPresetEditorPayload,
   ArtboardPresetEditorTypes
 } from '../actionTypes/artboardPresetEditor';
 
-export const openArtboardPresetEditor = (payload: Btwx.ArtboardPreset): ArtboardPresetEditorTypes => ({
+export const openArtboardPresetEditor = (payload: OpenArtboardPresetEditorPayload): ArtboardPresetEditorTypes => ({
   type: OPEN_ARTBOARD_PRESET_EDITOR,
   payload
 });

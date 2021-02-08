@@ -62,7 +62,7 @@ const EventDrawerEventEditEase = (props: EventDrawerEventEditEaseProps): ReactEl
       className='c-event-drawer__icon'>
       <IconButton
         onClick={handleClick}
-        icon='more'
+        iconName='more'
         active={editingEase} />
     </div>
     // <div

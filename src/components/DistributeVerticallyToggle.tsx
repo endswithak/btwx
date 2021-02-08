@@ -11,7 +11,7 @@ const DistributeVerticallyToggle = (): ReactElement => {
   return (
     <IconButton
       onClick={() => dispatch(distributeLayersVertically({layers: selected}))}
-      icon='distribute-vertically'
+      iconName='distribute-vertically'
       disabled={selected.length <= 2} />
   );
 }

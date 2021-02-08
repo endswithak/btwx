@@ -137,7 +137,7 @@ const ArtboardPresetEditor = (): ReactElement => {
                 value={height}
                 size='small'
                 type='text'
-                onChange={handleWidthChange}
+                onChange={handleHeightChange}
                 // right={<Form.Text>px</Form.Text>}
                 // rightReadOnly
                 required />

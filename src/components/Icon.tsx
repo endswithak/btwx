@@ -8,11 +8,12 @@ interface IconProps {
   style?: any;
   size?: Btwx.SizeVariant;
   shapeId?: string;
+  variant?: Btwx.TextColorVariant;
 }
 
 const Icon = (props: IconProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { name, style, size, shapeId } = props;
+  const { name, style, size, shapeId, variant } = props;
   const pathData = useSelector((state: RootState) => name === 'shape' && shapeId && state.layer.present.shapeIcons[shapeId] ? state.layer.present.shapeIcons[shapeId] : null);
   const iconData = (() => {
     switch(name) {
@@ -516,17 +517,35 @@ const Icon = (props: IconProps): ReactElement => {
           fill: 'M2.874,18 L3.792,14.868 L9.192,14.868 L10.11,18 L11.73,18 L7.914,5.4 L5.07,5.4 L1.254,18 L2.874,18 Z M8.778,13.464 L4.206,13.464 L6.384,6.048 L6.6,6.048 L8.778,13.464 Z M17.022,18.252 C17.586,18.252 18.123,18.108 18.633,17.82 C19.143,17.532 19.542,17.088 19.83,16.488 L19.83,16.488 L20.046,16.488 L20.046,16.596 C20.046,17.004 20.175,17.34 20.433,17.604 C20.691,17.868 21.024,18 21.432,18 L21.432,18 L22.386,18 L22.386,16.704 L21.936,16.704 C21.612,16.704 21.45,16.524 21.45,16.164 L21.45,16.164 L21.45,9.072 L20.046,9.072 L20.046,10.476 L19.83,10.476 C19.542,9.912 19.149,9.495 18.651,9.225 C18.153,8.955 17.598,8.82 16.986,8.82 C16.422,8.82 15.888,8.922 15.384,9.126 C14.88,9.33 14.439,9.627 14.061,10.017 C13.683,10.407 13.386,10.884 13.17,11.448 C12.954,12.012 12.846,12.66 12.846,13.392 L12.846,13.392 L12.846,13.68 C12.846,14.424 12.954,15.078 13.17,15.642 C13.386,16.206 13.683,16.683 14.061,17.073 C14.439,17.463 14.88,17.757 15.384,17.955 C15.888,18.153 16.434,18.252 17.022,18.252 Z M17.166,16.92 C16.314,16.92 15.621,16.635 15.087,16.065 C14.553,15.495 14.286,14.7 14.286,13.68 L14.286,13.68 L14.286,13.392 C14.286,12.912 14.358,12.471 14.502,12.069 C14.646,11.667 14.847,11.325 15.105,11.043 C15.363,10.761 15.666,10.542 16.014,10.386 C16.362,10.23 16.746,10.152 17.166,10.152 C17.574,10.152 17.955,10.233 18.309,10.395 C18.663,10.557 18.969,10.782 19.227,11.07 C19.485,11.358 19.686,11.703 19.83,12.105 C19.974,12.507 20.046,12.948 20.046,13.428 L20.046,13.428 L20.046,13.644 C20.046,14.136 19.974,14.583 19.83,14.985 C19.686,15.387 19.488,15.732 19.236,16.02 C18.984,16.308 18.681,16.53 18.327,16.686 C17.973,16.842 17.586,16.92 17.166,16.92 Z',
           opacity: null
         }
+      case 'orientation-portrait':
+        return {
+          name: 'orientation-portrait',
+          fill: 'M8,4 L16,4 L16,20 L8,20 L8,4',
+          opacity: null
+        }
+      case 'orientation-landscape':
+        return {
+          name: 'orientation-landscape',
+          fill: 'M4,8 L20,8 L20,16 L4,16 L4,8',
+          opacity: null
+        }
     }
   })();
   return (
     <svg
+      className={`c-icon${
+        size
+        ? `${' '}c-icon--${size}`
+        : ''
+      }${
+        variant
+        ? `${' '}c-icon--${variant}`
+        : ''
+      }`}
       viewBox='0 0 24 24'
       width='24px'
       height='24px'
-      style={{
-        transform: size === 'small' ? `scale(0.75)` : 'none',
-        ...style
-      }}>
+      style={style}>
       <path d={iconData && iconData.fill ? iconData.fill : null} />
       {
         iconData && iconData.opacity

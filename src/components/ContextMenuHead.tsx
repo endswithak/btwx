@@ -26,7 +26,7 @@ const ContextMenuHead = (props: ContextMenuHeadProps): ReactElement => {
       {
         backButton
         ? <IconButton
-            icon='thicc-chevron-left'
+            iconName='thicc-chevron-left'
             size='small'
             onClick={backButtonClick} />
         : null

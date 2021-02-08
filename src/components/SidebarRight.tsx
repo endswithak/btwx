@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import Sidebar from './Sidebar';
 import SidebarLayerStyles from './SidebarLayerStyles';
-import SidebarArtboardSizes from './SidebarArtboardSizes';
+import ArtboardPresets from './ArtboardPresets';
 import EmptyState from './EmptyState';
 
 const SidebarRight = (): ReactElement => {
@@ -33,7 +33,7 @@ const SidebarRight = (): ReactElement => {
         }
         {
           ready && activeTool === 'Artboard'
-          ? <SidebarArtboardSizes />
+          ? <ArtboardPresets />
           : null
         }
       </Sidebar>

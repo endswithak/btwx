@@ -1,9 +1,13 @@
 export const OPEN_ARTBOARD_PRESET_EDITOR = 'OPEN_ARTBOARD_PRESET_EDITOR';
 export const CLOSE_ARTBOARD_PRESET_EDITOR = 'CLOSE_ARTBOARD_PRESET_EDITOR';
 
+export interface OpenArtboardPresetEditorPayload extends Btwx.ArtboardPreset {
+  new?: boolean;
+}
+
 export interface OpenArtboardPresetEditor {
   type: typeof OPEN_ARTBOARD_PRESET_EDITOR;
-  payload: Btwx.ArtboardPreset;
+  payload: OpenArtboardPresetEditorPayload;
 }
 
 export interface CloseArtboardPresetEditor {

@@ -13,7 +13,7 @@ const AlignMiddleToggle = (): ReactElement => {
   return (
     <IconButton
       onClick={() => dispatch(alignLayersToMiddle({layers: selected}))}
-      icon='align-middle'
+      iconName='align-middle'
       disabled={selected.length <= 1 || selectedMiddle !== 'multi'} />
   );
 }

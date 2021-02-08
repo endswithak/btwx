@@ -1,54 +1,29 @@
-import React, { useContext, ReactElement } from 'react';
-import styled from 'styled-components';
-import { ThemeContext } from './ThemeProvider';
+import React, { ReactElement } from 'react';
 import Icon from './Icon';
+import Button, { ButtonProps } from './Button';
 
-interface IconButtonProps {
-  onClick(): void;
-  disabled?: boolean;
-  active?: boolean;
-  icon: string;
-  size?: Btwx.SizeVariant;
-  remove?: boolean;
-  activeIcon?: string;
+interface IconButtonProps extends ButtonProps {
+  iconName: string;
+  activeIconName?: string;
   description?: string;
-  theme?: Btwx.Theme;
 }
 
-const Button = styled.button<IconButtonProps>`
-  svg {
-    fill: ${props => props.active ? props.theme.palette.primary : props.theme.text.lighter};
-  }
-  :hover {
-    svg {
-      fill: ${props => props.remove ? props.theme.palette.error : props.active ? props.theme.palette.primary : props.theme.text.base};
-    }
-    :disabled {
-      svg {
-        fill: ${props => props.active ? props.theme.palette.primary : props.theme.text.lighter};
-      }
-      cursor: default;
-    }
-  }
-  :disabled {
-    opacity: 0.5;
-  }
-`;
-
-const IconButton = (props: IconButtonProps): ReactElement => {
-  const theme = useContext(ThemeContext);
-  const { onClick, disabled, active, icon, activeIcon, size, description } = props;
+const IconButton = ({
+  iconName,
+  activeIconName,
+  description,
+  ...rest
+}: IconButtonProps): ReactElement => {
+  const { active, size } = rest;
 
   return (
     <Button
-      {...props}
-      className={`c-icon-button ${size ? `c-icon-button--${size}` : ''}`}
-      theme={theme}
-      name={icon}>
+      {...rest}
+      icon>
       <Icon
-        name={activeIcon && active ? activeIcon : icon}
+        name={activeIconName && active ? activeIconName : iconName}
         size={size} />
-      <span>{description ? description : icon}</span>
+      <span className='h-screen-reader'>{description ? description : iconName}</span>
     </Button>
   );
 }

@@ -1,8 +1,7 @@
-import React, { useContext, ReactElement, useEffect } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setLayerHover, selectLayers, deselectLayers } from '../store/actions/layer';
-import { ThemeContext } from './ThemeProvider';
 import Icon from './Icon';
 
 interface SidebarLayerMaskedIconProps {
@@ -11,7 +10,6 @@ interface SidebarLayerMaskedIconProps {
 }
 
 const SidebarLayerMaskedIcon = (props: SidebarLayerMaskedIconProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { id } = props;
   const isMasked = useSelector((state: RootState) => state.layer.present.byId[id].type === 'Artboard' ? null : (state.layer.present.byId[id] as Btwx.MaskableLayer).masked);
   const isSelected = useSelector((state: RootState) => state.layer.present.byId[id].selected);
@@ -60,13 +58,13 @@ const SidebarLayerMaskedIcon = (props: SidebarLayerMaskedIconProps): ReactElemen
         isMasked
         ? <Icon
             name='masked'
-            style={{
-              fill: underlyingMaskHover
+            variant={
+              underlyingMaskHover
               ? isSelected || editing
-                ? theme.text.onPalette.primary
-                : theme.palette.primary
-              : theme.text.lighter
-            }} />
+                ? 'base-on-primary'
+                : 'primary'
+              : 'lighter'
+            } />
         : null
       }
     </div>

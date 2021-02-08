@@ -20,9 +20,11 @@ const JustificationInput = (): ReactElement => {
   }, [justificationValue, selected]);
 
   const handleChange = (e: any): void => {
-    dispatch(setLayersJustification({layers: selected, justification: e.target.value as Btwx.Jusftification}));
-    setJustification(e.target.value);
-    dispatch(setTextSettingsJustification({justification: e.target.value as Btwx.Jusftification}));
+    if (e.target.value !== justification) {
+      dispatch(setLayersJustification({layers: selected, justification: e.target.value as Btwx.Jusftification}));
+      setJustification(e.target.value);
+      dispatch(setTextSettingsJustification({justification: e.target.value as Btwx.Jusftification}));
+    }
   };
 
   const options = DEFAULT_JUSTIFICATION_OPTIONS.map((option) => (

@@ -2,24 +2,33 @@
   @include truncate-text;
   @include themed() {
     color: theme-prop(text-light);
-    fill: theme-prop(text-light);
     background: theme-prop(button-background);
     box-shadow: 0 0 0 1px theme-prop(button-border) inset;
+
+    .c-icon {
+      fill: theme-prop(text-light);
+    }
 
     &:hover,
     &:focus,
     &:focus &:hover {
       color: theme-prop(text-base);
-      fill: theme-prop(text-base);
       box-shadow: 0 0 0 1px theme-prop(button-border-active) inset;
+
+      .c-icon {
+        fill: theme-prop(text-base);
+      }
     }
 
     &:disabled,
     &.c-button--disabled {
       opacity: 50%;
       color: theme-prop(text-lighter);
-      fill: theme-prop(text-lighter);
       box-shadow: 0 0 0 1px theme-prop(button-border) inset;
+
+      .c-icon {
+        fill: theme-prop(text-lighter);
+      }
 
       &:hover,
       &:focus,
@@ -33,7 +42,7 @@
   font-size: $font-size;
   line-height: $button-size;
   text-align: center;
-  padding: 0 $padding;
+  padding: 0 $padding-small;
   height: $button-size;
   flex-wrap: nowrap;
   align-items: center;
@@ -42,7 +51,6 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  width: 100%;
   position: relative;
 
   &.c-button--left {
@@ -85,18 +93,56 @@
 
   &.c-button--active {
     @include themed() {
-      color: theme-prop(text-on-primary);
-      fill: theme-prop(text-on-primary);
+      color: theme-prop(text-light-on-primary);
       background: theme-prop(primary);
       box-shadow: 0 0 0 1px theme-prop(primary) inset;
+
+      .c-icon {
+        fill: theme-prop(text-light-on-primary);
+      }
 
       &:hover,
       &:focus,
       &:focus &:hover  {
-        color: theme-prop(text-on-primary);
-        fill: theme-prop(text-on-primary);
+        color: theme-prop(text-base-on-primary);
         background: theme-prop(primary-active);
         box-shadow: 0 0 0 1px theme-prop(primary-active) inset;
+
+        .c-icon {
+          fill: theme-prop(text-base-on-primary);
+        }
+      }
+    }
+  }
+
+  &.c-button--block {
+    width: 100%;
+  }
+
+  &.c-button--icon {
+    @include themed() {
+      padding: 0;
+      background: none;
+      box-shadow: none;
+
+      &.c-button--active {
+        background: none;
+        box-shadow: none;
+
+        .c-icon {
+          fill: theme-prop(primary);
+        }
+
+        &:hover,
+        &:focus,
+        &:focus &:hover  {
+          background: none;
+          box-shadow: none;
+
+          .c-icon {
+            fill: theme-prop(primary-active);
+          }
+        }
       }
     }
   }
@@ -104,15 +150,24 @@
   @each $theme-color-name in $theme-color-names {
     &.c-button--#{$theme-color-name} {
       @include themed() {
-        color: theme-prop(text-on-#{$theme-color-name});
+        color: theme-prop(text-light-on-#{$theme-color-name});
         background: theme-prop($theme-color-name);
         box-shadow: 0 0 0 1px theme-prop($theme-color-name) inset;
+
+        .c-icon {
+          fill: theme-prop(text-light-on-#{$theme-color-name});
+        }
 
         &:hover,
         &:focus,
         &:focus &:hover  {
+          color: theme-prop(text-base-on-#{$theme-color-name});
           background: theme-prop(#{$theme-color-name}-active);
           box-shadow: 0 0 0 1px theme-prop(#{$theme-color-name}-active) inset;
+
+          .c-icon {
+            fill: theme-prop(text-base-on-#{$theme-color-name});
+          }
         }
       }
     }
@@ -136,25 +191,25 @@
   height: $button-size;
   overflow: hidden;
 
-  &--read-only {
+  &.c-button__addon--read-only {
     pointer-events: none;
   }
 
-  &--small {
+  &.c-button__addon--small {
     width: $addon-size-small;
     height: $control-size-small;
   }
 
-  &--large {
+  &.c-button__addon--large {
     width: $addon-size-large;
     height: $control-size-large;
   }
 
-  &--left {
+  &.c-button__addon--left {
     left: 0;
   }
 
-  &--right {
+  &.c-button__addon--right {
     right: 0;
   }
 }

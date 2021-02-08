@@ -13,7 +13,7 @@ const AlignTopToggle = (): ReactElement => {
   return (
     <IconButton
       onClick={() => dispatch(alignLayersToTop({layers: selected}))}
-      icon='align-top'
+      iconName='align-top'
       disabled={selected.length <= 1 || selectedTop !== 'multi'} />
   );
 }

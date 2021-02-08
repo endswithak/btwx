@@ -1,0 +1,46 @@
+.c-empty-state {
+  @include absolute-full;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.c-empty-state__inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.c-empty-state__icon {
+  @include themed() {
+    fill: theme-prop(text-lighter);
+  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $unit * 8;
+  height: $unit * 8;
+}
+
+.c-empty-state__text,
+.c-empty-state__detail {
+  @include themed() {
+    color: theme-prop(text-lighter);
+  }
+  font-family: $font-family;
+  text-align: center;
+}
+
+.c-empty-state__text {
+  font-size: $font-size;
+  line-height: $unit * 10;
+  font-weight: $font-weight-bold;
+}
+
+.c-empty-state__detail {
+  font-size: $font-size-small;
+  line-height: $unit * 6;
+}

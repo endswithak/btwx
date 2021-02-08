@@ -1,196 +1,297 @@
 $font-family: 'Space Mono', system-ui, -apple-system, 'Space Mono', Menlo, Helvetica, Arial, sans-serif;
 
-$selection-color: #007AFF;
+$size-names: "small", "large";
 
 $glass-opacity: 0.88;
 
+$text-light-opacity: 0.75;
+$text-lighter-opacity: 0.50;
+$text-lightest-opacity: 0.33;
+$text-style-names: "body-1", "body-2";
+
 $theme-color-names: "primary", "accent", "success", "info", "error", "recording", "warn";
-$theme-text-color-names: "base", "light", "lighter", "lightest", "on-primary", "on-accent", "on-success", "on-info", "on-error", "on-recording", "on-warn";
+$theme-text-color-names: "base", "light", "lighter", "lightest", "base-on-primary", "base-on-accent", "base-on-success", "base-on-info", "base-on-error", "base-on-recording", "base-on-warn", "light-on-primary", "light-on-accent", "light-on-success", "light-on-info", "light-on-error", "light-on-recording", "light-on-warn", "lighter-on-primary", "lighter-on-accent", "lighter-on-success", "lighter-on-info", "lighter-on-error", "lighter-on-recording", "lighter-on-warn", "lightest-on-primary", "lightest-on-accent", "lightest-on-success", "lightest-on-info", "lightest-on-error", "lightest-on-recording", "lightest-on-warn";
 $theme-active-color-weight: 10%;
-// text
-$theme-light-text-base:           #000000;
-$theme-light-text-light:          rgba(0,0,0,0.75);
-$theme-light-text-lighter:        rgba(0,0,0,0.50);
-$theme-light-text-lightest:       rgba(0,0,0,0.33);
-$theme-dark-text-base:            #ffffff;
-$theme-dark-text-light:           rgba(255,255,255,0.75);
-$theme-dark-text-lighter:         rgba(255,255,255,0.50);
-$theme-dark-text-lightest:        rgba(255,255,255,0.33);
-// light theme colors
-$theme-light-primary:             #007AFF;
-$theme-light-primary-active:        color-shade($theme-light-primary, $theme-active-color-weight);
-$theme-light-accent:              #FF9500;
-$theme-light-accent-active:         color-shade($theme-light-accent, $theme-active-color-weight);
-$theme-light-gray:                #8E8E93;
-$theme-light-gray-active:           color-shade($theme-light-gray, $theme-active-color-weight);
-$theme-light-success:             #28CD41;
-$theme-light-success-active:        color-shade($theme-light-success, $theme-active-color-weight);
-$theme-light-info:                #55BEF0;
-$theme-light-info-active:           color-shade($theme-light-info, $theme-active-color-weight);
-$theme-light-error:               #FF3B30;
-$theme-light-error-active:          color-shade($theme-light-error, $theme-active-color-weight);
-$theme-light-recording:             $theme-light-error;
-$theme-light-recording-active:      $theme-light-error-active;
-$theme-light-warn:                #FFCC00;
-$theme-light-warn-active:           color-shade($theme-light-warn, $theme-active-color-weight);
-$theme-light-text-on-primary:       color-contrast($theme-light-primary);
-$theme-light-text-on-accent:        color-contrast($theme-light-accent);
-$theme-light-text-on-success:       color-contrast($theme-light-success);
-$theme-light-text-on-info:          color-contrast($theme-light-info);
-$theme-light-text-on-error:         color-contrast($theme-light-error);
-$theme-light-text-on-recording:     $theme-light-text-on-error;
-$theme-light-text-on-warn:          color-contrast($theme-light-warn);
-$theme-light-background-z0:         color-tint($theme-light-gray, 90%);
-$theme-light-background-z1:         color-tint($theme-light-gray, 80%);
-$theme-light-background-z2:         color-tint($theme-light-gray, 70%);
-$theme-light-background-z3:         color-tint($theme-light-gray, 60%);
-$theme-light-background-z4:         color-tint($theme-light-gray, 50%);
-$theme-light-background-z5:         color-tint($theme-light-gray, 40%);
-$theme-light-background-z6:         color-tint($theme-light-gray, 30%);
-$theme-light-background-z7:         color-tint($theme-light-gray, 20%);
-$theme-light-background-z8:         color-tint($theme-light-gray, 10%);
-// dark theme colors
-$theme-dark-primary:              #0A84FF;
-$theme-dark-primary-active:         color-tint($theme-dark-primary, $theme-active-color-weight);
-$theme-dark-accent:               #FF9F00;
-$theme-dark-accent-active:          color-tint($theme-dark-accent, $theme-active-color-weight);
-$theme-dark-gray:                 #98989D;
-$theme-dark-gray-active:            color-tint($theme-dark-gray, $theme-active-color-weight);
-$theme-dark-success:              #32D74B;
-$theme-dark-success-active:         color-tint($theme-dark-success, $theme-active-color-weight);
-$theme-dark-info:                 #5AC8F5;
-$theme-dark-info-active:            color-tint($theme-dark-info, $theme-active-color-weight);
-$theme-dark-error:                #FF453A;
-$theme-dark-error-active:           color-tint($theme-dark-error, $theme-active-color-weight);
-$theme-dark-recording:              $theme-dark-error;
-$theme-dark-recording-active:       $theme-dark-error-active;
-$theme-dark-warn:                 #FFD600;
-$theme-dark-warn-active:            color-tint($theme-dark-warn, $theme-active-color-weight);
-$theme-dark-text-on-primary:        color-contrast($theme-dark-primary);
-$theme-dark-text-on-accent:         color-contrast($theme-dark-accent);
-$theme-dark-text-on-success:        color-contrast($theme-dark-success);
-$theme-dark-text-on-info:           color-contrast($theme-dark-info);
-$theme-dark-text-on-error:          color-contrast($theme-dark-error);
-$theme-dark-text-on-recording:      $theme-dark-text-on-error;
-$theme-dark-text-on-warn:           color-contrast($theme-dark-warn);
-$theme-dark-background-z0:          color-shade($theme-dark-gray, 90%);
-$theme-dark-background-z1:          color-shade($theme-dark-gray, 80%);
-$theme-dark-background-z2:          color-shade($theme-dark-gray, 70%);
-$theme-dark-background-z3:          color-shade($theme-dark-gray, 60%);
-$theme-dark-background-z4:          color-shade($theme-dark-gray, 50%);
-$theme-dark-background-z5:          color-shade($theme-dark-gray, 40%);
-$theme-dark-background-z6:          color-shade($theme-dark-gray, 30%);
-$theme-dark-background-z7:          color-shade($theme-dark-gray, 20%);
-$theme-dark-background-z8:          color-shade($theme-dark-gray, 10%);
+
+// theme light palette
+$theme-light-primary:                     #007AFF;
+$theme-light-primary-active:                color-shade($theme-light-primary, $theme-active-color-weight);
+$theme-light-accent:                      #FF9500;
+$theme-light-accent-active:                 color-shade($theme-light-accent, $theme-active-color-weight);
+$theme-light-gray:                        #8E8E93;
+$theme-light-gray-active:                   color-shade($theme-light-gray, $theme-active-color-weight);
+$theme-light-success:                     #28CD41;
+$theme-light-success-active:                color-shade($theme-light-success, $theme-active-color-weight);
+$theme-light-info:                        #55BEF0;
+$theme-light-info-active:                   color-shade($theme-light-info, $theme-active-color-weight);
+$theme-light-error:                       #FF3B30;
+$theme-light-error-active:                  color-shade($theme-light-error, $theme-active-color-weight);
+$theme-light-warn:                        #FFCC00;
+$theme-light-warn-active:                   color-shade($theme-light-warn, $theme-active-color-weight);
+$theme-light-recording:                     $theme-light-error;
+$theme-light-recording-active:              $theme-light-error-active;
+// theme light text
+$theme-light-text-base:                   #000000;
+$theme-light-text-light:                    rgba($theme-light-text-base, $text-light-opacity);
+$theme-light-text-lighter:                  rgba($theme-light-text-base, $text-lighter-opacity);
+$theme-light-text-lightest:                 rgba($theme-light-text-base, $text-lightest-opacity);
+// theme light text base on color
+$theme-light-text-base-on-primary:          color-contrast($theme-light-primary);
+$theme-light-text-base-on-accent:           color-contrast($theme-light-accent);
+$theme-light-text-base-on-success:          color-contrast($theme-light-success);
+$theme-light-text-base-on-info:             color-contrast($theme-light-info);
+$theme-light-text-base-on-error:            color-contrast($theme-light-error);
+$theme-light-text-base-on-warn:             color-contrast($theme-light-warn);
+$theme-light-text-base-on-recording:        $theme-light-text-base-on-error;
+// theme light text light on color
+$theme-light-text-light-on-primary:         rgba($theme-light-text-base-on-primary, $text-light-opacity);
+$theme-light-text-light-on-accent:          rgba($theme-light-text-base-on-accent, $text-light-opacity);
+$theme-light-text-light-on-success:         rgba($theme-light-text-base-on-success, $text-light-opacity);
+$theme-light-text-light-on-info:            rgba($theme-light-text-base-on-info, $text-light-opacity);
+$theme-light-text-light-on-error:           rgba($theme-light-text-base-on-error, $text-light-opacity);
+$theme-light-text-light-on-warn:            rgba($theme-light-text-base-on-warn, $text-light-opacity);
+$theme-light-text-light-on-recording:       $theme-light-text-light-on-error;
+// theme light text lighter on color
+$theme-light-text-lighter-on-primary:       rgba($theme-light-text-base-on-primary, $text-lighter-opacity);
+$theme-light-text-lighter-on-accent:        rgba($theme-light-text-base-on-accent, $text-lighter-opacity);
+$theme-light-text-lighter-on-success:       rgba($theme-light-text-base-on-success, $text-lighter-opacity);
+$theme-light-text-lighter-on-info:          rgba($theme-light-text-base-on-info, $text-lighter-opacity);
+$theme-light-text-lighter-on-error:         rgba($theme-light-text-base-on-error, $text-lighter-opacity);
+$theme-light-text-lighter-on-warn:          rgba($theme-light-text-base-on-warn, $text-lighter-opacity);
+$theme-light-text-lighter-on-recording:     $theme-light-text-lighter-on-error;
+// theme light text lightest on color
+$theme-light-text-lightest-on-primary:      rgba($theme-light-text-base-on-primary, $text-lightest-opacity);
+$theme-light-text-lightest-on-accent:       rgba($theme-light-text-base-on-accent, $text-lightest-opacity);
+$theme-light-text-lightest-on-success:      rgba($theme-light-text-base-on-success, $text-lightest-opacity);
+$theme-light-text-lightest-on-info:         rgba($theme-light-text-base-on-info, $text-lightest-opacity);
+$theme-light-text-lightest-on-error:        rgba($theme-light-text-base-on-error, $text-lightest-opacity);
+$theme-light-text-lightest-on-warn:         rgba($theme-light-text-base-on-warn, $text-lightest-opacity);
+$theme-light-text-lightest-on-recording:    $theme-light-text-lightest-on-error;
+// theme light backgrounds
+$theme-light-background-z0:                 color-tint($theme-light-gray, 90%);
+$theme-light-background-z1:                 color-tint($theme-light-gray, 80%);
+$theme-light-background-z2:                 color-tint($theme-light-gray, 70%);
+$theme-light-background-z3:                 color-tint($theme-light-gray, 60%);
+$theme-light-background-z4:                 color-tint($theme-light-gray, 50%);
+$theme-light-background-z5:                 color-tint($theme-light-gray, 40%);
+$theme-light-background-z6:                 color-tint($theme-light-gray, 30%);
+$theme-light-background-z7:                 color-tint($theme-light-gray, 20%);
+$theme-light-background-z8:                 color-tint($theme-light-gray, 10%);
+// theme dark palette
+$theme-dark-primary:                      #0A84FF;
+$theme-dark-primary-active:                 color-tint($theme-dark-primary, $theme-active-color-weight);
+$theme-dark-accent:                       #FF9F00;
+$theme-dark-accent-active:                  color-tint($theme-dark-accent, $theme-active-color-weight);
+$theme-dark-gray:                         #98989D;
+$theme-dark-gray-active:                    color-tint($theme-dark-gray, $theme-active-color-weight);
+$theme-dark-success:                      #32D74B;
+$theme-dark-success-active:                 color-tint($theme-dark-success, $theme-active-color-weight);
+$theme-dark-info:                         #5AC8F5;
+$theme-dark-info-active:                    color-tint($theme-dark-info, $theme-active-color-weight);
+$theme-dark-error:                        #FF453A;
+$theme-dark-error-active:                   color-tint($theme-dark-error, $theme-active-color-weight);
+$theme-dark-warn:                         #FFD600;
+$theme-dark-warn-active:                    color-tint($theme-dark-warn, $theme-active-color-weight);
+$theme-dark-recording:                      $theme-dark-error;
+$theme-dark-recording-active:               $theme-dark-error-active;
+// theme dark text
+$theme-dark-text-base:                    #ffffff;
+$theme-dark-text-light:                     rgba($theme-dark-text-base, $text-light-opacity);
+$theme-dark-text-lighter:                   rgba($theme-dark-text-base, $text-lighter-opacity);
+$theme-dark-text-lightest:                  rgba($theme-dark-text-base, $text-lightest-opacity);
+// theme dark text base on color
+$theme-dark-text-base-on-primary:           color-contrast($theme-dark-primary);
+$theme-dark-text-base-on-accent:            color-contrast($theme-dark-accent);
+$theme-dark-text-base-on-success:           color-contrast($theme-dark-success);
+$theme-dark-text-base-on-info:              color-contrast($theme-dark-info);
+$theme-dark-text-base-on-error:             color-contrast($theme-dark-error);
+$theme-dark-text-base-on-warn:              color-contrast($theme-dark-warn);
+$theme-dark-text-base-on-recording:         $theme-dark-text-base-on-error;
+// theme dark text light on color
+$theme-dark-text-light-on-primary:          rgba($theme-dark-text-base-on-primary, $text-light-opacity);
+$theme-dark-text-light-on-accent:           rgba($theme-dark-text-base-on-accent, $text-light-opacity);
+$theme-dark-text-light-on-success:          rgba($theme-dark-text-base-on-success, $text-light-opacity);
+$theme-dark-text-light-on-info:             rgba($theme-dark-text-base-on-info, $text-light-opacity);
+$theme-dark-text-light-on-error:            rgba($theme-dark-text-base-on-error, $text-light-opacity);
+$theme-dark-text-light-on-warn:             rgba($theme-dark-text-base-on-warn, $text-light-opacity);
+$theme-dark-text-light-on-recording:        $theme-dark-text-light-on-error;
+// theme dark text lighter on color
+$theme-dark-text-lighter-on-primary:        rgba($theme-dark-text-base-on-primary, $text-lighter-opacity);
+$theme-dark-text-lighter-on-accent:         rgba($theme-dark-text-base-on-accent, $text-lighter-opacity);
+$theme-dark-text-lighter-on-success:        rgba($theme-dark-text-base-on-success, $text-lighter-opacity);
+$theme-dark-text-lighter-on-info:           rgba($theme-dark-text-base-on-info, $text-lighter-opacity);
+$theme-dark-text-lighter-on-error:          rgba($theme-dark-text-base-on-error, $text-lighter-opacity);
+$theme-dark-text-lighter-on-warn:           rgba($theme-dark-text-base-on-warn, $text-lighter-opacity);
+$theme-dark-text-lighter-on-recording:      $theme-dark-text-lighter-on-error;
+// theme dark text lightest on color
+$theme-dark-text-lightest-on-primary:       rgba($theme-dark-text-base-on-primary, $text-lightest-opacity);
+$theme-dark-text-lightest-on-accent:        rgba($theme-dark-text-base-on-accent, $text-lightest-opacity);
+$theme-dark-text-lightest-on-success:       rgba($theme-dark-text-base-on-success, $text-lightest-opacity);
+$theme-dark-text-lightest-on-info:          rgba($theme-dark-text-base-on-info, $text-lightest-opacity);
+$theme-dark-text-lightest-on-error:         rgba($theme-dark-text-base-on-error, $text-lightest-opacity);
+$theme-dark-text-lightest-on-warn:          rgba($theme-dark-text-base-on-warn, $text-lightest-opacity);
+$theme-dark-text-lightest-on-recording:     $theme-dark-text-lightest-on-error;
+// theme dark backgrounds
+$theme-dark-background-z0:                  color-shade($theme-dark-gray, 90%);
+$theme-dark-background-z1:                  color-shade($theme-dark-gray, 80%);
+$theme-dark-background-z2:                  color-shade($theme-dark-gray, 70%);
+$theme-dark-background-z3:                  color-shade($theme-dark-gray, 60%);
+$theme-dark-background-z4:                  color-shade($theme-dark-gray, 50%);
+$theme-dark-background-z5:                  color-shade($theme-dark-gray, 40%);
+$theme-dark-background-z6:                  color-shade($theme-dark-gray, 30%);
+$theme-dark-background-z7:                  color-shade($theme-dark-gray, 20%);
+$theme-dark-background-z8:                  color-shade($theme-dark-gray, 10%);
 
 $themes: (
   light: (
-    primary:                        $theme-light-primary,
-    primary-active:                 $theme-light-primary-active,
-    accent:                         $theme-light-accent,
-    accent-active:                  $theme-light-accent-active,
-    success:                        $theme-light-success,
-    success-active:                 $theme-light-success-active,
-    info:                           $theme-light-info,
-    info-active:                    $theme-light-info-active,
-    error:                          $theme-light-error,
-    error-active:                   $theme-light-error-active,
-    recording:                      $theme-light-recording,
-    recording-active:               $theme-light-recording-active,
-    warn:                           $theme-light-warn,
-    warn-active:                    $theme-light-warn-active,
-    text-base:                      $theme-light-text-base,
-    text-light:                     $theme-light-text-light,
-    text-lighter:                   $theme-light-text-lighter,
-    text-lightest:                  $theme-light-text-lightest,
-    text-on-primary:                $theme-light-text-on-primary,
-    text-on-accent:                 $theme-light-text-on-accent,
-    text-on-success:                $theme-light-text-on-success,
-    text-on-info:                   $theme-light-text-on-info,
-    text-on-error:                  $theme-light-text-on-error,
-    text-on-recording:              $theme-light-text-on-recording,
-    text-on-warn:                   $theme-light-text-on-warn,
-    background-z0:                  $theme-light-background-z0,
-    background-z1:                  $theme-light-background-z1,
-    background-z2:                  $theme-light-background-z2,
-    background-z3:                  $theme-light-background-z3,
-    background-z4:                  $theme-light-background-z4,
-    background-z5:                  $theme-light-background-z5,
-    background-z6:                  $theme-light-background-z6,
-    background-z7:                  $theme-light-background-z7,
-    background-z8:                  $theme-light-background-z8,
-    button-background:              $theme-light-background-z0,
-    button-border:                  $theme-light-background-z3,
-    button-border-active:           $theme-light-background-z4,
-    control-background:             $theme-light-background-z0,
-    control-border:                 $theme-light-background-z3,
-    control-border-active:          $theme-light-background-z4,
-    slider-thumb-background:        #fff,
-    slider-thumb-border:            $theme-light-background-z5,
-    sidebar-background:             $theme-light-background-z1,
-    sidebar-border:                 $theme-light-background-z3,
-    topbar-background:              $theme-light-background-z1,
-    topbar-border:                  $theme-light-background-z3,
-    titlebar-background:            $theme-light-background-z1,
-    event-drawer-background:        $theme-light-background-z1,
-    event-drawer-border:            $theme-light-background-z3,
-    modal-background:               $theme-light-background-z1,
-    modal-border:                   $theme-light-background-z3,
-    glass-background:               rgba($theme-light-background-z1, $glass-opacity)
+    primary:                                $theme-light-primary,
+    primary-active:                         $theme-light-primary-active,
+    accent:                                 $theme-light-accent,
+    accent-active:                          $theme-light-accent-active,
+    success:                                $theme-light-success,
+    success-active:                         $theme-light-success-active,
+    info:                                   $theme-light-info,
+    info-active:                            $theme-light-info-active,
+    error:                                  $theme-light-error,
+    error-active:                           $theme-light-error-active,
+    recording:                              $theme-light-recording,
+    recording-active:                       $theme-light-recording-active,
+    warn:                                   $theme-light-warn,
+    warn-active:                            $theme-light-warn-active,
+    text-base:                              $theme-light-text-base,
+    text-light:                             $theme-light-text-light,
+    text-lighter:                           $theme-light-text-lighter,
+    text-lightest:                          $theme-light-text-lightest,
+    text-base-on-primary:                   $theme-light-text-base-on-primary,
+    text-base-on-accent:                    $theme-light-text-base-on-accent,
+    text-base-on-success:                   $theme-light-text-base-on-success,
+    text-base-on-info:                      $theme-light-text-base-on-info,
+    text-base-on-error:                     $theme-light-text-base-on-error,
+    text-base-on-recording:                 $theme-light-text-base-on-recording,
+    text-base-on-warn:                      $theme-light-text-base-on-warn,
+    text-light-on-primary:                  $theme-light-text-light-on-primary,
+    text-light-on-accent:                   $theme-light-text-light-on-accent,
+    text-light-on-success:                  $theme-light-text-light-on-success,
+    text-light-on-info:                     $theme-light-text-light-on-info,
+    text-light-on-error:                    $theme-light-text-light-on-error,
+    text-light-on-recording:                $theme-light-text-light-on-recording,
+    text-light-on-warn:                     $theme-light-text-light-on-warn,
+    text-lighter-on-primary:                $theme-light-text-lighter-on-primary,
+    text-lighter-on-accent:                 $theme-light-text-lighter-on-accent,
+    text-lighter-on-success:                $theme-light-text-lighter-on-success,
+    text-lighter-on-info:                   $theme-light-text-lighter-on-info,
+    text-lighter-on-error:                  $theme-light-text-lighter-on-error,
+    text-lighter-on-recording:              $theme-light-text-lighter-on-recording,
+    text-lighter-on-warn:                   $theme-light-text-lighter-on-warn,
+    text-lightest-on-primary:               $theme-light-text-lightest-on-primary,
+    text-lightest-on-accent:                $theme-light-text-lightest-on-accent,
+    text-lightest-on-success:               $theme-light-text-lightest-on-success,
+    text-lightest-on-info:                  $theme-light-text-lightest-on-info,
+    text-lightest-on-error:                 $theme-light-text-lightest-on-error,
+    text-lightest-on-recording:             $theme-light-text-lightest-on-recording,
+    text-lightest-on-warn:                  $theme-light-text-lightest-on-warn,
+    background-z0:                          $theme-light-background-z0,
+    background-z1:                          $theme-light-background-z1,
+    background-z2:                          $theme-light-background-z2,
+    background-z3:                          $theme-light-background-z3,
+    background-z4:                          $theme-light-background-z4,
+    background-z5:                          $theme-light-background-z5,
+    background-z6:                          $theme-light-background-z6,
+    background-z7:                          $theme-light-background-z7,
+    background-z8:                          $theme-light-background-z8,
+    button-background:                      $theme-light-background-z0,
+    button-border:                          $theme-light-background-z3,
+    button-border-active:                   $theme-light-background-z4,
+    control-background:                     $theme-light-background-z0,
+    control-border:                         $theme-light-background-z3,
+    control-border-active:                  $theme-light-background-z4,
+    slider-thumb-background:                #fff,
+    slider-thumb-border:                    $theme-light-background-z5,
+    sidebar-background:                     $theme-light-background-z1,
+    sidebar-border:                         $theme-light-background-z3,
+    topbar-background:                      $theme-light-background-z1,
+    topbar-border:                          $theme-light-background-z3,
+    titlebar-background:                    $theme-light-background-z1,
+    event-drawer-background:                $theme-light-background-z1,
+    event-drawer-border:                    $theme-light-background-z3,
+    modal-background:                       $theme-light-background-z1,
+    modal-border:                           $theme-light-background-z3,
+    glass-background:                       rgba($theme-light-background-z1, $glass-opacity)
   ),
   dark: (
-    primary:                        $theme-dark-primary,
-    primary-active:                 $theme-dark-primary-active,
-    accent:                         $theme-dark-accent,
-    accent-active:                  $theme-dark-accent-active,
-    success:                        $theme-dark-success,
-    success-active:                 $theme-dark-success-active,
-    info:                           $theme-dark-info,
-    info-active:                    $theme-dark-info-active,
-    error:                          $theme-dark-error,
-    error-active:                   $theme-dark-error-active,
-    recording:                      $theme-dark-recording,
-    recording-active:               $theme-dark-recording-active,
-    warn:                           $theme-dark-warn,
-    warn-active:                    $theme-dark-warn-active,
-    text-base:                      $theme-dark-text-base,
-    text-light:                     $theme-dark-text-light,
-    text-lighter:                   $theme-dark-text-lighter,
-    text-lightest:                  $theme-dark-text-lightest,
-    text-on-primary:                $theme-dark-text-on-primary,
-    text-on-accent:                 $theme-dark-text-on-accent,
-    text-on-success:                $theme-dark-text-on-success,
-    text-on-info:                   $theme-dark-text-on-info,
-    text-on-error:                  $theme-dark-text-on-error,
-    text-on-recording:              $theme-dark-text-on-recording,
-    text-on-warn:                   $theme-dark-text-on-warn,
-    background-z0:                  $theme-dark-background-z0,
-    background-z1:                  $theme-dark-background-z1,
-    background-z2:                  $theme-dark-background-z2,
-    background-z3:                  $theme-dark-background-z3,
-    background-z4:                  $theme-dark-background-z4,
-    background-z5:                  $theme-dark-background-z5,
-    background-z6:                  $theme-dark-background-z6,
-    background-z7:                  $theme-dark-background-z7,
-    background-z8:                  $theme-dark-background-z8,
-    button-background:              $theme-dark-background-z2,
-    button-border:                  $theme-dark-background-z3,
-    button-border-active:           $theme-dark-background-z4,
-    control-background:             $theme-dark-background-z2,
-    control-border:                 $theme-dark-background-z3,
-    control-border-active:          $theme-dark-background-z4,
-    slider-thumb-background:        color-tint($theme-dark-gray, 80%),
-    slider-thumb-border:            $theme-dark-background-z2,
-    sidebar-background:             $theme-dark-background-z1,
-    sidebar-border:                 $theme-dark-background-z3,
-    topbar-background:              $theme-dark-background-z1,
-    topbar-border:                  $theme-dark-background-z3,
-    titlebar-background:            $theme-dark-background-z1,
-    event-drawer-background:        $theme-dark-background-z1,
-    event-drawer-border:            $theme-dark-background-z3,
-    modal-background:               $theme-dark-background-z1,
-    modal-border:                   $theme-dark-background-z3,
-    glass-background:               rgba($theme-dark-background-z1, $glass-opacity)
+    primary:                                $theme-dark-primary,
+    primary-active:                         $theme-dark-primary-active,
+    accent:                                 $theme-dark-accent,
+    accent-active:                          $theme-dark-accent-active,
+    success:                                $theme-dark-success,
+    success-active:                         $theme-dark-success-active,
+    info:                                   $theme-dark-info,
+    info-active:                            $theme-dark-info-active,
+    error:                                  $theme-dark-error,
+    error-active:                           $theme-dark-error-active,
+    recording:                              $theme-dark-recording,
+    recording-active:                       $theme-dark-recording-active,
+    warn:                                   $theme-dark-warn,
+    warn-active:                            $theme-dark-warn-active,
+    text-base:                              $theme-dark-text-base,
+    text-light:                             $theme-dark-text-light,
+    text-lighter:                           $theme-dark-text-lighter,
+    text-lightest:                          $theme-dark-text-lightest,
+    text-base-on-primary:                   $theme-dark-text-base-on-primary,
+    text-base-on-accent:                    $theme-dark-text-base-on-accent,
+    text-base-on-success:                   $theme-dark-text-base-on-success,
+    text-base-on-info:                      $theme-dark-text-base-on-info,
+    text-base-on-error:                     $theme-dark-text-base-on-error,
+    text-base-on-recording:                 $theme-dark-text-base-on-recording,
+    text-base-on-warn:                      $theme-dark-text-base-on-warn,
+    text-light-on-primary:                  $theme-dark-text-light-on-primary,
+    text-light-on-accent:                   $theme-dark-text-light-on-accent,
+    text-light-on-success:                  $theme-dark-text-light-on-success,
+    text-light-on-info:                     $theme-dark-text-light-on-info,
+    text-light-on-error:                    $theme-dark-text-light-on-error,
+    text-light-on-recording:                $theme-dark-text-light-on-recording,
+    text-light-on-warn:                     $theme-dark-text-light-on-warn,
+    text-lighter-on-primary:                $theme-dark-text-lighter-on-primary,
+    text-lighter-on-accent:                 $theme-dark-text-lighter-on-accent,
+    text-lighter-on-success:                $theme-dark-text-lighter-on-success,
+    text-lighter-on-info:                   $theme-dark-text-lighter-on-info,
+    text-lighter-on-error:                  $theme-dark-text-lighter-on-error,
+    text-lighter-on-recording:              $theme-dark-text-lighter-on-recording,
+    text-lighter-on-warn:                   $theme-dark-text-lighter-on-warn,
+    text-lightest-on-primary:               $theme-dark-text-lightest-on-primary,
+    text-lightest-on-accent:                $theme-dark-text-lightest-on-accent,
+    text-lightest-on-success:               $theme-dark-text-lightest-on-success,
+    text-lightest-on-info:                  $theme-dark-text-lightest-on-info,
+    text-lightest-on-error:                 $theme-dark-text-lightest-on-error,
+    text-lightest-on-recording:             $theme-dark-text-lightest-on-recording,
+    text-lightest-on-warn:                  $theme-dark-text-lightest-on-warn,
+    background-z0:                          $theme-dark-background-z0,
+    background-z1:                          $theme-dark-background-z1,
+    background-z2:                          $theme-dark-background-z2,
+    background-z3:                          $theme-dark-background-z3,
+    background-z4:                          $theme-dark-background-z4,
+    background-z5:                          $theme-dark-background-z5,
+    background-z6:                          $theme-dark-background-z6,
+    background-z7:                          $theme-dark-background-z7,
+    background-z8:                          $theme-dark-background-z8,
+    button-background:                      $theme-dark-background-z2,
+    button-border:                          $theme-dark-background-z3,
+    button-border-active:                   $theme-dark-background-z4,
+    control-background:                     $theme-dark-background-z2,
+    control-border:                         $theme-dark-background-z3,
+    control-border-active:                  $theme-dark-background-z4,
+    slider-thumb-background:                color-tint($theme-dark-gray, 80%),
+    slider-thumb-border:                    $theme-dark-background-z2,
+    sidebar-background:                     $theme-dark-background-z1,
+    sidebar-border:                         $theme-dark-background-z3,
+    topbar-background:                      $theme-dark-background-z1,
+    topbar-border:                          $theme-dark-background-z3,
+    titlebar-background:                    $theme-dark-background-z1,
+    event-drawer-background:                $theme-dark-background-z1,
+    event-drawer-border:                    $theme-dark-background-z3,
+    modal-background:                       $theme-dark-background-z1,
+    modal-border:                           $theme-dark-background-z3,
+    glass-background:                       rgba($theme-dark-background-z1, $glass-opacity)
   )
 );
 
@@ -200,6 +301,18 @@ $font-size-large: 16px;
 $font-size: 14px;
 $font-size-small: 12px;
 $font-size-extra-small: 10px;
+
+$text-body-1-size: 12px;
+$text-body-1-size-small: 10px;
+$text-body-1-size-large: 14px;
+
+$text-body-2-size: 11px;
+$text-body-2-size-small: 9px;
+$text-body-2-size-large: 13px;
+
+$text-detail-size: 12px;
+$text-detail-size-small: 10px;
+$text-detail-size-large: 14px;
 
 $line-height: $unit * 6;
 
@@ -237,3 +350,13 @@ $border-radius-large: $unit * 2;
 $padding: $unit * 2;
 $padding-small: $unit;
 $padding-large: $unit * 3;
+
+$list-item-single-size: $unit * 8;
+$list-item-single-size-small: $unit * 6;
+$list-item-single-size-large: $unit * 10;
+
+$list-item-double-size: $list-item-single-size * 2;
+$list-item-double-size-small: $list-item-single-size-small * 2;
+$list-item-double-size-large: $list-item-single-size-large * 2;
+
+$icon-size: $unit * 6;

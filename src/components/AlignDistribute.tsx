@@ -1,10 +1,8 @@
 import React, { ReactElement } from 'react';
 import SidebarSectionWrap from './SidebarSectionWrap';
-import SidebarSection from './SidebarSection';
-import SidebarSectionRow from './SidebarSectionRow';
-import SidebarSectionColumn from './SidebarSectionColumn';
 import DistributeHorizontallyToggle from './DistributeHorizontallyToggle';
 import DistributeVerticallyToggle from './DistributeVerticallyToggle';
+import ButtonGroup from './ButtonGroup';
 import AlignLeftToggle from './AlignLeftToggle';
 import AlignRightToggle from './AlignRightToggle';
 import AlignTopToggle from './AlignTopToggle';
@@ -15,34 +13,16 @@ import AlignMiddleToggle from './AlignMiddleToggle';
 const AlignDistribute = (): ReactElement => {
   return (
     <SidebarSectionWrap bottomBorder>
-      <SidebarSection>
-        <SidebarSectionRow>
-          <SidebarSectionColumn>
-            <DistributeHorizontallyToggle />
-          </SidebarSectionColumn>
-          <SidebarSectionColumn>
-            <DistributeVerticallyToggle />
-          </SidebarSectionColumn>
-          <SidebarSectionColumn>
-            <AlignLeftToggle />
-          </SidebarSectionColumn>
-          <SidebarSectionColumn>
-            <AlignCenterToggle />
-          </SidebarSectionColumn>
-          <SidebarSectionColumn>
-            <AlignRightToggle />
-          </SidebarSectionColumn>
-          <SidebarSectionColumn>
-            <AlignTopToggle />
-          </SidebarSectionColumn>
-          <SidebarSectionColumn>
-            <AlignMiddleToggle />
-          </SidebarSectionColumn>
-          <SidebarSectionColumn>
-            <AlignBottomToggle />
-          </SidebarSectionColumn>
-        </SidebarSectionRow>
-      </SidebarSection>
+      <ButtonGroup block>
+        <DistributeHorizontallyToggle />
+        <DistributeVerticallyToggle />
+        <AlignLeftToggle />
+        <AlignCenterToggle />
+        <AlignRightToggle />
+        <AlignTopToggle />
+        <AlignMiddleToggle />
+        <AlignBottomToggle />
+      </ButtonGroup>
     </SidebarSectionWrap>
   );
 }

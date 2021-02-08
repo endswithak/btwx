@@ -6,11 +6,12 @@ import FormGroupContext from './FormGroupContext';
 interface TextProps {
   size?: Btwx.TextSizeVariant;
   variant?: Btwx.TextColorVariant;
+  textStyle?: Btwx.TextStyle;
   children: any;
 }
 
 const Text = (props: TextProps): ReactElement => {
-  const { children, size, variant } = props;
+  const { children, size, variant, textStyle } = props;
 
   return (
     <span
@@ -22,6 +23,10 @@ const Text = (props: TextProps): ReactElement => {
         variant
         ? `${' '}c-text--${variant}`
         : `${' '}c-text--base`
+      }${
+        textStyle
+        ? `${' '}c-text--${textStyle}`
+        : ''
       }`}>
       { children }
     </span>

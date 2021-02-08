@@ -24,8 +24,8 @@ const GradientSliderRemove = (props: GradientSliderProps): ReactElement => {
     <IconButton
       onClick={removeStop}
       disabled={disabled}
-      icon='trash-can'
-      remove />
+      iconName='trash-can'
+      variant='error' />
   );
 }
 

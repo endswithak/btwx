@@ -19,7 +19,7 @@ const EventDrawerListItemEdit = (props: EventDrawerListItemEditProps): ReactElem
     <div className='c-event-drawer-list-item__action c-event-drawer-list-item__action--edit'>
       <IconButton
         onClick={handleClick}
-        icon='edit' />
+        iconName='edit' />
     </div>
   );
 }

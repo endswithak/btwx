@@ -1,9 +1,8 @@
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { showLayerChildren, hideLayerChildren } from '../store/actions/layer';
-import { ThemeContext } from './ThemeProvider';
-import Icon from './Icon';
+import IconButton from './IconButton';
 
 interface SidebarLayerChevronProps {
   id: string;
@@ -13,7 +12,6 @@ interface SidebarLayerChevronProps {
 }
 
 const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { id, isDragGhost, isOpen, setOpen } = props;
   const canOpen = useSelector((state: RootState) => state.layer.present.byId[id].type === 'Group' || state.layer.present.byId[id].type === 'Artboard');
   const isSelected = useSelector((state: RootState) => state.layer.present.byId[id].selected);
@@ -37,29 +35,54 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
   return (
     <div
       className='c-sidebar-layer__icon c-sidebar-layer__icon--chevron'
-      id={`${id}-open-icon`}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onMouseDown={canOpen ? handleMouseDown : null}
-      onMouseUp={() => setHover(true)}
-      style={{
-        pointerEvents: canOpen ? 'auto' : 'none'
-      }}>
+      id={`${id}-open-icon`}>
       {
         canOpen
-        ? <Icon
-            name={isOpen ? 'thicc-chevron-down' : 'thicc-chevron-right'}
+        ? <IconButton
+            active={isOpen}
+            onMouseEnter={() => setHover(true)}
+            onMouseLeave={() => setHover(false)}
+            onMouseDown={canOpen ? handleMouseDown : null}
+            onMouseUp={() => setHover(true)}
+            iconName='thicc-chevron-right'
+            activeIconName='thicc-chevron-down'
             size='small'
+            variant={
+              isSelected
+              ? 'primary'
+              : null
+            }
             style={{
-              fill: isSelected
-              ? theme.text.onPalette.primary
-              : hover
-                ? theme.text.base
-                : theme.text.lighter
+              pointerEvents: canOpen ? 'auto' : 'none'
             }} />
         : null
       }
     </div>
+    // <div
+    //   className='c-sidebar-layer__icon c-sidebar-layer__icon--chevron'
+    //   id={`${id}-open-icon`}
+    //   onMouseEnter={() => setHover(true)}
+    //   onMouseLeave={() => setHover(false)}
+    //   onMouseDown={canOpen ? handleMouseDown : null}
+    //   onMouseUp={() => setHover(true)}
+    //   style={{
+    //     pointerEvents: canOpen ? 'auto' : 'none'
+    //   }}>
+    //   {
+    //     canOpen
+    //     ? <IconButton
+    //         name={isOpen ? 'thicc-chevron-down' : 'thicc-chevron-right'}
+    //         size='small'
+    //         variant={
+    //           isSelected
+    //           ? 'base-on-primary'
+    //           : hover
+    //             ? 'base'
+    //             : 'lighter'
+    //         } />
+    //     : null
+    //   }
+    // </div>
   );
 }
 

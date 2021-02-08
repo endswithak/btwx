@@ -3,30 +3,56 @@
   font-size: $font-size;
   line-height: $line-height;
 
-  &--small {
+  &.c-text--body-1 {
+    @include themed() {
+      color: theme-prop(text-base);
+    }
+    font-size: $text-body-1-size;
+  }
+
+  &.c-text--body-2 {
+    @include themed() {
+      color: theme-prop(text-light);
+    }
+    font-size: $text-body-2-size;
+  }
+
+  &.c-text--small {
     font-size: $font-size-small;
+
+    &.c-text--body-1 {
+      font-size: $text-body-1-size-small;
+    }
+
+    &.c-text--body-2 {
+      font-size: $text-body-2-size-small;
+    }
   }
 
-  &--extra-small {
-    font-size: $font-size-extra-small;
-  }
-
-  &--large {
+  &.c-text--large {
     font-size: $font-size-large;
+
+    &.c-text--body-1 {
+      font-size: $text-body-1-size-large;
+    }
+
+    &.c-text--body-2 {
+      font-size: $text-body-2-size-large;
+    }
   }
 
   @each $theme-color-name in $theme-color-names {
-    &--#{$theme-color-name} {
+    &.c-text--#{$theme-color-name} {
       @include themed() {
-        color: theme-prop($theme-color-name);
+        color: theme-prop($theme-color-name) !important;
       }
     }
   }
 
   @each $theme-text-color-name in $theme-text-color-names {
-    &--#{$theme-text-color-name} {
+    &.c-text--on-#{$theme-text-color-name} {
       @include themed() {
-        color: theme-prop(text-#{$theme-text-color-name});
+        color: theme-prop(text-#{$theme-text-color-name}) !important;
       }
     }
   }

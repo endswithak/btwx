@@ -5,7 +5,7 @@ import { RootState } from '../store/reducers';
 import { openArtboardPresetEditor } from '../store/actions/artboardPresetEditor';
 import Button from './Button';
 
-const SidebarArtboardPlatformAdd = (): ReactElement => {
+const ArtboardPresetAddButton = (): ReactElement => {
   const artboardPresetEditor = useSelector((state: RootState) => state.artboardPresetEditor);
   const dispatch = useDispatch();
 
@@ -15,16 +15,20 @@ const SidebarArtboardPlatformAdd = (): ReactElement => {
       category: artboardPresetEditor.category,
       type: artboardPresetEditor.type,
       width: artboardPresetEditor.width,
-      height: artboardPresetEditor.height
+      height: artboardPresetEditor.height,
+      new: true
     }));
   }
 
   return (
     <Button
-      text='Add Custom Size...'
+      block
       onClick={handleClick}
-      active={artboardPresetEditor.isOpen} />
+      active={artboardPresetEditor.isOpen && artboardPresetEditor.new}
+      size='small'>
+      Add Custom Size...
+    </Button>
   );
 }
 
-export default SidebarArtboardPlatformAdd;
+export default ArtboardPresetAddButton;

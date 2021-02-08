@@ -33,7 +33,7 @@ const SidebarCollapseSection = (props: SidebarCollapseSectionProps): ReactElemen
                 <IconButton
                   onClick={onClick}
                   size='small'
-                  icon={collapsed ? 'thicc-chevron-right' : 'thicc-chevron-down'} />
+                  iconName={collapsed ? 'thicc-chevron-right' : 'thicc-chevron-down'} />
               </>
             </SidebarSectionRow>
           </SidebarSectionColumn>

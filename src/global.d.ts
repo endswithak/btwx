@@ -17,7 +17,41 @@ declare namespace Btwx {
 
   type ColorVariant = 'primary' | 'accent' | 'success' | 'error' | 'warn' | 'info';
 
-  type TextColorVariant = ColorVariant | 'base' | 'light' | 'lighter' | 'lightest' | 'on-primary' | 'on-accent' | 'on-success' | 'on-error' | 'on-info' | 'on-warn';
+  type TextColorVariant = ColorVariant |
+                          'base' |
+                          'light' |
+                          'lighter' |
+                          'lightest' |
+                          'base-on-primary' |
+                          'base-on-accent' |
+                          'base-on-success' |
+                          'base-on-error' |
+                          'base-on-info' |
+                          'base-on-warn' |
+                          'base-on-recording' |
+                          'light-on-primary' |
+                          'light-on-accent' |
+                          'light-on-success' |
+                          'light-on-error' |
+                          'light-on-info' |
+                          'light-on-warn' |
+                          'light-on-recording' |
+                          'lighter-on-primary' |
+                          'lighter-on-accent' |
+                          'lighter-on-success' |
+                          'lighter-on-error' |
+                          'lighter-on-info' |
+                          'lighter-on-warn' |
+                          'lighter-on-recording' |
+                          'lightest-on-primary' |
+                          'lightest-on-accent' |
+                          'lightest-on-success' |
+                          'lightest-on-error' |
+                          'lightest-on-info' |
+                          'lightest-on-warn' |
+                          'lightest-on-recording';
+
+  type TextStyle = 'body-1' | 'body-2' | 'detail' | 'cap' | 'small-cap';
 
   type SizeVariant = 'small' | 'large';
 

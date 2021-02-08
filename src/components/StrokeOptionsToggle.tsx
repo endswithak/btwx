@@ -12,7 +12,7 @@ const StrokeOptionsToggle = (props: StrokeOptionsToggleProps): ReactElement => {
   return (
     <IconButton
       onClick={onClick}
-      icon='more'
+      iconName='more'
       active={showOptions}
       description={showOptions ? 'hide stroke options' : 'show stroke options'}
       size='small' />

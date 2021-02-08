@@ -6,8 +6,7 @@ import { DEVICES } from '../constants';
 import Form from './Form';
 import Icon from './Icon';
 
-const SidebarArtboardPlatformSelector = (): ReactElement => {
-  const formRef = useRef<HTMLFormElement>(null);
+const ArtboardPresetPlatform = (): ReactElement => {
   const formControlRef = useRef<HTMLSelectElement>(null);
   const platformValue = useSelector((state: RootState) => state.documentSettings.artboardPresets.platform);
   const optionValues = useSelector((state: RootState) => [
@@ -50,10 +49,9 @@ const SidebarArtboardPlatformSelector = (): ReactElement => {
 
   return (
     <Form
-      ref={formRef}
       inline
       validated={true}>
-      <Form.Group controlId='blend-mode'>
+      <Form.Group controlId='control-platform'>
         <Form.Control
           ref={formControlRef}
           as='select'
@@ -76,4 +74,4 @@ const SidebarArtboardPlatformSelector = (): ReactElement => {
   );
 }
 
-export default SidebarArtboardPlatformSelector;
+export default ArtboardPresetPlatform;

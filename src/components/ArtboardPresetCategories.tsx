@@ -2,15 +2,9 @@ import React, { ReactElement } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { DEVICES } from '../constants';
-import SidebarArtboardPlatformCategory from './SidebarArtboardPlatformCategory';
+import ArtboardPresetCategory from './ArtboardPresetCategory';
 
-interface SidebarArtboardPlatformCategoriesProps {
-  orientation: Btwx.DeviceOrientationType;
-  onDeviceClick(device: Btwx.Device): void;
-}
-
-const SidebarArtboardPlatformCategories = (props: SidebarArtboardPlatformCategoriesProps): ReactElement => {
-  const { orientation, onDeviceClick } = props;
+const ArtboardPresetCategories = (): ReactElement => {
   const categories = useSelector((state: RootState) => state.documentSettings.artboardPresets.platform === 'Custom' ? [{
     type: 'Custom',
     devices: state.documentSettings.artboardPresets.allIds.reduce((result: Btwx.ArtboardPreset[], current) => {
@@ -23,15 +17,13 @@ const SidebarArtboardPlatformCategories = (props: SidebarArtboardPlatformCategor
     <>
       {
         categories.map((category, index) => (
-          <SidebarArtboardPlatformCategory
+          <ArtboardPresetCategory
             key={index}
-            category={category}
-            onDeviceClick={onDeviceClick}
-            orientation={orientation} />
+            category={category} />
         ))
       }
     </>
   );
 }
 
-export default SidebarArtboardPlatformCategories;
+export default ArtboardPresetCategories;

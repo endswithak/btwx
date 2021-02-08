@@ -1,0 +1,29 @@
+.c-icon {
+  @include themed() {
+    fill: theme-prop(text-lighter);
+  }
+  display: inline-block;
+  width: $icon-size;
+  height: $icon-size;
+
+  &.c-icon--small {
+    transform: scale(0.75);
+  }
+
+  &.c-icon--large {
+    transform: scale(1.75);
+  }
+
+  @each $theme-color-name in $theme-color-names {
+    &.c-icon--#{$theme-color-name} {
+      @include themed() {
+        fill: theme-prop($theme-color-name);
+      }
+    }
+    &.c-icon--on-#{$theme-color-name} {
+      @include themed() {
+        fill: theme-prop(text-on-#{$theme-color-name});
+      }
+    }
+  }
+}
