@@ -6,17 +6,17 @@ interface StrokeOptionsToggleProps {
   setStyleEnabled(styleEnabled: boolean): void;
 }
 
-const StyleToggle = (props: StrokeOptionsToggleProps): ReactElement => {
-  const { styleEnabled, setStyleEnabled } = props;
-
-  return (
-    <IconButton
-      onClick={() => setStyleEnabled(!styleEnabled)}
-      size='small'
-      active={styleEnabled}
-      iconName='switch-off'
-      activeIconName='switch-on' />
-  );
-}
+const StyleToggle = ({
+  styleEnabled,
+  setStyleEnabled
+}: StrokeOptionsToggleProps): ReactElement => (
+  <IconButton
+    onClick={() => setStyleEnabled(!styleEnabled)}
+    size='small'
+    active={styleEnabled}
+    variant={styleEnabled ? 'primary' : null}
+    iconName='switch-off'
+    activeIconName='switch-on' />
+);
 
 export default StyleToggle;

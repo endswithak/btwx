@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
-import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { setEventDrawerTweenEditing } from '../store/actions/eventDrawer';
 import { setLayerTweenTiming } from '../store/actions/layer';
@@ -15,7 +14,7 @@ interface TimelineLeftHandleProps {
 }
 
 const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
-  const theme = useContext(ThemeContext);
+  const themeUnit = 4;
   const { tweenId } = props;
   const tween = useSelector((state: RootState) => state.layer.present.tweens.byId[tweenId]);
   const [prevDelay, setPrevDelay] = useState(tween.delay);
@@ -23,8 +22,8 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
   const dispatch = useDispatch();
 
   const setupHandle = (): void => {
-    const rightHandleInitialPos = ((tween.delay * 100) * theme.unit) + ((tween.duration * 100) * theme.unit) - theme.unit * 4;
-    const leftHandleInitialPos = ((tween.delay * 100) * theme.unit);
+    const rightHandleInitialPos = ((tween.delay * 100) * themeUnit) + ((tween.duration * 100) * themeUnit) - themeUnit * 4;
+    const leftHandleInitialPos = ((tween.delay * 100) * themeUnit);
     const leftHandleElement = document.getElementById(`${tweenId}-handle-left`);
     if (Draggable.get(leftHandleElement)) {
       Draggable.get(leftHandleElement).kill();
@@ -46,10 +45,10 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
         minY: timelineElement.clientHeight,
         maxY: timelineElement.clientHeight
       },
-      minX: theme.unit,
+      minX: themeUnit,
       liveSnap: {
         x: function(value): number {
-          return Math.round(value / theme.unit) * theme.unit;
+          return Math.round(value / themeUnit) * themeUnit;
         }
       },
       onPress: function() {
@@ -78,12 +77,12 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
         });
         Draggable.get(rightHandleElement).update().applyBounds({
           minX: this.x,
-          maxX: timelineElement.clientWidth - (theme.unit * 4),
+          maxX: timelineElement.clientWidth - (themeUnit * 4),
           minY: timelineElement.clientHeight,
           maxY: timelineElement.clientHeight
         });
         const rightHandlePos = Draggable.get(rightHandleElement).x;
-        const duration = (((rightHandlePos + theme.unit * 4) - this.x) / 4) / 100;
+        const duration = (((rightHandlePos + themeUnit * 4) - this.x) / 4) / 100;
         const delay = (this.x / 4) / 100;
         setPrevDelay(delay);
         dispatch(setLayerTweenTiming({id: tweenId, duration, delay}));
@@ -108,12 +107,12 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
       const rightHandleElement = document.getElementById(`${tweenId}-handle-right`);
       const leftHandleElement = document.getElementById(`${tweenId}-handle-left`);
       const timelineElement = document.getElementById(`${tweenId}-timeline`);
-      const leftHandlePos = ((tween.delay * 100) * theme.unit);
+      const leftHandlePos = ((tween.delay * 100) * themeUnit);
       gsap.set(leftHandleElement, {x: leftHandlePos});
       Draggable.get(leftHandleElement).update();
       Draggable.get(rightHandleElement).update().applyBounds({
         minX: Draggable.get(leftHandleElement).x,
-        maxX: timelineElement.clientWidth - (theme.unit * 4),
+        maxX: timelineElement.clientWidth - (themeUnit * 4),
         minY: timelineElement.clientHeight,
         maxY: timelineElement.clientHeight
       });
@@ -133,19 +132,10 @@ const TimelineLeftHandle = (props: TimelineLeftHandleProps): ReactElement => {
     <div
       id={`${tweenId}-handle-left`}
       className='c-timeline-handle c-timeline-handle--left'>
-      <div
-        className='c-timeline-handle__ellipse'
-        style={{
-          background: theme.text.onPalette.primary
-        }} />
+      <div className='c-timeline-handle__ellipse' />
       <span
         id={`${tweenId}-tooltip-left`}
-        className='c-timeline-handle__tooltip'
-        style={{
-          background: theme.name === 'dark' ? theme.background.z6 : theme.background.z0,
-          color: theme.text.base,
-          boxShadow: `0 1px 4px 0 rgba(0,0,0,0.25)`
-        }} />
+        className='c-timeline-handle__tooltip' />
     </div>
   );
 }

@@ -1,16 +1,16 @@
-import React, { useContext, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setEventDrawerTweenHoverThunk } from '../store/actions/eventDrawer';
-import { ThemeContext } from './ThemeProvider';
 import EventDrawerEventEditEase from './EventDrawerEventEditEase';
+import Icon from './Icon';
+import ListItem from './ListItem';
 
 interface EventDrawerEventLayerTweenPropProps {
   tweenId: string;
 }
 
 const EventDrawerEventLayerTweenProp = (props: EventDrawerEventLayerTweenPropProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { tweenId } = props;
   const tween = useSelector((state: RootState) => state.layer.present.tweens.byId[tweenId]);
   const tweenHover = useSelector((state: RootState) => state.eventDrawer.tweenHover);
@@ -30,27 +30,29 @@ const EventDrawerEventLayerTweenProp = (props: EventDrawerEventLayerTweenPropPro
   }
 
   return (
-    <div
-      className='c-event-drawer-event-layer__tween'
+    <ListItem
       onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}>
+      onMouseLeave={handleMouseLeave}
+      flushWithPadding>
       {
         tweenId === tweenHover && !tweenEditing || tweenId === tweenEditing
         ? <EventDrawerEventEditEase tweenId={tweenId} />
-        : <div className='c-event-drawer__icon' />
+        : <Icon />
       }
-      <div
-        className='c-event-drawer-event-layer-tween__name'
-        style={{
-          color: tweenId === tweenEditing
-          ? theme.palette.primary
-          : tweenId === tweenHover
-            ? theme.text.base
-            : theme.text.lighter
-        }}>
-        { titleCaseProp }
-      </div>
-    </div>
+      <ListItem.Body>
+        <ListItem.Text
+          size='small'
+          variant={
+            tweenId === tweenEditing
+            ? 'primary'
+            : tweenId === tweenHover
+              ? 'base'
+              : 'lighter'
+          }>
+          { titleCaseProp }
+        </ListItem.Text>
+      </ListItem.Body>
+    </ListItem>
   );
 }
 

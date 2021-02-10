@@ -1,5 +1,12 @@
 $font-family: 'Space Mono', system-ui, -apple-system, 'Space Mono', Menlo, Helvetica, Arial, sans-serif;
 
+$aspect-ratios: (
+  "1x1": 100%,
+  "4x3": calc(3 / 4 * 100%),
+  "16x9": calc(9 / 16 * 100%),
+  "21x9": calc(9 / 21 * 100%)
+);
+
 $size-names: "small", "large";
 
 $glass-opacity: 0.88;
@@ -205,6 +212,9 @@ $themes: (
     control-background:                     $theme-light-background-z0,
     control-border:                         $theme-light-background-z3,
     control-border-active:                  $theme-light-background-z4,
+    list-item-root-background:              $theme-light-background-z0,
+    list-item-root-border:                  $theme-light-background-z3,
+    list-item-root-border-active:           $theme-light-background-z4,
     slider-thumb-background:                #fff,
     slider-thumb-border:                    $theme-light-background-z5,
     sidebar-background:                     $theme-light-background-z1,
@@ -280,6 +290,9 @@ $themes: (
     control-background:                     $theme-dark-background-z2,
     control-border:                         $theme-dark-background-z3,
     control-border-active:                  $theme-dark-background-z4,
+    list-item-root-background:              $theme-dark-background-z2,
+    list-item-root-border:                  $theme-dark-background-z3,
+    list-item-root-border-active:           $theme-dark-background-z4,
     slider-thumb-background:                color-tint($theme-dark-gray, 80%),
     slider-thumb-border:                    $theme-dark-background-z2,
     sidebar-background:                     $theme-dark-background-z1,
@@ -335,9 +348,9 @@ $control-size: $unit * 8;
 $control-size-small: $unit * 6;
 $control-size-large: $unit * 10;
 
-$addon-size: $unit * 8;
+$addon-size: $unit * 6;
 $addon-size-small: $unit * 6;
-$addon-size-large: $unit * 10;
+$addon-size-large: $unit * 6;
 
 $button-size: $unit * 8;
 $button-size-small: $unit * 6;
@@ -347,9 +360,8 @@ $border-radius: $unit;
 $border-radius-small: $unit / 2;
 $border-radius-large: $unit * 2;
 
-$padding: $unit * 2;
-$padding-small: $unit;
-$padding-large: $unit * 3;
+$padding: $unit;
+$padding-large: $unit * 2;
 
 $list-item-single-size: $unit * 8;
 $list-item-single-size-small: $unit * 6;

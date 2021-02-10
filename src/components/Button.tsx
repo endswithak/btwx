@@ -8,7 +8,7 @@ export interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
   disabled?: boolean;
   active?: boolean;
   type?: Btwx.ButtonType;
-  variant?: Btwx.ColorVariant;
+  variant?: Btwx.ColorVariant | Btwx.TextColorVariant;
   size?: Btwx.SizeVariant;
   left?: ReactElement;
   right?: ReactElement;
@@ -16,6 +16,7 @@ export interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
   rightReadOnly?: boolean;
   block?: boolean;
   icon?: boolean;
+  square?: boolean;
 }
 
 const Button: React.FC<ButtonProps & React.HTMLAttributes<HTMLOrSVGElement>> = ({
@@ -32,6 +33,7 @@ const Button: React.FC<ButtonProps & React.HTMLAttributes<HTMLOrSVGElement>> = (
   icon,
   block,
   active,
+  square,
   ...rest
 }: ButtonProps) => (
   <Tag
@@ -40,6 +42,10 @@ const Button: React.FC<ButtonProps & React.HTMLAttributes<HTMLOrSVGElement>> = (
     className={`c-button${
       block
       ? `${' '}c-button--block`
+      : ''
+    }${
+      square
+      ? `${' '}c-button--square`
       : ''
     }${
       icon

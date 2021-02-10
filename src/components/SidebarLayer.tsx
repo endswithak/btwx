@@ -29,7 +29,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   const isSelected = useSelector((state: RootState) => state.layer.present.byId[id].selected);
   const isEditing = useSelector((state: RootState) => state.leftSidebar.editing === id);
   const isArtboard = useSelector((state: RootState) => state.layer.present.byId[id].type === 'Artboard' && !isDragGhost);
-  const isHovering = useSelector((state: RootState) => state.layer.present.byId[id].hover && !isDragGhost);
+  const isActiveArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard === id);
   // const isHover = useSelector((state: RootState) => state.layer.present.byId[id].hover);
   // const hover = useSelector((state: RootState) => state.layer.present.hover);
   // const underlyingMask = useSelector((state: RootState) => state.layer.present.byId[id].type !== 'Artboard' ? (state.layer.present.byId[id] as Btwx.MaskableLayer).underlyingMask : null);
@@ -108,8 +108,11 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
 
   return (
     <ListItem
-      as='button'
+      as='div'
       id={isDragGhost ? `dragGhost-${id}` : id}
+      flush
+      interactive
+      root={isArtboard}
       draggable={!isDragGhost && draggable}
       onMouseEnter={isDragGhost ? null : handleMouseEnter}
       onMouseLeave={isDragGhost ? null : handleMouseLeave}
@@ -143,6 +146,18 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
         ? <SidebarLayerDropzoneWrap
             layer={id}
             isDragGhost={isDragGhost} />
+        : null
+      }
+      {
+        isActiveArtboard
+        ? <ListItem.Right>
+            <div
+              className={`c-sidebar-layer__icon--aa${
+                isSelected
+                ? `${' '}c-sidebar-layer__icon--aa-selected`
+                : ''
+              }`} />
+          </ListItem.Right>
         : null
       }
     </ListItem>

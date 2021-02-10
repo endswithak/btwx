@@ -4,16 +4,18 @@ import { RootState } from '../store/reducers';
 import { ThemeContext } from './ThemeProvider';
 
 interface IconProps {
-  name: string;
+  name?: string;
   style?: any;
   size?: Btwx.SizeVariant;
   shapeId?: string;
   variant?: Btwx.TextColorVariant;
+  outline?: boolean;
+  path?: string;
 }
 
 const Icon = (props: IconProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { name, style, size, shapeId, variant } = props;
+  const { name, style, size, shapeId, variant, outline, path } = props;
   const pathData = useSelector((state: RootState) => name === 'shape' && shapeId && state.layer.present.shapeIcons[shapeId] ? state.layer.present.shapeIcons[shapeId] : null);
   const iconData = (() => {
     switch(name) {
@@ -57,6 +59,12 @@ const Icon = (props: IconProps): ReactElement => {
         return {
           name: 'artboard',
           fill: 'M12.4743416,2.84188612 L12.859,3.99988612 L21,4 L21,15 L22,15 L22,16 L16.859,15.9998861 L18.4743416,20.8418861 L17.5256584,21.1581139 L16.805,18.9998861 L7.193,18.9998861 L6.47434165,21.1581139 L5.52565835,20.8418861 L7.139,15.9998861 L2,16 L2,15 L3,15 L3,4 L11.139,3.99988612 L11.5256584,2.84188612 L12.4743416,2.84188612 Z M15.805,15.9998861 L8.193,15.9998861 L7.526,17.9998861 L16.472,17.9998861 L15.805,15.9998861 Z M20,5 L4,5 L4,15 L20,15 L20,5 Z',
+          opacity: null
+        }
+      case 'active-artboard':
+        return {
+          name: 'active-artboard',
+          fill: 'M12.4743416,2.84188612 L12.859,3.99988612 L21,4 L21,15 L22,15 L22,16 L16.859,15.9998861 L18.4743416,20.8418861 L17.5256584,21.1581139 L16.805,18.9998861 L7.193,18.9998861 L6.47434165,21.1581139 L5.52565835,20.8418861 L7.139,15.9998861 L2,16 L2,15 L3,15 L3.00004975,12.9645627 C3.1633354,12.9879165 3.33025657,13 3.5,13 C3.67008985,13 3.8373459,12.9878671 4.00094991,12.9644196 L4,15 L20,15 L20,5 L4,5 L4.00094991,6.03558044 C3.8373459,6.0121329 3.67008985,6 3.5,6 C3.33025657,6 3.1633354,6.01208353 3.00004975,6.03543731 L3,4 L11.139,3.99988612 L11.5256584,2.84188612 L12.4743416,2.84188612 Z M15.805,15.9998861 L8.193,15.9998861 L7.526,17.9998861 L16.472,17.9998861 L15.805,15.9998861 Z M3.5,7 C4.88071187,7 6,8.11928813 6,9.5 C6,10.8807119 4.88071187,12 3.5,12 C2.11928813,12 1,10.8807119 1,9.5 C1,8.11928813 2.11928813,7 3.5,7 Z',
           opacity: null
         }
       case 'rectangle':
@@ -532,7 +540,7 @@ const Icon = (props: IconProps): ReactElement => {
     }
   })();
   return (
-    <svg
+    <span
       className={`c-icon${
         size
         ? `${' '}c-icon--${size}`
@@ -541,18 +549,24 @@ const Icon = (props: IconProps): ReactElement => {
         variant
         ? `${' '}c-icon--${variant}`
         : ''
+      }${
+        outline
+        ? `${' '}c-icon--outline`
+        : ''
       }`}
-      viewBox='0 0 24 24'
-      width='24px'
-      height='24px'
       style={style}>
-      <path d={iconData && iconData.fill ? iconData.fill : null} />
-      {
-        iconData && iconData.opacity
-        ? <path style={{ opacity: 0.5 }} d={iconData.opacity} />
-        : null
-      }
-    </svg>
+      <svg
+        viewBox='0 0 24 24'
+        width='24px'
+        height='24px'>
+        <path d={iconData && iconData.fill ? iconData.fill : path ? path : null} />
+        {
+          iconData && iconData.opacity
+          ? <path style={{ opacity: 0.5 }} d={iconData.opacity} />
+          : null
+        }
+      </svg>
+    </span>
   )
 }
 

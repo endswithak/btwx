@@ -1,22 +1,21 @@
-import React, { useContext, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { ScrollSyncPane } from 'react-scroll-sync';
 import { RootState } from '../store/reducers';
 import { getTweenEventLayers } from '../store/selectors/layer';
 import { setEventDrawerEventThunk } from '../store/actions/eventDrawer';
-import { setLayerHover, selectLayers } from '../store/actions/layer';
-import { ThemeContext } from './ThemeProvider';
+import { setLayerHover } from '../store/actions/layer';
 import EventDrawerEventLayer from './EventDrawerEventLayer';
-import EventDrawerEventLayersHeader from './EventDrawerEventLayersHeader';
 import EventDrawerEventLayersEmptyState from './EventDrawerEventLayersEmptyState';
-import EventDrawerEventLayersStickyHeader from './EventDrawerEventLayersStickyHeader';
+import EventDrawerStickyHeader from './EventDrawerStickyHeader';
+import IconButton from './IconButton';
+import ListItem from './ListItem';
 
 interface EventDrawerEventLayersProps {
   scrollLayer: string;
 }
 
 const EventDrawerEventLayers = (props: EventDrawerEventLayersProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { scrollLayer } = props;
   const eventLayers = useSelector((state: RootState) => getTweenEventLayers(state.layer.present, state.eventDrawer.event));
   const isEmpty = eventLayers.allIds.length === 0;
@@ -47,26 +46,29 @@ const EventDrawerEventLayers = (props: EventDrawerEventLayersProps): ReactElemen
       id='event-layers'
       className='c-event-drawer-event__layers'
       style={{
-        boxShadow: `-1px 0 0 ${theme.name === 'dark'
-        ? theme.background.z4
-        : theme.background.z5} inset`,
         width: eventDrawerEventLayersWidth
       }}>
-      <EventDrawerEventLayersHeader
-        text={artboardItem.name}
-        icon={{
-          name: 'thicc-chevron-left',
-          small: true
-        }}
-        // onClick={(): void => handleClick(artboardItem.id)}
+      <ListItem
+        as='div'
         onMouseEnter={(): void => handleMouseEnter(artboardItem.id)}
         onMouseLeave={handleMouseLeave}
-        onIconClick={() => dispatch(setEventDrawerEventThunk({id: null}))} />
+        flushWithPadding
+        root>
+        <IconButton
+          iconName='thicc-chevron-left'
+          size='small'
+          onClick={() => dispatch(setEventDrawerEventThunk({id: null}))} />
+        <ListItem.Body>
+          <ListItem.Text size='small'>
+            { artboardItem.name }
+          </ListItem.Text>
+        </ListItem.Body>
+      </ListItem>
       {
         isEmpty
         ? <EventDrawerEventLayersEmptyState />
         : <>
-            <EventDrawerEventLayersStickyHeader
+            <EventDrawerStickyHeader
               scrollLayer={scrollLayer} />
             <ScrollSyncPane>
               <div

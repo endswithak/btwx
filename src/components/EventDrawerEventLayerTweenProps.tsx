@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getTweenEventLayerTweens } from '../store/selectors/layer';
 import EventDrawerEventLayerTweenProp from './EventDrawerEventLayerTweenProp';
+import ListGroup from './ListGroup';
 
 interface EventDrawerEventLayerTweenPropsProps {
   layerId: string;
@@ -23,7 +24,7 @@ const EventDrawerEventLayerTweenProps = (props: EventDrawerEventLayerTweenPropsP
   }, []);
 
   return (
-    <>
+    <ListGroup>
       {
         orderedLayerTweensByProp.map((id, index) => (
           <EventDrawerEventLayerTweenProp
@@ -31,7 +32,7 @@ const EventDrawerEventLayerTweenProps = (props: EventDrawerEventLayerTweenPropsP
             tweenId={id} />
         ))
       }
-    </>
+    </ListGroup>
   );
 }
 

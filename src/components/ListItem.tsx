@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React from 'react';
 import Icon from './Icon';
 import Text from './Text';
 import ListItemBody from './ListItemBody';
@@ -12,7 +12,10 @@ interface ListItemProps {
   variant?: Btwx.ColorVariant;
   right?: any;
   active?: boolean;
-  nestingLevel?: number;
+  root?: boolean;
+  flush?: boolean;
+  flushWithPadding?: boolean;
+  interactive?: boolean;
 }
 
 type ListItem = React.FC<ListItemProps & React.HTMLAttributes<HTMLOrSVGElement>> & {
@@ -30,7 +33,10 @@ const ListItem: ListItem = ({
   size,
   variant,
   right,
-  nestingLevel,
+  root,
+  flush,
+  flushWithPadding,
+  interactive,
   ...rest
 }: ListItemProps) =>  {
 
@@ -40,6 +46,22 @@ const ListItem: ListItem = ({
       className={`c-list-item${
         active
         ? `${' '}c-list-item--active`
+        : ''
+      }${
+        interactive
+        ? `${' '}c-list-item--interactive`
+        : ''
+      }${
+        flush
+        ? `${' '}c-list-item--flush`
+        : ''
+      }${
+        flushWithPadding
+        ? `${' '}c-list-item--flush-with-padding`
+        : ''
+      }${
+        root
+        ? `${' '}c-list-item--root`
         : ''
       }${
         variant

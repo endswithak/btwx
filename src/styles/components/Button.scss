@@ -9,6 +9,10 @@
       fill: theme-prop(text-light);
     }
 
+    .c-icon--outline {
+      stroke: theme-prop(text-light);
+    }
+
     &:hover,
     &:focus,
     &:focus &:hover {
@@ -17,6 +21,10 @@
 
       .c-icon {
         fill: theme-prop(text-base);
+      }
+
+      .c-icon--outline {
+        stroke: theme-prop(text-base);
       }
     }
 
@@ -28,6 +36,10 @@
 
       .c-icon {
         fill: theme-prop(text-lighter);
+      }
+
+      .c-icon--outline {
+        stroke: theme-prop(text-lighter);
       }
 
       &:hover,
@@ -42,7 +54,7 @@
   font-size: $font-size;
   line-height: $button-size;
   text-align: center;
-  padding: 0 $padding-small;
+  padding: 0 $padding;
   height: $button-size;
   flex-wrap: nowrap;
   align-items: center;
@@ -62,7 +74,6 @@
   }
 
   &.c-button--small {
-    padding: 0 $padding-small;
     height: $button-size-small;
     font-size: $font-size-small;
     line-height: $button-size-small;
@@ -101,6 +112,10 @@
         fill: theme-prop(text-light-on-primary);
       }
 
+      .c-icon--outline {
+        stroke: theme-prop(text-light-on-primary);
+      }
+
       &:hover,
       &:focus,
       &:focus &:hover  {
@@ -111,8 +126,21 @@
         .c-icon {
           fill: theme-prop(text-base-on-primary);
         }
+
+        .c-icon--outline {
+          stroke: theme-prop(text-base-on-primary);
+        }
       }
     }
+  }
+
+  &.c-button--square {
+    @include aspect(1, 1);
+    height: auto !important;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   &.c-button--block {
@@ -124,23 +152,51 @@
       padding: 0;
       background: none;
       box-shadow: none;
+      flex-shrink: 0;
+
+      .c-icon {
+        fill: theme-prop(text-lighter);
+      }
+
+      .c-icon--outline {
+        stroke: theme-prop(text-lighter);
+      }
+
+      &:hover  {
+        background: none;
+        box-shadow: none;
+
+        .c-icon {
+          fill: theme-prop(text-base);
+        }
+
+        .c-icon--outline {
+          stroke: theme-prop(text-base);
+        }
+      }
 
       &.c-button--active {
         background: none;
         box-shadow: none;
 
         .c-icon {
-          fill: theme-prop(primary);
+          fill: theme-prop(text-lighter);
         }
 
-        &:hover,
-        &:focus,
-        &:focus &:hover  {
+        .c-icon--outline {
+          stroke: theme-prop(text-lighter);
+        }
+
+        &:hover {
           background: none;
           box-shadow: none;
 
           .c-icon {
-            fill: theme-prop(primary-active);
+            fill: theme-prop(text-base);
+          }
+
+          .c-icon--outline {
+            stroke: theme-prop(text-base);
           }
         }
       }
@@ -158,6 +214,10 @@
           fill: theme-prop(text-light-on-#{$theme-color-name});
         }
 
+        .c-icon--outline {
+          stroke: theme-prop(text-light-on-#{$theme-color-name});
+        }
+
         &:hover,
         &:focus,
         &:focus &:hover  {
@@ -167,6 +227,10 @@
 
           .c-icon {
             fill: theme-prop(text-base-on-#{$theme-color-name});
+          }
+
+          .c-icon--outline {
+            stroke: theme-prop(text-base-on-#{$theme-color-name});
           }
         }
       }

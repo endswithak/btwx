@@ -127,7 +127,7 @@ export const getLayersWithSearch = createSelector(
   (layersById, layerSearch, allArtboardIds) => {
     return Object.keys(layersById).reduce((result, current) => {
       const name = layersById[current].name;
-      if (name.toUpperCase().includes(layerSearch.replace(/\s/g, '').toUpperCase()) && name !== 'root') {
+      if (name.replace(/\s/g, '').toUpperCase().includes(layerSearch.replace(/\s/g, '').toUpperCase()) && name !== 'root') {
         if (allArtboardIds.includes(current)) {
           result = [...result, current];
         } else {

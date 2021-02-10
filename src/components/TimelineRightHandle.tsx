@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
-import { ThemeContext } from './ThemeProvider';
 import { RootState } from '../store/reducers';
 import { setEventDrawerTweenEditing } from '../store/actions/eventDrawer';
 import { setLayerTweenDuration } from '../store/actions/layer';
@@ -15,7 +14,7 @@ interface TimelineRightHandleProps {
 }
 
 const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
-  const theme = useContext(ThemeContext);
+  const themeUnit = 4;
   const { tweenId } = props;
   const tween = useSelector((state: RootState) => state.layer.present.tweens.byId[tweenId]);
   const [prevDuration, setPrevDuration] = useState(tween.duration);
@@ -24,8 +23,8 @@ const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
   const dispatch = useDispatch();
 
   const setupHandle = (): void => {
-    const rightHandleInitialPos = ((tween.delay * 100) * theme.unit) + ((tween.duration * 100) * theme.unit) - theme.unit * 4;
-    const leftHandleInitialPos = ((tween.delay * 100) * theme.unit);
+    const rightHandleInitialPos = ((tween.delay * 100) * themeUnit) + ((tween.duration * 100) * themeUnit) - themeUnit * 4;
+    const leftHandleInitialPos = ((tween.delay * 100) * themeUnit);
     const rightHandleElement = document.getElementById(`${tweenId}-handle-right`);
     if (Draggable.get(rightHandleElement)) {
       Draggable.get(rightHandleElement).kill();
@@ -43,18 +42,18 @@ const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
       autoScroll: 1,
       bounds: {
         minX: Draggable.get(leftHandleElement) ? Draggable.get(leftHandleElement).x : leftHandleInitialPos,
-        maxX: timelineElement.clientWidth - (theme.unit * 4),
+        maxX: timelineElement.clientWidth - (themeUnit * 4),
         minY: timelineElement.clientHeight,
         maxY: timelineElement.clientHeight
       },
       liveSnap: {
         x: function(value): number {
-          return Math.round(value / theme.unit) * theme.unit;
+          return Math.round(value / themeUnit) * themeUnit;
         }
       },
       onPress: function() {
         dispatch(setEventDrawerTweenEditing({id: tweenId}));
-        gsap.set(guide, {x: this.x + (theme.unit * 4)});
+        gsap.set(guide, {x: this.x + (themeUnit * 4)});
         gsap.set(rightTooltipElement, {display: 'inline'});
         rightTooltipElement.innerHTML = `${(tweenHandleElement.clientWidth / 4) / 100}s`;
         document.body.style.cursor = 'ew-resize';
@@ -83,7 +82,7 @@ const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
           maxY: timelineElement.clientHeight
         });
         const leftHandlePos = Draggable.get(leftHandleElement).x;
-        const duration = (((this.x + theme.unit * 4) - leftHandlePos) / 4) / 100;
+        const duration = (((this.x + themeUnit * 4) - leftHandlePos) / 4) / 100;
         setPrevDuration(duration);
         dispatch(setLayerTweenDuration({id: tweenId, duration }));
       }
@@ -107,7 +106,7 @@ const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
       const rightHandleElement = document.getElementById(`${tweenId}-handle-right`);
       const leftHandleElement = document.getElementById(`${tweenId}-handle-left`);
       const timelineElement = document.getElementById(`${tweenId}-timeline`);
-      const rightHandlePos = ((tween.delay * 100) * theme.unit) + ((tween.duration * 100) * theme.unit) - theme.unit * 4;
+      const rightHandlePos = ((tween.delay * 100) * themeUnit) + ((tween.duration * 100) * themeUnit) - themeUnit * 4;
       gsap.set(rightHandleElement, {x: rightHandlePos});
       Draggable.get(rightHandleElement).update();
       Draggable.get(leftHandleElement).update().applyBounds({
@@ -133,25 +132,10 @@ const TimelineRightHandle = (props: TimelineRightHandleProps): ReactElement => {
     <div
       id={`${tweenId}-handle-right`}
       className='c-timeline-handle c-timeline-handle--right'>
-      <div
-        className='c-timeline-handle__ellipse'
-        style={{
-          background: theme.text.onPalette.primary
-        }} />
+      <div className='c-timeline-handle__ellipse' />
       <span
         id={`${tweenId}-tooltip-right`}
-        className='c-timeline-handle__tooltip'
-        style={{
-          background: theme.name === 'dark' ? theme.background.z6 : theme.background.z0,
-          color: theme.text.base,
-          boxShadow: `0 1px 4px 0 rgba(0,0,0,0.25)`
-        }} />
-      <div
-        className='c-timeline-handle__guide'
-        style={{
-          background: theme.palette.error,
-          right: 0
-        }} />
+        className='c-timeline-handle__tooltip' />
     </div>
   );
 }

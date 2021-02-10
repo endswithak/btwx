@@ -71,7 +71,7 @@
   }
   display: block;
   font-family: $font-family;
-  font-size: $font-size;
+  font-size: $font-size-small;
   width: 100%;
   line-height: $control-size;
   border: none;
@@ -84,6 +84,13 @@
     padding-left: $addon-size;
   }
 
+  &.c-form-control--search {
+    @include themed() {
+      box-shadow: none !important;
+      background: none !important;
+    }
+  }
+
   &.c-form-control--right {
     padding-right: $addon-size;
   }
@@ -91,16 +98,7 @@
   &.c-form-control--small {
     font-size: $font-size-small;
     line-height: $control-size-small;
-    padding: 0 $padding-small;
     height: $control-size-small;
-
-    &.c-form-control--left {
-      padding-left: $addon-size-small;
-    }
-
-    &.c-form-control--right {
-      padding-right: $addon-size-small;
-    }
   }
 
   &.c-form-control--large {
@@ -108,14 +106,6 @@
     line-height: $control-size-large;
     padding: 0 $padding-large;
     height: $control-size-large;
-
-    &.c-form-control--left {
-      padding-left: $addon-size-large;
-    }
-
-    &.c-form-control--right {
-      padding-right: $addon-size-large;
-    }
   }
 
   &.c-form-control--valid {
@@ -191,16 +181,6 @@
 
   &.c-form-control__addon--read-only {
     pointer-events: none;
-  }
-
-  &.c-form-control__addon--small {
-    width: $addon-size-small;
-    height: $control-size-small;
-  }
-
-  &.c-form-control__addon--large {
-    width: $addon-size-large;
-    height: $control-size-large;
   }
 
   &.c-form-control__addon--left {

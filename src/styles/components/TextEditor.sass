@@ -11,6 +11,10 @@
   resize: none
   background: none
 
+  &::selection
+    @include themed()
+      background: theme-prop(primary)
+
 .c-text-editor__span
   white-space: pre
   position: absolute

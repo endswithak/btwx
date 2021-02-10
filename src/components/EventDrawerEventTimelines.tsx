@@ -5,7 +5,7 @@ import { RootState } from '../store/reducers';
 import { getTweenEventLayers } from '../store/selectors/layer';
 import EventDrawerEventTimeline from './EventDrawerEventTimeline';
 import EventDrawerEventTimelinesEmptyState from './EventDrawerEventTimelinesEmptyState';
-import EventDrawerEventTimelinesHeader from './EventDrawerEventTimelinesHeader';
+import EventDrawerEventTimelinesHeaders from './EventDrawerEventTimelinesHeaders';
 import EventDrawerEventTimelineGuide from './EventDrawerEventTimelineGuide';
 
 const EventDrawerEventTimelines = (): ReactElement => {
@@ -19,7 +19,7 @@ const EventDrawerEventTimelines = (): ReactElement => {
         isEmpty
         ? <EventDrawerEventTimelinesEmptyState />
         : <div className='c-event-drawer-event__layers-timeline'>
-            <EventDrawerEventTimelinesHeader />
+            <EventDrawerEventTimelinesHeaders />
             <ScrollSyncPane>
               <div
                 ref={timelineRef}

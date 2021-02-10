@@ -189,6 +189,8 @@
   margin-right: 0
 
 .c-ease-editor-main__section--foot
+  @include themed()
+    box-shadow: 0 -1px 0 0 theme-prop(modal-border)
   height: $unit * 18
   padding-top: $unit * 4
 
@@ -269,7 +271,10 @@
   justify-content: center
 
 .c-ease-editor-selector__dropdown
-  +background-blur
+  @include background-blur
+  @include themed()
+    background: theme-prop(glass-background)
+    box-shadow: 0 0 0 1px theme-prop(modal-border), 0 4px 16px 0 rgba(0,0,0,0.16)
   position: absolute
   width: 200px
   top: $unit * 6

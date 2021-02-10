@@ -29,6 +29,7 @@ export interface FormControlProps {
   disabled?: boolean;
   placeholder?: string;
   htmlSize?: number;
+  search?: boolean;
   onChange?: React.ChangeEventHandler<FormControlElement>;
   onFocus?: React.FocusEventHandler<FormControlElement>;
   onBlur?: React.FocusEventHandler<FormControlElement>;
@@ -74,6 +75,8 @@ const FormControl: RefForwardingComponent<'input', FormControlProps> = forwardRe
   rightReadOnly,
   colorGradient,
   multiColor,
+  style,
+  search,
   ...rest
 }: FormControlProps, ref: any) {
   const fg = useContext(FormGroupContext);
@@ -107,6 +110,10 @@ const FormControl: RefForwardingComponent<'input', FormControlProps> = forwardRe
           ? `${' '}c-form-control--left`
           : ''
         }${
+          search
+          ? `${' '}c-form-control--search`
+          : ''
+        }${
           right
           ? `${' '}c-form-control--right`
           : ''
@@ -135,9 +142,10 @@ const FormControl: RefForwardingComponent<'input', FormControlProps> = forwardRe
           ? `${' '}c-form-control--multi-color`
           : ''
         }`}
-        style={htmlSize ? {
-          height: htmlSize * controlSize
-        } : {}} />
+        style={{
+          ...style,
+          ...(htmlSize ? { height: htmlSize * controlSize } : {})
+        }} />
       {
         left
         ? <FormControlAddon

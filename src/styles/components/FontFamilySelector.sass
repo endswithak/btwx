@@ -1,5 +1,8 @@
 .c-font-family-selector
-  +background-blur
+  @include background-blur
+  @include themed()
+    background: theme-prop(glass-background)
+    box-shadow: 0 0 0 1px theme-prop(modal-border), 0 4px 16px 0 rgba(0,0,0,0.16)
   transform-origin: left top
   position: absolute
   width: 248px
@@ -46,58 +49,16 @@
       background: none
 
 .c-font-family-selector__items
+  @include themed()
+    box-shadow: 0 -1px 0 0 theme-prop(modal-border)
   width: 100%
   height: ($unit * 8) * 8
   position: relative
   overflow: hidden
 
-  .c-form
-    padding: 0 !important
-
-  .c-form-control
-    top: 1px
+  .c-form-group
+    padding: $unit * 2 0 !important
 
   .c-form-control__control
-    padding: $unit
-    border-radius: 0 0 $unit $unit
     background: none !important
     box-shadow: none !important
-
-.c-font-family-selector__item
-  position: relative
-  display: flex
-  align-items: center
-  justify-content: center
-  height: $unit * 8
-  width: 100%
-  padding: 0 $unit
-  border-radius: $unit
-
-.c-font-family-selector__item--bottom-divider
-  margin-bottom: $unit * 3
-
-  &:after
-    +content-block
-    height: 1px
-    top: $unit * 9.5
-    opacity: 0.44
-
-// .c-font-family-selector__item--text
-//   padding-left: $unit *
-
-.c-font-family-selector-item__icon
-  flex-grow: 0
-  flex-shrink: 0
-  width: $unit * 10
-  height $unit * 10
-  display: flex
-  align-items: center
-  justify-content: center
-
-.c-font-family-selector-item__label
-  flex-grow: 2
-  // font-family: $font-family
-  font-size: $font-size-small
-  line-height: $unit * 8
-  padding: 0
-  text-align: left

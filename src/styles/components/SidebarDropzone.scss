@@ -1,0 +1,37 @@
+.c-sidebar-dropzone {
+  @include absolute-full;
+  @include themed() {
+    &.c-sidebar-dropzone--top {
+      box-shadow: 0 $unit / 2 0 0 theme-prop(primary) inset;
+    }
+    &.c-sidebar-dropzone--center {
+      box-shadow: 0 0 0 1px theme-prop(primary) inset;
+    }
+    &.c-sidebar-dropzone--bottom {
+      box-shadow: 0 $unit / 2 0 0 theme-prop(primary);
+    }
+    &.c-sidebar-dropzone--parent {
+      box-shadow: 0 0 0 1px theme-prop(sidebar-border) inset;
+    }
+  }
+  z-index: 999999999;
+}
+
+.c-sidebar-dropzone__tbi {
+  @include themed() {
+    background: theme-prop(primary);
+  }
+  width: $unit * 2;
+  height: $unit * 2;
+  position: absolute;
+  left: -$unit;
+  border-radius: 50%;
+}
+
+.c-sidebar-dropzone__tbi--top {
+  top: -3px;
+}
+
+.c-sidebar-dropzone__tbi--bottom {
+  bottom: -5px;
+}

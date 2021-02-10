@@ -1,4 +1,6 @@
 .c-text {
+  @include truncate-text;
+  display: inline-block;
   font-family: $font-family;
   font-size: $font-size;
   line-height: $line-height;
@@ -50,7 +52,7 @@
   }
 
   @each $theme-text-color-name in $theme-text-color-names {
-    &.c-text--on-#{$theme-text-color-name} {
+    &.c-text--#{$theme-text-color-name} {
       @include themed() {
         color: theme-prop(text-#{$theme-text-color-name}) !important;
       }

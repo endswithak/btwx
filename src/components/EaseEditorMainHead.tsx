@@ -1,37 +1,16 @@
-import React, { ReactElement, useContext } from 'react';
+import React, { ReactElement } from 'react';
 import gsap from 'gsap';
-import styled from 'styled-components';
 import { CustomEase } from 'gsap/CustomEase';
 import { RoughEase, SlowMo } from 'gsap/EasePack';
 import { CustomBounce } from 'gsap/CustomBounce';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { closeEaseEditor } from '../store/actions/easeEditor';
-import { ThemeContext } from './ThemeProvider';
 import Icon from './Icon';
+import IconButton from './IconButton';
+import ToggleButtonGroup from './ToggleButtonGroup';
 
 gsap.registerPlugin(CustomEase, RoughEase, SlowMo, CustomBounce);
-
-interface ButtonProps {
-  isActive: boolean;
-  lineIcon?: boolean;
-}
-
-const Button = styled.button<ButtonProps>`
-  background: ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z3 : props.theme.background.z0};
-  box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z4 : props.theme.background.z5} inset;
-  svg {
-    stroke: ${props => props.lineIcon ? props.isActive ? props.theme.text.onPalette.primary : props.theme.text.lighter : 'none'};
-    fill: ${props => !props.lineIcon ? props.isActive ? props.theme.text.onPalette.primary : props.theme.text.lighter : 'none'};
-  }
-  :hover {
-    box-shadow: 0 0 0 1px${props => props.isActive ? props.theme.palette.primary : props.theme.name === 'dark' ? props.theme.background.z5 : props.theme.background.z6} inset;
-    svg {
-      stroke: ${props => props.lineIcon ? props.isActive ? props.theme.text.onPalette.primary : props.theme.text.base : 'none'};
-      fill: ${props => !props.lineIcon ? props.isActive ? props.theme.text.onPalette.primary : props.theme.text.base : 'none'};
-    }
-  }
-`;
 
 interface EaseEditorMainHeadProps {
   tab: Btwx.EaseEditorTab;
@@ -39,7 +18,6 @@ interface EaseEditorMainHeadProps {
 }
 
 const EaseEditorMainHead = (props: EaseEditorMainHeadProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { tab, setTab } = props;
   const isTextTween = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].prop === 'text' : null);
   const easeIcon = useSelector((state: RootState) => {
@@ -68,6 +46,9 @@ const EaseEditorMainHead = (props: EaseEditorMainHeadProps): ReactElement => {
       return null;
     }
   });
+  const handleChange = (e: any) => {
+    setTab(e.target.value);
+  }
   const dispatch = useDispatch();
 
   return (
@@ -75,47 +56,28 @@ const EaseEditorMainHead = (props: EaseEditorMainHeadProps): ReactElement => {
       <div className='c-ease-editor__tabs'>
         {
           isTextTween
-          ? <>
-              <Button
-                className='c-ease-editor__tab'
-                isActive={tab === 'ease'}
-                lineIcon={true}
-                theme={theme}
-                onClick={() => setTab('ease')}>
-                <svg
-                  viewBox='0 0 24 24'
-                  width='24px'
-                  height='24px'
-                  style={{
-                    strokeWidth: 1,
-                    transform: `scale(0.75)`,
-                    overflow: 'visible'
-                  }}>
-                  <path d={easeIcon} />
-                </svg>
-              </Button>
-              <Button
-                className='c-ease-editor__tab'
-                isActive={tab === 'text'}
-                lineIcon={false}
-                theme={theme}
-                onClick={() => setTab('text')}>
+          ? <ToggleButtonGroup
+              type='radio'
+              name='ease-editor-tab'
+              value={tab}
+              size='large'
+              onChange={handleChange}>
+              <ToggleButtonGroup.Button value='ease'>
                 <Icon
-                  name='ease-editor-text-tab' />
-              </Button>
-            </>
+                  path={easeIcon}
+                  size='small'
+                  outline />
+              </ToggleButtonGroup.Button>
+              <ToggleButtonGroup.Button value='text'>
+                <Icon name='ease-editor-text-tab' />
+              </ToggleButtonGroup.Button>
+            </ToggleButtonGroup>
           : null
         }
       </div>
-      <Button
-        className='c-ease-editor__tab c-ease-editor__tab--close'
-        isActive={false}
-        lineIcon={false}
-        theme={theme}
-        onClick={() => dispatch(closeEaseEditor())}>
-        <Icon
-          name='close' />
-      </Button>
+      <IconButton
+        iconName='close'
+        onClick={() => dispatch(closeEaseEditor())} />
     </div>
   );
 }

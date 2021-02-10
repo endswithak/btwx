@@ -4,7 +4,6 @@ import { FixedSizeTree as Tree } from '../../react-vtree';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getTreeWalker } from '../store/selectors/layer';
-import { setRef } from '../store/actions/leftSidebar';
 import SidebarLayer from './SidebarLayer';
 import SidebarLayerDragGhosts from './SidebarLayerDragGhosts';
 import SidebarLeftEmptyState from './SidebarLeftEmptyState';
@@ -13,7 +12,7 @@ const SidebarLayerTree = (): ReactElement => {
   const treeWalker = useSelector((state: RootState) => getTreeWalker(state));
   const isEmpty = useSelector((state: RootState) => state.layer.present.byId.root.children.length === 0);
   const searchActive = useSelector((state: RootState) => state.leftSidebar.search.replace(/\s/g, '').length > 0);
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
 
   // useEffect(() => {
   //   console.log('LAYER TREEEEEE');

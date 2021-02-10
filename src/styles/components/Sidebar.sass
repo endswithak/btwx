@@ -30,20 +30,8 @@
   overflow-x: hidden
 
 .c-sidebar__vtree
+  @include themed()
+    box-shadow: 0 1px 0 0 theme-prop(sidebar-border) inset
   position: absolute
   width: 100%
   height: 100%
-
-.c-sidebar--left
-  .c-sidebar__scroll
-    top: $unit / 2
-    height: calc(100% - 2px)
-
-.c-sidebar__drag-handle
-  position: absolute
-  height: 100%
-  width: $unit * 2
-  z-index: 2
-
-.c-sidebar__drag-handle--left
-  left: 0

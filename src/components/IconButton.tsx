@@ -6,12 +6,14 @@ interface IconButtonProps extends ButtonProps {
   iconName: string;
   activeIconName?: string;
   description?: string;
+  variant?: Btwx.TextColorVariant;
 }
 
 const IconButton = ({
   iconName,
   activeIconName,
   description,
+  variant,
   ...rest
 }: IconButtonProps): ReactElement => {
   const { active, size } = rest;
@@ -22,7 +24,8 @@ const IconButton = ({
       icon>
       <Icon
         name={activeIconName && active ? activeIconName : iconName}
-        size={size} />
+        size={size}
+        variant={variant} />
       <span className='h-screen-reader'>{description ? description : iconName}</span>
     </Button>
   );

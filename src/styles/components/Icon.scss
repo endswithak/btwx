@@ -2,27 +2,60 @@
   @include themed() {
     fill: theme-prop(text-lighter);
   }
-  display: inline-block;
+  display: inline-flex;
   width: $icon-size;
   height: $icon-size;
+  min-width: $icon-size;
+  min-height: $icon-size;
+  overflow: visible;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 
-  &.c-icon--small {
+  > svg {
+    overflow: visible;
+  }
+
+  &.c-icon--small > svg {
     transform: scale(0.75);
   }
 
-  &.c-icon--large {
+  &.c-icon--large > svg {
     transform: scale(1.75);
+  }
+
+  &.c-icon--outline {
+    @include themed() {
+      fill: none !important;
+      stroke: theme-prop(text-lighter);
+    }
+    stroke-width: 1px;
   }
 
   @each $theme-color-name in $theme-color-names {
     &.c-icon--#{$theme-color-name} {
       @include themed() {
-        fill: theme-prop($theme-color-name);
+        fill: theme-prop($theme-color-name) !important;
+      }
+      &.c-icon--outline {
+        @include themed() {
+          fill: none !important;
+          stroke: theme-prop($theme-color-name) !important;
+        }
       }
     }
-    &.c-icon--on-#{$theme-color-name} {
+  }
+
+  @each $text-theme-color-name in $theme-text-color-names {
+    &.c-icon--#{$text-theme-color-name} {
       @include themed() {
-        fill: theme-prop(text-on-#{$theme-color-name});
+        fill: theme-prop(text-#{$text-theme-color-name}) !important;
+      }
+      &.c-icon--outline {
+        @include themed() {
+          fill: none !important;
+          stroke: theme-prop(text-#{$text-theme-color-name}) !important;
+        }
       }
     }
   }

@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement } from 'react';
-import { ThemeContext } from './ThemeProvider';
-import FormGroupContext from './FormGroupContext';
+import React, { ReactElement } from 'react';
 
 interface TextProps {
   size?: Btwx.TextSizeVariant;
-  variant?: Btwx.TextColorVariant;
+  variant?: Btwx.ColorVariant | Btwx.TextColorVariant;
   textStyle?: Btwx.TextStyle;
   children: any;
 }

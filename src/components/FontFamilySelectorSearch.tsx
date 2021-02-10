@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { forwardRef } from 'react';
-import SearchInput from './SearchInput';
+import SearchFormControl from './SearchFormControl';
+import Form from './Form';
 
 interface FontFamilySearchProps {
   search: string;
@@ -25,22 +26,24 @@ const FontFamilySearch = forwardRef(function FontFamilySearch(props: FontFamilyS
   }
 
   const handleClear = (): void => {
+    setSearch('');
     setSearching(false);
   }
 
   return (
-    <SearchInput
-      ref={ref}
-      value={search}
-      active={searching}
-      field={{
-        placeholder: 'Search Typefaces...',
-        onFocus: (e): void => handleFocus(e),
-        onBlur: (e): void => handleBlur(e)
-      }}
-      onClear={handleClear}
-      onChangeDebounce={handleChangeDebounce}
-      submitOnBlur />
+    <Form
+      inline
+      canvasAutoFocus>
+      <SearchFormControl
+        ref={ref}
+        value={search}
+        isActive={searching}
+        placeholder='Search Typefaces...'
+        onBlur={handleBlur}
+        onFocus={handleFocus}
+        onClear={handleClear}
+        onChangeDebounce={handleChangeDebounce} />
+    </Form>
   )
 });
 

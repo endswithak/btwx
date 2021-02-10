@@ -2,6 +2,18 @@
   width: 100%
   padding: 0 $unit
 
+  &.c-sidebar-section-wrap--bottom-border
+    @include themed()
+      box-shadow: 0 -1px 0 0 theme-prop(sidebar-border) inset
+
+  &.c-sidebar-section-wrap--white-space
+    padding-top: $padding
+    padding-bottom: $padding
+
+  &.c-sidebar-section-wrap--bg
+    @include themed()
+      background: theme-prop(control-background)
+
 .c-sidebar-section
   display: flex
   flex-wrap: wrap

@@ -1,17 +1,14 @@
-import React, { ReactElement, useEffect, useState, useContext, useRef } from 'react';
+import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
 import { closeFontFamilySelector } from '../store/actions/fontFamilySelector';
 import FontFamilySelectorSearch from './FontFamilySelectorSearch';
 import FontFamilySelectorItems from './FontFamilySelectorItems';
-import { ThemeContext } from './ThemeProvider';
 
 
 const FontFamilySelector = (): ReactElement => {
-  const searchTextFieldRef = useRef<HTMLInputElement>(null);
+  const searchTextFieldRef = useRef(null);
   const listRef = useRef<HTMLDivElement>(null);
-  const theme = useContext(ThemeContext);
   const systemFonts = useSelector((state: RootState) => state.textSettings.systemFonts);
   const y = useSelector((state: RootState) => state.fontFamilySelector.y);
   const [itemData, setItemData] = useState([]);
@@ -28,7 +25,7 @@ const FontFamilySelector = (): ReactElement => {
   const getItemData = (search?: string): { value: string; label: boolean }[] => {
     if (search.replace(/\s/g, '').length > 0) {
       return systemFonts.reduce((result, current) => {
-        if (current.toUpperCase().includes(search.replace(/\s/g, '').toUpperCase())) {
+        if (current.replace(/\s/g, '').toUpperCase().includes(search.replace(/\s/g, '').toUpperCase())) {
           result = [...result, { value: current, label: current }];
         }
         return result;
@@ -60,14 +57,7 @@ const FontFamilySelector = (): ReactElement => {
       className='c-font-family-selector'
       ref={listRef}
       style={{
-        top: y,
-        background: tinyColor(theme.name === 'dark'
-        ? theme.background.z1
-        : theme.background.z2).setAlpha(0.77).toRgbString(),
-        boxShadow: `0 0 0 1px ${theme.name === 'dark'
-        ? theme.background.z4
-        : theme.background.z5
-        }, 0 4px 16px 0 rgba(0,0,0,0.16)`
+        top: y
       }}>
       <FontFamilySelectorSearch
         ref={searchTextFieldRef}

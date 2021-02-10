@@ -147,12 +147,15 @@ const ArtboardPresetEditor = (): ReactElement => {
             </Form.Group>
           </Form.Row>
           <Form.Row>
-            <Button onClick={() => dispatch(closeArtboardPresetEditor())}>
+            <Button
+              onClick={() => dispatch(closeArtboardPresetEditor())}
+              block>
               Cancel
             </Button>
             <Button
               type='submit'
-              variant='primary'>
+              variant='primary'
+              block>
               Save
             </Button>
           </Form.Row>

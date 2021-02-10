@@ -32,16 +32,20 @@ const FontFamilySelectorItems = (props: FontFamilySelectorItemsProps): ReactElem
     <div className='c-font-family-selector__items'>
       {
         itemData && itemData.length > 0
-        ? <Form>
-            <Form.Group controlId='control-font-family'>
+        ? <Form inline>
+            <Form.Group controlId='control-font-family-selector'>
               <Form.Control
                 ref={formControlRef}
                 as='select'
-                value={fontFamily}
+                value={searching ? undefined : fontFamily}
                 htmlSize={8}
                 type='text'
                 onChange={handleChange}
-                required>
+                required
+                style={{
+                  boxShadow: 'none',
+                  background: 'none'
+                }}>
                 {
                   itemData.map((ff: any, index) => (
                     <option
@@ -79,61 +83,3 @@ const FontFamilySelectorItems = (props: FontFamilySelectorItemsProps): ReactElem
 }
 
 export default FontFamilySelectorItems;
-
-// import React, { ReactElement, memo } from 'react';
-// import AutoSizer from 'react-virtualized-auto-sizer';
-// import { FixedSizeList as List } from 'react-window';
-// import FontFamilySelectorItem from './FontFamilySelectorItem';
-// import EmptyState from './EmptyState';
-
-// interface FontFamilySelectorItemsProps {
-//   itemData: { family: string; selected: boolean }[];
-//   search: string;
-//   searching: boolean;
-// }
-
-// const FontFamilySelectorItems = (props: FontFamilySelectorItemsProps): ReactElement => {
-//   const { itemData, search, searching } = props;
-
-//   const Node = memo(function Node(props: any) {
-//     const {data, index, style} = props;
-//     return (
-//       <FontFamilySelectorItem
-//         active={data[index].selected}
-//         fontFamily={data[index].family}
-//         style={style} />
-//     )
-//   });
-
-//   return (
-//     <div className='c-font-family-selector__items'>
-//       {
-//         itemData && itemData.length > 0
-//         ? <AutoSizer>
-//             {({height, width}): ReactElement => (
-//               <List
-//                 itemSize={32}
-//                 height={height}
-//                 itemCount={itemData.length}
-//                 itemData={itemData}
-//                 width={width}>
-//                 { Node }
-//               </List>
-//             )}
-//           </AutoSizer>
-//         : searching
-//           ? <EmptyState
-//               icon='search'
-//               text='No Typefaces Found'
-//               detail={`Could not find any typefaces matching "${search}"`}
-//               style={{width: 211}} />
-//           : <EmptyState
-//               icon='text'
-//               text='No Typefaces Found'
-//               style={{width: 211}} />
-//       }
-//     </div>
-//   );
-// }
-
-// export default FontFamilySelectorItems;

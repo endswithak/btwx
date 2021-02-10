@@ -7,11 +7,17 @@
   height: $unit * 4
 
 .c-timeline-handle__ellipse
+  @include themed()
+    background: theme-prop(text-base-on-primary)
   width: $unit * 2
   height: $unit * 2
   border-radius: $unit * 2
 
 .c-timeline-handle__tooltip
+  @include themed()
+    background: theme-prop(control-background)
+    box-shadow: 0 0 0 1px theme-prop(control-border) inset, 0 1px 4px 0 rgba(0,0,0,0.25)
+    color: theme-prop(text-base)
   display: flex
   position: absolute
   align-items: center
@@ -34,12 +40,8 @@
     left: 0
 
 .c-timeline-tween-handle
+  @include themed()
+    background: theme-prop(primary)
   position: relative
   height: $unit * 4
   border-radius: $unit * 2
-
-.c-event-drawer-event__guide
-  position: absolute
-  z-index: 3
-  width: 1px
-  height: 100%

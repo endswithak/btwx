@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { ReactElement, useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { setCanvasFocusing } from '../store/actions/canvasSettings';
 import { setLayerName } from '../store/actions/layer';
 import { setEditing } from '../store/actions/leftSidebar';
 import { RootState } from '../store/reducers';
@@ -18,17 +20,16 @@ const SidebarLayerTitleInput = (props: SidebarLayerTitleInputProps): ReactElemen
 
   const handleMouseDown = (event: any): void => {
     if (formControlRef.current && event.target !== formControlRef.current) {
-      if (formControlRef.current) {
-        formControlRef.current.blur();
-      }
+      formControlRef.current.blur();
     }
   }
 
-  const handleSubmit = (e: any): void => {
+  const handleSubmit = (): void => {
     if (name.replace(/\s/g, '').length > 0 && name !== nameValue) {
       dispatch(setLayerName({id: id, name: name}));
     }
     dispatch(setEditing({editing: null}));
+    dispatch(setCanvasFocusing({focusing: true}));
   }
 
   const handleChange = (e: any): void => {
@@ -41,6 +42,7 @@ const SidebarLayerTitleInput = (props: SidebarLayerTitleInputProps): ReactElemen
       formControlRef.current.focus();
       formControlRef.current.select();
     }
+    dispatch(setCanvasFocusing({focusing: false}));
     return () => {
       document.removeEventListener('mousedown', handleMouseDown);
     }
@@ -49,9 +51,7 @@ const SidebarLayerTitleInput = (props: SidebarLayerTitleInputProps): ReactElemen
   return (
     <Form
       inline
-      onSubmit={handleSubmit}
-      submitOnBlur
-      canvasAutoFocus>
+      onSubmit={handleSubmit}>
       <Form.Group controlId={`control-${id}-name`}>
         <Form.Control
           ref={formControlRef}
@@ -59,7 +59,8 @@ const SidebarLayerTitleInput = (props: SidebarLayerTitleInputProps): ReactElemen
           value={name}
           size='small'
           type='text'
-          onChange={handleChange} />
+          onChange={handleChange}
+          onBlur={handleSubmit} />
       </Form.Group>
     </Form>
   );

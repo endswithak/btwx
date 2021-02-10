@@ -15,7 +15,7 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
   const { id, isDragGhost, isOpen, setOpen } = props;
   const canOpen = useSelector((state: RootState) => state.layer.present.byId[id].type === 'Group' || state.layer.present.byId[id].type === 'Artboard');
   const isSelected = useSelector((state: RootState) => state.layer.present.byId[id].selected);
-  const [hover, setHover] = useState(false);
+  // const [hover, setHover] = useState(false);
   const dispatch = useDispatch();
 
   const handleMouseDown = (e: any) => {
@@ -40,16 +40,16 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
         canOpen
         ? <IconButton
             active={isOpen}
-            onMouseEnter={() => setHover(true)}
-            onMouseLeave={() => setHover(false)}
+            // onMouseEnter={() => setHover(true)}
+            // onMouseLeave={() => setHover(false)}
             onMouseDown={canOpen ? handleMouseDown : null}
-            onMouseUp={() => setHover(true)}
+            // onMouseUp={() => setHover(true)}
             iconName='thicc-chevron-right'
             activeIconName='thicc-chevron-down'
             size='small'
             variant={
               isSelected
-              ? 'primary'
+              ? 'lighter-on-primary'
               : null
             }
             style={{

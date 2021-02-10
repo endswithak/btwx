@@ -6,11 +6,23 @@
   display: flex
 
 .c-event-drawer-event__layers
+  @include themed()
+    box-shadow: 1px 0 0 0 theme-prop(event-drawer-border)
   height: 100%
   display: flex
   flex-direction: column
   flex-shrink: 0
   position: relative
+
+.c-event-drawer-event-layers__header
+  .c-list-item
+    padding: 0 $padding
+
+.c-event-drawer-event-layers-timeline__header
+  @include themed()
+    background: theme-prop(control-background)
+    box-shadow: 0 1px 0 0 theme-prop(event-drawer-border) inset
+  z-index: 4
 
 .c-event-drawer-event-layers__header,
 .c-event-drawer-event-layers-timeline__header
@@ -21,10 +33,15 @@
   width: 100%
   position: relative
 
-.c-event-drawer-event-layers__header--sticky
+.c-event-drawer-sticky-header
   position: absolute
   top: $unit * 8
   z-index: 2
+  display: flex
+  height: $unit * 8
+  min-height: $unit * 8
+  flex-shrink: 0
+  width: 100%
 
 .c-event-drawer-event-layers__layers,
 .c-event-drawer-event-layers-timeline__layers
@@ -77,7 +94,7 @@
   width: 100%
   font-size: $font-size-small
   align-items: center
-  padding: 0 $unit * 2
+  padding: 0 $padding
 
 .c-event-drawer-event-layer__icon
   margin-right: $unit * 2
@@ -86,6 +103,8 @@
   justify-content: center
 
 .c-event-drawer-event-layer-tween__name
+  @include themed()
+    color: theme-prop(text-base)
   flex-grow: 2
   width: 100%
   line-height: $unit * 8
@@ -121,3 +140,55 @@
   height: $unit
   width: $unit
   margin-left: $unit
+
+.c-event-drawer-event__guide
+  @include themed()
+    background: theme-prop(error)
+  position: absolute
+  z-index: 3
+  width: 1px
+  height: 100%
+
+.c-event-drawer-ruler
+  @include themed()
+    background: theme-prop(control-background)
+    box-shadow: 0 1px 0 0 theme-prop(event-drawer-border) inset, 0 1px 0 0 theme-prop(event-drawer-border)
+  display: flex
+  height: $unit * 8
+  max-height: $unit * 8
+  flex-shrink: 0
+  width: 100%
+  position: absolute
+  z-index: 3
+  top: $unit * 8
+
+.c-event-drawer-ruler__unit
+  @include themed()
+    box-shadow: -1px 0 0 0 theme-prop(event-drawer-border) inset
+  width: $unit * 5
+  min-width: $unit * 5
+  position: relative
+  flex-shrink: 0
+  display: flex
+  align-self: flex-end
+  height: 25%
+
+  > span
+    @include themed()
+      color: theme-prop(text-lighter)
+    position: absolute
+    bottom: $unit * 4
+    right: $unit
+    font-size: $font-size-extra-small
+
+  &.c-event-drawer-ruler__unit--quarter-second
+    height: 50%
+
+  &.c-event-drawer-ruler__unit--half-second
+    height: 75%
+
+  &.c-event-drawer-ruler__unit--second
+    height: 100%
+
+  &.c-event-drawer-ruler__unit--end
+    box-shadow: none

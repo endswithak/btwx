@@ -1,5 +1,4 @@
-import React, { useContext, ReactElement } from 'react';
-import { ThemeContext } from './ThemeProvider';
+import React, { ReactElement } from 'react';
 
 interface SidebarSectionWrapProps {
   children: ReactElement | ReactElement[];
@@ -9,31 +8,30 @@ interface SidebarSectionWrapProps {
   style?: any;
 }
 
-const SidebarSectionWrap = (props: SidebarSectionWrapProps): ReactElement => {
-  const theme = useContext(ThemeContext);
-  const { children, bottomBorder, whiteSpace, style, bg } = props;
-
-  return (
-    <div
-      className='c-sidebar-section-wrap'
-      style={{
-        boxShadow: bottomBorder
-        ? `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
-        : 'none',
-        paddingTop: whiteSpace
-        ? theme.unit
-        : 0,
-        paddingBottom: whiteSpace
-        ? theme.unit
-        : 0,
-        background: bg
-        ? theme.name === 'dark' ? theme.background.z3 : theme.background.z0
-        : 'none',
-        ...style
-      }}>
-      { children }
-    </div>
-  );
-}
+const SidebarSectionWrap = ({
+  children,
+  bottomBorder,
+  whiteSpace,
+  style,
+  bg
+}: SidebarSectionWrapProps): ReactElement => (
+  <div
+    className={`c-sidebar-section-wrap${
+      bottomBorder
+      ? `${' '}c-sidebar-section-wrap--bottom-border`
+      : ''
+    }${
+      whiteSpace
+      ? `${' '}c-sidebar-section-wrap--white-space`
+      : ''
+    }${
+      bg
+      ? `${' '}c-sidebar-section-wrap--bg`
+      : ''
+    }`}
+    style={style}>
+    { children }
+  </div>
+);
 
 export default SidebarSectionWrap;

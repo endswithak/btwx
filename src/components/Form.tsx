@@ -25,9 +25,16 @@ type Form = RefForwardingComponent<'form', FormProps> & {
   Row: typeof FormRow;
 }
 
-const Form: Form = (forwardRef(function Form(props: FormProps, ref) {
+const Form: Form = (forwardRef(function Form({
+  inline,
+  validated,
+  submitOnBlur,
+  canvasAutoFocus,
+  children,
+  ...rest
+}: FormProps, ref) {
   const canvasFocusing = useSelector((state: RootState) => state.canvasSettings.focusing);
-  const { inline, children, validated, submitOnBlur, canvasAutoFocus, onSubmit, onBlur, onFocus } = props;
+  const { onSubmit, onBlur, onFocus } = rest;
   const dispatch = useDispatch();
 
   const handleSubmit = (e: any): void => {
@@ -60,6 +67,7 @@ const Form: Form = (forwardRef(function Form(props: FormProps, ref) {
 
   return (
     <form
+      {...rest}
       noValidate
       className={`c-form ${inline ? 'c-form--inline' : ''}`}
       onSubmit={handleSubmit}

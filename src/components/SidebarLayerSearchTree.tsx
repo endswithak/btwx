@@ -19,7 +19,8 @@ const SidebarLayerTree = (): ReactElement => {
         isOpen={isOpen}
         setOpen={setOpen}
         style={style}
-        draggable={false} />
+        draggable={false}
+        searchTree />
     )
   });
 

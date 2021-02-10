@@ -65,7 +65,8 @@ const ArtboardPreset = (props: ArtboardPresetProps): ReactElement => {
     <ListItem
       onClick={handleDeviceClick}
       onContextMenu={handleContextMenu}
-      active={isActive}>
+      active={isActive}
+      interactive>
       <ListItem.Body>
         <ListItem.Text textStyle='body-1'>
           { device.type }

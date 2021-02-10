@@ -1,17 +1,54 @@
 .c-list-item {
-  @include themed() {
-    &:hover {
-      box-shadow: 0 0 0 1px theme-prop(primary) inset;
-    }
-  }
   position: relative;
   display: flex;
-  padding: 0 $padding-small;
   border-radius: $border-radius;
   align-items: center;
-  justify-content: center;
   height: $list-item-single-size;
+  min-height: $list-item-single-size;
   width: 100%;
+  padding: 0 $padding;
+
+  > * {
+    position: relative;
+    flex: 1 1 auto;
+  }
+
+  &.c-list-item--flush {
+    padding: 0;
+    border-radius: 0;
+  }
+
+  &.c-list-item--flush-with-padding {
+    border-radius: 0;
+  }
+
+  &.c-list-item--root {
+    @include themed() {
+      background: theme-prop(list-item-root-background);
+      box-shadow: 0 0 0 1px theme-prop(list-item-root-border) inset;
+
+      .c-text {
+        font-weight: $font-weight-bold;
+      }
+
+      &.c-list-item--active {
+        box-shadow: 0 0 0 1px theme-prop(primary) inset;
+      }
+
+      &.c-list-item--flush,
+      &.c-list-item--flush-with-padding {
+        box-shadow: 0 1px 0 0 theme-prop(list-item-root-border) inset, 0 1px 0 0 theme-prop(list-item-root-border);
+      }
+    }
+  }
+
+  &.c-list-item--interactive {
+    @include themed() {
+      &:hover {
+        box-shadow: 0 0 0 1px theme-prop(primary) inset !important;
+      }
+    }
+  }
 
   &.c-list-item--active {
     @include themed() {
@@ -29,21 +66,26 @@
 
   &.c-list-item--double {
     height: $list-item-double-size;
+    min-height: $list-item-double-size;
   }
 
   &.c-list-item--small {
     height: $list-item-single-size-small;
+    min-height: $list-item-single-size-small;
 
     &.c-list-item--double {
       height: $list-item-double-size-small;
+      min-height: $list-item-double-size-small;
     }
   }
 
   &.c-list-item--large {
     height: $list-item-single-size-large;
+    min-height: $list-item-single-size-large;
 
     &.c-list-item--double {
       height: $list-item-double-size-large;
+      min-height: $list-item-double-size-large;
     }
   }
 
@@ -69,7 +111,8 @@
   flex-grow: 2;
   display: flex;
   flex-direction: column;
-  padding: 0 $padding-small;
+  padding: 0 $padding-large;
+  overflow: hidden;
 }
 
 .c-list-item__right {
@@ -79,5 +122,5 @@
   justify-content: center;
   text-align: right;
   flex-shrink: 0;
-  padding: 0 $padding-small;
+  padding-right: $padding-large;
 }
