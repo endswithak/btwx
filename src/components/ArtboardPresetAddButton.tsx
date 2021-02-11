@@ -24,7 +24,7 @@ const ArtboardPresetAddButton = (): ReactElement => {
     <Button
       block
       onClick={handleClick}
-      active={artboardPresetEditor.isOpen && artboardPresetEditor.new}
+      isActive={artboardPresetEditor.isOpen && artboardPresetEditor.new}
       size='small'>
       Add Custom Size...
     </Button>

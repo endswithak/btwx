@@ -43,19 +43,6 @@ const SidebarLayersSearch = (): ReactElement => {
         onClear={handleClear}
         onChangeDebounce={handleChangeDebounce} />
     </Form>
-    // <SearchInput
-    //   ref={inputRef}
-    //   value={search}
-    //   active={active}
-    //   field={{
-    //     id: 'layers-search-input',
-    //     placeholder: 'Search Layers...',
-    //     onFocus: (e): void => handleFocus(e),
-    //     onBlur: (e): void => handleBlur(e)
-    //   }}
-    //   onClear={handleClear}
-    //   onChangeDebounce={handleChangeDebounce}
-    //   submitOnBlur />
   )
 }
 

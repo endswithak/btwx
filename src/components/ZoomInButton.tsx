@@ -1,18 +1,17 @@
 import React, { ReactElement } from 'react';
 import { useDispatch } from 'react-redux';
 import { zoomInThunk } from '../store/actions/zoomTool';
-import TopbarButton from './TopbarButton';
+import StackedButton from './StackedButton';
 
 const ZoomInButton = (): ReactElement => {
   const dispatch = useDispatch();
 
   return (
-    <TopbarButton
-      hideLabel
+    <StackedButton
       label='Zoom In'
       onClick={() => dispatch(zoomInThunk())}
-      icon='zoom-in'
-      />
+      iconName='zoom-in'
+      size='small' />
   );
 }
 

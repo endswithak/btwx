@@ -13,8 +13,9 @@ const StrokeOptionsToggle = (props: StrokeOptionsToggleProps): ReactElement => {
     <IconButton
       onClick={onClick}
       iconName='more'
-      active={showOptions}
-      description={showOptions ? 'hide stroke options' : 'show stroke options'}
+      isActive={showOptions}
+      toggle
+      label={showOptions ? 'hide stroke options' : 'show stroke options'}
       size='small' />
   );
 }

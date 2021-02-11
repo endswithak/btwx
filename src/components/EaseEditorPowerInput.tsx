@@ -25,7 +25,7 @@ const EaseEditorPowerInput = (): ReactElement => {
     <ToggleButtonGroup.Button
       key={key}
       value={key}
-      square>
+      aspectRatio='1x1'>
       <Icon
         path={CustomEase.getSVGData((DEFAULT_EASE_CURVES as any)[easeValue][key], {width: 24, height: 24})}
         size='large'

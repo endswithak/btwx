@@ -15,6 +15,8 @@ declare namespace Btwx {
 
   type ButtonType = 'submit' | 'reset' | 'button' | 'checkbox' | 'radio';
 
+  type AspectRatio = '1x1' | '4x3' | '16x9' | '21x9';
+
   type ColorVariant = 'primary' | 'accent' | 'success' | 'error' | 'warn' | 'info';
 
   type TextColorVariant = ColorVariant |
@@ -152,6 +154,8 @@ declare namespace Btwx {
   type DeviceOrientationType = 'Landscape' | 'Portrait';
 
   type BooleanOperation = 'unite' | 'intersect' | 'subtract' | 'exclude' | 'divide';
+
+  type TweenEventSortBy = 'layer' | 'event' | 'artboard' | 'destinationArtboard';
 
   type TweenEventSort = 'none' | 'layer-asc' | 'layer-dsc' | 'event-asc' | 'event-dsc' | 'artboard-asc' | 'artboard-dsc' | 'destinationArtboard-asc' | 'destinationArtboard-dsc';
 

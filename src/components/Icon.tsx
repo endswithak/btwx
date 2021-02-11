@@ -318,19 +318,19 @@ const Icon = (props: IconProps): ReactElement => {
       case 'justify-left':
         return {
           name: 'justify-left',
-          fill: 'M15 15H3v2h12v-2zm0-8H3v2h12V7zM3 13h18v-2H3v2zm0 8h18v-2H3v2zM3 3v2h18V3H3z',
+          fill: 'M21,19 L21,21 L3,21 L3,19 L21,19 Z M14,15 L14,17 L3,17 L3,15 L14,15 Z M18,11 L18,13 L3,13 L3,11 L18,11 Z M14,7 L14,9 L3,9 L3,7 L14,7 Z M21,3 L21,5 L3,5 L3,3 L21,3 Z',
           opacity: null
         }
       case 'justify-center':
         return {
           name: 'justify-center',
-          fill: 'M7 15v2h10v-2H7zm-4 6h18v-2H3v2zm0-8h18v-2H3v2zm4-6v2h10V7H7zM3 3v2h18V3H3z',
+          fill: 'M21,19 L21,21 L3,21 L3,19 L21,19 Z M18,15 L18,17 L7,17 L7,15 L18,15 Z M20,11 L20,13 L5,13 L5,11 L20,11 Z M18,7 L18,9 L7,9 L7,7 L18,7 Z M21,3 L21,5 L3,5 L3,3 L21,3 Z',
           opacity: null
         }
       case 'justify-right':
         return {
           name: 'justify-right',
-          fill: 'M3 21h18v-2H3v2zm6-4h12v-2H9v2zm-6-4h18v-2H3v2zm6-4h12V7H9v2zM3 3v2h18V3H3z',
+          fill: 'M21,19 L21,21 L3,21 L3,19 L21,19 Z M21,15 L21,17 L10,17 L10,15 L21,15 Z M21,11 L21,13 L6,13 L6,11 L21,11 Z M21,7 L21,9 L10,9 L10,7 L21,7 Z M21,3 L21,5 L3,5 L3,3 L21,3 Z',
           opacity: null
         }
       case 'thicc-chevron-down':

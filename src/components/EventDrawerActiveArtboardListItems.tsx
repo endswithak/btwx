@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getActiveArtboardSortedEvents } from '../store/selectors/layer';
 import EventDrawerListItem from './EventDrawerListItem';
+import ListGroup from './ListGroup';
 
 const EventDrawerActiveArtboardListItems = (): ReactElement => {
   const sortedTweenEvents = useSelector((state: RootState) => getActiveArtboardSortedEvents(state));
@@ -11,7 +12,7 @@ const EventDrawerActiveArtboardListItems = (): ReactElement => {
   return (
     activeArtboardEvents.length > 0
     ? <>
-        <div>
+        <ListGroup>
           {
             activeArtboardEvents.map((tweenEvent, index) => (
               <EventDrawerListItem
@@ -19,7 +20,7 @@ const EventDrawerActiveArtboardListItems = (): ReactElement => {
                 id={tweenEvent} />
             ))
           }
-        </div>
+        </ListGroup>
         <div className='c-event-drawer-events__divider' />
       </>
     : null

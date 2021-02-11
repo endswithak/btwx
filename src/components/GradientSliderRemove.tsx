@@ -25,7 +25,8 @@ const GradientSliderRemove = (props: GradientSliderProps): ReactElement => {
       onClick={removeStop}
       disabled={disabled}
       iconName='trash-can'
-      variant='error' />
+      variant='error'
+      label='delete stop' />
   );
 }
 

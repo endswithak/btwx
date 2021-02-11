@@ -14,7 +14,8 @@ const AlignLeftToggle = (): ReactElement => {
     <IconButton
       onClick={() => dispatch(alignLayersToLeft({layers: selected}))}
       iconName='align-left'
-      disabled={selected.length <= 1 || selectedLeft !== 'multi'} />
+      disabled={selected.length <= 1 || selectedLeft !== 'multi'}
+      label='align to left' />
   );
 }
 

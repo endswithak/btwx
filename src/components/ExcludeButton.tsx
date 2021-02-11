@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { applyBooleanOperationThunk } from '../store/actions/layer';
 import { canBooleanSelected } from '../store/selectors/layer';
-import TopbarButton from './TopbarButton';
+import StackedButton from './StackedButton';
 
 const ExcludeButton = (): ReactElement => {
   const canExclude = useSelector((state: RootState) => canBooleanSelected(state));
@@ -16,11 +16,12 @@ const ExcludeButton = (): ReactElement => {
   }
 
   return (
-    <TopbarButton
+    <StackedButton
       label='Difference'
       onClick={handleExcludeClick}
-      icon='exclude'
-      disabled={!canExclude} />
+      iconName='exclude'
+      disabled={!canExclude}
+      size='small' />
   );
 }
 

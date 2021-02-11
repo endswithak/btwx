@@ -1,103 +1,88 @@
-import React, { ReactElement } from 'react';
-import ButtonAddon from './ButtonAddon';
+import React, { ReactElement, forwardRef } from 'react';
+import { RefForwardingComponent } from '../utils';
 
 export interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
   children?: any;
   id?: string;
   as?: keyof JSX.IntrinsicElements;
   disabled?: boolean;
-  active?: boolean;
+  isActive?: boolean;
   type?: Btwx.ButtonType;
   variant?: Btwx.ColorVariant | Btwx.TextColorVariant;
   size?: Btwx.SizeVariant;
-  left?: ReactElement;
-  right?: ReactElement;
-  leftReadOnly?: boolean;
-  rightReadOnly?: boolean;
   block?: boolean;
+  clear?: boolean;
+  toggle?: boolean;
+  stacked?: boolean;
   icon?: boolean;
-  square?: boolean;
+  aspectRatio?: Btwx.AspectRatio;
 }
 
-const Button: React.FC<ButtonProps & React.HTMLAttributes<HTMLOrSVGElement>> = ({
+const Button: RefForwardingComponent<'button', ButtonProps> = forwardRef(function Button({
   as: Tag = 'button',
   children,
   variant,
   size,
   disabled,
   type,
-  left,
-  right,
-  leftReadOnly,
-  rightReadOnly,
   icon,
   block,
-  active,
-  square,
+  isActive,
+  toggle,
+  stacked,
+  clear,
+  aspectRatio,
   ...rest
-}: ButtonProps) => (
-  <Tag
-    {...rest}
-    type={type ? type : 'button'}
-    className={`c-button${
-      block
-      ? `${' '}c-button--block`
-      : ''
-    }${
-      square
-      ? `${' '}c-button--square`
-      : ''
-    }${
-      icon
-      ? `${' '}c-button--icon`
-      : ''
-    }${
-      left
-      ? `${' '}c-button--left`
-      : ''
-    }${
-      right
-      ? `${' '}c-button--right`
-      : ''
-    }${
-      variant
-      ? `${' '}c-button--${variant}`
-      : ''
-    }${
-      active
-      ? `${' '}c-button--active`
-      : ''
-    }${
-      size
-      ? `${' '}c-button--${size}`
-      : ''
-    }${
-      disabled
-      ? `${' '}c-button--disabled`
-      : ''
-    }`}>
-    { children }
-    {
-      left
-      ? <ButtonAddon
-          type='left'
-          size={size}
-          readOnly={leftReadOnly}>
-          { left }
-        </ButtonAddon>
-      : null
-    }
-    {
-      right
-      ? <ButtonAddon
-          type='right'
-          size={size}
-          readOnly={rightReadOnly}>
-          { right }
-        </ButtonAddon>
-      : null
-    }
-  </Tag>
-);
+}: ButtonProps, ref: any) {
+  return (
+    <Tag
+      {...rest}
+      ref={ref}
+      type={type ? type : 'button'}
+      className={`c-button${
+        block
+        ? `${' '}c-button--block`
+        : ''
+      }${
+        toggle
+        ? `${' '}c-button--toggle`
+        : ''
+      }${
+        stacked
+        ? `${' '}c-button--stacked`
+        : ''
+      }${
+        clear
+        ? `${' '}c-button--clear`
+        : ''
+      }${
+        aspectRatio
+        ? `${' '}c-button--${aspectRatio}`
+        : ''
+      }${
+        icon
+        ? `${' '}c-button--icon`
+        : ''
+      }${
+        variant
+        ? `${' '}c-button--${variant}`
+        : ''
+      }${
+        isActive
+        ? `${' '}c-button--active`
+        : ''
+      }${
+        size
+        ? `${' '}c-button--${size}`
+        : ''
+      }${
+        disabled
+        ? `${' '}c-button--disabled`
+        : ''
+      }`}>
+      { children }
+    </Tag>
+  )
+});
 
 export default Button;

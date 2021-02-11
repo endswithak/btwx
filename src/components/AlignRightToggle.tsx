@@ -14,7 +14,8 @@ const AlignRightToggle = (): ReactElement => {
     <IconButton
       onClick={() => dispatch(alignLayersToRight({layers: selected}))}
       iconName='align-right'
-      disabled={selected.length <= 1 || selectedRight !== 'multi'} />
+      disabled={selected.length <= 1 || selectedRight !== 'multi'}
+      label='align to right' />
   );
 }
 

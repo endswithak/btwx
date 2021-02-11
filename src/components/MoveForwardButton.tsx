@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { bringSelectedForwardThunk } from '../store/actions/layer';
 import { canBringSelectedForward } from '../store/selectors/layer';
-import TopbarButton from './TopbarButton';
+import StackedButton from './StackedButton';
 
 const MoveForwardButton = (): ReactElement => {
   const canMoveForward = useSelector((state: RootState) => canBringSelectedForward(state));
@@ -16,11 +16,12 @@ const MoveForwardButton = (): ReactElement => {
   }
 
   return (
-    <TopbarButton
+    <StackedButton
       label='Forward'
       onClick={handleMoveForwardClick}
-      icon='move-forward'
-      disabled={!canMoveForward} />
+      iconName='move-forward'
+      disabled={!canMoveForward}
+      size='small' />
   );
 }
 

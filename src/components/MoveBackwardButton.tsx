@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { canSendSelectedBackward } from '../store/selectors/layer';
 import { sendSelectedBackwardThunk } from '../store/actions/layer';
-import TopbarButton from './TopbarButton';
+import StackedButton from './StackedButton';
 
 const MoveBackwardButton = (): ReactElement => {
   const canMoveBackward = useSelector((state: RootState) => canSendSelectedBackward(state));
@@ -16,11 +16,12 @@ const MoveBackwardButton = (): ReactElement => {
   }
 
   return (
-    <TopbarButton
+    <StackedButton
       label='Backward'
       onClick={handleMoveBackwardClick}
-      icon='move-backward'
-      disabled={!canMoveBackward} />
+      iconName='move-backward'
+      disabled={!canMoveBackward}
+      size='small' />
   );
 }
 

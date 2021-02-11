@@ -4,6 +4,7 @@ import ListItem from './ListItem';
 interface ListGroupProps {
   as?: any;
   children?: any;
+  horizontal?: boolean;
 }
 
 type ListGroup = React.FC<ListGroupProps & React.HTMLAttributes<HTMLOrSVGElement>> & {
@@ -13,17 +14,19 @@ type ListGroup = React.FC<ListGroupProps & React.HTMLAttributes<HTMLOrSVGElement
 const ListGroup: ListGroup = ({
   as: Tag = 'ul',
   children,
+  horizontal,
   ...rest
-}: ListGroupProps) =>  {
-
-  return (
-    <Tag
-      {...rest}
-      className={`c-list-group`}>
-      { children }
-    </Tag>
-  );
-}
+}: ListGroupProps) => (
+  <Tag
+    {...rest}
+    className={`c-list-group${
+      horizontal
+      ? `${' '}c-list-group--horizontal`
+      : ''
+    }`}>
+    { children }
+  </Tag>
+);
 
 ListGroup.Item = ListItem;
 

@@ -1,34 +1,38 @@
-import React, { ReactElement } from 'react';
+import React, { forwardRef } from 'react';
 import Icon from './Icon';
 import Button, { ButtonProps } from './Button';
 
 interface IconButtonProps extends ButtonProps {
   iconName: string;
   activeIconName?: string;
-  description?: string;
   variant?: Btwx.TextColorVariant;
+  label?: string;
 }
 
-const IconButton = ({
+const IconButton = forwardRef(function IconButton({
   iconName,
   activeIconName,
-  description,
   variant,
+  label,
   ...rest
-}: IconButtonProps): ReactElement => {
-  const { active, size } = rest;
+}: IconButtonProps, ref: any) {
+  const { isActive, size } = rest;
 
   return (
     <Button
       {...rest}
+      ref={ref}
+      clear
       icon>
       <Icon
-        name={activeIconName && active ? activeIconName : iconName}
+        name={activeIconName && isActive ? activeIconName : iconName}
         size={size}
         variant={variant} />
-      <span className='h-screen-reader'>{description ? description : iconName}</span>
+      <span className='h-screen-reader'>
+        { label ? label : iconName }
+      </span>
     </Button>
   );
-}
+});
 
 export default IconButton;

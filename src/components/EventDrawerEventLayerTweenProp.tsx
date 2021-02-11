@@ -33,7 +33,7 @@ const EventDrawerEventLayerTweenProp = (props: EventDrawerEventLayerTweenPropPro
     <ListItem
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      flushWithPadding>
+      flush>
       {
         tweenId === tweenHover && !tweenEditing || tweenId === tweenEditing
         ? <EventDrawerEventEditEase tweenId={tweenId} />

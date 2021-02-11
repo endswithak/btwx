@@ -122,7 +122,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
       onDragStart={isDragGhost ? null : handleDragStart}
       onDragEnd={isDragGhost ? null : handleDragEnd}
       onDragEnter={handleDragEnter}
-      active={isSelected || isEditing}
+      isActive={isSelected || isEditing}
       style={{
         ...style,
         paddingLeft: !isDragGhost ? nestingLevel * 12 : 0

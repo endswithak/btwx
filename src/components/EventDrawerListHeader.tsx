@@ -1,36 +1,22 @@
-import React, { useContext, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import styled from 'styled-components';
 import { RootState } from '../store/reducers';
 import { setEventDrawerEventSort } from '../store/actions/eventDrawer';
-import { ThemeContext } from './ThemeProvider';
 import Icon from './Icon';
-
-interface HeaderItemProps {
-  isActive?: boolean;
-  isDisabled?: boolean;
-}
-
-const HeaderItem = styled.button<HeaderItemProps>`
-  color: ${props => props.isActive ? props.theme.palette.primary : props.theme.text.lighter};
-  font-weight: 700;
-  cursor:  ${props => props.isDisabled ? 'default' : 'pointer'};
-  :hover {
-    color: ${props => props.isActive && !props.isDisabled ? props.theme.palette.primaryHover : props.isDisabled ? props.theme.text.lighter : props.theme.text.base};
-  }
-`;
+import Text from './Text';
+import ListGroup from './ListGroup';
+import ListItem from './ListItem';
 
 const EventDrawerListHeader = (): ReactElement => {
-  const theme = useContext(ThemeContext);
   const eventSort = useSelector((state: RootState) => state.eventDrawer.eventSort);
   const sortOrder = eventSort !== 'none' ? eventSort.substring(eventSort.length, eventSort.length - 3) as 'asc' | 'dsc' : null;
-  const sortBy = eventSort !== 'none' ? ((): 'layer' | 'event' | 'artboard' | 'destinationArtboard' => {
+  const sortBy = eventSort !== 'none' ? ((): Btwx.TweenEventSortBy => {
     const hyphenIndex = eventSort.indexOf('-');
-    return eventSort.substring(0, hyphenIndex) as 'layer' | 'event' | 'artboard' | 'destinationArtboard';
+    return eventSort.substring(0, hyphenIndex) as Btwx.TweenEventSortBy;
   })() : null;
   const dispatch = useDispatch();
 
-  const handleSort = (by: 'layer' | 'event' | 'artboard' | 'destinationArtboard'): void => {
+  const handleSort = (by: Btwx.TweenEventSortBy): void => {
     if (sortOrder) {
       if (sortBy === by) {
         switch(sortOrder) {
@@ -49,18 +35,63 @@ const EventDrawerListHeader = (): ReactElement => {
     }
   }
 
+  const items = (['layer', 'event', 'artboard', 'destinationArtboard'] as Btwx.TweenEventSortBy[]).map((sort, index) => (
+    <ListItem
+      key={sort}
+      onClick={(): void => handleSort(sort)}
+      flush
+      root>
+      {
+        eventSort === `${sort}-asc` || eventSort === `${sort}-dsc`
+        ? <Icon
+            name={`sort-alpha-${sortOrder}`}
+            variant='primary'
+            size='small'
+            style={{
+              marginLeft: 4
+            }} />
+        : null
+      }
+      <ListItem.Body>
+        <Text
+          textStyle='cap'
+          size='small'
+          variant={
+            eventSort === `${sort}-asc` || eventSort === `${sort}-dsc`
+            ? 'primary'
+            : null
+          }>
+          {
+            (() => {
+              switch(sort) {
+                case 'destinationArtboard':
+                  return 'Destination';
+                default:
+                  return sort;
+              }
+            })()
+          }
+        </Text>
+      </ListItem.Body>
+    </ListItem>
+  ));
+
   return (
-    <div
-      className='c-event-drawer-list__header'
-      style={{
-        background: theme.name === 'dark'
-        ? theme.background.z3
-        : theme.background.z0,
-        boxShadow: `0 -1px 0 0 ${theme.name === 'dark'
-        ? theme.background.z4
-        : theme.background.z5} inset`
-      }}>
-      <div className='c-event-drawer-list__item c-event-drawer-list__item--labels'>
+    <div className='c-event-drawer-list__header'>
+      <ListGroup horizontal>
+        { items }
+        <ListGroup.Item
+          flush
+          root>
+          <Text
+            variant='lighter'
+            textStyle='cap'
+            size='small'>
+            Actions
+          </Text>
+        </ListGroup.Item>
+      </ListGroup>
+      {/* <div className='c-event-drawer-list__item c-event-drawer-list__item--labels'>
         <HeaderItem
           theme={theme}
           className='c-event-drawer-list-item__module c-event-drawer-list-item__module--label'
@@ -88,9 +119,7 @@ const EventDrawerListHeader = (): ReactElement => {
             eventSort === 'event-asc' || eventSort === 'event-dsc'
             ? <Icon
                 name={`sort-alpha-${sortOrder}`}
-                style={{
-                  fill: theme.palette.primary
-                }}
+                variant='primary'
                 size='small' />
             : null
           }
@@ -105,9 +134,7 @@ const EventDrawerListHeader = (): ReactElement => {
             eventSort === 'artboard-asc' || eventSort === 'artboard-dsc'
             ? <Icon
                 name={`sort-alpha-${sortOrder}`}
-                style={{
-                  fill: theme.palette.primary
-                }}
+                variant='primary'
                 size='small' />
             : null
           }
@@ -122,9 +149,7 @@ const EventDrawerListHeader = (): ReactElement => {
             eventSort === 'destinationArtboard-asc' || eventSort === 'destinationArtboard-dsc'
             ? <Icon
                 name={`sort-alpha-${sortOrder}`}
-                style={{
-                  fill: theme.palette.primary
-                }}
+                variant='primary'
                 size='small' />
             : null
           }
@@ -135,7 +160,7 @@ const EventDrawerListHeader = (): ReactElement => {
           isDisabled>
           actions
         </HeaderItem>
-      </div>
+      </div> */}
     </div>
   );
 }

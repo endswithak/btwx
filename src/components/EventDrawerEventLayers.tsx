@@ -52,12 +52,13 @@ const EventDrawerEventLayers = (props: EventDrawerEventLayersProps): ReactElemen
         as='div'
         onMouseEnter={(): void => handleMouseEnter(artboardItem.id)}
         onMouseLeave={handleMouseLeave}
-        flushWithPadding
+        flush
         root>
         <IconButton
           iconName='thicc-chevron-left'
           size='small'
-          onClick={() => dispatch(setEventDrawerEventThunk({id: null}))} />
+          onClick={() => dispatch(setEventDrawerEventThunk({id: null}))}
+          label='back' />
         <ListItem.Body>
           <ListItem.Text size='small'>
             { artboardItem.name }

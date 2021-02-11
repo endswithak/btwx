@@ -7,6 +7,9 @@
   flex-direction: column
 
 .c-event-drawer-list__header
+  @include themed()
+    background: theme-prop(control-background)
+    box-shadow: 0 1px 0 0 theme-prop(event-drawer-border) inset
   width: 100%
   max-width: 100%
   flex-shrink: 0
@@ -71,7 +74,7 @@
 .c-event-drawer-events__divider
   @include themed()
     background: theme-prop(event-drawer-border)
-  height: 1
+  height: 1px
   margin-top: $unit / 2
   margin-bottom: $unit / 2
   width: 100%

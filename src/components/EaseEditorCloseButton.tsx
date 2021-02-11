@@ -13,7 +13,8 @@ const EaseEditorCloseButton = (): ReactElement => {
   return (
     <IconButton
       iconName='close'
-      onClick={handleClick} />
+      onClick={handleClick}
+      label='close' />
   );
 }
 

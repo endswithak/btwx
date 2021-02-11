@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { applyBooleanOperationThunk } from '../store/actions/layer';
 import { canBooleanSelected } from '../store/selectors/layer';
-import TopbarButton from './TopbarButton';
+import StackedButton from './StackedButton';
 
 const IntersectButton = (): ReactElement => {
   const canIntersect = useSelector((state: RootState) => canBooleanSelected(state));
@@ -16,11 +16,12 @@ const IntersectButton = (): ReactElement => {
   }
 
   return (
-    <TopbarButton
+    <StackedButton
       label='Intersect'
       onClick={handleIntersectClick}
-      icon='intersect'
-      disabled={!canIntersect} />
+      iconName='intersect'
+      disabled={!canIntersect}
+      size='small' />
   );
 }
 

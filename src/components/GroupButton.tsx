@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { groupSelectedThunk } from '../store/actions/layer';
 import { canGroupSelected } from '../store/selectors/layer';
-import TopbarButton from './TopbarButton';
+import StackedButton from './StackedButton';
 
 const GroupButton = (): ReactElement => {
   const canGroup = useSelector((state: RootState) => canGroupSelected(state));
@@ -16,11 +16,12 @@ const GroupButton = (): ReactElement => {
   }
 
   return (
-    <TopbarButton
+    <StackedButton
       label='Group'
       onClick={handleGroupClick}
-      icon='group'
-      disabled={!canGroup} />
+      iconName='group'
+      disabled={!canGroup}
+      size='small' />
   );
 }
 

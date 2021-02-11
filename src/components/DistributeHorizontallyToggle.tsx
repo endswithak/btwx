@@ -12,7 +12,8 @@ const DistributeHorizontallyToggle = (): ReactElement => {
     <IconButton
       onClick={() => dispatch(distributeLayersHorizontally({layers: selected}))}
       iconName='distribute-horizontally'
-      disabled={selected.length <= 2} />
+      disabled={selected.length <= 2}
+      label='distribute horizontally' />
   );
 }
 

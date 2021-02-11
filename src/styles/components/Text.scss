@@ -19,6 +19,10 @@
     font-size: $text-body-2-size;
   }
 
+  &.c-text--cap {
+    text-transform: uppercase;
+  }
+
   &.c-text--small {
     font-size: $font-size-small;
 

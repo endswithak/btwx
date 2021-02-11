@@ -1,50 +1,48 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
+import { RefForwardingComponent } from '../utils';
 import Icon from './Icon';
 import Text from './Text';
 import ListItemBody from './ListItemBody';
 import ListItemRight from './ListItemRight';
 
-interface ListItemProps {
+interface ListItemProps extends React.HTMLAttributes<HTMLOrSVGElement> {
   as?: any;
   children?: any;
-  double?: boolean;
   size?: Btwx.SizeVariant;
   variant?: Btwx.ColorVariant;
   right?: any;
-  active?: boolean;
+  isActive?: boolean;
   root?: boolean;
   flush?: boolean;
-  flushWithPadding?: boolean;
   interactive?: boolean;
 }
 
-type ListItem = React.FC<ListItemProps & React.HTMLAttributes<HTMLOrSVGElement>> & {
+type ListItem = RefForwardingComponent<'li', ListItemProps> & {
   Text: typeof Text;
   Icon: typeof Icon;
   Body: typeof ListItemBody;
   Right: typeof ListItemRight;
 }
 
-const ListItem: ListItem = ({
+const ListItem: ListItem = (forwardRef(function ListItem({
   as: Tag = 'li',
   children,
-  active,
-  double,
+  isActive,
   size,
   variant,
   right,
   root,
   flush,
-  flushWithPadding,
   interactive,
   ...rest
-}: ListItemProps) =>  {
+}: ListItemProps, ref: any) {
 
   return (
     <Tag
       {...rest}
+      ref={ref}
       className={`c-list-item${
-        active
+        isActive
         ? `${' '}c-list-item--active`
         : ''
       }${
@@ -54,10 +52,6 @@ const ListItem: ListItem = ({
       }${
         flush
         ? `${' '}c-list-item--flush`
-        : ''
-      }${
-        flushWithPadding
-        ? `${' '}c-list-item--flush-with-padding`
         : ''
       }${
         root
@@ -72,10 +66,6 @@ const ListItem: ListItem = ({
         ? `${' '}c-list-item--${size}`
         : ''
       }${
-        double
-        ? `${' '}c-list-item--double`
-        : ''
-      }${
         right
         ? `${' '}c-list-item--right`
         : ''
@@ -83,7 +73,7 @@ const ListItem: ListItem = ({
       { children }
     </Tag>
   );
-}
+}) as unknown) as ListItem;
 
 ListItem.Text = Text;
 ListItem.Icon = Icon;

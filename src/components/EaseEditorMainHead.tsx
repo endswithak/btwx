@@ -77,7 +77,8 @@ const EaseEditorMainHead = (props: EaseEditorMainHeadProps): ReactElement => {
       </div>
       <IconButton
         iconName='close'
-        onClick={() => dispatch(closeEaseEditor())} />
+        onClick={() => dispatch(closeEaseEditor())}
+        label='close' />
     </div>
   );
 }

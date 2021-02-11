@@ -2,7 +2,7 @@ import React, { ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { zoomOutThunk } from '../store/actions/zoomTool';
-import TopbarButton from './TopbarButton';
+import StackedButton from './StackedButton';
 
 const ZoomOutButton = (): ReactElement => {
   const canZoomOut = useSelector((state: RootState) => state.documentSettings.zoom !== 0.01);
@@ -15,13 +15,12 @@ const ZoomOutButton = (): ReactElement => {
   }
 
   return (
-    <TopbarButton
-      hideLabel
+    <StackedButton
       label='Zoom Out'
       onClick={handleZoomOutClick}
       disabled={!canZoomOut}
-      icon='zoom-out'
-      />
+      iconName='zoom-out'
+      size='small' />
   );
 }
 

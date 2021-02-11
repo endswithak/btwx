@@ -1,30 +1,21 @@
-import React, { useContext, ReactElement } from 'react';
-import { ThemeContext } from './ThemeProvider';
-import styled from 'styled-components';
+import React, { ReactElement } from 'react';
 
 interface ColorSelectorProps {
-  onClick(): void;
   isActive: boolean;
+  onClick(): void;
 }
 
-const Button = styled.button<ColorSelectorProps>`
-  background: ${props => props.isActive ? props.theme.palette.primary : props.theme.text.lighter};
-  box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.text.lighter};
-  :hover {
-    background: ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.text.light};
-    box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.text.light};
-  }
-`;
-
-const ColorSelector = (props: ColorSelectorProps): ReactElement => {
-  const theme = useContext(ThemeContext);
-
-  return (
-    <Button
-      {...props}
-      className='c-fill-editor__type'
-      theme={theme} />
-  );
-}
+const ColorSelector = ({
+  isActive,
+  onClick
+}: ColorSelectorProps): ReactElement => (
+  <button
+    onClick={onClick}
+    className={`c-fill-editor__type c-fill-editor__type--color${
+      isActive
+      ? `${' '}c-fill-editor__type--active`
+      : ''
+    }`} />
+);
 
 export default ColorSelector;

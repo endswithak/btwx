@@ -1,13 +1,17 @@
 .c-topbar-dropdown-button
   display: flex
   position: relative
-  margin: 0 $unit
+  width: $unit * 16
+  justify-content: center
 
   .c-topbar-button__button
     margin: 0
 
 .c-topbar-dropdown-button__dropdown
-  +background-blur
+  @include background-blur
+  @include themed()
+    background: theme-prop(glass-background)
+    box-shadow: 0 0 0 1px theme-prop(modal-border), 0 4px 16px 0 rgba(0,0,0,0.16)
   position: absolute
   min-width: 172px
   top: $unit * 8
@@ -46,7 +50,7 @@
 .c-topbar-dropdown-button__icon
   flex-grow: 0
   flex-shrink: 0
-  width: $unit * 10
+  width: $unit * 12
   height $unit * 10
   display: flex
   align-items: center

@@ -1,4 +1,6 @@
 .c-gradient-slider
+  @include themed()
+    box-shadow: 0 -1px 0 0 theme-prop(control-border) inset
   display: flex
   align-items: center
   justify-content: center
@@ -38,3 +40,8 @@
   width: $unit * 2
   height: $unit * 2
   border-radius: 50%
+  box-shadow: 0 0 0 2px #fff, 0 0 0 1px rgba(0, 0, 0, 0.3) inset, 0 0 0 3px rgba(0, 0, 0, 0.3)
+
+  &.c-gradient-slider__circle--active
+    @include themed()
+      box-shadow: 0 0 0 2px #fff, 0 0 0 3px theme-prop(primary), 0 0 0 1px rgba(0, 0, 0, 0.3) inset, 0 0 0 3px rgba(0, 0, 0, 0.3)

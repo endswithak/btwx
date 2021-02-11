@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement } from 'react';
-import { ThemeContext } from './ThemeProvider';
+import React, { ReactElement } from 'react';
 import ColorSelector from './ColorSelector';
 import LinearGradientSelector from './LinearGradientSelector';
 import RadialGradientSelector from './RadialGradientSelector';
@@ -23,39 +22,34 @@ interface FillTypeSelectorProps {
   };
 }
 
-const FillTypeSelector = (props: FillTypeSelectorProps): ReactElement => {
-  const theme = useContext(ThemeContext);
-  const { colorSelector, linearGradientSelector, radialGradientSelector } = props;
-
-  return (
-    <div
-      className='c-fill-editor__type-selector'
-      style={{
-        boxShadow: `0 -1px 0 0 ${theme.name === 'dark' ? theme.background.z4 : theme.background.z5} inset`
-      }}>
-      {
-        colorSelector.enabled
-        ? <ColorSelector
-            onClick={colorSelector.onClick}
-            isActive={colorSelector.isActive} />
-        : null
-      }
-      {
-        linearGradientSelector.enabled
-        ? <LinearGradientSelector
-            onClick={linearGradientSelector.onClick}
-            isActive={linearGradientSelector.isActive} />
-        : null
-      }
-      {
-        radialGradientSelector.enabled
-        ? <RadialGradientSelector
-            onClick={radialGradientSelector.onClick}
-            isActive={radialGradientSelector.isActive} />
-        : null
-      }
-    </div>
-  );
-}
+const FillTypeSelector = ({
+  colorSelector,
+  linearGradientSelector,
+  radialGradientSelector
+}: FillTypeSelectorProps): ReactElement => (
+  <div className='c-fill-editor__type-selector'>
+    {
+      colorSelector.enabled
+      ? <ColorSelector
+          onClick={colorSelector.onClick}
+          isActive={colorSelector.isActive} />
+      : null
+    }
+    {
+      linearGradientSelector.enabled
+      ? <LinearGradientSelector
+          onClick={linearGradientSelector.onClick}
+          isActive={linearGradientSelector.isActive} />
+      : null
+    }
+    {
+      radialGradientSelector.enabled
+      ? <RadialGradientSelector
+          onClick={radialGradientSelector.onClick}
+          isActive={radialGradientSelector.isActive} />
+      : null
+    }
+  </div>
+);
 
 export default FillTypeSelector;

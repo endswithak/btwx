@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
-import { ThemeContext } from './ThemeProvider';
+import React, { ReactElement, useRef, useState, useEffect } from 'react';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 
@@ -16,7 +15,6 @@ interface GradientSliderProps {
 
 const GradientSliderStop = (props: GradientSliderProps): ReactElement => {
   const ref = useRef<HTMLDivElement>(null);
-  const theme = useContext(ThemeContext);
   const { stop, index, activeStopIndex, onStopPress, onStopDrag } = props;
   const [prevPos, setPrevPos] = useState(stop.position);
 
@@ -63,12 +61,11 @@ const GradientSliderStop = (props: GradientSliderProps): ReactElement => {
       ref={ref}
       className='c-gradient-slider__pointer'>
       <div
-        className='c-gradient-slider__circle'
-        style={{
-          boxShadow: index === activeStopIndex
-          ? `0 0 0 2px #fff, 0 0 0 3px ${theme.palette.primary}, 0 0 0 1px rgba(0, 0, 0, 0.3) inset, 0 0 0 3px rgba(0, 0, 0, 0.3)`
-          : `0 0 0 2px #fff, 0 0 0 1px rgba(0, 0, 0, 0.3) inset, 0 0 0 3px rgba(0, 0, 0, 0.3)`
-        }} />
+        className={`c-gradient-slider__circle${
+          index === activeStopIndex
+          ? `${' '}c-gradient-slider__circle--active`
+          : ''
+        }`} />
     </div>
   );
 }

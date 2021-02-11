@@ -13,8 +13,9 @@ const StyleToggle = ({
   <IconButton
     onClick={() => setStyleEnabled(!styleEnabled)}
     size='small'
-    active={styleEnabled}
-    variant={styleEnabled ? 'primary' : null}
+    isActive={styleEnabled}
+    toggle
+    label={styleEnabled ? 'disable' : 'enable'}
     iconName='switch-off'
     activeIconName='switch-on' />
 );

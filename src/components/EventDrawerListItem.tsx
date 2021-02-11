@@ -1,33 +1,22 @@
-import React, { useContext, ReactElement, useRef } from 'react';
-import styled from 'styled-components';
+import React, { ReactElement, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setEventDrawerEventThunk, setEventDrawerEventHoverThunk } from '../store/actions/eventDrawer';
 import { setLayerHover, setActiveArtboard } from '../store/actions/layer';
 import { openContextMenu } from '../store/actions/contextMenu';
 import { DEFAULT_TWEEN_EVENTS } from '../constants';
-import { ThemeContext } from './ThemeProvider';
 import EventDrawerListItemEdit from './EventDrawerListItemEdit';
 import EventDrawerListItemRemove from './EventDrawerListItemRemove';
 import SidebarLayerIcon from './SidebarLayerIcon';
+import ListItem from './ListItem';
+import ListGroup from './ListGroup';
 
 interface EventDrawerListItemProps {
   id: string;
 }
 
-interface ItemProps {
-  hovering: boolean;
-}
-
-const Item = styled.div<ItemProps>`
-  color: ${props => props.theme.text.base};
-  box-shadow: ${props => props.hovering ? `0 0 0 1px ${props.theme.palette.primary} inset` : 'none'};
-  cursor: pointer;
-`;
-
 const EventDrawerListItem = (props: EventDrawerListItemProps): ReactElement => {
-  const theme = useContext(ThemeContext);
-  const actionsContainerRef = useRef<HTMLDivElement>(null);
+  const actionsContainerRef = useRef(null);
   const { id } = props;
   // const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
   const tweenEvent = useSelector((state: RootState) => state.layer.present.events.byId[id]);
@@ -71,38 +60,71 @@ const EventDrawerListItem = (props: EventDrawerListItemProps): ReactElement => {
   }
 
   return (
-    <Item
-      className='c-event-drawer-list__item'
+    <ListItem
+      interactive
       onDoubleClick={handleDoubleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onContextMenu={handleContextMenu}
-      theme={theme}
-      hovering={hovering}>
-      <div className='c-event-drawer-list-item__module'>
-        <SidebarLayerIcon
-          id={layerItem.id}
-          isDragGhost />
-        <span style={{marginLeft: theme.unit * 2}}>
-          {layerItem.name}
-        </span>
-      </div>
-      <div className='c-event-drawer-list-item__module'>
-        <span>{tweenEventDisplayName}</span>
-      </div>
-      <div className='c-event-drawer-list-item__module'>
-        <span>{artboardName}</span>
-      </div>
-      <div className='c-event-drawer-list-item__module'>
-        <span>{destinationName}</span>
-      </div>
-      <div
-        ref={actionsContainerRef}
-        className='c-event-drawer-list-item__module'>
-        <EventDrawerListItemEdit id={id} />
-        <EventDrawerListItemRemove id={id} />
-      </div>
-    </Item>
+      onContextMenu={handleContextMenu}>
+      <ListGroup horizontal>
+        <ListItem
+          flush
+          style={{
+            width: '25%'
+          }}>
+          <SidebarLayerIcon
+            id={layerItem.id}
+            isDragGhost />
+          <ListItem.Body>
+            <ListItem.Text size='small'>
+              {layerItem.name}
+            </ListItem.Text>
+          </ListItem.Body>
+        </ListItem>
+        <ListItem
+          flush
+          style={{
+            width: '25%'
+          }}>
+          <ListItem.Body>
+            <ListItem.Text size='small'>
+              { tweenEventDisplayName }
+            </ListItem.Text>
+          </ListItem.Body>
+        </ListItem>
+        <ListItem
+          flush
+          style={{
+            width: '25%'
+          }}>
+          <ListItem.Body>
+            <ListItem.Text size='small'>
+              { artboardName }
+            </ListItem.Text>
+          </ListItem.Body>
+        </ListItem>
+        <ListItem
+          flush
+          style={{
+            width: '25%'
+          }}>
+          <ListItem.Body>
+            <ListItem.Text size='small'>
+              { destinationName }
+            </ListItem.Text>
+          </ListItem.Body>
+        </ListItem>
+        <ListItem
+          ref={actionsContainerRef}
+          flush
+          style={{
+            width: '25%'
+          }}>
+          <EventDrawerListItemEdit id={id} />
+          <EventDrawerListItemRemove id={id} />
+        </ListItem>
+      </ListGroup>
+    </ListItem>
   );
 }
 

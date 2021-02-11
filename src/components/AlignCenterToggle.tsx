@@ -14,7 +14,8 @@ const AlignCenterToggle = (): ReactElement => {
     <IconButton
       onClick={() => dispatch(alignLayersToCenter({layers: selected}))}
       iconName='align-center'
-      disabled={selected.length <= 1 || selectedCenter !== 'multi'} />
+      disabled={selected.length <= 1 || selectedCenter !== 'multi'}
+      label='align to center' />
   );
 }
 

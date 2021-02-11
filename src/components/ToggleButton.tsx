@@ -1,6 +1,5 @@
 import React, { useContext, forwardRef } from 'react';
 import { RefForwardingComponent } from '../utils';
-import { ThemeContext } from './ThemeProvider';
 import Button, { ButtonProps } from './Button';
 import ToggleButtonGroupContext from './ToggleButtonGroupContext';
 // import Icon from './Icon';
@@ -15,19 +14,28 @@ export interface ToggleButtonProps extends ButtonProps {
   inputRef?: React.LegacyRef<HTMLInputElement>;
 }
 
-const ToggleButton: RefForwardingComponent<'button', ToggleButtonProps> = forwardRef(function ToggleButton(props: ToggleButtonProps, ref: any) {
-  const { type, size, name, disabled, onChange, checked, value, children } = props;
+const ToggleButton: RefForwardingComponent<'button', ToggleButtonProps> = forwardRef(function ToggleButton({
+  type,
+  size,
+  name,
+  disabled,
+  checked,
+  value,
+  children,
+  onChange,
+  ...rest
+}: ToggleButtonProps, ref: any) {
   const tg = useContext(ToggleButtonGroupContext);
-  const theme = useContext(ThemeContext);
 
   return (
     <Button
-      {...props}
+      {...rest}
+      as='label'
       size={size || tg.size}
       type={undefined}
-      active={!!checked || tg.value === value}
+      isActive={!!checked || tg.value === value}
       disabled={!!disabled || tg.disabled}
-      as='label'>
+      toggle>
       <input
         name={name || tg.name}
         type={type || tg.type}

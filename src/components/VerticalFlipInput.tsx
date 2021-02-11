@@ -33,7 +33,7 @@ const VerticalFlipInput = (): ReactElement => {
         <ToggleButton
           type='checkbox'
           value={verticalFlip}
-          active={verticalFlip}
+          isActive={verticalFlip}
           checked={verticalFlip}
           onChange={handleChange}
           size='small'

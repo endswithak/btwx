@@ -39,19 +39,12 @@ const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
       {
         canOpen
         ? <IconButton
-            active={isOpen}
             // onMouseEnter={() => setHover(true)}
             // onMouseLeave={() => setHover(false)}
             onMouseDown={canOpen ? handleMouseDown : null}
             // onMouseUp={() => setHover(true)}
-            iconName='thicc-chevron-right'
-            activeIconName='thicc-chevron-down'
+            iconName={isOpen ? 'thicc-chevron-down' : 'thicc-chevron-right'}
             size='small'
-            variant={
-              isSelected
-              ? 'lighter-on-primary'
-              : null
-            }
             style={{
               pointerEvents: canOpen ? 'auto' : 'none'
             }} />

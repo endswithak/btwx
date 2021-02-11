@@ -36,7 +36,7 @@ const EventDrawerEventLayer = (props: EventDrawerEventLayerProps): ReactElement 
       onMouseLeave={handleMouseLeave}>
       <ListItem
         as='div'
-        flushWithPadding
+        flush
         root>
         <SidebarLayerIcon
           id={id}

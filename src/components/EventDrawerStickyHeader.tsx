@@ -31,11 +31,11 @@ const EventDrawerStickyHeader = (props: EventDrawerStickyHeaderProps): ReactElem
     scrollLayerItem
     ? <div className='c-event-drawer-sticky-header'>
         <ListItem
-          flushWithPadding
-          root
           as='div'
           onMouseEnter={(): void => handleMouseEnter(scrollLayerItem.id)}
-          onMouseLeave={handleMouseLeave}>
+          onMouseLeave={handleMouseLeave}
+          flush
+          root>
           <Icon
             name={((): string => {
               switch(scrollLayerItem.type) {

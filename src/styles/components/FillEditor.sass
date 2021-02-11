@@ -13,6 +13,9 @@
   margin: $unit * 2
 
 .c-fill-editor__type-selector
+  @include themed()
+    background: theme-prop(glass-background)
+    box-shadow: 0 -1px 0 0 theme-prop(modal-border) inset
   position: relative
   display: flex
   align-items: center
@@ -20,6 +23,10 @@
   height: $unit * 8
 
 .c-fill-editor__type
+  @include themed()
+    box-shadow: 0 0 0 1px theme-prop(text-lighter)
+    &:hover
+      box-shadow: 0 0 0 1px theme-prop(text-light)
   width: $unit * 4
   height: $unit * 4
   display: flex
@@ -31,6 +38,48 @@
   max-width: $unit * 4
   max-height: $unit * 4
   margin: 0 $unit
+
+  &.c-fill-editor__type--active
+    @include themed()
+      box-shadow: 0 0 0 1px theme-prop(primary)
+      &:hover
+        box-shadow: 0 0 0 1px theme-prop(primary)
+
+  &.c-fill-editor__type--color
+    @include themed()
+      background: theme-prop(text-lighter)
+      &:hover
+        background: theme-prop(text-base)
+
+    &.c-fill-editor__type--active
+      @include themed()
+        background: radial-gradient(theme-prop(primary), theme-prop(glass-background))
+        &:hover
+          background: radial-gradient(theme-prop(primary), theme-prop(glass-background))
+
+  &.c-fill-editor__type--radial-gradient
+    @include themed()
+      background: radial-gradient(theme-prop(text-light), theme-prop(glass-background))
+      &:hover
+        background: radial-gradient(theme-prop(text-base), theme-prop(glass-background))
+
+    &.c-fill-editor__type--active
+      @include themed()
+        background: radial-gradient(theme-prop(primary), theme-prop(glass-background))
+        &:hover
+          background: radial-gradient(theme-prop(primary), theme-prop(glass-background))
+
+  &.c-fill-editor__type--linear-gradient
+    @include themed()
+      background: linear-gradient(theme-prop(text-light), theme-prop(glass-background))
+      &:hover
+        background: linear-gradient(theme-prop(text-base), theme-prop(glass-background))
+
+    &.c-fill-editor__type--active
+      @include themed()
+        background: linear-gradient(theme-prop(primary), theme-prop(glass-background))
+        &:hover
+          background: linear-gradient(theme-prop(primary), theme-prop(glass-background))
 
 .c-fill-editor__remove-stop
   position: absolute

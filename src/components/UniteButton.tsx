@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { canBooleanSelected } from '../store/selectors/layer';
 import { applyBooleanOperationThunk } from '../store/actions/layer';
-import TopbarButton from './TopbarButton';
+import StackedButton from './StackedButton';
 
 const UniteButton = (): ReactElement => {
   const canUnite = useSelector((state: RootState) => canBooleanSelected(state));
@@ -16,11 +16,12 @@ const UniteButton = (): ReactElement => {
   }
 
   return (
-    <TopbarButton
+    <StackedButton
       label='Union'
       onClick={handleUniteClick}
-      icon='unite'
-      disabled={!canUnite} />
+      iconName='unite'
+      disabled={!canUnite}
+      size='small' />
   );
 }
 

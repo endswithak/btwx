@@ -4,7 +4,7 @@ import { ipcRenderer, remote } from 'electron';
 import { RootState } from '../store/reducers';
 import { openPreview, stopPreviewRecording } from '../store/actions/preview';
 import { DEFAULT_MAC_DEVICE, DEFAULT_WINDOWS_DEVICE } from '../constants';
-import TopbarButton from './TopbarButton';
+import StackedButton from './StackedButton';
 
 const PreviewButton = (): ReactElement => {
   const activeArtboard = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.activeArtboard]);
@@ -59,13 +59,15 @@ const PreviewButton = (): ReactElement => {
   }
 
   return (
-    <TopbarButton
+    <StackedButton
       id='preview-button'
       label='Preview'
       onClick={handlePreviewClick}
-      icon={buttonIcon()}
+      iconName={buttonIcon()}
+      size='small'
       isActive={isOpen}
-      recording={recording} />
+      // recording={recording}
+      />
   );
 }
 

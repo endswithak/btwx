@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { canBooleanSelected } from '../store/selectors/layer';
 import { applyBooleanOperationThunk } from '../store/actions/layer';
-import TopbarButton from './TopbarButton';
+import StackedButton from './StackedButton';
 
 const SubtractButton = (): ReactElement => {
   const canSubtract = useSelector((state: RootState) => canBooleanSelected(state));
@@ -16,11 +16,12 @@ const SubtractButton = (): ReactElement => {
   }
 
   return (
-    <TopbarButton
+    <StackedButton
       label='Subtract'
       onClick={handleSubtractClick}
-      icon='subtract'
-      disabled={!canSubtract} />
+      iconName='subtract'
+      disabled={!canSubtract}
+      size='small' />
   );
 }
 

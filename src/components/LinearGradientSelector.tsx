@@ -1,31 +1,21 @@
-import React, { useContext, ReactElement } from 'react';
-import { ThemeContext } from './ThemeProvider';
-import styled from 'styled-components';
+import React, { ReactElement } from 'react';
 
 interface LinearGradientSelectorProps {
-  onClick(): void;
   isActive: boolean;
-  theme?: Btwx.Theme;
+  onClick(): void;
 }
 
-const Button = styled.button<LinearGradientSelectorProps>`
-  background: linear-gradient(to top, ${props => props.isActive ? props.theme.palette.primary : props.theme.text.light}, ${props => props.theme.background.z1});
-  box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primary : props.theme.text.lighter};
-  :hover {
-    background: linear-gradient(to top, ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.text.base}, ${props => props.theme.background.z1});
-    box-shadow: 0 0 0 1px ${props => props.isActive ? props.theme.palette.primaryHover : props.theme.text.light};
-  }
-`;
-
-const LinearGradientSelector = (props: LinearGradientSelectorProps): ReactElement => {
-  const theme = useContext(ThemeContext);
-
-  return (
-    <Button
-      {...props}
-      className='c-fill-editor__type'
-      theme={theme} />
-  );
-}
+const LinearGradientSelector = ({
+  isActive,
+  onClick
+}: LinearGradientSelectorProps): ReactElement => (
+  <button
+    onClick={onClick}
+    className={`c-fill-editor__type c-fill-editor__type--linear-gradient${
+      isActive
+      ? `${' '}c-fill-editor__type--active`
+      : ''
+    }`} />
+);
 
 export default LinearGradientSelector;

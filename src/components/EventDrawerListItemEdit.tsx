@@ -16,11 +16,14 @@ const EventDrawerListItemEdit = (props: EventDrawerListItemEditProps): ReactElem
   }
 
   return (
-    <div className='c-event-drawer-list-item__action c-event-drawer-list-item__action--edit'>
-      <IconButton
-        onClick={handleClick}
-        iconName='edit' />
-    </div>
+    <IconButton
+      onClick={handleClick}
+      iconName='edit'
+      style={{
+        flexGrow: 0,
+        marginRight: 16
+      }}
+      label='edit' />
   );
 }
 

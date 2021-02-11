@@ -1,61 +1,13 @@
 .c-button {
-  @include truncate-text;
-  @include themed() {
-    color: theme-prop(text-light);
-    background: theme-prop(button-background);
-    box-shadow: 0 0 0 1px theme-prop(button-border) inset;
-
-    .c-icon {
-      fill: theme-prop(text-light);
-    }
-
-    .c-icon--outline {
-      stroke: theme-prop(text-light);
-    }
-
-    &:hover,
-    &:focus,
-    &:focus &:hover {
-      color: theme-prop(text-base);
-      box-shadow: 0 0 0 1px theme-prop(button-border-active) inset;
-
-      .c-icon {
-        fill: theme-prop(text-base);
-      }
-
-      .c-icon--outline {
-        stroke: theme-prop(text-base);
-      }
-    }
-
-    &:disabled,
-    &.c-button--disabled {
-      opacity: 50%;
-      color: theme-prop(text-lighter);
-      box-shadow: 0 0 0 1px theme-prop(button-border) inset;
-
-      .c-icon {
-        fill: theme-prop(text-lighter);
-      }
-
-      .c-icon--outline {
-        stroke: theme-prop(text-lighter);
-      }
-
-      &:hover,
-      &:focus,
-      &:focus &:hover  {
-        box-shadow: 0 0 0 1px theme-prop(button-border) inset;
-      }
-    }
-  }
+  @include truncate-text();
+  @include default-button();
   display: flex;
   font-family: $font-family;
   font-size: $font-size;
   line-height: $button-size;
   text-align: center;
   padding: 0 $padding;
-  height: $button-size;
+  min-height: $button-size;
   flex-wrap: nowrap;
   align-items: center;
   justify-content: center;
@@ -65,215 +17,69 @@
   text-overflow: ellipsis;
   position: relative;
 
-  &.c-button--left {
-    padding-left: $addon-size;
-  }
-
-  &.c-button--right {
-    padding-right: $addon-size;
-  }
-
   &.c-button--small {
-    height: $button-size-small;
+    min-height: $button-size-small;
     font-size: $font-size-small;
     line-height: $button-size-small;
-
-    &.c-button--left {
-      padding-left: $addon-size-small;
-    }
-
-    &.c-button--right {
-      padding-right: $addon-size-small;
-    }
   }
 
   &.c-button--large {
     padding: 0 $padding-large;
-    height: $button-size-large;
+    min-height: $button-size-large;
     font-size: $font-size-large;
     line-height: $button-size-large;
-
-    &.c-button--left {
-      padding-left: $addon-size-large;
-    }
-
-    &.c-button--right {
-      padding-right: $addon-size-large;
-    }
-  }
-
-  &.c-button--active {
-    @include themed() {
-      color: theme-prop(text-light-on-primary);
-      background: theme-prop(primary);
-      box-shadow: 0 0 0 1px theme-prop(primary) inset;
-
-      .c-icon {
-        fill: theme-prop(text-light-on-primary);
-      }
-
-      .c-icon--outline {
-        stroke: theme-prop(text-light-on-primary);
-      }
-
-      &:hover,
-      &:focus,
-      &:focus &:hover  {
-        color: theme-prop(text-base-on-primary);
-        background: theme-prop(primary-active);
-        box-shadow: 0 0 0 1px theme-prop(primary-active) inset;
-
-        .c-icon {
-          fill: theme-prop(text-base-on-primary);
-        }
-
-        .c-icon--outline {
-          stroke: theme-prop(text-base-on-primary);
-        }
-      }
-    }
-  }
-
-  &.c-button--square {
-    @include aspect(1, 1);
-    height: auto !important;
-    padding: 0 !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 
   &.c-button--block {
     width: 100%;
   }
 
-  &.c-button--icon {
-    @include themed() {
-      padding: 0;
-      background: none;
-      box-shadow: none;
-      flex-shrink: 0;
+  &.c-button--clear {
+    @include clear-button();
+  }
 
-      .c-icon {
-        fill: theme-prop(text-lighter);
-      }
-
-      .c-icon--outline {
-        stroke: theme-prop(text-lighter);
-      }
-
-      &:hover  {
-        background: none;
-        box-shadow: none;
-
-        .c-icon {
-          fill: theme-prop(text-base);
-        }
-
-        .c-icon--outline {
-          stroke: theme-prop(text-base);
-        }
-      }
-
-      &.c-button--active {
-        background: none;
-        box-shadow: none;
-
-        .c-icon {
-          fill: theme-prop(text-lighter);
-        }
-
-        .c-icon--outline {
-          stroke: theme-prop(text-lighter);
-        }
-
-        &:hover {
-          background: none;
-          box-shadow: none;
-
-          .c-icon {
-            fill: theme-prop(text-base);
-          }
-
-          .c-icon--outline {
-            stroke: theme-prop(text-base);
-          }
-        }
-      }
+  &.c-button--toggle {
+    input[type='checkbox'],
+    input[type='radio'] {
+      position: absolute;
+      clip: rect(0,0,0,0);
+      pointer-events: none;
     }
+  }
+
+  &.c-button--icon {
+    padding: 0;
+  }
+
+  &.c-button--stacked {
+    @include stacked-button();
   }
 
   @each $theme-color-name in $theme-color-names {
     &.c-button--#{$theme-color-name} {
-      @include themed() {
-        color: theme-prop(text-light-on-#{$theme-color-name});
-        background: theme-prop($theme-color-name);
-        box-shadow: 0 0 0 1px theme-prop($theme-color-name) inset;
-
-        .c-icon {
-          fill: theme-prop(text-light-on-#{$theme-color-name});
-        }
-
-        .c-icon--outline {
-          stroke: theme-prop(text-light-on-#{$theme-color-name});
-        }
-
-        &:hover,
-        &:focus,
-        &:focus &:hover  {
-          color: theme-prop(text-base-on-#{$theme-color-name});
-          background: theme-prop(#{$theme-color-name}-active);
-          box-shadow: 0 0 0 1px theme-prop(#{$theme-color-name}-active) inset;
-
-          .c-icon {
-            fill: theme-prop(text-base-on-#{$theme-color-name});
-          }
-
-          .c-icon--outline {
-            stroke: theme-prop(text-base-on-#{$theme-color-name});
-          }
-        }
-      }
+      @include theme-button($theme-color-name);
     }
   }
 
-  input[type='checkbox'],
-  input[type='radio'] {
-    position: absolute;
-    clip: rect(0,0,0,0);
-    pointer-events: none;
+  @each $aspect-ratio-name, $aspect-ratio-value in $aspect-ratios {
+    &.c-button--#{$aspect-ratio-name} {
+      display: block;
+      position: relative;
+      padding-bottom: $aspect-ratio-value;
+      height: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
   }
 }
 
-.c-button__addon {
-  flex-shrink: 0;
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: $addon-size;
-  height: $button-size;
-  overflow: hidden;
-
-  &.c-button__addon--read-only {
-    pointer-events: none;
+.c-stacked-button__label {
+  @include themed() {
+    color: theme-prop(text-light);
   }
-
-  &.c-button__addon--small {
-    width: $addon-size-small;
-    height: $control-size-small;
-  }
-
-  &.c-button__addon--large {
-    width: $addon-size-large;
-    height: $control-size-large;
-  }
-
-  &.c-button__addon--left {
-    left: 0;
-  }
-
-  &.c-button__addon--right {
-    right: 0;
-  }
+  font-family: $font-family;
+  font-size: $font-size-extra-small;
+  text-align: center;
 }

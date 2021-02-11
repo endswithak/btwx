@@ -33,7 +33,7 @@ const HorizontalFlipInput = (): ReactElement => {
         <ToggleButton
           type='checkbox'
           value={horizontalFlip}
-          active={horizontalFlip}
+          isActive={horizontalFlip}
           checked={horizontalFlip}
           onChange={handleChange}
           size='small'

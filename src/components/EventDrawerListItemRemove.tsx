@@ -16,12 +16,14 @@ const EventDrawerListItemRemove = (props: EventDrawerListItemRemoveProps): React
   }
 
   return (
-    <div className='c-event-drawer-list-item__action c-event-drawer-list-item__action--remove'>
-      <IconButton
-        onClick={handleClick}
-        iconName='trash-can'
-        variant='error' />
-    </div>
+    <IconButton
+      onClick={handleClick}
+      iconName='trash-can'
+      variant='error'
+      style={{
+        flexGrow: 0
+      }}
+      label='remove' />
   );
 }
 
