@@ -21,6 +21,25 @@
   overflow: hidden;
 }
 
+@mixin aspect-b($aspect-ratio) {
+  position: relative;
+  width: 100%;
+
+  &::before {
+    display: block;
+    padding-top: $aspect-ratio;
+    content: "";
+  }
+
+  > * {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
 @mixin aspect-fill {
   @include absolute-full;
   height: 100%;
@@ -95,11 +114,11 @@
     background: none;
     box-shadow: none;
 
-    .c-icon {
+    .c-icon svg {
       fill: theme-prop(text-lighter);
     }
 
-    .c-icon--outline {
+    .c-icon--outline svg {
       stroke: theme-prop(text-lighter);
     }
 
@@ -109,11 +128,11 @@
       background: none;
       box-shadow: none;
 
-      .c-icon {
+      .c-icon svg {
         fill: theme-prop(text-base);
       }
 
-      .c-icon--outline {
+      .c-icon--outline svg {
         stroke: theme-prop(text-base);
       }
     }
@@ -124,11 +143,11 @@
         background: none;
         box-shadow: none;
 
-        .c-icon {
+        .c-icon svg {
           fill: theme-prop(primary);
         }
 
-        .c-icon--outline {
+        .c-icon--outline svg {
           stroke: theme-prop(primary);
         }
 
@@ -137,11 +156,11 @@
           background: none;
           box-shadow: none;
 
-          .c-icon {
+          .c-icon svg {
             fill: theme-prop(primary-active);
           }
 
-          .c-icon--outline {
+          .c-icon--outline svg {
             stroke: theme-prop(primary-active);
           }
         }
@@ -156,11 +175,11 @@
       background: none;
       box-shadow: none;
 
-      .c-icon {
+      .c-icon svg {
         fill: theme-prop(text-lighter);
       }
 
-      .c-icon--outline {
+      .c-icon--outline svg {
         stroke: theme-prop(text-lighter);
       }
     }
@@ -194,11 +213,11 @@
       .c-stacked-button__icon {
         background: theme-prop(primary);
 
-        .c-icon {
+        .c-icon svg {
           fill: theme-prop(text-light-on-primary);
         }
 
-        .c-icon--outline {
+        .c-icon--outline svg {
           stroke: theme-prop(text-light-on-primary);
         }
       }
@@ -210,11 +229,11 @@
         .c-stacked-button__icon {
           background: theme-prop(primary-active);
 
-          .c-icon {
+          .c-icon svg {
             fill: theme-prop(text-base-on-primary);
           }
 
-          .c-icon--outline {
+          .c-icon--outline svg {
             stroke: theme-prop(text-base-on-primary);
           }
         }
@@ -240,11 +259,11 @@
     background: theme-prop(button-background);
     box-shadow: 0 0 0 1px theme-prop(button-border) inset;
 
-    .c-icon {
+    .c-icon svg {
       fill: theme-prop(text-lighter);
     }
 
-    .c-icon--outline {
+    .c-icon--outline svg {
       stroke: theme-prop(text-lighter);
     }
 
@@ -252,11 +271,11 @@
       color: theme-prop(text-base);
       box-shadow: 0 0 0 1px theme-prop(button-border-active) inset;
 
-      .c-icon {
+      .c-icon svg {
         fill: theme-prop(text-base);
       }
 
-      .c-icon--outline {
+      .c-icon--outline svg {
         stroke: theme-prop(text-base);
       }
     }
@@ -266,11 +285,11 @@
       background: theme-prop(primary);
       box-shadow: 0 0 0 1px theme-prop(primary) inset;
 
-      .c-icon {
+      .c-icon svg {
         fill: theme-prop(text-light-on-primary);
       }
 
-      .c-icon--outline {
+      .c-icon--outline svg {
         stroke: theme-prop(text-light-on-primary);
       }
 
@@ -279,11 +298,11 @@
         background: theme-prop(primary-active);
         box-shadow: 0 0 0 1px theme-prop(primary-active) inset;
 
-        .c-icon {
+        .c-icon svg {
           fill: theme-prop(text-base-on-primary);
         }
 
-        .c-icon--outline {
+        .c-icon--outline svg {
           stroke: theme-prop(text-base-on-primary);
         }
       }
@@ -296,11 +315,11 @@
         background: theme-prop(primary);
         box-shadow: 0 0 0 1px theme-prop(primary) inset;
 
-        .c-icon {
+        .c-icon svg {
           fill: theme-prop(text-lighter-on-primary);
         }
 
-        .c-icon--outline {
+        .c-icon--outline svg {
           stroke: theme-prop(text-lighter-on-primary);
         }
       }
@@ -313,11 +332,11 @@
       color: theme-prop(text-lighter);
       box-shadow: 0 0 0 1px theme-prop(button-border) inset;
 
-      .c-icon {
+      .c-icon svg {
         fill: theme-prop(text-lighter);
       }
 
-      .c-icon--outline {
+      .c-icon--outline svg {
         stroke: theme-prop(text-lighter);
       }
     }
@@ -330,11 +349,11 @@
     background: theme-prop($theme-color);
     box-shadow: 0 0 0 1px theme-prop($theme-color) inset;
 
-    .c-icon {
+    .c-icon svg {
       fill: theme-prop(text-light-on-#{$theme-color});
     }
 
-    .c-icon--outline {
+    .c-icon--outline svg {
       stroke: theme-prop(text-light-on-#{$theme-color});
     }
 
@@ -344,11 +363,11 @@
       background: theme-prop(#{$theme-color}-active);
       box-shadow: 0 0 0 1px theme-prop(#{$theme-color}-active) inset;
 
-      .c-icon {
+      .c-icon svg {
         fill: theme-prop(text-base-on-#{$theme-color});
       }
 
-      .c-icon--outline {
+      .c-icon--outline svg {
         stroke: theme-prop(text-base-on-#{$theme-color});
       }
     }
@@ -361,34 +380,12 @@
       background: theme-prop($theme-color);
       box-shadow: 0 0 0 1px theme-prop($theme-color) inset;
 
-      .c-icon {
+      .c-icon svg {
         fill: theme-prop(text-lighter-on-#{$theme-color});
       }
 
-      .c-icon--outline {
+      .c-icon--outline svg {
         stroke: theme-prop(text-lighter-on-#{$theme-color});
-      }
-    }
-  }
-}
-
-@mixin theme-icon($theme-color, $text-theme-color: false) {
-  @if ($text-theme-color) {
-    @include themed() {
-      fill: theme-prop(text-#{$theme-color});
-
-      &.c-icon--outline {
-        fill: none;
-        stroke: theme-prop(text-#{$theme-color});
-      }
-    }
-  } @else {
-    @include themed() {
-      fill: theme-prop($theme-color);
-
-      &.c-icon--outline {
-        fill: none;
-        stroke: theme-prop($theme-color);
       }
     }
   }

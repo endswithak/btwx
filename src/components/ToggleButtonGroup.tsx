@@ -2,9 +2,9 @@ import React, { forwardRef, useMemo } from 'react';
 import { Omit, RefForwardingComponent } from '../utils';
 import ButtonGroup, { ButtonGroupProps } from './ButtonGroup';
 import ToggleButton from './ToggleButton';
-import ToggleButtonGroupContext from './ToggleButtonGroupContext';
+import ToggleGroupContext from './ToggleGroupContext';
 
-export interface ToggleButtonRadioProps<T>
+export interface ToggleButtonGroupRadioProps<T>
   extends Omit<ButtonGroupProps, 'toggle'> {
   type?: 'radio';
   name: string;
@@ -13,7 +13,7 @@ export interface ToggleButtonRadioProps<T>
   onChange?: (value: T, event: any) => void;
 }
 
-export interface ToggleButtonCheckboxProps<T>
+export interface ToggleButtonGroupCheckboxProps<T>
   extends Omit<ButtonGroupProps, 'toggle'> {
   type: 'checkbox';
   name?: string;
@@ -22,7 +22,7 @@ export interface ToggleButtonCheckboxProps<T>
   onChange?: (value: T[]) => void;
 }
 
-export type ToggleButtonGroupProps<T> = ToggleButtonRadioProps<T> | ToggleButtonCheckboxProps<T>;
+export type ToggleButtonGroupProps<T> = ToggleButtonGroupRadioProps<T> | ToggleButtonGroupCheckboxProps<T>;
 
 type ToggleButtonGroup<T> = RefForwardingComponent<'div',ToggleButtonGroupProps<T>> & {
   Button: typeof ToggleButton;
@@ -34,11 +34,11 @@ const ToggleButtonGroup: ToggleButtonGroup<any> = (forwardRef(function ToggleBut
   const context = useMemo(() => ({ disabled, name, size, type, value, onChange }), [disabled, name, size, type, value, onChange]);
 
   return (
-    <ToggleButtonGroupContext.Provider value={context}>
+    <ToggleGroupContext.Provider value={context}>
       <ButtonGroup {...props}>
         { children }
       </ButtonGroup>
-    </ToggleButtonGroupContext.Provider>
+    </ToggleGroupContext.Provider>
   );
 }) as unknown) as ToggleButtonGroup<any>;
 

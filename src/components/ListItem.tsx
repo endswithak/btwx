@@ -5,8 +5,8 @@ import Text from './Text';
 import ListItemBody from './ListItemBody';
 import ListItemRight from './ListItemRight';
 
-interface ListItemProps extends React.HTMLAttributes<HTMLOrSVGElement> {
-  as?: any;
+export interface ListItemProps extends React.HTMLAttributes<HTMLOrSVGElement> {
+  as?: React.ElementType;
   children?: any;
   size?: Btwx.SizeVariant;
   variant?: Btwx.ColorVariant;
@@ -15,6 +15,9 @@ interface ListItemProps extends React.HTMLAttributes<HTMLOrSVGElement> {
   root?: boolean;
   flush?: boolean;
   interactive?: boolean;
+  hovering?: boolean;
+  disabled?: boolean;
+  toggle?: boolean;
 }
 
 type ListItem = RefForwardingComponent<'li', ListItemProps> & {
@@ -34,6 +37,9 @@ const ListItem: ListItem = (forwardRef(function ListItem({
   root,
   flush,
   interactive,
+  hovering,
+  disabled,
+  toggle,
   ...rest
 }: ListItemProps, ref: any) {
 
@@ -48,6 +54,18 @@ const ListItem: ListItem = (forwardRef(function ListItem({
       }${
         interactive
         ? `${' '}c-list-item--interactive`
+        : ''
+      }${
+        disabled
+        ? `${' '}c-list-item--disabled`
+        : ''
+      }${
+        toggle
+        ? `${' '}c-list-item--toggle`
+        : ''
+      }${
+        hovering
+        ? `${' '}c-list-item--hovering`
         : ''
       }${
         flush

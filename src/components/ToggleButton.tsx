@@ -1,7 +1,7 @@
 import React, { useContext, forwardRef } from 'react';
 import { RefForwardingComponent } from '../utils';
 import Button, { ButtonProps } from './Button';
-import ToggleButtonGroupContext from './ToggleButtonGroupContext';
+import ToggleButtonGroupContext from './ToggleGroupContext';
 // import Icon from './Icon';
 
 export interface ToggleButtonProps extends ButtonProps {
@@ -9,9 +9,9 @@ export interface ToggleButtonProps extends ButtonProps {
   name?: string;
   checked?: boolean;
   disabled?: boolean;
-  onChange?: React.ChangeEventHandler<HTMLInputElement>;
   value: any;
   inputRef?: React.LegacyRef<HTMLInputElement>;
+  onChange?: React.ChangeEventHandler<HTMLInputElement>;
 }
 
 const ToggleButton: RefForwardingComponent<'button', ToggleButtonProps> = forwardRef(function ToggleButton({

@@ -39,15 +39,22 @@ $layersSidebarCellHeight: $unit * 8 // 32
   flex-shrink: 0
 
 .c-sidebar-layer__icon--aa
-  @include themed()
-    background: theme-prop(primary)
-  border-radius: 50%
-  width: $unit * 2
-  height: $unit * 2
+  &:after
+    @include themed()
+      background: theme-prop(primary)
+    content: ''
+    position: absolute
+    border-radius: 50%
+    width: $unit * 2
+    height: $unit * 2
+    left: 50%
+    top: 50%
+    transform: translate(-50%, -50%)
 
   &.c-sidebar-layer__icon--aa-selected
-    @include themed()
-      background: theme-prop(text-base-on-primary)
+    &:after
+      @include themed()
+        background: theme-prop(text-base-on-primary)
 
 .c-sidebar-layer__icon--empty
   width: 0

@@ -10,6 +10,7 @@ import EventDrawerEventLayersEmptyState from './EventDrawerEventLayersEmptyState
 import EventDrawerStickyHeader from './EventDrawerStickyHeader';
 import IconButton from './IconButton';
 import ListItem from './ListItem';
+import ListGroup from './ListGroup';
 
 interface EventDrawerEventLayersProps {
   scrollLayer: string;
@@ -36,10 +37,6 @@ const EventDrawerEventLayers = (props: EventDrawerEventLayersProps): ReactElemen
       dispatch(setLayerHover({id: null}));
     }
   }
-
-  // const handleClick = (id: string): void => {
-  //   dispatch(selectLayers({layers: [id], newSelection: true}));
-  // }
 
   return (
     <div
@@ -75,14 +72,15 @@ const EventDrawerEventLayers = (props: EventDrawerEventLayersProps): ReactElemen
               <div
                 id='event-drawer-event-layers'
                 className='c-event-drawer-event-layers__layers'>
-                {
-                  eventLayers.allIds.map((layer, index) => (
-                    <EventDrawerEventLayer
-                      key={index}
-                      id={layer}
-                      index={index} />
-                  ))
-                }
+                <ListGroup>
+                  {
+                    eventLayers.allIds.map((layer) => (
+                      <EventDrawerEventLayer
+                        key={layer}
+                        id={layer} />
+                    ))
+                  }
+                </ListGroup>
               </div>
             </ScrollSyncPane>
           </>

@@ -7,6 +7,7 @@ interface IconButtonProps extends ButtonProps {
   activeIconName?: string;
   variant?: Btwx.TextColorVariant;
   label?: string;
+  activeLabel?: string;
 }
 
 const IconButton = forwardRef(function IconButton({
@@ -14,9 +15,12 @@ const IconButton = forwardRef(function IconButton({
   activeIconName,
   variant,
   label,
+  activeLabel,
   ...rest
 }: IconButtonProps, ref: any) {
   const { isActive, size } = rest;
+  const buttonIcon = activeIconName && isActive ? activeIconName : iconName;
+  const buttonLabel = activeLabel && isActive ? activeLabel : label ? label : iconName;
 
   return (
     <Button
@@ -25,11 +29,11 @@ const IconButton = forwardRef(function IconButton({
       clear
       icon>
       <Icon
-        name={activeIconName && isActive ? activeIconName : iconName}
+        name={buttonIcon}
         size={size}
         variant={variant} />
       <span className='h-screen-reader'>
-        { label ? label : iconName }
+        { buttonLabel }
       </span>
     </Button>
   );

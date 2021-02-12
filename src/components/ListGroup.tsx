@@ -1,20 +1,26 @@
 import React from 'react';
 import ListItem from './ListItem';
+import { PropWithChildren } from '../utils';
 
-interface ListGroupProps {
+export interface ListGroupProps extends PropWithChildren {
   as?: any;
-  children?: any;
+  size?: Btwx.SizeVariant;
   horizontal?: boolean;
+  disabled?: boolean;
+  toggle?: boolean;
 }
 
-type ListGroup = React.FC<ListGroupProps & React.HTMLAttributes<HTMLOrSVGElement>> & {
+type ListGroup = React.FC<ListGroupProps> & {
   Item: typeof ListItem;
 }
 
 const ListGroup: ListGroup = ({
   as: Tag = 'ul',
+  size,
   children,
   horizontal,
+  disabled,
+  toggle,
   ...rest
 }: ListGroupProps) => (
   <Tag
@@ -22,6 +28,18 @@ const ListGroup: ListGroup = ({
     className={`c-list-group${
       horizontal
       ? `${' '}c-list-group--horizontal`
+      : ''
+    }${
+      disabled
+      ? `${' '}c-list-group--disabled`
+      : ''
+    }${
+      toggle
+      ? `${' '}c-list-group--toggle`
+      : ''
+    }${
+      size
+      ? `${' '}c-list-group--size`
       : ''
     }`}>
     { children }

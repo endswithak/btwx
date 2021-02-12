@@ -1,21 +1,24 @@
 import React, { ReactElement } from 'react';
-import IconButton from './IconButton';
+import ToggleIconButton from './ToggleIconButton';
 
 interface StrokeOptionsToggleProps {
+  style: 'fill' | 'stroke' | 'shadow';
   styleEnabled: boolean;
   setStyleEnabled(styleEnabled: boolean): void;
 }
 
 const StyleToggle = ({
+  style,
   styleEnabled,
   setStyleEnabled
 }: StrokeOptionsToggleProps): ReactElement => (
-  <IconButton
-    onClick={() => setStyleEnabled(!styleEnabled)}
+  <ToggleIconButton
+    value={styleEnabled}
+    type='checkbox'
+    onChange={() => setStyleEnabled(!styleEnabled)}
     size='small'
-    isActive={styleEnabled}
-    toggle
-    label={styleEnabled ? 'disable' : 'enable'}
+    checked={styleEnabled}
+    label={style}
     iconName='switch-off'
     activeIconName='switch-on' />
 );

@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import IconButton from './IconButton';
+import ToggleIconButton from './ToggleIconButton';
 
 interface StrokeOptionsToggleProps {
   showOptions: boolean;
@@ -10,12 +10,13 @@ const StrokeOptionsToggle = (props: StrokeOptionsToggleProps): ReactElement => {
   const { showOptions, onClick } = props;
 
   return (
-    <IconButton
-      onClick={onClick}
+    <ToggleIconButton
+      value={showOptions}
+      type='checkbox'
+      onChange={onClick}
       iconName='more'
-      isActive={showOptions}
-      toggle
-      label={showOptions ? 'hide stroke options' : 'show stroke options'}
+      checked={showOptions}
+      label='stroke options'
       size='small' />
   );
 }

@@ -1,7 +1,4 @@
 .c-icon {
-  @include themed() {
-    fill: theme-prop(text-lighter);
-  }
   display: inline-flex;
   width: $icon-size;
   height: $icon-size;
@@ -13,6 +10,9 @@
   flex-shrink: 0;
 
   > svg {
+    @include themed() {
+      fill: theme-prop(text-lighter);
+    }
     overflow: visible;
   }
 
@@ -34,13 +34,33 @@
 
   @each $theme-color-name in $theme-color-names {
     &.c-icon--#{$theme-color-name} {
-      @include theme-icon($theme-color-name);
+      @include themed() {
+        svg {
+          fill: theme-prop($theme-color-name) !important;
+        }
+
+        &.c-icon--outline {
+          fill: none;
+          stroke: theme-prop($theme-color-name) !important;
+        }
+      }
     }
   }
 
   @each $text-theme-color-name in $theme-text-color-names {
     &.c-icon--#{$text-theme-color-name} {
-      @include theme-icon($text-theme-color-name, true);
+      @include themed() {
+        svg {
+          fill: theme-prop(text-#{$text-theme-color-name}) !important;
+        }
+
+        &.c-icon--outline {
+          svg {
+            fill: none;
+            stroke: theme-prop(text-#{$text-theme-color-name}) !important;
+          }
+        }
+      }
     }
   }
 }

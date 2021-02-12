@@ -1,6 +1,6 @@
 import React, { createContext } from 'react';
 
-interface ToggleButtonGroupContextType {
+interface ToggleGroupContextType {
   name: string;
   disabled?: boolean;
   type: 'radio' | 'checkbox';
@@ -9,7 +9,7 @@ interface ToggleButtonGroupContextType {
   onChange?: any;
 }
 
-const ToggleButtonGroupContext = createContext<ToggleButtonGroupContextType>({
+const ToggleGroupContext = createContext<ToggleGroupContextType>({
   name: null,
   disabled: false,
   type: null,
@@ -18,4 +18,4 @@ const ToggleButtonGroupContext = createContext<ToggleButtonGroupContextType>({
   onChange: () => {}
 });
 
-export default ToggleButtonGroupContext;
+export default ToggleGroupContext;

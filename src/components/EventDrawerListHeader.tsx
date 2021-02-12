@@ -84,83 +84,12 @@ const EventDrawerListHeader = (): ReactElement => {
           flush
           root>
           <Text
-            variant='lighter'
             textStyle='cap'
             size='small'>
             Actions
           </Text>
         </ListGroup.Item>
       </ListGroup>
-      {/* <div className='c-event-drawer-list__item c-event-drawer-list__item--labels'>
-        <HeaderItem
-          theme={theme}
-          className='c-event-drawer-list-item__module c-event-drawer-list-item__module--label'
-          onClick={(): void => handleSort('layer')}
-          isActive={eventSort === 'layer-asc' || eventSort === 'layer-dsc'}>
-          layer
-          {
-            eventSort === 'layer-asc' || eventSort === 'layer-dsc'
-            ? <Icon
-                name={`sort-alpha-${sortOrder}`}
-                style={{
-                  fill: theme.palette.primary
-                }}
-                size='small' />
-            : null
-          }
-        </HeaderItem>
-        <HeaderItem
-          theme={theme}
-          className='c-event-drawer-list-item__module c-event-drawer-list-item__module--label'
-          onClick={(): void => handleSort('event')}
-          isActive={eventSort === 'event-asc' || eventSort === 'event-dsc'}>
-          event
-          {
-            eventSort === 'event-asc' || eventSort === 'event-dsc'
-            ? <Icon
-                name={`sort-alpha-${sortOrder}`}
-                variant='primary'
-                size='small' />
-            : null
-          }
-        </HeaderItem>
-        <HeaderItem
-          theme={theme}
-          className='c-event-drawer-list-item__module c-event-drawer-list-item__module--label'
-          onClick={(): void => handleSort('artboard')}
-          isActive={eventSort === 'artboard-asc' || eventSort === 'artboard-dsc'}>
-          artboard
-          {
-            eventSort === 'artboard-asc' || eventSort === 'artboard-dsc'
-            ? <Icon
-                name={`sort-alpha-${sortOrder}`}
-                variant='primary'
-                size='small' />
-            : null
-          }
-        </HeaderItem>
-        <HeaderItem
-          theme={theme}
-          className='c-event-drawer-list-item__module c-event-drawer-list-item__module--label'
-          onClick={(): void => handleSort('destinationArtboard')}
-          isActive={eventSort === 'destinationArtboard-asc' || eventSort === 'destinationArtboard-dsc'}>
-          destination
-          {
-            eventSort === 'destinationArtboard-asc' || eventSort === 'destinationArtboard-dsc'
-            ? <Icon
-                name={`sort-alpha-${sortOrder}`}
-                variant='primary'
-                size='small' />
-            : null
-          }
-        </HeaderItem>
-        <HeaderItem
-          theme={theme}
-          className='c-event-drawer-list-item__module c-event-drawer-list-item__module--label'
-          isDisabled>
-          actions
-        </HeaderItem>
-      </div> */}
     </div>
   );
 }

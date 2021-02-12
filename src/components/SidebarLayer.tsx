@@ -30,7 +30,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   const isEditing = useSelector((state: RootState) => state.leftSidebar.editing === id);
   const isArtboard = useSelector((state: RootState) => state.layer.present.byId[id].type === 'Artboard' && !isDragGhost);
   const isActiveArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard === id);
-  // const isHover = useSelector((state: RootState) => state.layer.present.byId[id].hover);
+  const isHover = useSelector((state: RootState) => state.layer.present.byId[id].hover);
   // const hover = useSelector((state: RootState) => state.layer.present.hover);
   // const underlyingMask = useSelector((state: RootState) => state.layer.present.byId[id].type !== 'Artboard' ? (state.layer.present.byId[id] as Btwx.MaskableLayer).underlyingMask : null);
   // const editing = useSelector((state: RootState) => state.leftSidebar.editing === id);
@@ -112,6 +112,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
       id={isDragGhost ? `dragGhost-${id}` : id}
       flush
       interactive
+      hovering={isHover}
       root={isArtboard}
       draggable={!isDragGhost && draggable}
       onMouseEnter={isDragGhost ? null : handleMouseEnter}
@@ -125,7 +126,8 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
       isActive={isSelected || isEditing}
       style={{
         ...style,
-        paddingLeft: !isDragGhost ? nestingLevel * 12 : 0
+        paddingLeft: !isDragGhost ? nestingLevel * 12 : 0,
+        paddingRight: 0
       }}>
       <SidebarLayerChevron
         id={id}
@@ -152,7 +154,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
         isActiveArtboard
         ? <ListItem.Right>
             <div
-              className={`c-sidebar-layer__icon--aa${
+              className={`c-sidebar-layer__icon c-sidebar-layer__icon--aa${
                 isSelected
                 ? `${' '}c-sidebar-layer__icon--aa-selected`
                 : ''

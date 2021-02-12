@@ -25,6 +25,7 @@ const FillToggle = (): ReactElement => {
 
   return (
     <StyleToggle
+      style='fill'
       styleEnabled={enabled}
       setStyleEnabled={handleToggleClick} />
   );

@@ -62,6 +62,7 @@ const EventDrawerListItem = (props: EventDrawerListItemProps): ReactElement => {
   return (
     <ListItem
       interactive
+      hovering={hovering}
       onDoubleClick={handleDoubleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

@@ -28,14 +28,14 @@ const SidebarCollapseSection = (props: SidebarCollapseSectionProps): ReactElemen
           </SidebarSectionColumn>
           <SidebarSectionColumn width='50%'>
             <SidebarSectionRow justifyContent='flex-end' alignItems='center'>
-              <>
+              <div className='c-sidebar-section__actions'>
                 { actions }
                 <IconButton
                   onClick={onClick}
                   size='small'
                   iconName={collapsed ? 'thicc-chevron-right' : 'thicc-chevron-down'}
                   label={collapsed ? 'show section' : 'hide section'} />
-              </>
+              </div>
             </SidebarSectionRow>
           </SidebarSectionColumn>
         </SidebarSectionRow>

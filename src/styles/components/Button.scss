@@ -49,6 +49,7 @@
 
   &.c-button--icon {
     padding: 0;
+    min-width: $icon-size;
   }
 
   &.c-button--stacked {
@@ -63,14 +64,7 @@
 
   @each $aspect-ratio-name, $aspect-ratio-value in $aspect-ratios {
     &.c-button--#{$aspect-ratio-name} {
-      display: block;
-      position: relative;
-      padding-bottom: $aspect-ratio-value;
-      height: 0;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      @include aspect-b($aspect-ratio-value);
     }
   }
 }

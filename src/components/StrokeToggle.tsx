@@ -25,6 +25,7 @@ const StrokeToggle = (): ReactElement => {
 
   return (
     <StyleToggle
+      style='stroke'
       styleEnabled={enabled}
       setStyleEnabled={handleToggleClick} />
   );

@@ -25,6 +25,7 @@ const ShadowToggle = (): ReactElement => {
 
   return (
     <StyleToggle
+      style='shadow'
       styleEnabled={enabled}
       setStyleEnabled={handleToggleClick} />
   );
