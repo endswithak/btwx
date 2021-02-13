@@ -3,6 +3,9 @@ import { RefForwardingComponent } from '../utils';
 import ListItem, { ListItemProps } from './ListItem';
 import ToggleGroupContext from './ToggleGroupContext';
 import Icon from './Icon';
+import Text from './Text';
+import ListItemBody from './ListItemBody';
+import ListItemRight from './ListItemRight';
 
 export interface ToggleListItemProps extends ListItemProps {
   type?: 'checkbox' | 'radio';
@@ -15,7 +18,14 @@ export interface ToggleListItemProps extends ListItemProps {
   onChange?: React.ChangeEventHandler<HTMLInputElement>;
 }
 
-const ToggleListItem: RefForwardingComponent<'button', ToggleListItemProps> = forwardRef(function ToggleListItem({
+type ToggleListItem = RefForwardingComponent<'button', ToggleListItemProps> & {
+  Text: typeof Text;
+  Icon: typeof Icon;
+  Body: typeof ListItemBody;
+  Right: typeof ListItemRight;
+}
+
+const ToggleListItem: ToggleListItem = (forwardRef(function ToggleListItem({
   type,
   size,
   name,
@@ -55,19 +65,22 @@ const ToggleListItem: RefForwardingComponent<'button', ToggleListItemProps> = fo
         checked={!!checked || tg.value === value}
         disabled={!!disabled || tg.disabled}
         onChange={onChange || tg.onChange} />
-      { children }
       {
         !hideRight
-        ? <ListItem.Right>
-            <Icon
-              name={getIcon()}
-              size={size || tg.size}
-              variant={checked ? 'primary' : null} />
-          </ListItem.Right>
+        ? <Icon
+            name={getIcon()}
+            size='small'
+            variant={checked ? 'primary' : null} />
         : null
       }
+      { children }
     </ListItem>
   );
-});
+}) as unknown) as ToggleListItem;
+
+ToggleListItem.Text = Text;
+ToggleListItem.Icon = Icon;
+ToggleListItem.Body = ListItemBody;
+ToggleListItem.Right = ListItemRight;
 
 export default ToggleListItem;

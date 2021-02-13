@@ -277,19 +277,23 @@ export const getSelectedFillColors = createSelector(
 export const getSelectedFillHex = createSelector(
   [ getSelectedFill ],
   (selectedFills) => {
-    const firstItem = selectedFills[Object.keys(selectedFills)[0]];
-    const firstItemColor = firstItem.color;
-    const firstItemHex = tinyColor({h: firstItemColor.h, s: firstItemColor.s, l: firstItemColor.l}).toHex();
-    const hexMatch = Object.keys(selectedFills).every((id) => {
-      const fill = selectedFills[id];
-      const fillColor = fill.color;
-      const fillHex = tinyColor({h: fillColor.h, s: fillColor.s, l: fillColor.l}).toHex();
-      return fillHex === firstItemHex;
-    });
-    if (hexMatch) {
-      return firstItemHex;
+    if (Object.keys(selectedFills).length > 0) {
+      const firstItem = selectedFills[Object.keys(selectedFills)[0]];
+      const firstItemColor = firstItem.color;
+      const firstItemHex = tinyColor({h: firstItemColor.h, s: firstItemColor.s, l: firstItemColor.l}).toHex();
+      const hexMatch = Object.keys(selectedFills).every((id) => {
+        const fill = selectedFills[id];
+        const fillColor = fill.color;
+        const fillHex = tinyColor({h: fillColor.h, s: fillColor.s, l: fillColor.l}).toHex();
+        return fillHex === firstItemHex;
+      });
+      if (hexMatch) {
+        return firstItemHex;
+      } else {
+        return 'multi';
+      }
     } else {
-      return 'multi';
+      return null;
     }
   }
 );

@@ -1,4 +1,7 @@
-import React, { ReactElement, useEffect, useState, useRef } from 'react';
+/* eslint-disable @typescript-eslint/no-use-before-define */
+import React, { ReactElement, useEffect, useState, useRef, useCallback } from 'react';
+import { remote } from 'electron';
+import debounce from 'lodash.debounce';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
@@ -10,6 +13,9 @@ import MathFormGroup from './MathFormGroup';
 import Form from './Form';
 
 const StarPointsInput = (): ReactElement => {
+  const minPoints = 3;
+  const maxPoints = 50;
+  const isMac = remote.process.platform === 'darwin';
   const formControlRef = useRef(null);
   const formControlSliderRef = useRef(null);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
@@ -19,12 +25,19 @@ const StarPointsInput = (): ReactElement => {
   const [points, setPoints] = useState(pointsValue);
   const dispatch = useDispatch();
 
+  const debouncePoints = useCallback(
+    debounce((points: number) => {
+      dispatch(setStarsPointsThunk({layers: selected, points: points}));
+    }, 150),
+    []
+  );
+
   useEffect(() => {
     setPoints(pointsValue);
   }, [pointsValue, selected]);
 
-  const handleSliderChange = (e: any): void => {
-    setPoints(e.target.value);
+  const handleSliderChange = (newPoints: number): void => {
+    setPoints(newPoints);
     Object.keys(selectedById).forEach((key) => {
       const layerItem = selectedById[key];
       const isMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
@@ -37,7 +50,7 @@ const StarPointsInput = (): ReactElement => {
         center: paperLayer.bounds.center,
         radius1: maxDim / 2,
         radius2: (maxDim / 2) * (layerItem as Btwx.Star).radius,
-        points: e.target.value,
+        points: newPoints,
         insert: false
       });
       newShape.bounds.width = paperLayer.bounds.width;
@@ -56,11 +69,37 @@ const StarPointsInput = (): ReactElement => {
   const handleSliderSubmit = (e: any): void => {
     if (e.target.value !== pointsValue) {
       dispatch(setStarsPointsThunk({layers: selected, points: e.target.value}));
+      buildPointsTouchBar(e.target.value);
     }
   }
 
   const handleControlSubmitSuccess = (nextPoints: any): void => {
     dispatch(setStarsPointsThunk({layers: selected, points: nextPoints}));
+    buildPointsTouchBar(nextPoints);
+  }
+
+  const buildPointsTouchBar = (opt = points): void => {
+    if (isMac) {
+      const { TouchBarSlider } = remote.TouchBar;
+      const pointsSlider = new TouchBarSlider({
+        label: 'Points',
+        value: opt !== 'multi' ? parseInt(opt) : 0,
+        minValue: minPoints,
+        maxValue: maxPoints,
+        change: (newValue): void => {
+          handleSliderChange(newValue);
+          debouncePoints(newValue);
+        }
+      });
+      const newTouchBar = new remote.TouchBar({
+        items: [pointsSlider]
+      });
+      remote.getCurrentWindow().setTouchBar(newTouchBar);
+    }
+  }
+
+  const handleSliderFocus = (): void => {
+    buildPointsTouchBar();
   }
 
   return (
@@ -74,10 +113,11 @@ const StarPointsInput = (): ReactElement => {
               value={points !== 'multi' ? points : 0}
               type='range'
               step={1}
-              min={3}
-              max={50}
+              min={minPoints}
+              max={maxPoints}
               size='small'
-              onChange={handleSliderChange}
+              onChange={(e: any) => handleSliderChange(e.target.value)}
+              onFocus={handleSliderFocus}
               onMouseUp={handleSliderSubmit}
               required />
           </Form.Group>
@@ -88,8 +128,8 @@ const StarPointsInput = (): ReactElement => {
           ref={formControlRef}
           controlId='control-star-points'
           value={points}
-          min={3}
-          max={50}
+          min={minPoints}
+          max={maxPoints}
           size='small'
           label='Points'
           onSubmitSuccess={handleControlSubmitSuccess}

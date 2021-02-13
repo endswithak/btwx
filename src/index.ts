@@ -56,10 +56,12 @@ export const createNewDocument = ({width, height, document}: {width?: number; he
       width: width ? width : 1024,
       minWidth: 1024,
       minHeight: 768,
+      transparent: true,
       frame: false,
       icon: path.join(__dirname, 'assets', 'icon-32x32.png'),
       titleBarStyle: 'hidden',
       backgroundColor: getWindowBackground(),
+      vibrancy: 'under-window',
       webPreferences: {
         nodeIntegration: true
       }

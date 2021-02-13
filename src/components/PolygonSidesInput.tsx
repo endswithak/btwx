@@ -1,4 +1,7 @@
-import React, { ReactElement, useEffect, useState, useRef } from 'react';
+/* eslint-disable @typescript-eslint/no-use-before-define */
+import React, { ReactElement, useEffect, useState, useRef, useCallback } from 'react';
+import { remote } from 'electron';
+import debounce from 'lodash.debounce';
 import { useSelector, useDispatch } from 'react-redux';
 import { paperMain } from '../canvas';
 import { RootState } from '../store/reducers';
@@ -10,6 +13,9 @@ import MathFormGroup from './MathFormGroup';
 import Form from './Form';
 
 const PolygonSidesInput = (): ReactElement => {
+  const minSides = 3;
+  const maxSides = 10;
+  const isMac = remote.process.platform === 'darwin';
   const formControlRef = useRef(null);
   const formControlSliderRef = useRef(null);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
@@ -19,12 +25,19 @@ const PolygonSidesInput = (): ReactElement => {
   const [sides, setSides] = useState(sidesValue);
   const dispatch = useDispatch();
 
+  const debounceSides = useCallback(
+    debounce((s: number) => {
+      dispatch(setPolygonsSidesThunk({layers: selected, sides: s}));
+    }, 150),
+    []
+  );
+
   useEffect(() => {
     setSides(sidesValue);
   }, [sidesValue, selected]);
 
-  const handleSliderChange = (e: any): void => {
-    setSides(e.target.value);
+  const handleSliderChange = (newSides: number): void => {
+    setSides(newSides);
     Object.keys(selectedById).forEach((key) => {
       const layerItem = selectedById[key];
       const isMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
@@ -35,7 +48,7 @@ const PolygonSidesInput = (): ReactElement => {
       const newShape = new paperMain.Path.RegularPolygon({
         center: paperLayer.bounds.center,
         radius: Math.max(paperLayer.bounds.width, paperLayer.bounds.height) / 2,
-        sides: e.target.value,
+        sides: newSides,
         insert: false
       });
       newShape.bounds.width = paperLayer.bounds.width;
@@ -54,11 +67,37 @@ const PolygonSidesInput = (): ReactElement => {
   const handleSliderSubmit = (e: any): void => {
     if (e.target.value !== sidesValue) {
       dispatch(setPolygonsSidesThunk({layers: selected, sides: e.target.value}));
+      buildSidesTouchBar(e.target.value);
     }
   }
 
   const handleControlSubmitSuccess = (nextSides: any): void => {
     dispatch(setPolygonsSidesThunk({layers: selected, sides: nextSides}));
+    buildSidesTouchBar(nextSides);
+  }
+
+  const buildSidesTouchBar = (opt = sides): void => {
+    if (isMac) {
+      const { TouchBarSlider } = remote.TouchBar;
+      const sidesSlider = new TouchBarSlider({
+        label: 'Sides',
+        value: opt !== 'multi' ? parseInt(opt) : 0,
+        minValue: minSides,
+        maxValue: maxSides,
+        change: (newValue): void => {
+          handleSliderChange(newValue);
+          debounceSides(newValue);
+        }
+      });
+      const newTouchBar = new remote.TouchBar({
+        items: [sidesSlider]
+      });
+      remote.getCurrentWindow().setTouchBar(newTouchBar);
+    }
+  }
+
+  const handleSliderFocus = (): void => {
+    buildSidesTouchBar();
   }
 
   return (
@@ -72,11 +111,12 @@ const PolygonSidesInput = (): ReactElement => {
               value={sides !== 'multi' ? sides : 0}
               type='range'
               step={1}
-              min={3}
-              max={10}
+              min={minSides}
+              max={maxSides}
               size='small'
-              onChange={handleSliderChange}
+              onChange={(e: any) => handleSliderChange(e.target.value)}
               onMouseUp={handleSliderSubmit}
+              onFocus={handleSliderFocus}
               required />
           </Form.Group>
         </Form>
@@ -86,8 +126,8 @@ const PolygonSidesInput = (): ReactElement => {
           ref={formControlRef}
           controlId='control-polygon-sides'
           value={sides}
-          min={3}
-          max={10}
+          min={minSides}
+          max={maxSides}
           size='small'
           label='Sides'
           onSubmitSuccess={handleControlSubmitSuccess}

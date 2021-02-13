@@ -13,17 +13,20 @@
     background: theme-prop(glass-background)
     box-shadow: 0 0 0 1px theme-prop(modal-border), 0 4px 16px 0 rgba(0,0,0,0.16)
   position: absolute
-  min-width: 172px
+  min-width: 200px
   top: $unit * 8
   padding: $unit
   z-index: 9999999
   border-radius: $unit
 
-.c-topbar-dropdown-button__dropdown--left
-  left: $icon-size / 2
+  .c-list-item__right
+      padding-right: $padding
 
-.c-topbar-dropdown-button__dropdown--right
-  right: $icon-size / 2
+  &.c-topbar-dropdown-button__dropdown--left
+    left: $icon-size / 2
+
+  &.c-topbar-dropdown-button__dropdown--right
+    right: $icon-size / 2
 
 .c-topbar-dropdown-button__option
   position: relative

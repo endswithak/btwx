@@ -1,14 +1,10 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { ReactElement, useRef, useState } from 'react';
+import React, { ReactElement, useEffect, useRef, useState } from 'react';
+import { remote } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { toggleLeftSidebarThunk, toggleRightSidebarThunk, toggleEventDrawerThunk } from '../store/actions/viewSettings';
-import TopbarDropdownButton from './TopbarDropdownButton';
-import ToggleListGroup from './ToggleListGroup';
 import ToggleListItem from './ToggleListItem';
-import ListItemBody from './ListItemBody';
-import Text from './Text';
-import Icon from './Icon';
 import StackedButton from './StackedButton';
 
 const InsertButton = (): ReactElement => {
@@ -21,6 +17,8 @@ const InsertButton = (): ReactElement => {
   const [eventDrawerOpen, setEventDrawerOpen] = useState(eventDrawerOpenValue);
   const [showDropdown, setShowDropdown] = useState(false);
   const dispatch = useDispatch();
+
+  const isMac = remote.process.platform === 'darwin';
 
   const onMouseDown = (event: any): void => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -60,6 +58,24 @@ const InsertButton = (): ReactElement => {
     setEventDrawerOpen(!eventDrawerOpen);
   }
 
+  useEffect(() => {
+    if (leftSidebarOpenValue !== leftSidebarOpen) {
+      setLeftSidebarOpen(leftSidebarOpenValue);
+    }
+  }, [leftSidebarOpenValue]);
+
+  useEffect(() => {
+    if (rightSidebarOpenValue !== rightSidebarOpen) {
+      setRightSidebarOpen(rightSidebarOpenValue);
+    }
+  }, [rightSidebarOpenValue]);
+
+  useEffect(() => {
+    if (eventDrawerOpenValue !== eventDrawerOpen) {
+      setEventDrawerOpen(eventDrawerOpenValue);
+    }
+  }, [eventDrawerOpenValue]);
+
   return (
     <div
       className='c-topbar-dropdown-button'
@@ -79,10 +95,20 @@ const InsertButton = (): ReactElement => {
               onChange={handleLeftSidebarChange}
               value={leftSidebarOpen}
               checked={leftSidebarOpen}>
-              <Icon name='left-sidebar' />
-              <ListItemBody>
-                <Text size='small'>Layers</Text>
-              </ListItemBody>
+              <ToggleListItem.Icon name='left-sidebar' />
+              <ToggleListItem.Body>
+                <ToggleListItem.Text
+                  size='small'>
+                  Layers
+                </ToggleListItem.Text>
+              </ToggleListItem.Body>
+              <ToggleListItem.Right>
+                <ToggleListItem.Text
+                  variant='lighter'
+                  size='small'>
+                  { isMac ? '⌥⌘1' : 'Alt+Ctrl+1' }
+                </ToggleListItem.Text>
+              </ToggleListItem.Right>
             </ToggleListItem>
             <ToggleListItem
               name='styles'
@@ -90,10 +116,20 @@ const InsertButton = (): ReactElement => {
               onChange={handleRightSidebarChange}
               value={rightSidebarOpen}
               checked={rightSidebarOpen}>
-              <Icon name='right-sidebar' />
-              <ListItemBody>
-                <Text size='small'>Styles</Text>
-              </ListItemBody>
+              <ToggleListItem.Icon name='right-sidebar' />
+              <ToggleListItem.Body>
+                <ToggleListItem.Text
+                  size='small'>
+                  Styles
+                </ToggleListItem.Text>
+              </ToggleListItem.Body>
+              <ToggleListItem.Right>
+                <ToggleListItem.Text
+                  variant='lighter'
+                  size='small'>
+                  { isMac ? '⌥⌘2' : 'Alt+Ctrl+2' }
+                </ToggleListItem.Text>
+              </ToggleListItem.Right>
             </ToggleListItem>
             <ToggleListItem
               name='events'
@@ -101,10 +137,20 @@ const InsertButton = (): ReactElement => {
               onChange={handleEventsChange}
               value={eventDrawerOpen}
               checked={eventDrawerOpen}>
-              <Icon name='tweens' />
-              <ListItemBody>
-                <Text size='small'>Events</Text>
-              </ListItemBody>
+              <ToggleListItem.Icon name='tweens' />
+              <ToggleListItem.Body>
+                <ToggleListItem.Text
+                  size='small'>
+                  Events
+                </ToggleListItem.Text>
+              </ToggleListItem.Body>
+              <ToggleListItem.Right>
+                <ToggleListItem.Text
+                  variant='lighter'
+                  size='small'>
+                  { isMac ? '⌥⌘3' : 'Alt+Ctrl+3' }
+                </ToggleListItem.Text>
+              </ToggleListItem.Right>
             </ToggleListItem>
           </div>
         : null

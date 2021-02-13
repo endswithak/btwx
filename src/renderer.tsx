@@ -32,6 +32,7 @@ import { Provider } from 'react-redux';
 import App from './components/App';
 import configureStore from './store';
 import Menu from './components/Menu';
+import Touchbar from './components/Touchbar';
 import Preview from './components/Preview';
 import ThemeProvider from './components/ThemeProvider';
 
@@ -43,6 +44,7 @@ import './styles/index.sass';
     <Provider store={store}>
       <ThemeProvider>
         <Menu />
+        <Touchbar />
         <App />
       </ThemeProvider>
     </Provider>,

@@ -163,7 +163,7 @@ export const isMac = process.platform === 'darwin';
 
 export const getWindowBackground = (themeName?: Btwx.ThemeName): string => {
   const theme = getTheme(themeName ? themeName : isMac ? systemPreferences.getUserDefault('theme', 'string') : 'dark');
-  return theme.background.z0;
+  return tinyColor(theme.background.z0).setAlpha(0).toHex8String();
 };
 
 export const getAllWindowPreviewStates = (fromRenderer?: boolean): Promise<{previewState: PreviewState; windowId: number}[]> => {

@@ -1,4 +1,7 @@
-import React, { ReactElement, useEffect, useState, useRef } from 'react';
+/* eslint-disable @typescript-eslint/no-use-before-define */
+import React, { ReactElement, useEffect, useState, useRef, useCallback } from 'react';
+import { remote } from 'electron';
+import debounce from 'lodash.debounce';
 import { useSelector, useDispatch } from 'react-redux';
 import { paperMain } from '../canvas';
 import { RootState } from '../store/reducers';
@@ -10,6 +13,7 @@ import PercentageFormGroup from './PercentageFormGroup';
 import Form from './Form';
 
 const StarRadiusInput = (): ReactElement => {
+  const isMac = remote.process.platform === 'darwin';
   const formControlRef = useRef(null);
   const formControlSliderRef = useRef(null);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
@@ -19,12 +23,19 @@ const StarRadiusInput = (): ReactElement => {
   const [radius, setRadius] = useState(radiusValue);
   const dispatch = useDispatch();
 
+  const debounceRadius = useCallback(
+    debounce((radius: number) => {
+      dispatch(setStarsRadiusThunk({layers: selected, radius: radius}));
+    }, 150),
+    []
+  );
+
   useEffect(() => {
     setRadius(radiusValue);
   }, [radiusValue, selected]);
 
-  const handleSliderChange = (e: any): void => {
-    setRadius(e.target.value);
+  const handleSliderChange = (newRadius: number): void => {
+    setRadius(newRadius);
     Object.keys(selectedById).forEach((key) => {
       const layerItem = selectedById[key];
       const isMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
@@ -36,7 +47,7 @@ const StarRadiusInput = (): ReactElement => {
       const newShape = new paperMain.Path.Star({
         center: paperLayer.bounds.center,
         radius1: maxDim / 2,
-        radius2: (maxDim / 2) * e.target.value,
+        radius2: (maxDim / 2) * newRadius,
         points: (layerItem as Btwx.Star).points,
         insert: false
       });
@@ -56,11 +67,38 @@ const StarRadiusInput = (): ReactElement => {
   const handleSliderSubmit = (e: any): void => {
     if (e.target.value !== radiusValue) {
       dispatch(setStarsRadiusThunk({layers: selected, radius: e.target.value}));
+      buildRadiusTouchBar(e.target.value);
     }
   }
 
   const handleControlSubmitSuccess = (nextRadius: any): void => {
     dispatch(setStarsRadiusThunk({layers: selected, radius: nextRadius}));
+    buildRadiusTouchBar(nextRadius);
+  }
+
+  const buildRadiusTouchBar = (opt = radius) => {
+    if (isMac) {
+      const { TouchBarSlider } = remote.TouchBar;
+      const radiusSlider = new TouchBarSlider({
+        label: 'Radius',
+        value: opt !== 'multi' ? parseInt(opt * 100) : 0,
+        minValue: 0,
+        maxValue: 100,
+        change: (newValue) => {
+          const newRadius = Math.round(newValue) / 100;
+          handleSliderChange(newRadius);
+          debounceRadius(newRadius);
+        }
+      });
+      const newTouchBar = new remote.TouchBar({
+        items: [radiusSlider]
+      });
+      remote.getCurrentWindow().setTouchBar(newTouchBar);
+    }
+  }
+
+  const handleSliderFocus = () => {
+    buildRadiusTouchBar();
   }
 
   return (
@@ -77,8 +115,9 @@ const StarRadiusInput = (): ReactElement => {
               min={0}
               max={1}
               size='small'
-              onChange={handleSliderChange}
+              onChange={(e: any) => handleSliderChange(e.target.value)}
               onMouseUp={handleSliderSubmit}
+              onFocus={handleSliderFocus}
               required />
           </Form.Group>
         </Form>

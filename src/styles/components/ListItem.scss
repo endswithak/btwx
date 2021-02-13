@@ -56,7 +56,7 @@
       background: theme-prop(primary);
 
       .c-text {
-        color: theme-prop(text-base-on-primary) !important;
+        color: theme-prop(text-base-on-primary);
       }
 
       .c-icon svg {
@@ -81,7 +81,7 @@
         background: none;
 
         .c-text {
-          color: theme-prop(text-base) !important;
+          color: theme-prop(text-base);
         }
 
         .c-icon svg {

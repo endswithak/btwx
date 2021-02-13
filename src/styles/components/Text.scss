@@ -14,7 +14,7 @@
 
   &.c-text--body-2 {
     @include themed() {
-      color: theme-prop(text-light);
+      color: theme-prop(text-lighter);
     }
     font-size: $text-body-2-size;
   }
