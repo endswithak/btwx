@@ -1,13 +1,29 @@
-import React, { ReactElement, useEffect } from 'react';
+/* eslint-disable @typescript-eslint/no-use-before-define */
+import { remote } from 'electron';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { zoomFitSelectedThunk } from '../store/actions/zoomTool';
-import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'viewZoomFitSelected';
 
-const MenuViewZoomFitSelected = (props: MenuItemProps): ReactElement => {
-  const { menuItem } = props;
+interface MenuViewZoomFitSelectedProps {
+  menu: Electron.Menu;
+  setFitSelected(fitSelected: any): void;
+}
+
+const MenuViewZoomFitSelected = (props: MenuViewZoomFitSelectedProps): ReactElement => {
+  const { menu, setFitSelected } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
+    label: 'Fit Selection',
+    id: MENU_ITEM_ID,
+    enabled: false,
+    accelerator: remote.process.platform === 'darwin' ? 'Cmd+2' : 'Ctrl+2',
+    click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+      dispatch(zoomFitSelectedThunk());
+    }
+  });
+  const [menuItem, setMenuItem] = useState(undefined);
   const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
   const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
   const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
@@ -15,21 +31,24 @@ const MenuViewZoomFitSelected = (props: MenuItemProps): ReactElement => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    menuItem.enabled = canZoom && !isResizing && !isDragging && !isDrawing;
-  }, [canZoom, isDragging, isResizing, isDrawing]);
+    setFitSelected(menuItemTemplate);
+  }, [menuItemTemplate]);
 
   useEffect(() => {
-    (window as any)[MENU_ITEM_ID] = (): void => {
-      dispatch(zoomFitSelectedThunk());
-    };
-  }, []);
+    if (menu) {
+      setMenuItem(menu.getMenuItemById(MENU_ITEM_ID));
+    }
+  }, [menu]);
+
+  useEffect(() => {
+    if (menuItem) {
+      menuItem.enabled = canZoom && !isResizing && !isDragging && !isDrawing;
+    }
+  }, [canZoom, isDragging, isResizing, isDrawing]);
 
   return (
     <></>
   );
 }
 
-export default MenuItem(
-  MenuViewZoomFitSelected,
-  MENU_ITEM_ID
-);
+export default MenuViewZoomFitSelected;

@@ -11,12 +11,13 @@ import MenuEditFind from './MenuEditFind';
 import MenuEditRename from './MenuEditRename';
 
 interface MenuEditProps {
+  menu: Electron.Menu;
   setEdit(edit: any): void;
 }
 
 const MenuEdit = (props: MenuEditProps): ReactElement => {
-  const { setEdit } = props;
-  const [menuItem, setMenuItem] = useState({
+  const { menu, setEdit } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Edit'
   });
   const [undo, setUndo] = useState(undefined);
@@ -33,7 +34,7 @@ const MenuEdit = (props: MenuEditProps): ReactElement => {
   useEffect(() => {
     if (undo && redo && cut && copy && paste) {
       setEdit({
-        ...menuItem,
+        ...menuItemTemplate,
         submenu: [
           undo,
           redo,
@@ -57,68 +58,37 @@ const MenuEdit = (props: MenuEditProps): ReactElement => {
   return (
     <>
       <MenuEditUndo
+        menu={menu}
         setUndo={setUndo} />
       <MenuEditRedo
+        menu={menu}
         setRedo={setRedo} />
       <MenuEditCut
+        menu={menu}
         setCut={setCut} />
       <MenuEditCopy
+        menu={menu}
         setCopy={setCopy} />
       <MenuEditPaste
+        menu={menu}
         setPaste={setPaste} />
       <MenuEditDelete
+        menu={menu}
         setDeleteLayers={setDeleteLayers} />
       <MenuEditDuplicate
+        menu={menu}
         setDuplicate={setDuplicate} />
       <MenuEditSelect
+        menu={menu}
         setSelect={setSelect} />
       <MenuEditFind
+        menu={menu}
         setFind={setFind} />
       <MenuEditRename
+        menu={menu}
         setRename={setRename} />
     </>
   );
 };
 
 export default MenuEdit;
-
-// import React, { ReactElement } from 'react';
-// import MenuEditUndo from './MenuEditUndo';
-// import MenuEditRedo from './MenuEditRedo';
-// import MenuEditCut from './MenuEditCut';
-// import MenuEditCopy from './MenuEditCopy';
-// import MenuEditCopySVG from './MenuEditCopySVG';
-// import MenuEditCopyStyle from './MenuEditCopyStyle';
-// import MenuEditPaste from './MenuEditPaste';
-// import MenuEditPasteOverSelection from './MenuEditPasteOverSelection';
-// import MenuEditPasteSVG from './MenuEditPasteSVG';
-// import MenuEditPasteStyle from './MenuEditPasteStyle';
-// import MenuEditDelete from './MenuEditDelete';
-// import MenuEditDuplicate from './MenuEditDuplicate';
-// import MenuEditSelectAll from './MenuEditSelectAll';
-// import MenuEditSelectAllArtboards from './MenuEditSelectAllArtboards';
-// import MenuEditFind from './MenuEditFind';
-// import MenuEditRename from './MenuEditRename';
-
-// const MenuEdit = (): ReactElement => (
-//   <>
-//     <MenuEditUndo />
-//     <MenuEditRedo />
-//     <MenuEditCut />
-//     <MenuEditCopy />
-//     <MenuEditCopySVG />
-//     <MenuEditCopyStyle />
-//     <MenuEditPaste />
-//     <MenuEditPasteOverSelection />
-//     <MenuEditPasteSVG />
-//     <MenuEditPasteStyle />
-//     <MenuEditDelete />
-//     <MenuEditDuplicate />
-//     <MenuEditSelectAll />
-//     <MenuEditSelectAllArtboards />
-//     <MenuEditFind />
-//     <MenuEditRename />
-//   </>
-// );
-
-// export default MenuEdit;

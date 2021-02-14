@@ -1,33 +1,50 @@
-import React, { ReactElement, useEffect } from 'react';
+/* eslint-disable @typescript-eslint/no-use-before-define */
+import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getSelectedTop } from '../store/selectors/layer';
 import { alignSelectedToTopThunk } from '../store/actions/layer';
-import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'arrangeAlignTop';
 
-const MenuArrangeAlignTop = (props: MenuItemProps): ReactElement => {
-  const { menuItem } = props;
+interface MenuArrangeAlignTopProps {
+  menu: Electron.Menu;
+  setTop(top: any): void;
+}
+
+const MenuArrangeAlignTop = (props: MenuArrangeAlignTopProps): ReactElement => {
+  const { menu, setTop } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
+    label: 'Top',
+    id: MENU_ITEM_ID,
+    enabled: false,
+    click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+      dispatch(alignSelectedToTopThunk());
+    }
+  });
+  const [menuItem, setMenuItem] = useState(undefined);
   const isEnabled = useSelector((state: RootState) => state.canvasSettings.focusing && (state.layer.present.selected.length >= 2 && getSelectedTop(state) === 'multi'));
   const dispatch = useDispatch();
 
   useEffect(() => {
-    menuItem.enabled = isEnabled;
-  }, [isEnabled]);
+    setTop(menuItemTemplate);
+  }, [menuItemTemplate]);
 
   useEffect(() => {
-    (window as any)[MENU_ITEM_ID] = (): void => {
-      dispatch(alignSelectedToTopThunk());
-    };
-  }, []);
+    if (menu) {
+      setMenuItem(menu.getMenuItemById(MENU_ITEM_ID));
+    }
+  }, [menu]);
+
+  useEffect(() => {
+    if (menuItem) {
+      menuItem.enabled = isEnabled;
+    }
+  }, [isEnabled]);
 
   return (
     <></>
   );
 }
 
-export default MenuItem(
-  MenuArrangeAlignTop,
-  MENU_ITEM_ID
-);
+export default MenuArrangeAlignTop;

@@ -8,12 +8,13 @@ import { redoThunk } from '../store/actions/layer';
 export const MENU_ITEM_ID = 'editRedo';
 
 interface MenuEditRedoProps {
+  menu: Electron.Menu;
   setRedo(redo: any): void;
 }
 
 const MenuEditRedo = (props: MenuEditRedoProps): ReactElement => {
-  const { setRedo } = props;
-  const [menuItem, setMenuItem] = useState({
+  const { menu, setRedo } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Redo',
     id: MENU_ITEM_ID,
     enabled: false,
@@ -22,6 +23,7 @@ const MenuEditRedo = (props: MenuEditRedoProps): ReactElement => {
       dispatch(redoThunk());
     }
   });
+  const [menuItem, setMenuItem] = useState(undefined);
   const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
   const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
   const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
@@ -29,15 +31,20 @@ const MenuEditRedo = (props: MenuEditRedoProps): ReactElement => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const appMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    if (appMenuItem) {
-      appMenuItem.enabled = canRedo && !isResizing && !isDragging && !isDrawing;
-    }
-  }, [canRedo, isDragging, isResizing, isDrawing]);
+    setRedo(menuItemTemplate);
+  }, [menuItemTemplate]);
 
   useEffect(() => {
-    setRedo(menuItem);
-  }, [menuItem]);
+    if (menu) {
+      setMenuItem(menu.getMenuItemById(MENU_ITEM_ID));
+    }
+  }, [menu]);
+
+  useEffect(() => {
+    if (menuItem) {
+      menuItem.enabled = canRedo && !isResizing && !isDragging && !isDrawing;
+    }
+  }, [canRedo, isDragging, isResizing, isDrawing]);
 
   return (
     <></>
@@ -45,39 +52,3 @@ const MenuEditRedo = (props: MenuEditRedoProps): ReactElement => {
 }
 
 export default MenuEditRedo;
-
-// import React, { ReactElement, useEffect } from 'react';
-// import { useSelector, useDispatch } from 'react-redux';
-// import { RootState } from '../store/reducers';
-// import { redoThunk } from '../store/actions/layer';
-// import MenuItem, { MenuItemProps } from './MenuItem';
-
-// export const MENU_ITEM_ID = 'editRedo';
-
-// const MenuEditRedo = (props: MenuItemProps): ReactElement => {
-//   const { menuItem } = props;
-//   const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-//   const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-//   const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-//   const canRedo = useSelector((state: RootState) => state.layer.future.length > 0 && state.canvasSettings.focusing);
-//   const dispatch = useDispatch();
-
-//   useEffect(() => {
-//     menuItem.enabled = canRedo && !isResizing && !isDragging && !isDrawing;
-//   }, [canRedo, isDragging, isResizing, isDrawing]);
-
-//   useEffect(() => {
-//     (window as any)[MENU_ITEM_ID] = (): void => {
-//       dispatch(redoThunk());
-//     };
-//   }, []);
-
-//   return (
-//     <></>
-//   );
-// }
-
-// export default MenuItem(
-//   MenuEditRedo,
-//   MENU_ITEM_ID
-// );

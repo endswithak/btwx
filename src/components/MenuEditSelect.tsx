@@ -3,12 +3,13 @@ import MenuEditSelectAll from './MenuEditSelectAll';
 import MenuEditSelectAllArtboards from './MenuEditSelectAllArtboards';
 
 interface MenuEditSelectProps {
+  menu: Electron.Menu;
   setSelect(select: any): void;
 }
 
 const MenuEditSelect = (props: MenuEditSelectProps): ReactElement => {
-  const { setSelect } = props;
-  const [menuItem, setMenuItem] = useState({
+  const { menu, setSelect } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Select'
   });
   const [selectAll, setSelectAll] = useState(undefined);
@@ -17,7 +18,7 @@ const MenuEditSelect = (props: MenuEditSelectProps): ReactElement => {
   useEffect(() => {
     if (selectAll && selectAllArtboards) {
       setSelect({
-        ...menuItem,
+        ...menuItemTemplate,
         submenu: [selectAll, selectAllArtboards]
       });
     }
@@ -26,8 +27,10 @@ const MenuEditSelect = (props: MenuEditSelectProps): ReactElement => {
   return (
     <>
       <MenuEditSelectAll
+        menu={menu}
         setSelectAll={setSelectAll} />
       <MenuEditSelectAllArtboards
+        menu={menu}
         setSelectAllArtboards={setSelectAllArtboards} />
     </>
   );

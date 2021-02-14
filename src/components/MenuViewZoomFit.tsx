@@ -1,14 +1,44 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useState, useEffect } from 'react';
 import MenuViewZoomFitCanvas from './MenuViewZoomFitCanvas';
 import MenuViewZoomFitSelected from './MenuViewZoomFitSelected';
 import MenuViewZoomFitArtboard from './MenuViewZoomFitArtboard';
 
-const MenuViewZoomFit = (): ReactElement => (
-  <>
-    <MenuViewZoomFitCanvas />
-    <MenuViewZoomFitSelected />
-    <MenuViewZoomFitArtboard />
-  </>
-);
+interface MenuViewZoomFitProps {
+  menu: Electron.Menu;
+  setZoomFit(zoomFit: any): void;
+}
+
+const MenuViewZoomFit = (props: MenuViewZoomFitProps): ReactElement => {
+  const { menu, setZoomFit } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
+    label: 'Zoom To'
+  });
+  const [fitCanvas, setFitCanvas] = useState(undefined);
+  const [fitSelected, setFitSelected] = useState(undefined);
+  const [fitArtboard, setFitArtboard] = useState(undefined);
+
+  useEffect(() => {
+    if (fitCanvas && fitSelected && fitArtboard) {
+      setZoomFit({
+        ...menuItemTemplate,
+        submenu: [fitCanvas, fitSelected, fitArtboard]
+      });
+    }
+  }, [fitCanvas, fitSelected, fitArtboard]);
+
+  return (
+    <>
+      <MenuViewZoomFitCanvas
+        menu={menu}
+        setFitCanvas={setFitCanvas} />
+      <MenuViewZoomFitSelected
+        menu={menu}
+        setFitSelected={setFitSelected} />
+      <MenuViewZoomFitArtboard
+        menu={menu}
+        setFitArtboard={setFitArtboard} />
+    </>
+  );
+};
 
 export default MenuViewZoomFit;

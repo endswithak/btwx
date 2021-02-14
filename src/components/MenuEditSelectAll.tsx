@@ -8,12 +8,13 @@ import { selectAllLayers } from '../store/actions/layer';
 export const MENU_ITEM_ID = 'editSelectAll';
 
 interface MenuEditSelectAllProps {
+  menu: Electron.Menu;
   setSelectAll(selectAll: any): void;
 }
 
 const MenuEditSelectAll = (props: MenuEditSelectAllProps): ReactElement => {
-  const { setSelectAll } = props;
-  const [menuItem, setMenuItem] = useState({
+  const { menu, setSelectAll } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Select All',
     id: MENU_ITEM_ID,
     enabled: false,
@@ -22,6 +23,7 @@ const MenuEditSelectAll = (props: MenuEditSelectAllProps): ReactElement => {
       dispatch(selectAllLayers());
     }
   });
+  const [menuItem, setMenuItem] = useState(undefined);
   const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
   const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
   const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
@@ -29,15 +31,20 @@ const MenuEditSelectAll = (props: MenuEditSelectAllProps): ReactElement => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const appMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    if (appMenuItem) {
-      appMenuItem.enabled = canSelectAll && !isResizing && !isDragging && !isDrawing;
-    }
-  }, [canSelectAll, isDragging, isResizing, isDrawing]);
+    setSelectAll(menuItemTemplate);
+  }, [menuItemTemplate]);
 
   useEffect(() => {
-    setSelectAll(menuItem);
-  }, [menuItem]);
+    if (menu) {
+      setMenuItem(menu.getMenuItemById(MENU_ITEM_ID));
+    }
+  }, [menu]);
+
+  useEffect(() => {
+    if (menuItem) {
+      menuItem.enabled = canSelectAll && !isResizing && !isDragging && !isDrawing;
+    }
+  }, [canSelectAll, isDragging, isResizing, isDrawing]);
 
   return (
     <></>
@@ -45,39 +52,3 @@ const MenuEditSelectAll = (props: MenuEditSelectAllProps): ReactElement => {
 }
 
 export default MenuEditSelectAll;
-
-// import React, { ReactElement, useEffect } from 'react';
-// import { useSelector, useDispatch } from 'react-redux';
-// import { RootState } from '../store/reducers';
-// import { selectAllLayers } from '../store/actions/layer';
-// import MenuItem, { MenuItemProps } from './MenuItem';
-
-// export const MENU_ITEM_ID = 'editSelectAll';
-
-// const MenuEditSelectAll = (props: MenuItemProps): ReactElement => {
-//   const { menuItem } = props;
-//   const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-//   const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-//   const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-//   const canSelectAll = useSelector((state: RootState) => state.layer.present.allIds.length > 1 && state.canvasSettings.focusing);
-//   const dispatch = useDispatch();
-
-//   useEffect(() => {
-//     menuItem.enabled = canSelectAll && !isResizing && !isDragging && !isDrawing;
-//   }, [canSelectAll, isDragging, isResizing, isDrawing]);
-
-//   useEffect(() => {
-//     (window as any)[MENU_ITEM_ID] = (): void => {
-//       dispatch(selectAllLayers());
-//     };
-//   }, []);
-
-//   return (
-//     <></>
-//   );
-// }
-
-// export default MenuItem(
-//   MenuEditSelectAll,
-//   MENU_ITEM_ID
-// );

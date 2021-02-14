@@ -1,38 +1,59 @@
-import React, { ReactElement, useEffect } from 'react';
+/* eslint-disable @typescript-eslint/no-use-before-define */
+import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { toggleSelectedHorizontalFlipThunk } from '../store/actions/layer';
 import { canFlipSeleted, selectedHorizontalFlipEnabled } from '../store/selectors/layer';
-import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'layerTransformFlipHorizontally';
 
-const MenuLayerTransformFlipHorizontally = (props: MenuItemProps): ReactElement => {
-  const { menuItem } = props;
+interface MenuLayerTransformFlipHorizontallyProps {
+  menu: Electron.Menu;
+  setHorizontalFlip(horizontalFlip: any): void;
+}
+
+const MenuLayerTransformFlipHorizontally = (props: MenuLayerTransformFlipHorizontallyProps): ReactElement => {
+  const { menu, setHorizontalFlip } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
+    label: 'Flip Horizontally',
+    id: MENU_ITEM_ID,
+    enabled: false,
+    type: 'checkbox',
+    checked: false,
+    click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+      dispatch(toggleSelectedHorizontalFlipThunk());
+    }
+  });
+  const [menuItem, setMenuItem] = useState(undefined);
   const isEnabled = useSelector((state: RootState) => canFlipSeleted(state));
   const isChecked = useSelector((state: RootState) => selectedHorizontalFlipEnabled(state));
   const dispatch = useDispatch();
 
   useEffect(() => {
-    menuItem.enabled = isEnabled;
+    setHorizontalFlip(menuItemTemplate);
+  }, [menuItemTemplate]);
+
+  useEffect(() => {
+    if (menu) {
+      setMenuItem(menu.getMenuItemById(MENU_ITEM_ID));
+    }
+  }, [menu]);
+
+  useEffect(() => {
+    if (menuItem) {
+      menuItem.enabled = isEnabled;
+    }
   }, [isEnabled]);
 
   useEffect(() => {
-    menuItem.checked = isChecked;
+    if (menuItem) {
+      menuItem.checked = isChecked;
+    }
   }, [isChecked]);
-
-  useEffect(() => {
-    (window as any)[MENU_ITEM_ID] = (): void => {
-      dispatch(toggleSelectedHorizontalFlipThunk());
-    };
-  }, []);
 
   return (
     <></>
   );
 }
 
-export default MenuItem(
-  MenuLayerTransformFlipHorizontally,
-  MENU_ITEM_ID
-);
+export default MenuLayerTransformFlipHorizontally;

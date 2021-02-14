@@ -5,12 +5,13 @@ import MenuInsertText from './MenuInsertText';
 import MenuInsertImage from './MenuInsertImage';
 
 interface MenuInsertProps {
+  menu: Electron.Menu;
   setInsert(insert: any): void;
 }
 
 const MenuInsert = (props: MenuInsertProps): ReactElement => {
-  const { setInsert } = props;
-  const [menuItem, setMenuItem] = useState({
+  const { menu, setInsert } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Insert'
   });
   const [artboard, setArtboard] = useState(undefined);
@@ -21,7 +22,7 @@ const MenuInsert = (props: MenuInsertProps): ReactElement => {
   useEffect(() => {
     if (artboard && shape && text && image) {
       setInsert({
-        ...menuItem,
+        ...menuItemTemplate,
         submenu: [
           artboard,
           { type: 'separator' },
@@ -36,32 +37,19 @@ const MenuInsert = (props: MenuInsertProps): ReactElement => {
   return (
     <>
       <MenuInsertArtboard
+        menu={menu}
         setArtboard={setArtboard} />
       <MenuInsertShape
+        menu={menu}
         setShape={setShape} />
       <MenuInsertText
+        menu={menu}
         setText={setText} />
       <MenuInsertImage
+        menu={menu}
         setImage={setImage} />
     </>
   )
 };
 
 export default MenuInsert;
-
-// import React, { ReactElement } from 'react';
-// import MenuInsertArtboard from './MenuInsertArtboard';
-// import MenuInsertShape from './MenuInsertShape';
-// import MenuInsertText from './MenuInsertText';
-// import MenuInsertImage from './MenuInsertImage';
-
-// const MenuInsert = (): ReactElement => (
-//   <>
-//     <MenuInsertArtboard />
-//     <MenuInsertShape />
-//     <MenuInsertText />
-//     <MenuInsertImage />
-//   </>
-// );
-
-// export default MenuInsert;

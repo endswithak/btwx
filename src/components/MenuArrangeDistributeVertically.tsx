@@ -1,13 +1,29 @@
-import React, { ReactElement, useEffect } from 'react';
+/* eslint-disable @typescript-eslint/no-use-before-define */
+import { remote } from 'electron';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { distributeSelectedVerticallyThunk } from '../store/actions/layer';
-import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'arrangeDistributeVertically';
 
-const MenuArrangeDistributeVertically = (props: MenuItemProps): ReactElement => {
-  const { menuItem } = props;
+interface MenuArrangeDistributeVerticallyProps {
+  menu: Electron.Menu;
+  setVertical(vertical: any): void;
+}
+
+const MenuArrangeDistributeVertically = (props: MenuArrangeDistributeVerticallyProps): ReactElement => {
+  const { menu, setVertical } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
+    label: 'Vertically',
+    id: MENU_ITEM_ID,
+    enabled: false,
+    accelerator: remote.process.platform === 'darwin' ? 'Ctrl+Cmd+V' : 'Ctrl+Shift+V',
+    click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+      dispatch(distributeSelectedVerticallyThunk());
+    }
+  });
+  const [menuItem, setMenuItem] = useState(undefined);
   const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
   const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
   const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
@@ -15,21 +31,24 @@ const MenuArrangeDistributeVertically = (props: MenuItemProps): ReactElement => 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    menuItem.enabled = canDistribute && !isResizing && !isDragging && !isDrawing;
-  }, [canDistribute, isDragging, isResizing, isDrawing]);
+    setVertical(menuItemTemplate);
+  }, [menuItemTemplate]);
 
   useEffect(() => {
-    (window as any)[MENU_ITEM_ID] = (): void => {
-      dispatch(distributeSelectedVerticallyThunk());
-    };
-  }, []);
+    if (menu) {
+      setMenuItem(menu.getMenuItemById(MENU_ITEM_ID));
+    }
+  }, [menu]);
+
+  useEffect(() => {
+    if (menuItem) {
+      menuItem.enabled = canDistribute && !isResizing && !isDragging && !isDrawing;
+    }
+  }, [canDistribute, isDragging, isResizing, isDrawing]);
 
   return (
     <></>
   );
 }
 
-export default MenuItem(
-  MenuArrangeDistributeVertically,
-  MENU_ITEM_ID
-);
+export default MenuArrangeDistributeVertically;

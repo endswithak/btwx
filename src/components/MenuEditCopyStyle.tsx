@@ -8,12 +8,13 @@ import { copyStyleThunk } from '../store/actions/layer';
 export const MENU_ITEM_ID = 'editCopyStyle';
 
 interface MenuEditCopyStyleProps {
+  menu: Electron.Menu;
   setCopyStyle(copyStyle: any): void;
 }
 
 const MenuEditCopyStyle = (props: MenuEditCopyStyleProps): ReactElement => {
-  const { setCopyStyle } = props;
-  const [menuItem, setMenuItem] = useState({
+  const { menu, setCopyStyle } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Copy Style',
     id: MENU_ITEM_ID,
     enabled: false,
@@ -21,7 +22,8 @@ const MenuEditCopyStyle = (props: MenuEditCopyStyleProps): ReactElement => {
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(copyStyleThunk());
     }
-  })
+  });
+  const [menuItem, setMenuItem] = useState(undefined);
   const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
   const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
   const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
@@ -29,15 +31,20 @@ const MenuEditCopyStyle = (props: MenuEditCopyStyleProps): ReactElement => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const appMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    if (appMenuItem) {
-      appMenuItem.enabled = canCopy && !isResizing && !isDragging && !isDrawing
-    }
-  }, [canCopy, isDragging, isResizing, isDrawing]);
+    setCopyStyle(menuItemTemplate);
+  }, [menuItemTemplate]);
 
   useEffect(() => {
-    setCopyStyle(menuItem);
-  }, [menuItem]);
+    if (menu) {
+      setMenuItem(menu.getMenuItemById(MENU_ITEM_ID));
+    }
+  }, [menu]);
+
+  useEffect(() => {
+    if (menuItem) {
+      menuItem.enabled = canCopy && !isResizing && !isDragging && !isDrawing
+    }
+  }, [canCopy, isDragging, isResizing, isDrawing]);
 
   return (
     <></>
@@ -45,39 +52,3 @@ const MenuEditCopyStyle = (props: MenuEditCopyStyleProps): ReactElement => {
 }
 
 export default MenuEditCopyStyle;
-
-// import React, { ReactElement, useEffect, } from 'react';
-// import { useSelector, useDispatch } from 'react-redux';
-// import { RootState } from '../store/reducers';
-// import { copyStyleThunk } from '../store/actions/layer';
-// import MenuItem, { MenuItemProps } from './MenuItem';
-
-// export const MENU_ITEM_ID = 'editCopyStyle';
-
-// const MenuEditCopyStyle = (props: MenuItemProps): ReactElement => {
-//   const { menuItem } = props;
-//   const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-//   const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-//   const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-//   const canCopy = useSelector((state: RootState) => state.layer.present.selected.length === 1 && state.canvasSettings.focusing);
-//   const dispatch = useDispatch();
-
-//   useEffect(() => {
-//     menuItem.enabled = canCopy && !isResizing && !isDragging && !isDrawing;
-//   }, [canCopy, isDragging, isResizing, isDrawing]);
-
-//   useEffect(() => {
-//     (window as any)[MENU_ITEM_ID] = (): void => {
-//       dispatch(copyStyleThunk());
-//     };
-//   }, []);
-
-//   return (
-//     <></>
-//   );
-// }
-
-// export default MenuItem(
-//   MenuEditCopyStyle,
-//   MENU_ITEM_ID
-// );

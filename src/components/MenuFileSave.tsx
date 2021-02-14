@@ -8,12 +8,13 @@ import { saveDocumentThunk } from '../store/actions/documentSettings';
 export const MENU_ITEM_ID = 'fileSave';
 
 interface MenuFileSaveProps {
+  menu: Electron.Menu;
   setSave(save: any): void;
 }
 
 const MenuFileSave = (props: MenuFileSaveProps): ReactElement => {
-  const { setSave } = props;
-  const [menuItem, setMenuItem] = useState({
+  const { menu, setSave } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Save',
     id: MENU_ITEM_ID,
     enabled: false,
@@ -22,6 +23,7 @@ const MenuFileSave = (props: MenuFileSaveProps): ReactElement => {
       dispatch(saveDocumentThunk());
     }
   });
+  const [menuItem, setMenuItem] = useState(undefined);
   const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
   const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
   const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
@@ -29,15 +31,20 @@ const MenuFileSave = (props: MenuFileSaveProps): ReactElement => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const appMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    if (appMenuItem) {
-      appMenuItem.enabled = canSave && !isResizing && !isDragging && !isDrawing;
-    }
-  }, [canSave, isDragging, isResizing, isDrawing]);
+    setSave(menuItemTemplate);
+  }, [menuItemTemplate]);
 
   useEffect(() => {
-    setSave(menuItem);
-  }, [menuItem]);
+    if (menu) {
+      setMenuItem(menu.getMenuItemById(MENU_ITEM_ID));
+    }
+  }, [menu]);
+
+  useEffect(() => {
+    if (menuItem) {
+      menuItem.enabled = canSave && !isResizing && !isDragging && !isDrawing;
+    }
+  }, [canSave, isDragging, isResizing, isDrawing]);
 
   return (
     <></>
@@ -45,39 +52,3 @@ const MenuFileSave = (props: MenuFileSaveProps): ReactElement => {
 }
 
 export default MenuFileSave;
-
-// import React, { ReactElement, useEffect } from 'react';
-// import { useSelector, useDispatch } from 'react-redux';
-// import { RootState } from '../store/reducers';
-// import { saveDocumentThunk } from '../store/actions/documentSettings';
-// import MenuItem, { MenuItemProps } from './MenuItem';
-
-// export const MENU_ITEM_ID = 'fileSave';
-
-// const MenuFileSave = (props: MenuItemProps): ReactElement => {
-//   const { menuItem } = props;
-//   const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-//   const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-//   const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-//   const canSave = useSelector((state: RootState) => state.layer.present.edit && state.layer.present.edit.id !== state.documentSettings.edit);
-//   const dispatch = useDispatch();
-
-//   useEffect(() => {
-//     menuItem.enabled = canSave && !isResizing && !isDragging && !isDrawing;
-//   }, [canSave, isDragging, isResizing, isDrawing]);
-
-//   useEffect(() => {
-//     (window as any)[MENU_ITEM_ID] = (): void => {
-//       dispatch(saveDocumentThunk());
-//     };
-//   }, []);
-
-//   return (
-//     <></>
-//   );
-// }
-
-// export default MenuItem(
-//   MenuFileSave,
-//   MENU_ITEM_ID
-// );

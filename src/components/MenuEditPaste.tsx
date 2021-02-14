@@ -5,13 +5,14 @@ import MenuEditPasteSVG from './MenuEditPasteSVG';
 import MenuEditPasteStyle from './MenuEditPasteStyle';
 
 interface MenuEditPasteProps {
+  menu: Electron.Menu;
   setPaste(paste: any): void;
 }
 
 const MenuEditPaste = (props: MenuEditPasteProps): ReactElement => {
-  const { setPaste } = props;
-  const [menuItem, setMenuItem] = useState({
-    label: 'Copy'
+  const { menu, setPaste } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
+    label: 'Paste'
   });
   const [pasteLayers, setPasteLayers] = useState(undefined);
   const [pasteOverSelection, setPasteOverSelection] = useState(undefined);
@@ -21,7 +22,7 @@ const MenuEditPaste = (props: MenuEditPasteProps): ReactElement => {
   useEffect(() => {
     if (pasteLayers && pasteOverSelection && pasteSVG && pasteStyle) {
       setPaste({
-        ...menuItem,
+        ...menuItemTemplate,
         submenu: [pasteLayers, pasteOverSelection, pasteSVG, pasteStyle]
       });
     }
@@ -30,51 +31,19 @@ const MenuEditPaste = (props: MenuEditPasteProps): ReactElement => {
   return (
     <>
       <MenuEditPasteLayers
+        menu={menu}
         setPasteLayers={setPasteLayers} />
       <MenuEditPasteOverSelection
+        menu={menu}
         setPasteOverSelection={setPasteOverSelection} />
       <MenuEditPasteSVG
+        menu={menu}
         setPasteSVG={setPasteSVG} />
       <MenuEditPasteStyle
+        menu={menu}
         setPasteStyle={setPasteStyle} />
     </>
   );
 }
 
 export default MenuEditPaste;
-
-// import React, { ReactElement, useEffect } from 'react';
-// import { useSelector, useDispatch } from 'react-redux';
-// import { RootState } from '../store/reducers';
-// import { pasteLayersThunk } from '../store/actions/layer';
-// import MenuItem, { MenuItemProps } from './MenuItem';
-
-// export const MENU_ITEM_ID = 'editPaste';
-
-// const MenuEditPaste = (props: MenuItemProps): ReactElement => {
-//   const { menuItem } = props;
-//   const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-//   const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-//   const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-//   const canPaste = useSelector((state: RootState) => state.canvasSettings.focusing);
-//   const dispatch = useDispatch();
-
-//   useEffect(() => {
-//     menuItem.enabled = canPaste && !isResizing && !isDragging && !isDrawing;
-//   }, [canPaste, isDragging, isResizing, isDrawing]);
-
-//   useEffect(() => {
-//     (window as any)[MENU_ITEM_ID] = (): void => {
-//       dispatch(pasteLayersThunk({}));
-//     };
-//   }, []);
-
-//   return (
-//     <></>
-//   );
-// }
-
-// export default MenuItem(
-//   MenuEditPaste,
-//   MENU_ITEM_ID
-// );

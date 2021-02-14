@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { remote } from 'electron';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -8,12 +7,13 @@ import { toggleShapeToolThunk } from '../store/actions/shapeTool';
 export const MENU_ITEM_ID = 'insertShapePolygon';
 
 interface MenuInsertShapePolygonProps {
+  menu: Electron.Menu;
   setPolygon(polygon: any): void;
 }
 
 const MenuInsertShapePolygon = (props: MenuInsertShapePolygonProps): ReactElement => {
-  const { setPolygon } = props;
-  const [menuItem, setMenuItem] = useState({
+  const { menu, setPolygon } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Polygon',
     id: MENU_ITEM_ID,
     type: 'checkbox',
@@ -23,27 +23,32 @@ const MenuInsertShapePolygon = (props: MenuInsertShapePolygonProps): ReactElemen
       dispatch(toggleShapeToolThunk('Polygon'));
     }
   });
+  const [menuItem, setMenuItem] = useState(undefined);
   const canInsert = useSelector((state: RootState) => state.canvasSettings.focusing && state.layer.present.activeArtboard !== null);
   const isChecked = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Shape' && state.shapeTool.shapeType === 'Polygon');
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const appMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    if (appMenuItem) {
-      appMenuItem.enabled = canInsert;
+    setPolygon(menuItemTemplate);
+  }, [menuItemTemplate]);
+
+  useEffect(() => {
+    if (menu) {
+      setMenuItem(menu.getMenuItemById(MENU_ITEM_ID));
+    }
+  }, [menu]);
+
+  useEffect(() => {
+    if (menuItem) {
+      menuItem.enabled = canInsert;
     }
   }, [canInsert]);
 
   useEffect(() => {
-    const appMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    if (appMenuItem) {
-      appMenuItem.checked = isChecked;
+    if (menuItem) {
+      menuItem.checked = isChecked;
     }
   }, [isChecked]);
-
-  useEffect(() => {
-    setPolygon(menuItem);
-  }, [menuItem]);
 
   return (
     <></>
@@ -51,41 +56,3 @@ const MenuInsertShapePolygon = (props: MenuInsertShapePolygonProps): ReactElemen
 }
 
 export default MenuInsertShapePolygon;
-
-// import React, { ReactElement, useEffect } from 'react';
-// import { useSelector, useDispatch } from 'react-redux';
-// import { RootState } from '../store/reducers';
-// import { toggleShapeToolThunk } from '../store/actions/shapeTool';
-// import MenuItem, { MenuItemProps } from './MenuItem';
-
-// export const MENU_ITEM_ID = 'insertShapePolygon';
-
-// const MenuInsertShapePolygon = (props: MenuItemProps): ReactElement => {
-//   const { menuItem } = props;
-//   const canInsert = useSelector((state: RootState) => state.canvasSettings.focusing && state.layer.present.activeArtboard !== null);
-//   const isChecked = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Shape' && state.shapeTool.shapeType === 'Polygon');
-//   const dispatch = useDispatch();
-
-//   useEffect(() => {
-//     menuItem.enabled = canInsert;
-//   }, [canInsert]);
-
-//   useEffect(() => {
-//     menuItem.checked = isChecked;
-//   }, [isChecked]);
-
-//   useEffect(() => {
-//     (window as any)[MENU_ITEM_ID] = (): void => {
-//       dispatch(toggleShapeToolThunk('Polygon'));
-//     };
-//   }, []);
-
-//   return (
-//     <></>
-//   );
-// }
-
-// export default MenuItem(
-//   MenuInsertShapePolygon,
-//   MENU_ITEM_ID
-// );

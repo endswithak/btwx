@@ -8,12 +8,13 @@ import { copyLayersThunk } from '../store/actions/layer';
 export const MENU_ITEM_ID = 'editCopy';
 
 interface MenuEditCopyLayersProps {
+  menu: Electron.Menu;
   setCopyLayers(copyLayers: any): void;
 }
 
 const MenuEditCopyLayers = (props: MenuEditCopyLayersProps): ReactElement => {
-  const { setCopyLayers } = props;
-  const [menuItem, setMenuItem] = useState({
+  const { menu, setCopyLayers } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Copy',
     id: MENU_ITEM_ID,
     enabled: false,
@@ -22,6 +23,7 @@ const MenuEditCopyLayers = (props: MenuEditCopyLayersProps): ReactElement => {
       dispatch(copyLayersThunk());
     }
   });
+  const [menuItem, setMenuItem] = useState(undefined);
   const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
   const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
   const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
@@ -29,15 +31,20 @@ const MenuEditCopyLayers = (props: MenuEditCopyLayersProps): ReactElement => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const appMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    if (appMenuItem) {
-      appMenuItem.enabled = canCopy && !isResizing && !isDragging && !isDrawing;
-    }
-  }, [canCopy, isDragging, isResizing, isDrawing]);
+    setCopyLayers(menuItemTemplate);
+  }, [menuItemTemplate]);
 
   useEffect(() => {
-    setCopyLayers(menuItem);
-  }, [menuItem]);
+    if (menu) {
+      setMenuItem(menu.getMenuItemById(MENU_ITEM_ID));
+    }
+  }, [menu]);
+
+  useEffect(() => {
+    if (menuItem) {
+      menuItem.enabled = canCopy && !isResizing && !isDragging && !isDrawing;
+    }
+  }, [canCopy, isDragging, isResizing, isDrawing]);
 
   return (
     <></>

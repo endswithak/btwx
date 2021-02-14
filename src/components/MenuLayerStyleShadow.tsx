@@ -1,38 +1,59 @@
-import React, { ReactElement, useEffect } from 'react';
+/* eslint-disable @typescript-eslint/no-use-before-define */
+import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { toggleSelectedShadowThunk } from '../store/actions/layer';
 import { canToggleSelectedShadow, selectedShadowEnabled } from '../store/selectors/layer';
-import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'layerStyleShadow';
 
-const MenuLayerStyleShadow = (props: MenuItemProps): ReactElement => {
-  const { menuItem } = props;
+interface MenuLayerStyleShadowProps {
+  menu: Electron.Menu;
+  setShadow(shadow: any): void;
+}
+
+const MenuLayerStyleShadow = (props: MenuLayerStyleShadowProps): ReactElement => {
+  const { menu, setShadow } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
+    label: 'Shadow',
+    id: MENU_ITEM_ID,
+    enabled: false,
+    type: 'checkbox',
+    checked: false,
+    click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+      dispatch(toggleSelectedShadowThunk());
+    }
+  });
+  const [menuItem, setMenuItem] = useState(undefined);
   const isEnabled = useSelector((state: RootState) => canToggleSelectedShadow(state));
   const isChecked = useSelector((state: RootState) => selectedShadowEnabled(state));
   const dispatch = useDispatch();
 
   useEffect(() => {
-    menuItem.enabled = isEnabled;
+    setShadow(menuItemTemplate);
+  }, [menuItemTemplate]);
+
+  useEffect(() => {
+    if (menu) {
+      setMenuItem(menu.getMenuItemById(MENU_ITEM_ID));
+    }
+  }, [menu]);
+
+  useEffect(() => {
+    if (menuItem) {
+      menuItem.enabled = isEnabled;
+    }
   }, [isEnabled]);
 
   useEffect(() => {
-    menuItem.checked = isChecked;
+    if (menuItem) {
+      menuItem.checked = isChecked;
+    }
   }, [isChecked]);
-
-  useEffect(() => {
-    (window as any)[MENU_ITEM_ID] = (): void => {
-      dispatch(toggleSelectedShadowThunk());
-    };
-  }, []);
 
   return (
     <></>
   );
 }
 
-export default MenuItem(
-  MenuLayerStyleShadow,
-  MENU_ITEM_ID
-);
+export default MenuLayerStyleShadow;

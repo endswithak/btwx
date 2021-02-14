@@ -8,12 +8,13 @@ import { pasteLayersThunk } from '../store/actions/layer';
 export const MENU_ITEM_ID = 'editPaste';
 
 interface MenuEditPasteLayersProps {
+  menu: Electron.Menu;
   setPasteLayers(pasteLayers: any): void;
 }
 
 const MenuEditPasteLayers = (props: MenuEditPasteLayersProps): ReactElement => {
-  const { setPasteLayers } = props;
-  const [menuItem, setMenuItem] = useState({
+  const { menu, setPasteLayers } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Paste',
     id: MENU_ITEM_ID,
     enabled: false,
@@ -22,6 +23,7 @@ const MenuEditPasteLayers = (props: MenuEditPasteLayersProps): ReactElement => {
       dispatch(pasteLayersThunk({}));
     }
   });
+  const [menuItem, setMenuItem] = useState(undefined);
   const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
   const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
   const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
@@ -29,15 +31,20 @@ const MenuEditPasteLayers = (props: MenuEditPasteLayersProps): ReactElement => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const appMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    if (appMenuItem) {
-      appMenuItem.enabled = canPaste && !isResizing && !isDragging && !isDrawing;
-    }
-  }, [canPaste, isDragging, isResizing, isDrawing]);
+    setPasteLayers(menuItemTemplate);
+  }, [menuItemTemplate]);
 
   useEffect(() => {
-    setPasteLayers(menuItem);
-  }, [menuItem]);
+    if (menu) {
+      setMenuItem(menu.getMenuItemById(MENU_ITEM_ID));
+    }
+  }, [menu]);
+
+  useEffect(() => {
+    if (menuItem) {
+      menuItem.enabled = canPaste && !isResizing && !isDragging && !isDrawing;
+    }
+  }, [canPaste, isDragging, isResizing, isDrawing]);
 
   return (
     <></>

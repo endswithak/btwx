@@ -5,12 +5,13 @@ import MenuFileSaveAs from './MenuFileSaveAs';
 import MenuFileOpen from './MenuFileOpen';
 
 interface MenuFileProps {
+  menu: Electron.Menu;
   setFile(file: any): void;
 }
 
 const MenuFile = (props: MenuFileProps): ReactElement => {
-  const { setFile } = props;
-  const [menuItem, setMenuItem] = useState({
+  const { menu, setFile } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'File'
   });
   const [newDocument, setNewDocument] = useState(undefined);
@@ -21,7 +22,7 @@ const MenuFile = (props: MenuFileProps): ReactElement => {
   useEffect(() => {
     if (newDocument && save && saveAs && open) {
       setFile({
-        ...menuItem,
+        ...menuItemTemplate,
         submenu: [
           newDocument,
           save,
@@ -35,30 +36,19 @@ const MenuFile = (props: MenuFileProps): ReactElement => {
   return (
     <>
       <MenuFileNew
+        menu={menu}
         setNewDocument={setNewDocument} />
       <MenuFileSave
+        menu={menu}
         setSave={setSave} />
       <MenuFileSaveAs
+        menu={menu}
         setSaveAs={setSaveAs} />
       <MenuFileOpen
+        menu={menu}
         setOpen={setOpen} />
     </>
   );
 };
 
 export default MenuFile;
-
-// import React, { ReactElement } from 'react';
-// import MenuFileSave from './MenuFileSave';
-// import MenuFileSaveAs from './MenuFileSaveAs';
-// import MenuFileOpen from './MenuFileOpen';
-
-// const MenuFile = (): ReactElement => (
-//   <>
-//     <MenuFileSave />
-//     <MenuFileSaveAs />
-//     <MenuFileOpen />
-//   </>
-// );
-
-// export default MenuFile;

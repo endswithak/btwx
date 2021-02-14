@@ -6,21 +6,22 @@ import { RootState } from '../store/reducers';
 import { enableDarkTheme } from '../store/actions/viewSettings';
 import { THEME_DARK_BACKGROUND_MIN } from '../constants';
 import { getAllDocumentWindows } from '../utils';
-import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'appThemeDark';
 
 interface MenuAppThemeDarkProps {
+  menu: Electron.Menu;
   setDark(item: any): any;
 }
 
 const MenuAppThemeDark = (props: MenuAppThemeDarkProps): ReactElement => {
-  const { setDark } = props;
+  const { setDark, menu } = props;
+  const [menuItem, setMenuItem] = useState(undefined);
   const checked = useSelector((state: RootState) => state.viewSettings.theme === 'dark');
   const previewWindowId = useSelector((state: RootState) => state.preview.windowId);
   const dispatch = useDispatch();
 
-  const [menuItem, setMenuItem] = useState({
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Dark',
     type: 'checkbox',
     checked: checked,
@@ -40,15 +41,20 @@ const MenuAppThemeDark = (props: MenuAppThemeDarkProps): ReactElement => {
   });
 
   useEffect(() => {
-    const appMenuItem = remote.Menu.getApplicationMenu().getMenuItemById(MENU_ITEM_ID);
-    if (appMenuItem) {
-      appMenuItem.checked = checked;
-    }
-  }, [checked]);
+    setDark(menuItemTemplate);
+  }, [menuItemTemplate]);
 
   useEffect(() => {
-    setDark(menuItem);
-  }, [menuItem]);
+    if (menu) {
+      setMenuItem(menu.getMenuItemById(MENU_ITEM_ID));
+    }
+  }, [menu]);
+
+  useEffect(() => {
+    if (menuItem) {
+      menuItem.checked = checked;
+    }
+  }, [checked]);
 
   return (
     <></>
@@ -56,58 +62,3 @@ const MenuAppThemeDark = (props: MenuAppThemeDarkProps): ReactElement => {
 }
 
 export default MenuAppThemeDark;
-
-// import React, { ReactElement, useEffect } from 'react';
-// import { remote } from 'electron';
-// import { useSelector, useDispatch } from 'react-redux';
-// import { RootState } from '../store/reducers';
-// import { enableDarkTheme } from '../store/actions/viewSettings';
-// import { THEME_DARK_BACKGROUND_MIN } from '../constants';
-// import { getAllDocumentWindows } from '../utils';
-// import MenuItem, { MenuItemProps } from './MenuItem';
-
-// export const MENU_ITEM_ID = 'appThemeDark';
-
-// const MenuAppThemeDark = (props: MenuItemProps): ReactElement => {
-//   const { menuItem } = props;
-//   const checked = useSelector((state: RootState) => state.viewSettings.theme === 'dark');
-//   const previewWindowId = useSelector((state: RootState) => state.preview.windowId);
-//   const dispatch = useDispatch();
-
-//   useEffect(() => {
-//     menuItem.enabled = true;
-//     menuItem.checked = checked;
-//   }, [checked]);
-
-//   useEffect(() => {
-//     (window as any)[MENU_ITEM_ID] = (updateOtherWindows?: boolean): void => {
-//       remote.nativeTheme.themeSource = 'dark';
-//       const currentWindow = remote.getCurrentWindow();
-//       dispatch(enableDarkTheme());
-//       currentWindow.setBackgroundColor(THEME_DARK_BACKGROUND_MIN);
-//       if (previewWindowId) {
-//         const previewWindow = remote.BrowserWindow.fromId(previewWindowId);
-//         previewWindow.webContents.executeJavaScript(`setTheme('dark')`);
-//         previewWindow.setBackgroundColor(THEME_DARK_BACKGROUND_MIN);
-//       }
-//       if (updateOtherWindows) {
-//         getAllDocumentWindows(true).then((documentWindows) => {
-//           documentWindows.forEach((window) => {
-//             if (window.id !== currentWindow.id) {
-//               window.webContents.executeJavaScript(`${MENU_ITEM_ID}(false)`);
-//             }
-//           });
-//         });
-//       }
-//     };
-//   }, [previewWindowId]);
-
-//   return (
-//     <></>
-//   );
-// }
-
-// export default MenuItem(
-//   MenuAppThemeDark,
-//   MENU_ITEM_ID
-// );

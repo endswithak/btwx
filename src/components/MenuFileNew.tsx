@@ -7,12 +7,13 @@ import { saveDocumentThunk } from '../store/actions/documentSettings';
 export const MENU_ITEM_ID = 'fileNew';
 
 interface MenuAppThemeProps {
+  menu: Electron.Menu;
   setNewDocument(newDocument: any): void;
 }
 
 const MenuFileNew = (props: MenuAppThemeProps): ReactElement => {
-  const { setNewDocument } = props;
-  const [menuItem, setMenuItem] = useState({
+  const { menu, setNewDocument } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'New',
     id: MENU_ITEM_ID,
     enabled: true,
@@ -27,12 +28,19 @@ const MenuFileNew = (props: MenuAppThemeProps): ReactElement => {
       //   createNewDocument({});
       // }
     }
-  })
+  });
+  const [menuItem, setMenuItem] = useState(undefined);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    setNewDocument(menuItem);
-  }, [menuItem]);
+    setNewDocument(menuItemTemplate);
+  }, [menuItemTemplate]);
+
+  useEffect(() => {
+    if (menu) {
+      setMenuItem(menu.getMenuItemById(MENU_ITEM_ID));
+    }
+  }, [menu]);
 
   return (
     <></>

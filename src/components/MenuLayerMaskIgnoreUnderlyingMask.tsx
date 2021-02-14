@@ -1,14 +1,32 @@
-import React, { ReactElement, useEffect } from 'react';
+/* eslint-disable @typescript-eslint/no-use-before-define */
+import { remote } from 'electron';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { toggleSelectionIgnoreUnderlyingMask } from '../store/actions/layer';
 import { selectedIgnoreUnderlyingMaskEnabled } from '../store/selectors/layer';
-import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'layerMaskIgnoreUnderlyingMask';
 
-const MenuLayerMaskToggleUnderlyingMask = (props: MenuItemProps): ReactElement => {
-  const { menuItem } = props;
+interface MenuLayerMaskToggleUnderlyingMaskProps {
+  menu: Electron.Menu;
+  setIgnore(ignore: any): void;
+}
+
+const MenuLayerMaskToggleUnderlyingMask = (props: MenuLayerMaskToggleUnderlyingMaskProps): ReactElement => {
+  const { menu, setIgnore } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
+    label: 'Ignore Underlying Mask',
+    id: MENU_ITEM_ID,
+    enabled: false,
+    accelerator: remote.process.platform === 'darwin' ? 'Cmd+Shift+M' : 'Ctrl+Shift+M',
+    type: 'checkbox',
+    checked: false,
+    click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+      dispatch(toggleSelectionIgnoreUnderlyingMask());
+    }
+  });
+  const [menuItem, setMenuItem] = useState(undefined);
   const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
   const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
   const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
@@ -16,25 +34,30 @@ const MenuLayerMaskToggleUnderlyingMask = (props: MenuItemProps): ReactElement =
   const dispatch = useDispatch();
 
   useEffect(() => {
-    menuItem.enabled = !isResizing && !isDragging && !isDrawing;
+    setIgnore(menuItemTemplate);
+  }, [menuItemTemplate]);
+
+  useEffect(() => {
+    if (menu) {
+      setMenuItem(menu.getMenuItemById(MENU_ITEM_ID));
+    }
+  }, [menu]);
+
+  useEffect(() => {
+    if (menuItem) {
+      menuItem.enabled = !isResizing && !isDragging && !isDrawing;
+    }
   }, [isDragging, isResizing, isDrawing]);
 
   useEffect(() => {
-    menuItem.checked = ignoringUnderlyingMask;
+    if (menuItem) {
+      menuItem.checked = ignoringUnderlyingMask;
+    }
   }, [ignoringUnderlyingMask]);
-
-  useEffect(() => {
-    (window as any)[MENU_ITEM_ID] = (): void => {
-      dispatch(toggleSelectionIgnoreUnderlyingMask());
-    };
-  }, []);
 
   return (
     <></>
   );
 }
 
-export default MenuItem(
-  MenuLayerMaskToggleUnderlyingMask,
-  MENU_ITEM_ID
-);
+export default MenuLayerMaskToggleUnderlyingMask;

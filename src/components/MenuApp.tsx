@@ -1,15 +1,15 @@
-import { remote } from 'electron';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { APP_NAME } from '../constants';
 import MenuAppTheme from './MenuAppTheme';
 
 interface MenuAppProps {
+  menu: Electron.Menu;
   setApp(app: any): void;
 }
 
 const MenuApp = (props: MenuAppProps): ReactElement => {
-  const { setApp } = props;
-  const [menuItem, setMenuItem] = useState({
+  const { setApp, menu } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: APP_NAME
   });
   const [theme, setTheme] = useState(undefined);
@@ -17,7 +17,7 @@ const MenuApp = (props: MenuAppProps): ReactElement => {
   useEffect(() => {
     if (theme) {
       setApp({
-        ...menuItem,
+        ...menuItemTemplate,
         submenu: [
           theme,
           { type: 'separator' },
@@ -36,24 +36,10 @@ const MenuApp = (props: MenuAppProps): ReactElement => {
   return (
     <>
       <MenuAppTheme
+        menu={menu}
         setTheme={setTheme} />
-      {/* <MenuAppReload
-        appMenu={menuItem} /> */}
     </>
   )
 };
 
 export default MenuApp;
-
-// import React, { ReactElement } from 'react';
-// import MenuAppTheme from './MenuAppTheme';
-// import MenuAppReload from './MenuAppReload';
-
-// const MenuApp = (): ReactElement => (
-//   <>
-//     <MenuAppTheme />
-//     <MenuAppReload />
-//   </>
-// );
-
-// export default MenuApp;

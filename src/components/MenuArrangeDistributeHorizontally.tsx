@@ -1,13 +1,29 @@
-import React, { ReactElement, useEffect } from 'react';
+/* eslint-disable @typescript-eslint/no-use-before-define */
+import { remote } from 'electron';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { distributeSelectedHorizontallyThunk } from '../store/actions/layer';
-import MenuItem, { MenuItemProps } from './MenuItem';
 
 export const MENU_ITEM_ID = 'arrangeDistributeHorizontally';
 
-const MenuArrangeDistributeHorizontally = (props: MenuItemProps): ReactElement => {
-  const { menuItem } = props;
+interface MenuArrangeDistributeHorizontallyProps {
+  menu: Electron.Menu;
+  setHorizontal(horizontal: any): void;
+}
+
+const MenuArrangeDistributeHorizontally = (props: MenuArrangeDistributeHorizontallyProps): ReactElement => {
+  const { menu, setHorizontal } = props;
+  const [menuItemTemplate, setMenuItemTemplate] = useState({
+    label: 'Horizontally',
+    id: MENU_ITEM_ID,
+    enabled: false,
+    accelerator: remote.process.platform === 'darwin' ? 'Ctrl+Cmd+H' : 'Ctrl+Shift+H',
+    click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
+      dispatch(distributeSelectedHorizontallyThunk());
+    }
+  });
+  const [menuItem, setMenuItem] = useState(undefined);
   const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
   const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
   const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
@@ -15,21 +31,24 @@ const MenuArrangeDistributeHorizontally = (props: MenuItemProps): ReactElement =
   const dispatch = useDispatch();
 
   useEffect(() => {
-    menuItem.enabled = canDistribute && !isResizing && !isDragging && !isDrawing;
-  }, [canDistribute, isDragging, isResizing, isDrawing]);
+    setHorizontal(menuItemTemplate);
+  }, [menuItemTemplate]);
 
   useEffect(() => {
-    (window as any)[MENU_ITEM_ID] = (): void => {
-      dispatch(distributeSelectedHorizontallyThunk());
-    };
-  }, []);
+    if (menu) {
+      setMenuItem(menu.getMenuItemById(MENU_ITEM_ID));
+    }
+  }, [menu]);
+
+  useEffect(() => {
+    if (menuItem) {
+      menuItem.enabled = canDistribute && !isResizing && !isDragging && !isDrawing;
+    }
+  }, [canDistribute, isDragging, isResizing, isDrawing]);
 
   return (
     <></>
   );
 }
 
-export default MenuItem(
-  MenuArrangeDistributeHorizontally,
-  MENU_ITEM_ID
-);
+export default MenuArrangeDistributeHorizontally;
