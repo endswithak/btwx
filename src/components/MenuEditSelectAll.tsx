@@ -14,20 +14,22 @@ interface MenuEditSelectAllProps {
 
 const MenuEditSelectAll = (props: MenuEditSelectAllProps): ReactElement => {
   const { menu, setSelectAll } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.present.allIds.length > 1 &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Select All',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     accelerator: remote.process.platform === 'darwin' ? 'Cmd+A' : 'Ctrl+A',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(selectAllLayers());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const canSelectAll = useSelector((state: RootState) => state.layer.present.allIds.length > 1 && state.canvasSettings.focusing);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -42,9 +44,9 @@ const MenuEditSelectAll = (props: MenuEditSelectAllProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canSelectAll && !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [canSelectAll, isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   return (
     <></>

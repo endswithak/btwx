@@ -15,20 +15,22 @@ interface MenuArrangeGroupProps {
 
 const MenuArrangeGroup = (props: MenuArrangeGroupProps): ReactElement => {
   const { menu, setGroup } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    canGroupSelected(state) &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Group',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     accelerator: remote.process.platform === 'darwin' ? 'Cmd+G' : 'Ctrl+G',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(groupSelectedThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const canGroup = useSelector((state: RootState) => canGroupSelected(state) && state.canvasSettings.focusing);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -43,9 +45,9 @@ const MenuArrangeGroup = (props: MenuArrangeGroupProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canGroup && !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [canGroup, isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   return (
     <></>

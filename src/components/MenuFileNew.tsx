@@ -13,10 +13,15 @@ interface MenuAppThemeProps {
 
 const MenuFileNew = (props: MenuAppThemeProps): ReactElement => {
   const { menu, setNewDocument } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'New',
     id: MENU_ITEM_ID,
-    enabled: true,
+    enabled: isEnabled,
     accelerator: remote.process.platform === 'darwin' ? 'Cmd+N' : 'Ctrl+N',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       // if (browserWindow) {
@@ -41,6 +46,12 @@ const MenuFileNew = (props: MenuAppThemeProps): ReactElement => {
       setMenuItem(menu.getMenuItemById(MENU_ITEM_ID));
     }
   }, [menu]);
+
+  useEffect(() => {
+    if (menuItem) {
+      menuItem.enabled = isEnabled;
+    }
+  }, [isEnabled]);
 
   return (
     <></>

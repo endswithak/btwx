@@ -14,16 +14,19 @@ interface MenuArrangeAlignVerticallyProps {
 
 const MenuArrangeAlignVertically = (props: MenuArrangeAlignVerticallyProps): ReactElement => {
   const { menu, setMiddle } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.present.selected.length >= 2 &&
+    getSelectedMiddle(state) === 'multi'
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Vertically',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(alignSelectedToMiddleThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isEnabled = useSelector((state: RootState) => state.canvasSettings.focusing && (state.layer.present.selected.length >= 2 && getSelectedMiddle(state) === 'multi'));
   const dispatch = useDispatch();
 
   useEffect(() => {

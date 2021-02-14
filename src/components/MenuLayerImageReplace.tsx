@@ -14,16 +14,21 @@ interface MenuLayerImageReplaceProps {
 
 const MenuLayerImageReplace = (props: MenuLayerImageReplaceProps): ReactElement => {
   const { menu, setReplace } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    canReplaceSelectedImages(state) &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Replace...',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(replaceSelectedImagesThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isEnabled = useSelector((state: RootState) => state.canvasSettings.focusing && canReplaceSelectedImages(state));
   const dispatch = useDispatch();
 
   useEffect(() => {

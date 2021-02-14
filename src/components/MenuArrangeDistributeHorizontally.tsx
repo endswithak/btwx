@@ -14,20 +14,22 @@ interface MenuArrangeDistributeHorizontallyProps {
 
 const MenuArrangeDistributeHorizontally = (props: MenuArrangeDistributeHorizontallyProps): ReactElement => {
   const { menu, setHorizontal } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.present.selected.length >= 3 &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Horizontally',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     accelerator: remote.process.platform === 'darwin' ? 'Ctrl+Cmd+H' : 'Ctrl+Shift+H',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(distributeSelectedHorizontallyThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const canDistribute = useSelector((state: RootState) => state.canvasSettings.focusing && state.layer.present.selected.length >= 3);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -42,9 +44,9 @@ const MenuArrangeDistributeHorizontally = (props: MenuArrangeDistributeHorizonta
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canDistribute && !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [canDistribute, isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   return (
     <></>

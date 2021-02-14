@@ -14,19 +14,21 @@ interface MenuFileSaveAsProps {
 
 const MenuFileSaveAs = (props: MenuFileSaveAsProps): ReactElement => {
   const { menu, setSaveAs } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Save As...',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     accelerator: remote.process.platform === 'darwin' ? 'Cmd+Shift+S' : 'Ctrl+Shift+S',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(saveDocumentAsThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -41,9 +43,9 @@ const MenuFileSaveAs = (props: MenuFileSaveAsProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   return (
     <></>

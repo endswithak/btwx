@@ -15,23 +15,27 @@ interface MenuLayerMaskUseAsMaskProps {
 
 const MenuLayerMaskUseAsMask = (props: MenuLayerMaskUseAsMaskProps): ReactElement => {
   const { menu, setUseAsMask } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    canToggleSelectedUseAsMask(state) &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
+  const isChecked = useSelector((state: RootState) =>
+    selectedUseAsMaskEnabled(state)
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Use As Mask',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     accelerator: remote.process.platform === 'darwin' ? 'Cmd+M' : 'Ctrl+M',
     type: 'checkbox',
-    checked: false,
+    checked: isChecked,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleSelectedMaskThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const canMask = useSelector((state: RootState) => canToggleSelectedUseAsMask(state));
-  const usingAsMask = useSelector((state: RootState) => selectedUseAsMaskEnabled(state));
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -46,15 +50,15 @@ const MenuLayerMaskUseAsMask = (props: MenuLayerMaskUseAsMaskProps): ReactElemen
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canMask && !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [canMask, isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.checked = usingAsMask;
+      menuItem.checked = isChecked;
     }
-  }, [usingAsMask]);
+  }, [isChecked]);
 
   return (
     <></>

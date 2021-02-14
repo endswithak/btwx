@@ -14,20 +14,22 @@ interface MenuEditPasteOverSelectionProps {
 
 const MenuEditPasteOverSelection = (props: MenuEditPasteOverSelectionProps): ReactElement => {
   const { menu, setPasteOverSelection } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.present.selected.length > 0 &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Paste Over Selection',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     accelerator: remote.process.platform === 'darwin' ? 'Cmd+Shift+V' : 'Ctrl+Shift+V',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(pasteLayersThunk({overSelection: true}));
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const canPasteOverSelection = useSelector((state: RootState) => state.layer.present.selected.length > 0 && state.canvasSettings.focusing);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -42,9 +44,9 @@ const MenuEditPasteOverSelection = (props: MenuEditPasteOverSelectionProps): Rea
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canPasteOverSelection && !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [canPasteOverSelection, isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   return (
     <></>

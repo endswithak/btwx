@@ -14,20 +14,22 @@ interface MenuEditPasteStyleProps {
 
 const MenuEditPasteStyle = (props: MenuEditPasteStyleProps): ReactElement => {
   const { menu, setPasteStyle } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.present.selected.length > 0 &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Paste Style',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     accelerator: remote.process.platform === 'darwin' ? 'Cmd+Alt+V' : 'Ctrl+Alt+V',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(pasteStyleThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const canPasteStyle = useSelector((state: RootState) => state.layer.present.selected.length > 0 && state.canvasSettings.focusing);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -42,9 +44,9 @@ const MenuEditPasteStyle = (props: MenuEditPasteStyleProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canPasteStyle && !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [canPasteStyle, isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   return (
     <></>

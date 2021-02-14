@@ -14,19 +14,19 @@ interface MenuLayerStyleFillProps {
 
 const MenuLayerStyleFill = (props: MenuLayerStyleFillProps): ReactElement => {
   const { menu, setFill } = props;
+  const isEnabled = useSelector((state: RootState) => canToggleSelectedFillOrStroke(state));
+  const isChecked = useSelector((state: RootState) => selectedFillEnabled(state));
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Fill',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     type: 'checkbox',
-    checked: false,
+    checked: isChecked,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleSelectedFillThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isEnabled = useSelector((state: RootState) => canToggleSelectedFillOrStroke(state));
-  const isChecked = useSelector((state: RootState) => selectedFillEnabled(state));
   const dispatch = useDispatch();
 
   useEffect(() => {

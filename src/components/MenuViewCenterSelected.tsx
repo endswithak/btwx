@@ -14,20 +14,22 @@ interface MenuViewCenterSelectedProps {
 
 const MenuViewCenterSelected = (props: MenuViewCenterSelectedProps): ReactElement => {
   const { menu, setCenter } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.present.selected.length > 0 &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Center Selection',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     accelerator: remote.process.platform === 'darwin' ? 'Cmd+3' : 'Ctrl+3',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(centerSelectedThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const canCenter = useSelector((state: RootState) => state.layer.present.selected.length > 0);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -42,9 +44,9 @@ const MenuViewCenterSelected = (props: MenuViewCenterSelectedProps): ReactElemen
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canCenter && !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [canCenter, isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   return (
     <></>

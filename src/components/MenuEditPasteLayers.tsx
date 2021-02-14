@@ -14,20 +14,21 @@ interface MenuEditPasteLayersProps {
 
 const MenuEditPasteLayers = (props: MenuEditPasteLayersProps): ReactElement => {
   const { menu, setPasteLayers } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Paste',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     accelerator: remote.process.platform === 'darwin' ? 'Cmd+V' : 'Ctrl+V',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(pasteLayersThunk({}));
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const canPaste = useSelector((state: RootState) => state.canvasSettings.focusing);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -42,9 +43,9 @@ const MenuEditPasteLayers = (props: MenuEditPasteLayersProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canPaste && !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [canPaste, isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   return (
     <></>

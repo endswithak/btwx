@@ -14,16 +14,19 @@ interface MenuArrangeAlignLeftProps {
 
 const MenuArrangeAlignLeft = (props: MenuArrangeAlignLeftProps): ReactElement => {
   const { menu, setLeft } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.present.selected.length >= 2 &&
+    getSelectedLeft(state) === 'multi'
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Left',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(alignSelectedToLeftThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isEnabled = useSelector((state: RootState) => state.canvasSettings.focusing && (state.layer.present.selected.length >= 2 && getSelectedLeft(state) === 'multi'));
   const dispatch = useDispatch();
 
   useEffect(() => {

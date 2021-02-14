@@ -14,20 +14,22 @@ interface MenuEditRedoProps {
 
 const MenuEditRedo = (props: MenuEditRedoProps): ReactElement => {
   const { menu, setRedo } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.future.length > 0 &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Redo',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     accelerator: remote.process.platform === 'darwin' ? 'Cmd+Shift+Z' : 'Ctrl+Shift+Z',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(redoThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const canRedo = useSelector((state: RootState) => state.layer.future.length > 0 && state.canvasSettings.focusing);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -42,9 +44,9 @@ const MenuEditRedo = (props: MenuEditRedoProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canRedo && !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [canRedo, isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   return (
     <></>

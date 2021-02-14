@@ -14,19 +14,19 @@ interface MenuLayerStyleShadowProps {
 
 const MenuLayerStyleShadow = (props: MenuLayerStyleShadowProps): ReactElement => {
   const { menu, setShadow } = props;
+  const isEnabled = useSelector((state: RootState) => canToggleSelectedShadow(state));
+  const isChecked = useSelector((state: RootState) => selectedShadowEnabled(state));
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Shadow',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     type: 'checkbox',
-    checked: false,
+    checked: isChecked,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleSelectedShadowThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isEnabled = useSelector((state: RootState) => canToggleSelectedShadow(state));
-  const isChecked = useSelector((state: RootState) => selectedShadowEnabled(state));
   const dispatch = useDispatch();
 
   useEffect(() => {

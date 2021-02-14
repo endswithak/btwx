@@ -13,19 +13,27 @@ interface MenuInsertShapeStarProps {
 
 const MenuInsertShapeStar = (props: MenuInsertShapeStarProps): ReactElement => {
   const { menu, setStar } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.present.activeArtboard !== null &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
+  const isChecked = useSelector((state: RootState) =>
+    state.canvasSettings.activeTool === 'Shape' &&
+    state.shapeTool.shapeType === 'Star'
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Star',
     id: MENU_ITEM_ID,
     type: 'checkbox',
-    checked: false,
-    enabled: false,
+    checked: isChecked,
+    enabled: isEnabled,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleShapeToolThunk('Star'));
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const canInsert = useSelector((state: RootState) => state.canvasSettings.focusing && state.layer.present.activeArtboard !== null);
-  const isChecked = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Shape' && state.shapeTool.shapeType === 'Star');
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -40,9 +48,9 @@ const MenuInsertShapeStar = (props: MenuInsertShapeStarProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canInsert;
+      menuItem.enabled = isEnabled;
     }
-  }, [canInsert]);
+  }, [isEnabled]);
 
   useEffect(() => {
     if (menuItem) {

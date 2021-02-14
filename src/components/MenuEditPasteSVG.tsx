@@ -14,16 +14,20 @@ interface MenuEditPasteSVGProps {
 
 const MenuEditPasteSVG = (props: MenuEditPasteSVGProps): ReactElement => {
   const { menu, setPasteSVG } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Paste SVG Code',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(pasteSVGThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const canPaste = useSelector((state: RootState) => canPasteSVG() && state.canvasSettings.focusing);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -38,9 +42,9 @@ const MenuEditPasteSVG = (props: MenuEditPasteSVGProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canPaste;
+      menuItem.enabled = isEnabled;
     }
-  }, [canPaste]);
+  }, [isEnabled]);
 
   return (
     <></>

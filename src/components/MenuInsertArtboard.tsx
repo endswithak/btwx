@@ -13,24 +13,26 @@ interface MenuInsertArtboardProps {
 
 const MenuInsertArtboard = (props: MenuInsertArtboardProps): ReactElement => {
   const { menu, setArtboard } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
+  const isChecked = useSelector((state: RootState) =>
+    state.canvasSettings.activeTool === 'Artboard'
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Artboard',
     id: MENU_ITEM_ID,
     type: 'checkbox',
-    checked: false,
-    enabled: false,
+    checked: isChecked,
+    enabled: isEnabled,
     accelerator: 'A',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleArtboardToolThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const isSelecting = useSelector((state: RootState) => state.canvasSettings.selecting);
-  const isFocusing = useSelector((state: RootState) => state.canvasSettings.focusing);
-  const isChecked = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Artboard');
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -45,9 +47,9 @@ const MenuInsertArtboard = (props: MenuInsertArtboardProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = isFocusing && !isResizing && !isDragging && !isDrawing && !isSelecting;
+      menuItem.enabled = isEnabled;
     }
-  }, [isFocusing, isDragging, isResizing, isDrawing, isSelecting]);
+  }, [isEnabled]);
 
   useEffect(() => {
     if (menuItem) {

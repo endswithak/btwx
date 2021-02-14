@@ -15,6 +15,12 @@ interface MenuArrangeUngroupProps {
 
 const MenuArrangeUngroup = (props: MenuArrangeUngroupProps): ReactElement => {
   const { menu, setUngroup } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    canUngroupSelected(state) &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Ungroup',
     id: MENU_ITEM_ID,
@@ -25,10 +31,6 @@ const MenuArrangeUngroup = (props: MenuArrangeUngroupProps): ReactElement => {
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const canUngroup = useSelector((state: RootState) => canUngroupSelected(state));
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -43,9 +45,9 @@ const MenuArrangeUngroup = (props: MenuArrangeUngroupProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canUngroup && !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [canUngroup, isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   return (
     <></>

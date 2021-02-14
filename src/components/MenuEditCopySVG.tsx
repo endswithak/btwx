@@ -13,16 +13,21 @@ interface MenuEditCopySVGProps {
 
 const MenuEditCopySVG = (props: MenuEditCopySVGProps): ReactElement => {
   const { menu, setCopySVG } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.present.selected.length > 0 &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Copy SVG Code',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(copySVGThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const canCopy = useSelector((state: RootState) => state.layer.present.selected.length > 0 && state.canvasSettings.focusing);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -37,9 +42,9 @@ const MenuEditCopySVG = (props: MenuEditCopySVGProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canCopy;
+      menuItem.enabled = isEnabled;
     }
-  }, [canCopy]);
+  }, [isEnabled]);
 
   return (
     <></>

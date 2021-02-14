@@ -15,22 +15,26 @@ interface MenuLayerMaskToggleUnderlyingMaskProps {
 
 const MenuLayerMaskToggleUnderlyingMask = (props: MenuLayerMaskToggleUnderlyingMaskProps): ReactElement => {
   const { menu, setIgnore } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
+  const isChecked = useSelector((state: RootState) =>
+    selectedIgnoreUnderlyingMaskEnabled(state)
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Ignore Underlying Mask',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     accelerator: remote.process.platform === 'darwin' ? 'Cmd+Shift+M' : 'Ctrl+Shift+M',
     type: 'checkbox',
-    checked: false,
+    checked: isChecked,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleSelectionIgnoreUnderlyingMask());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const ignoringUnderlyingMask = useSelector((state: RootState) => selectedIgnoreUnderlyingMaskEnabled(state));
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -45,15 +49,15 @@ const MenuLayerMaskToggleUnderlyingMask = (props: MenuLayerMaskToggleUnderlyingM
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.checked = ignoringUnderlyingMask;
+      menuItem.checked = isChecked;
     }
-  }, [ignoringUnderlyingMask]);
+  }, [isChecked]);
 
   return (
     <></>

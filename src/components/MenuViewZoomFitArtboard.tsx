@@ -14,20 +14,22 @@ interface MenuViewZoomFitArtboardProps {
 
 const MenuViewZoomFitArtboard = (props: MenuViewZoomFitArtboardProps): ReactElement => {
   const { menu, setFitArtboard } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.present.activeArtboard !== null &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Fit Active Artboard',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     accelerator: remote.process.platform === 'darwin' ? 'Cmd+4' : 'Ctrl+4',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(zoomFitActiveArtboardThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const canZoom = useSelector((state: RootState) => state.layer.present.activeArtboard !== null);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -42,9 +44,9 @@ const MenuViewZoomFitArtboard = (props: MenuViewZoomFitArtboardProps): ReactElem
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canZoom && !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [canZoom, isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   return (
     <></>

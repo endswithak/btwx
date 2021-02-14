@@ -14,16 +14,21 @@ interface MenuLayerImageOriginalDimensionsProps {
 
 const MenuLayerImageOriginalDimensions = (props: MenuLayerImageOriginalDimensionsProps): ReactElement => {
   const { menu, setOriginalDims } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    canResetSelectedImageDimensions(state) &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Set to Original Dimensions',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(resetSelectedImageDimensionsThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isEnabled = useSelector((state: RootState) => state.canvasSettings.focusing && canResetSelectedImageDimensions(state));
   const dispatch = useDispatch();
 
   useEffect(() => {

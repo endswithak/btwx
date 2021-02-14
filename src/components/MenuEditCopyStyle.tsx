@@ -14,6 +14,12 @@ interface MenuEditCopyStyleProps {
 
 const MenuEditCopyStyle = (props: MenuEditCopyStyleProps): ReactElement => {
   const { menu, setCopyStyle } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.present.selected.length === 1 &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Copy Style',
     id: MENU_ITEM_ID,
@@ -24,10 +30,6 @@ const MenuEditCopyStyle = (props: MenuEditCopyStyleProps): ReactElement => {
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const canCopy = useSelector((state: RootState) => state.layer.present.selected.length === 1 && state.canvasSettings.focusing);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -42,9 +44,9 @@ const MenuEditCopyStyle = (props: MenuEditCopyStyleProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canCopy && !isResizing && !isDragging && !isDrawing
+      menuItem.enabled = isEnabled;
     }
-  }, [canCopy, isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   return (
     <></>

@@ -14,24 +14,25 @@ interface MenuViewShowEventsProps {
 
 const MenuViewShowEvents = (props: MenuViewShowEventsProps): ReactElement => {
   const { menu, setShowEvents } = props;
-  const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const isOpen = useSelector((state: RootState) => state.viewSettings.eventDrawer.isOpen);
-  const dispatch = useDispatch();
-
+  const isEnabled = useSelector((state: RootState) =>
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
+  const isChecked = useSelector((state: RootState) => state.viewSettings.eventDrawer.isOpen);
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Show Styles',
     id: MENU_ITEM_ID,
     type: 'checkbox',
-    checked: isOpen,
-    enabled: !isResizing && !isDragging && !isDrawing,
+    checked: isChecked,
+    enabled: isEnabled,
     accelerator: remote.process.platform === 'darwin' ? 'Cmd+Alt+2' : 'Ctrl+Alt+2',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleEventDrawerThunk());
     }
   });
+  const [menuItem, setMenuItem] = useState(undefined);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setShowEvents(menuItemTemplate);
@@ -45,15 +46,15 @@ const MenuViewShowEvents = (props: MenuViewShowEventsProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.checked = isOpen;
+      menuItem.checked = isChecked;
     }
-  }, [isOpen]);
+  }, [isChecked]);
 
   return (
     <></>

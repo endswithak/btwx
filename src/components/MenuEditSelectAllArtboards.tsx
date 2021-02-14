@@ -14,20 +14,22 @@ interface MenuEditSelectAllArtboardsProps {
 
 const MenuEditSelectAllArtboards = (props: MenuEditSelectAllArtboardsProps): ReactElement => {
   const { menu, setSelectAllArtboards } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.present.allArtboardIds.length > 0 &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Select All Artboards',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     accelerator: remote.process.platform === 'darwin' ? 'Cmd+Shift+A' : 'Ctrl+Shift+A',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(selectAllArtboardsThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const canSelectAllArtboards = useSelector((state: RootState) => state.layer.present.allArtboardIds.length > 0 && state.canvasSettings.focusing);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -42,9 +44,9 @@ const MenuEditSelectAllArtboards = (props: MenuEditSelectAllArtboardsProps): Rea
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canSelectAllArtboards && !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [canSelectAllArtboards, isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   return (
     <></>

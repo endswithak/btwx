@@ -14,19 +14,19 @@ interface MenuLayerTransformFlipHorizontallyProps {
 
 const MenuLayerTransformFlipHorizontally = (props: MenuLayerTransformFlipHorizontallyProps): ReactElement => {
   const { menu, setHorizontalFlip } = props;
+  const isEnabled = useSelector((state: RootState) => canFlipSeleted(state));
+  const isChecked = useSelector((state: RootState) => selectedHorizontalFlipEnabled(state));
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Flip Horizontally',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     type: 'checkbox',
-    checked: false,
+    checked: isChecked,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleSelectedHorizontalFlipThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isEnabled = useSelector((state: RootState) => canFlipSeleted(state));
-  const isChecked = useSelector((state: RootState) => selectedHorizontalFlipEnabled(state));
   const dispatch = useDispatch();
 
   useEffect(() => {

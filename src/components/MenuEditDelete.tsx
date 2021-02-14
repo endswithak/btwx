@@ -13,20 +13,22 @@ interface MenuEditDeleteProps {
 
 const MenuEditDelete = (props: MenuEditDeleteProps): ReactElement => {
   const { menu, setDeleteLayers } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.present.selected.length > 0 &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Delete',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     accelerator: 'Backspace',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(removeLayersThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const canDelete = useSelector((state: RootState) => state.layer.present.selected.length > 0 && state.canvasSettings.focusing);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -41,9 +43,9 @@ const MenuEditDelete = (props: MenuEditDeleteProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canDelete && !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [canDelete, isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   return (
     <></>

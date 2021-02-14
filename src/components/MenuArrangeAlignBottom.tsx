@@ -14,16 +14,19 @@ interface MenuArrangeAlignBottomProps {
 
 const MenuArrangeAlignBottom = (props: MenuArrangeAlignBottomProps): ReactElement => {
   const { menu, setBottom } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.present.selected.length >= 2 &&
+    getSelectedBottom(state) === 'multi'
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Bottom',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(alignSelectedToBottomThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isEnabled = useSelector((state: RootState) => state.canvasSettings.focusing && (state.layer.present.selected.length >= 2 && getSelectedBottom(state) === 'multi'));
   const dispatch = useDispatch();
 
   useEffect(() => {

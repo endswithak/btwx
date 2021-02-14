@@ -15,20 +15,22 @@ interface MenuArrangeSendBackwardProps {
 
 const MenuArrangeSendBackward = (props: MenuArrangeSendBackwardProps): ReactElement => {
   const { menu, setSendBackward } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    canSendSelectedBackward(state) &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Send Backward',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     accelerator: remote.process.platform === 'darwin' ? 'Cmd+[' : 'Ctrl+[',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(sendSelectedBackwardThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const canMove = useSelector((state: RootState) => canSendSelectedBackward(state) && state.canvasSettings.focusing);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -43,9 +45,9 @@ const MenuArrangeSendBackward = (props: MenuArrangeSendBackwardProps): ReactElem
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canMove && !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [canMove, isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   return (
     <></>

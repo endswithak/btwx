@@ -15,10 +15,16 @@ interface MenuInsertImageProps {
 
 const MenuInsertImage = (props: MenuInsertImageProps): ReactElement => {
   const { menu, setImage } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.present.activeArtboard !== null &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Image...',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
         filters: [
@@ -47,7 +53,6 @@ const MenuInsertImage = (props: MenuInsertImageProps): ReactElement => {
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const canInsert = useSelector((state: RootState) => state.canvasSettings.focusing && state.layer.present.activeArtboard !== null);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -62,9 +67,9 @@ const MenuInsertImage = (props: MenuInsertImageProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canInsert;
+      menuItem.enabled = isEnabled;
     }
-  }, [canInsert]);
+  }, [isEnabled]);
 
   return (
     <></>

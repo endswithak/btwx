@@ -13,24 +13,28 @@ interface MenuInsertShapeLineProps {
 
 const MenuInsertShapeLine = (props: MenuInsertShapeLineProps): ReactElement => {
   const { menu, setLine } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.present.activeArtboard !== null &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
+  const isChecked = useSelector((state: RootState) =>
+    state.canvasSettings.activeTool === 'Shape' &&
+    state.shapeTool.shapeType === 'Line'
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Line',
     id: MENU_ITEM_ID,
     type: 'checkbox',
-    checked: false,
-    enabled: false,
+    checked: isChecked,
+    enabled: isEnabled,
     accelerator: 'L',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleShapeToolThunk('Line'));
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const isSelecting = useSelector((state: RootState) => state.canvasSettings.selecting);
-  const canInsert = useSelector((state: RootState) => state.canvasSettings.focusing && state.layer.present.activeArtboard !== null);
-  const insertingLine = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Shape' && state.shapeTool.shapeType === 'Line');
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -45,15 +49,15 @@ const MenuInsertShapeLine = (props: MenuInsertShapeLineProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canInsert && !isResizing && !isDragging && !isDrawing && !isSelecting;
+      menuItem.enabled = isEnabled;
     }
-  }, [canInsert, isDragging, isResizing, isDrawing, isSelecting]);
+  }, [isEnabled]);
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.checked = insertingLine;
+      menuItem.checked = isChecked;
     }
-  }, [insertingLine]);
+  }, [isChecked]);
 
   return (
     <></>

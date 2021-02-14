@@ -14,20 +14,23 @@ interface MenuEditRenameProps {
 
 const MenuEditRename = (props: MenuEditRenameProps): ReactElement => {
   const { menu, setRename } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.present.selected.length === 1 &&
+    state.leftSidebar.editing !== state.layer.present.selected[0] &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Rename Layer',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     accelerator: remote.process.platform === 'darwin' ? 'Cmd+R' : 'Ctrl+R',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(setEditingThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const canRename = useSelector((state: RootState) => state.layer.present.selected.length === 1 && state.leftSidebar.editing !== state.layer.present.selected[0]);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -42,9 +45,9 @@ const MenuEditRename = (props: MenuEditRenameProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canRename && !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [canRename, isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   return (
     <></>

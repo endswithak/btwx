@@ -14,19 +14,19 @@ interface MenuLayerStyleStrokeProps {
 
 const MenuLayerStyleStroke = (props: MenuLayerStyleStrokeProps): ReactElement => {
   const { menu, setStroke } = props;
+  const isEnabled = useSelector((state: RootState) => canToggleSelectedFillOrStroke(state));
+  const isChecked = useSelector((state: RootState) => selectedStrokeEnabled(state));
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Stroke',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     type: 'checkbox',
-    checked: false,
+    checked: isChecked,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleSelectedStrokeThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isEnabled = useSelector((state: RootState) => canToggleSelectedFillOrStroke(state));
-  const isChecked = useSelector((state: RootState) => selectedStrokeEnabled(state));
   const dispatch = useDispatch();
 
   useEffect(() => {

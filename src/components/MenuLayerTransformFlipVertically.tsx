@@ -14,19 +14,19 @@ interface MenuLayerTransformFlipVerticallyProps {
 
 const MenuLayerTransformFlipVertically = (props: MenuLayerTransformFlipVerticallyProps): ReactElement => {
   const { menu, setVerticalFlip } = props;
+  const isEnabled = useSelector((state: RootState) => canFlipSeleted(state));
+  const isChecked = useSelector((state: RootState) => selectedVerticalFlipEnabled(state));
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Flip Vertically',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     type: 'checkbox',
-    checked: false,
+    checked: isChecked,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleSelectedVerticalFlipThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isEnabled = useSelector((state: RootState) => canFlipSeleted(state));
-  const isChecked = useSelector((state: RootState) => selectedVerticalFlipEnabled(state));
   const dispatch = useDispatch();
 
   useEffect(() => {

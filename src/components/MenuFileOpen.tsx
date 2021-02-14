@@ -15,10 +15,15 @@ interface MenuFileOpenProps {
 
 const MenuFileOpen = (props: MenuFileOpenProps): ReactElement => {
   const { menu, setOpen } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Open...',
     id: 'fileOpen',
-    enabled: false,
+    enabled: isEnabled,
     accelerator: remote.process.platform === 'darwin' ? 'Cmd+O' : 'Ctrl+O',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       remote.dialog.showOpenDialog({
@@ -34,9 +39,6 @@ const MenuFileOpen = (props: MenuFileOpenProps): ReactElement => {
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -51,9 +53,9 @@ const MenuFileOpen = (props: MenuFileOpenProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   return (
     <></>

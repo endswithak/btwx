@@ -14,16 +14,19 @@ interface MenuArrangeAlignTopProps {
 
 const MenuArrangeAlignTop = (props: MenuArrangeAlignTopProps): ReactElement => {
   const { menu, setTop } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.present.selected.length >= 2 &&
+    getSelectedTop(state) === 'multi'
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Top',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(alignSelectedToTopThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isEnabled = useSelector((state: RootState) => state.canvasSettings.focusing && (state.layer.present.selected.length >= 2 && getSelectedTop(state) === 'multi'));
   const dispatch = useDispatch();
 
   useEffect(() => {

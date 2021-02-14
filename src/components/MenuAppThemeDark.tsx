@@ -16,15 +16,12 @@ interface MenuAppThemeDarkProps {
 
 const MenuAppThemeDark = (props: MenuAppThemeDarkProps): ReactElement => {
   const { setDark, menu } = props;
-  const [menuItem, setMenuItem] = useState(undefined);
-  const checked = useSelector((state: RootState) => state.viewSettings.theme === 'dark');
+  const isChecked = useSelector((state: RootState) => state.viewSettings.theme === 'dark');
   const previewWindowId = useSelector((state: RootState) => state.preview.windowId);
-  const dispatch = useDispatch();
-
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Dark',
     type: 'checkbox',
-    checked: checked,
+    checked: isChecked,
     id: MENU_ITEM_ID,
     enabled: true,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event) => {
@@ -39,6 +36,8 @@ const MenuAppThemeDark = (props: MenuAppThemeDarkProps): ReactElement => {
       }
     }
   });
+  const [menuItem, setMenuItem] = useState(undefined);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setDark(menuItemTemplate);
@@ -52,9 +51,9 @@ const MenuAppThemeDark = (props: MenuAppThemeDarkProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.checked = checked;
+      menuItem.checked = isChecked;
     }
-  }, [checked]);
+  }, [isChecked]);
 
   return (
     <></>

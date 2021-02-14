@@ -15,20 +15,22 @@ interface MenuArrangeBringToFrontProps {
 
 const MenuArrangeBringToFront = (props: MenuArrangeBringToFrontProps): ReactElement => {
   const { menu, setBringToFront } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    canBringSelectedForward(state) &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Bring To Front',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     accelerator: remote.process.platform === 'darwin' ? 'Cmd+Alt+]' : 'Ctrl+Alt+]',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(bringSelectedToFrontThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const canMove = useSelector((state: RootState) => canBringSelectedForward(state) && state.canvasSettings.focusing);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -43,9 +45,9 @@ const MenuArrangeBringToFront = (props: MenuArrangeBringToFrontProps): ReactElem
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canMove && !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [canMove, isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   return (
     <></>

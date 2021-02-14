@@ -14,20 +14,22 @@ interface MenuViewZoomFitSelectedProps {
 
 const MenuViewZoomFitSelected = (props: MenuViewZoomFitSelectedProps): ReactElement => {
   const { menu, setFitSelected } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.present.selected.length > 0 &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Fit Selection',
     id: MENU_ITEM_ID,
-    enabled: false,
+    enabled: isEnabled,
     accelerator: remote.process.platform === 'darwin' ? 'Cmd+2' : 'Ctrl+2',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(zoomFitSelectedThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const canZoom = useSelector((state: RootState) => state.layer.present.selected.length > 0);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -42,9 +44,9 @@ const MenuViewZoomFitSelected = (props: MenuViewZoomFitSelectedProps): ReactElem
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canZoom && !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [canZoom, isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   return (
     <></>

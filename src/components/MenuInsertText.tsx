@@ -13,24 +13,27 @@ interface MenuInsertTextProps {
 
 const MenuInsertText = (props: MenuInsertTextProps): ReactElement => {
   const { menu, setText } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    state.layer.present.activeArtboard !== null &&
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
+  const isChecked = useSelector((state: RootState) =>
+    state.canvasSettings.activeTool === 'Text'
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Text',
     id: MENU_ITEM_ID,
     type: 'checkbox',
-    checked: false,
-    enabled: false,
+    checked: isChecked,
+    enabled: isEnabled,
     accelerator: 'T',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleTextToolThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
-  const isSelecting = useSelector((state: RootState) => state.canvasSettings.selecting);
-  const canInsert = useSelector((state: RootState) => state.canvasSettings.focusing && state.layer.present.activeArtboard !== null);
-  const insertingText = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Text');
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -45,15 +48,15 @@ const MenuInsertText = (props: MenuInsertTextProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = canInsert && !isResizing && !isDragging && !isDrawing && !isSelecting;
+      menuItem.enabled = isEnabled;
     }
-  }, [canInsert, isDragging, isResizing, isDrawing, isSelecting]);
+  }, [isEnabled]);
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.checked = insertingText;
+      menuItem.checked = isChecked;
     }
-  }, [insertingText]);
+  }, [isChecked]);
 
   return (
     <></>

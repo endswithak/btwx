@@ -14,19 +14,21 @@ interface MenuViewZoomInProps {
 
 const MenuViewZoomIn = (props: MenuViewZoomInProps): ReactElement => {
   const { menu, setZoomIn } = props;
+  const isEnabled = useSelector((state: RootState) =>
+    !state.canvasSettings.dragging &&
+    !state.canvasSettings.resizing &&
+    !state.canvasSettings.drawing
+  );
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Zoom In',
     id: MENU_ITEM_ID,
-    enabled: false,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+Plus' : 'Ctrl+Plus',
+    enabled: isEnabled,
+    accelerator: remote.process.platform === 'darwin' ? 'Cmd+=' : 'Ctrl+=',
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(zoomInThunk());
     }
   });
   const [menuItem, setMenuItem] = useState(undefined);
-  const isDragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
-  const isDrawing = useSelector((state: RootState) => state.canvasSettings.drawing);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -41,9 +43,9 @@ const MenuViewZoomIn = (props: MenuViewZoomInProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.enabled = !isResizing && !isDragging && !isDrawing;
+      menuItem.enabled = isEnabled;
     }
-  }, [isDragging, isResizing, isDrawing]);
+  }, [isEnabled]);
 
   return (
     <></>

@@ -16,15 +16,12 @@ interface MenuAppThemeLightProps {
 
 const MenuAppThemeLight = (props: MenuAppThemeLightProps): ReactElement => {
   const { setLight, menu } = props;
-  const [menuItem, setMenuItem] = useState(undefined);
-  const checked = useSelector((state: RootState) => state.viewSettings.theme === 'light');
+  const isChecked = useSelector((state: RootState) => state.viewSettings.theme === 'light');
   const previewWindowId = useSelector((state: RootState) => state.preview.windowId);
-  const dispatch = useDispatch();
-
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Light',
     type: 'checkbox',
-    checked: checked,
+    checked: isChecked,
     id: MENU_ITEM_ID,
     enabled: true,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event) => {
@@ -39,6 +36,8 @@ const MenuAppThemeLight = (props: MenuAppThemeLightProps): ReactElement => {
       }
     }
   });
+  const [menuItem, setMenuItem] = useState(undefined);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setLight(menuItemTemplate);
@@ -52,9 +51,9 @@ const MenuAppThemeLight = (props: MenuAppThemeLightProps): ReactElement => {
 
   useEffect(() => {
     if (menuItem) {
-      menuItem.checked = checked;
+      menuItem.checked = isChecked;
     }
-  }, [checked]);
+  }, [isChecked]);
 
   return (
     <></>
