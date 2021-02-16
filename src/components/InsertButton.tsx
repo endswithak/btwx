@@ -94,7 +94,7 @@ const InsertButton = (): ReactElement => {
         }
         break;
       case 'Text':
-        return 'text';
+        return 'text-alt';
       case 'Artboard':
         return 'artboard';
       default:
@@ -259,7 +259,7 @@ const InsertButton = (): ReactElement => {
                 isActive={activeTool === 'Text'}
                 disabled={activeArtboard === null}
                 interactive>
-                <ListItem.Icon name='text' />
+                <ListItem.Icon name='text-alt' />
                 <ListItem.Body>
                   <ListItem.Text size='small'>
                     Text

@@ -10,7 +10,6 @@ gsap.registerPlugin(Draggable);
 interface ColorPickerSaturationProps {
   hue: number | 'multi';
   saturation: number | 'multi';
-  value: number | 'multi';
   lightness: number | 'multi';
   colorValues: {
     [id: string]: Btwx.Color;
@@ -18,7 +17,6 @@ interface ColorPickerSaturationProps {
   setHex(hex: string | 'multi'): void;
   setSaturation(saturation: number | 'multi'): void;
   setLightness(lightness: number | 'multi'): void;
-  setValue(value: number | 'multi'): void;
   setRed(red: number | 'multi'): void;
   setGreen(green: number | 'multi'): void;
   setBlue(blue: number | 'multi'): void;
@@ -27,7 +25,7 @@ interface ColorPickerSaturationProps {
 
 const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement => {
   const theme = useContext(ThemeContext);
-  const { hue, saturation, value, lightness, setHex, setSaturation, setLightness, setValue, setRed, setGreen, setBlue, onChange, colorValues } = props;
+  const { hue, saturation, lightness, setHex, setSaturation, setLightness, setRed, setGreen, setBlue, onChange, colorValues } = props;
   const pointerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -50,13 +48,12 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
           const l = (2 - s) * v / 2;
           const sat = s < 0 ? 0 : s > 1 ? 1 : s;
           const lit = l < 0 ? 0 : l > 1 ? 1 : l;
-          const val = v < 0 ? 0 : v > 1 ? 1 : v;
           let hex: string | 'multi';
           let red: number | 'multi';
           let green: number | 'multi';
           let blue: number | 'multi';
           const newColors = Object.keys(colorValues).reduce((result, current, index) => {
-            const colorInstance = tinyColor({h: colorValues[current].h, s: sat, l: lit, v: val});
+            const colorInstance = tinyColor({h: colorValues[current].h, s: sat, l: lit});
             const newHex = colorInstance.toHex();
             const rgb = colorInstance.toRgb();
             if (index === 0) {
@@ -80,13 +77,12 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
             }
             return {
               ...result,
-              [current]: { s: sat, l: lit, v: val }
+              [current]: { s: sat, l: lit }
             };
           }, {});
           setHex(hex);
           setSaturation(sat);
           setLightness(lit);
-          setValue(val);
           setRed(red);
           setGreen(green);
           setBlue(blue);
@@ -102,13 +98,15 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
   useEffect(() => {
     if (!dragging && pointerRef.current && Draggable.get(pointerRef.current)) {
       const thing = Draggable.get(pointerRef.current);
+      const colorInstance = tinyColor({h: hue !== 'multi' ? hue : 0, s: saturation !== 'multi' ? saturation : 0, l: lightness !== 'multi' ? lightness : 0});
+      const hsv = colorInstance.toHsv();
       gsap.set(pointerRef.current, {
-        x: thing.maxX * (lightness === 1 || lightness === 'multi' ? 0 : saturation !== 'multi' ? saturation : 0 ),
-        y: thing.maxY * (-(value !== 'multi' ? value : 0) + 1)
+        x: thing.maxX * (hsv.s),
+        y: thing.maxY * (1 - hsv.v)
       });
       Draggable.get(pointerRef.current).update();
     }
-  }, [saturation, value, lightness]);
+  }, [saturation, lightness]);
 
   const handleMouseDown = (event: any) => {
     if (!dragging && pointerRef.current && Draggable.get(pointerRef.current)) {
@@ -120,14 +118,13 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
       const l = (2 - s) * v / 2;
       const sat = s < 0 ? 0 : s > 1 ? 1 : s;
       const lit = l < 0 ? 0 : l > 1 ? 1 : l;
-      const val = v < 0 ? 0 : v > 1 ? 1 : v;
       setDragging(true);
       let hex: string | 'multi';
       let red: number | 'multi';
       let green: number | 'multi';
       let blue: number | 'multi';
       const newColors = Object.keys(colorValues).reduce((result, current, index) => {
-        const colorInstance = tinyColor({h: colorValues[current].h, s: sat, l: lit, v: val});
+        const colorInstance = tinyColor({h: colorValues[current].h, s: sat, l: lit});
         const newHex = colorInstance.toHex();
         const rgb = colorInstance.toRgb();
         if (index === 0) {
@@ -151,13 +148,12 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
         }
         return {
           ...result,
-          [current]: { s: sat, l: lit, v: val }
+          [current]: { s: sat, l: lit }
         };
       }, {});
       setHex(hex);
       setSaturation(sat);
       setLightness(lit);
-      setValue(val);
       setRed(red);
       setGreen(green);
       setBlue(blue);

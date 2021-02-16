@@ -1,6 +1,10 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 import gsap from 'gsap';
+import { remote } from 'electron';
+import capitalize from 'lodash.capitalize';
+import { clearTouchbar } from '../utils';
 import { CustomEase } from 'gsap/CustomEase';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -12,6 +16,7 @@ import Icon from './Icon';
 gsap.registerPlugin(CustomEase);
 
 const EaseEditorPowerInput = (): ReactElement => {
+  const isMac = remote.process.platform === 'darwin';
   const easeId = useSelector((state: RootState) => state.easeEditor.tween ? state.easeEditor.tween : null);
   const easeValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].ease : null);
   const powerValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].power : null);
@@ -21,17 +26,55 @@ const EaseEditorPowerInput = (): ReactElement => {
     dispatch(setLayerTweenPower({id: easeId, power: e.target.value}));
   }
 
-  const options = Object.keys((DEFAULT_EASE_CURVES as any)[easeValue]).map((key, index) => (
+  const buildTouchbar = (): void => {
+    const { TouchBar } = remote;
+    const { TouchBarLabel, TouchBarSegmentedControl } = TouchBar;
+    const leftLabel = new TouchBarLabel({
+      label: `${capitalize(easeValue)}: `
+    });
+    const control = new TouchBarSegmentedControl({
+      segments: ['out', 'inOut', 'in'].map((key, index) => {
+        const image = remote.nativeImage.createFromPath(`${remote.app.getAppPath()}/src/assets/tb-ease-${easeValue}-${key}.png`);
+        return {
+          label: key,
+          icon: image
+        }
+      }),
+      selectedIndex: ['out', 'inOut', 'in'].indexOf(powerValue),
+      change: (index) => {
+        dispatch(setLayerTweenPower({id: easeId, power: ['out', 'inOut', 'in'][index] as Btwx.CubicBezierType}));
+      }
+    });
+    const touchbar = new TouchBar({
+      items: [leftLabel, control]
+    });
+    remote.getCurrentWindow().setTouchBar(touchbar);
+  }
+
+  const options = ['out', 'inOut', 'in'].map((key, index) => (
     <ToggleButtonGroup.Button
       key={key}
       value={key}
       aspectRatio='1x1'>
       <Icon
-        path={CustomEase.getSVGData((DEFAULT_EASE_CURVES as any)[easeValue][key], {width: 24, height: 24})}
-        size='large'
-        outline />
+        name={`ease-${easeValue}-${key}`}
+        size='large' />
     </ToggleButtonGroup.Button>
   ));
+
+  useEffect(() => {
+    if (isMac) {
+      buildTouchbar();
+    }
+  }, [powerValue, easeValue]);
+
+  useEffect(() => {
+    return () => {
+      if (isMac) {
+        clearTouchbar();
+      }
+    }
+  }, []);
 
   return (
     <div className='c-ease-editor-body__powers'>

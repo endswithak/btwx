@@ -85,8 +85,8 @@ const MathFormGroup = forwardRef(function MathFormGroup(props: MathFormGroupProp
           value={currentValue}
           size={size}
           type='text'
-          isInvalid={!valid && dirty}
-          isValid={valid && dirty}
+          // isInvalid={!valid && dirty}
+          // isValid={valid && dirty}
           onChange={handleChange}
           required
           right={right}

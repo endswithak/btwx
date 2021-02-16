@@ -5,12 +5,11 @@ interface ColorPickerColorProps {
   hue: number | 'multi';
   saturation: number | 'multi';
   lightness: number | 'multi';
-  value: number | 'multi';
   alpha: number | 'multi';
 }
 
 const ColorPickerColor = (props: ColorPickerColorProps): ReactElement => {
-  const { hue, saturation, lightness, value, alpha } = props;
+  const { hue, saturation, lightness, alpha } = props;
 
   return (
     <div

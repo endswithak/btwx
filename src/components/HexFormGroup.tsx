@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useEffect, useState, forwardRef } from 'react';
+import React, { useEffect, useState, forwardRef, useCallback } from 'react';
+import { remote } from 'electron';
+import debounce from 'lodash.debounce';
 import tinyColor from 'tinycolor2';
-import { evaluateHex } from '../utils';
+import { evaluateHex, clearTouchbar } from '../utils';
 import Form from './Form';
 
 interface HexFormGroup {
@@ -18,11 +20,31 @@ interface HexFormGroup {
 }
 
 const HexFormGroup = forwardRef(function HexFormGroup(props: HexFormGroup, ref: any) {
+  const isMac = remote.process.platform === 'darwin';
   const { controlId, size, disabled, inline, submitOnBlur, canvasAutoFocus, label, value, onSubmitSuccess, onSubmitError } = props;
   const [currentValue, setCurrentValue] = useState(value);
   const [evaluation, setEvaluation] = useState(evaluateHex(value));
   const [valid, setValid] = useState(value === 'multi' || tinyColor(value).isValid());
   const [dirty, setDirty] = useState(false);
+
+  const debounceColorChange = useCallback(
+    debounce((color: string) => {
+      const hex = tinyColor(color).toHex();
+      setValid(true);
+      setDirty(false);
+      setCurrentValue(hex);
+      setEvaluation(hex);
+      onSubmitSuccess(hex);
+    }, 150),
+    []
+  );
+
+  const debounceBuildTouchbar = useCallback(
+    debounce((nextValid: boolean, nextEval: string) => {
+      buildColorPickerTouchBar(nextValid ? `#${nextEval}` : null);
+    }, 150),
+    []
+  );
 
   const handleChange = (e: any): void => {
     const nextValue = e.target.value;
@@ -32,6 +54,9 @@ const HexFormGroup = forwardRef(function HexFormGroup(props: HexFormGroup, ref: 
     setValid(nextValid);
     setDirty(nextEval !== value);
     setCurrentValue(nextValue);
+    if (isMac) {
+      debounceBuildTouchbar(nextValid, nextEval);
+    }
   }
 
   const handleSubmit = (e: any): void => {
@@ -48,12 +73,36 @@ const HexFormGroup = forwardRef(function HexFormGroup(props: HexFormGroup, ref: 
     setDirty(false);
   }
 
+  const buildColorPickerTouchBar = (tv = valid ? `#${evaluation}` : null): void => {
+    const { TouchBarColorPicker } = remote.TouchBar;
+    const colorPicker = new TouchBarColorPicker({
+      selectedColor: tv,
+      change: debounceColorChange
+    });
+    const colorEditorTouchBar = new remote.TouchBar({
+      items: [colorPicker]
+    });
+    remote.getCurrentWindow().setTouchBar(colorEditorTouchBar);
+  }
+
   useEffect(() => {
     const nextEval = evaluateHex(value);
     setCurrentValue(value);
     setEvaluation(nextEval);
     setValid(value === 'multi' || tinyColor(value).isValid());
   }, [value]);
+
+  const handleFocus = () => {
+    if (isMac) {
+      buildColorPickerTouchBar();
+    }
+  }
+
+  const handleBlur = () => {
+    if (isMac) {
+      clearTouchbar();
+    }
+  }
 
   return (
     <Form
@@ -69,12 +118,14 @@ const HexFormGroup = forwardRef(function HexFormGroup(props: HexFormGroup, ref: 
           value={currentValue}
           size={size}
           type='text'
-          isInvalid={!valid && dirty}
-          isValid={valid && dirty}
+          // isInvalid={!valid && dirty}
+          // isValid={valid && dirty}
           onChange={handleChange}
           required
           left={<Form.Text>#</Form.Text>}
-          leftReadOnly />
+          leftReadOnly
+          onFocus={handleFocus}
+          onBlur={handleBlur} />
         {
           label
           ? <Form.Label>

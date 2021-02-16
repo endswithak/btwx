@@ -10,7 +10,7 @@ export const THEME_RECORDING_COLOR = THEME_RED;
 export const THEME_ORANGE = '#FF9500';
 export const THEME_GREEN = '#28CD41';
 export const THEME_UNIT_SIZE = 4;
-export const DEFAULT_ARTBOARD_BACKGROUND_COLOR = { h: 0, s: 0, l: 1, v: 1, a: 1 };
+export const DEFAULT_ARTBOARD_BACKGROUND_COLOR = { h: 0, s: 0, l: 1, a: 1 };
 export const DEFAULT_THEME = 'dark';
 export const WEB_SAFE_FONTS = ['Arial', 'Verdana', 'Helvetica', 'Tahoma', 'Trebuchet MS', 'Times New Roman', 'Georgia', 'Garamond', 'Courier New', 'Brush Script MT'];
 export const WEB_SAFE_FONT_WEIGHTS = [400, 700];
@@ -220,10 +220,10 @@ export const DEFAULT_GRADIENT_DESTINATION_X = 0.5;
 export const DEFAULT_GRADIENT_DESTINATION_Y = -0.5;
 export const DEFAULT_GRADIENT_DESTINATION = { x: DEFAULT_GRADIENT_DESTINATION_X, y: DEFAULT_GRADIENT_DESTINATION_Y };
 export const DEFAULT_GRADIENT_STOP_0_POSITION = 0;
-export const DEFAULT_GRADIENT_STOP_0_COLOR = { h: 0, s: 0, l: 0.8, v: 0.8, a: 1 };
+export const DEFAULT_GRADIENT_STOP_0_COLOR = { h: 0, s: 0, l: 0.8, a: 1 };
 export const DEFAULT_GRADIENT_STOP_0 = { position: DEFAULT_GRADIENT_STOP_0_POSITION, color: DEFAULT_GRADIENT_STOP_0_COLOR };
 export const DEFAULT_GRADIENT_STOP_1_POSITION = 1;
-export const DEFAULT_GRADIENT_STOP_1_COLOR = { h: 0, s: 0, l: 0, v: 0, a: 1 };
+export const DEFAULT_GRADIENT_STOP_1_COLOR = { h: 0, s: 0, l: 0, a: 1 };
 export const DEFAULT_GRADIENT_STOP_1 = { position: DEFAULT_GRADIENT_STOP_1_POSITION, color: DEFAULT_GRADIENT_STOP_1_COLOR };
 export const DEFAULT_GRADIENT_STOPS = [DEFAULT_GRADIENT_STOP_0, DEFAULT_GRADIENT_STOP_1];
 
@@ -241,7 +241,7 @@ export const DEFAULT_GRADIENT_STYLE: Btwx.Gradient = {
 }
 
 export const DEFAULT_FILL_FILL_TYPE = 'color';
-export const DEFAULT_FILL_COLOR = { h: 0, s: 0, l: 0.8, v: 0.8, a: 1 };
+export const DEFAULT_FILL_COLOR = { h: 0, s: 0, l: 0.8, a: 1 };
 
 export const DEFAULT_FILL_STYLE: Btwx.Fill = {
   fillType: DEFAULT_FILL_FILL_TYPE,
@@ -251,7 +251,7 @@ export const DEFAULT_FILL_STYLE: Btwx.Fill = {
 }
 
 export const DEFAULT_STROKE_FILL_TYPE = 'color';
-export const DEFAULT_STROKE_COLOR = { h: 0, s: 0, l: 0.6, v: 0.6, a: 1 };
+export const DEFAULT_STROKE_COLOR = { h: 0, s: 0, l: 0.6, a: 1 };
 export const DEFAULT_STROKE_WIDTH = 1;
 
 export const DEFAULT_STROKE_STYLE: Btwx.Stroke = {
@@ -279,7 +279,7 @@ export const DEFAULT_STROKE_OPTIONS_STYLE: Btwx.StrokeOptions = {
 }
 
 export const DEFAULT_SHADOW_FILL_TYPE = 'color';
-export const DEFAULT_SHADOW_COLOR = { h: 0, s: 0, l: 0, v: 0, a: 0.5 };
+export const DEFAULT_SHADOW_COLOR = { h: 0, s: 0, l: 0, a: 0.5 };
 export const DEFAULT_SHADOW_BLUR = 10;
 export const DEFAULT_SHADOW_OFFSET_X = 0;
 export const DEFAULT_SHADOW_OFFSET_Y = 0;
@@ -326,7 +326,7 @@ export const DEFAULT_LETTER_SPACING = 0;
 export const DEFAULT_TEXT_TRANSFORM = 'none';
 export const DEFAULT_TEXT_TRANSFORM_OPTIONS: Btwx.TextTransform[] = ['none', 'uppercase', 'lowercase'];
 export const DEFAULT_LEADING = 16;
-export const DEFAULT_TEXT_FILL_COLOR = { h: 0, s: 0, l: 0, v: 0, a: 1 };
+export const DEFAULT_TEXT_FILL_COLOR = { h: 0, s: 0, l: 0, a: 1 };
 
 export const DEFAULT_TEXT_STYLE: Btwx.TextStyle = {
   fontSize: DEFAULT_FONT_SIZE,

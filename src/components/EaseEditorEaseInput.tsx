@@ -17,14 +17,12 @@ const EaseEditorEaseInput = (): ReactElement => {
   const dispatch = useDispatch();
 
   const selectorOptions = Object.keys(DEFAULT_EASE_CURVES).map((key, index) => {
-    const easeCurves = (DEFAULT_EASE_CURVES as any)[key];
-    const icon = CustomEase.getSVGData(easeCurves.out, {width: 24, height: 24});
     return {
       value: key,
       label: key === 'customBounce'
       ? 'Custom Bounce'
         : capitalize(key),
-      icon: icon,
+      icon: `ease-${key}-out`,
       onClick: () => {
         dispatch(setLayerTweenEase({id: id, ease: key as any}));
       }

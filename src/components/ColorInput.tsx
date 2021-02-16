@@ -90,8 +90,7 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
 
   const handleHexSubmitSuccess = (nextHex: any): void => {
     const hsl = tinyColor(nextHex).toHsl();
-    const hsv = tinyColor(nextHex).toHsv();
-    const nextColor = { h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v } as Btwx.Color;
+    const nextColor = { h: hsl.h, s: hsl.s, l: hsl.l } as Btwx.Color;
     switch(prop) {
       case 'fill': {
         dispatch(setLayersFillColor({layers: selected, fillColor: nextColor}));
@@ -149,7 +148,7 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
               isActive={colorEditorOpen && colorEditorProp === prop}
               multiColor={hexValue === 'multi'}
               value={`#${hexValue}`}
-              onChange={() => {}}
+              onChange={() => { return; }}
               onClick={handleSwatchClick} />
             <Form.Label>
               Color

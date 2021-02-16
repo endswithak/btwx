@@ -13,7 +13,6 @@ interface ColorPickerHexInputProps {
   setHue(hue: number): void;
   setSaturation(saturation: number): void;
   setLightness(lightness: number): void;
-  setValue(value: number): void;
   setRed(red: number): void;
   setGreen(green: number): void;
   setBlue(blue: number): void;
@@ -22,23 +21,21 @@ interface ColorPickerHexInputProps {
 
 const ColorPickerHexInput = (props: ColorPickerHexInputProps): ReactElement => {
   const formControlRef = useRef(null);
-  const { autoFocus, hex, colorValues, setHex, setHue, setSaturation, setLightness, setValue, setRed, setGreen, setBlue, onChange } = props;
+  const { autoFocus, hex, colorValues, setHex, setHue, setSaturation, setLightness, setRed, setGreen, setBlue, onChange } = props;
 
   const handleSubmitSuccess = (nextHex: any): void => {
     const hsl = tinyColor(nextHex).toHsl();
-    const hsv = tinyColor(nextHex).toHsv();
     const rgb = tinyColor(nextHex).toRgb();
     setHex(nextHex);
     setHue(hsl.h);
     setSaturation(hsl.s);
     setLightness(hsl.l);
-    setValue(hsv.v);
     setRed(rgb.r);
     setGreen(rgb.g);
     setBlue(rgb.b);
     onChange(Object.keys(colorValues).reduce((result, current) => ({
       ...result,
-      [current]: { h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v }
+      [current]: { h: hsl.h, s: hsl.s, l: hsl.l }
     }), {}));
   };
 

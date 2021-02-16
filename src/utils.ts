@@ -37,6 +37,11 @@ export const evaluateExp = (expression: any): any => {
   }
 }
 
+export const clearTouchbar = () => {
+  const emptyTouchbar = new remote.TouchBar({});
+  remote.getCurrentWindow().setTouchBar(emptyTouchbar);
+}
+
 export const evaluateHex = (hex: string): string => {
   if (hex === 'multi') {
     return hex;
@@ -71,7 +76,7 @@ export const gradientsMatch = (gradient1: Btwx.Gradient, gradient2: Btwx.Gradien
 };
 
 export const colorsMatch = (color1: Btwx.Color, color2: Btwx.Color): boolean => {
-  return Object.keys(color1).every((prop: 'h' | 's' | 'l' | 'v' | 'a') => color1[prop] === color2[prop]);
+  return Object.keys(color1).every((prop: 'h' | 's' | 'l' | 'a') => color1[prop] === color2[prop]);
 };
 
 export const bufferToBase64 = (buffer: Buffer) => {

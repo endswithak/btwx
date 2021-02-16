@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { ReactElement, useState, useEffect, useRef } from 'react';
+import React, { ReactElement, useState, useEffect, useRef, useCallback } from 'react';
 import tinyColor from 'tinycolor2';
+import debounce from 'lodash.debounce';
+import { remote } from 'electron';
+import { clearTouchbar } from '../utils';
 import Form from './Form';
 
 interface ColorPickerHueProps {
@@ -21,18 +24,43 @@ const ColorPickerHue = (props: ColorPickerHueProps): ReactElement => {
   const { hue, colorValues, setHue, setHex, setRed, setGreen, setBlue, onChange } = props;
   const [hueValue, setHueValue] = useState(hue !== 'multi' ? hue : 0);
 
+  const isMac = remote.process.platform === 'darwin';
+
+  const debounceBuildTouchbar = useCallback(
+    debounce((nextHue: number) => {
+      buildTouchBar(nextHue);
+    }, 150),
+    []
+  );
+
+  const buildTouchBar = (opt = hueValue as any): void => {
+    const { TouchBarSlider } = remote.TouchBar;
+    const hueSlider = new TouchBarSlider({
+      label: 'Hue',
+      value: parseInt(opt),
+      minValue: 0,
+      maxValue: 360,
+      change: (nextHue): void => {
+        handleHueChange(nextHue, false);
+      }
+    });
+    const newTouchBar = new remote.TouchBar({
+      items: [hueSlider]
+    });
+    remote.getCurrentWindow().setTouchBar(newTouchBar);
+  }
+
   useEffect(() => {
     setHueValue(hue !== 'multi' ? hue : 0);
   }, [hue]);
 
-  const handleChange = (e: any) => {
-    const target = e.target;
+  const handleHueChange = (nextHue: number, updateTouchbar = true): void => {
     let hex: string | 'multi';
     let red: number | 'multi';
     let green: number | 'multi';
     let blue: number | 'multi';
     const newColors = Object.keys(colorValues).reduce((result, current, index) => {
-      const colorInstance = tinyColor({h: target.value, s: colorValues[current].s, l: colorValues[current].l, v: colorValues[current].v});
+      const colorInstance = tinyColor({h: nextHue, s: colorValues[current].s, l: colorValues[current].l});
       const newHex = colorInstance.toHex();
       const rgb = colorInstance.toRgb();
       if (index === 0) {
@@ -56,17 +84,32 @@ const ColorPickerHue = (props: ColorPickerHueProps): ReactElement => {
       }
       return {
         ...result,
-        [current]: { h: target.value }
+        [current]: { h: nextHue }
       };
     }, {});
-    setHueValue(target.value);
-    setHue(target.value);
+    setHueValue(nextHue);
+    setHue(nextHue);
     setHex(hex);
     setRed(red);
     setGreen(green);
     setBlue(blue);
     onChange(newColors);
-  };
+    if (updateTouchbar) {
+      debounceBuildTouchbar(nextHue);
+    }
+  }
+
+  const handleFocus = (e: any): void => {
+    if (isMac) {
+      buildTouchBar();
+    }
+  }
+
+  const handleBlur = (e: any): void => {
+    if (isMac) {
+      clearTouchbar();
+    }
+  }
 
   return (
     <div className='c-color-picker__hue'>
@@ -80,7 +123,9 @@ const ColorPickerHue = (props: ColorPickerHueProps): ReactElement => {
         min={0}
         max={360}
         step={1}
-        onChange={handleChange}
+        onChange={(e: any) => handleHueChange(e.target.value)}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         value={hueValue} />
     </div>
   );

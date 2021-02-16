@@ -284,7 +284,6 @@ declare namespace Btwx {
     h: number;
     s: number;
     l: number;
-    v: number;
     a: number;
   }
 

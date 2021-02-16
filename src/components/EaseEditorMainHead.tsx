@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { closeEaseEditor } from '../store/actions/easeEditor';
 import Icon from './Icon';
-import IconButton from './IconButton';
+import Button from './Button';
 import ToggleButtonGroup from './ToggleButtonGroup';
 
 gsap.registerPlugin(CustomEase, RoughEase, SlowMo, CustomBounce);
@@ -20,36 +20,14 @@ interface EaseEditorMainHeadProps {
 const EaseEditorMainHead = (props: EaseEditorMainHeadProps): ReactElement => {
   const { tab, setTab } = props;
   const isTextTween = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].prop === 'text' : null);
-  const easeIcon = useSelector((state: RootState) => {
-    const tween = state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween] : null;
-    let ease;
-    if (tween) {
-      switch(tween.ease) {
-        case 'customBounce':
-          ease = `bounce({strength: ${tween.customBounce.strength}, endAtStart: ${tween.customBounce.endAtStart}, squash: ${tween.customBounce.squash}})`;
-          break;
-        case 'slow':
-          ease = `slow(${tween.slow.linearRatio}, ${tween.slow.power}, ${tween.slow.yoyoMode})`;
-          break;
-        case 'rough':
-          ease = tween.rough.ref; // `rough({clamp: ${tween.rough.clamp}, points: ${tween.rough.points}, randomize: ${tween.rough.randomize}, strength: ${tween.rough.strength}, taper: ${tween.rough.taper}, template: ${tween.rough.template}})`;
-          break;
-        case 'steps':
-          ease = `steps(${tween.steps.steps})`;
-          break;
-        default:
-          ease = `${tween.ease}.${tween.power}`;
-          break;
-      }
-      return CustomEase.getSVGData(ease, {width: 24, height: 24});
-    } else {
-      return null;
-    }
-  });
+  const isScrambleTextTween = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].prop === 'text' && state.layer.present.tweens.byId[state.easeEditor.tween].text.scramble : null);
+  const easeValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].ease : null);
+  const powerValue = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].power : null);
+  const dispatch = useDispatch();
+
   const handleChange = (e: any) => {
     setTab(e.target.value);
   }
-  const dispatch = useDispatch();
 
   return (
     <div className='c-ease-editor-main__section c-ease-editor-main__section--head'>
@@ -64,21 +42,22 @@ const EaseEditorMainHead = (props: EaseEditorMainHeadProps): ReactElement => {
               onChange={handleChange}>
               <ToggleButtonGroup.Button value='ease'>
                 <Icon
-                  path={easeIcon}
-                  size='small'
-                  outline />
+                  name={`ease-${easeValue}-${easeValue !== 'customBounce' && easeValue !== 'steps' && easeValue !== 'slow' && easeValue !== 'rough' ? powerValue : 'out'}`} />
               </ToggleButtonGroup.Button>
               <ToggleButtonGroup.Button value='text'>
-                <Icon name='ease-editor-text-tab' />
+                <Icon
+                  name={isScrambleTextTween ? 'scramble-text' : 'text'} />
               </ToggleButtonGroup.Button>
             </ToggleButtonGroup>
           : null
         }
       </div>
-      <IconButton
-        iconName='close'
+      <Button
         onClick={() => dispatch(closeEaseEditor())}
-        label='close' />
+        size='large'>
+        <Icon
+          name='close' />
+      </Button>
     </div>
   );
 }

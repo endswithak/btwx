@@ -38,7 +38,7 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
               return 'image';
           }
         })()}
-        size={type === 'Shape' ? 'small' : null}
+        size={type === 'Shape' || type === 'Text' ? 'small' : null}
         shapeId={type === 'Shape' ? id : null}
         variant={
           isOpenShape || isMask

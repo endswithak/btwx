@@ -198,12 +198,28 @@
     align-items: center;
     justify-content: center;
     border-radius: $border-radius;
+
+    &.c-stacked-button__icon--padded {
+      padding: 0 $padding;
+    }
   }
 
   @include themed() {
+
+    .c-stacked-button__icon {
+      .c-text {
+        color: theme-prop(text-light) !important;
+      }
+    }
+
     &:hover {
       box-shadow: none;
       background: none;
+      .c-stacked-button__icon {
+        .c-text {
+          color: theme-prop(text-base) !important;
+        }
+      }
     }
 
     &.c-button--active {
@@ -220,6 +236,10 @@
         .c-icon--outline svg {
           stroke: theme-prop(text-light-on-primary);
         }
+
+        .c-text {
+          color: theme-prop(text-light-on-primary) !important;
+        }
       }
 
       &:hover {
@@ -235,6 +255,10 @@
 
           .c-icon--outline svg {
             stroke: theme-prop(text-base-on-primary);
+          }
+
+          .c-text {
+            color: theme-prop(text-base-on-primary) !important;
           }
         }
       }
@@ -310,6 +334,7 @@
       &:disabled,
       &:disabled &:hover,
       &.c-button--disabled {
+        cursor: not-allowed;
         opacity: 50%;
         color: theme-prop(text-lighter-on-primary);
         background: theme-prop(primary);
@@ -328,6 +353,7 @@
     &:disabled,
     &:disabled &:hover,
     &.c-button--disabled {
+      cursor: not-allowed;
       opacity: 50%;
       color: theme-prop(text-lighter);
       box-shadow: 0 0 0 1px theme-prop(button-border) inset;
@@ -375,6 +401,7 @@
     &:disabled,
     &:disabled &:hover,
     &.c-button--disabled {
+      cursor: not-allowed;
       opacity: 50%;
       color: theme-prop(text-lighter-on-#{$theme-color});
       background: theme-prop($theme-color);

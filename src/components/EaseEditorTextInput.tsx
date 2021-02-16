@@ -12,12 +12,14 @@ const EaseEditorTextInput = (): ReactElement => {
 
   const selectorOptions = [{
     label: 'Text',
+    icon: 'text',
     value: 'text',
     onClick: (): void => {
       dispatch(setLayerTextTweenScramble({id: id, scramble: false}));
     }
   },{
     label: 'Scramble Text',
+    icon: 'scramble-text',
     value: 'scrambleText',
     onClick: (): void => {
       dispatch(setLayerTextTweenScramble({id: id, scramble: true}));

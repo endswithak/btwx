@@ -7,11 +7,13 @@ import { EaseEditorSelectorItemProps } from './EaseEditorSelectorItem';
 interface EaseEditorSelectorProps {
   items: EaseEditorSelectorItemProps[];
   selectedItem: EaseEditorSelectorItemProps;
+  onOpen?: any;
+  onClose?: any;
 }
 
 const EaseEditorSelector = (props: EaseEditorSelectorProps): ReactElement => {
   const ref = useRef<HTMLDivElement>(null);
-  const { items, selectedItem } = props;
+  const { items, selectedItem, onOpen, onClose } = props;
   const [isOpen, setIsOpen] = useState(false);
 
   const onMouseDown = (event: any): void => {
@@ -26,6 +28,18 @@ const EaseEditorSelector = (props: EaseEditorSelectorProps): ReactElement => {
       document.removeEventListener('mousedown', onMouseDown);
     }
   }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (onOpen) {
+        onOpen();
+      }
+    } else {
+      if (onClose) {
+        onClose();
+      }
+    }
+  }, [isOpen]);
 
   return (
     <div

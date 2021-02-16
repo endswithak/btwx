@@ -14,13 +14,12 @@ interface ColorPickerGreenInputProps {
   setHue(hue: number | 'multi'): void;
   setSaturation(saturation: number | 'multi'): void;
   setLightness(lightness: number | 'multi'): void;
-  setValue(value: number | 'multi'): void;
   onChange(colors: { [id: string]: { [P in keyof Btwx.Color]?: Btwx.Color[P] } }): void;
 }
 
 const ColorPickerGreenInput = (props: ColorPickerGreenInputProps): ReactElement => {
   const formControlRef = useRef(null);
-  const { colorValues, green, setGreen, setHex, setHue, setSaturation, setLightness, setValue, onChange } = props;
+  const { colorValues, green, setGreen, setHex, setHue, setSaturation, setLightness, onChange } = props;
 
   const handleSubmitSuccess = (nextGreen: any): void => {
     if (nextGreen > 255) {
@@ -33,21 +32,18 @@ const ColorPickerGreenInput = (props: ColorPickerGreenInputProps): ReactElement 
     let hue: number | 'multi';
     let saturation: number | 'multi';
     let lightness: number | 'multi';
-    let value: number | 'multi';
     const newColors = Object.keys(colorValues).reduce((result, current, index) => {
       const color = colorValues[current];
-      const colorInstance = tinyColor({h: color.h, s: color.s, l: color.l, v: color.v});
+      const colorInstance = tinyColor({h: color.h, s: color.s, l: color.l});
       const rgb = colorInstance.toRgb();
       const newColor = tinyColor({r: rgb.r, g: nextGreen, b: rgb.b});
       const newHex = newColor.toHex();
       const hsl = newColor.toHsl();
-      const hsv = newColor.toHsv();
       if (index === 0) {
         hex = newHex;
         hue = hsl.h;
         saturation = hsl.s;
         lightness = hsl.l;
-        value = hsv.v;
       } else {
         if (hex !== 'multi' && hex !== newHex) {
           hex = 'multi';
@@ -61,13 +57,10 @@ const ColorPickerGreenInput = (props: ColorPickerGreenInputProps): ReactElement 
         if (lightness !== 'multi' && lightness !== hsl.l) {
           lightness = 'multi';
         }
-        if (value !== 'multi' && value !== hsv.v) {
-          value = 'multi';
-        }
       }
       return {
         ...result,
-        [current]: { h: hsl.h, s: hsl.s, l: hsl.l, v: hsv.v }
+        [current]: { h: hsl.h, s: hsl.s, l: hsl.l }
       }
     }, {});
     setGreen(nextGreen);
@@ -75,7 +68,6 @@ const ColorPickerGreenInput = (props: ColorPickerGreenInputProps): ReactElement 
     setHue(hue);
     setSaturation(saturation);
     setLightness(lightness);
-    setValue(value);
     onChange(newColors);
   };
 

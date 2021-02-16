@@ -33,7 +33,7 @@ const ColorPickerSaturationInput = (props: ColorPickerSaturationInputProps): Rea
     let green: number | 'multi';
     let blue: number | 'multi';
     const newColors = Object.keys(colorValues).reduce((result, current, index) => {
-      const colorInstance = tinyColor({h: colorValues[current].h, s: nextSaturation / 100, l: colorValues[current].l, v: colorValues[current].v});
+      const colorInstance = tinyColor({h: colorValues[current].h, s: nextSaturation / 100, l: colorValues[current].l});
       const newHex = colorInstance.toHex();
       const rgb = colorInstance.toRgb();
       if (index === 0) {

@@ -16,6 +16,7 @@
   white-space: nowrap;
   text-overflow: ellipsis;
   position: relative;
+  cursor: pointer;
 
   &.c-button--small {
     min-height: $button-size-small;

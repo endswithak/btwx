@@ -41,8 +41,7 @@ const GradientSliderGradient = (props: GradientSliderGradientProps): ReactElemen
     const color2 = tinyColor({h: rightStop.color.h, s: rightStop.color.s, l: rightStop.color.l, a: rightStop.color.a});
     const colorAvg = tinyColor.mix(color1, color2, 50);
     const hsl = colorAvg.toHsl();
-    const hsv = colorAvg.toHsv();
-    const newStop = { position, color: { ...hsl, v: hsv.v } } as Btwx.GradientStop;
+    const newStop = { position, color: { ...hsl } } as Btwx.GradientStop;
     onSliderClick(newStop);
   }
 

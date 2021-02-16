@@ -12,6 +12,8 @@ import SubtractButton from './SubtractButton';
 import IntersectButton from './IntersectButton';
 import ExcludeButton from './ExcludeButton';
 import ViewButton from './ViewButton';
+import ZoomOutButton from './ZoomOutButton';
+import ZoomInButton from './ZoomInButton';
 
 const Topbar = (): ReactElement => (
   <div className='c-topbar'>
@@ -32,7 +34,9 @@ const Topbar = (): ReactElement => (
       <UngroupButton />
     </div>
     <div className='c-topbar__button-group'>
+      <ZoomOutButton />
       <ZoomButton />
+      <ZoomInButton />
       <ViewButton />
     </div>
     <div className='c-topbar__button-group'>

@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch  } from 'react-redux';
+import { remote } from 'electron';
 import { RootState } from '../store/reducers';
 import { DEFAULT_TEXT_TRANSFORM_OPTIONS } from '../constants';
 import { setLayersTextTransformThunk } from '../store/actions/layer';
@@ -14,13 +16,69 @@ const TextTransformInput = (): ReactElement => {
   const [textTransform, setTextTransform] = useState(textTransformValue);
   const dispatch = useDispatch();
 
+  // const isMac = remote.process.platform === 'darwin';
+
+  // const getValueByIndex = (index: number): Btwx.TextTransform => {
+  //   switch(index) {
+  //     case 0:
+  //       return 'none';
+  //     case 1:
+  //       return 'uppercase';
+  //     case 2:
+  //       return 'lowercase';
+  //   }
+  // }
+
+  // const getIndexByValue = (value: Btwx.TextTransform): number => {
+  //   switch(value) {
+  //     case 'none':
+  //       return 0;
+  //     case 'uppercase':
+  //       return 1;
+  //     case 'lowercase':
+  //       return 2;
+  //   }
+  // }
+
+  // const buildTouchBar = (selectedItem: Btwx.TextTransform): void => {
+  //   const { TouchBarSegmentedControl } = remote.TouchBar;
+  //   const noneImage = remote.nativeImage.createFromPath(`${remote.app.getAppPath()}/src/assets/tb-text-transform-none.png`);
+  //   const uppercaseImage = remote.nativeImage.createFromPath(`${remote.app.getAppPath()}/src/assets/tb-text-transform-uppercase.png`);
+  //   const lowercaseImage = remote.nativeImage.createFromPath(`${remote.app.getAppPath()}/src/assets/tb-text-transform-lowercase.png`);
+  //   const sidesSlider = new TouchBarSegmentedControl({
+  //     segments: [{
+  //       icon: noneImage
+  //     },{
+  //       icon: lowercaseImage
+  //     },{
+  //       icon: uppercaseImage
+  //     }],
+  //     mode: 'single',
+  //     selectedIndex: getIndexByValue(selectedItem),
+  //     change: (index): void => {
+  //       const value = getValueByIndex(index);
+  //       dispatch(setLayersTextTransformThunk({layers: selected, textTransform: value}));
+  //       setTextTransform(value);
+  //     }
+  //   });
+  //   const newTouchBar = new remote.TouchBar({
+  //     items: [sidesSlider]
+  //   });
+  //   remote.getCurrentWindow().setTouchBar(newTouchBar);
+  // }
+
   useEffect(() => {
     setTextTransform(textTransformValue);
   }, [textTransformValue, selected]);
 
   const handleChange = (e: any): void => {
-    dispatch(setLayersTextTransformThunk({layers: selected, textTransform: e.target.value as Btwx.TextTransform}));
-    setTextTransform(e.target.value);
+    if (e.target.value !== textTransform) {
+      dispatch(setLayersTextTransformThunk({layers: selected, textTransform: e.target.value as Btwx.TextTransform}));
+      setTextTransform(e.target.value);
+    }
+    // if (isMac) {
+    //   buildTouchBar(e.target.value);
+    // }
   };
 
   const options = DEFAULT_TEXT_TRANSFORM_OPTIONS.map((option) => (

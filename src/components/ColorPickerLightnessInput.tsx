@@ -33,7 +33,7 @@ const ColorPickerLighnessInput = (props: ColorPickerLighnessInputProps): ReactEl
     let green: number | 'multi';
     let blue: number | 'multi';
     const newColors = Object.keys(colorValues).reduce((result, current, index) => {
-      const colorInstance = tinyColor({h: colorValues[current].h, s: colorValues[current].s, l: nextLightness / 100, v: colorValues[current].v});
+      const colorInstance = tinyColor({h: colorValues[current].h, s: colorValues[current].s, l: nextLightness / 100});
       const newHex = colorInstance.toHex();
       const rgb = colorInstance.toRgb();
       if (index === 0) {
