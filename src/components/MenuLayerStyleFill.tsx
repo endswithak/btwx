@@ -14,6 +14,7 @@ interface MenuLayerStyleFillProps {
 
 const MenuLayerStyleFill = (props: MenuLayerStyleFillProps): ReactElement => {
   const { menu, setFill } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.layer.style.fill);
   const isEnabled = useSelector((state: RootState) => canToggleSelectedFillOrStroke(state));
   const isChecked = useSelector((state: RootState) => selectedFillEnabled(state));
   const [menuItemTemplate, setMenuItemTemplate] = useState({
@@ -22,6 +23,7 @@ const MenuLayerStyleFill = (props: MenuLayerStyleFillProps): ReactElement => {
     enabled: isEnabled,
     type: 'checkbox',
     checked: isChecked,
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleSelectedFillThunk());
     }

@@ -14,6 +14,7 @@ interface MenuViewZoomFitArtboardProps {
 
 const MenuViewZoomFitArtboard = (props: MenuViewZoomFitArtboardProps): ReactElement => {
   const { menu, setFitArtboard } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.view.zoomFit.activeArtboard);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.activeArtboard !== null &&
     !state.canvasSettings.dragging &&
@@ -24,7 +25,7 @@ const MenuViewZoomFitArtboard = (props: MenuViewZoomFitArtboardProps): ReactElem
     label: 'Fit Active Artboard',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+4' : 'Ctrl+4',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(zoomFitActiveArtboardThunk());
     }

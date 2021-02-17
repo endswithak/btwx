@@ -14,6 +14,7 @@ interface MenuEditRedoProps {
 
 const MenuEditRedo = (props: MenuEditRedoProps): ReactElement => {
   const { menu, setRedo } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.edit.redo);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.future.length > 0 &&
     !state.canvasSettings.dragging &&
@@ -24,7 +25,7 @@ const MenuEditRedo = (props: MenuEditRedoProps): ReactElement => {
     label: 'Redo',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+Shift+Z' : 'Ctrl+Shift+Z',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(redoThunk());
     }

@@ -14,6 +14,7 @@ interface MenuViewShowLayersProps {
 
 const MenuViewShowLayers = (props: MenuViewShowLayersProps): ReactElement => {
   const { menu, setShowLayers } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.view.showLayers);
   const isEnabled = useSelector((state: RootState) =>
     !state.canvasSettings.dragging &&
     !state.canvasSettings.resizing &&
@@ -26,7 +27,7 @@ const MenuViewShowLayers = (props: MenuViewShowLayersProps): ReactElement => {
     type: 'checkbox',
     checked: isChecked,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+Alt+1' : 'Ctrl+Alt+1',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleLeftSidebarThunk());
     }

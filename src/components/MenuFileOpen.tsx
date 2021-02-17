@@ -15,6 +15,7 @@ interface MenuFileOpenProps {
 
 const MenuFileOpen = (props: MenuFileOpenProps): ReactElement => {
   const { menu, setOpen } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.file.open);
   const isEnabled = useSelector((state: RootState) =>
     !state.canvasSettings.dragging &&
     !state.canvasSettings.resizing &&
@@ -24,7 +25,7 @@ const MenuFileOpen = (props: MenuFileOpenProps): ReactElement => {
     label: 'Open...',
     id: 'fileOpen',
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+O' : 'Ctrl+O',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       remote.dialog.showOpenDialog({
         filters: [

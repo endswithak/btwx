@@ -15,6 +15,7 @@ interface MenuArrangeBringForwardProps {
 
 const MenuArrangeBringForward = (props: MenuArrangeBringForwardProps): ReactElement => {
   const { menu, setBringForward } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.arrange.bringForward);
   const isEnabled = useSelector((state: RootState) =>
     canBringSelectedForward(state) &&
     !state.canvasSettings.dragging &&
@@ -25,7 +26,7 @@ const MenuArrangeBringForward = (props: MenuArrangeBringForwardProps): ReactElem
     label: 'Bring Forward',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+]' : 'Ctrl+]',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(bringSelectedForwardThunk());
     }

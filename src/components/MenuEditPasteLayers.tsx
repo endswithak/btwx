@@ -14,6 +14,7 @@ interface MenuEditPasteLayersProps {
 
 const MenuEditPasteLayers = (props: MenuEditPasteLayersProps): ReactElement => {
   const { menu, setPasteLayers } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.edit.paste.paste);
   const isEnabled = useSelector((state: RootState) =>
     !state.canvasSettings.dragging &&
     !state.canvasSettings.resizing &&
@@ -23,7 +24,7 @@ const MenuEditPasteLayers = (props: MenuEditPasteLayersProps): ReactElement => {
     label: 'Paste',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+V' : 'Ctrl+V',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(pasteLayersThunk({}));
     }

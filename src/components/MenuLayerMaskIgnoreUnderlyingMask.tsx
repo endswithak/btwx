@@ -15,6 +15,7 @@ interface MenuLayerMaskToggleUnderlyingMaskProps {
 
 const MenuLayerMaskToggleUnderlyingMask = (props: MenuLayerMaskToggleUnderlyingMaskProps): ReactElement => {
   const { menu, setIgnore } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.layer.mask.ignoreUnderlyingMask);
   const isEnabled = useSelector((state: RootState) =>
     !state.canvasSettings.dragging &&
     !state.canvasSettings.resizing &&
@@ -27,9 +28,9 @@ const MenuLayerMaskToggleUnderlyingMask = (props: MenuLayerMaskToggleUnderlyingM
     label: 'Ignore Underlying Mask',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+Shift+M' : 'Ctrl+Shift+M',
     type: 'checkbox',
     checked: isChecked,
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleSelectionIgnoreUnderlyingMask());
     }

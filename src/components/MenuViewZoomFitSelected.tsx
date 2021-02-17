@@ -14,6 +14,7 @@ interface MenuViewZoomFitSelectedProps {
 
 const MenuViewZoomFitSelected = (props: MenuViewZoomFitSelectedProps): ReactElement => {
   const { menu, setFitSelected } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.view.zoomFit.selected);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.selected.length > 0 &&
     !state.canvasSettings.dragging &&
@@ -24,7 +25,7 @@ const MenuViewZoomFitSelected = (props: MenuViewZoomFitSelectedProps): ReactElem
     label: 'Fit Selection',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+2' : 'Ctrl+2',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(zoomFitSelectedThunk());
     }

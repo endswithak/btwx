@@ -15,6 +15,7 @@ interface MenuLayerMaskUseAsMaskProps {
 
 const MenuLayerMaskUseAsMask = (props: MenuLayerMaskUseAsMaskProps): ReactElement => {
   const { menu, setUseAsMask } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.layer.mask.useAsMask);
   const isEnabled = useSelector((state: RootState) =>
     canToggleSelectedUseAsMask(state) &&
     !state.canvasSettings.dragging &&
@@ -28,9 +29,9 @@ const MenuLayerMaskUseAsMask = (props: MenuLayerMaskUseAsMaskProps): ReactElemen
     label: 'Use As Mask',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+M' : 'Ctrl+M',
     type: 'checkbox',
     checked: isChecked,
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleSelectedMaskThunk());
     }

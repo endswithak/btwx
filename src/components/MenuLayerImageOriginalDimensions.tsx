@@ -14,6 +14,7 @@ interface MenuLayerImageOriginalDimensionsProps {
 
 const MenuLayerImageOriginalDimensions = (props: MenuLayerImageOriginalDimensionsProps): ReactElement => {
   const { menu, setOriginalDims } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.layer.image.originalDimensions);
   const isEnabled = useSelector((state: RootState) =>
     canResetSelectedImageDimensions(state) &&
     !state.canvasSettings.dragging &&
@@ -24,6 +25,7 @@ const MenuLayerImageOriginalDimensions = (props: MenuLayerImageOriginalDimension
     label: 'Set to Original Dimensions',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(resetSelectedImageDimensionsThunk());
     }

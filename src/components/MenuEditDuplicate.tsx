@@ -14,6 +14,7 @@ interface MenuEditDuplicateProps {
 
 const MenuEditDuplicate = (props: MenuEditDuplicateProps): ReactElement => {
   const { menu, setDuplicate } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.edit.duplicate);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.selected.length > 0 &&
     !state.canvasSettings.dragging &&
@@ -24,7 +25,7 @@ const MenuEditDuplicate = (props: MenuEditDuplicateProps): ReactElement => {
     label: 'Duplicate',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+D' : 'Ctrl+D',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(duplicateSelectedThunk());
     }

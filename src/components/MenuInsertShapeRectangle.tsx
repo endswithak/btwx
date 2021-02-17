@@ -13,6 +13,7 @@ interface MenuInsertShapeRectangleProps {
 
 const MenuInsertShapeRectangle = (props: MenuInsertShapeRectangleProps): ReactElement => {
   const { menu, setRectangle } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.insert.shape.rectangle);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.activeArtboard !== null &&
     !state.canvasSettings.dragging &&
@@ -29,7 +30,7 @@ const MenuInsertShapeRectangle = (props: MenuInsertShapeRectangleProps): ReactEl
     type: 'checkbox',
     checked: isChecked,
     enabled: isEnabled,
-    accelerator: 'R',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleShapeToolThunk('Rectangle'));
     }

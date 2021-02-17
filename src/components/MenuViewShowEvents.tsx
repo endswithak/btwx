@@ -14,6 +14,7 @@ interface MenuViewShowEventsProps {
 
 const MenuViewShowEvents = (props: MenuViewShowEventsProps): ReactElement => {
   const { menu, setShowEvents } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.view.showEvents);
   const isEnabled = useSelector((state: RootState) =>
     !state.canvasSettings.dragging &&
     !state.canvasSettings.resizing &&
@@ -26,7 +27,7 @@ const MenuViewShowEvents = (props: MenuViewShowEventsProps): ReactElement => {
     type: 'checkbox',
     checked: isChecked,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+Alt+2' : 'Ctrl+Alt+2',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleEventDrawerThunk());
     }

@@ -14,6 +14,7 @@ interface MenuLayerStyleStrokeProps {
 
 const MenuLayerStyleStroke = (props: MenuLayerStyleStrokeProps): ReactElement => {
   const { menu, setStroke } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.layer.style.stroke);
   const isEnabled = useSelector((state: RootState) => canToggleSelectedFillOrStroke(state));
   const isChecked = useSelector((state: RootState) => selectedStrokeEnabled(state));
   const [menuItemTemplate, setMenuItemTemplate] = useState({
@@ -22,6 +23,7 @@ const MenuLayerStyleStroke = (props: MenuLayerStyleStrokeProps): ReactElement =>
     enabled: isEnabled,
     type: 'checkbox',
     checked: isChecked,
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleSelectedStrokeThunk());
     }

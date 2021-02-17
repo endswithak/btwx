@@ -15,6 +15,7 @@ interface MenuArrangeUngroupProps {
 
 const MenuArrangeUngroup = (props: MenuArrangeUngroupProps): ReactElement => {
   const { menu, setUngroup } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.arrange.ungroup);
   const isEnabled = useSelector((state: RootState) =>
     canUngroupSelected(state) &&
     !state.canvasSettings.dragging &&
@@ -25,7 +26,7 @@ const MenuArrangeUngroup = (props: MenuArrangeUngroupProps): ReactElement => {
     label: 'Ungroup',
     id: MENU_ITEM_ID,
     enabled: false,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+Shift+G' : 'Ctrl+Shift+G',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(ungroupSelectedThunk());
     }

@@ -13,6 +13,7 @@ interface MenuInsertTextProps {
 
 const MenuInsertText = (props: MenuInsertTextProps): ReactElement => {
   const { menu, setText } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.insert.text);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.activeArtboard !== null &&
     !state.canvasSettings.dragging &&
@@ -28,7 +29,7 @@ const MenuInsertText = (props: MenuInsertTextProps): ReactElement => {
     type: 'checkbox',
     checked: isChecked,
     enabled: isEnabled,
-    accelerator: 'T',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleTextToolThunk());
     }

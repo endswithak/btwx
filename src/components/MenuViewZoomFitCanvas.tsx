@@ -14,6 +14,7 @@ interface MenuViewZoomFitCanvasProps {
 
 const MenuViewZoomFitCanvas = (props: MenuViewZoomFitCanvasProps): ReactElement => {
   const { menu, setFitCanvas } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.view.zoomFit.canvas);
   const isEnabled = useSelector((state: RootState) =>
     !state.canvasSettings.dragging &&
     !state.canvasSettings.resizing &&
@@ -23,7 +24,7 @@ const MenuViewZoomFitCanvas = (props: MenuViewZoomFitCanvasProps): ReactElement 
     label: 'Fit Canvas',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+1' : 'Ctrl+1',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(zoomFitCanvasThunk());
     }

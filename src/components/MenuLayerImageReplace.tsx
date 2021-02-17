@@ -14,6 +14,7 @@ interface MenuLayerImageReplaceProps {
 
 const MenuLayerImageReplace = (props: MenuLayerImageReplaceProps): ReactElement => {
   const { menu, setReplace } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.layer.image.replace);
   const isEnabled = useSelector((state: RootState) =>
     canReplaceSelectedImages(state) &&
     !state.canvasSettings.dragging &&
@@ -24,6 +25,7 @@ const MenuLayerImageReplace = (props: MenuLayerImageReplaceProps): ReactElement 
     label: 'Replace...',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(replaceSelectedImagesThunk());
     }

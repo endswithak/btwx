@@ -14,6 +14,7 @@ interface MenuEditCopyLayersProps {
 
 const MenuEditCopyLayers = (props: MenuEditCopyLayersProps): ReactElement => {
   const { menu, setCopyLayers } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.edit.copy.copy);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.selected.length > 0 &&
     !state.canvasSettings.dragging &&
@@ -24,7 +25,7 @@ const MenuEditCopyLayers = (props: MenuEditCopyLayersProps): ReactElement => {
     label: 'Copy',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+C' : 'Ctrl+C',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(copyLayersThunk());
     }

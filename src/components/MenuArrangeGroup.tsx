@@ -15,6 +15,7 @@ interface MenuArrangeGroupProps {
 
 const MenuArrangeGroup = (props: MenuArrangeGroupProps): ReactElement => {
   const { menu, setGroup } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.arrange.group);
   const isEnabled = useSelector((state: RootState) =>
     canGroupSelected(state) &&
     !state.canvasSettings.dragging &&
@@ -25,7 +26,7 @@ const MenuArrangeGroup = (props: MenuArrangeGroupProps): ReactElement => {
     label: 'Group',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+G' : 'Ctrl+G',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(groupSelectedThunk());
     }

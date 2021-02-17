@@ -14,6 +14,7 @@ interface MenuFileSaveAsProps {
 
 const MenuFileSaveAs = (props: MenuFileSaveAsProps): ReactElement => {
   const { menu, setSaveAs } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.file.saveAs);
   const isEnabled = useSelector((state: RootState) =>
     !state.canvasSettings.dragging &&
     !state.canvasSettings.resizing &&
@@ -23,7 +24,7 @@ const MenuFileSaveAs = (props: MenuFileSaveAsProps): ReactElement => {
     label: 'Save As...',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+Shift+S' : 'Ctrl+Shift+S',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(saveDocumentAsThunk());
     }

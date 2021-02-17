@@ -15,6 +15,7 @@ interface MenuLayerCombineIntersectProps {
 
 const MenuLayerCombineIntersect = (props: MenuLayerCombineIntersectProps): ReactElement => {
   const { menu, setIntersect } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.layer.combine.intersect);
   const isEnabled = useSelector((state: RootState) =>
     canBooleanSelected(state) &&
     !state.canvasSettings.dragging &&
@@ -25,7 +26,7 @@ const MenuLayerCombineIntersect = (props: MenuLayerCombineIntersectProps): React
     label: 'Intersect',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+Alt+I' : 'Ctrl+Alt+I',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(applyBooleanOperationThunk('intersect'));
     }

@@ -13,6 +13,7 @@ interface MenuEditDeleteProps {
 
 const MenuEditDelete = (props: MenuEditDeleteProps): ReactElement => {
   const { menu, setDeleteLayers } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.edit.delete);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.selected.length > 0 &&
     !state.canvasSettings.dragging &&
@@ -23,7 +24,7 @@ const MenuEditDelete = (props: MenuEditDeleteProps): ReactElement => {
     label: 'Delete',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: 'Backspace',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(removeLayersThunk());
     }

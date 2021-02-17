@@ -13,6 +13,7 @@ interface MenuInsertShapeEllipseProps {
 
 const MenuInsertShapeEllipse = (props: MenuInsertShapeEllipseProps): ReactElement => {
   const { menu, setEllipse } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.insert.shape.ellipse);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.activeArtboard !== null &&
     !state.canvasSettings.dragging &&
@@ -29,7 +30,7 @@ const MenuInsertShapeEllipse = (props: MenuInsertShapeEllipseProps): ReactElemen
     type: 'checkbox',
     checked: isChecked,
     enabled: isEnabled,
-    accelerator: 'O',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleShapeToolThunk('Ellipse'));
     }

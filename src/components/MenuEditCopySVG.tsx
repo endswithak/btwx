@@ -13,6 +13,7 @@ interface MenuEditCopySVGProps {
 
 const MenuEditCopySVG = (props: MenuEditCopySVGProps): ReactElement => {
   const { menu, setCopySVG } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.edit.copy.svg);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.selected.length > 0 &&
     !state.canvasSettings.dragging &&
@@ -23,6 +24,7 @@ const MenuEditCopySVG = (props: MenuEditCopySVGProps): ReactElement => {
     label: 'Copy SVG Code',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(copySVGThunk());
     }

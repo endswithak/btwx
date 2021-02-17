@@ -14,6 +14,7 @@ interface MenuArrangeDistributeHorizontallyProps {
 
 const MenuArrangeDistributeHorizontally = (props: MenuArrangeDistributeHorizontallyProps): ReactElement => {
   const { menu, setHorizontal } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.arrange.distribute.horizontally);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.selected.length >= 3 &&
     !state.canvasSettings.dragging &&
@@ -24,7 +25,7 @@ const MenuArrangeDistributeHorizontally = (props: MenuArrangeDistributeHorizonta
     label: 'Horizontally',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Ctrl+Cmd+H' : 'Ctrl+Shift+H',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(distributeSelectedHorizontallyThunk());
     }

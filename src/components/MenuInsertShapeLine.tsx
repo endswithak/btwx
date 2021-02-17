@@ -13,6 +13,7 @@ interface MenuInsertShapeLineProps {
 
 const MenuInsertShapeLine = (props: MenuInsertShapeLineProps): ReactElement => {
   const { menu, setLine } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.insert.shape.line);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.activeArtboard !== null &&
     !state.canvasSettings.dragging &&
@@ -29,7 +30,7 @@ const MenuInsertShapeLine = (props: MenuInsertShapeLineProps): ReactElement => {
     type: 'checkbox',
     checked: isChecked,
     enabled: isEnabled,
-    accelerator: 'L',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleShapeToolThunk('Line'));
     }

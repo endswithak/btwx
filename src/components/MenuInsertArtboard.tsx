@@ -13,6 +13,7 @@ interface MenuInsertArtboardProps {
 
 const MenuInsertArtboard = (props: MenuInsertArtboardProps): ReactElement => {
   const { menu, setArtboard } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.insert.artboard);
   const isEnabled = useSelector((state: RootState) =>
     !state.canvasSettings.dragging &&
     !state.canvasSettings.resizing &&
@@ -27,7 +28,7 @@ const MenuInsertArtboard = (props: MenuInsertArtboardProps): ReactElement => {
     type: 'checkbox',
     checked: isChecked,
     enabled: isEnabled,
-    accelerator: 'A',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleArtboardToolThunk());
     }

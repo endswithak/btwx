@@ -14,6 +14,7 @@ interface MenuEditSelectAllArtboardsProps {
 
 const MenuEditSelectAllArtboards = (props: MenuEditSelectAllArtboardsProps): ReactElement => {
   const { menu, setSelectAllArtboards } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.edit.select.selectAllArtboards);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.allArtboardIds.length > 0 &&
     !state.canvasSettings.dragging &&
@@ -24,7 +25,7 @@ const MenuEditSelectAllArtboards = (props: MenuEditSelectAllArtboardsProps): Rea
     label: 'Select All Artboards',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+Shift+A' : 'Ctrl+Shift+A',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(selectAllArtboardsThunk());
     }

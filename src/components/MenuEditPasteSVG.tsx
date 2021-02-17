@@ -14,6 +14,7 @@ interface MenuEditPasteSVGProps {
 
 const MenuEditPasteSVG = (props: MenuEditPasteSVGProps): ReactElement => {
   const { menu, setPasteSVG } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.edit.paste.svg);
   const isEnabled = useSelector((state: RootState) =>
     !state.canvasSettings.dragging &&
     !state.canvasSettings.resizing &&
@@ -23,6 +24,7 @@ const MenuEditPasteSVG = (props: MenuEditPasteSVGProps): ReactElement => {
     label: 'Paste SVG Code',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(pasteSVGThunk());
     }

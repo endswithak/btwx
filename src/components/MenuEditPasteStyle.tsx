@@ -14,6 +14,7 @@ interface MenuEditPasteStyleProps {
 
 const MenuEditPasteStyle = (props: MenuEditPasteStyleProps): ReactElement => {
   const { menu, setPasteStyle } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.edit.paste.style);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.selected.length > 0 &&
     !state.canvasSettings.dragging &&
@@ -24,7 +25,7 @@ const MenuEditPasteStyle = (props: MenuEditPasteStyleProps): ReactElement => {
     label: 'Paste Style',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+Alt+V' : 'Ctrl+Alt+V',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(pasteStyleThunk());
     }

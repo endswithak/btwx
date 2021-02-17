@@ -13,6 +13,7 @@ interface MenuInsertShapeStarProps {
 
 const MenuInsertShapeStar = (props: MenuInsertShapeStarProps): ReactElement => {
   const { menu, setStar } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.insert.shape.star);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.activeArtboard !== null &&
     !state.canvasSettings.dragging &&
@@ -29,6 +30,7 @@ const MenuInsertShapeStar = (props: MenuInsertShapeStarProps): ReactElement => {
     type: 'checkbox',
     checked: isChecked,
     enabled: isEnabled,
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleShapeToolThunk('Star'));
     }

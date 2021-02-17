@@ -15,6 +15,7 @@ interface MenuLayerCombineSubtractProps {
 
 const MenuLayerCombineSubtract = (props: MenuLayerCombineSubtractProps): ReactElement => {
   const { menu, setSubtract } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.layer.combine.subtract);
   const isEnabled = useSelector((state: RootState) =>
     canBooleanSelected(state) &&
     !state.canvasSettings.dragging &&
@@ -25,7 +26,7 @@ const MenuLayerCombineSubtract = (props: MenuLayerCombineSubtractProps): ReactEl
     label: 'Subtract',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+Alt+S' : 'Ctrl+Alt+S',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(applyBooleanOperationThunk('subtract'));
     }

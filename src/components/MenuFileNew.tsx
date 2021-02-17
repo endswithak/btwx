@@ -13,6 +13,7 @@ interface MenuAppThemeProps {
 
 const MenuFileNew = (props: MenuAppThemeProps): ReactElement => {
   const { menu, setNewDocument } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.file.new);
   const isEnabled = useSelector((state: RootState) =>
     !state.canvasSettings.dragging &&
     !state.canvasSettings.resizing &&
@@ -22,7 +23,7 @@ const MenuFileNew = (props: MenuAppThemeProps): ReactElement => {
     label: 'New',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+N' : 'Ctrl+N',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       // if (browserWindow) {
       //   getFocusedDocumentFromRenderer(browserWindow).then((focusedDocument) => {

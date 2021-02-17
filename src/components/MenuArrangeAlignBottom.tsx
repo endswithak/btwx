@@ -14,6 +14,7 @@ interface MenuArrangeAlignBottomProps {
 
 const MenuArrangeAlignBottom = (props: MenuArrangeAlignBottomProps): ReactElement => {
   const { menu, setBottom } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.arrange.align.bottom);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.selected.length >= 2 &&
     getSelectedBottom(state) === 'multi'
@@ -22,6 +23,7 @@ const MenuArrangeAlignBottom = (props: MenuArrangeAlignBottomProps): ReactElemen
     label: 'Bottom',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(alignSelectedToBottomThunk());
     }

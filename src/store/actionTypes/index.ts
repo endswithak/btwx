@@ -17,6 +17,7 @@ import { TextSettingsTypes } from './textSettings';
 import { TextToolTypes } from './textTool';
 import { EventDrawerTypes } from './eventDrawer';
 import { FontFamilySelectorTypes } from './fontFamilySelector';
+import { KeyBindingsTypes } from './keyBindings';
 
 export type RootAction = ArtboardPresetEditorTypes |
                          ArtboardToolTypes |
@@ -36,4 +37,5 @@ export type RootAction = ArtboardPresetEditorTypes |
                          TextToolTypes |
                          EventDrawerTypes |
                          ViewSettingsTypes |
-                         FontFamilySelectorTypes;
+                         FontFamilySelectorTypes |
+                         KeyBindingsTypes;

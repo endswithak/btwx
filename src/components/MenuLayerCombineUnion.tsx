@@ -15,6 +15,7 @@ interface MenuLayerCombineUnionProps {
 
 const MenuLayerCombineUnion = (props: MenuLayerCombineUnionProps): ReactElement => {
   const { menu, setUnion } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.layer.combine.union);
   const isEnabled = useSelector((state: RootState) =>
     canBooleanSelected(state) &&
     !state.canvasSettings.dragging &&
@@ -25,7 +26,7 @@ const MenuLayerCombineUnion = (props: MenuLayerCombineUnionProps): ReactElement 
     label: 'Union',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+Alt+U' : 'Ctrl+Alt+U',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(applyBooleanOperationThunk('unite'));
     }

@@ -14,6 +14,7 @@ interface MenuEditSelectAllProps {
 
 const MenuEditSelectAll = (props: MenuEditSelectAllProps): ReactElement => {
   const { menu, setSelectAll } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.edit.select.selectAll);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.allIds.length > 1 &&
     !state.canvasSettings.dragging &&
@@ -24,7 +25,7 @@ const MenuEditSelectAll = (props: MenuEditSelectAllProps): ReactElement => {
     label: 'Select All',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+A' : 'Ctrl+A',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(selectAllLayers());
     }

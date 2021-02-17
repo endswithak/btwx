@@ -14,6 +14,7 @@ interface MenuEditCopyStyleProps {
 
 const MenuEditCopyStyle = (props: MenuEditCopyStyleProps): ReactElement => {
   const { menu, setCopyStyle } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.edit.copy.style);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.selected.length === 1 &&
     !state.canvasSettings.dragging &&
@@ -24,7 +25,7 @@ const MenuEditCopyStyle = (props: MenuEditCopyStyleProps): ReactElement => {
     label: 'Copy Style',
     id: MENU_ITEM_ID,
     enabled: false,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+Alt+C' : 'Ctrl+Alt+C',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(copyStyleThunk());
     }

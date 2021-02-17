@@ -22,6 +22,7 @@ import shapeTool from './shapeTool';
 import artboardTool from './artboardTool';
 import textTool from './textTool';
 import fontFamilySelector from './fontFamilySelector';
+import keyBindings from './keyBindings';
 
 export const reducers = {
   layer,
@@ -43,7 +44,8 @@ export const reducers = {
   shapeTool,
   artboardTool,
   textTool,
-  fontFamilySelector
+  fontFamilySelector,
+  keyBindings
 };
 
 const appReducer = combineReducers(reducers);

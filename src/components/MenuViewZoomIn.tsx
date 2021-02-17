@@ -14,6 +14,7 @@ interface MenuViewZoomInProps {
 
 const MenuViewZoomIn = (props: MenuViewZoomInProps): ReactElement => {
   const { menu, setZoomIn } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.view.zoomIn);
   const isEnabled = useSelector((state: RootState) =>
     !state.canvasSettings.dragging &&
     !state.canvasSettings.resizing &&
@@ -23,7 +24,7 @@ const MenuViewZoomIn = (props: MenuViewZoomInProps): ReactElement => {
     label: 'Zoom In',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+=' : 'Ctrl+=',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(zoomInThunk());
     }

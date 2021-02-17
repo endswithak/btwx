@@ -15,6 +15,7 @@ interface MenuArrangeBringToFrontProps {
 
 const MenuArrangeBringToFront = (props: MenuArrangeBringToFrontProps): ReactElement => {
   const { menu, setBringToFront } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.arrange.bringToFront);
   const isEnabled = useSelector((state: RootState) =>
     canBringSelectedForward(state) &&
     !state.canvasSettings.dragging &&
@@ -25,7 +26,7 @@ const MenuArrangeBringToFront = (props: MenuArrangeBringToFrontProps): ReactElem
     label: 'Bring To Front',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+Alt+]' : 'Ctrl+Alt+]',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(bringSelectedToFrontThunk());
     }

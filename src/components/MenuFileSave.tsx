@@ -14,6 +14,7 @@ interface MenuFileSaveProps {
 
 const MenuFileSave = (props: MenuFileSaveProps): ReactElement => {
   const { menu, setSave } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.file.save);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.edit &&
     state.layer.present.edit.id !== state.documentSettings.edit &&
@@ -25,7 +26,7 @@ const MenuFileSave = (props: MenuFileSaveProps): ReactElement => {
     label: 'Save',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+S' : 'Ctrl+S',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(saveDocumentThunk());
     }

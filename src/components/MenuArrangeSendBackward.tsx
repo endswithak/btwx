@@ -15,6 +15,7 @@ interface MenuArrangeSendBackwardProps {
 
 const MenuArrangeSendBackward = (props: MenuArrangeSendBackwardProps): ReactElement => {
   const { menu, setSendBackward } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.arrange.sendBackward);
   const isEnabled = useSelector((state: RootState) =>
     canSendSelectedBackward(state) &&
     !state.canvasSettings.dragging &&
@@ -25,7 +26,7 @@ const MenuArrangeSendBackward = (props: MenuArrangeSendBackwardProps): ReactElem
     label: 'Send Backward',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+[' : 'Ctrl+[',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(sendSelectedBackwardThunk());
     }

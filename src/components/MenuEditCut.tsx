@@ -13,6 +13,7 @@ interface MenuEditCutProps {
 
 const MenuEditCut = (props: MenuEditCutProps): ReactElement => {
   const { menu, setCut } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.edit.cut);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.selected.length > 0 &&
     !state.canvasSettings.dragging &&
@@ -23,6 +24,7 @@ const MenuEditCut = (props: MenuEditCutProps): ReactElement => {
     label: 'Cut',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(removeLayersThunk());
     }

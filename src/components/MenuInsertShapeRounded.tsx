@@ -13,6 +13,7 @@ interface MenuInsertShapeRoundedProps {
 
 const MenuInsertShapeRounded = (props: MenuInsertShapeRoundedProps): ReactElement => {
   const { menu, setRounded } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.insert.shape.rounded);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.activeArtboard !== null &&
     !state.canvasSettings.dragging &&
@@ -29,7 +30,7 @@ const MenuInsertShapeRounded = (props: MenuInsertShapeRoundedProps): ReactElemen
     type: 'checkbox',
     checked: isChecked,
     enabled: isEnabled,
-    accelerator: 'U',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleShapeToolThunk('Rounded'));
     }

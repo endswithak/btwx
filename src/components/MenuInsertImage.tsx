@@ -15,6 +15,7 @@ interface MenuInsertImageProps {
 
 const MenuInsertImage = (props: MenuInsertImageProps): ReactElement => {
   const { menu, setImage } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.insert.image);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.activeArtboard !== null &&
     !state.canvasSettings.dragging &&
@@ -25,6 +26,7 @@ const MenuInsertImage = (props: MenuInsertImageProps): ReactElement => {
     label: 'Image...',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
         filters: [

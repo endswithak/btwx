@@ -14,6 +14,7 @@ interface MenuEditFindProps {
 
 const MenuEditFind = (props: MenuEditFindProps): ReactElement => {
   const { menu, setFind } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.edit.find);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.byId.root.children.length !== 0 &&
     !state.canvasSettings.dragging &&
@@ -24,7 +25,7 @@ const MenuEditFind = (props: MenuEditFindProps): ReactElement => {
     label: 'Find Layer',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+F' : 'Ctrl+F',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       const layersSearchInput = document.getElementById('layers-search-input');
       dispatch(setSearching({searching: true}));

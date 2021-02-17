@@ -14,6 +14,7 @@ interface MenuViewShowStylesProps {
 
 const MenuViewShowStyles = (props: MenuViewShowStylesProps): ReactElement => {
   const { menu, setShowStyles } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.view.showStyles);
   const isEnabled = useSelector((state: RootState) =>
     !state.canvasSettings.dragging &&
     !state.canvasSettings.resizing &&
@@ -26,7 +27,7 @@ const MenuViewShowStyles = (props: MenuViewShowStylesProps): ReactElement => {
     type: 'checkbox',
     checked: isChecked,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+Alt+3' : 'Ctrl+Alt+3',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(toggleRightSidebarThunk());
     }

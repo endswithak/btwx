@@ -14,6 +14,7 @@ interface MenuEditRenameProps {
 
 const MenuEditRename = (props: MenuEditRenameProps): ReactElement => {
   const { menu, setRename } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.edit.rename);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.selected.length === 1 &&
     state.leftSidebar.editing !== state.layer.present.selected[0] &&
@@ -25,7 +26,7 @@ const MenuEditRename = (props: MenuEditRenameProps): ReactElement => {
     label: 'Rename Layer',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+R' : 'Ctrl+R',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(setEditingThunk());
     }

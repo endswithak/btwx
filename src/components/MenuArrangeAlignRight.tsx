@@ -14,6 +14,7 @@ interface MenuArrangeAlignRightProps {
 
 const MenuArrangeAlignRight = (props: MenuArrangeAlignRightProps): ReactElement => {
   const { menu, setRight } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.arrange.align.right);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.selected.length >= 2 &&
     getSelectedRight(state) === 'multi'
@@ -22,6 +23,7 @@ const MenuArrangeAlignRight = (props: MenuArrangeAlignRightProps): ReactElement 
     label: 'Right',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(alignSelectedToRightThunk());
     }

@@ -14,6 +14,7 @@ interface MenuEditUndoProps {
 
 const MenuEditUndo = (props: MenuEditUndoProps): ReactElement => {
   const { menu, setUndo } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.edit.undo);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.past.length > 0 &&
     !state.canvasSettings.dragging &&
@@ -24,7 +25,7 @@ const MenuEditUndo = (props: MenuEditUndoProps): ReactElement => {
     label: 'Undo',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+Z' : 'Ctrl+Z',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(undoThunk());
     }

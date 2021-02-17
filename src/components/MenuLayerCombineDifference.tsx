@@ -15,6 +15,7 @@ interface MenuLayerCombineDifferenceProps {
 
 const MenuLayerCombineDifference = (props: MenuLayerCombineDifferenceProps): ReactElement => {
   const { menu, setDifference } = props;
+  const accelerator = useSelector((state: RootState) => state.keyBindings.layer.combine.difference);
   const isEnabled = useSelector((state: RootState) =>
     canBooleanSelected(state) &&
     !state.canvasSettings.dragging &&
@@ -25,7 +26,7 @@ const MenuLayerCombineDifference = (props: MenuLayerCombineDifferenceProps): Rea
     label: 'Difference',
     id: MENU_ITEM_ID,
     enabled: isEnabled,
-    accelerator: remote.process.platform === 'darwin' ? 'Cmd+Alt+X' : 'Ctrl+Alt+X',
+    accelerator,
     click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event): void => {
       dispatch(applyBooleanOperationThunk('exclude'));
     }
