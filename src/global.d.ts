@@ -4,15 +4,6 @@ declare module 'string.prototype.replaceall';
 
 declare namespace Btwx {
 
-  type UserDefaultKey = 'artboardPresetDevicePlatform' | 'artboardPresetDeviceOrientation' | 'colorFormat' | 'theme';
-
-  interface UserDefaults {
-    artboardPresetDevicePlatform: DevicePlatformType;
-    artboardPresetDeviceOrientation: Orientation;
-    colorFormat: ColorFormat;
-    theme: ThemeName;
-  }
-
   type ButtonType = 'submit' | 'reset' | 'button' | 'checkbox' | 'radio';
 
   type AspectRatio = '1x1' | '4x3' | '16x9' | '21x9';
@@ -53,7 +44,11 @@ declare namespace Btwx {
                           'lightest-on-warn' |
                           'lightest-on-recording';
 
-  type TextStyle = 'body-1' | 'body-2' | 'detail' | 'cap' | 'small-cap';
+  type ThemeTextStyle = 'body-1' | 'body-2' | 'detail' | 'cap' | 'small-cap';
+
+  type WindowType = 'document' | 'preview' | 'preferences';
+
+  type PreferencesTab = 'general' | 'bindings';
 
   type SizeVariant = 'small' | 'large';
 
@@ -199,64 +194,10 @@ declare namespace Btwx {
     bounds: paper.Rectangle;
   }
 
-  interface DocumentSettingsState {
-    id: string;
-    name: string;
-    path: string;
-    matrix: number[];
-    artboardPresets: {
-      allIds: string[];
-      byId: {
-        [id: string]: ArtboardPreset;
-      };
-      orientation: DeviceOrientationType;
-      platform: DevicePlatformType;
-    };
-    images: {
-      allIds: string[];
-      byId: {
-        [id: string]: DocumentImage;
-      };
-    };
-    colorFormat: ColorFormat;
-    edit: string;
-  }
-
-  interface LayerState {
-    byId: {
-      [id: string]: Artboard | Group | Shape | Text | Image;
-    };
-    allIds: string[];
-    page: string;
-    activeArtboard: string;
-    selected: string[];
-    allArtboardIds: string[];
-    allShapeIds: string[];
-    allGroupIds: string[];
-    allTextIds: string[];
-    allImageIds: string[];
-    allMaskIds: string[];
-    scope: string[];
-    hover: string;
-    events: {
-      allIds: string[];
-      byId: {
-        [id: string]: Btwx.TweenEvent;
-      };
-    };
-    tweens: {
-      allIds: string[];
-      byId: {
-        [id: string]: Btwx.Tween;
-      };
-    };
-    paperProject: string;
-    edit: string;
-  }
-
   interface Document {
-    layer: LayerState;
-    documentSettings: DocumentSettingsState;
+    layer: any;
+    documentSettings: any;
+    viewSettings: any;
   }
 
   interface HitResult {
@@ -674,6 +615,8 @@ declare namespace Btwx {
   }
 
   type ThemeName = 'light' | 'dark';
+
+  type CanvasTheme = 'btwx-default' | 'light' | 'dark';
 
   interface Theme {
     name: ThemeName;

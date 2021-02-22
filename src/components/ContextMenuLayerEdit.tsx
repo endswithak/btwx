@@ -108,14 +108,12 @@ const ContextMenuWrapLayerEdit = (): ReactElement => {
     label: 'Select All',
     enabled: canSelectAll,
     visible: contextMenu.id && contextMenu.id === 'root',
-    accelerator: process.platform === 'darwin' ? 'Cmd+A' : 'Ctrl+A',
     click: (): void => {
       dispatch(selectAllLayers());
     }
   },{
     label: 'Copy',
     visible: contextMenu.id && contextMenu.id !== 'root',
-    accelerator: process.platform === 'darwin' ? 'Cmd+C' : 'Ctrl+C',
     click: (): void => {
       dispatch(copyLayersThunk());
     }
@@ -145,7 +143,6 @@ const ContextMenuWrapLayerEdit = (): ReactElement => {
     label: 'Duplicate',
     visible: contextMenu.id && contextMenu.id !== 'root',
     enabled: canDuplicate,
-    accelerator: process.platform === 'darwin' ? 'Cmd+D' : 'Ctrl+D',
     click: (): void => {
       if (selected.length > 0) {
         dispatch(duplicateLayers({layers: selected}));
@@ -159,7 +156,6 @@ const ContextMenuWrapLayerEdit = (): ReactElement => {
   },{
     label: 'Delete',
     visible: contextMenu.id && contextMenu.id !== 'root',
-    accelerator: 'Backspace',
     click: (): void => {
       if (selected.length > 0) {
         dispatch(removeLayers({layers: selected}));
@@ -174,7 +170,6 @@ const ContextMenuWrapLayerEdit = (): ReactElement => {
     label: 'Bring Forward',
     visible: contextMenu.id && contextMenu.id !== 'root',
     enabled: canMoveForward,
-    accelerator: process.platform === 'darwin' ? 'Cmd+]' : 'Ctrl+]',
     click: (): void => {
       if (selected.length > 0) {
         dispatch(bringLayersForward({layers: selected}));
@@ -186,7 +181,6 @@ const ContextMenuWrapLayerEdit = (): ReactElement => {
     label: 'Send Backward',
     visible: contextMenu.id && contextMenu.id !== 'root',
     enabled: canMoveBackward,
-    accelerator: process.platform === 'darwin' ? 'Cmd+[' : 'Ctrl+[',
     click: (): void => {
       if (selected.length > 0) {
         dispatch(sendLayersBackward({layers: selected}));
@@ -201,7 +195,6 @@ const ContextMenuWrapLayerEdit = (): ReactElement => {
     label: 'Group',
     visible: contextMenu.id && contextMenu.id !== 'root',
     enabled: canGroup,
-    accelerator: process.platform === 'darwin' ? 'Cmd+G' : 'Ctrl+G',
     click: (): void => {
       if (selected.length > 0) {
         dispatch(groupLayersThunk({layers: selected}));
@@ -213,7 +206,6 @@ const ContextMenuWrapLayerEdit = (): ReactElement => {
     label: 'Ungroup',
     visible: contextMenu.id && contextMenu.id !== 'root',
     enabled: canUngroup,
-    accelerator: process.platform === 'darwin' ? 'Cmd+Shift+G' : 'Ctrl+Shift+G',
     click: (): void => {
       if (selected.length > 0) {
         dispatch(ungroupLayers({layers: selected}));
@@ -225,7 +217,6 @@ const ContextMenuWrapLayerEdit = (): ReactElement => {
     label: 'Rename Layer',
     visible: contextMenu.id && contextMenu.id !== 'root',
     enabled: canRename,
-    accelerator: process.platform === 'darwin' ? 'Cmd+R' : 'Ctrl+R',
     click: (): void => {
       dispatch(setEditing({editing: selected[0]}));
     }

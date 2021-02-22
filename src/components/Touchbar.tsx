@@ -46,7 +46,7 @@ const Touchbar = (): ReactElement => {
   const canGroup = useSelector((state: RootState) => canGroupSelected(state) && state.canvasSettings.focusing);
   const canUngroup = useSelector((state: RootState) => canUngroupSelected(state));
   //
-  const theme = useSelector((state: RootState) => state.viewSettings.theme);
+  const theme = useSelector((state: RootState) => state.preferences.theme);
   const dispatch = useDispatch();
 
   const isMac = remote.process.platform === 'darwin';

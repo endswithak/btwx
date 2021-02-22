@@ -5,6 +5,7 @@ import { RootState } from '../store/reducers';
 import { openPreview, stopPreviewRecording } from '../store/actions/preview';
 import { DEFAULT_MAC_DEVICE, DEFAULT_WINDOWS_DEVICE } from '../constants';
 import StackedButton from './StackedButton';
+import Icon from './Icon';
 
 const PreviewButton = (): ReactElement => {
   const activeArtboard = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.activeArtboard]);
@@ -63,11 +64,14 @@ const PreviewButton = (): ReactElement => {
       id='preview-button'
       label='Preview'
       onClick={handlePreviewClick}
-      iconName={buttonIcon()}
       size='small'
       isActive={isOpen}
       // recording={recording}
-      />
+      >
+      <Icon
+        name={buttonIcon()}
+        size='small' />
+    </StackedButton>
   );
 }
 

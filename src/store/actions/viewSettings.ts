@@ -14,8 +14,6 @@ import {
   CLOSE_LEFT_SIDEBAR,
   OPEN_EVENT_DRAWER,
   CLOSE_EVENT_DRAWER,
-  ENABLE_DARK_THEME,
-  ENABLE_LIGHT_THEME,
   SetLeftSidebarWidthPayload,
   SetRightSidebarWidthPayload,
   SetEventDrawerHeightPayload,
@@ -129,11 +127,3 @@ export const toggleEventDrawerThunk = () => {
     dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
   }
 };
-
-export const enableDarkTheme = (): ViewSettingsTypes => ({
-  type: ENABLE_DARK_THEME
-});
-
-export const enableLightTheme = (): ViewSettingsTypes => ({
-  type: ENABLE_LIGHT_THEME
-});

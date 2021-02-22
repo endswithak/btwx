@@ -14,7 +14,7 @@ interface ArtboardPresetProps {
 
 const ArtboardPreset = (props: ArtboardPresetProps): ReactElement => {
   const { device } = props;
-  const orientation = useSelector((state: RootState) => state.documentSettings.artboardPresets.orientation);
+  const orientation = useSelector((state: RootState) => state.artboardPresets.orientation);
   const isActive = useSelector((state: RootState) => device.category && device.category === 'Custom' && (device as Btwx.ArtboardPreset).id === state.artboardPresetEditor.id);
   const artboardWidth = orientation === 'Landscape' ? device.height : device.width;
   const artboardHeight = orientation === 'Landscape' ? device.width : device.height;

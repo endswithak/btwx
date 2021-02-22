@@ -4,6 +4,7 @@ import { RootState } from '../store/reducers';
 import { canBooleanSelected } from '../store/selectors/layer';
 import { applyBooleanOperationThunk } from '../store/actions/layer';
 import StackedButton from './StackedButton';
+import Icon from './Icon';
 
 const SubtractButton = (): ReactElement => {
   const canSubtract = useSelector((state: RootState) => canBooleanSelected(state));
@@ -19,9 +20,12 @@ const SubtractButton = (): ReactElement => {
     <StackedButton
       label='Subtract'
       onClick={handleSubtractClick}
-      iconName='subtract'
       disabled={!canSubtract}
-      size='small' />
+      size='small'>
+      <Icon
+        size='small'
+        name='subtract' />
+    </StackedButton>
   );
 }
 

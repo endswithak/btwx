@@ -16,7 +16,7 @@ interface MenuAppThemeLightProps {
 
 const MenuAppThemeLight = (props: MenuAppThemeLightProps): ReactElement => {
   const { setLight, menu } = props;
-  const isChecked = useSelector((state: RootState) => state.viewSettings.theme === 'light');
+  const isChecked = useSelector((state: RootState) => state.preferences.theme === 'light');
   const previewWindowId = useSelector((state: RootState) => state.preview.windowId);
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Light',

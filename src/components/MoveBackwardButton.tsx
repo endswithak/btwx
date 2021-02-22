@@ -4,6 +4,7 @@ import { RootState } from '../store/reducers';
 import { canSendSelectedBackward } from '../store/selectors/layer';
 import { sendSelectedBackwardThunk } from '../store/actions/layer';
 import StackedButton from './StackedButton';
+import Icon from './Icon';
 
 const MoveBackwardButton = (): ReactElement => {
   const canMoveBackward = useSelector((state: RootState) => canSendSelectedBackward(state));
@@ -19,9 +20,12 @@ const MoveBackwardButton = (): ReactElement => {
     <StackedButton
       label='Backward'
       onClick={handleMoveBackwardClick}
-      iconName='move-backward'
       disabled={!canMoveBackward}
-      size='small' />
+      size='small'>
+      <Icon
+        name='move-backward'
+        size='small' />
+    </StackedButton>
   );
 }
 

@@ -1,6 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { APP_NAME } from '../constants';
 import MenuAppTheme from './MenuAppTheme';
+import MenuAppPreferences from './MenuAppPreferences';
 
 interface MenuAppProps {
   menu: Electron.Menu;
@@ -13,13 +14,16 @@ const MenuApp = (props: MenuAppProps): ReactElement => {
     label: APP_NAME
   });
   const [theme, setTheme] = useState(undefined);
+  const [preferences, setPreferences] = useState(undefined);
 
   useEffect(() => {
-    if (theme) {
+    if (theme && preferences) {
       setApp({
         ...menuItemTemplate,
         submenu: [
           theme,
+          { type: 'separator' },
+          preferences,
           { type: 'separator' },
           { role: 'services' },
           { type: 'separator' },
@@ -31,13 +35,16 @@ const MenuApp = (props: MenuAppProps): ReactElement => {
         ]
       });
     }
-  }, [theme]);
+  }, [theme, preferences]);
 
   return (
     <>
       <MenuAppTheme
         menu={menu}
         setTheme={setTheme} />
+      <MenuAppPreferences
+        menu={menu}
+        setPreferences={setPreferences} />
     </>
   )
 };

@@ -1,5 +1,3 @@
-import { remote } from 'electron';
-
 import {
   DEFAULT_LEFT_SIDEBAR_WIDTH,
   DEFAULT_RIGHT_SIDEBAR_WIDTH,
@@ -19,8 +17,6 @@ import {
   CLOSE_RIGHT_SIDEBAR,
   OPEN_EVENT_DRAWER,
   CLOSE_EVENT_DRAWER,
-  ENABLE_DARK_THEME,
-  ENABLE_LIGHT_THEME,
   ViewSettingsTypes,
 } from '../actionTypes/viewSettings';
 
@@ -38,7 +34,6 @@ export interface ViewSettingsState {
     height: number;
     layersWidth: number;
   };
-  theme: Btwx.ThemeName;
 }
 
 const initialState: ViewSettingsState = {
@@ -54,8 +49,7 @@ const initialState: ViewSettingsState = {
     isOpen: true,
     height: DEFAULT_TWEEN_DRAWER_HEIGHT, // remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('eventDrawerHeight', 'integer') : DEFAULT_TWEEN_DRAWER_HEIGHT,
     layersWidth: DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH // remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('eventDrawerEventLayersWidth', 'integer') : DEFAULT_TWEEN_DRAWER_LAYERS_WIDTH,
-  },
-  theme: remote.process.platform === 'darwin' ? remote.systemPreferences.getUserDefault('theme', 'string') : DEFAULT_THEME
+  }
 };
 
 export default (state = initialState, action: ViewSettingsTypes): ViewSettingsState => {
@@ -160,24 +154,6 @@ export default (state = initialState, action: ViewSettingsTypes): ViewSettingsSt
           ...state.eventDrawer,
           layersWidth: action.payload.width
         }
-      };
-    }
-    case ENABLE_DARK_THEME: {
-      if (remote.process.platform === 'darwin') {
-        remote.systemPreferences.setUserDefault('theme', 'string', 'dark');
-      }
-      return {
-        ...state,
-        theme: 'dark'
-      };
-    }
-    case ENABLE_LIGHT_THEME: {
-      if (remote.process.platform === 'darwin') {
-        remote.systemPreferences.setUserDefault('theme', 'string', 'light');
-      }
-      return {
-        ...state,
-        theme: 'light'
       };
     }
     default:

@@ -4,6 +4,7 @@ import { RootState } from '../store/reducers';
 import { canBooleanSelected } from '../store/selectors/layer';
 import { applyBooleanOperationThunk } from '../store/actions/layer';
 import StackedButton from './StackedButton';
+import Icon from './Icon';
 
 const UniteButton = (): ReactElement => {
   const canUnite = useSelector((state: RootState) => canBooleanSelected(state));
@@ -19,9 +20,12 @@ const UniteButton = (): ReactElement => {
     <StackedButton
       label='Union'
       onClick={handleUniteClick}
-      iconName='unite'
       disabled={!canUnite}
-      size='small' />
+      size='small'>
+      <Icon
+        name='unite'
+        size='small' />
+    </StackedButton>
   );
 }
 

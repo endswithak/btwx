@@ -18,7 +18,7 @@ import Titlebar from './Titlebar';
 
 const App = (): ReactElement => {
   const ready = useSelector((state: RootState) => state.canvasSettings.ready);
-  const theme = useSelector((state: RootState) => state.viewSettings.theme);
+  const theme = useSelector((state: RootState) => state.preferences.theme);
   const dispatch = useDispatch();
 
   useEffect(() => {

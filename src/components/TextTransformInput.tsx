@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch  } from 'react-redux';
-import { remote } from 'electron';
 import { RootState } from '../store/reducers';
 import { DEFAULT_TEXT_TRANSFORM_OPTIONS } from '../constants';
 import { setLayersTextTransformThunk } from '../store/actions/layer';

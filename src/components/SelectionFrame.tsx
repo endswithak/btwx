@@ -6,7 +6,7 @@ import { updateSelectionFrame } from '../store/actions/layer';
 import { paperMain } from '../canvas';
 
 const SelectionFrame = (): ReactElement => {
-  const theme = useSelector((state: RootState) => state.viewSettings.theme);
+  const theme = useSelector((state: RootState) => state.preferences.theme);
   const selectedBounds = useSelector((state: RootState) => getSelectedBounds(state));
   const selectedPaperScopes = useSelector((state: RootState) => getSelectedProjectIndices(state));
   const singleLineHandles = useSelector((state: RootState) => {

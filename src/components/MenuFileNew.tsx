@@ -1,4 +1,3 @@
-import { remote } from 'electron';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';

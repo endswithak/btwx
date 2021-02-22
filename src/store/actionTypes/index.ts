@@ -18,8 +18,12 @@ import { TextToolTypes } from './textTool';
 import { EventDrawerTypes } from './eventDrawer';
 import { FontFamilySelectorTypes } from './fontFamilySelector';
 import { KeyBindingsTypes } from './keyBindings';
+import { PreferencesTypes } from './preferences';
+import { ArtboardPresetsTypes } from './artboardPresets';
+import { SessionTypes } from './session';
 
 export type RootAction = ArtboardPresetEditorTypes |
+                         ArtboardPresetsTypes |
                          ArtboardToolTypes |
                          CanvasSettingsTypes |
                          ColorEditorTypes |
@@ -38,4 +42,6 @@ export type RootAction = ArtboardPresetEditorTypes |
                          EventDrawerTypes |
                          ViewSettingsTypes |
                          FontFamilySelectorTypes |
-                         KeyBindingsTypes;
+                         KeyBindingsTypes |
+                         PreferencesTypes |
+                         SessionTypes;

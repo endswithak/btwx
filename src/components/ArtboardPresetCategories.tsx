@@ -5,13 +5,13 @@ import { DEVICES } from '../constants';
 import ArtboardPresetCategory from './ArtboardPresetCategory';
 
 const ArtboardPresetCategories = (): ReactElement => {
-  const categories = useSelector((state: RootState) => state.documentSettings.artboardPresets.platform === 'Custom' ? [{
+  const categories = useSelector((state: RootState) => state.artboardPresets.platform === 'Custom' ? [{
     type: 'Custom',
-    devices: state.documentSettings.artboardPresets.allIds.reduce((result: Btwx.ArtboardPreset[], current) => {
-      result = [...result, state.documentSettings.artboardPresets.byId[current]];
+    devices: state.artboardPresets.allIds.reduce((result: Btwx.ArtboardPreset[], current) => {
+      result = [...result, state.artboardPresets.byId[current]];
       return result;
     }, [])
-  }] : DEVICES.find((platform) => platform.type === state.documentSettings.artboardPresets.platform).categories) as Btwx.DeviceCategory[];
+  }] : DEVICES.find((platform) => platform.type === state.artboardPresets.platform).categories) as Btwx.DeviceCategory[];
 
   return (
     <>

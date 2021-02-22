@@ -12,6 +12,7 @@ import TopbarDropdownButton from './TopbarDropdownButton';
 import ListGroup from './ListGroup';
 import ListItem from './ListItem';
 import StackedButton from './StackedButton';
+import Icon from './Icon';
 
 const InsertButton = (): ReactElement => {
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -109,9 +110,12 @@ const InsertButton = (): ReactElement => {
       <StackedButton
         label='Insert'
         onClick={handleClick}
-        iconName={getInsertButtonIcon()}
         size='small'
-        isActive={showDropdown || activeTool === 'Artboard' || activeTool === 'Shape' || activeTool === 'Text'} />
+        isActive={showDropdown || activeTool === 'Artboard' || activeTool === 'Shape' || activeTool === 'Text'}>
+        <Icon
+          size='small'
+          name={getInsertButtonIcon()} />
+      </StackedButton>
       {
         showDropdown
         ? <div className='c-topbar-dropdown-button__dropdown c-topbar-dropdown-button__dropdown--left'>

@@ -1,11 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
-import { ipcRenderer, remote } from 'electron';
+// import { ipcRenderer, remote } from 'electron';
 import { ActionCreators } from 'redux-undo';
-import fs from 'fs';
-import path from 'path';
+// import fs from 'fs';
+// import path from 'path';
 import { RootState } from '../reducers';
 import { APP_NAME } from '../../constants';
 import { paperMain } from '../../canvas';
+import { updateFramesThunk } from './layer';
 
 import {
   OPEN_DOCUMENT,
@@ -14,11 +15,6 @@ import {
   ADD_DOCUMENT_IMAGE,
   SET_CANVAS_MATRIX,
   SET_CANVAS_COLOR_FORMAT,
-  ADD_ARTBOARD_PRESET,
-  REMOVE_ARTBOARD_PRESET,
-  UPDATE_ARTBOARD_PRESET,
-  SET_ARTBOARD_PRESET_DEVICE_ORIENTATION,
-  SET_ARTBOARD_PRESET_DEVICE_PLATFORM,
   HYDRATE_DOCUMENT,
   HydrateDocumentPayload,
   OpenDocumentPayload,
@@ -27,14 +23,8 @@ import {
   AddDocumentImagePayload,
   SetCanvasMatrixPayload,
   SetCanvasColorFormatPayload,
-  AddArtboardPresetPayload,
-  RemoveArtboardPresetPayload,
-  UpdateArtboardPresetPayload,
-  SetArtboardPresetDeviceOrientationPayload,
-  SetArtboardPresetDevicePlatformPayload,
   DocumentSettingsTypes
 } from '../actionTypes/documentSettings';
-import { updateFramesThunk } from './layer';
 
 export const openDocument = (payload: OpenDocumentPayload): DocumentSettingsTypes => ({
   type: OPEN_DOCUMENT,
@@ -74,31 +64,6 @@ export const setCanvasColorFormat = (payload: SetCanvasColorFormatPayload): Docu
   payload
 });
 
-export const addArtboardPreset = (payload: AddArtboardPresetPayload): DocumentSettingsTypes => ({
-  type: ADD_ARTBOARD_PRESET,
-  payload
-});
-
-export const updateArtboardPreset = (payload: UpdateArtboardPresetPayload): DocumentSettingsTypes => ({
-  type: UPDATE_ARTBOARD_PRESET,
-  payload
-});
-
-export const removeArtboardPreset = (payload: RemoveArtboardPresetPayload): DocumentSettingsTypes => ({
-  type: REMOVE_ARTBOARD_PRESET,
-  payload
-});
-
-export const setArtboardPresetDeviceOrientation = (payload: SetArtboardPresetDeviceOrientationPayload): DocumentSettingsTypes => ({
-  type: SET_ARTBOARD_PRESET_DEVICE_ORIENTATION,
-  payload
-});
-
-export const setArtboardPresetDevicePlatform = (payload: SetArtboardPresetDevicePlatformPayload): DocumentSettingsTypes => ({
-  type: SET_ARTBOARD_PRESET_DEVICE_PLATFORM,
-  payload
-});
-
 export const openDocumentThunk = (filePath: string) => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
@@ -107,8 +72,8 @@ export const openDocumentThunk = (filePath: string) => {
         return console.log(err);
       } else {
         if (!state.documentSettings.path && state.layer.present.edit.id === null) {
-          const documentJSON = JSON.parse(data);
-          dispatch(hydrateDocument({document: documentJSON}));
+          // const documentJSON = JSON.parse(data);
+          dispatch(hydrateDocument({document: JSON.parse(data)}));
           dispatch(ActionCreators.clearHistory());
           dispatch(updateFramesThunk());
         } else {
@@ -130,15 +95,19 @@ export const writeFileThunk = () => {
         edit: null
       },
       layer: {
-        ...layer.present,
-        hover: null,
-        edit: {
-          id: null,
-          selectedEdit: null,
-          detail: null,
-          payload: null,
-          actionType: null
-        }
+        past: [],
+        present: {
+          ...layer.present,
+          hover: null,
+          edit: {
+            id: null,
+            selectedEdit: null,
+            detail: null,
+            payload: null,
+            actionType: null
+          }
+        },
+        future: []
       }
     });
     fs.writeFile(`${documentSettings.path}.${APP_NAME}`, saveState, function(err) {

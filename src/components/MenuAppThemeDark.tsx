@@ -16,7 +16,7 @@ interface MenuAppThemeDarkProps {
 
 const MenuAppThemeDark = (props: MenuAppThemeDarkProps): ReactElement => {
   const { setDark, menu } = props;
-  const isChecked = useSelector((state: RootState) => state.viewSettings.theme === 'dark');
+  const isChecked = useSelector((state: RootState) => state.preferences.theme === 'dark');
   const previewWindowId = useSelector((state: RootState) => state.preview.windowId);
   const [menuItemTemplate, setMenuItemTemplate] = useState({
     label: 'Dark',

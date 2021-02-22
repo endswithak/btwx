@@ -193,20 +193,20 @@
   box-shadow: none;
   background: none;
 
-  .c-stacked-button__icon {
+  .c-stacked-button__top {
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: $border-radius;
 
-    &.c-stacked-button__icon--padded {
+    &.c-stacked-button__top--padded {
       padding: 0 $padding;
     }
   }
 
   @include themed() {
 
-    .c-stacked-button__icon {
+    .c-stacked-button__top {
       .c-text {
         color: theme-prop(text-light) !important;
       }
@@ -215,7 +215,7 @@
     &:hover {
       box-shadow: none;
       background: none;
-      .c-stacked-button__icon {
+      .c-stacked-button__top {
         .c-text {
           color: theme-prop(text-base) !important;
         }
@@ -226,7 +226,7 @@
       box-shadow: none;
       background: none;
 
-      .c-stacked-button__icon {
+      .c-stacked-button__top {
         background: theme-prop(primary);
 
         .c-icon svg {
@@ -246,7 +246,7 @@
         box-shadow: none;
         background: none;
 
-        .c-stacked-button__icon {
+        .c-stacked-button__top {
           background: theme-prop(primary-active);
 
           .c-icon svg {
@@ -270,7 +270,7 @@
       box-shadow: none;
       background: none;
       opacity: 50%;
-      .c-stacked-button__icon {
+      .c-stacked-button__top {
         background: none;
       }
     }

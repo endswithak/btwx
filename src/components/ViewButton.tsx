@@ -6,6 +6,7 @@ import { RootState } from '../store/reducers';
 import { toggleLeftSidebarThunk, toggleRightSidebarThunk, toggleEventDrawerThunk } from '../store/actions/viewSettings';
 import ToggleListItem from './ToggleListItem';
 import StackedButton from './StackedButton';
+import Icon from './Icon';
 
 const InsertButton = (): ReactElement => {
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -83,9 +84,12 @@ const InsertButton = (): ReactElement => {
       <StackedButton
         label='View'
         onClick={handleClick}
-        iconName='left-sidebar'
         size='small'
-        isActive={showDropdown} />
+        isActive={showDropdown}>
+        <Icon
+          name='left-sidebar'
+          size='small' />
+      </StackedButton>
       {
         showDropdown
         ? <div className='c-topbar-dropdown-button__dropdown c-topbar-dropdown-button__dropdown--right'>

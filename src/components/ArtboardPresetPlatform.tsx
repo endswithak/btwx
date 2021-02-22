@@ -1,22 +1,22 @@
 import React, { ReactElement, useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { setArtboardPresetDevicePlatform } from '../store/actions/documentSettings';
+import { setArtboardPresetDevicePlatform } from '../store/actions/artboardPresets';
 import { DEVICES } from '../constants';
 import Form from './Form';
 import Icon from './Icon';
 
 const ArtboardPresetPlatform = (): ReactElement => {
   const formControlRef = useRef<HTMLSelectElement>(null);
-  const platformValue = useSelector((state: RootState) => state.documentSettings.artboardPresets.platform);
+  const platformValue = useSelector((state: RootState) => state.artboardPresets.platform);
   const optionValues = useSelector((state: RootState) => [
     ...DEVICES,
     {
       type: 'Custom',
       categories: [{
         type: 'Custom',
-        devices: state.documentSettings.artboardPresets.allIds.reduce((result: Btwx.ArtboardPreset[], current) => {
-          result = [...result, state.documentSettings.artboardPresets.byId[current]];
+        devices: state.artboardPresets.allIds.reduce((result: Btwx.ArtboardPreset[], current) => {
+          result = [...result, state.artboardPresets.byId[current]];
           return result;
         }, [])
       }]

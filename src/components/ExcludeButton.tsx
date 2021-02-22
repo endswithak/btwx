@@ -4,6 +4,7 @@ import { RootState } from '../store/reducers';
 import { applyBooleanOperationThunk } from '../store/actions/layer';
 import { canBooleanSelected } from '../store/selectors/layer';
 import StackedButton from './StackedButton';
+import Icon from './Icon';
 
 const ExcludeButton = (): ReactElement => {
   const canExclude = useSelector((state: RootState) => canBooleanSelected(state));
@@ -19,9 +20,12 @@ const ExcludeButton = (): ReactElement => {
     <StackedButton
       label='Difference'
       onClick={handleExcludeClick}
-      iconName='exclude'
       disabled={!canExclude}
-      size='small' />
+      size='small'>
+      <Icon
+        size='small'
+        name='exclude' />
+    </StackedButton>
   );
 }
 

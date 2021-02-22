@@ -4,6 +4,7 @@ import { RootState } from '../store/reducers';
 import { applyBooleanOperationThunk } from '../store/actions/layer';
 import { canBooleanSelected } from '../store/selectors/layer';
 import StackedButton from './StackedButton';
+import Icon from './Icon';
 
 const IntersectButton = (): ReactElement => {
   const canIntersect = useSelector((state: RootState) => canBooleanSelected(state));
@@ -19,9 +20,12 @@ const IntersectButton = (): ReactElement => {
     <StackedButton
       label='Intersect'
       onClick={handleIntersectClick}
-      iconName='intersect'
       disabled={!canIntersect}
-      size='small' />
+      size='small'>
+      <Icon
+        size='small'
+        name='intersect' />
+    </StackedButton>
   );
 }
 

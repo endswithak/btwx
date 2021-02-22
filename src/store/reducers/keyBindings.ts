@@ -376,9 +376,10 @@ const DEFAULT_VIEW_SHOW_LAYERS = remote.process.platform === 'darwin' ? DEFAULT_
 const DEFAULT_VIEW_SHOW_STYLES = remote.process.platform === 'darwin' ? DEFAULT_MAC_VIEW_SHOW_STYLES : DEFAULT_WINDOWS_VIEW_SHOW_STYLES;
 const DEFAULT_VIEW_SHOW_EVENTS = remote.process.platform === 'darwin' ? DEFAULT_MAC_VIEW_SHOW_EVENTS : DEFAULT_WINDOWS_VIEW_SHOW_EVENTS;
 
+const DEFAULT_ALL_BINDINGS = remote.process.platform === 'darwin' ? ALL_MAC_KEY_BINDINGS : ALL_WINDOWS_KEY_BINDINGS;
+
 export interface KeyBindingsState {
-  allMacBindings: string[];
-  allWindowsBindings: string[];
+  allBindings: string[];
   file: {
     new: string;
     save: string;
@@ -482,9 +483,8 @@ export interface KeyBindingsState {
   };
 }
 
-const initialState: KeyBindingsState = {
-  allMacBindings: ALL_MAC_KEY_BINDINGS,
-  allWindowsBindings: ALL_WINDOWS_KEY_BINDINGS,
+export const initialState: KeyBindingsState = {
+  allBindings: DEFAULT_ALL_BINDINGS,
   file: {
     new: DEFAULT_FILE_NEW,
     save: DEFAULT_FILE_SAVE,
@@ -591,6 +591,9 @@ const initialState: KeyBindingsState = {
 export default (state = initialState, action: KeyBindingsTypes): KeyBindingsState => {
   switch (action.type) {
     case SET_FILE_NEW: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbFileNew', 'string', action.payload.binding);
+      }
       return {
         ...state,
         file: {
@@ -600,6 +603,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_FILE_SAVE: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbFileSave', 'string', action.payload.binding);
+      }
       return {
         ...state,
         file: {
@@ -609,6 +615,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_FILE_SAVE_AS: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbFileSaveAs', 'string', action.payload.binding);
+      }
       return {
         ...state,
         file: {
@@ -618,6 +627,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_FILE_OPEN: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbFileOpen', 'string', action.payload.binding);
+      }
       return {
         ...state,
         file: {
@@ -627,6 +639,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_EDIT_UNDO: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbEditUndo', 'string', action.payload.binding);
+      }
       return {
         ...state,
         edit: {
@@ -636,6 +651,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_EDIT_REDO: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbEditRedo', 'string', action.payload.binding);
+      }
       return {
         ...state,
         edit: {
@@ -645,6 +663,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_EDIT_CUT: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbEditCut', 'string', action.payload.binding);
+      }
       return {
         ...state,
         edit: {
@@ -654,6 +675,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_EDIT_COPY_COPY: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbEditCopyCopy', 'string', action.payload.binding);
+      }
       return {
         ...state,
         edit: {
@@ -666,6 +690,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_EDIT_COPY_STYLE: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbEditCopyStyle', 'string', action.payload.binding);
+      }
       return {
         ...state,
         edit: {
@@ -678,6 +705,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_EDIT_COPY_SVG: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbEditCopySvg', 'string', action.payload.binding);
+      }
       return {
         ...state,
         edit: {
@@ -690,6 +720,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_EDIT_PASTE_PASTE: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbEditPastePaste', 'string', action.payload.binding);
+      }
       return {
         ...state,
         edit: {
@@ -702,6 +735,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_EDIT_PASTE_OVER_SELECTION: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbEditPasteOverSelection', 'string', action.payload.binding);
+      }
       return {
         ...state,
         edit: {
@@ -714,6 +750,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_EDIT_PASTE_STYLE: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbEditPasteStyle', 'string', action.payload.binding);
+      }
       return {
         ...state,
         edit: {
@@ -726,6 +765,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_EDIT_PASTE_SVG: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbEditPasteSvg', 'string', action.payload.binding);
+      }
       return {
         ...state,
         edit: {
@@ -738,6 +780,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_EDIT_DELETE: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbEditDelete', 'string', action.payload.binding);
+      }
       return {
         ...state,
         edit: {
@@ -747,6 +792,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_EDIT_DUPLICATE: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbEditDuplicate', 'string', action.payload.binding);
+      }
       return {
         ...state,
         edit: {
@@ -756,6 +804,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_EDIT_SELECT_SELECT_ALL: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbEditSelectSelectAll', 'string', action.payload.binding);
+      }
       return {
         ...state,
         edit: {
@@ -768,6 +819,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_EDIT_SELECT_SELECT_ALL_ARTBOARDS: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbEditSelectSelectAllArtboards', 'string', action.payload.binding);
+      }
       return {
         ...state,
         edit: {
@@ -780,6 +834,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_EDIT_FIND: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbEditFind', 'string', action.payload.binding);
+      }
       return {
         ...state,
         edit: {
@@ -789,6 +846,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_EDIT_RENAME: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbEditRename', 'string', action.payload.binding);
+      }
       return {
         ...state,
         edit: {
@@ -798,6 +858,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_INSERT_ARTBOARD: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbInsertArtboard', 'string', action.payload.binding);
+      }
       return {
         ...state,
         insert: {
@@ -807,6 +870,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_INSERT_SHAPE_RECTANGLE: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbInsertShapeRectangle', 'string', action.payload.binding);
+      }
       return {
         ...state,
         insert: {
@@ -819,6 +885,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_INSERT_SHAPE_ROUNDED: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbInsertShapeRounded', 'string', action.payload.binding);
+      }
       return {
         ...state,
         insert: {
@@ -831,6 +900,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_INSERT_SHAPE_ELLIPSE: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbInsertShapeEllipse', 'string', action.payload.binding);
+      }
       return {
         ...state,
         insert: {
@@ -843,6 +915,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_INSERT_SHAPE_POLYGON: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbInsertShapePolygon', 'string', action.payload.binding);
+      }
       return {
         ...state,
         insert: {
@@ -855,6 +930,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_INSERT_SHAPE_STAR: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbInsertShapeStar', 'string', action.payload.binding);
+      }
       return {
         ...state,
         insert: {
@@ -867,6 +945,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_INSERT_SHAPE_LINE: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbInsertShapeLine', 'string', action.payload.binding);
+      }
       return {
         ...state,
         insert: {
@@ -879,6 +960,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_INSERT_TEXT: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbInsertText', 'string', action.payload.binding);
+      }
       return {
         ...state,
         insert: {
@@ -888,6 +972,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_INSERT_IMAGE: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbInsertImage', 'string', action.payload.binding);
+      }
       return {
         ...state,
         insert: {
@@ -897,6 +984,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_LAYER_STYLE_FILL: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbLayerStyleFill', 'string', action.payload.binding);
+      }
       return {
         ...state,
         layer: {
@@ -909,6 +999,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_LAYER_STYLE_STROKE: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbLayerStyleStroke', 'string', action.payload.binding);
+      }
       return {
         ...state,
         layer: {
@@ -921,6 +1014,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_LAYER_STYLE_SHADOW: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbLayerStyleShadow', 'string', action.payload.binding);
+      }
       return {
         ...state,
         layer: {
@@ -933,6 +1029,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_LAYER_TRANSFORM_FLIP_HORIZONTALLY: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbLayerTransformFlipHorizontally', 'string', action.payload.binding);
+      }
       return {
         ...state,
         layer: {
@@ -945,6 +1044,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_LAYER_TRANSFORM_FLIP_VERTICALLY: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbLayerTransformFlipVertically', 'string', action.payload.binding);
+      }
       return {
         ...state,
         layer: {
@@ -957,6 +1059,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_LAYER_COMBINE_UNION: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbLayerCombineUnion', 'string', action.payload.binding);
+      }
       return {
         ...state,
         layer: {
@@ -969,6 +1074,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_LAYER_COMBINE_SUBTRACT: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbLayerCombineSubtract', 'string', action.payload.binding);
+      }
       return {
         ...state,
         layer: {
@@ -981,6 +1089,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_LAYER_COMBINE_INTERSECT: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbLayerCombineIntersect', 'string', action.payload.binding);
+      }
       return {
         ...state,
         layer: {
@@ -993,6 +1104,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_LAYER_COMBINE_DIFFERENCE: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbLayerCombineDifference', 'string', action.payload.binding);
+      }
       return {
         ...state,
         layer: {
@@ -1005,6 +1119,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_LAYER_IMAGE_ORIGINAL_DIMENSIONS: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbLayerImageOriginalDimensions', 'string', action.payload.binding);
+      }
       return {
         ...state,
         layer: {
@@ -1017,6 +1134,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_LAYER_IMAGE_REPLACE: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbLayerImageReplace', 'string', action.payload.binding);
+      }
       return {
         ...state,
         layer: {
@@ -1029,6 +1149,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_LAYER_MASK_USE_AS_MASK: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbLayerMaskUseAsMask', 'string', action.payload.binding);
+      }
       return {
         ...state,
         layer: {
@@ -1041,6 +1164,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_LAYER_MASK_IGNORE_UNDERLYING_MASK: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbLayerMaskIgnoreUnderlyingMask', 'string', action.payload.binding);
+      }
       return {
         ...state,
         layer: {
@@ -1053,6 +1179,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_ARRANGE_BRING_FORWARD: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbArrangeBringForward', 'string', action.payload.binding);
+      }
       return {
         ...state,
         arrange: {
@@ -1062,6 +1191,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_ARRANGE_BRING_TO_FRONT: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbArrangeBringToFront', 'string', action.payload.binding);
+      }
       return {
         ...state,
         arrange: {
@@ -1071,6 +1203,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_ARRANGE_SEND_BACKWARD: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbArrangeSendBackward', 'string', action.payload.binding);
+      }
       return {
         ...state,
         arrange: {
@@ -1080,6 +1215,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_ARRANGE_SEND_TO_BACK: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbArrangeSendToBack', 'string', action.payload.binding);
+      }
       return {
         ...state,
         arrange: {
@@ -1089,6 +1227,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_ARRANGE_ALIGN_LEFT: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbArrangeAlignLeft', 'string', action.payload.binding);
+      }
       return {
         ...state,
         arrange: {
@@ -1101,6 +1242,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_ARRANGE_ALIGN_CENTER: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbArrangeAlignCenter', 'string', action.payload.binding);
+      }
       return {
         ...state,
         arrange: {
@@ -1113,6 +1257,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_ARRANGE_ALIGN_RIGHT: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbArrangeAlignRight', 'string', action.payload.binding);
+      }
       return {
         ...state,
         arrange: {
@@ -1125,6 +1272,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_ARRANGE_ALIGN_TOP: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbArrangeAlignTop', 'string', action.payload.binding);
+      }
       return {
         ...state,
         arrange: {
@@ -1137,6 +1287,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_ARRANGE_ALIGN_MIDDLE: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbArrangeAlignMiddle', 'string', action.payload.binding);
+      }
       return {
         ...state,
         arrange: {
@@ -1149,6 +1302,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_ARRANGE_ALIGN_BOTTOM: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbArrangeAlignBottom', 'string', action.payload.binding);
+      }
       return {
         ...state,
         arrange: {
@@ -1161,6 +1317,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_ARRANGE_DISTRIBUTE_HORIZONTALLY: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbArrangeDistributeHorizontally', 'string', action.payload.binding);
+      }
       return {
         ...state,
         arrange: {
@@ -1173,6 +1332,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_ARRANGE_DISTRIBUTE_VERTICALLY: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbArrangeDistributeVertically', 'string', action.payload.binding);
+      }
       return {
         ...state,
         arrange: {
@@ -1185,6 +1347,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_ARRANGE_GROUP: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbArrangeGroup', 'string', action.payload.binding);
+      }
       return {
         ...state,
         arrange: {
@@ -1194,6 +1359,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_ARRANGE_UNGROUP: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbArrangeUngroup', 'string', action.payload.binding);
+      }
       return {
         ...state,
         arrange: {
@@ -1203,6 +1371,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_VIEW_ZOOM_IN: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbViewZoomIn', 'string', action.payload.binding);
+      }
       return {
         ...state,
         view: {
@@ -1212,6 +1383,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_VIEW_ZOOM_OUT: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbViewZoomOut', 'string', action.payload.binding);
+      }
       return {
         ...state,
         view: {
@@ -1221,6 +1395,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_VIEW_ZOOM_FIT_CANVAS: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbViewZoomFitCanvas', 'string', action.payload.binding);
+      }
       return {
         ...state,
         view: {
@@ -1233,6 +1410,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_VIEW_ZOOM_FIT_SELECTED: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbViewZoomFitSelected', 'string', action.payload.binding);
+      }
       return {
         ...state,
         view: {
@@ -1245,6 +1425,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_VIEW_ZOOM_FIT_ACTIVE_ARTBOARD: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbViewZoomFitActiveArtboard', 'string', action.payload.binding);
+      }
       return {
         ...state,
         view: {
@@ -1257,6 +1440,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_VIEW_CENTER_SELECTED: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbViewCenterSelected', 'string', action.payload.binding);
+      }
       return {
         ...state,
         view: {
@@ -1266,6 +1452,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_VIEW_SHOW_LAYERS: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbViewShowLayers', 'string', action.payload.binding);
+      }
       return {
         ...state,
         view: {
@@ -1275,6 +1464,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_VIEW_SHOW_STYLES: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbViewShowStyles', 'string', action.payload.binding);
+      }
       return {
         ...state,
         view: {
@@ -1284,6 +1476,9 @@ export default (state = initialState, action: KeyBindingsTypes): KeyBindingsStat
       }
     }
     case SET_VIEW_SHOW_EVENTS: {
+      if (remote.process.platform === 'darwin') {
+        remote.systemPreferences.setUserDefault('kbViewShowEvents', 'string', action.payload.binding);
+      }
       return {
         ...state,
         view: {

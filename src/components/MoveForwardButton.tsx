@@ -4,6 +4,7 @@ import { RootState } from '../store/reducers';
 import { bringSelectedForwardThunk } from '../store/actions/layer';
 import { canBringSelectedForward } from '../store/selectors/layer';
 import StackedButton from './StackedButton';
+import Icon from './Icon';
 
 const MoveForwardButton = (): ReactElement => {
   const canMoveForward = useSelector((state: RootState) => canBringSelectedForward(state));
@@ -19,9 +20,12 @@ const MoveForwardButton = (): ReactElement => {
     <StackedButton
       label='Forward'
       onClick={handleMoveForwardClick}
-      iconName='move-forward'
       disabled={!canMoveForward}
-      size='small' />
+      size='small'>
+      <Icon
+        size='small'
+        name='move-forward' />
+    </StackedButton>
   );
 }
 

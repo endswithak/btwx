@@ -2,6 +2,7 @@ import React, { ReactElement } from 'react';
 import { useDispatch } from 'react-redux';
 import { zoomInThunk } from '../store/actions/zoomTool';
 import StackedButton from './StackedButton';
+import Icon from './Icon';
 
 const ZoomInButton = (): ReactElement => {
   const dispatch = useDispatch();
@@ -10,8 +11,11 @@ const ZoomInButton = (): ReactElement => {
     <StackedButton
       label='Zoom In'
       onClick={() => dispatch(zoomInThunk())}
-      iconName='zoom-in'
-      size='small' />
+      size='small'>
+      <Icon
+        name='zoom-in'
+        size='small' />
+    </StackedButton>
   );
 }
 

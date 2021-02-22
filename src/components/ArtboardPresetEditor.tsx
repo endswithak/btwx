@@ -3,7 +3,7 @@ import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { closeArtboardPresetEditor } from '../store/actions/artboardPresetEditor';
-import { addArtboardPreset, updateArtboardPreset, setArtboardPresetDevicePlatform } from '../store/actions/documentSettings';
+import { addArtboardPreset, updateArtboardPreset, setArtboardPresetDevicePlatform } from '../store/actions/artboardPresets';
 import { setCanvasFocusing } from '../store/actions/canvasSettings';
 import Form from './Form';
 import Button from './Button';
@@ -15,7 +15,7 @@ const ArtboardPresetEditor = (): ReactElement => {
   const heightControlRef = useRef(null);
   const artboardPresetEditor = useSelector((state: RootState) => state.artboardPresetEditor);
   // const platformType = useSelector((state: RootState) => state.documentSettings.artboardPresets.platform);
-  const exists = useSelector((state: RootState) => state.documentSettings.artboardPresets.allIds.includes(state.artboardPresetEditor.id));
+  const exists = useSelector((state: RootState) => state.artboardPresets.allIds.includes(state.artboardPresetEditor.id));
   // const canvasFocusing = useSelector((state: RootState) => state.canvasSettings.focusing);
   const [name, setName] = useState(artboardPresetEditor.type);
   const [width, setWidth] = useState(artboardPresetEditor.width);

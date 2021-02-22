@@ -23,6 +23,9 @@ import artboardTool from './artboardTool';
 import textTool from './textTool';
 import fontFamilySelector from './fontFamilySelector';
 import keyBindings from './keyBindings';
+import preferences from './preferences';
+import artboardPresets from './artboardPresets';
+import session from './session';
 
 export const reducers = {
   layer,
@@ -45,7 +48,10 @@ export const reducers = {
   artboardTool,
   textTool,
   fontFamilySelector,
-  keyBindings
+  keyBindings,
+  preferences,
+  artboardPresets,
+  session
 };
 
 const appReducer = combineReducers(reducers);
@@ -57,12 +63,7 @@ const rootReducer = (state: RootState, action: RootAction): RootState => {
     case HYDRATE_DOCUMENT: {
       return {
         ...state,
-        documentSettings: action.payload.document.documentSettings,
-        viewSettings: action.payload.document.viewSettings,
-        layer: {
-          ...state.layer,
-          present: action.payload.document.layer
-        }
+        ...action.payload.document
       };
     }
     case HYDRATE_PREVIEW: {

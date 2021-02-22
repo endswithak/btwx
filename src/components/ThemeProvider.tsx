@@ -12,7 +12,7 @@ const { Provider } = ThemeContext;
 
 const ThemeProvider = (props: ThemeProviderProps): ReactElement => {
   const { children } = props;
-  const theme = useSelector((state: RootState) => state.viewSettings.theme);
+  const theme = useSelector((state: RootState) => state.preferences.theme);
   return (
     <Provider value={getTheme(theme)}>
       {children}

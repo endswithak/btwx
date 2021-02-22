@@ -4,6 +4,7 @@ import { RootState } from '../store/reducers';
 import { groupSelectedThunk } from '../store/actions/layer';
 import { canGroupSelected } from '../store/selectors/layer';
 import StackedButton from './StackedButton';
+import Icon from './Icon';
 
 const GroupButton = (): ReactElement => {
   const canGroup = useSelector((state: RootState) => canGroupSelected(state));
@@ -19,9 +20,12 @@ const GroupButton = (): ReactElement => {
     <StackedButton
       label='Group'
       onClick={handleGroupClick}
-      iconName='group'
       disabled={!canGroup}
-      size='small' />
+      size='small'>
+      <Icon
+        size='small'
+        name='group' />
+    </StackedButton>
   );
 }
 

@@ -32,19 +32,18 @@ import { Provider } from 'react-redux';
 import App from './components/App';
 import configureStore from './store';
 import Menu from './components/Menu';
-import Touchbar from './components/Touchbar';
 import Preview from './components/Preview';
+import Preferences from './components/Preferences';
 import ThemeProvider from './components/ThemeProvider';
 
 import './styles/index.sass';
 
 (window as any).renderNewDocument = (preloadedState?: Btwx.Document): void => {
-  const store = configureStore({preloadedState, windowType: 'document'});
+  const store = configureStore({ preloadedState });
   ReactDOM.render(
     <Provider store={store}>
       <ThemeProvider>
         <Menu />
-        <Touchbar />
         <App />
       </ThemeProvider>
     </Provider>,
@@ -52,14 +51,26 @@ import './styles/index.sass';
   );
 };
 
-(window as any).renderPreviewWindow = (preloadedState?: Btwx.Document): void => {
-  const store = configureStore({preloadedState, windowType: 'preview'});
-  ReactDOM.render(
-    <Provider store={store}>
-      <ThemeProvider>
-        <Preview />
-      </ThemeProvider>
-    </Provider>,
-    document.getElementById('root')
-  );
-};
+// (window as any).renderPreviewWindow = (preloadedState?: Btwx.Document): void => {
+//   const store = configureStore({ preloadedState });
+//   ReactDOM.render(
+//     <Provider store={store}>
+//       <ThemeProvider>
+//         <Preview />
+//       </ThemeProvider>
+//     </Provider>,
+//     document.getElementById('root')
+//   );
+// };
+
+// (window as any).renderPreferences = (preloadedState?: Btwx.Document): void => {
+//   const store = configureStore({ preloadedState });
+//   ReactDOM.render(
+//     <Provider store={store}>
+//       <ThemeProvider>
+//         <Preferences />
+//       </ThemeProvider>
+//     </Provider>,
+//     document.getElementById('root')
+//   );
+// };

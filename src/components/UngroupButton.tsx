@@ -4,6 +4,7 @@ import { RootState } from '../store/reducers';
 import { canUngroupSelected } from '../store/selectors/layer';
 import { ungroupSelectedThunk } from '../store/actions/layer';
 import StackedButton from './StackedButton';
+import Icon from './Icon';
 
 const UngroupButton = (): ReactElement => {
   const canUngroup = useSelector((state: RootState) => canUngroupSelected(state));
@@ -19,9 +20,12 @@ const UngroupButton = (): ReactElement => {
     <StackedButton
       label='Ungroup'
       onClick={handleUngroupClick}
-      iconName='ungroup'
       disabled={!canUngroup}
-      size='small' />
+      size='small'>
+      <Icon
+        name='ungroup'
+        size='small' />
+    </StackedButton>
   );
 }
 

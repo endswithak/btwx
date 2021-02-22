@@ -47,9 +47,12 @@ const ZoomButton = (): ReactElement => {
       <StackedButton
         label='Zoom'
         onClick={handleClick}
-        text={`${zoom}%`}
         size='small'
-        isActive={showDropdown} />
+        isActive={showDropdown}>
+        <Text size='small'>
+          {`${zoom}%`}
+        </Text>
+      </StackedButton>
       {
         showDropdown
         ? <div className='c-topbar-dropdown-button__dropdown c-topbar-dropdown-button__dropdown--left'>

@@ -12,9 +12,6 @@ export const CLOSE_RIGHT_SIDEBAR = 'CLOSE_RIGHT_SIDEBAR';
 export const OPEN_EVENT_DRAWER = 'OPEN_EVENT_DRAWER';
 export const CLOSE_EVENT_DRAWER = 'CLOSE_EVENT_DRAWER';
 
-export const ENABLE_DARK_THEME = 'ENABLE_DARK_THEME';
-export const ENABLE_LIGHT_THEME = 'ENABLE_LIGHT_THEME';
-
 export interface SetLeftSidebarWidthPayload {
   width: number;
 }
@@ -75,14 +72,6 @@ export interface CloseEventDrawer {
   type: typeof CLOSE_EVENT_DRAWER;
 }
 
-export interface EnableDarkTheme {
-  type: typeof ENABLE_DARK_THEME;
-}
-
-export interface EnableLightTheme {
-  type: typeof ENABLE_LIGHT_THEME;
-}
-
 export type ViewSettingsTypes = SetLeftSidebarWidth |
                                 SetRightSidebarWidth |
                                 SetEventDrawerHeight |
@@ -92,6 +81,4 @@ export type ViewSettingsTypes = SetLeftSidebarWidth |
                                 OpenRightSidebar |
                                 CloseRightSidebar |
                                 OpenEventDrawer |
-                                CloseEventDrawer |
-                                EnableDarkTheme |
-                                EnableLightTheme;
+                                CloseEventDrawer;

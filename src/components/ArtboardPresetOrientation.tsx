@@ -1,13 +1,13 @@
 import React, { ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { setArtboardPresetDeviceOrientation } from '../store/actions/documentSettings';
+import { setArtboardPresetDeviceOrientation } from '../store/actions/artboardPresets';
 import Form from './Form';
 import ToggleButtonGroup from './ToggleButtonGroup';
 import Icon from './Icon';
 
 const ArtboardPresetOrientation = (): ReactElement => {
-  const orientation = useSelector((state: RootState) => state.documentSettings.artboardPresets.orientation);
+  const orientation = useSelector((state: RootState) => state.artboardPresets.orientation);
   const dispatch = useDispatch();
 
   const handleChange = (e: any): void => {
