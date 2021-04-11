@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="33px" height="33px" viewBox="0 0 33 33" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>insert-ellipse</title>
+    <defs>
+        <path d="M17,9 L17,16 L24,16 L24,17 L17,17 L17,24 L16,24 L16,17 L9,17 L9,16 L16,16 L16,9 L17,9 Z M27,1 C29.7614237,1 32,3.23857625 32,6 C32,8.76142375 29.7614237,11 27,11 C24.2385763,11 22,8.76142375 22,6 C22,3.23857625 24.2385763,1 27,1 Z" id="path-1"></path>
+        <filter x="-10.9%" y="-10.9%" width="121.7%" height="121.7%" filterUnits="objectBoundingBox" id="filter-2">
+            <feMorphology radius="1" operator="dilate" in="SourceAlpha" result="shadowSpreadOuter1"></feMorphology>
+            <feOffset dx="0" dy="0" in="shadowSpreadOuter1" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="0.5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feComposite in="shadowBlurOuter1" in2="SourceAlpha" operator="out" result="shadowBlurOuter1"></feComposite>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.24 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="insert-ellipse" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Combined-Shape">
+            <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+            <path stroke="#FFFFFF" stroke-width="1" d="M17.5,8.5 L17.5,15.5 L24.5,15.5 L24.5,17.5 L17.5,17.5 L17.5,24.5 L15.5,24.5 L15.5,17.5 L8.5,17.5 L8.5,15.5 L15.5,15.5 L15.5,8.5 L17.5,8.5 Z M27,0.5 C28.5187831,0.5 29.8937831,1.11560847 30.8890873,2.1109127 C31.8843915,3.10621694 32.5,4.48121694 32.5,6 C32.5,7.51878306 31.8843915,8.89378306 30.8890873,9.8890873 C29.8937831,10.8843915 28.5187831,11.5 27,11.5 C25.4812169,11.5 24.1062169,10.8843915 23.1109127,9.8890873 C22.1156085,8.89378306 21.5,7.51878306 21.5,6 C21.5,4.48121694 22.1156085,3.10621694 23.1109127,2.1109127 C24.1062169,1.11560847 25.4812169,0.5 27,0.5 L27,0.5 Z" fill="#000000" fill-rule="evenodd"></path>
+        </g>
+    </g>
+</svg>

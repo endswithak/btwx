@@ -1,0 +1,52 @@
+$layersSidebarCellHeight: $unit * 8 // 32
+
+.c-layers-sidebar__layer-item
+  position: relative
+  display: flex
+  align-items: center
+  height: $layersSidebarCellHeight
+  padding: 0
+  cursor: pointer
+
+.c-layers-sidebar-layer-item__background
+  +absolute-full
+  border-radius: $unit
+  z-index: -1
+
+.c-sidebar-layer__name
+  font-size: $font-size-small
+  line-height: $layersSidebarCellHeight
+  flex-grow: 2
+  cursor: pointer
+  padding-left: $unit * 2
+  width: 100%
+  overflow: hidden
+  white-space: nowrap
+  text-overflow: ellipsis
+
+  &:before
+    +content-block
+
+.c-sidebar-layer__name--editing
+  padding-left: 0
+
+.c-sidebar-layer__name--artboard
+  font-weight: $font-weight-bold
+
+.c-sidebar-layer__icon
+  position: relative
+  display: flex
+  align-items: center
+  justify-content: center
+  height: $layersSidebarCellHeight
+  width: $unit * 6 // 24
+  cursor: pointer
+  flex-grow: 0
+  flex-shrink: 0
+  z-index: 1
+
+.c-sidebar-layer__icon--chevron
+  z-index: 1
+
+  svg
+    position: absolute

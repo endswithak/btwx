@@ -1,0 +1,65 @@
+.c-text {
+  @include truncate-text;
+  display: inline-block;
+  font-family: $font-family;
+  font-size: $font-size;
+  line-height: $line-height;
+
+  &.c-text--body-1 {
+    @include themed() {
+      color: theme-prop(text-base);
+    }
+    font-size: $text-body-1-size;
+  }
+
+  &.c-text--body-2 {
+    @include themed() {
+      color: theme-prop(text-lighter);
+    }
+    font-size: $text-body-2-size;
+  }
+
+  &.c-text--cap {
+    text-transform: uppercase;
+  }
+
+  &.c-text--small {
+    font-size: $font-size-small;
+
+    &.c-text--body-1 {
+      font-size: $text-body-1-size-small;
+    }
+
+    &.c-text--body-2 {
+      font-size: $text-body-2-size-small;
+    }
+  }
+
+  &.c-text--large {
+    font-size: $font-size-large;
+
+    &.c-text--body-1 {
+      font-size: $text-body-1-size-large;
+    }
+
+    &.c-text--body-2 {
+      font-size: $text-body-2-size-large;
+    }
+  }
+
+  @each $theme-color-name in $theme-color-names {
+    &.c-text--#{$theme-color-name} {
+      @include themed() {
+        color: theme-prop($theme-color-name) !important;
+      }
+    }
+  }
+
+  @each $theme-text-color-name in $theme-text-color-names {
+    &.c-text--#{$theme-text-color-name} {
+      @include themed() {
+        color: theme-prop(text-#{$theme-text-color-name}) !important;
+      }
+    }
+  }
+}

@@ -1,0 +1,69 @@
+$layersSidebarCellHeight: $unit * 8 // 32
+
+.c-sidebar-layer
+  position: relative
+  border-radius: $unit
+  display: flex
+  align-items: center
+  height: $layersSidebarCellHeight
+  padding: 0
+  cursor: pointer
+  border-radius: $border-radius
+
+.c-sidebar-layer__name
+  font-family: $font-family
+  font-size: $font-size-small
+  line-height: $layersSidebarCellHeight
+  flex-grow: 2
+  cursor: pointer
+  padding-left: $unit * 2
+  width: 100%
+  overflow: hidden
+  white-space: nowrap
+  text-overflow: ellipsis
+  text-align: left
+
+.c-sidebar-layer__name--editing
+  padding-left: 0
+
+.c-sidebar-layer__name--artboard
+  font-weight: $font-weight-bold
+
+.c-sidebar-layer__icon
+  position: relative
+  width: $unit * 6 // 24
+  z-index: 1
+  display: flex
+  align-items: center
+  justify-content: center
+  flex-shrink: 0
+
+.c-sidebar-layer__icon--aa
+  &:after
+    @include themed()
+      background: theme-prop(primary)
+    content: ''
+    position: absolute
+    border-radius: 50%
+    width: $unit * 2
+    height: $unit * 2
+    left: 50%
+    top: 50%
+    transform: translate(-50%, -50%)
+
+  &.c-sidebar-layer__icon--aa-selected
+    &:after
+      @include themed()
+        background: theme-prop(text-base-on-primary)
+
+.c-sidebar-layer__icon--empty
+  width: 0
+
+.c-sidebar-layer__icon--chevron
+  z-index: 1
+
+.c-sidebar-layer--ghost
+  position: absolute
+  left: -999999999999px
+  top: -999999999999px
+

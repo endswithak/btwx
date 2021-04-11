@@ -1,0 +1,53 @@
+.c-sidebar-section-wrap
+  width: 100%
+  padding: 0 $unit
+
+  &.c-sidebar-section-wrap--bottom-border
+    @include themed()
+      box-shadow: 0 -1px 0 0 theme-prop(sidebar-border) inset
+
+  &.c-sidebar-section-wrap--white-space
+    padding-top: $padding
+    padding-bottom: $padding
+
+  &.c-sidebar-section-wrap--bg
+    @include themed()
+      background: theme-prop(control-background)
+
+.c-sidebar-section
+  display: flex
+  flex-wrap: wrap
+  width: 100%
+
+.c-sidebar-section__row
+  display: flex
+  flex-grow: 2
+  flex-shrink: 0
+  width: 100%
+
+.c-sidebar-section__column
+  display: inline-flex
+  flex-grow: 1
+  flex-wrap: wrap
+
+.c-sidebar-section__head
+  text-transform: uppercase
+  font-weight: $font-weight-bold
+  height: $unit * 6
+  line-height: $unit * 6
+  font-size: $font-size-small
+  padding: 0 $unit
+  font-family: $font-family
+
+.c-sidebar-section__label
+  @include themed()
+    color: theme-prop(text-base)
+  height: $unit * 8
+  line-height: $unit * 8
+  font-size: $font-size-extra-small
+  text-transform: uppercase
+  padding: 0 $unit
+
+.c-sidebar-section__actions
+  display: inline-flex
+  padding: 0 $padding

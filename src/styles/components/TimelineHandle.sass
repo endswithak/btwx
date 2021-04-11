@@ -1,0 +1,80 @@
+.c-timeline-handle
+  display: flex
+  align-items: center
+  justify-content: center
+  position: absolute
+  width: $unit * 4
+  height: $unit * 4
+  cursor: ew-resize
+  z-index: 2
+
+  &:hover
+    .c-timeline-handle__ellipse
+      @include themed()
+        background: theme-prop(text-base)
+
+  &.c-timeline-handle--duration
+    .c-timeline-handle__tooltip
+      right: 1px
+
+  &.c-timeline-handle--both
+    .c-timeline-handle__tooltip
+      left: 2px
+
+  &.c-timeline-handle--selected
+    .c-timeline-handle__ellipse
+      @include themed()
+        background: theme-prop(primary)
+
+        &:hover
+          background: theme-prop(primary)
+
+  .c-timeline-handle__ellipse
+    @include themed()
+      background: theme-prop(text-lighter)
+    width: $unit * 2
+    height: $unit * 2
+    border-radius: $unit * 2
+
+    &:hover
+      @include themed()
+        background: theme-prop(text-light)
+
+  .c-timeline-handle__tooltip
+    @include themed()
+      background: theme-prop(primary)
+      box-shadow: 0 1px 4px 0 rgba(0,0,0,0.25)
+      color: theme-prop(text-base-on-primary)
+    display: flex
+    position: absolute
+    align-items: center
+    justify-content: center
+    display: none
+    font-size: $font-size-small
+    line-height: 16px
+    text-align: center
+    padding: $unit
+    zIndex: 999999999
+    top: $unit * 5
+    border-radius: $unit
+
+.c-timeline-tween-handle
+  @include themed()
+    background: theme-prop(control-background)
+    box-shadow: 0 0 0 1px theme-prop(control-border) inset
+    &:hover
+      box-shadow: 0 0 0 1px theme-prop(control-border-active) inset
+  position: relative
+  height: $unit * 4
+  border-radius: $unit * 2
+  cursor: ew-resize
+  z-index: 1
+
+  &.c-timeline-tween-handle--selected
+    @include themed()
+      background: theme-prop(primary)
+      box-shadow: 0 0 0 1px theme-prop(primary) inset
+
+  &.c-timeline-tween-handle--handle-selected
+    @include themed()
+      box-shadow: 0 0 0 1px theme-prop(primary) inset

@@ -1,0 +1,97 @@
+.c-fill-editor
+  @include background-blur
+  @include themed()
+    background: theme-prop(glass-background)
+    box-shadow: 0 0 0 1px theme-prop(modal-border), $glass-shadow
+  transform-origin: center top
+  position: absolute
+  width: 248px
+  display: flex
+  flex-direction: column
+  border-radius: $unit
+  z-index: 99999999999
+  margin: $unit * 2
+
+.c-fill-editor__type-selector
+  @include themed()
+    box-shadow: 0 -1px 0 0 theme-prop(modal-border) inset
+  position: relative
+  display: flex
+  align-items: center
+  justify-content: center
+  height: $unit * 8
+  border-radius: $border-radius $border-radius 0 0
+
+.c-fill-editor__type
+  @include themed()
+    box-shadow: 0 0 0 1px theme-prop(text-lighter)
+    &:hover
+      box-shadow: 0 0 0 1px theme-prop(text-light)
+  width: $unit * 4
+  height: $unit * 4
+  display: flex
+  align-items: center
+  justify-content: center
+  flex-grow: 1
+  flex-shrink: 0
+  border-radius: 50%
+  max-width: $unit * 4
+  max-height: $unit * 4
+  margin: 0 $unit
+
+  &.c-fill-editor__type--active
+    @include themed()
+      box-shadow: 0 0 0 1px theme-prop(primary)
+      &:hover
+        box-shadow: 0 0 0 1px theme-prop(primary)
+
+  &.c-fill-editor__type--color
+    @include themed()
+      background: theme-prop(text-lighter)
+      &:hover
+        background: theme-prop(text-base)
+
+    &.c-fill-editor__type--active
+      @include themed()
+        background: theme-prop(primary)
+        &:hover
+          background: theme-prop(primary)
+
+  &.c-fill-editor__type--radial-gradient
+    @include themed()
+      background: radial-gradient(theme-prop(text-light), theme-prop(glass-background))
+      &:hover
+        background: radial-gradient(theme-prop(text-base), theme-prop(glass-background))
+
+    &.c-fill-editor__type--active
+      @include themed()
+        background: radial-gradient(theme-prop(primary), theme-prop(glass-background))
+        &:hover
+          background: radial-gradient(theme-prop(primary), theme-prop(glass-background))
+
+  &.c-fill-editor__type--linear-gradient
+    @include themed()
+      background: linear-gradient(theme-prop(text-light), theme-prop(glass-background))
+      &:hover
+        background: linear-gradient(theme-prop(text-base), theme-prop(glass-background))
+
+    &.c-fill-editor__type--active
+      @include themed()
+        background: linear-gradient(theme-prop(primary), theme-prop(glass-background))
+        &:hover
+          background: linear-gradient(theme-prop(primary), theme-prop(glass-background))
+
+.c-fill-editor__remove-stop
+  position: absolute
+  right: 0
+  width: $unit * 6
+  height: $unit * 6
+  display: flex
+  align-items: center
+  justify-content: center
+  flex-grow: 1
+  flex-shrink: 0
+  border-radius: 50%
+  max-width: $unit * 6
+  max-height: $unit * 6
+  margin: 0 $unit * 2

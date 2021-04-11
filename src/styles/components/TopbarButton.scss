@@ -1,0 +1,80 @@
+.c-topbar-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: $unit * 14;
+  height: 100%;
+
+  &.c-topbar-button--active {
+    @include themed() {
+      background: theme-prop(primary);
+
+      .c-icon {
+        fill: theme-prop(text-base-on-primary);
+      }
+
+      &:hover {
+        background: theme-prop(primary-active);
+      }
+    }
+  }
+
+  &.c-topbar-button--recording {
+    @include themed() {
+      background: theme-prop(recording);
+
+      .c-icon {
+        fill: theme-prop(text-base-on-recording);
+      }
+
+      &:hover {
+        background: theme-prop(recording-active);
+      }
+    }
+  }
+}
+
+// .c-topbar-button__button {
+//   @include themed() {
+//     color: theme-prop(text-lighter);
+
+//     .c-icon {
+//       fill: theme-prop(text-lighter);
+//     }
+
+//     &:hover {
+//       color: theme-prop(text-base);
+
+//       .c-icon {
+//         fill: theme-prop(text-base);
+//       }
+//     }
+
+//     &:disabled {
+//       color: theme-prop(text-lighter);
+
+//       .c-icon {
+//         fill: theme-prop(text-lighter);
+//       }
+
+//       &:hover {
+//         color: theme-prop(text-lighter);
+
+//         .c-icon {
+//           fill: theme-prop(text-lighter);
+//         }
+//       }
+//     }
+//   }
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   width: $unit * 14;
+//   height: $unit * 6;
+//   margin: 0 $unit;
+//   outline: 0;
+//   border: 0;
+//   border-radius: $unit;
+// }

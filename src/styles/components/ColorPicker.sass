@@ -1,0 +1,84 @@
+.c-color-picker
+  display: flex
+  flex-direction: column
+  width: 100%
+
+.c-color-picker__saturation
+  padding: $unit * 2
+
+.c-color-picker-saturation
+  @include aspect(4,3)
+  @include themed()
+    box-shadow: 0 0 0 1px theme-prop(modal-border)
+  border-radius: $unit
+
+.c-color-picker-saturation__color,
+.c-color-picker-saturation__white,
+.c-color-picker-saturation__black
+  @include aspect-fill
+
+.c-color-picker-saturation__white
+  background: linear-gradient(to right, #fff, rgba(255,255,255,0))
+
+.c-color-picker-saturation__black
+  background: linear-gradient(to top, #000, rgba(0,0,0,0))
+
+.c-color-picker-saturation__pointer
+  position: absolute
+
+.c-color-picker-saturation__circle
+  width: $unit * 2
+  height: $unit * 2
+  box-shadow: $picker-shadow
+  border-radius: 50%
+
+.c-color-picker__alpha,
+.c-color-picker__hue
+  display: flex
+  align-items: center
+  width: 100%
+  height: $unit * 4
+
+.c-color-picker__controls
+  display: flex
+  padding: 0 $unit
+  height: $unit * 10
+
+.c-color-picker__fields
+  display: flex
+  padding: 0 $unit
+
+.c-color-picker__fields--hex
+  form:first-child
+    min-width: 75%
+
+.c-color-picker__fields--rgb
+  padding-bottom: $unit
+
+.c-color-picker__sliders
+  display: flex
+  flex-direction: column
+  flex-grow: 2
+  flex-shrink: 0
+  align-items: center
+  justify-content: center
+  width: 75%
+  max-width: 75%
+
+.c-color-picker__color
+  display: flex
+  width: $unit * 8
+  height: $unit * 10
+  flex-grow: 1
+  flex-shrink: 0
+  padding: 0 $unit
+  align-items: center
+  justify-content: center
+
+.c-color-picker__swatch
+  @include themed()
+    box-shadow: 0 0 0 1px theme-prop(modal-border)
+  width: $unit * 7
+  height: $unit * 7
+  max-height: $unit * 7
+  border-radius: 100%

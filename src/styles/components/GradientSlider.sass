@@ -1,0 +1,47 @@
+.c-gradient-slider
+  @include themed()
+    box-shadow: 0 -1px 0 0 theme-prop(control-border) inset
+  display: flex
+  align-items: center
+  justify-content: center
+  padding: $unit * 2
+  width: 100%
+  max-width: 100%
+  height: $unit * 8
+
+.c-gradient-slider__slider
+  width: 100%
+  height: $unit * 2
+  position: relative
+  display: flex
+  align-items: center
+  border-radius: $unit
+  flex-grow: 2
+  margin-right: $unit
+
+.c-gradient-slider__gradient
+  @include absolute-full
+  @include themed()
+    box-shadow: 0 0 0 1px theme-prop(control-border) inset !important
+
+    &:hover
+      box-shadow: 0 0 0 1px theme-prop(control-border-active) inset !important
+
+    &:focus,
+    &:focus &:hover
+      box-shadow: 0 0 0 1px theme-prop(primary) inset !important
+
+  border-radius: $unit * 2
+
+.c-gradient-slider__pointer
+  position: absolute
+
+.c-gradient-slider__circle
+  width: $unit * 2
+  height: $unit * 2
+  border-radius: 50%
+  box-shadow: 0 0 0 2px #fff, 0 0 0 1px rgba(0, 0, 0, 0.3) inset, 0 0 0 3px rgba(0, 0, 0, 0.3)
+
+  &.c-gradient-slider__circle--active
+    @include themed()
+      box-shadow: 0 0 0 2px #fff, 0 0 0 3px theme-prop(primary), 0 0 0 1px rgba(0, 0, 0, 0.3) inset, 0 0 0 3px rgba(0, 0, 0, 0.3)

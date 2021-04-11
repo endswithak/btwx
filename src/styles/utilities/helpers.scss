@@ -1,0 +1,23 @@
+@each $theme-color-name in $theme-color-names {
+  .h-text--#{$theme-color-name} {
+    @include themed() {
+      color: theme-prop($theme-color-name);
+    }
+  }
+}
+
+@each $theme-text-color-name in $theme-text-color-names {
+  .h-text--#{$theme-text-color-name} {
+    @include themed() {
+      color: theme-prop(text-#{$theme-text-color-name});
+    }
+  }
+}
+
+.h-screen-reader {
+  @include screen-reader;
+}
+
+.h-absolute-full {
+  @include absolute-full;
+}

@@ -1,0 +1,65 @@
+.c-topbar-dropdown-button
+  display: flex
+  position: relative
+  width: $unit * 16
+  justify-content: center
+
+  .c-topbar-button__button
+    margin: 0
+
+.c-topbar-dropdown-button__dropdown
+  @include background-blur
+  @include themed()
+    background: theme-prop(glass-background)
+    box-shadow: 0 0 0 1px theme-prop(modal-border), $glass-shadow
+  position: absolute
+  min-width: 200px
+  top: $unit * 8
+  padding: $unit
+  z-index: 9999999
+  border-radius: $unit
+
+  &.c-topbar-dropdown-button__dropdown--left
+    left: $icon-size / 2
+
+  &.c-topbar-dropdown-button__dropdown--right
+    right: $icon-size / 2
+
+.c-topbar-dropdown-button__option
+  position: relative
+  display: flex
+  align-items: center
+  justify-content: center
+  height: $unit * 8
+  width: 100%
+  padding: 0 $unit
+  border-radius: $unit
+
+.c-topbar-dropdown-button__option--bottom-divider
+  margin-bottom: $unit * 3
+
+  &:after
+    +content-block
+    height: 1px
+    top: $unit * 9.5
+    opacity: 0.44
+
+.c-topbar-dropdown-button__option--text
+  padding-left: $unit * 3
+
+.c-topbar-dropdown-button__icon
+  flex-grow: 0
+  flex-shrink: 0
+  width: $unit * 12
+  height $unit * 10
+  display: flex
+  align-items: center
+  justify-content: center
+
+.c-topbar-dropdown-button__label
+  flex-grow: 2
+  font-family: $font-family
+  font-size: $font-size-small
+  line-height: $unit * 8
+  padding: 0
+  text-align: left

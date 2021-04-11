@@ -1,0 +1,170 @@
+.c-list-item {
+  position: relative;
+  display: flex;
+  border-radius: $border-radius;
+  align-items: center;
+  height: $list-item-single-size;
+  min-height: $list-item-single-size;
+  width: 100%;
+  padding: 0 $padding;
+
+  &.c-list-item--flush {
+    border-radius: 0;
+  }
+
+  &.c-list-item--root {
+    @include themed() {
+      background: theme-prop(list-item-root-background);
+      box-shadow: 0 0 0 1px theme-prop(list-item-root-border) inset;
+
+      .c-text {
+        font-weight: $font-weight-bold;
+      }
+
+      &.c-list-item--flush {
+        box-shadow: 0 1px 0 0 theme-prop(list-item-root-border) inset, 0 1px 0 0 theme-prop(list-item-root-border);
+
+        &.c-list-item--active {
+          box-shadow: 0 0 0 1px theme-prop(primary) inset;
+        }
+
+        &.c-list-item--sticky {
+          box-shadow: 0 1px 0 0 theme-prop(list-item-root-border) inset;
+
+          &.c-list-item--active {
+            box-shadow: 0 0 0 1px theme-prop(primary) inset;
+          }
+        }
+      }
+    }
+  }
+
+  &.c-list-item--interactive {
+    cursor: pointer;
+
+    @include themed() {
+      &:hover {
+        box-shadow: 0 0 0 1px theme-prop(primary) inset !important;
+      }
+
+      &.c-list-item--active {
+        &:hover {
+          box-shadow: 0 0 0 1px theme-prop(primary-active) inset !important;
+        }
+      }
+    }
+  }
+
+  &.c-list-item--hovering {
+    @include themed() {
+      box-shadow: 0 0 0 1px theme-prop(primary) inset !important;
+    }
+  }
+
+  &.c-list-item--active {
+    @include themed() {
+      background: theme-prop(primary);
+
+      .c-text {
+        color: theme-prop(text-base-on-primary) !important;
+      }
+
+      .c-icon svg {
+        fill: theme-prop(text-lighter-on-primary);
+      }
+    }
+  }
+
+  &.c-list-item--disabled {
+    cursor: not-allowed;
+    opacity: 50%;
+    box-shadow: none;
+    pointer-events: none;
+
+    &:hover {
+      box-shadow: none;
+    }
+  }
+
+  &.c-list-item--toggle {
+    &.c-list-item--active {
+      @include themed() {
+        background: none;
+
+        .c-text {
+          color: theme-prop(text-base) !important;
+        }
+
+        .c-icon svg {
+          fill: theme-prop(text-lighter);
+        }
+      }
+    }
+    input[type='checkbox'],
+    input[type='radio'] {
+      position: absolute;
+      clip: rect(0, 0, 0, 0);
+      pointer-events: none;
+    }
+  }
+
+  &.c-list-item--double {
+    height: $list-item-double-size;
+    min-height: $list-item-double-size;
+  }
+
+  &.c-list-item--small {
+    height: $list-item-single-size-small;
+    min-height: $list-item-single-size-small;
+
+    &.c-list-item--double {
+      height: $list-item-double-size-small;
+      min-height: $list-item-double-size-small;
+    }
+  }
+
+  &.c-list-item--large {
+    height: $list-item-single-size-large;
+    min-height: $list-item-single-size-large;
+
+    &.c-list-item--double {
+      height: $list-item-double-size-large;
+      min-height: $list-item-double-size-large;
+    }
+  }
+
+  @each $theme-color-name in $theme-color-names {
+    &.c-list-item--#{$theme-color-name} {
+      @include themed() {
+        background: $theme-color-name;
+
+        .c-text {
+          color: theme-prop(text-base-on-#{$theme-color-name});
+        }
+
+        .c-icon {
+          fill: theme-prop(text-lighter-on-#{$theme-color-name});
+        }
+      }
+    }
+  }
+}
+
+.c-list-item__body {
+  width: 100%;
+  flex-grow: 2;
+  display: flex;
+  flex-direction: column;
+  padding-left: $padding;
+  overflow: hidden;
+  text-align: left;
+}
+
+.c-list-item__right {
+  justify-self: flex-end;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: right;
+  flex-shrink: 0;
+}

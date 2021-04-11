@@ -1,0 +1,38 @@
+.c-event-drawer
+  @include themed()
+    background: theme-prop(event-drawer-background)
+    // box-shadow: 0 1px 0 0 theme-prop(event-drawer-border) inset
+  position: relative
+  bottom: 0
+  width: 100%
+  display: flex
+  flex-shrink: 0
+  overflow: hidden
+  z-index: 1
+  padding: 0 1px
+
+.c-event-drawer__icon
+  width: $unit * 8
+  height: $unit * 8
+  display: flex
+  align-items: center
+  justify-content: center
+  flex-shrink: 0
+  padding-right: $unit * 2
+  cursor: pointer
+
+.c-event-drawer__drag-handle
+  position: absolute
+  width: 100%
+  height: $unit * 2
+  z-index: 2
+  bottom: 0
+
+.c-event-drawer__layers-drag-handle
+  position: absolute
+  width: $unit * 4
+  height: $unit * 8
+  margin-left: -$unit * 2
+  z-index: 5
+  top: 0
+  overflow: visible

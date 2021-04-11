@@ -1,0 +1,33 @@
+.c-list-group {
+  display: flex;
+  flex-direction: column;
+  padding-left: 0;
+  margin-bottom: 0;
+  width: 100%;
+
+  &.c-list-group--horizontal {
+    flex-direction: row;
+
+    > .c-list-item:not(:first-child),
+    > .c-list-group:not(:first-child),
+    > .c-list-item:not(:last-child),
+    > .c-list-group:not(:last-child) > .c-list-item {
+      margin-left: -1px;
+    }
+
+    .c-list-item {
+      border-radius: 0;
+      overflow: hidden;
+
+      &:first-child {
+        border-top-left-radius: $border-radius;
+        border-bottom-left-radius: $border-radius;
+      }
+
+      &:last-child {
+        border-top-right-radius: $border-radius;
+        border-bottom-right-radius: $border-radius;
+      }
+    }
+  }
+}

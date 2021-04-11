@@ -1,0 +1,47 @@
+.c-event-drawer-list
+  position: relative
+  height: 100%
+  width: 100%
+  max-width: 100%
+  display: flex
+  flex-direction: column
+
+.c-event-drawer-list__header
+  @include themed()
+    background: theme-prop(control-background)
+    box-shadow: 0 1px 0 0 theme-prop(event-drawer-border) inset
+  width: 100%
+  // max-width: 100%
+  // flex-shrink: 0
+
+.c-event-drawer-list__items
+  display: flex
+  flex-direction: column
+  position: relative
+  width: 100%
+  max-width: 100%
+  overflow-y: scroll
+  flex-grow: 2
+  height: 100%
+
+.c-event-drawer-list__item
+  display: flex
+  flex-grow: 2
+  width: 100%
+  max-width: 100%
+  height: $unit * 8
+  max-height: $unit * 8
+  font-size: $font-size-small
+  // cursor: pointer
+
+  &::selection
+    background: none
+
+.c-event-drawer-events__divider
+  @include themed()
+    background: theme-prop(event-drawer-border)
+  height: 1px
+  margin-top: $unit / 2
+  margin-bottom: $unit / 2
+  width: 100%
+  flex-shrink: 0

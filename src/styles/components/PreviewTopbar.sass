@@ -1,0 +1,15 @@
+.c-preview-topbar
+  @include themed()
+    background: theme-prop(topbar-background)
+    box-shadow: 0 -1px 0 0 theme-prop(sidebar-border) inset
+  width: 100%
+  flex-grow: 0
+  flex-shrink: 0
+  display: flex
+  align-items: center
+  justify-content: space-between
+  box-sizing: border-box
+  padding: 0 $unit
+  z-index: 99
+  overflow: hidden
+  transform-origin: center top

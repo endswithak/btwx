@@ -1,0 +1,206 @@
+.c-event-drawer-event
+  position: relative
+  height: 100%
+  width: 100%
+  max-width: 100%
+  display: flex
+
+.c-event-drawer-event__layers
+  @include themed()
+    box-shadow: 1px 0 0 0 theme-prop(event-drawer-border)
+  height: 100%
+  display: flex
+  flex-direction: column
+  flex-shrink: 0
+  position: relative
+
+.c-event-drawer-event-layers__header
+  .c-list-item
+    padding: 0 $padding
+
+.c-event-drawer-event-layers-timeline__header
+  @include themed()
+    background: theme-prop(control-background)
+    box-shadow: 0 1px 0 0 theme-prop(event-drawer-border) inset
+  z-index: 4
+
+.c-event-drawer-event-layers__header,
+.c-event-drawer-event-layers-timeline__header
+  display: flex
+  height: $unit * 8
+  max-height: $unit * 8
+  flex-shrink: 0
+  width: 100%
+  position: relative
+
+.c-event-drawer-sticky-header
+  @include themed()
+    box-shadow: 1px 0 0 0 theme-prop(event-drawer-border)
+  position: absolute
+  top: $unit * 8
+  z-index: 3
+  display: flex
+  height: $unit * 8
+  min-height: $unit * 8
+  flex-shrink: 0
+  width: 100%
+
+.c-event-drawer-event-layers__layers
+  z-index: 2
+
+.c-event-drawer-event__layers-timeline-wrap
+  z-index: 1
+
+.c-event-drawer-event-layers__layers,
+.c-event-drawer-event-layers-timeline__layers
+  height: 100%
+  width: 100%
+  display: flex
+  overflow: scroll
+  flex-direction: column
+  flex-grow: 2
+
+.c-event-drawer-event__layers-timeline-wrap
+  height: 100%
+  width: 80%
+  display: flex
+  flex-grow: 2
+  overflow: scroll
+
+.c-event-drawer-event__layers-timeline
+  height: 100%
+  min-width: $unit * 1000
+  width: $unit * 1000 // 4000 // 10 sec max
+  display: flex
+  flex-direction: column
+  flex-grow: 2
+  position: relative
+
+.c-event-drawer-event__layer,
+.c-event-drawer-event__tweens
+  display: flex
+  flex-direction: column
+  flex-shrink: 0
+  width: 100%
+
+.c-event-drawer-event__layer-timeline,
+.c-event-drawer-event__tweens-timeline
+  display: flex
+  flex-direction: column
+  flex-shrink: 0
+  width: 100%
+
+.c-event-drawer-event-layers__layers,
+.c-event-drawer-event__layer-timeline:last-child
+  padding-bottom: $unit * 6
+
+.c-event-drawer-event-layer__tween
+  display: flex
+  height: $unit * 8
+  max-height: $unit * 8
+  flex-grow: 2
+  width: 100%
+  font-size: $font-size-small
+  align-items: center
+  padding: 0 $padding
+
+.c-event-drawer-event-layer__icon
+  margin-right: $unit * 2
+  display: flex
+  align-items: center
+  justify-content: center
+
+.c-event-drawer-event-layer-tween__name
+  @include themed()
+    color: theme-prop(text-base)
+  flex-grow: 2
+  width: 100%
+  line-height: $unit * 8
+  overflow: hidden
+  white-space: nowrap
+  text-overflow: ellipsis
+  font-family: $font-family
+  text-align: left
+
+  &::selection
+    background: none
+
+.c-event-drawer-event-layer__tween--right
+  justify-content: flex-end
+
+.c-event-drawer-event-layer__tween-timeline
+  position: relative
+  display: flex
+  height: $unit * 8
+  max-height: $unit * 8
+  flex-grow: 2
+  width: 100%
+  font-size: $font-size-small
+  align-items: center
+
+.c-event-drawer-events-item__artboard
+  display: flex
+  align-items: center
+
+.c-event-drawer-events-item__active-artboard
+  display: inline-block
+  border-radius: 50%
+  height: $unit
+  width: $unit
+  margin-left: $unit
+
+.c-event-drawer-event__guide
+  @include themed()
+    background: theme-prop(error)
+  position: absolute
+  z-index: 3
+  width: 1px
+  height: 100%
+
+.c-event-drawer-ruler
+  @include themed()
+    background: theme-prop(control-background)
+    box-shadow: 0 1px 0 0 theme-prop(event-drawer-border) inset, 0 1px 0 0 theme-prop(event-drawer-border)
+  display: flex
+  height: $unit * 8
+  max-height: $unit * 8
+  flex-shrink: 0
+  width: 100%
+  position: absolute
+  z-index: 3
+  top: $unit * 8
+
+.c-event-drawer-ruler__unit
+  @include themed()
+    box-shadow: -1px 0 0 0 theme-prop(event-drawer-measure) inset
+  width: $unit * 5
+  min-width: $unit * 5
+  position: relative
+  flex-shrink: 0
+  display: flex
+  align-self: flex-end
+  height: 25%
+
+  > span
+    @include themed()
+      color: theme-prop(text-lighter)
+    position: absolute
+    bottom: $unit * 4
+    right: $unit
+    font-size: $font-size-extra-small
+
+  &.c-event-drawer-ruler__unit--quarter-second
+    height: 50%
+
+  &.c-event-drawer-ruler__unit--half-second
+    height: 75%
+
+  &.c-event-drawer-ruler__unit--second
+    height: 100%
+
+  &.c-event-drawer-ruler__unit--end
+    box-shadow: none
+
+.c-event-drawer-tween-prop
+  @include themed()
+    background: linear-gradient(to right, theme-prop(primary) 0%, rgba(theme-prop(primary), 0) 100%) !important

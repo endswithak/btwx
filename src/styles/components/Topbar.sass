@@ -1,0 +1,21 @@
+.c-topbar
+  @include themed()
+    background: theme-prop(topbar-background)
+    box-shadow: 0 -1px 0 0 theme-prop(sidebar-border) inset
+  height: $unit * 15
+  max-height: $unit * 15
+  width: 100%
+  flex-grow: 0
+  flex-shrink: 0
+  display: flex
+  align-items: flex-end
+  justify-content: space-between
+  padding: 0 $unit
+  z-index: 5
+
+.c-topbar__button-group
+  display: flex
+  align-items: center
+
+  > .c-button
+    width: $unit * 16

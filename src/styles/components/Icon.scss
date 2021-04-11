@@ -1,0 +1,70 @@
+.c-icon {
+  display: inline-flex;
+  width: $icon-size;
+  height: $icon-size;
+  min-width: $icon-size;
+  min-height: $icon-size;
+  overflow: visible;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  > svg {
+    @include themed() {
+      fill: theme-prop(text-lighter);
+    }
+    overflow: visible;
+  }
+
+  &.c-icon--small > svg {
+    transform: scale(0.75);
+  }
+
+  &.c-icon--large > svg {
+    transform: scale(1.75);
+  }
+
+  &.c-icon--outline {
+    @include themed() {
+      svg {
+        fill: none !important;
+        stroke: theme-prop(text-lighter);
+        stroke-width: 1px;
+      }
+    }
+  }
+
+  @each $theme-color-name in $theme-color-names {
+    &.c-icon--#{$theme-color-name} {
+      @include themed() {
+        svg {
+          fill: theme-prop($theme-color-name) !important;
+        }
+
+        &.c-icon--outline {
+          svg {
+            fill: none !important;
+            stroke: theme-prop($theme-color-name) !important;
+          }
+        }
+      }
+    }
+  }
+
+  @each $text-theme-color-name in $theme-text-color-names {
+    &.c-icon--#{$text-theme-color-name} {
+      @include themed() {
+        svg {
+          fill: theme-prop(text-#{$text-theme-color-name}) !important;
+        }
+
+        &.c-icon--outline {
+          svg {
+            fill: none !important;
+            stroke: theme-prop(text-#{$text-theme-color-name}) !important;
+          }
+        }
+      }
+    }
+  }
+}

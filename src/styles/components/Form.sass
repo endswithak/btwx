@@ -1,0 +1,49 @@
+.c-form
+  display: flex
+  flex-direction: column
+  width: 100%
+
+.c-form--inline
+  flex-direction: row
+
+.c-form-group
+  display: flex
+  flex-direction: column
+  width: 100%
+  padding: $unit
+
+.c-form-row
+  display: flex
+  flex-wrap: nowrap
+  width: 100%
+
+.c-form-label
+  @include themed()
+    color: theme-prop(text-base)
+  display: flex
+  align-self: flex-end
+  font-family: $font-family
+  font-size: $font-size-extra-small
+  text-align: right
+  line-height: $unit * 2
+  text-transform: uppercase
+  padding-top: $unit * 2
+
+  &::selection
+    background: none
+
+.c-form-text
+  font-family: $font-family
+  font-size: $font-size
+  line-height: $control-size
+
+  &::selection
+    background: none
+
+.c-form-text--small
+  font-size: $font-size-small
+  line-height: $control-size-small
+
+.c-form-text--large
+  font-size: $font-size-large
+  line-height: $control-size-large

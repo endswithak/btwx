@@ -1,0 +1,442 @@
+@mixin absolute-full {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+}
+
+@mixin content-block {
+  @include absolute-full;
+  content: '';
+  width: 100%;
+  display: block;
+}
+
+@mixin aspect($width, $height) {
+  display: block;
+  position: relative;
+  padding-bottom: percentage($height / $width);
+  height: 0;
+  overflow: hidden;
+}
+
+@mixin aspect-b($aspect-ratio) {
+  position: relative;
+  width: 100%;
+
+  &::before {
+    display: block;
+    padding-top: $aspect-ratio;
+    content: '';
+  }
+
+  > * {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@mixin aspect-fill {
+  @include absolute-full;
+  height: 100%;
+  width: 100%;
+  max-height: 100%;
+  max-width: 100%;
+}
+
+@mixin background-blur {
+  backdrop-filter: blur($background-blur);
+}
+
+@mixin screen-reader {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+@mixin container {
+  width: 100%;
+  height: 100%;
+  padding: 0 $padding;
+  margin: 0 auto;
+}
+
+@mixin truncate-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin themed($themes: $themes) {
+  @each $theme, $map in $themes {
+    .theme--#{$theme} & {
+      $theme-map: () !global;
+      @each $key, $submap in $map {
+        $value: map-get(map-get($themes, $theme), '#{$key}');
+        $theme-map: map-merge(
+          $theme-map,
+          (
+            $key: $value,
+          )
+        ) !global;
+      }
+      @content;
+      $theme-map: null !global;
+    }
+  }
+}
+
+@mixin os($platforms: $platforms) {
+  @each $platform, $map in $platforms {
+    .os--#{$platform} & {
+      $platform-map: () !global;
+      @each $key, $submap in $map {
+        $value: map-get(map-get($platforms, $platform), '#{$key}');
+        $platform-map: map-merge(
+          $platform-map,
+          (
+            $key: $value,
+          )
+        ) !global;
+      }
+      @content;
+      $platform-map: null !global;
+    }
+  }
+}
+
+@mixin form-verification($validation) {
+  @include themed() {
+    &:focus,
+    &:focus &:hover {
+      box-shadow: 0 0 0 1px theme-prop($validation) inset;
+    }
+    &::selection {
+      background: theme-prop($validation);
+    }
+  }
+  & ~ span .c-form-text {
+    @include themed() {
+      color: theme-prop($validation);
+    }
+  }
+}
+
+@mixin clear-button() {
+  @include themed() {
+    color: theme-prop(text-lighter);
+    background: none;
+    box-shadow: none;
+
+    .c-icon svg {
+      fill: theme-prop(text-lighter);
+    }
+
+    .c-icon--outline svg {
+      stroke: theme-prop(text-lighter);
+    }
+
+    &:hover,
+    &.c-button--active {
+      color: theme-prop(text-base);
+      background: none;
+      box-shadow: none;
+
+      .c-icon svg {
+        fill: theme-prop(text-base);
+      }
+
+      .c-icon--outline svg {
+        stroke: theme-prop(text-base);
+      }
+    }
+
+    &.c-button--toggle {
+      &.c-button--active {
+        color: theme-prop(primary);
+        background: none;
+        box-shadow: none;
+
+        .c-icon svg {
+          fill: theme-prop(primary);
+        }
+
+        .c-icon--outline svg {
+          stroke: theme-prop(primary);
+        }
+
+        &:hover {
+          color: theme-prop(primary-active);
+          background: none;
+          box-shadow: none;
+
+          .c-icon svg {
+            fill: theme-prop(primary-active);
+          }
+
+          .c-icon--outline svg {
+            stroke: theme-prop(primary-active);
+          }
+        }
+      }
+    }
+
+    &:disabled,
+    &:disabled &:hover,
+    &.c-button--disabled {
+      opacity: 50%;
+      color: theme-prop(text-lighter);
+      background: none;
+      box-shadow: none;
+
+      .c-icon svg {
+        fill: theme-prop(text-lighter);
+      }
+
+      .c-icon--outline svg {
+        stroke: theme-prop(text-lighter);
+      }
+    }
+  }
+}
+
+@mixin stacked-button() {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+  background: none;
+
+  .c-stacked-button__top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: $border-radius;
+
+    &.c-stacked-button__top--padded {
+      padding: 0 $padding;
+    }
+  }
+
+  @include themed() {
+    .c-stacked-button__top {
+      .c-text {
+        color: theme-prop(text-light) !important;
+      }
+    }
+
+    &:hover {
+      box-shadow: none;
+      background: none;
+      .c-stacked-button__top {
+        .c-text {
+          color: theme-prop(text-base) !important;
+        }
+      }
+    }
+
+    &.c-button--active {
+      box-shadow: none;
+      background: none;
+
+      .c-stacked-button__top {
+        background: theme-prop(primary);
+
+        .c-icon svg {
+          fill: theme-prop(text-light-on-primary);
+        }
+
+        .c-icon--outline svg {
+          stroke: theme-prop(text-light-on-primary);
+        }
+
+        .c-text {
+          color: theme-prop(text-light-on-primary) !important;
+        }
+      }
+
+      &:hover {
+        box-shadow: none;
+        background: none;
+
+        .c-stacked-button__top {
+          background: theme-prop(primary-active);
+
+          .c-icon svg {
+            fill: theme-prop(text-base-on-primary);
+          }
+
+          .c-icon--outline svg {
+            stroke: theme-prop(text-base-on-primary);
+          }
+
+          .c-text {
+            color: theme-prop(text-base-on-primary) !important;
+          }
+        }
+      }
+    }
+
+    &:disabled,
+    &:disabled &:hover,
+    &.c-button--disabled {
+      box-shadow: none;
+      background: none;
+      opacity: 50%;
+      .c-stacked-button__top {
+        background: none;
+      }
+    }
+  }
+}
+
+@mixin default-button() {
+  @include themed() {
+    color: theme-prop(text-lighter);
+    background: theme-prop(button-background);
+    box-shadow: 0 0 0 1px theme-prop(button-border) inset;
+
+    .c-icon svg {
+      fill: theme-prop(text-lighter);
+    }
+
+    .c-icon--outline svg {
+      stroke: theme-prop(text-lighter);
+    }
+
+    &:hover {
+      color: theme-prop(text-base);
+      box-shadow: 0 0 0 1px theme-prop(button-border-active) inset;
+
+      .c-icon svg {
+        fill: theme-prop(text-base);
+      }
+
+      .c-icon--outline svg {
+        stroke: theme-prop(text-base);
+      }
+    }
+
+    &.c-button--active {
+      color: theme-prop(text-light-on-primary);
+      background: theme-prop(primary);
+      box-shadow: 0 0 0 1px theme-prop(primary) inset;
+
+      .c-icon svg {
+        fill: theme-prop(text-light-on-primary);
+      }
+
+      .c-icon--outline svg {
+        stroke: theme-prop(text-light-on-primary);
+      }
+
+      &:hover {
+        color: theme-prop(text-base-on-primary);
+        background: theme-prop(primary-active);
+        box-shadow: 0 0 0 1px theme-prop(primary-active) inset;
+
+        .c-icon svg {
+          fill: theme-prop(text-base-on-primary);
+        }
+
+        .c-icon--outline svg {
+          stroke: theme-prop(text-base-on-primary);
+        }
+      }
+
+      &:disabled,
+      &:disabled &:hover,
+      &.c-button--disabled {
+        cursor: not-allowed;
+        opacity: 50%;
+        color: theme-prop(text-lighter-on-primary);
+        background: theme-prop(primary);
+        box-shadow: 0 0 0 1px theme-prop(primary) inset;
+
+        .c-icon svg {
+          fill: theme-prop(text-lighter-on-primary);
+        }
+
+        .c-icon--outline svg {
+          stroke: theme-prop(text-lighter-on-primary);
+        }
+      }
+    }
+
+    &:disabled,
+    &:disabled &:hover,
+    &.c-button--disabled {
+      cursor: not-allowed;
+      opacity: 50%;
+      color: theme-prop(text-lighter);
+      box-shadow: 0 0 0 1px theme-prop(button-border) inset;
+
+      .c-icon svg {
+        fill: theme-prop(text-lighter);
+      }
+
+      .c-icon--outline svg {
+        stroke: theme-prop(text-lighter);
+      }
+    }
+  }
+}
+
+@mixin theme-button($theme-color) {
+  @include themed() {
+    color: theme-prop(text-light-on-#{$theme-color});
+    background: theme-prop($theme-color);
+    box-shadow: 0 0 0 1px theme-prop($theme-color) inset;
+
+    .c-icon svg {
+      fill: theme-prop(text-light-on-#{$theme-color});
+    }
+
+    .c-icon--outline svg {
+      stroke: theme-prop(text-light-on-#{$theme-color});
+    }
+
+    &:hover,
+    &.c-button--active {
+      color: theme-prop(text-base-on-#{$theme-color});
+      background: theme-prop(#{$theme-color}-active);
+      box-shadow: 0 0 0 1px theme-prop(#{$theme-color}-active) inset;
+
+      .c-icon svg {
+        fill: theme-prop(text-base-on-#{$theme-color});
+      }
+
+      .c-icon--outline svg {
+        stroke: theme-prop(text-base-on-#{$theme-color});
+      }
+    }
+
+    &:disabled,
+    &:disabled &:hover,
+    &.c-button--disabled {
+      cursor: not-allowed;
+      opacity: 50%;
+      color: theme-prop(text-lighter-on-#{$theme-color});
+      background: theme-prop($theme-color);
+      box-shadow: 0 0 0 1px theme-prop($theme-color) inset;
+
+      .c-icon svg {
+        fill: theme-prop(text-lighter-on-#{$theme-color});
+      }
+
+      .c-icon--outline svg {
+        stroke: theme-prop(text-lighter-on-#{$theme-color});
+      }
+    }
+  }
+}

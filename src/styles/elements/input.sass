@@ -1,0 +1,22 @@
+input[type='range']
+  &::-webkit-slider-thumb
+    @include themed()
+      background: theme-prop(slider-thumb-background)
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3)
+    height: $unit * 3
+    width: $unit * 3
+    border-radius: 100%
+    cursor: pointer
+    transform-origin: center center
+    transform: translateY(-50%)
+    position: relative
+    top: 50%
+
+  &::-webkit-slider-runnable-track
+    width: 100%
+    height: $unit
+    cursor: pointer
+    border-radius: $border-radius
+    box-shadow: none
+    margin: 0
+    padding: 0

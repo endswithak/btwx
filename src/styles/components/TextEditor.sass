@@ -1,0 +1,23 @@
+.c-text-editor
+  +absolute-full
+  z-index: 1
+  overflow: hidden
+
+.c-text-editor__textarea
+  padding: 0
+  outline: none
+  border: none
+  margin: 0
+  resize: none
+  background: none
+
+  &::selection
+    @include themed()
+      background: theme-prop(primary)
+
+.c-text-editor__span
+  white-space: pre
+  position: absolute
+  opacity: 0
+  left: -999999999999
+  z-index: -999999999999

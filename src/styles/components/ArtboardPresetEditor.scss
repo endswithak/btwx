@@ -1,0 +1,127 @@
+.c-artboard-preset-editor {
+  @include background-blur;
+  @include themed() {
+    background: theme-prop(glass-background);
+    box-shadow: 0 0 0 1px theme-prop(modal-border);
+  }
+  position: absolute;
+  border: none;
+  display: flex;
+  outline: none;
+  overflow: hidden;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: $unit * 121;
+  height: $unit * 58;
+  border-radius: $unit;
+  z-index: 999999999999;
+
+  &::selection {
+    background: none;
+  }
+}
+
+.c-artboard-preset-editor__aside {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 50%;
+  height: 100%;
+  padding: 0 $unit * 8;
+}
+
+.c-artboard-preset-editor__icon {
+  width: $unit * 12;
+  height: $unit * 12;
+  min-width: $unit * 12;
+  min-height: $unit * 12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: $unit * 8;
+}
+
+.c-artboard-preset-editor-icon__plane {
+  width: $unit * 6;
+  height: $unit * 8;
+  position: absolute;
+}
+
+.c-artboard-preset-editor-icon__plane--bg {
+  @include themed() {
+    background: theme-prop(background-z4);
+  }
+  top: $unit / 2;
+  left: $unit * 2;
+}
+
+.c-artboard-preset-editor-icon__plane--fg {
+  @include themed() {
+    background: theme-prop(primary);
+  }
+  opacity: 0.5;
+  bottom: $unit / 2;
+  right: $unit * 2;
+  z-index: 999;
+}
+
+.c-artboard-preset-editor__head,
+.c-artboard-preset-editor__body {
+  font-family: $font-family;
+  font-size: $font-size-small;
+  line-height: 16px;
+  text-align: center;
+}
+
+.c-artboard-preset-editor__head {
+  @include themed() {
+    color: theme-prop(text-base);
+  }
+  font-weight: bold;
+  padding-bottom: $unit * 2;
+}
+
+.c-artboard-preset-editor__body {
+  @include themed() {
+    color: theme-prop(text-lighter);
+  }
+}
+
+.c-artboard-preset-editor__main {
+  @include themed() {
+    background: theme-prop(modal-background);
+    box-shadow: -1px 0 0 0 theme-prop(modal-border);
+  }
+  width: 50%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: column;
+  padding: $unit * 8;
+}
+
+.c-artboard-preset-editor__form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-self: center;
+}
+
+.c-artboard-preset-editor__size-input {
+  display: flex;
+}
+
+.c-artboard-preset-editor__buttons {
+  width: 100%;
+  height: $unit * 6;
+  align-self: flex-end;
+  display: flex;
+
+  button {
+    margin: 0 $unit;
+  }
+}

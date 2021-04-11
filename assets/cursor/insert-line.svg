@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="33px" height="33px" viewBox="0 0 33 33" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>insert-line</title>
+    <defs>
+        <path d="M17,9 L17,16 L24,16 L24,17 L17,17 L17,24 L16,24 L16,17 L9,17 L9,16 L16,16 L16,9 L17,9 Z M30.7426407,1.96446609 L31.4497475,2.67157288 L23.6715729,10.4497475 L22.9644661,9.74264069 L30.7426407,1.96446609 Z" id="path-1"></path>
+        <filter x="-11.1%" y="-13.2%" width="124.1%" height="124.6%" filterUnits="objectBoundingBox" id="filter-2">
+            <feMorphology radius="1" operator="dilate" in="SourceAlpha" result="shadowSpreadOuter1"></feMorphology>
+            <feOffset dx="0" dy="0" in="shadowSpreadOuter1" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="0.5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feComposite in="shadowBlurOuter1" in2="SourceAlpha" operator="out" result="shadowBlurOuter1"></feComposite>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.24 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="insert-line" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Combined-Shape">
+            <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+            <path stroke="#FFFFFF" stroke-width="1" d="M17.5,8.5 L17.5,15.5 L24.5,15.5 L24.5,17.5 L17.5,17.5 L17.5,24.5 L15.5,24.5 L15.5,17.5 L8.5,17.5 L8.5,15.5 L15.5,15.5 L15.5,8.5 L17.5,8.5 Z M30.7426407,1.25735931 L32.1568542,2.67157288 L23.6715729,11.1568542 L22.2573593,9.74264069 L30.7426407,1.25735931 Z" fill="#000000" fill-rule="evenodd"></path>
+        </g>
+    </g>
+</svg>
