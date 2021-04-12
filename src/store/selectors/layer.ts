@@ -712,10 +712,10 @@ export const getLimitedReverseSelected = createSelector(
 );
 
 export const getLayersWithSearch = createSelector(
-  [ getLayersById, getLayerSearch, getAllArtboardIds ],
-  (layersById, layerSearch, allArtboardIds) => {
-    return Object.keys(layersById).reduce((result, current) => {
-      const name = layersById[current].name;
+  [ getTree, getLayerSearch, getAllArtboardIds ],
+  (tree, layerSearch, allArtboardIds) => {
+    return Object.keys(tree).reduce((result, current) => {
+      const name = tree[current].name;
       if (name.replace(/\s/g, '').toUpperCase().includes(layerSearch.replace(/\s/g, '').toUpperCase()) && name !== 'root') {
         if (allArtboardIds.includes(current)) {
           result = [...result, current];
@@ -3359,7 +3359,7 @@ export const hasFillGradientDestinationYTween = (layerItem: Btwx.Layer, equivale
 };
 
 export const hasXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image';
+  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image' || layerItem.type === 'Text';
   const xMatch = layerItem.frame.x.toFixed(2) === equivalentLayerItem.frame.x.toFixed(2);
   if (validType) {
     return !xMatch;
@@ -3379,7 +3379,7 @@ export const hasXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer
 // };
 
 export const hasYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image';
+  const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image' || layerItem.type === 'Text';
   const yMatch = layerItem.frame.y.toFixed(2) === equivalentLayerItem.frame.y.toFixed(2);
   if (validType) {
     return !yMatch;
@@ -3566,11 +3566,13 @@ export const hasLineHeightTween = (layerItem: Btwx.Layer, equivalentLayerItem: B
   return validType && !leadingMatch;
 };
 
-export const hasJustificationTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = layerItem.type === 'Text';
-  const justificationMatch = validType && (layerItem as Btwx.Text).textStyle.justification === (equivalentLayerItem as Btwx.Text).textStyle.justification;
-  return validType && !justificationMatch;
-};
+// export const hasJustificationTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+//   const validType = layerItem.type === 'Text';
+//   const justificationMatch = validType && (layerItem as Btwx.Text).textStyle.justification === (equivalentLayerItem as Btwx.Text).textStyle.justification;
+//   const textMatch = validType && (layerItem as Btwx.Text).text === (equivalentLayerItem as Btwx.Text).text;
+//   const Match = validType && (layerItem as Btwx.Text).text === (equivalentLayerItem as Btwx.Text).text;
+//   return validType && !justificationMatch;
+// };
 
 export const hasTextTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const validType = layerItem.type === 'Text';
@@ -3670,8 +3672,8 @@ export const getEquivalentTweenProp = (layerItem: Btwx.Layer, equivalentLayerIte
       return hasFontWeightTween(layerItem, equivalentLayerItem);
     case 'lineHeight':
       return hasLineHeightTween(layerItem, equivalentLayerItem);
-    case 'justification':
-      return hasJustificationTween(layerItem, equivalentLayerItem);
+    // case 'justification':
+    //   return hasJustificationTween(layerItem, equivalentLayerItem);
     case 'text':
       return hasTextTween(layerItem, equivalentLayerItem);
     case 'fromX':
@@ -3722,7 +3724,7 @@ export const getEquivalentTweenProps = (layerItem: Btwx.Layer, equivalentLayerIt
   letterSpacing: hasLetterSpacingTween(layerItem, equivalentLayerItem),
   fontWeight: hasFontWeightTween(layerItem, equivalentLayerItem),
   lineHeight: hasLineHeightTween(layerItem, equivalentLayerItem),
-  justification: hasJustificationTween(layerItem, equivalentLayerItem),
+  // justification: hasJustificationTween(layerItem, equivalentLayerItem),
   text: hasTextTween(layerItem, equivalentLayerItem),
   fromX: hasFromXTween(layerItem, equivalentLayerItem),
   fromY: hasFromYTween(layerItem, equivalentLayerItem),

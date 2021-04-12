@@ -236,8 +236,6 @@ import {
   SET_LAYERS_TEXT_TRANSFORM,
   SET_LAYER_LEADING,
   SET_LAYERS_LEADING,
-  // SET_LAYER_PARAGRAPH,
-  // SET_LAYERS_PARAGRAPH,
   SET_LAYER_FONT_WEIGHT,
   SET_LAYERS_FONT_WEIGHT,
   SET_LAYER_FONT_FAMILY,
@@ -246,8 +244,6 @@ import {
   SET_LAYERS_JUSTIFICATION,
   SET_LAYER_VERTICAL_ALIGNMENT,
   SET_LAYERS_VERTICAL_ALIGNMENT,
-  // SET_LAYER_OBLIQUE,
-  // SET_LAYERS_OBLIQUE,
   SET_LAYER_FONT_STYLE,
   SET_LAYERS_FONT_STYLE,
   SET_LAYER_POINT_X,
@@ -542,8 +538,6 @@ import {
   setLayersTextTransform,
   setLayerLeading,
   setLayersLeading,
-  // setLayerParagraph,
-  // setLayersParagraph,
   setLayerFontWeight,
   setLayersFontWeight,
   setLayerFontFamily,
@@ -552,8 +546,6 @@ import {
   setLayersJustification,
   setLayerVerticalAlignment,
   setLayersVerticalAlignment,
-  // setLayerOblique,
-  // setLayersOblique,
   setLayerFontStyle,
   setLayersFontStyle,
   setLayerPointX,
@@ -1199,10 +1191,6 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayerLeading(state, action);
     case SET_LAYERS_LEADING:
       return setLayersLeading(state, action);
-    // case SET_LAYER_PARAGRAPH:
-    //   return setLayerParagraph(state, action);
-    // case SET_LAYERS_PARAGRAPH:
-    //   return setLayersParagraph(state, action);
     case SET_LAYER_JUSTIFICATION:
       return setLayerJustification(state, action);
     case SET_LAYERS_JUSTIFICATION:
@@ -1211,10 +1199,6 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayerVerticalAlignment(state, action);
     case SET_LAYERS_VERTICAL_ALIGNMENT:
       return setLayersVerticalAlignment(state, action);
-    // case SET_LAYER_OBLIQUE:
-    //   return setLayerOblique(state, action);
-    // case SET_LAYERS_OBLIQUE:
-    //   return setLayersOblique(state, action);
     case SET_LAYER_FONT_STYLE:
       return setLayerFontStyle(state, action);
     case SET_LAYERS_FONT_STYLE:
@@ -1605,8 +1589,6 @@ export default undoable(baseReducer, {
       SET_LAYERS_TEXT_TRANSFORM,
       SET_LAYER_LEADING,
       SET_LAYERS_LEADING,
-      // SET_LAYER_PARAGRAPH,
-      // SET_LAYERS_PARAGRAPH,
       SET_LAYER_FONT_WEIGHT,
       SET_LAYERS_FONT_WEIGHT,
       SET_LAYER_FONT_FAMILY,
@@ -1615,8 +1597,6 @@ export default undoable(baseReducer, {
       SET_LAYERS_JUSTIFICATION,
       SET_LAYER_VERTICAL_ALIGNMENT,
       SET_LAYERS_VERTICAL_ALIGNMENT,
-      // SET_LAYER_OBLIQUE,
-      // SET_LAYERS_OBLIQUE,
       SET_LAYER_FONT_STYLE,
       SET_LAYERS_FONT_STYLE,
       SET_LAYER_POINT_X,

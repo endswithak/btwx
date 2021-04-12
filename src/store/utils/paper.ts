@@ -150,14 +150,14 @@ interface MeasureTextLineReturn {
 
 export const measureTextLine = ({ paperLayer, artboardPosition }: MeasureTextLine): MeasureTextLineReturn => {
   const linePosition = paperLayer.position;
-  const relativePos = linePosition.subtract(artboardPosition).round();
-  const anchor = paperLayer.point.subtract(artboardPosition).round();
+  const relativePos = linePosition.subtract(artboardPosition);
+  const anchor = paperLayer.point.subtract(artboardPosition);
   return {
     frame: {
       x: relativePos.x,
       y: relativePos.y,
-      width: Math.round(paperLayer.bounds.width),
-      height: Math.round(paperLayer.bounds.height)
+      width: paperLayer.bounds.width,
+      height: paperLayer.bounds.height
     },
     anchor: {
       x: anchor.x,
@@ -181,16 +181,16 @@ export const getTextInnerBounds = ({ paperLayer, frame, textResize, artboardPosi
   let y;
   switch(textResize) {
     case 'autoWidth':
-      innerWidth = Math.round(textContent.bounds.width);
-      innerHeight = Math.round(textContent.bounds.height);
-      x = Math.round(textContent.position.x - artboardPosition.x);
-      y = Math.round(textContent.position.y - artboardPosition.y);
+      innerWidth = textContent.bounds.width;
+      innerHeight = textContent.bounds.height;
+      x = textContent.position.x - artboardPosition.x;
+      y = textContent.position.y - artboardPosition.y;
       break;
     case 'autoHeight':
       innerWidth = frame.innerWidth;
-      innerHeight = Math.round(textContent.bounds.height);
+      innerHeight = textContent.bounds.height;
       x = frame.x;
-      y = Math.round(textContent.position.y - artboardPosition.y);
+      y = textContent.position.y - artboardPosition.y;
       break;
     case 'fixed':
       innerWidth = frame.innerWidth;

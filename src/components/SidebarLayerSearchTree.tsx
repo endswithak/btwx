@@ -1,4 +1,4 @@
-import React, { ReactElement, memo, useEffect, useRef } from 'react';
+import React, { ReactElement, useEffect, useRef } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -15,6 +15,7 @@ const SidebarLayerTree = (): ReactElement => {
 
   useEffect(() => {
     if (ref.current) {
+      console.log('search scrollto');
       ref.current.scrollToItem(`search-tree-${scroll}`, 'start');
     }
   }, [scroll]);

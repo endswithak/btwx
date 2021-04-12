@@ -1,71 +1,80 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { v4 as uuidv4 } from 'uuid';
 import capitalize from 'lodash.capitalize';
-import paper from 'paper';
-import tinyColor from 'tinycolor2';
-import layer, { LayerState } from '../reducers/layer';
+import { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
 import { addItem, removeItem, insertItem, moveItemAbove, moveItemBelow } from './general';
 import { paperMain } from '../../canvas';
-import {
-  ARTBOARDS_PER_PROJECT, TWEEN_PROPS_MAP, DEFAULT_TWEEN_EASE, getDefaultTweenProps
-} from '../../constants';
+import { ARTBOARDS_PER_PROJECT, TWEEN_PROPS_MAP, DEFAULT_TWEEN_EASE, getDefaultTweenProps } from '../../constants';
 
 import {
   AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer,
-  AddLayerChild, InsertLayerChild, InsertLayerAbove, InsertLayerBelow, GroupLayers, UngroupLayers, UngroupLayer,
-  DeselectAllLayers, RemoveLayers, HideLayerChildren, ShowLayerChildren,
-  DecreaseLayerScope, NewLayerScope, SetLayerHover, ClearLayerScope, IncreaseLayerScope, SelectLayers,
-  DeselectLayers, MoveLayerTo, MoveLayerBy, MoveLayersTo, MoveLayersBy, DeepSelectLayer, EscapeLayerScope,
-  MoveLayer, MoveLayers, AddArtboard, SetLayerName, SetActiveArtboard, AddLayerTween, RemoveLayerTween,
-  AddLayerEvent, RemoveLayerEvent, SetLayerTweenDuration, SetLayerTweenDelay, SetLayerTweenEase,
-  SetLayerTweenPower, SetLayerX, SetLayerY, SetLayerWidth, SetLayerHeight, SetLayerOpacity, SetLayerFillColor,
-  SetLayerStrokeColor, SetLayerStrokeWidth, SetLayerShadowColor, SetLayerShadowBlur, SetLayerShadowXOffset,
-  SetLayerShadowYOffset, SetLayerRotation, EnableLayerFill, DisableLayerFill, EnableLayerStroke,
-  DisableLayerStroke, DisableLayerShadow, EnableLayerShadow, SetLayerStrokeCap, SetLayerStrokeJoin, ScaleLayer,
-  ScaleLayers, EnableLayerHorizontalFlip, DisableLayerHorizontalFlip, EnableLayerVerticalFlip, DisableLayerVerticalFlip,
-  AddText, SetLayerText, SetLayerFontSize, SetLayerFontWeight, SetLayerFontFamily, SetLayerLeading, SetLayerJustification,
-  SetLayerFillType, SetLayerStrokeFillType, AddLayersMask, RemoveLayersMask, SetLayerFill,
-  AlignLayersToLeft, AlignLayersToRight, AlignLayersToTop, AlignLayersToBottom, AlignLayersToCenter, AlignLayersToMiddle,
-  DistributeLayersHorizontally, DistributeLayersVertically, DuplicateLayer, DuplicateLayers, RemoveDuplicatedLayers,
-  BringLayerForward, SendLayerBackward, BringLayersForward, SendLayersBackward, BringLayerToFront, BringLayersToFront,
-  SendLayerToBack, SendLayersToBack, AddImage, InsertLayersAbove, InsertLayersBelow, AddLayerChildren, SetLayerBlendMode,
-  UniteLayers, SetRoundedRadius, SetPolygonSides, SetStarPoints, IntersectLayers, SubtractLayers, ExcludeLayers, DivideLayers,
-  SetStarRadius, SetLayerStrokeDashOffset, SetLayersOpacity, SetLayersBlendMode, SetLayersX, SetLayersY, SetLayersWidth,
-  SetLayersHeight, SetLayersRotation, SetLayersFillColor, SetLayersStrokeColor, SetLayersShadowColor, EnableLayersFill,
-  DisableLayersFill, EnableLayersStroke, DisableLayersStroke, EnableLayersShadow, DisableLayersShadow, SetLayersFillType,
-  SetLayersStrokeFillType, SetLayersStrokeWidth, SetLayersStrokeCap, SetLayersStrokeJoin, SetLayersStrokeDashOffset,
-  SetLayerStrokeDashArray, SetLayersStrokeDashArray, SetLayerStrokeDashArrayWidth, SetLayersStrokeDashArrayWidth, SetLayerStrokeDashArrayGap,
+  AddLayerChild, InsertLayerChild, InsertLayerAbove, InsertLayerBelow,
+  GroupLayers, UngroupLayers, UngroupLayer, DeselectAllLayers, RemoveLayers,
+  HideLayerChildren, ShowLayerChildren, DecreaseLayerScope, NewLayerScope, SetLayerHover,
+  ClearLayerScope, IncreaseLayerScope, SelectLayers, DeselectLayers, MoveLayerTo,
+  MoveLayerBy, MoveLayersTo, MoveLayersBy, DeepSelectLayer, EscapeLayerScope,
+  MoveLayer, MoveLayers, AddArtboard, SetLayerName, SetActiveArtboard, AddLayerTween,
+  RemoveLayerTween, AddLayerEvent, RemoveLayerEvent, SetLayerTweenDuration, SetLayerTweenDelay,
+  SetLayerTweenEase, SetLayerTweenPower, SetLayerX, SetLayerY, SetLayerWidth, SetLayerHeight,
+  SetLayerOpacity, SetLayerFillColor, SetLayerStrokeColor, SetLayerStrokeWidth, SetLayerShadowColor,
+  SetLayerShadowBlur, SetLayerShadowXOffset, SetLayerShadowYOffset, SetLayerRotation, EnableLayerFill,
+  DisableLayerFill, EnableLayerStroke, DisableLayerStroke, DisableLayerShadow, EnableLayerShadow,
+  SetLayerStrokeCap, SetLayerStrokeJoin, ScaleLayer, ScaleLayers, EnableLayerHorizontalFlip,
+  DisableLayerHorizontalFlip, EnableLayerVerticalFlip, DisableLayerVerticalFlip, AddText, SetLayerText,
+  SetLayerFontSize, SetLayerFontWeight, SetLayerFontFamily, SetLayerLeading, SetLayerJustification,
+  SetLayerFillType, SetLayerStrokeFillType, AddLayersMask, RemoveLayersMask, SetLayerFill, AlignLayersToLeft,
+  AlignLayersToRight, AlignLayersToTop, AlignLayersToBottom, AlignLayersToCenter, AlignLayersToMiddle,
+  DistributeLayersHorizontally, DistributeLayersVertically, DuplicateLayer, DuplicateLayers,
+  RemoveDuplicatedLayers, BringLayerForward, SendLayerBackward, BringLayersForward, SendLayersBackward,
+  BringLayerToFront, BringLayersToFront, SendLayerToBack, SendLayersToBack, AddImage, InsertLayersAbove,
+  InsertLayersBelow, AddLayerChildren, SetLayerBlendMode, UniteLayers, SetRoundedRadius, SetPolygonSides,
+  SetStarPoints, IntersectLayers, SubtractLayers, ExcludeLayers, DivideLayers, SetStarRadius,
+  SetLayerStrokeDashOffset, SetLayersOpacity, SetLayersBlendMode, SetLayersX, SetLayersY, SetLayersWidth,
+  SetLayersHeight, SetLayersRotation, SetLayersFillColor, SetLayersStrokeColor, SetLayersShadowColor,
+  EnableLayersFill, DisableLayersFill, EnableLayersStroke, DisableLayersStroke, EnableLayersShadow,
+  DisableLayersShadow, SetLayersFillType, SetLayersStrokeFillType, SetLayersStrokeWidth, SetLayersStrokeCap,
+  SetLayersStrokeJoin, SetLayersStrokeDashOffset, SetLayerStrokeDashArray, SetLayersStrokeDashArray,
+  SetLayerStrokeDashArrayWidth, SetLayersStrokeDashArrayWidth, SetLayerStrokeDashArrayGap,
   SetLayersStrokeDashArrayGap, SetLayerGradient, SetLayersGradient, SetLayerGradientType, SetLayersGradientType,
-  SetLayerGradientOrigin, SetLayersGradientOrigin, SetLayerGradientDestination, SetLayersGradientDestination, SetLayerGradientStopColor,
-  SetLayersGradientStopColor, SetLayerGradientStopPosition, SetLayersGradientStopPosition, AddLayerGradientStop, AddLayersGradientStop,
-  RemoveLayerGradientStop, RemoveLayersGradientStop, SetLayerActiveGradientStop, SetLayersShadowBlur, SetLayersShadowXOffset,
-  SetLayersShadowYOffset, SetLayersFontSize, SetLayersFontWeight, SetLayersFontFamily, SetLayersLeading, SetLayersJustification,
-  SetLayerTweenTiming, SetRoundedRadii, SetPolygonsSides, SetStarsPoints, SetStarsRadius, SetLayerEdit, AddLayers, SetLineFromX,
-  SetLineFromY, SetLineFrom, SetLineToX, SetLineToY, SetLineTo, SetLinesFromX, SetLinesFromY, SetLinesToX, SetLinesToY, SelectAllLayers,
-  SetLayerStyle, SetLayersStyle, EnableLayersHorizontalFlip, DisableLayersHorizontalFlip, DisableLayersVerticalFlip, EnableLayersVerticalFlip,
-  SetLayerScope, SetLayersScope, SetGlobalScope, SetLayerUnderlyingMask, SetLayersUnderlyingMask, SetLayerMasked, SetLayersMasked, ToggleLayerMask,
-  ToggleLayersMask, ToggleLayersIgnoreUnderlyingMask, ToggleLayerIgnoreUnderlyingMask, AreaSelectLayers, SetLayersGradientOD, ResetImagesDimensions,
-  ResetImageDimensions, ReplaceImage, ReplaceImages, PasteLayersFromClipboard, SetLayerOblique, SetLayersOblique, SetLayerPointX, SetLayersPointX,
-  SetLayerPointY, SetLayersPointY, SetLayerScrambleTextTweenCharacters, SetLayerScrambleTextTweenRevealDelay, SetLayerScrambleTextTweenSpeed,
-  SetLayerScrambleTextTweenDelimiter, SetLayerScrambleTextTweenRightToLeft, SetLayerCustomBounceTweenStrength, SetLayerCustomBounceTweenEndAtStart,
-  SetLayerCustomBounceTweenSquash, SetLayerCustomWiggleTweenWiggles, SetLayerCustomWiggleTweenType, SetLayerStepsTweenSteps, SetLayerRoughTweenClamp,
-  SetLayerRoughTweenPoints, SetLayerRoughTweenRandomize, SetLayerRoughTweenStrength, SetLayerRoughTweenTaper, SetLayerRoughTweenTemplate,
-  SetLayerSlowTweenLinearRatio, SetLayerSlowTweenPower, SetLayerSlowTweenYoYoMode, SetLayerTextTweenDelimiter, SetLayerTextTweenSpeed,
-  SetLayerTextTweenDiff, SetLayerTextTweenScramble, SetLayerLeft, SetLayerCenter, SetLayersLeft, SetLayersCenter, SetLayerRight, SetLayersRight,
-  SetLayerTop, SetLayersTop, SetLayerMiddle, SetLayersMiddle, SetLayerBottom, SetLayersBottom, SetLayerLetterSpacing, SetLayersLetterSpacing,
-  SetLayerTextTransform, SetLayersTextTransform, SetLayersFillColors, SetLayersStrokeColors, SetLayersShadowColors, AddLayersEvent, SetLayerTree,
-  SetLayerTreeScroll, SetLayerCustomWiggleTweenStrength, SetLayerBlur, SetLayersBlur, EnableLayerBlur, EnableLayersBlur, DisableLayerBlur, DisableLayersBlur,
-  SetLayerParagraph, SetLayersParagraph, SetLayerTextResize, SetLayersTextResize, SetLayerVerticalAlignment, SetLayersVerticalAlignment, SetLayerFontStyle,
-  SetLayersFontStyle, SelectLayerEvent, DeselectLayerEvent, SelectLayerEvents, DeselectLayerEvents, SelectLayerEventTween, DeselectLayerEventTween,
-  SelectLayerEventTweens, DeselectLayerEventTweens, SetLayersTweenDuration, SetLayersTweenDelay, SetLayersTweenTiming, SetLayersTweenEase,
-  SetLayersTweenPower, SetLayersStepsTweenSteps, SetLayersRoughTweenClamp, SetLayersRoughTweenPoints, SetLayersRoughTweenRandomize,
-  SetLayersRoughTweenStrength, SetLayersRoughTweenTaper, SetLayersRoughTweenTemplate, SetLayersSlowTweenLinearRatio, SetLayersSlowTweenPower,
-  SetLayersSlowTweenYoYoMode, SetLayersTextTweenDelimiter, SetLayersTextTweenSpeed, SetLayersTextTweenDiff, SetLayersTextTweenScramble,
-  SetLayersScrambleTextTweenCharacters, SetLayersScrambleTextTweenRevealDelay, SetLayersScrambleTextTweenSpeed, SetLayersScrambleTextTweenDelimiter,
-  SetLayersScrambleTextTweenRightToLeft, SetLayersCustomBounceTweenStrength, SetLayersCustomBounceTweenEndAtStart, SetLayersCustomBounceTweenSquash,
-  SetLayersCustomWiggleTweenStrength, SetLayersCustomWiggleTweenWiggles, SetLayersCustomWiggleTweenType, RemoveLayerTweens,
-  RemoveLayersEvent, ShowLayersChildren, HideLayersChildren, SetLayerTreeStickyArtboard
+  SetLayerGradientOrigin, SetLayersGradientOrigin, SetLayerGradientDestination, SetLayersGradientDestination,
+  SetLayerGradientStopColor, SetLayersGradientStopColor, SetLayerGradientStopPosition,
+  SetLayersGradientStopPosition, AddLayerGradientStop, AddLayersGradientStop, RemoveLayerGradientStop,
+  RemoveLayersGradientStop, SetLayerActiveGradientStop, SetLayersShadowBlur, SetLayersShadowXOffset,
+  SetLayersShadowYOffset, SetLayersFontSize, SetLayersFontWeight, SetLayersFontFamily, SetLayersLeading,
+  SetLayersJustification, SetLayerTweenTiming, SetRoundedRadii, SetPolygonsSides, SetStarsPoints,
+  SetStarsRadius, SetLayerEdit, AddLayers, SetLineFromX, SetLineFromY, SetLineFrom, SetLineToX, SetLineToY,
+  SetLineTo, SetLinesFromX, SetLinesFromY, SetLinesToX, SetLinesToY, SelectAllLayers, SetLayerStyle,
+  SetLayersStyle, EnableLayersHorizontalFlip, DisableLayersHorizontalFlip, DisableLayersVerticalFlip,
+  EnableLayersVerticalFlip, SetLayerScope, SetLayersScope, SetGlobalScope, SetLayerUnderlyingMask,
+  SetLayersUnderlyingMask, SetLayerMasked, SetLayersMasked, ToggleLayerMask, ToggleLayersMask,
+  ToggleLayersIgnoreUnderlyingMask, ToggleLayerIgnoreUnderlyingMask, AreaSelectLayers, SetLayersGradientOD,
+  ResetImagesDimensions, ResetImageDimensions, ReplaceImage, ReplaceImages, PasteLayersFromClipboard,
+  SetLayerPointX, SetLayersPointX, SetLayerPointY, SetLayersPointY, SetLayerScrambleTextTweenCharacters,
+  SetLayerScrambleTextTweenRevealDelay, SetLayerScrambleTextTweenSpeed, SetLayerScrambleTextTweenDelimiter,
+  SetLayerScrambleTextTweenRightToLeft, SetLayerCustomBounceTweenStrength, SetLayerCustomBounceTweenEndAtStart,
+  SetLayerCustomBounceTweenSquash, SetLayerCustomWiggleTweenWiggles, SetLayerCustomWiggleTweenType,
+  SetLayerStepsTweenSteps, SetLayerRoughTweenClamp, SetLayerRoughTweenPoints, SetLayerRoughTweenRandomize,
+  SetLayerRoughTweenStrength, SetLayerRoughTweenTaper, SetLayerRoughTweenTemplate, SetLayerSlowTweenLinearRatio,
+  SetLayerSlowTweenPower, SetLayerSlowTweenYoYoMode, SetLayerTextTweenDelimiter, SetLayerTextTweenSpeed,
+  SetLayerTextTweenDiff, SetLayerTextTweenScramble, SetLayerLeft, SetLayerCenter, SetLayersLeft, SetLayersCenter,
+  SetLayerRight, SetLayersRight, SetLayerTop, SetLayersTop, SetLayerMiddle, SetLayersMiddle, SetLayerBottom,
+  SetLayersBottom, SetLayerLetterSpacing, SetLayersLetterSpacing, SetLayerTextTransform, SetLayersTextTransform,
+  SetLayersFillColors, SetLayersStrokeColors, SetLayersShadowColors, AddLayersEvent, SetLayerTree, SetLayerTreeScroll,
+  SetLayerCustomWiggleTweenStrength, SetLayerBlur, SetLayersBlur, EnableLayerBlur, EnableLayersBlur, DisableLayerBlur,
+  DisableLayersBlur, SetLayerTextResize, SetLayersTextResize, SetLayerVerticalAlignment, SetLayersVerticalAlignment,
+  SetLayerFontStyle, SetLayersFontStyle, SelectLayerEvent, DeselectLayerEvent, SelectLayerEvents, DeselectLayerEvents,
+  SelectLayerEventTween, DeselectLayerEventTween, SelectLayerEventTweens, DeselectLayerEventTweens,
+  SetLayersTweenDuration, SetLayersTweenDelay, SetLayersTweenTiming, SetLayersTweenEase, SetLayersTweenPower,
+  SetLayersStepsTweenSteps, SetLayersRoughTweenClamp, SetLayersRoughTweenPoints, SetLayersRoughTweenRandomize,
+  SetLayersRoughTweenStrength, SetLayersRoughTweenTaper, SetLayersRoughTweenTemplate, SetLayersSlowTweenLinearRatio,
+  SetLayersSlowTweenPower, SetLayersSlowTweenYoYoMode, SetLayersTextTweenDelimiter, SetLayersTextTweenSpeed,
+  SetLayersTextTweenDiff, SetLayersTextTweenScramble, SetLayersScrambleTextTweenCharacters,
+  SetLayersScrambleTextTweenRevealDelay, SetLayersScrambleTextTweenSpeed, SetLayersScrambleTextTweenDelimiter,
+  SetLayersScrambleTextTweenRightToLeft, SetLayersCustomBounceTweenStrength, SetLayersCustomBounceTweenEndAtStart,
+  SetLayersCustomBounceTweenSquash, SetLayersCustomWiggleTweenStrength, SetLayersCustomWiggleTweenWiggles,
+  SetLayersCustomWiggleTweenType, RemoveLayerTweens, RemoveLayersEvent, ShowLayersChildren, HideLayersChildren,
+  SetLayerTreeStickyArtboard
 } from '../actionTypes/layer';
 
 import {
@@ -8494,7 +8503,7 @@ export const setLayerJustification = (state: LayerState, action: SetLayerJustifi
       } as Btwx.Text
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['justification']);
+  // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['justification']);
   return currentState;
 };
 

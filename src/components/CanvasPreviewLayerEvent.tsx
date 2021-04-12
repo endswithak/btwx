@@ -19,8 +19,9 @@ export interface EventLayerTimelineData {
   paperLayer: paper.Item;
   artboardBackground: paper.Path.Rectangle;
   // textLinesGroup: paper.Group;
-  textContent: paper.AreaText;
+  textContent: paper.PointText;
   textBackground: paper.Path.Rectangle;
+  textMask: paper.Path.Rectangle;
 }
 
 const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElement => {
@@ -90,7 +91,10 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
         //   ? paperLayer.getItem({ data: { id: 'textLines' } }) as paper.Group
         //   : null,
         textContent: paperLayer.data.layerType === 'Text'
-          ? paperLayer.getItem({ data: { id: 'textContent' } }) as paper.AreaText
+          ? paperLayer.getItem({ data: { id: 'textContent' } }) as paper.PointText
+          : null,
+        textMask: paperLayer.data.layerType === 'Text'
+          ? paperLayer.getItem({ data: { id: 'textMask' } }) as paper.Path.Rectangle
           : null,
         textBackground: paperLayer.data.layerType === 'Text'
           ? paperLayer.getItem({ data: { id: 'textBackground' } }) as paper.Path.Rectangle

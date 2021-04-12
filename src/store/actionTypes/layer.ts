@@ -271,8 +271,6 @@ export const SET_LAYER_FONT_SIZE = 'SET_LAYER_FONT_SIZE';
 export const SET_LAYERS_FONT_SIZE = 'SET_LAYERS_FONT_SIZE';
 export const SET_LAYER_LEADING = 'SET_LAYER_LEADING';
 export const SET_LAYERS_LEADING = 'SET_LAYERS_LEADING';
-export const SET_LAYER_PARAGRAPH = 'SET_LAYER_PARAGRAPH';
-export const SET_LAYERS_PARAGRAPH = 'SET_LAYERS_PARAGRAPH';
 export const SET_LAYER_FONT_WEIGHT = 'SET_LAYER_FONT_WEIGHT';
 export const SET_LAYERS_FONT_WEIGHT = 'SET_LAYERS_FONT_WEIGHT';
 export const SET_LAYER_FONT_FAMILY = 'SET_LAYER_FONT_FAMILY';
@@ -281,8 +279,6 @@ export const SET_LAYER_JUSTIFICATION = 'SET_LAYER_JUSTIFICATION';
 export const SET_LAYERS_JUSTIFICATION = 'SET_LAYERS_JUSTIFICATION';
 export const SET_LAYER_VERTICAL_ALIGNMENT = 'SET_LAYER_VERTICAL_ALIGNMENT';
 export const SET_LAYERS_VERTICAL_ALIGNMENT = 'SET_LAYERS_VERTICAL_ALIGNMENT';
-export const SET_LAYER_OBLIQUE = 'SET_LAYER_OBLIQUE';
-export const SET_LAYERS_OBLIQUE = 'SET_LAYERS_OBLIQUE';
 export const SET_LAYER_FONT_STYLE = 'SET_LAYER_FONT_STYLE';
 export const SET_LAYERS_FONT_STYLE = 'SET_LAYERS_FONT_STYLE';
 export const SET_LAYER_POINT_X = 'SET_LAYER_POINT_X';
@@ -2983,32 +2979,6 @@ export interface SetLayersLeading {
   payload: SetLayersLeadingPayload;
 }
 
-export interface SetLayerParagraphPayload {
-  id: string;
-  paragraph: number;
-  bounds?: Btwx.Frame;
-  lines?: Btwx.TextLine[];
-  contentHeight?: number;
-}
-
-export interface SetLayerParagraph {
-  type: typeof SET_LAYER_PARAGRAPH;
-  payload: SetLayerParagraphPayload;
-}
-
-export interface SetLayersParagraphPayload {
-  layers: string[];
-  paragraph: number;
-  bounds?: Btwx.Frame[];
-  lines?: Btwx.TextLine[][];
-  contentHeight?: number[];
-}
-
-export interface SetLayersParagraph {
-  type: typeof SET_LAYERS_PARAGRAPH;
-  payload: SetLayersParagraphPayload;
-}
-
 export interface SetLayerFontWeightPayload {
   id: string;
   fontWeight: string | number;
@@ -3119,28 +3089,6 @@ export interface SetLayersVerticalAlignmentPayload {
 export interface SetLayersVerticalAlignment {
   type: typeof SET_LAYERS_VERTICAL_ALIGNMENT;
   payload: SetLayersVerticalAlignmentPayload;
-}
-
-export interface SetLayerObliquePayload {
-  id: string;
-  oblique: number;
-  bounds?: Btwx.Frame;
-}
-
-export interface SetLayerOblique {
-  type: typeof SET_LAYER_OBLIQUE;
-  payload: SetLayerObliquePayload;
-}
-
-export interface SetLayersObliquePayload {
-  layers: string[];
-  oblique: number;
-  bounds?: Btwx.Frame[];
-}
-
-export interface SetLayersOblique {
-  type: typeof SET_LAYERS_OBLIQUE;
-  payload: SetLayersObliquePayload;
 }
 
 export interface SetLayerFontStylePayload {
@@ -4186,8 +4134,6 @@ export type LayerTypes = AddArtboard |
                          SetLayersFontSize |
                          SetLayerLeading |
                          SetLayersLeading |
-                         SetLayerParagraph |
-                         SetLayersParagraph |
                          SetLayerFontWeight |
                          SetLayersFontWeight |
                          SetLayerFontFamily |
@@ -4196,8 +4142,6 @@ export type LayerTypes = AddArtboard |
                          SetLayersJustification |
                          SetLayerVerticalAlignment |
                          SetLayersVerticalAlignment |
-                         SetLayerOblique |
-                         SetLayersOblique |
                          SetLayerFontStyle |
                          SetLayersFontStyle |
                          SetLayerPointX |

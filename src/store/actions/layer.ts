@@ -274,8 +274,6 @@ import {
   SET_LAYERS_FONT_SIZE,
   SET_LAYER_LEADING,
   SET_LAYERS_LEADING,
-  SET_LAYER_PARAGRAPH,
-  SET_LAYERS_PARAGRAPH,
   SET_LAYER_FONT_WEIGHT,
   SET_LAYERS_FONT_WEIGHT,
   SET_LAYER_FONT_FAMILY,
@@ -284,8 +282,6 @@ import {
   SET_LAYERS_JUSTIFICATION,
   SET_LAYER_VERTICAL_ALIGNMENT,
   SET_LAYERS_VERTICAL_ALIGNMENT,
-  SET_LAYER_OBLIQUE,
-  SET_LAYERS_OBLIQUE,
   SET_LAYER_FONT_STYLE,
   SET_LAYERS_FONT_STYLE,
   SET_LAYER_POINT_X,
@@ -592,8 +588,6 @@ import {
   SetLayersFontSizePayload,
   SetLayerLeadingPayload,
   SetLayersLeadingPayload,
-  SetLayerParagraphPayload,
-  SetLayersParagraphPayload,
   SetLayerFontWeightPayload,
   SetLayersFontWeightPayload,
   SetLayerFontFamilyPayload,
@@ -602,8 +596,6 @@ import {
   SetLayersJustificationPayload,
   SetLayerVerticalAlignmentPayload,
   SetLayersVerticalAlignmentPayload,
-  SetLayerObliquePayload,
-  SetLayersObliquePayload,
   SetLayerFontStylePayload,
   SetLayersFontStylePayload,
   SetLayerPointXPayload,
@@ -3054,7 +3046,7 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
           textResize: nextResize
         });
         // get next point, inner bounds, and lines
-        const nextPoint = textContent.point.subtract(artboardPosition).round();
+        const nextPoint = textContent.point.subtract(artboardPosition);
         const nextContentHeight = Math.round(textContent.bounds.height);
         const nextInnerBounds = getTextInnerBounds({
           paperLayer: duplicate,
@@ -3209,21 +3201,17 @@ export const setLayerTextThunk = (payload: SetLayerTextPayload) => {
     const nextContent = getContent({
       paragraphs: nextParagraphs
     });
-    // check if point changed
-    const hasPointChange = pointChanged({layerItem});
     // set next content
     textContent.content = nextContent;
     // reposition text content
-    if (hasPointChange) {
-      positionTextContent({
-        paperLayer: clone,
-        verticalAlignment: (layerItem as Btwx.Text).textStyle.verticalAlignment,
-        justification: (layerItem as Btwx.Text).textStyle.justification,
-        textResize: (layerItem as Btwx.Text).textStyle.textResize
-      });
-    }
+    positionTextContent({
+      paperLayer: clone,
+      verticalAlignment: (layerItem as Btwx.Text).textStyle.verticalAlignment,
+      justification: (layerItem as Btwx.Text).textStyle.justification,
+      textResize: (layerItem as Btwx.Text).textStyle.textResize
+    });
     // get next point, inner bounds, and lines
-    const nextPoint = textContent.point.subtract(artboardPosition).round();
+    const nextPoint = textContent.point.subtract(artboardPosition);
     const nextContentHeight = Math.round(textContent.bounds.height);
     const nextInnerBounds = getTextInnerBounds({
       paperLayer: clone,
@@ -3259,10 +3247,10 @@ export const setLayerTextThunk = (payload: SetLayerTextPayload) => {
         lines: nextTextLines,
         paragraphs: nextParagraphs,
         contentHeight: nextContentHeight,
-        ...(hasPointChange ? {
+        point: {
           x: nextPoint.x,
           y: nextPoint.y
-        } : {})
+        }
       })
     )
   }
@@ -3315,21 +3303,17 @@ export const setLayersTextResizeThunk = (payload: SetLayersTextResizePayload) =>
       const nextContent = getContent({
         paragraphs: nextParagraphs
       });
-      // check if point changed
-      const hasPointChange = pointChanged({layerItem});
       // apply new props
       textContent.content = nextContent;
       // reposition text content
-      if (hasPointChange) {
-        positionTextContent({
-          paperLayer: clone,
-          verticalAlignment: (layerItem as Btwx.Text).textStyle.verticalAlignment,
-          justification: (layerItem as Btwx.Text).textStyle.justification,
-          textResize: payload.resize
-        });
-      }
+      positionTextContent({
+        paperLayer: clone,
+        verticalAlignment: (layerItem as Btwx.Text).textStyle.verticalAlignment,
+        justification: (layerItem as Btwx.Text).textStyle.justification,
+        textResize: payload.resize
+      });
       // get next point, inner bounds, and lines
-      const nextPoint = textContent.point.subtract(artboardPosition).round();
+      const nextPoint = textContent.point.subtract(artboardPosition);
       const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
@@ -3356,7 +3340,7 @@ export const setLayersTextResizeThunk = (payload: SetLayersTextResizePayload) =>
       });
       // push updates
       paragraphs.push(nextParagraphs);
-      point.push(hasPointChange ? nextPoint : null);
+      point.push(nextPoint);
       contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
@@ -3425,22 +3409,18 @@ export const setLayersFontSizeThunk = (payload: SetLayersFontSizePayload) => {
       const nextContent = getContent({
         paragraphs: nextParagraphs
       });
-      // check if point changed
-      const hasPointChange = pointChanged({layerItem});
       // apply new props
       textContent.fontSize = payload.fontSize;
       textContent.content = nextContent;
       // reposition text content
-      if (hasPointChange) {
-        positionTextContent({
-          paperLayer: clone,
-          verticalAlignment: (layerItem as Btwx.Text).textStyle.verticalAlignment,
-          justification: (layerItem as Btwx.Text).textStyle.justification,
-          textResize: (layerItem as Btwx.Text).textStyle.textResize
-        });
-      }
+      positionTextContent({
+        paperLayer: clone,
+        verticalAlignment: (layerItem as Btwx.Text).textStyle.verticalAlignment,
+        justification: (layerItem as Btwx.Text).textStyle.justification,
+        textResize: (layerItem as Btwx.Text).textStyle.textResize
+      });
       // get next point, inner bounds, and lines
-      const nextPoint = textContent.point.subtract(artboardPosition).round();
+      const nextPoint = textContent.point.subtract(artboardPosition);
       const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
@@ -3467,7 +3447,7 @@ export const setLayersFontSizeThunk = (payload: SetLayersFontSizePayload) => {
       });
       // push updates
       paragraphs.push(nextParagraphs);
-      point.push(hasPointChange ? nextPoint : null);
+      point.push(nextPoint);
       contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
@@ -3548,14 +3528,12 @@ export const setLayersLeadingThunk = (payload: SetLayersLeadingPayload) => {
           break;
       }
       //
-      if (layerItem.textStyle.textResize === 'fixed' && layerItem.textStyle.verticalAlignment !== 'top') {
-        positionTextContent({
-          paperLayer: clone,
-          verticalAlignment: (layerItem as Btwx.Text).textStyle.verticalAlignment,
-          justification: (layerItem as Btwx.Text).textStyle.justification,
-          textResize: (layerItem as Btwx.Text).textStyle.textResize
-        });
-      }
+      positionTextContent({
+        paperLayer: clone,
+        verticalAlignment: (layerItem as Btwx.Text).textStyle.verticalAlignment,
+        justification: (layerItem as Btwx.Text).textStyle.justification,
+        textResize: (layerItem as Btwx.Text).textStyle.textResize
+      });
       // get next point, inner bounds, and lines
       const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
@@ -3596,82 +3574,6 @@ export const setLayersLeadingThunk = (payload: SetLayersLeadingPayload) => {
     });
     dispatch(
       setLayersLeading({
-        ...payload,
-        bounds,
-        lines,
-        contentHeight
-      })
-    )
-  }
-};
-
-export const setLayerParagraph = (payload: SetLayerParagraphPayload): LayerTypes => ({
-  type: SET_LAYER_PARAGRAPH,
-  payload
-});
-
-export const setLayersParagraph = (payload: SetLayersParagraphPayload): LayerTypes => ({
-  type: SET_LAYERS_PARAGRAPH,
-  payload
-});
-
-export const setLayersParagraphThunk = (payload: SetLayersParagraphPayload) => {
-  return (dispatch: any, getState: any) => {
-    const state = getState() as RootState;
-    const lines: Btwx.TextLine[][] = [];
-    const bounds: Btwx.Frame[] = [];
-    const contentHeight: number[] = [];
-    payload.layers.forEach((id) => {
-      const layerItem = state.layer.present.byId[id] as Btwx.Text;
-      const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
-      const projectIndex = artboardItem.projectIndex;
-      const paperLayer = paperMain.projects[projectIndex].getItem({data: {id: id}});
-      const clone = paperLayer.clone({insert: false}) as paper.Group;
-      const textContent = clone.getItem({data: {id: 'textContent'}}) as paper.AreaText;
-      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
-      // clear layer transforms
-      clearLayerTransforms({
-        paperLayer: clone,
-        transform: layerItem.transform
-      });
-      // apply new props
-      // textContent.paragraph = payload.paragraph;
-      // get next point, inner bounds, and lines
-      const nextContentHeight = Math.round(textContent.bounds.height);
-      const nextInnerBounds = getTextInnerBounds({
-        paperLayer: clone,
-        frame: layerItem.frame,
-        textResize: layerItem.textStyle.textResize,
-        artboardPosition
-      });
-      const textLines = getTextLines({
-        paperLayer: textContent,
-        leading: layerItem.textStyle.leading,
-        artboardPosition: artboardPosition,
-        paragraphs: layerItem.paragraphs
-      });
-      // resize text bounding box
-      resizeTextBoundingBox({
-        paperLayer: clone,
-        innerBounds: nextInnerBounds,
-        artboardPosition
-      });
-      // apply layer transforms
-      applyLayerTransforms({
-        paperLayer: clone,
-        transform: layerItem.transform
-      });
-      // push updates
-      contentHeight.push(nextContentHeight);
-      lines.push(textLines);
-      bounds.push({
-        ...nextInnerBounds,
-        width: Math.round(clone.bounds.width),
-        height: Math.round(clone.bounds.height)
-      });
-    });
-    dispatch(
-      setLayersParagraph({
         ...payload,
         bounds,
         lines,
@@ -3728,22 +3630,18 @@ export const setLayersFontWeightThunk = (payload: SetLayersFontWeightPayload) =>
       const nextContent = getContent({
         paragraphs: nextParagraphs
       });
-      // check if point changed
-      const hasPointChange = pointChanged({layerItem});
       // apply new props
       textContent.fontWeight = payload.fontWeight;
       textContent.content = nextContent;
       // reposition text content
-      if (hasPointChange) {
-        positionTextContent({
-          paperLayer: clone,
-          verticalAlignment: (layerItem as Btwx.Text).textStyle.verticalAlignment,
-          justification: (layerItem as Btwx.Text).textStyle.justification,
-          textResize: (layerItem as Btwx.Text).textStyle.textResize
-        });
-      }
+      positionTextContent({
+        paperLayer: clone,
+        verticalAlignment: (layerItem as Btwx.Text).textStyle.verticalAlignment,
+        justification: (layerItem as Btwx.Text).textStyle.justification,
+        textResize: (layerItem as Btwx.Text).textStyle.textResize
+      });
       // get next point, inner bounds, and lines
-      const nextPoint = textContent.point.subtract(artboardPosition).round();
+      const nextPoint = textContent.point.subtract(artboardPosition);
       const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
@@ -3770,7 +3668,7 @@ export const setLayersFontWeightThunk = (payload: SetLayersFontWeightPayload) =>
       });
       // push updates
       paragraphs.push(nextParagraphs);
-      point.push(hasPointChange ? nextPoint : null);
+      point.push(nextPoint);
       contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
@@ -3839,22 +3737,18 @@ export const setLayersFontFamilyThunk = (payload: SetLayersFontFamilyPayload) =>
       const nextContent = getContent({
         paragraphs: nextParagraphs
       });
-      // check if point changed
-      const hasPointChange = pointChanged({layerItem});
       // apply new props
       textContent.fontFamily = payload.fontFamily;
       textContent.content = nextContent;
       // reposition text content
-      if (hasPointChange) {
-        positionTextContent({
-          paperLayer: clone,
-          verticalAlignment: (layerItem as Btwx.Text).textStyle.verticalAlignment,
-          justification: (layerItem as Btwx.Text).textStyle.justification,
-          textResize: (layerItem as Btwx.Text).textStyle.textResize
-        });
-      }
+      positionTextContent({
+        paperLayer: clone,
+        verticalAlignment: (layerItem as Btwx.Text).textStyle.verticalAlignment,
+        justification: (layerItem as Btwx.Text).textStyle.justification,
+        textResize: (layerItem as Btwx.Text).textStyle.textResize
+      });
       // get next point, inner bounds, and lines
-      const nextPoint = textContent.point.subtract(artboardPosition).round();
+      const nextPoint = textContent.point.subtract(artboardPosition);
       const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
@@ -3881,7 +3775,7 @@ export const setLayersFontFamilyThunk = (payload: SetLayersFontFamilyPayload) =>
       });
       // push updates
       paragraphs.push(nextParagraphs);
-      point.push(hasPointChange ? nextPoint : null);
+      point.push(nextPoint);
       contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
@@ -3950,22 +3844,18 @@ export const setLayersLetterSpacingThunk = (payload: SetLayersLetterSpacingPaylo
       const nextContent = getContent({
         paragraphs: nextParagraphs
       });
-      // check if point changed
-      const hasPointChange = pointChanged({layerItem});
       // apply new props
       textContent.letterSpacing = payload.letterSpacing;
       textContent.content = nextContent;
       // reposition text content
-      if (hasPointChange) {
-        positionTextContent({
-          paperLayer: clone,
-          verticalAlignment: (layerItem as Btwx.Text).textStyle.verticalAlignment,
-          justification: (layerItem as Btwx.Text).textStyle.justification,
-          textResize: (layerItem as Btwx.Text).textStyle.textResize
-        });
-      }
+      positionTextContent({
+        paperLayer: clone,
+        verticalAlignment: (layerItem as Btwx.Text).textStyle.verticalAlignment,
+        justification: (layerItem as Btwx.Text).textStyle.justification,
+        textResize: (layerItem as Btwx.Text).textStyle.textResize
+      });
       // get next point, inner bounds, and lines
-      const nextPoint = textContent.point.subtract(artboardPosition).round();
+      const nextPoint = textContent.point.subtract(artboardPosition);
       const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
@@ -3992,7 +3882,7 @@ export const setLayersLetterSpacingThunk = (payload: SetLayersLetterSpacingPaylo
       });
       // push updates
       paragraphs.push(nextParagraphs);
-      point.push(hasPointChange ? nextPoint : null);
+      point.push(nextPoint);
       contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
@@ -4061,22 +3951,18 @@ export const setLayersTextTransformThunk = (payload: SetLayersTextTransformPaylo
       const nextContent = getContent({
         paragraphs: nextParagraphs
       });
-      // check if point changed
-      const hasPointChange = pointChanged({layerItem});
       // apply new props
       textContent.textTransform = payload.textTransform;
       textContent.content = nextContent;
       // reposition text content
-      if (hasPointChange) {
-        positionTextContent({
-          paperLayer: clone,
-          verticalAlignment: (layerItem as Btwx.Text).textStyle.verticalAlignment,
-          justification: (layerItem as Btwx.Text).textStyle.justification,
-          textResize: (layerItem as Btwx.Text).textStyle.textResize
-        });
-      }
+      positionTextContent({
+        paperLayer: clone,
+        verticalAlignment: (layerItem as Btwx.Text).textStyle.verticalAlignment,
+        justification: (layerItem as Btwx.Text).textStyle.justification,
+        textResize: (layerItem as Btwx.Text).textStyle.textResize
+      });
       // get next point, inner bounds, and lines
-      const nextPoint = textContent.point.subtract(artboardPosition).round();
+      const nextPoint = textContent.point.subtract(artboardPosition);
       const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
@@ -4103,7 +3989,7 @@ export const setLayersTextTransformThunk = (payload: SetLayersTextTransformPaylo
       });
       // push updates
       paragraphs.push(nextParagraphs);
-      point.push(hasPointChange ? nextPoint : null);
+      point.push(nextPoint);
       contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
@@ -4209,7 +4095,7 @@ export const setLayersJustificationThunk = (payload: SetLayersJustificationPaylo
       //   textResize: (layerItem as Btwx.Text).textStyle.textResize
       // });
       // get next point, inner bounds, and lines
-      const nextPoint = textContent.point.subtract(artboardPosition).round();
+      const nextPoint = textContent.point.subtract(artboardPosition);
       const nextContentHeight = Math.round(textContent.bounds.height);
       const textLines = getTextLines({
         paperLayer: textContent,
@@ -4278,7 +4164,7 @@ export const setLayersVerticalAlignmentThunk = (payload: SetLayersVerticalAlignm
         textResize: (layerItem as Btwx.Text).textStyle.textResize
       });
       // get next point, inner bounds, and lines
-      const nextPoint = textContent.point.subtract(artboardPosition).round();
+      const nextPoint = textContent.point.subtract(artboardPosition);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
         frame: (layerItem as Btwx.Text).frame,
@@ -4369,22 +4255,18 @@ export const setLayersFontStyleThunk = (payload: SetLayersFontStylePayload) => {
       const nextContent = getContent({
         paragraphs: nextParagraphs
       });
-      // check if point changed
-      const hasPointChange = pointChanged({layerItem});
       // apply new props
       textContent.fontStyle = payload.fontStyle;
       textContent.content = nextContent;
       // reposition text content
-      if (hasPointChange) {
-        positionTextContent({
-          paperLayer: clone,
-          verticalAlignment: (layerItem as Btwx.Text).textStyle.verticalAlignment,
-          justification: (layerItem as Btwx.Text).textStyle.justification,
-          textResize: (layerItem as Btwx.Text).textStyle.textResize
-        });
-      }
+      positionTextContent({
+        paperLayer: clone,
+        verticalAlignment: (layerItem as Btwx.Text).textStyle.verticalAlignment,
+        justification: (layerItem as Btwx.Text).textStyle.justification,
+        textResize: (layerItem as Btwx.Text).textStyle.textResize
+      });
       // get next point, inner bounds, and lines
-      const nextPoint = textContent.point.subtract(artboardPosition).round();
+      const nextPoint = textContent.point.subtract(artboardPosition);
       const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
@@ -4411,7 +4293,7 @@ export const setLayersFontStyleThunk = (payload: SetLayersFontStylePayload) => {
       });
       // push updates
       paragraphs.push(nextParagraphs);
-      point.push(hasPointChange ? nextPoint : null);
+      point.push(nextPoint);
       contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
@@ -4432,69 +4314,6 @@ export const setLayersFontStyleThunk = (payload: SetLayersFontStylePayload) => {
     )
   }
 };
-
-// export const setLayerOblique = (payload: SetLayerObliquePayload): LayerTypes => ({
-//   type: SET_LAYER_OBLIQUE,
-//   payload
-// });
-
-// export const setLayersOblique = (payload: SetLayersObliquePayload): LayerTypes => ({
-//   type: SET_LAYERS_OBLIQUE,
-//   payload
-// });
-
-// export const setLayersObliqueThunk = (payload: SetLayersObliquePayload) => {
-//   return (dispatch: any, getState: any) => {
-//     const state = getState() as RootState;
-//     const bounds: Btwx.Frame[] = [];
-//     payload.layers.forEach((id) => {
-//       const layerItem = state.layer.present.byId[id] as Btwx.Text;
-//       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
-//       const projectIndex = artboardItem.projectIndex;
-//       const paperLayer = paperMain.projects[projectIndex].getItem({data: {id}});
-//       const clone = paperLayer.clone({insert: false});
-//       const textContent = clone.getItem({data: {id: 'textContent'}}) as paper.AreaText;
-//       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
-//       clearLayerTransforms({
-//         paperLayer: clone,
-//         transform: layerItem.transform
-//       });
-//       const innerWidth = textContent.bounds.width;
-//       const innerHeight = textContent.bounds.height;
-//     const positionInArtboard = textContent.position.subtract(artboardPosition).round();
-//       clearTextOblique({
-//         paperLayer: textContent,
-//         oblique: layerItem.textStyle.oblique,
-//         leading: layerItem.textStyle.leading,
-//         fontSize: layerItem.textStyle.fontSize
-//       });
-//       applyTextOblique({
-//         paperLayer: textContent,
-//         oblique: payload.oblique,
-//         leading: layerItem.textStyle.leading,
-//         fontSize: layerItem.textStyle.fontSize
-//       });
-//       applyLayerTransforms({
-//         paperLayer: clone,
-//         transform: layerItem.transform
-//       });
-//       bounds.push({
-//         x: positionInArtboard.x,
-//         y: positionInArtboard.y,
-//         width: Math.round(textContent.bounds.width),
-//         height: Math.round(textContent.bounds.height),
-//         innerWidth: Math.round(innerWidth),
-//         innerHeight: Math.round(innerHeight)
-//       });
-//     });
-//     dispatch(
-//       setLayersOblique({
-//         ...payload,
-//         bounds
-//       })
-//     )
-//   }
-// };
 
 export const setLayerPointX = (payload: SetLayerPointXPayload): LayerTypes => ({
   type: SET_LAYER_POINT_X,

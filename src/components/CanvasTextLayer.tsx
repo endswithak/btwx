@@ -36,6 +36,7 @@ interface GetParagraphs {
   letterSpacing: number;
   textTransform: Btwx.TextTransform;
   fontStyle: Btwx.FontStyle;
+  preview?: boolean;
 }
 
 export const getParagraphs = ({
@@ -47,7 +48,8 @@ export const getParagraphs = ({
   innerWidth,
   letterSpacing,
   textTransform,
-  fontStyle
+  fontStyle,
+  preview = false
  }: GetParagraphs): string[][] => {
   const paragraphs = [];
   const lines = text.split(/\r\n|\n|\r/mg);
@@ -70,7 +72,8 @@ export const getParagraphs = ({
           font: font,
           text: testLine.substring(0, testLine.length - 1),
           letterSpacing,
-          textTransform
+          textTransform,
+          preview
         });
         if (testLineWidth > innerWidth && i > 0) {
           pLines.push(line.substring(0, line.length - 1));
@@ -110,11 +113,12 @@ interface GetTextWidth {
   text: string;
   letterSpacing: number;
   textTransform: Btwx.TextTransform
+  preview?: boolean;
 }
 
-export const getTextWidth = ({font, text, letterSpacing, textTransform}: GetTextWidth) => {
-  const canvas = paperMain.view.element;
-  const ctx = paperMain.view.element.getContext('2d');
+export const getTextWidth = ({font, text, letterSpacing, textTransform, preview}: GetTextWidth) => {
+  const canvas = preview ? paperPreview.view.element : paperMain.view.element;
+  const ctx = preview ? paperPreview.view.element.getContext('2d') : paperMain.view.element.getContext('2d');
   let prevFont = ctx.font;
   let width = 0;
   let measureText = text;
@@ -190,7 +194,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   const getAreaTextRectangle = () => {
     const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
     const textPosition = new paperMain.Point(layerItem.frame.x, layerItem.frame.y);
-    const absPosition = textPosition.add(artboardPosition).round();
+    const absPosition = textPosition.add(artboardPosition);
     const topLeft = new paperMain.Point(
       absPosition.x - (layerItem.frame.innerWidth / 2),
       absPosition.y - (layerItem.frame.innerHeight / 2)
@@ -208,7 +212,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   const getAbsPoint = () => {
     const point = new paperMain.Point(layerItem.point.x, layerItem.point.y);
     const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
-    return point.add(artboardPosition).round();
+    return point.add(artboardPosition);
   }
 
   const applyFill = (): void => {
