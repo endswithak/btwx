@@ -3608,6 +3608,18 @@ export const hasToYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Lay
   return validType && (!toYMatch || !innerWidthMatch);
 };
 
+export const hasScaleXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'Image' || layerItem.type === 'Text';
+  const horizontalFlipMatch = validType && ((layerItem.transform.horizontalFlip && equivalentLayerItem.transform.horizontalFlip) || (!layerItem.transform.horizontalFlip && !equivalentLayerItem.transform.horizontalFlip));
+  return validType && !horizontalFlipMatch;
+};
+
+export const hasScaleYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'Image' || layerItem.type === 'Text';
+  const verticalFlipMatch = validType && ((layerItem.transform.verticalFlip && equivalentLayerItem.transform.verticalFlip) || (!layerItem.transform.verticalFlip && !equivalentLayerItem.transform.verticalFlip));
+  return validType && !verticalFlipMatch;
+};
+
 export const getEquivalentTweenProp = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer, prop: Btwx.TweenProp): boolean => {
   switch(prop) {
     case 'image':
@@ -3684,6 +3696,10 @@ export const getEquivalentTweenProp = (layerItem: Btwx.Layer, equivalentLayerIte
       return hasToXTween(layerItem, equivalentLayerItem);
     case 'toY':
       return hasToYTween(layerItem, equivalentLayerItem);
+    case 'scaleX':
+      return hasScaleXTween(layerItem, equivalentLayerItem);
+    case 'scaleY':
+      return hasScaleYTween(layerItem, equivalentLayerItem);
     // case 'pointX':
     //   return hasPointXTween(layerItem, equivalentLayerItem);
     // case 'pointY':
@@ -3730,6 +3746,8 @@ export const getEquivalentTweenProps = (layerItem: Btwx.Layer, equivalentLayerIt
   fromY: hasFromYTween(layerItem, equivalentLayerItem),
   toX: hasToXTween(layerItem, equivalentLayerItem),
   toY: hasToYTween(layerItem, equivalentLayerItem),
+  scaleX: hasScaleXTween(layerItem, equivalentLayerItem),
+  scaleY: hasScaleYTween(layerItem, equivalentLayerItem)
   // pointX: hasPointXTween(layerItem, equivalentLayerItem),
   // pointY: hasPointYTween(layerItem, equivalentLayerItem)
 });

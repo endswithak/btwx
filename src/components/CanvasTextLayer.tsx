@@ -152,6 +152,8 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
   const [rendered, setRendered] = useState<boolean>(false);
   const [prevRotation, setPrevRotation] = useState(layerItem.transform.rotation);
+  // const [prevHorizontalFlip, setPrevHorizontalFlip] = useState(layerItem.transform.horizontalFlip);
+  // const [prevVerticalFlip, setPrevVerticalFlip] = useState(layerItem.transform.verticalFlip);
   const [prevTweening, setPrevTweening] = useState(tweening);
   const [eventInstance, setEventInstance] = useState(0);
   const content = useMemo(() =>
@@ -385,7 +387,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
       } else {
         let paperParent = paperProject.getItem({ data: { id: layerItem.parent } });
         if (layerItem.parent === layerItem.artboard) {
-          paperParent = paperParent.getItem({ data:{ id:'artboardLayers' } });
+          paperParent = paperParent.getItem({ data: { id:'artboardLayers' } });
         }
         paperParent.insertChild(layerIndex, paperLayer);
       }
@@ -415,8 +417,17 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   useEffect(() => {
     if (rendered) {
       const { paperLayer } = getPaperLayer();
-      paperLayer.rotation = -prevRotation;
-      paperLayer.rotation = layerItem.transform.rotation;
+      clearLayerTransforms({
+        paperLayer,
+        transform: {
+          ...layerItem.transform,
+          rotation: prevRotation
+        }
+      });
+      applyLayerTransforms({
+        paperLayer,
+        transform: layerItem.transform
+      });
       setPrevRotation(layerItem.transform.rotation);
     }
   }, [layerItem.transform.rotation]);
@@ -469,11 +480,11 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
       textContent.content = content;
       textBackground.bounds = bounds;
       textMask.bounds = bounds;
-      textContent.point = getAbsPoint();
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
+      textContent.point = getAbsPoint();
     }
   }, [layerItem.text]);
 
@@ -488,11 +499,11 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
       textContent.content = content;
       textBackground.bounds = bounds;
       textMask.bounds = bounds;
-      textContent.point = getAbsPoint();
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
+      textContent.point = getAbsPoint();
     }
   }, [layerItem.frame.innerWidth, layerItem.frame.innerHeight]);
 
@@ -507,13 +518,13 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
       textContent.content = content;
       textBackground.bounds = bounds;
       textMask.bounds = bounds;
-      textContent.point = getAbsPoint();
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
+      textContent.point = getAbsPoint();
     }
-  }, [layerItem.point.x, layerItem.point.y, artboardItem.frame.innerWidth, artboardItem.frame.innerHeight]);
+  }, [layerItem.frame.x, layerItem.frame.y, artboardItem.frame.innerWidth, artboardItem.frame.innerHeight]);
 
   ///////////////////////////////////////////////////////
   // CONTEXT
@@ -649,11 +660,11 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
       textContent.content = content;
       textBackground.bounds = bounds;
       textMask.bounds = bounds;
-      textContent.point = getAbsPoint();
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
+      textContent.point = getAbsPoint();
     }
   }, [layerItem.textStyle.fontFamily]);
 
@@ -669,11 +680,11 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
       textContent.content = content;
       textBackground.bounds = bounds;
       textMask.bounds = bounds;
-      textContent.point = getAbsPoint();
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
+      textContent.point = getAbsPoint();
     }
   }, [layerItem.textStyle.fontWeight]);
 
@@ -689,11 +700,11 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
       textContent.content = content;
       textBackground.bounds = bounds;
       textMask.bounds = bounds;
-      textContent.point = getAbsPoint();
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
+      textContent.point = getAbsPoint();
     }
   }, [layerItem.textStyle.fontStyle]);
 
@@ -709,11 +720,11 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
       textContent.content = content;
       textBackground.bounds = bounds;
       textMask.bounds = bounds;
-      textContent.point = getAbsPoint();
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
+      textContent.point = getAbsPoint();
     }
   }, [layerItem.textStyle.letterSpacing]);
 
@@ -729,11 +740,11 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
       textContent.content = content;
       textBackground.bounds = bounds;
       textMask.bounds = bounds;
-      textContent.point = getAbsPoint();
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
+      textContent.point = getAbsPoint();
     }
   }, [layerItem.textStyle.textTransform]);
 
@@ -749,11 +760,11 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
       textContent.content = content;
       textBackground.bounds = bounds;
       textMask.bounds = bounds;
-      textContent.point = getAbsPoint();
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
+      textContent.point = getAbsPoint();
     }
   }, [layerItem.textStyle.fontSize]);
 
@@ -765,11 +776,11 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         transform: layerItem.transform
       });
       textContent.justification = layerItem.textStyle.justification;
-      textContent.point = getAbsPoint();
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
+      textContent.point = getAbsPoint();
     }
   }, [layerItem.textStyle.justification]);
 
@@ -780,11 +791,11 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         paperLayer,
         transform: layerItem.transform
       });
-      textContent.point = getAbsPoint();
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
+      textContent.point = getAbsPoint();
     }
   }, [layerItem.textStyle.verticalAlignment]);
 
@@ -800,11 +811,11 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
       textContent.content = content;
       textBackground.bounds = bounds;
       textMask.bounds = bounds;
-      textContent.point = getAbsPoint();
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
+      textContent.point = getAbsPoint();
     }
   }, [layerItem.textStyle.leading]);
 

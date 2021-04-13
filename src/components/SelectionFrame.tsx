@@ -14,12 +14,22 @@ const SelectionFrame = (): ReactElement => {
     const layerItem = singleItemSelected ? state.layer.present.byId[state.layer.present.selected[0]] : null;
     const singleShapeSelected = singleItemSelected && layerItem.type === 'Shape';
     const singleLineSelected = singleShapeSelected && (layerItem as Btwx.Shape).shapeType === 'Line';
-    const lineItem = layerItem as Btwx.Line;
-    const artboardItem = singleLineSelected ? state.layer.present.byId[layerItem.artboard] : null;
-    return singleLineSelected ? {
-      from: { x: artboardItem.frame.x + lineItem.from.x, y: artboardItem.frame.y + lineItem.from.y },
-      to: { x: artboardItem.frame.x + lineItem.to.x, y: artboardItem.frame.y + lineItem.to.y }
-    } : null;
+    if (singleLineSelected) {
+      const lineItem = layerItem as Btwx.Line;
+      const artboardItem = state.layer.present.byId[layerItem.artboard];
+      return {
+        from: {
+          x: artboardItem.frame.x + lineItem.from.x,
+          y: artboardItem.frame.y + lineItem.from.y
+        },
+        to: {
+          x: artboardItem.frame.x + lineItem.to.x,
+          y: artboardItem.frame.y + lineItem.to.y
+        }
+      }
+    } else {
+      return null;
+    }
   });
   const zoom = useSelector((state: RootState) => state.documentSettings.zoom);
 

@@ -1918,7 +1918,7 @@ export interface SetLayersHeightPayload {
   };
   bounds?: {
     [id: string]: Btwx.Frame;
-  }
+  };
   lines?: {
     [id: string]: Btwx.TextLine[];
   };
@@ -1943,6 +1943,9 @@ export interface SetLayerRotationPayload {
   rotation: number;
   bounds?: Btwx.Frame;
   pathData?: string;
+  point?: Btwx.Point;
+  from?: Btwx.Point;
+  to?: Btwx.Point;
 }
 
 export interface SetLayerRotation {
@@ -1953,8 +1956,21 @@ export interface SetLayerRotation {
 export interface SetLayersRotationPayload {
   layers: string[];
   rotation: number;
-  bounds?: Btwx.Frame[];
-  pathData?: string[];
+  bounds?: {
+    [id: string]: Btwx.Frame;
+  };
+  pathData?: {
+    [id: string]: string;
+  };
+  point?: {
+    [id: string]: Btwx.Point;
+  };
+  from?: {
+    [id: string]: Btwx.Point;
+  };
+  to?: {
+    [id: string]: Btwx.Point;
+  };
 }
 
 export interface SetLayersRotation {
@@ -2959,6 +2975,7 @@ export interface SetLayerLeadingPayload {
   bounds?: Btwx.Frame;
   lines?: Btwx.TextLine[];
   contentHeight?: number;
+  point?: Btwx.Point;
 }
 
 export interface SetLayerLeading {
@@ -2972,6 +2989,7 @@ export interface SetLayersLeadingPayload {
   bounds?: Btwx.Frame[];
   lines?: Btwx.TextLine[][];
   contentHeight?: number[];
+  point?: Btwx.Point[];
 }
 
 export interface SetLayersLeading {

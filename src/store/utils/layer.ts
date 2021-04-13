@@ -5820,6 +5820,9 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
   const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
   const isShape = layerItem.type === 'Shape';
   const isLine = isShape && (layerItem as Btwx.Shape).shapeType === 'Line';
+  const point = action.payload.point ? action.payload.point : null;
+  const from = action.payload.from ? action.payload.from : null;
+  const to = action.payload.to ? action.payload.to : null;
   currentState = {
     ...currentState,
     byId: {
@@ -5850,6 +5853,51 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
     }
     currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
   }
+  if (point) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          point: {
+            ...(currentState.byId[action.payload.id] as Btwx.Text).point,
+            ...point
+          }
+        } as Btwx.Text
+      }
+    }
+  }
+  if (from) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          from: {
+            ...(currentState.byId[action.payload.id] as Btwx.Line).from,
+            ...from
+          }
+        } as Btwx.Line
+      }
+    }
+  }
+  if (to) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          to: {
+            ...(currentState.byId[action.payload.id] as Btwx.Line).to,
+            ...to
+          }
+        } as Btwx.Line
+      }
+    }
+  }
   currentState = updateGroupParentBounds(currentState, groupParents);
   if (layerItem.type !== 'Group') {
     currentState = updateLayerTweensByProps(currentState, action.payload.id, isLine ? ['fromX', 'fromY', 'toX', 'toY'] : ['rotation']);
@@ -5866,9 +5914,20 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
 export const setLayersRotation = (state: LayerState, action: SetLayersRotation): LayerState => {
   let currentState = state;
   currentState = action.payload.layers.reduce((result, current, index) => {
-    const pathData = action.payload.pathData ? action.payload.pathData[index] : null;
-    const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
-    return setLayerRotation(result, layerActions.setLayerRotation({id: current, rotation: action.payload.rotation, pathData, bounds}) as SetLayerRotation);
+    const pathData = action.payload.pathData ? action.payload.pathData[current] : null;
+    const bounds = action.payload.bounds ? action.payload.bounds[current] : null;
+    const point = action.payload.point ? action.payload.point[current] : null;
+    const from = action.payload.point ? action.payload.from[current] : null;
+    const to = action.payload.point ? action.payload.to[current] : null;
+    return setLayerRotation(result, layerActions.setLayerRotation({
+      id: current,
+      rotation: action.payload.rotation,
+      pathData,
+      bounds,
+      point,
+      from,
+      to
+    }) as SetLayerRotation);
     // if (layerItem.type === 'Group') {
     //   const layerAndDescendants = getLayerAndDescendants(result, current);
     //   return layerAndDescendants.reduce((lr, lc) => {
@@ -5953,22 +6012,23 @@ export const enableLayerHorizontalFlip = (state: LayerState, action: EnableLayer
     }
     currentState = updateLayerTweensByProps(currentState, action.payload.id, ['toX']);
   }
-  // if (point) {
-  //   currentState = {
-  //     ...currentState,
-  //     byId: {
-  //       ...currentState.byId,
-  //       [action.payload.id]: {
-  //         ...currentState.byId[action.payload.id],
-  //         point: {
-  //           ...(currentState.byId[action.payload.id] as Btwx.Text).point,
-  //           x: point.x
-  //         }
-  //       } as Btwx.Text
-  //     }
-  //   }
-  //   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['pointX']);
-  // }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleX']);
+  if (point) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          point: {
+            ...(currentState.byId[action.payload.id] as Btwx.Text).point,
+            x: point.x
+          }
+        } as Btwx.Text
+      }
+    }
+    // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['pointX']);
+  }
   return currentState;
 };
 
@@ -6062,22 +6122,23 @@ export const disableLayerHorizontalFlip = (state: LayerState, action: DisableLay
     }
     currentState = updateLayerTweensByProps(currentState, action.payload.id, ['toX']);
   }
-  // if (point) {
-  //   currentState = {
-  //     ...currentState,
-  //     byId: {
-  //       ...currentState.byId,
-  //       [action.payload.id]: {
-  //         ...currentState.byId[action.payload.id],
-  //         point: {
-  //           ...(currentState.byId[action.payload.id] as Btwx.Text).point,
-  //           x: point.x
-  //         }
-  //       } as Btwx.Text
-  //     }
-  //   }
-  //   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['pointX']);
-  // }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleX']);
+  if (point) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          point: {
+            ...(currentState.byId[action.payload.id] as Btwx.Text).point,
+            x: point.x
+          }
+        } as Btwx.Text
+      }
+    }
+    // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['pointX']);
+  }
   return currentState;
 };
 
@@ -6171,22 +6232,23 @@ export const enableLayerVerticalFlip = (state: LayerState, action: EnableLayerVe
     }
     currentState = updateLayerTweensByProps(currentState, action.payload.id, ['toY']);
   }
-  // if (point) {
-  //   currentState = {
-  //     ...currentState,
-  //     byId: {
-  //       ...currentState.byId,
-  //       [action.payload.id]: {
-  //         ...currentState.byId[action.payload.id],
-  //         point: {
-  //           ...(currentState.byId[action.payload.id] as Btwx.Text).point,
-  //           y: point.y
-  //         }
-  //       } as Btwx.Text
-  //     }
-  //   }
-  //   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['pointY']);
-  // }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleY']);
+  if (point) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          point: {
+            ...(currentState.byId[action.payload.id] as Btwx.Text).point,
+            y: point.y
+          }
+        } as Btwx.Text
+      }
+    }
+    // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['pointY']);
+  }
   return currentState;
 };
 
@@ -6280,22 +6342,23 @@ export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayer
     }
     currentState = updateLayerTweensByProps(currentState, action.payload.id, ['toY']);
   }
-  // if (point) {
-  //   currentState = {
-  //     ...currentState,
-  //     byId: {
-  //       ...currentState.byId,
-  //       [action.payload.id]: {
-  //         ...currentState.byId[action.payload.id],
-  //         point: {
-  //           ...(currentState.byId[action.payload.id] as Btwx.Text).point,
-  //           y: point.y
-  //         }
-  //       } as Btwx.Text
-  //     }
-  //   }
-  //   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['pointY']);
-  // }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleY']);
+  if (point) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          point: {
+            ...(currentState.byId[action.payload.id] as Btwx.Text).point,
+            y: point.y
+          }
+        } as Btwx.Text
+      }
+    }
+    // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['pointY']);
+  }
   return currentState;
 };
 
@@ -7822,6 +7885,7 @@ export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState =>
       }
     }
   }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleX', 'scaleY']);
   if (pathData) {
     currentState = {
       ...currentState,
@@ -8445,6 +8509,10 @@ export const setLayerLeading = (state: LayerState, action: SetLayerLeading): Lay
           ...(currentState.byId[action.payload.id] as Btwx.Text).textStyle,
           leading: action.payload.leading
         },
+        point: {
+          ...(currentState.byId[action.payload.id] as Btwx.Text).point,
+          ...action.payload.point
+        },
         contentHeight: action.payload.contentHeight ? action.payload.contentHeight : (currentState.byId[action.payload.id] as Btwx.Text).contentHeight
       } as Btwx.Text
     }
@@ -8459,13 +8527,15 @@ export const setLayersLeading = (state: LayerState, action: SetLayersLeading): L
   currentState = action.payload.layers.reduce((result, current, index) => {
     const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
     const lines = action.payload.lines ? action.payload.lines[index] : null;
+    const point = action.payload.point ? action.payload.point[index] : null;
     const contentHeight = action.payload.contentHeight ? action.payload.contentHeight[index] : null;
     return setLayerLeading(result, layerActions.setLayerLeading({
       id: current,
       leading: action.payload.leading,
       bounds,
       lines,
-      contentHeight
+      contentHeight,
+      point
     }) as SetLayerLeading);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({

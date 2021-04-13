@@ -2090,8 +2090,8 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
           ...bounds,
           [id]: {
             ...layerItem.frame,
-            width: Math.round(clone.bounds.width),
-            height: Math.round(clone.bounds.height)
+            width: clone.bounds.width,
+            height: clone.bounds.height
           }
         }
       }
@@ -2172,8 +2172,8 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
           ...bounds,
           [id]: {
             ...nextInnerBounds,
-            width: Math.round(clone.bounds.width),
-            height: Math.round(clone.bounds.height)
+            width: clone.bounds.width,
+            height: clone.bounds.height
           }
         }
         textResize = {
@@ -2235,8 +2235,8 @@ export const setLayersHeightThunk = (payload: SetLayersHeightPayload) => {
           ...bounds,
           [id]: {
             ...layerItem.frame,
-            width: Math.round(clone.bounds.width),
-            height: Math.round(clone.bounds.height)
+            width: clone.bounds.width,
+            height: clone.bounds.height
           }
         }
       } else {
@@ -2282,8 +2282,8 @@ export const setLayersHeightThunk = (payload: SetLayersHeightPayload) => {
           ...bounds,
           [id]: {
             ...nextInnerBounds,
-            width: Math.round(clone.bounds.width),
-            height: Math.round(clone.bounds.height)
+            width: clone.bounds.width,
+            height: clone.bounds.height
           }
         }
         textResize = {
@@ -2317,31 +2317,80 @@ export const setLayersRotation = (payload: SetLayersRotationPayload): LayerTypes
 export const setLayersRotationThunk = (payload: SetLayersRotationPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
-    const bounds: Btwx.Frame[] = [];
-    const pathData: string[] = [];
+    let bounds: { [id: string]: Btwx.Frame; } = {};
+    let pathData: { [id: string]: string; } = {};
+    let point: { [id: string]: Btwx.Point; } = {};
+    let to: { [id: string]: Btwx.Point; } = {};
+    let from: { [id: string]: Btwx.Point; } = {};
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
-      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
+      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
+      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data:{id}});
       const clone = paperLayer.clone({insert: false}) as paper.CompoundPath;
-      clone.rotation = -layerItem.transform.rotation;
-      clone.rotation = payload.rotation;
-      if (layerItem.type === 'Shape') {
-        pathData.push(clone.pathData);
-      } else {
-        pathData.push(null);
-      }
-      bounds.push({
-        ...layerItem.frame,
-        width: Math.round(clone.bounds.width),
-        height: Math.round(clone.bounds.height)
+      clearLayerTransforms({
+        paperLayer: clone,
+        transform: layerItem.transform
       });
+      applyLayerTransforms({
+        paperLayer: clone,
+        transform: {
+          ...layerItem.transform,
+          rotation: payload.rotation
+        }
+      });
+      if (layerItem.type === 'Shape') {
+        pathData = {
+          ...pathData,
+          [id]: clone.pathData
+        }
+        if ((layerItem as Btwx.Shape).shapeType === 'Line') {
+          const fromPoint = (clone as paper.Path).firstSegment.point.subtract(artboardPosition);
+          const toPoint = (clone as paper.Path).lastSegment.point.subtract(artboardPosition);
+          from = {
+            ...from,
+            [id]: {
+              x: fromPoint.x,
+              y: fromPoint.y
+            }
+          }
+          to = {
+            ...to,
+            [id]: {
+              x: toPoint.x,
+              y: toPoint.y
+            }
+          }
+        }
+      }
+      if (layerItem.type === 'Text') {
+        const textContent = clone.getItem({data:{id:'textContent'}}) as paper.PointText;
+        const newPoint = textContent.point.subtract(artboardPosition);
+        point = {
+          ...point,
+          [id]: {
+            x: newPoint.x,
+            y: newPoint.y
+          }
+        }
+      }
+      bounds = {
+        ...bounds,
+        [id]: {
+          ...layerItem.frame,
+          width: clone.bounds.width,
+          height: clone.bounds.height
+        }
+      }
     });
     dispatch(
       setLayersRotation({
         ...payload,
         bounds,
-        pathData
+        pathData,
+        point,
+        from,
+        to
       })
     )
   }
@@ -2431,8 +2480,8 @@ export const setLayersHorizontalFlipThunk = (payload: (EnableLayersHorizontalFli
             [id]: (duplicate as paper.CompoundPath).pathData
           }
           if ((layerItem as Btwx.Shape).shapeType === 'Line') {
-            const fromPoint = (duplicate as paper.Path).firstSegment.point.subtract(artboardPosition).round();
-            const toPoint = (duplicate as paper.Path).lastSegment.point.subtract(artboardPosition).round();
+            const fromPoint = (duplicate as paper.Path).firstSegment.point.subtract(artboardPosition);
+            const toPoint = (duplicate as paper.Path).lastSegment.point.subtract(artboardPosition);
             // const vector = toPoint.subtract(fromPoint).round();
             from = {
               ...from,
@@ -2445,6 +2494,16 @@ export const setLayersHorizontalFlipThunk = (payload: (EnableLayersHorizontalFli
               [id]: {
                 x: toPoint.x
               } as Btwx.Point
+            }
+          }
+        }
+        if (layerItem.type === 'Text') {
+          const textContent = paperLayer.getItem({data:{id:'textContent'}}) as paper.PointText;
+          point = {
+            ...point,
+            [id]: {
+              x: textContent.point.x,
+              y: textContent.point.y
             }
           }
         }
@@ -2481,13 +2540,22 @@ export const toggleSelectedHorizontalFlipThunk = () => {
     const mixed = !state.layer.present.selected.every((id) => state.layer.present.byId[id].transform.horizontalFlip);
     if (mixed) {
       const unFlipped = state.layer.present.selected.filter((id) => !state.layer.present.byId[id].transform.horizontalFlip);
-      dispatch(setLayersHorizontalFlipThunk({layers: unFlipped, enabled: true}));
+      dispatch(setLayersHorizontalFlipThunk({
+        layers: unFlipped,
+        enabled: true
+      }));
     } else {
       const flipped = state.layer.present.selected.every((id) => state.layer.present.byId[id].transform.horizontalFlip);
       if (flipped) {
-        dispatch(setLayersHorizontalFlipThunk({layers: state.layer.present.selected, enabled: false}));
+        dispatch(setLayersHorizontalFlipThunk({
+          layers: state.layer.present.selected,
+          enabled: false
+        }));
       } else {
-        dispatch(setLayersHorizontalFlipThunk({layers: state.layer.present.selected, enabled: true}));
+        dispatch(setLayersHorizontalFlipThunk({
+          layers: state.layer.present.selected,
+          enabled: true
+        }));
       }
     }
   }
@@ -2537,8 +2605,8 @@ export const setLayersVerticalFlipThunk = (payload: (EnableLayersVerticalFlipPay
             [id]: (duplicate as paper.CompoundPath).pathData
           }
           if ((layerItem as Btwx.Shape).shapeType === 'Line') {
-            const fromPoint = (duplicate as paper.Path).firstSegment.point.subtract(artboardPosition).round();
-            const toPoint = (duplicate as paper.Path).lastSegment.point.subtract(artboardPosition).round();
+            const fromPoint = (duplicate as paper.Path).firstSegment.point.subtract(artboardPosition);
+            const toPoint = (duplicate as paper.Path).lastSegment.point.subtract(artboardPosition);
             // const vector = toPoint.subtract(fromPoint).round();
             from = {
               ...from,
@@ -2551,6 +2619,16 @@ export const setLayersVerticalFlipThunk = (payload: (EnableLayersVerticalFlipPay
               [id]: {
                 y: toPoint.y
               } as Btwx.Point
+            }
+          }
+        }
+        if (layerItem.type === 'Text') {
+          const textContent = paperLayer.getItem({data:{id:'textContent'}}) as paper.PointText;
+          point = {
+            ...point,
+            [id]: {
+              x: textContent.point.x,
+              y: textContent.point.y
             }
           }
         }
@@ -2587,13 +2665,22 @@ export const toggleSelectedVerticalFlipThunk = () => {
     const mixed = !state.layer.present.selected.every((id) => state.layer.present.byId[id].transform.verticalFlip);
     if (mixed) {
       const unFlipped = state.layer.present.selected.filter((id) => !state.layer.present.byId[id].transform.verticalFlip);
-      dispatch(setLayersVerticalFlipThunk({layers: unFlipped, enabled: true}));
+      dispatch(setLayersVerticalFlipThunk({
+        layers: unFlipped,
+        enabled: true
+      }));
     } else {
       const flipped = state.layer.present.selected.every((id) => state.layer.present.byId[id].transform.verticalFlip);
       if (flipped) {
-        dispatch(setLayersVerticalFlipThunk({layers: state.layer.present.selected, enabled: false}));
+        dispatch(setLayersVerticalFlipThunk({
+          layers: state.layer.present.selected,
+          enabled: false
+        }));
       } else {
-        dispatch(setLayersVerticalFlipThunk({layers: state.layer.present.selected, enabled: true}));
+        dispatch(setLayersVerticalFlipThunk({
+          layers: state.layer.present.selected,
+          enabled: true
+        }));
       }
     }
   }
@@ -2615,13 +2702,19 @@ export const toggleSelectedFillThunk = () => {
     const mixed = !state.layer.present.selected.every((id) => state.layer.present.byId[id].style.fill.enabled);
     if (mixed) {
       const disabled = state.layer.present.selected.filter((id) => !state.layer.present.byId[id].style.fill.enabled);
-      dispatch(enableLayersFill({layers: disabled}));
+      dispatch(enableLayersFill({
+        layers: disabled
+      }));
     } else {
       const enabled = state.layer.present.selected.every((id) => state.layer.present.byId[id].style.fill.enabled);
       if (enabled) {
-        dispatch(disableLayersFill({layers: state.layer.present.selected}));
+        dispatch(disableLayersFill({
+          layers: state.layer.present.selected
+        }));
       } else {
-        dispatch(enableLayersFill({layers: state.layer.present.selected}));
+        dispatch(enableLayersFill({
+          layers: state.layer.present.selected
+        }));
       }
     }
   }
@@ -2668,13 +2761,19 @@ export const toggleSelectedStrokeThunk = () => {
     const mixed = !state.layer.present.selected.every((id) => state.layer.present.byId[id].style.stroke.enabled);
     if (mixed) {
       const disabled = state.layer.present.selected.filter((id) => !state.layer.present.byId[id].style.stroke.enabled);
-      dispatch(enableLayersStroke({layers: disabled}));
+      dispatch(enableLayersStroke({
+        layers: disabled
+      }));
     } else {
       const enabled = state.layer.present.selected.every((id) => state.layer.present.byId[id].style.stroke.enabled);
       if (enabled) {
-        dispatch(disableLayersStroke({layers: state.layer.present.selected}));
+        dispatch(disableLayersStroke({
+          layers: state.layer.present.selected
+        }));
       } else {
-        dispatch(enableLayersStroke({layers: state.layer.present.selected}));
+        dispatch(enableLayersStroke({
+          layers: state.layer.present.selected
+        }));
       }
     }
   }
@@ -2896,13 +2995,19 @@ export const toggleSelectedShadowThunk = () => {
     const mixed = !state.layer.present.selected.every((id) => state.layer.present.byId[id].style.shadow.enabled);
     if (mixed) {
       const disabled = state.layer.present.selected.filter((id) => !state.layer.present.byId[id].style.shadow.enabled);
-      dispatch(enableLayersShadow({layers: disabled}));
+      dispatch(enableLayersShadow({
+        layers: disabled
+      }));
     } else {
       const enabled = state.layer.present.selected.every((id) => state.layer.present.byId[id].style.shadow.enabled);
       if (enabled) {
-        dispatch(disableLayersShadow({layers: state.layer.present.selected}));
+        dispatch(disableLayersShadow({
+          layers: state.layer.present.selected
+        }));
       } else {
-        dispatch(enableLayersShadow({layers: state.layer.present.selected}));
+        dispatch(enableLayersShadow({
+          layers: state.layer.present.selected
+        }));
       }
     }
   }
@@ -3011,8 +3116,9 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
         const duplicate = paperLayer.clone({insert: false}) as paper.Group;
         const textContent = duplicate.getItem({ data: { id: 'textContent' } }) as paper.PointText;
         const textBackground = duplicate.getItem({ data: { id: 'textBackground' } });
-        const width = Math.round(duplicate.bounds.width);
-        const height = Math.round(duplicate.bounds.height);
+        const width = duplicate.bounds.width;
+        const height = duplicate.bounds.height;
+        const nextPoint = textContent.point.subtract(artboardPosition);
         duplicate.scale(
           (payload.horizontalFlip && !layerItem.transform.horizontalFlip) || (!payload.horizontalFlip && layerItem.transform.horizontalFlip) ? -1 : 1,
           (payload.verticalFlip && !layerItem.transform.verticalFlip) || (!payload.verticalFlip && layerItem.transform.verticalFlip) ? -1 : 1
@@ -3027,7 +3133,7 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
           fontWeight: (layerItem as Btwx.Text).textStyle.fontWeight,
           fontFamily: (layerItem as Btwx.Text).textStyle.fontFamily,
           textResize: nextResize,
-          innerWidth: Math.round(textBackground.bounds.width),
+          innerWidth: textBackground.bounds.width,
           letterSpacing: (layerItem as Btwx.Text).textStyle.letterSpacing,
           textTransform: (layerItem as Btwx.Text).textStyle.textTransform,
           fontStyle: (layerItem as Btwx.Text).textStyle.fontStyle,
@@ -3046,16 +3152,16 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
           textResize: nextResize
         });
         // get next point, inner bounds, and lines
-        const nextPoint = textContent.point.subtract(artboardPosition);
+        // const nextPoint = textContent.point.subtract(artboardPosition);
         const nextContentHeight = Math.round(textContent.bounds.height);
         const nextInnerBounds = getTextInnerBounds({
           paperLayer: duplicate,
           frame: {
             ...layerItem.frame,
-            x: Math.round(textBackground.position.x - artboardPosition.x),
-            y: Math.round(textBackground.position.y - artboardPosition.y),
-            innerWidth: Math.round(textBackground.bounds.width),
-            innerHeight: Math.round(textBackground.bounds.height),
+            x: textBackground.position.x - artboardPosition.x,
+            y: textBackground.position.y - artboardPosition.y,
+            innerWidth: textBackground.bounds.width,
+            innerHeight: textBackground.bounds.height,
           },
           textResize: nextResize,
           artboardPosition
@@ -3099,9 +3205,9 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
         }
       }
       if (isLine && (payload.horizontalFlip || payload.verticalFlip)) {
-        const fromPoint = (paperLayer as paper.Path).firstSegment.point.subtract(artboardPosition).round();
-        const toPoint = (paperLayer as paper.Path).lastSegment.point.subtract(artboardPosition).round();
-        const vector = toPoint.subtract(fromPoint).round();
+        const fromPoint = (paperLayer as paper.Path).firstSegment.point.subtract(artboardPosition);
+        const toPoint = (paperLayer as paper.Path).lastSegment.point.subtract(artboardPosition);
+        const vector = toPoint.subtract(fromPoint);
         innerWidth = Math.round(vector.length);
         innerHeight = 0;
         from = {
@@ -3133,12 +3239,12 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
         bounds = {
           ...bounds,
           [id]: {
-            x: Math.round(isArtboard ? artboardBackground.bounds.center.x : paperPosition.x - artboardItem.frame.x),
-            y: Math.round(isArtboard ? artboardBackground.bounds.center.y : paperPosition.y - artboardItem.frame.y),
-            innerWidth: Math.round(isArtboard ? artboardBackground.bounds.width : innerWidth),
-            innerHeight: Math.round(isArtboard ? artboardBackground.bounds.height : innerHeight),
-            width: Math.round(isArtboard ? artboardBackground.bounds.width : paperLayer.bounds.width),
-            height: Math.round(isArtboard ? artboardBackground.bounds.height : paperLayer.bounds.height)
+            x: isArtboard ? artboardBackground.bounds.center.x : paperPosition.x - artboardItem.frame.x,
+            y: isArtboard ? artboardBackground.bounds.center.y : paperPosition.y - artboardItem.frame.y,
+            innerWidth: isArtboard ? artboardBackground.bounds.width : innerWidth,
+            innerHeight: isArtboard ? artboardBackground.bounds.height : innerHeight,
+            width: isArtboard ? artboardBackground.bounds.width : paperLayer.bounds.width,
+            height: isArtboard ? artboardBackground.bounds.height : paperLayer.bounds.height
           }
         }
       }
@@ -3211,7 +3317,6 @@ export const setLayerTextThunk = (payload: SetLayerTextPayload) => {
       textResize: (layerItem as Btwx.Text).textStyle.textResize
     });
     // get next point, inner bounds, and lines
-    const nextPoint = textContent.point.subtract(artboardPosition);
     const nextContentHeight = Math.round(textContent.bounds.height);
     const nextInnerBounds = getTextInnerBounds({
       paperLayer: clone,
@@ -3236,13 +3341,14 @@ export const setLayerTextThunk = (payload: SetLayerTextPayload) => {
       paperLayer: clone,
       transform: layerItem.transform
     });
+    const nextPoint = textContent.point.subtract(artboardPosition);
     dispatch(
       setLayerText({
         ...payload,
         bounds: {
           ...nextInnerBounds,
-          width: Math.round(clone.bounds.width),
-          height: Math.round(clone.bounds.height),
+          width: clone.bounds.width,
+          height: clone.bounds.height,
         },
         lines: nextTextLines,
         paragraphs: nextParagraphs,
@@ -3313,7 +3419,6 @@ export const setLayersTextResizeThunk = (payload: SetLayersTextResizePayload) =>
         textResize: payload.resize
       });
       // get next point, inner bounds, and lines
-      const nextPoint = textContent.point.subtract(artboardPosition);
       const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
@@ -3340,13 +3445,14 @@ export const setLayersTextResizeThunk = (payload: SetLayersTextResizePayload) =>
       });
       // push updates
       paragraphs.push(nextParagraphs);
-      point.push(nextPoint);
+      const nextPoint = textContent.point.subtract(artboardPosition);
+      point.push({x: nextPoint.x, y: nextPoint.y});
       contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
         ...nextInnerBounds,
-        width: Math.round(clone.bounds.width),
-        height: Math.round(clone.bounds.height)
+        width: clone.bounds.width,
+        height: clone.bounds.height
       });
     });
     dispatch(
@@ -3384,7 +3490,7 @@ export const setLayersFontSizeThunk = (payload: SetLayersFontSizePayload) => {
       const layerItem = state.layer.present.byId[id] as Btwx.Text;
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
       const projectIndex = artboardItem.projectIndex;
-      const paperLayer = paperMain.projects[projectIndex].getItem({data: {id: id}});
+      const paperLayer = paperMain.projects[projectIndex].getItem({data:{id}});
       const clone = paperLayer.clone({insert: false}) as paper.Group;
       const textContent = clone.getItem({data: {id: 'textContent'}}) as paper.AreaText;
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
@@ -3420,7 +3526,6 @@ export const setLayersFontSizeThunk = (payload: SetLayersFontSizePayload) => {
         textResize: (layerItem as Btwx.Text).textStyle.textResize
       });
       // get next point, inner bounds, and lines
-      const nextPoint = textContent.point.subtract(artboardPosition);
       const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
@@ -3447,13 +3552,14 @@ export const setLayersFontSizeThunk = (payload: SetLayersFontSizePayload) => {
       });
       // push updates
       paragraphs.push(nextParagraphs);
-      point.push(nextPoint);
+      const nextPoint = textContent.point.subtract(artboardPosition);
+      point.push({x: nextPoint.x, y: nextPoint.y});
       contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
         ...nextInnerBounds,
-        width: Math.round(clone.bounds.width),
-        height: Math.round(clone.bounds.height)
+        width: clone.bounds.width,
+        height: clone.bounds.height
       });
     });
     dispatch(
@@ -3485,6 +3591,7 @@ export const setLayersLeadingThunk = (payload: SetLayersLeadingPayload) => {
     const lines: Btwx.TextLine[][] = [];
     const bounds: Btwx.Frame[] = [];
     const contentHeight: number[] = [];
+    const point: Btwx.Point[] = [];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id] as Btwx.Text;
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
@@ -3507,11 +3614,11 @@ export const setLayersLeadingThunk = (payload: SetLayersLeadingPayload) => {
       switch(layerItem.textStyle.textResize) {
         case 'autoWidth':
           nextInnerHeight = textContent.bounds.height;
-          nextY = Math.round(textContent.position.y - artboardPosition.y);
+          nextY = textContent.position.y - artboardPosition.y;
           break;
         case 'autoHeight':
           nextInnerHeight = textContent.bounds.height;
-          nextY = Math.round(textContent.position.y - artboardPosition.y);
+          nextY = textContent.position.y - artboardPosition.y;
           break;
         case 'fixed':
           switch(layerItem.textStyle.verticalAlignment) {
@@ -3565,11 +3672,13 @@ export const setLayersLeadingThunk = (payload: SetLayersLeadingPayload) => {
       });
       // push updates
       contentHeight.push(nextContentHeight);
+      const nextPoint = textContent.point.subtract(artboardPosition);
+      point.push({x: nextPoint.x, y: nextPoint.y});
       lines.push(textLines);
       bounds.push({
         ...nextInnerBounds,
-        width: Math.round(clone.bounds.width),
-        height: Math.round(clone.bounds.height)
+        width: clone.bounds.width,
+        height: clone.bounds.height
       });
     });
     dispatch(
@@ -3577,7 +3686,8 @@ export const setLayersLeadingThunk = (payload: SetLayersLeadingPayload) => {
         ...payload,
         bounds,
         lines,
-        contentHeight
+        contentHeight,
+        point
       })
     )
   }
@@ -3605,7 +3715,7 @@ export const setLayersFontWeightThunk = (payload: SetLayersFontWeightPayload) =>
       const layerItem = state.layer.present.byId[id] as Btwx.Text;
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
       const projectIndex = artboardItem.projectIndex;
-      const paperLayer = paperMain.projects[projectIndex].getItem({data: {id: id}});
+      const paperLayer = paperMain.projects[projectIndex].getItem({data:{id}});
       const clone = paperLayer.clone({insert: false}) as paper.Group;
       const textContent = clone.getItem({data: {id: 'textContent'}}) as paper.AreaText;
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
@@ -3641,7 +3751,6 @@ export const setLayersFontWeightThunk = (payload: SetLayersFontWeightPayload) =>
         textResize: (layerItem as Btwx.Text).textStyle.textResize
       });
       // get next point, inner bounds, and lines
-      const nextPoint = textContent.point.subtract(artboardPosition);
       const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
@@ -3668,13 +3777,14 @@ export const setLayersFontWeightThunk = (payload: SetLayersFontWeightPayload) =>
       });
       // push updates
       paragraphs.push(nextParagraphs);
-      point.push(nextPoint);
+      const nextPoint = textContent.point.subtract(artboardPosition);
+      point.push({x: nextPoint.x, y: nextPoint.y});
       contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
         ...nextInnerBounds,
-        width: Math.round(clone.bounds.width),
-        height: Math.round(clone.bounds.height)
+        width: clone.bounds.width,
+        height: clone.bounds.height
       });
     });
     dispatch(
@@ -3748,7 +3858,6 @@ export const setLayersFontFamilyThunk = (payload: SetLayersFontFamilyPayload) =>
         textResize: (layerItem as Btwx.Text).textStyle.textResize
       });
       // get next point, inner bounds, and lines
-      const nextPoint = textContent.point.subtract(artboardPosition);
       const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
@@ -3775,13 +3884,14 @@ export const setLayersFontFamilyThunk = (payload: SetLayersFontFamilyPayload) =>
       });
       // push updates
       paragraphs.push(nextParagraphs);
-      point.push(nextPoint);
+      const nextPoint = textContent.point.subtract(artboardPosition);
+      point.push({x: nextPoint.x, y: nextPoint.y});
       contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
         ...nextInnerBounds,
-        width: Math.round(clone.bounds.width),
-        height: Math.round(clone.bounds.height)
+        width: clone.bounds.width,
+        height: clone.bounds.height
       });
     });
     dispatch(
@@ -3855,7 +3965,6 @@ export const setLayersLetterSpacingThunk = (payload: SetLayersLetterSpacingPaylo
         textResize: (layerItem as Btwx.Text).textStyle.textResize
       });
       // get next point, inner bounds, and lines
-      const nextPoint = textContent.point.subtract(artboardPosition);
       const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
@@ -3882,13 +3991,14 @@ export const setLayersLetterSpacingThunk = (payload: SetLayersLetterSpacingPaylo
       });
       // push updates
       paragraphs.push(nextParagraphs);
-      point.push(nextPoint);
+      const nextPoint = textContent.point.subtract(artboardPosition);
+      point.push({x: nextPoint.x, y: nextPoint.y});
       contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
         ...nextInnerBounds,
-        width: Math.round(clone.bounds.width),
-        height: Math.round(clone.bounds.height)
+        width: clone.bounds.width,
+        height: clone.bounds.height
       });
     });
     dispatch(
@@ -3962,7 +4072,6 @@ export const setLayersTextTransformThunk = (payload: SetLayersTextTransformPaylo
         textResize: (layerItem as Btwx.Text).textStyle.textResize
       });
       // get next point, inner bounds, and lines
-      const nextPoint = textContent.point.subtract(artboardPosition);
       const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
@@ -3989,13 +4098,14 @@ export const setLayersTextTransformThunk = (payload: SetLayersTextTransformPaylo
       });
       // push updates
       paragraphs.push(nextParagraphs);
-      point.push(nextPoint);
+      const nextPoint = textContent.point.subtract(artboardPosition);
+      point.push({x: nextPoint.x, y: nextPoint.y});
       contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
         ...nextInnerBounds,
-        width: Math.round(clone.bounds.width),
-        height: Math.round(clone.bounds.height)
+        width: clone.bounds.width,
+        height: clone.bounds.height
       });
     });
     dispatch(
@@ -4095,7 +4205,6 @@ export const setLayersJustificationThunk = (payload: SetLayersJustificationPaylo
       //   textResize: (layerItem as Btwx.Text).textStyle.textResize
       // });
       // get next point, inner bounds, and lines
-      const nextPoint = textContent.point.subtract(artboardPosition);
       const nextContentHeight = Math.round(textContent.bounds.height);
       const textLines = getTextLines({
         paperLayer: textContent,
@@ -4109,7 +4218,8 @@ export const setLayersJustificationThunk = (payload: SetLayersJustificationPaylo
         transform: layerItem.transform
       });
       // push updates
-      points.push(nextPoint);
+      const nextPoint = textContent.point.subtract(artboardPosition);
+      points.push({x: nextPoint.x, y: nextPoint.y});
       contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push(layerItem.frame);
@@ -4164,7 +4274,6 @@ export const setLayersVerticalAlignmentThunk = (payload: SetLayersVerticalAlignm
         textResize: (layerItem as Btwx.Text).textStyle.textResize
       });
       // get next point, inner bounds, and lines
-      const nextPoint = textContent.point.subtract(artboardPosition);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
         frame: (layerItem as Btwx.Text).frame,
@@ -4189,12 +4298,13 @@ export const setLayersVerticalAlignmentThunk = (payload: SetLayersVerticalAlignm
         transform: layerItem.transform
       });
       // push updates
-      points.push(nextPoint);
+      const nextPoint = textContent.point.subtract(artboardPosition);
+      points.push({x: nextPoint.x, y: nextPoint.y});
       lines.push(textLines);
       bounds.push({
         ...nextInnerBounds,
-        width: Math.round(clone.bounds.width),
-        height: Math.round(clone.bounds.height)
+        width: clone.bounds.width,
+        height: clone.bounds.height
       });
     });
     dispatch(
@@ -4266,7 +4376,6 @@ export const setLayersFontStyleThunk = (payload: SetLayersFontStylePayload) => {
         textResize: (layerItem as Btwx.Text).textStyle.textResize
       });
       // get next point, inner bounds, and lines
-      const nextPoint = textContent.point.subtract(artboardPosition);
       const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
@@ -4293,13 +4402,14 @@ export const setLayersFontStyleThunk = (payload: SetLayersFontStylePayload) => {
       });
       // push updates
       paragraphs.push(nextParagraphs);
-      point.push(nextPoint);
+      const nextPoint = textContent.point.subtract(artboardPosition);
+      point.push({x: nextPoint.x, y: nextPoint.y});
       contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
         ...nextInnerBounds,
-        width: Math.round(clone.bounds.width),
-        height: Math.round(clone.bounds.height)
+        width: clone.bounds.width,
+        height: clone.bounds.height
       });
     });
     dispatch(
@@ -4726,10 +4836,10 @@ export const applyBooleanOperationThunk = (booleanOperation: Btwx.BooleanOperati
             frame: {
               x: position.x,
               y: position.y,
-              width: Math.round(booleanLayers.bounds.width),
-              height: Math.round(booleanLayers.bounds.height),
-              innerWidth: Math.round(booleanLayers.bounds.width),
-              innerHeight: Math.round(booleanLayers.bounds.height)
+              width: booleanLayers.bounds.width,
+              height: booleanLayers.bounds.height,
+              innerWidth: booleanLayers.bounds.width,
+              innerHeight: booleanLayers.bounds.height
             },
             style: layerItem.style,
             closed: true,
@@ -4813,8 +4923,8 @@ export const setRoundedRadiiThunk = (payload: SetRoundedRadiiPayload) => {
       pathData.push(clone.pathData);
       bounds.push({
         ...layerItem.frame,
-        width: Math.round(clone.bounds.width),
-        height: Math.round(clone.bounds.height)
+        width: clone.bounds.width,
+        height: clone.bounds.height
       });
     });
     dispatch(
@@ -4864,8 +4974,8 @@ export const setPolygonsSidesThunk = (payload: SetPolygonsSidesPayload) => {
       pathData.push(clone.pathData);
       bounds.push({
         ...layerItem.frame,
-        width: Math.round(clone.bounds.width),
-        height: Math.round(clone.bounds.height)
+        width: clone.bounds.width,
+        height: clone.bounds.height
       });
     });
     dispatch(
@@ -4917,8 +5027,8 @@ export const setStarsPointsThunk = (payload: SetStarsPointsPayload) => {
       pathData.push(clone.pathData);
       bounds.push({
         ...layerItem.frame,
-        width: Math.round(clone.bounds.width),
-        height: Math.round(clone.bounds.height)
+        width: clone.bounds.width,
+        height: clone.bounds.height
       });
     });
     dispatch(
@@ -4970,8 +5080,8 @@ export const setStarsRadiusThunk = (payload: SetStarsRadiusPayload) => {
       pathData.push(clone.pathData);
       bounds.push({
         ...layerItem.frame,
-        width: Math.round(clone.bounds.width),
-        height: Math.round(clone.bounds.height)
+        width: clone.bounds.width,
+        height: clone.bounds.height
       });
     });
     dispatch(
@@ -5019,8 +5129,8 @@ export const setLinesFromXThunk = (payload: SetLinesFromXPayload) => {
         y: positionInArtboard.y,
         innerWidth: Math.round(vector.length),
         innerHeight: 0,
-        width: Math.round(clone.bounds.width),
-        height: Math.round(clone.bounds.height)
+        width: clone.bounds.width,
+        height: clone.bounds.height
       });
     });
     dispatch(
@@ -5069,8 +5179,8 @@ export const setLinesFromYThunk = (payload: SetLinesFromYPayload) => {
         y: positionInArtboard.y,
         innerWidth: Math.round(vector.length),
         innerHeight: 0,
-        width: Math.round(clone.bounds.width),
-        height: Math.round(clone.bounds.height)
+        width: clone.bounds.width,
+        height: clone.bounds.height
       });
     });
     dispatch(
@@ -5110,8 +5220,8 @@ export const setLineFromThunk = (payload: SetLineFromPayload) => {
       y: positionInArtboard.y,
       innerWidth: Math.round(vector.length),
       innerHeight: 0,
-      width: Math.round(paperLayer.bounds.width),
-      height: Math.round(paperLayer.bounds.height)
+      width: paperLayer.bounds.width,
+      height: paperLayer.bounds.height
     }
     dispatch(
       setLineFrom({

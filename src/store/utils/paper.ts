@@ -4,6 +4,15 @@ import tinyColor from 'tinycolor2';
 import { DEFAULT_ROUNDED_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_RADIUS, DEFAULT_STAR_POINTS, DEFAULT_LINE_FROM, DEFAULT_LINE_TO } from '../../constants';
 import { paperMain, paperPreview } from '../../canvas';
 
+interface GetScaleReset {
+  scale: number;
+}
+
+export const getScaleReset = ({ scale }: GetScaleReset): number => {
+  let resetScale = Number((2 - scale).toFixed(2));
+  return resetScale;
+}
+
 interface HasPointChange {
   layerItem: Btwx.Text;
 }
@@ -86,22 +95,56 @@ export const positionTextContent = ({paperLayer, justification, verticalAlignmen
 interface ClearLayerTransforms {
   paperLayer: paper.Item;
   transform: Btwx.Transform;
+  variable?: boolean;
+  width?: number;
+  height?: number;
 }
 
-export const clearLayerTransforms = ({ paperLayer, transform }: ClearLayerTransforms): paper.Item => {
-  paperLayer.scale(transform.horizontalFlip ? -1 : 1, transform.verticalFlip ? -1 : 1);
-  paperLayer.rotation = -transform.rotation;
+export const clearLayerTransforms = ({ paperLayer, transform, variable, width, height }: ClearLayerTransforms): paper.Item => {
+  if (variable) {
+    paperLayer.scale(
+      (transform.horizontalFlip as any) < 0 ? -1 : 1,
+      (transform.verticalFlip as any) < 0 ? -1 : 1
+    );
+    paperLayer.scale(
+      width / paperLayer.bounds.width,
+      height / paperLayer.bounds.height
+    );
+    paperLayer.rotation = -transform.rotation;
+  } else {
+    paperLayer.scale(
+      transform.horizontalFlip ? -1 : 1,
+      transform.verticalFlip ? -1 : 1
+    );
+    paperLayer.rotation = -transform.rotation;
+  }
   return paperLayer;
 }
 
 interface ApplyLayerTransforms {
   paperLayer: paper.Item;
   transform: Btwx.Transform;
+  variable?: boolean;
 }
 
-export const applyLayerTransforms = ({ paperLayer, transform }: ApplyLayerTransforms): paper.Item => {
-  paperLayer.rotation = transform.rotation;
-  paperLayer.scale(transform.horizontalFlip ? -1 : 1, transform.verticalFlip ? -1 : 1);
+export const applyLayerTransforms = ({ paperLayer, transform, variable }: ApplyLayerTransforms): paper.Item => {
+  if (variable) {
+    paperLayer.rotation = transform.rotation;
+    paperLayer.scale(
+      Math.abs(transform.horizontalFlip as any),
+      Math.abs(transform.verticalFlip as any)
+    );
+    paperLayer.scale(
+      (transform.horizontalFlip as any) < 0 ? -1 : 1,
+      (transform.verticalFlip as any) < 0 ? -1 : 1
+    );
+  } else {
+    paperLayer.rotation = transform.rotation;
+    paperLayer.scale(
+      transform.horizontalFlip ? -1 : 1,
+      transform.verticalFlip ? -1 : 1
+    );
+  }
   return paperLayer;
 }
 

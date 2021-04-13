@@ -13,7 +13,7 @@ import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import { RootState } from '../store/reducers';
 import { paperPreview } from '../canvas';
 import { getTransformedText } from '../utils';
-import { positionTextContent, clearLayerTransforms, applyLayerTransforms } from '../store/utils/paper';
+import { positionTextContent, clearLayerTransforms, applyLayerTransforms, getScaleReset } from '../store/utils/paper';
 import { EventLayerTimelineData } from './CanvasPreviewLayerEvent';
 import { getParagraphs, getContent } from './CanvasTextLayer';
 
@@ -158,14 +158,34 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       onStart: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
         const startRotation = paperLayer.data.rotation || paperLayer.data.rotation === 0 ? paperLayer.data.rotation : originLayerItem.transform.rotation;
+        const startScaleX = paperLayer.data.scaleX || paperLayer.data.scaleX === 0 ? paperLayer.data.scaleX : 1;
+        const startScaleY = paperLayer.data.scaleY || paperLayer.data.scaleY === 0 ? paperLayer.data.scaleY : 1;
         const startPosition = paperLayer.position;
-        paperLayer.rotation = -startRotation;
+        clearLayerTransforms({
+          paperLayer,
+          transform: {
+            ...originLayerItem.transform,
+            rotation: startRotation,
+            horzontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true
+        });
         const beforeRaster = paperLayer.getItem({data: {id: 'raster'}}) as paper.Raster;
         const afterRaster = beforeRaster.clone() as paper.Raster;
         afterRaster.source = (paperPreview.project.getItem({data:{id: tween.destinationLayer}}).children[0] as paper.Raster).source;
         afterRaster.bounds = beforeRaster.bounds;
         afterRaster.opacity = 0;
-        paperLayer.rotation = startRotation;
+        applyLayerTransforms({
+          paperLayer,
+          transform: {
+            ...originLayerItem.transform,
+            rotation: startRotation,
+            horzontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true
+        });
         paperLayer.position = startPosition;
       },
       onUpdate: () => {
@@ -207,13 +227,33 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         const innerWidth = paperLayer.data.innerWidth ? paperLayer.data.innerWidth : originLayerItem.frame.innerWidth;
         const innerHeight = paperLayer.data.innerHeight ? paperLayer.data.innerHeight : originLayerItem.frame.innerHeight;
         const startRotation = paperLayer.data.rotation || paperLayer.data.rotation === 0 ? paperLayer.data.rotation : originLayerItem.transform.rotation;
+        const startScaleX = paperLayer.data.scaleX || paperLayer.data.scaleX === 0 ? paperLayer.data.scaleX : 1;
+        const startScaleY = paperLayer.data.scaleY || paperLayer.data.scaleY === 0 ? paperLayer.data.scaleY : 1;
         const startPosition = paperLayer.position;
-        paperLayer.rotation = -startRotation;
+        clearLayerTransforms({
+          paperLayer,
+          transform: {
+            ...originLayerItem.transform,
+            rotation: startRotation,
+            horzontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true
+        });
         // apply final clone path data to tweenPaperLayer
         (paperLayer as paper.Path).pathData = eventTimeline.data[tween.layer][tween.prop];
         paperLayer.bounds.width = innerWidth;
         paperLayer.bounds.height = innerHeight;
-        paperLayer.rotation = startRotation;
+        applyLayerTransforms({
+          paperLayer,
+          transform: {
+            ...originLayerItem.transform,
+            rotation: startRotation,
+            horzontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true
+        });
         paperLayer.position = startPosition;
         // update fill gradient origin/destination if needed
         updateGradients({ paperLayer, textContent, textBackground });
@@ -786,13 +826,22 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground, textMask } = eventLayerTimeline.data as EventLayerTimelineData;
         const startRotation = paperLayer.data.rotation || paperLayer.data.rotation === 0 ? paperLayer.data.rotation : originLayerItem.transform.rotation;
+        const startScaleX = paperLayer.data.scaleX ? paperLayer.data.scaleX : originLayerItem.transform.horizontalFlip ? -1 : 1;
+        const startScaleY = paperLayer.data.scaleY ? paperLayer.data.scaleY : originLayerItem.transform.verticalFlip ? -1 : 1;
+        const width = paperLayer.data.width ? paperLayer.data.width : (originLayerItem as Btwx.Text).frame.width;
+        const height = paperLayer.data.height ? paperLayer.data.height : (originLayerItem as Btwx.Text).frame.height;
         const startPosition = paperLayer.position;
         clearLayerTransforms({
           paperLayer,
           transform: {
             ...originLayerItem.transform,
             rotation: startRotation,
-          }
+            horizontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true,
+          width,
+          height
         });
         if (originLayerItem.type === 'Text') {
           const text = paperLayer.data.text ? paperLayer.data.text : (originLayerItem as Btwx.Text).text;
@@ -801,7 +850,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             fontSize: textContent.fontSize as number,
             fontWeight: textContent.fontWeight as number,
             fontFamily: textContent.fontFamily,
-            textResize: (destinationLayerItem as Btwx.Text).textStyle.textResize,
+            textResize: (originLayerItem as Btwx.Text).textStyle.textResize,
             innerWidth: eventTimeline.data[tween.layer][tween.prop],
             letterSpacing: textContent.letterSpacing as number,
             textTransform: textContent.textTransform,
@@ -832,24 +881,42 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           textBackground.pivot = null;
           positionTextContent({
             paperLayer: paperLayer as paper.Group,
-            verticalAlignment: (destinationLayerItem as Btwx.Text).textStyle.verticalAlignment,
-            justification: (destinationLayerItem as Btwx.Text).textStyle.justification,
-            textResize: (destinationLayerItem as Btwx.Text).textStyle.textResize
+            verticalAlignment: (originLayerItem as Btwx.Text).textStyle.verticalAlignment,
+            justification: (originLayerItem as Btwx.Text).textStyle.justification,
+            textResize: (originLayerItem as Btwx.Text).textStyle.textResize
           });
         } else {
           paperLayer.bounds.width = eventTimeline.data[tween.layer][tween.prop];
         }
+        paperLayer.rotation = startRotation;
+        paperLayer.data.width = paperLayer.bounds.width;
+        paperLayer.data.height = paperLayer.bounds.height;
+        paperLayer.rotation = -startRotation;
         applyLayerTransforms({
           paperLayer,
           transform: {
             ...originLayerItem.transform,
             rotation: startRotation,
-          }
+            horizontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true
         });
         paperLayer.data.innerWidth = eventTimeline.data[tween.layer][tween.prop];
         paperLayer.position = startPosition;
         if (originLayerItem.type === 'Shape' && (originLayerItem as Btwx.Shape).shapeType === 'Rounded' && destinationLayerItem.type === 'Shape' && (destinationLayerItem as Btwx.Shape).shapeType === 'Rounded') {
-          paperLayer.rotation = -startRotation;
+          clearLayerTransforms({
+            paperLayer,
+            transform: {
+              ...originLayerItem.transform,
+              rotation: startRotation,
+              horizontalFlip: startScaleX,
+              verticalFlip: startScaleY
+            } as any,
+            variable: true,
+            width: paperLayer.data.width,
+            height
+          });
           const newShape = new paperPreview.Path.Rectangle({
             from: paperLayer.bounds.topLeft,
             to: paperLayer.bounds.bottomRight,
@@ -857,7 +924,16 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             insert: false
           });
           (paperLayer as paper.Path).pathData = newShape.pathData;
-          paperLayer.rotation = startRotation;
+          applyLayerTransforms({
+            paperLayer,
+            transform: {
+              ...originLayerItem.transform,
+              rotation: startRotation,
+              horizontalFlip: startScaleX,
+              verticalFlip: startScaleY
+            } as any,
+            variable: true
+          });
         }
         updateGradients({ paperLayer, textContent, textBackground });
       },
@@ -874,13 +950,22 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textMask, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
         const startRotation = paperLayer.data.rotation || paperLayer.data.rotation === 0 ? paperLayer.data.rotation : originLayerItem.transform.rotation;
+        const startScaleX = paperLayer.data.scaleX ? paperLayer.data.scaleX : originLayerItem.transform.horizontalFlip ? -1 : 1;
+        const startScaleY = paperLayer.data.scaleY ? paperLayer.data.scaleY : originLayerItem.transform.verticalFlip ? -1 : 1;
+        const width = paperLayer.data.width ? paperLayer.data.width : (originLayerItem as Btwx.Text).frame.width;
+        const height = paperLayer.data.height ? paperLayer.data.height : (originLayerItem as Btwx.Text).frame.height;
         const startPosition = paperLayer.position;
         clearLayerTransforms({
           paperLayer,
           transform: {
             ...originLayerItem.transform,
             rotation: startRotation,
-          }
+            horizontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true,
+          width,
+          height
         });
         if (originLayerItem.type === 'Text') {
           switch((originLayerItem as Btwx.Text).textStyle.verticalAlignment) {
@@ -904,17 +989,35 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         } else {
           paperLayer.bounds.height = eventTimeline.data[tween.layer][tween.prop];
         }
+        paperLayer.rotation = startRotation;
+        paperLayer.data.height = paperLayer.bounds.height;
+        paperLayer.data.width = paperLayer.bounds.width;
+        paperLayer.rotation = -startRotation;
         applyLayerTransforms({
           paperLayer,
           transform: {
             ...originLayerItem.transform,
             rotation: startRotation,
-          }
+            horizontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true
         });
         paperLayer.data.innerHeight = eventTimeline.data[tween.layer][tween.prop];
         paperLayer.position = startPosition;
         if (originLayerItem.type === 'Shape' && (originLayerItem as Btwx.Shape).shapeType === 'Rounded' && destinationLayerItem.type === 'Shape' && (destinationLayerItem as Btwx.Shape).shapeType === 'Rounded') {
-          paperLayer.rotation = -startRotation;
+          clearLayerTransforms({
+            paperLayer,
+            transform: {
+              ...originLayerItem.transform,
+              rotation: startRotation,
+              horizontalFlip: startScaleX,
+              verticalFlip: startScaleY
+            } as any,
+            variable: true,
+            width,
+            height: paperLayer.data.height
+          });
           const newShape = new paperPreview.Path.Rectangle({
             from: paperLayer.bounds.topLeft,
             to: paperLayer.bounds.bottomRight,
@@ -922,7 +1025,16 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             insert: false
           });
           (paperLayer as paper.Path).pathData = newShape.pathData;
-          paperLayer.rotation = startRotation;
+          applyLayerTransforms({
+            paperLayer,
+            transform: {
+              ...originLayerItem.transform,
+              rotation: startRotation,
+              horizontalFlip: startScaleX,
+              verticalFlip: startScaleY
+            } as any,
+            variable: true
+          });
         }
         updateGradients({ paperLayer, textContent, textBackground });
       },
@@ -939,19 +1051,35 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
         const startRotation = paperLayer.data.rotation || paperLayer.data.rotation === 0 ? paperLayer.data.rotation : originLayerItem.transform.rotation;
+        const startScaleX = paperLayer.data.scaleX ? paperLayer.data.scaleX : originLayerItem.transform.horizontalFlip ? -1 : 1;
+        const startScaleY = paperLayer.data.scaleY ? paperLayer.data.scaleY : originLayerItem.transform.verticalFlip ? -1 : 1;
+        const width = paperLayer.data.width ? paperLayer.data.width : (originLayerItem as Btwx.Text).frame.width;
+        const height = paperLayer.data.height ? paperLayer.data.height : (originLayerItem as Btwx.Text).frame.height;
         clearLayerTransforms({
           paperLayer,
           transform: {
             ...originLayerItem.transform,
             rotation: startRotation,
-          }
+            horizontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true,
+          width,
+          height
         });
+        paperLayer.rotation = eventTimeline.data[tween.layer][tween.prop];
+        paperLayer.data.width = paperLayer.bounds.width;
+        paperLayer.data.height = paperLayer.bounds.height;
+        paperLayer.rotation = -eventTimeline.data[tween.layer][tween.prop];
         applyLayerTransforms({
           paperLayer,
           transform: {
             ...originLayerItem.transform,
             rotation: eventTimeline.data[tween.layer][tween.prop],
-          }
+            horizontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true
         });
         paperLayer.data.rotation = eventTimeline.data[tween.layer][tween.prop];
         updateGradients({ paperLayer, textContent, textBackground });
@@ -1105,14 +1233,23 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textMask, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
         const startRotation = paperLayer.data.rotation || paperLayer.data.rotation === 0 ? paperLayer.data.rotation : originLayerItem.transform.rotation;
+        const startScaleX = paperLayer.data.scaleX ? paperLayer.data.scaleX : originLayerItem.transform.horizontalFlip ? -1 : 1;
+        const startScaleY = paperLayer.data.scaleY ? paperLayer.data.scaleY : originLayerItem.transform.verticalFlip ? -1 : 1;
         const innerWidth = paperLayer.data.innerWidth ? paperLayer.data.innerWidth : (originLayerItem as Btwx.Text).frame.innerWidth;
+        const width = paperLayer.data.width ? paperLayer.data.width : (originLayerItem as Btwx.Text).frame.width;
+        const height = paperLayer.data.height ? paperLayer.data.height : (originLayerItem as Btwx.Text).frame.height;
         const startPosition = paperLayer.position;
         clearLayerTransforms({
           paperLayer,
           transform: {
             ...originLayerItem.transform,
             rotation: startRotation,
-          }
+            horizontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true,
+          width,
+          height
         });
         const text = paperLayer.data.text ? paperLayer.data.text : (originLayerItem as Btwx.Text).text;
         const nextParagraphs = getParagraphs({
@@ -1120,7 +1257,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           fontSize: eventTimeline.data[tween.layer][tween.prop] as number,
           fontWeight: textContent.fontWeight as number,
           fontFamily: textContent.fontFamily,
-          textResize: (destinationLayerItem as Btwx.Text).textStyle.textResize,
+          textResize: originTextItem.textStyle.textResize,
           innerWidth: innerWidth,
           letterSpacing: textContent.letterSpacing as number,
           textTransform: textContent.textTransform,
@@ -1132,7 +1269,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         });
         textContent.fontSize = eventTimeline.data[tween.layer][tween.prop];
         textContent.content = nextContent;
-        switch(destinationTextItem.textStyle.textResize) {
+        switch(originTextItem.textStyle.textResize) {
           case 'autoWidth':
             paperLayer.data.innerWidth = textContent.bounds.width;
             paperLayer.data.x = textContent.position.x;
@@ -1156,16 +1293,25 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         }
         positionTextContent({
           paperLayer: paperLayer as paper.Group,
-          verticalAlignment: (destinationLayerItem as Btwx.Text).textStyle.verticalAlignment,
-          justification: (destinationLayerItem as Btwx.Text).textStyle.justification,
-          textResize: (destinationLayerItem as Btwx.Text).textStyle.textResize
+          verticalAlignment: originTextItem.textStyle.verticalAlignment,
+          justification: originTextItem.textStyle.justification,
+          textResize: originTextItem.textStyle.textResize
         });
+        if (originTextItem.textStyle.textResize !== 'fixed') {
+          paperLayer.rotation = startRotation;
+          paperLayer.data.width = paperLayer.bounds.width;
+          paperLayer.data.height = paperLayer.bounds.height;
+          paperLayer.rotation = -startRotation;
+        }
         applyLayerTransforms({
           paperLayer,
           transform: {
             ...originLayerItem.transform,
             rotation: startRotation,
-          }
+            horizontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true
         });
         paperLayer.position = startPosition;
         // paperLayer.rotation = -startRotation;
@@ -1191,14 +1337,23 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textMask, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
         const startRotation = paperLayer.data.rotation || paperLayer.data.rotation === 0 ? paperLayer.data.rotation : originLayerItem.transform.rotation;
+        const startScaleX = paperLayer.data.scaleX ? paperLayer.data.scaleX : originLayerItem.transform.horizontalFlip ? -1 : 1;
+        const startScaleY = paperLayer.data.scaleY ? paperLayer.data.scaleY : originLayerItem.transform.verticalFlip ? -1 : 1;
         const innerWidth = paperLayer.data.innerWidth ? paperLayer.data.innerWidth : (originLayerItem as Btwx.Text).frame.innerWidth;
+        const width = paperLayer.data.width ? paperLayer.data.width : (originLayerItem as Btwx.Text).frame.width;
+        const height = paperLayer.data.height ? paperLayer.data.height : (originLayerItem as Btwx.Text).frame.height;
         const startPosition = paperLayer.position;
         clearLayerTransforms({
           paperLayer,
           transform: {
             ...originLayerItem.transform,
             rotation: startRotation,
-          }
+            horizontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true,
+          width,
+          height
         });
         const text = paperLayer.data.text ? paperLayer.data.text : (originLayerItem as Btwx.Text).text;
         const nextParagraphs = getParagraphs({
@@ -1206,7 +1361,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           fontSize: textContent.fontSize as number,
           fontWeight: eventTimeline.data[tween.layer][tween.prop] as number,
           fontFamily: textContent.fontFamily,
-          textResize: (destinationLayerItem as Btwx.Text).textStyle.textResize,
+          textResize: originTextItem.textStyle.textResize,
           innerWidth: innerWidth,
           letterSpacing: textContent.letterSpacing as number,
           textTransform: textContent.textTransform,
@@ -1218,7 +1373,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         });
         textContent.fontWeight = eventTimeline.data[tween.layer][tween.prop];
         textContent.content = nextContent;
-        switch(destinationTextItem.textStyle.textResize) {
+        switch(originTextItem.textStyle.textResize) {
           case 'autoWidth':
             paperLayer.data.innerWidth = textContent.bounds.width;
             paperLayer.data.x = textContent.position.x;
@@ -1242,16 +1397,25 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         }
         positionTextContent({
           paperLayer: paperLayer as paper.Group,
-          verticalAlignment: (destinationLayerItem as Btwx.Text).textStyle.verticalAlignment,
-          justification: (destinationLayerItem as Btwx.Text).textStyle.justification,
-          textResize: (destinationLayerItem as Btwx.Text).textStyle.textResize
+          verticalAlignment: originTextItem.textStyle.verticalAlignment,
+          justification: originTextItem.textStyle.justification,
+          textResize: originTextItem.textStyle.textResize
         });
+        if (originTextItem.textStyle.textResize !== 'fixed') {
+          paperLayer.rotation = startRotation;
+          paperLayer.data.width = paperLayer.bounds.width;
+          paperLayer.data.height = paperLayer.bounds.height;
+          paperLayer.rotation = -startRotation;
+        }
         applyLayerTransforms({
           paperLayer,
           transform: {
             ...originLayerItem.transform,
             rotation: startRotation,
-          }
+            horizontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          },
+          variable: true
         });
         paperLayer.position = startPosition;
         // paperLayer.rotation = -startRotation;
@@ -1277,17 +1441,26 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textMask, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
         const startRotation = paperLayer.data.rotation || paperLayer.data.rotation === 0 ? paperLayer.data.rotation : originLayerItem.transform.rotation;
+        const startScaleX = paperLayer.data.scaleX ? paperLayer.data.scaleX : originLayerItem.transform.horizontalFlip ? -1 : 1;
+        const startScaleY = paperLayer.data.scaleY ? paperLayer.data.scaleY : originLayerItem.transform.verticalFlip ? -1 : 1;
+        const width = paperLayer.data.width ? paperLayer.data.width : (originLayerItem as Btwx.Text).frame.width;
+        const height = paperLayer.data.height ? paperLayer.data.height : (originLayerItem as Btwx.Text).frame.height;
         const startPosition = paperLayer.position;
-        const diff = (eventTimeline.data[tween.layer][tween.prop] - (textContent.leading as number)) * 0.75;
         clearLayerTransforms({
           paperLayer,
           transform: {
             ...originLayerItem.transform,
             rotation: startRotation,
-          }
+            horizontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true,
+          width,
+          height
         });
+        const diff = (eventTimeline.data[tween.layer][tween.prop] - (textContent.leading as number)) * 0.75;
         textContent.leading = eventTimeline.data[tween.layer][tween.prop];
-        switch(destinationTextItem.textStyle.textResize) {
+        switch(originTextItem.textStyle.textResize) {
           case 'autoWidth':
             paperLayer.data.innerHeight = textContent.bounds.height;
             paperLayer.data.y = textContent.position.y;
@@ -1307,7 +1480,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             textBackground.pivot = null;
             break;
           case 'fixed':
-            switch(destinationTextItem.textStyle.verticalAlignment) {
+            switch(originTextItem.textStyle.verticalAlignment) {
               case 'top':
                 textMask.position.y -= diff;
                 textBackground.position.y -= diff;
@@ -1317,16 +1490,25 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         }
         positionTextContent({
           paperLayer: paperLayer as paper.Group,
-          verticalAlignment: destinationTextItem.textStyle.verticalAlignment,
-          justification: destinationTextItem.textStyle.justification,
-          textResize: destinationTextItem.textStyle.textResize
+          verticalAlignment: originTextItem.textStyle.verticalAlignment,
+          justification: originTextItem.textStyle.justification,
+          textResize: originTextItem.textStyle.textResize
         });
+        if (originTextItem.textStyle.textResize !== 'fixed') {
+          paperLayer.rotation = startRotation;
+          paperLayer.data.width = paperLayer.bounds.width;
+          paperLayer.data.height = paperLayer.bounds.height;
+          paperLayer.rotation = -startRotation;
+        }
         applyLayerTransforms({
           paperLayer,
           transform: {
             ...originLayerItem.transform,
             rotation: startRotation,
-          }
+            horizontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true
         });
         paperLayer.position = startPosition;
         paperLayer.data.leading = eventTimeline.data[tween.layer][tween.prop];
@@ -1372,13 +1554,23 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textMask, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
         const startRotation = paperLayer.data.rotation || paperLayer.data.rotation === 0 ? paperLayer.data.rotation : originLayerItem.transform.rotation;
+        const startScaleX = paperLayer.data.scaleX ? paperLayer.data.scaleX : originLayerItem.transform.horizontalFlip ? -1 : 1;
+        const startScaleY = paperLayer.data.scaleY ? paperLayer.data.scaleY : originLayerItem.transform.verticalFlip ? -1 : 1;
+        const innerWidth = paperLayer.data.innerWidth ? paperLayer.data.innerWidth : (originLayerItem as Btwx.Text).frame.innerWidth;
+        const width = paperLayer.data.width ? paperLayer.data.width : (originLayerItem as Btwx.Text).frame.width;
+        const height = paperLayer.data.height ? paperLayer.data.height : (originLayerItem as Btwx.Text).frame.height;
         const startPosition = paperLayer.position;
         clearLayerTransforms({
           paperLayer,
           transform: {
             ...originLayerItem.transform,
             rotation: startRotation,
-          }
+            horizontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true,
+          width,
+          height
         });
         // get next paragraphs
         const nextParagraphs = getParagraphs({
@@ -1386,8 +1578,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           fontSize: textContent.fontSize as number,
           fontWeight: textContent.fontWeight as number,
           fontFamily: textContent.fontFamily,
-          textResize: (destinationLayerItem as Btwx.Text).textStyle.textResize,
-          innerWidth: textBackground.bounds.width,
+          textResize: originTextItem.textStyle.textResize,
+          innerWidth: innerWidth,
           letterSpacing: textContent.letterSpacing as number,
           textTransform: textContent.textTransform,
           fontStyle: textContent.fontStyle,
@@ -1422,16 +1614,25 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         }
         positionTextContent({
           paperLayer: paperLayer as paper.Group,
-          verticalAlignment: (destinationLayerItem as Btwx.Text).textStyle.verticalAlignment,
-          justification: (destinationLayerItem as Btwx.Text).textStyle.justification,
-          textResize: (destinationLayerItem as Btwx.Text).textStyle.textResize
+          verticalAlignment: originTextItem.textStyle.verticalAlignment,
+          justification: originTextItem.textStyle.justification,
+          textResize: originTextItem.textStyle.textResize
         });
+        if (originTextItem.textStyle.textResize !== 'fixed') {
+          paperLayer.rotation = startRotation;
+          paperLayer.data.width = paperLayer.bounds.width;
+          paperLayer.data.height = paperLayer.bounds.height;
+          paperLayer.rotation = -startRotation;
+        }
         applyLayerTransforms({
           paperLayer,
           transform: {
             ...originLayerItem.transform,
             rotation: startRotation,
-          }
+            horizontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true
         });
         paperLayer.position = startPosition;
         paperLayer.data.text = textDOM.innerText;
@@ -1452,13 +1653,23 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textMask, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
         const startRotation = paperLayer.data.rotation || paperLayer.data.rotation === 0 ? paperLayer.data.rotation : originLayerItem.transform.rotation;
+        const startScaleX = paperLayer.data.scaleX ? paperLayer.data.scaleX : originLayerItem.transform.horizontalFlip ? -1 : 1;
+        const startScaleY = paperLayer.data.scaleY ? paperLayer.data.scaleY : originLayerItem.transform.verticalFlip ? -1 : 1;
         const innerWidth = paperLayer.data.innerWidth ? paperLayer.data.innerWidth : (originLayerItem as Btwx.Text).frame.innerWidth;
+        const width = paperLayer.data.width ? paperLayer.data.width : (originLayerItem as Btwx.Text).frame.width;
+        const height = paperLayer.data.height ? paperLayer.data.height : (originLayerItem as Btwx.Text).frame.height;
+        const startPosition = paperLayer.position;
         clearLayerTransforms({
           paperLayer,
           transform: {
             ...originLayerItem.transform,
             rotation: startRotation,
-          }
+            horizontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true,
+          width,
+          height
         });
         const text = paperLayer.data.text ? paperLayer.data.text : (originLayerItem as Btwx.Text).text;
         const nextParagraphs = getParagraphs({
@@ -1466,7 +1677,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           fontSize: textContent.fontSize as number,
           fontWeight: textContent.fontWeight as number,
           fontFamily: textContent.fontFamily,
-          textResize: (destinationLayerItem as Btwx.Text).textStyle.textResize,
+          textResize: originTextItem.textStyle.textResize,
           innerWidth: innerWidth,
           letterSpacing: eventTimeline.data[tween.layer][tween.prop] as number,
           textTransform: textContent.textTransform,
@@ -1502,16 +1713,25 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         }
         positionTextContent({
           paperLayer: paperLayer as paper.Group,
-          verticalAlignment: (destinationLayerItem as Btwx.Text).textStyle.verticalAlignment,
-          justification: (destinationLayerItem as Btwx.Text).textStyle.justification,
-          textResize: (destinationLayerItem as Btwx.Text).textStyle.textResize
+          verticalAlignment: originTextItem.textStyle.verticalAlignment,
+          justification: originTextItem.textStyle.justification,
+          textResize: originTextItem.textStyle.textResize
         });
+        if (originTextItem.textStyle.textResize !== 'fixed') {
+          paperLayer.rotation = startRotation;
+          paperLayer.data.width = paperLayer.bounds.width;
+          paperLayer.data.height = paperLayer.bounds.height;
+          paperLayer.rotation = -startRotation;
+        }
         applyLayerTransforms({
           paperLayer,
           transform: {
             ...originLayerItem.transform,
             rotation: startRotation,
-          }
+            horizontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true
         });
         updateGradients({ paperLayer, textContent, textBackground });
       },
@@ -1593,6 +1813,96 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         paperLayer.data.innerWidth = paperLayer.bounds.width;
         paperLayer.data.innerHeight = paperLayer.bounds.height;
         updateGradients({ paperLayer, textContent, textBackground });
+      },
+      ease: getEaseString(tween),
+    }, tween.delay);
+  };
+
+  const addScaleXTween = (): void => {
+    eventTimeline.data[tween.layer][tween.prop] = originLayerItem.transform.horizontalFlip ? -1 : 1;
+    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+      id: tweenId,
+      duration: tween.duration,
+      [tween.prop]: tween.ease === 'customWiggle' ? ((originLayerItem.transform.horizontalFlip ? 1 : -1) * tween.customWiggle.strength) : destinationLayerItem.transform.horizontalFlip ? -1 : 1,
+      onUpdate: () => {
+        const { paperLayer, textMask, textContent } = eventLayerTimeline.data as EventLayerTimelineData;
+        const startRotation = paperLayer.data.rotation || paperLayer.data.rotation === 0 ? paperLayer.data.rotation : originLayerItem.transform.rotation;
+        const startScaleX = paperLayer.data.scaleX || paperLayer.data.scaleX === 0 ? paperLayer.data.scaleX === 0 ? 0.01 : paperLayer.data.scaleX : originLayerItem.transform.horizontalFlip ? -1 : 1;
+        const startScaleY = paperLayer.data.scaleY || paperLayer.data.scaleY === 0 ? paperLayer.data.scaleY === 0 ? 0.01 : paperLayer.data.scaleY : originLayerItem.transform.verticalFlip ? -1 : 1;
+        const width = paperLayer.data.width ? paperLayer.data.width : (originLayerItem as Btwx.Text).frame.width;
+        const height = paperLayer.data.height ? paperLayer.data.height : (originLayerItem as Btwx.Text).frame.height;
+        let nextScaleX = eventTimeline.data[tween.layer][tween.prop];
+        if (nextScaleX === 0) {
+          nextScaleX = 0.01;
+        }
+        clearLayerTransforms({
+          paperLayer,
+          transform: {
+            ...originLayerItem.transform,
+            rotation: startRotation,
+            horizontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true,
+          width,
+          height
+        });
+        applyLayerTransforms({
+          paperLayer,
+          transform: {
+            ...originLayerItem.transform,
+            rotation: startRotation,
+            horizontalFlip: nextScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true
+        });
+        paperLayer.data.scaleX = nextScaleX;
+      },
+      ease: getEaseString(tween),
+    }, tween.delay);
+  };
+
+  const addScaleYTween = (): void => {
+    eventTimeline.data[tween.layer][tween.prop] = originLayerItem.transform.verticalFlip ? -1 : 1;
+    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+      id: tweenId,
+      duration: tween.duration,
+      [tween.prop]: tween.ease === 'customWiggle' ? ((originLayerItem.transform.verticalFlip ? 1 : -1) * tween.customWiggle.strength) : destinationLayerItem.transform.verticalFlip ? -1 : 1,
+      onUpdate: () => {
+        const { paperLayer } = eventLayerTimeline.data as EventLayerTimelineData;
+        const startRotation = paperLayer.data.rotation || paperLayer.data.rotation === 0 ? paperLayer.data.rotation : originLayerItem.transform.rotation;
+        const startScaleX = paperLayer.data.scaleX || paperLayer.data.scaleX === 0 ? paperLayer.data.scaleX === 0.01 ? 1 : paperLayer.data.scaleX : originLayerItem.transform.horizontalFlip ? -1 : 1;
+        const startScaleY = paperLayer.data.scaleY || paperLayer.data.scaleY === 0 ? paperLayer.data.scaleY === 0.01 ? 1 : paperLayer.data.scaleY : originLayerItem.transform.verticalFlip ? -1 : 1;
+        const width = paperLayer.data.width ? paperLayer.data.width : (originLayerItem as Btwx.Text).frame.width;
+        const height = paperLayer.data.height ? paperLayer.data.height : (originLayerItem as Btwx.Text).frame.height;
+        let nextScaleY = eventTimeline.data[tween.layer][tween.prop];
+        if (nextScaleY === 0) {
+          nextScaleY = 0.01;
+        }
+        clearLayerTransforms({
+          paperLayer,
+          transform: {
+            ...originLayerItem.transform,
+            rotation: startRotation,
+            horizontalFlip: startScaleX,
+            verticalFlip: startScaleY
+          } as any,
+          variable: true,
+          width,
+          height
+        });
+        applyLayerTransforms({
+          paperLayer,
+          transform: {
+            ...originLayerItem.transform,
+            rotation: startRotation,
+            horizontalFlip: startScaleX,
+            verticalFlip: nextScaleY
+          } as any,
+          variable: true
+        });
+        paperLayer.data.scaleY = nextScaleY;
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -1707,6 +2017,12 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         break;
       case 'toY':
         addToYTween();
+        break;
+      case 'scaleX':
+        addScaleXTween();
+        break;
+      case 'scaleY':
+        addScaleYTween();
         break;
       default:
         return;

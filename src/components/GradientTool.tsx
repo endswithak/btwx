@@ -132,7 +132,7 @@ const GradientTool = (props: PaperToolProps): ReactElement => {
           paperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
         }
         if (selectedById[id].type === 'Text') {
-          paperLayer = paperLayer.getItem({data: {id: 'textLines'}});
+          paperLayer = paperLayer.getItem({data: {id: 'textContent'}});
         }
         paperLayer[paperProp] = {
           gradient: paperLayer[paperProp].gradient,
@@ -152,7 +152,7 @@ const GradientTool = (props: PaperToolProps): ReactElement => {
           paperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
         }
         if (selectedById[id].type === 'Text') {
-          paperLayer = paperLayer.getItem({data: {id: 'textLines'}});
+          paperLayer = paperLayer.getItem({data: {id: 'textContent'}});
         }
         paperLayer[paperProp] = {
           gradient: paperLayer[paperProp].gradient,

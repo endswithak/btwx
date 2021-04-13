@@ -34,13 +34,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
   const dispatch = useDispatch();
 
-  const resizeTextContent = useCallback(throttle((bounds: paper.Rectangle, layerItem: Btwx.Text, paperLayer: paper.Group, handle: Btwx.ResizeHandle, horizontalFlip: boolean, verticalFlip: boolean) => {
-    // const hasPointChange = () => {
-    //   const left = handle.toLowerCase().includes('left') && layerItem.textStyle.justification === 'left';
-    //   const right = handle.toLowerCase().includes('right') && layerItem.textStyle.justification === 'right';
-    //   const top = handle.toLowerCase().includes('top');
-    //   return left || right || top || horizontalFlip || verticalFlip
-    // }
+  const resizeTextContent = useCallback(throttle((bounds: paper.Rectangle, layerItem: Btwx.Text, paperLayer: paper.Group, handle: Btwx.ResizeHandle) => {
     const textContent = paperLayer.getItem({data: { id: 'textContent' }}) as paper.PointText;
     const textMask = paperLayer.getItem({data: { id: 'textMask' }});
     let textResize: Btwx.TextResize = 'fixed';
@@ -69,14 +63,6 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
       verticalAlignment: layerItem.textStyle.verticalAlignment,
       textResize: textResize,
     });
-    // if (hasPointChange()) {
-    //   positionTextContent({
-    //     paperLayer: paperLayer,
-    //     justification: layerItem.textStyle.justification,
-    //     verticalAlignment: layerItem.textStyle.verticalAlignment,
-    //     textResize: textResize,
-    //   });
-    // }
   }, 0.25), []);
 
   const resetState = (): void => {
@@ -167,7 +153,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
         }
         textBackground.scale(hor, ver);
         textMask.scale(hor, ver);
-        resizeTextContent(textBackground.bounds, layerItem, paperLayer, handle, horizontalFlip, verticalFlip);
+        resizeTextContent(textBackground.bounds, layerItem, paperLayer, handle);
         if (layerItem.transform.rotation !== 0) {
           paperLayer.pivot = null;
           paperLayer.rotation = layerItem.transform.rotation;

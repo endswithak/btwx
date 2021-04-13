@@ -104,7 +104,9 @@ export const TWEEN_PROPS_MAP: { [id: string]: string[] } = {
   toY: [],
   // pointX: [],
   // pointY: [],
-  blur: []
+  blur: [],
+  scaleX: [],
+  scaleY: []
 }
 
 export const CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER = 20;
@@ -152,6 +154,8 @@ export const CUSTOM_WIGGLE_TWEEN_STRENGTH_MAP: { [id: string]: number | Btwx.Col
   toY: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
   // pointX: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
   // pointY: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
+  scaleX: -1,
+  scaleY: -1,
   blur: 10
 }
 

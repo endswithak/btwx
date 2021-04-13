@@ -87,9 +87,6 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
         artboardBackground: paperLayer.data.layerType === 'Artboard'
           ? paperLayer.getItem({ data: { id: 'artboardBackground' } }) as paper.Path.Rectangle
           : null,
-        // textLinesGroup: paperLayer.data.layerType === 'Text'
-        //   ? paperLayer.getItem({ data: { id: 'textLines' } }) as paper.Group
-        //   : null,
         textContent: paperLayer.data.layerType === 'Text'
           ? paperLayer.getItem({ data: { id: 'textContent' } }) as paper.PointText
           : null,
