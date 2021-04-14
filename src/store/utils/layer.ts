@@ -1754,20 +1754,18 @@ export const updateParentBounds = (state: LayerState, id: string, idAsParent?: b
 export const moveLayer = (state: LayerState, action: MoveLayer): LayerState => {
   let currentState = state;
   const layerItem = state.byId[action.payload.id];
-  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   if (layerItem.type === 'Group') {
     const layerDescendants = getLayerDescendants(currentState, action.payload.id);
     currentState = layerDescendants.reduce((result, current) => {
       const descendantItem = result.byId[current];
-      const descendantLine = descendantItem.type === 'Shape' && (descendantItem as Btwx.Shape).shapeType === 'Line';
       // result = updateLayerBounds(result, current);
       if (descendantItem.type !== 'Group') {
-        result = updateLayerTweensByProps(result, current, descendantLine ? ['x', 'y', 'fromX', 'fromY', 'toX', 'toY'] : ['x', 'y']);
+        result = updateLayerTweensByProps(result, current, ['x', 'y']);
       }
       return result;
     }, currentState);
   } else {
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, isLine ? ['x', 'y', 'fromX', 'fromY', 'toX', 'toY'] : ['x', 'y']);
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y']);
   }
   return currentState;
 };
@@ -1904,15 +1902,7 @@ export const moveLayerBy = (state: LayerState, action: MoveLayerBy): LayerState 
       }
     }
     if (li.type !== 'Group' && li.type !== 'Artboard') {
-      if (isLine) {
-        cs = updateLayerTweensByProps(cs, id, ['fromX', 'fromY', 'toX', 'toY']);
-      }
-      // else if (isText) {
-      //   cs = updateLayerTweensByProps(cs, id, ['pointX', 'pointY']);
-      // }
-      else {
-        cs = updateLayerTweensByProps(cs, id, ['x', 'y']);
-      }
+      cs = updateLayerTweensByProps(cs, id, ['x', 'y']);
     }
     return cs;
   }
@@ -4152,12 +4142,12 @@ export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
         }
       }
       if (descendantItem.type !== 'Group') {
-        result = updateLayerTweensByProps(result, current, isLine ? ['x', 'fromX', 'toX'] : ['x']);
+        result = updateLayerTweensByProps(result, current, ['x']);
       }
       return result;
     }, currentState);
   } else {
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, isLine ? ['x', 'fromX', 'toX'] : ['x']);
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
   }
   return currentState;
 };
@@ -4323,12 +4313,12 @@ export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
         }
       }
       if (descendantItem.type !== 'Group') {
-        result = updateLayerTweensByProps(result, current, isLine ? ['y', 'fromY', 'toY'] : ['y']);
+        result = updateLayerTweensByProps(result, current, ['y']);
       }
       return result;
     }, currentState);
   } else {
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, isLine? ['y', 'fromY', 'toY'] : ['y']);
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
   }
   return currentState;
 };
@@ -4495,12 +4485,12 @@ export const setLayerLeft = (state: LayerState, action: SetLayerLeft): LayerStat
         }
       }
       if (descendantItem.type !== 'Group') {
-        result = updateLayerTweensByProps(result, current, isLine ? ['x', 'fromX', 'toX'] : ['x']);
+        result = updateLayerTweensByProps(result, current, ['x']);
       }
       return result;
     }, currentState);
   } else {
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, isLine ? ['x', 'fromX', 'toX'] : ['x']);
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
   }
   return currentState;
 };
@@ -4665,12 +4655,12 @@ export const setLayerCenter = (state: LayerState, action: SetLayerCenter): Layer
         }
       }
       if (descendantItem.type !== 'Group') {
-        result = updateLayerTweensByProps(result, current, isLine ? ['x', 'fromX', 'toX'] : ['x']);
+        result = updateLayerTweensByProps(result, current, ['x']);
       }
       return result;
     }, currentState);
   } else {
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, isLine ? ['x', 'fromX', 'toX'] : ['x']);
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
   }
   return currentState;
 };
@@ -4836,12 +4826,12 @@ export const setLayerRight = (state: LayerState, action: SetLayerRight): LayerSt
         }
       }
       if (descendantItem.type !== 'Group') {
-        result = updateLayerTweensByProps(result, current, isLine ? ['x', 'fromX', 'toX'] : ['x']);
+        result = updateLayerTweensByProps(result, current, ['x']);
       }
       return result;
     }, currentState);
   } else {
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, isLine ? ['x', 'fromX', 'toX'] : ['x']);
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
   }
   return currentState;
 };
@@ -5007,12 +4997,12 @@ export const setLayerTop = (state: LayerState, action: SetLayerTop): LayerState 
         }
       }
       if (descendantItem.type !== 'Group') {
-        result = updateLayerTweensByProps(result, current, isLine ? ['y', 'fromY', 'toY'] : ['y']);
+        result = updateLayerTweensByProps(result, current, ['y']);
       }
       return result;
     }, currentState);
   } else {
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, isLine? ['y', 'fromY', 'toY'] : ['y']);
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
   }
   return currentState;
 };
@@ -5177,12 +5167,12 @@ export const setLayerMiddle = (state: LayerState, action: SetLayerMiddle): Layer
         }
       }
       if (descendantItem.type !== 'Group') {
-        result = updateLayerTweensByProps(result, current, isLine ? ['y', 'fromY', 'toY'] : ['y']);
+        result = updateLayerTweensByProps(result, current, ['y']);
       }
       return result;
     }, currentState);
   } else {
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, isLine? ['y', 'fromY', 'toY'] : ['y']);
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
   }
   return currentState;
 };
@@ -5348,12 +5338,12 @@ export const setLayerBottom = (state: LayerState, action: SetLayerBottom): Layer
         }
       }
       if (descendantItem.type !== 'Group') {
-        result = updateLayerTweensByProps(result, current, isLine ? ['y', 'fromY', 'toY'] : ['y']);
+        result = updateLayerTweensByProps(result, current, ['y']);
       }
       return result;
     }, currentState);
   } else {
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, isLine? ['y', 'fromY', 'toY'] : ['y']);
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
   }
   return currentState;
 };
@@ -5400,6 +5390,7 @@ export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerSt
       }
     }
     currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shape']);
   }
   if (textResize) {
     currentState = {
@@ -5538,6 +5529,7 @@ export const setLayerHeight = (state: LayerState, action: SetLayerHeight): Layer
       }
     }
     currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shape']);
   }
   if (textResize) {
     currentState = {
@@ -5852,6 +5844,7 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
       }
     }
     currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shape']);
   }
   if (point) {
     currentState = {
@@ -5900,7 +5893,7 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
   }
   currentState = updateGroupParentBounds(currentState, groupParents);
   if (layerItem.type !== 'Group') {
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, isLine ? ['fromX', 'fromY', 'toX', 'toY'] : ['rotation']);
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['rotation']);
     // if (layerItem.style.fill.fillType === 'gradient') {
     //   currentState = setLayerGradient(currentState, layerActions.setLayerGradient({id: action.payload.id, prop: 'fill', gradient: layerItem.style.fill.gradient}) as SetLayerGradient);
     // }
@@ -5979,6 +5972,7 @@ export const enableLayerHorizontalFlip = (state: LayerState, action: EnableLayer
       }
     }
     currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shape']);
   }
   if (from) {
     currentState = {
@@ -5994,7 +5988,6 @@ export const enableLayerHorizontalFlip = (state: LayerState, action: EnableLayer
         } as Btwx.Line
       }
     }
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromX']);
   }
   if (to) {
     currentState = {
@@ -6010,7 +6003,6 @@ export const enableLayerHorizontalFlip = (state: LayerState, action: EnableLayer
         } as Btwx.Line
       }
     }
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['toX']);
   }
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleX']);
   if (point) {
@@ -6089,6 +6081,7 @@ export const disableLayerHorizontalFlip = (state: LayerState, action: DisableLay
       }
     }
     currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shape']);
   }
   if (from) {
     currentState = {
@@ -6104,7 +6097,6 @@ export const disableLayerHorizontalFlip = (state: LayerState, action: DisableLay
         } as Btwx.Line
       }
     }
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromX']);
   }
   if (to) {
     currentState = {
@@ -6120,7 +6112,6 @@ export const disableLayerHorizontalFlip = (state: LayerState, action: DisableLay
         } as Btwx.Line
       }
     }
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['toX']);
   }
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleX']);
   if (point) {
@@ -6137,7 +6128,6 @@ export const disableLayerHorizontalFlip = (state: LayerState, action: DisableLay
         } as Btwx.Text
       }
     }
-    // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['pointX']);
   }
   return currentState;
 };
@@ -6199,6 +6189,7 @@ export const enableLayerVerticalFlip = (state: LayerState, action: EnableLayerVe
       }
     }
     currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shape']);
   }
   if (from) {
     currentState = {
@@ -6214,7 +6205,6 @@ export const enableLayerVerticalFlip = (state: LayerState, action: EnableLayerVe
         } as Btwx.Line
       }
     }
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromY']);
   }
   if (to) {
     currentState = {
@@ -6230,7 +6220,6 @@ export const enableLayerVerticalFlip = (state: LayerState, action: EnableLayerVe
         } as Btwx.Line
       }
     }
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['toY']);
   }
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleY']);
   if (point) {
@@ -6309,6 +6298,7 @@ export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayer
       }
     }
     currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shape']);
   }
   if (from) {
     currentState = {
@@ -6324,7 +6314,6 @@ export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayer
         } as Btwx.Line
       }
     }
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromY']);
   }
   if (to) {
     currentState = {
@@ -6340,7 +6329,6 @@ export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayer
         } as Btwx.Line
       }
     }
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['toY']);
   }
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleY']);
   if (point) {
@@ -7898,6 +7886,7 @@ export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState =>
       }
     }
     currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
+    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shape']);
   }
   if (rotation) {
     currentState = {
@@ -7926,7 +7915,6 @@ export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState =>
         } as Btwx.Line
       }
     }
-    // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromX', 'fromY']);
   }
   if (to) {
     currentState = {
@@ -7939,7 +7927,6 @@ export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState =>
         } as Btwx.Line
       }
     }
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['toX', 'toY']);
   }
   if (point) {
     currentState = {
@@ -7952,7 +7939,6 @@ export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState =>
         } as Btwx.Text
       }
     }
-    // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['pointX', 'pointY']);
   }
   if (resize) {
     currentState = {
@@ -10180,7 +10166,7 @@ export const setLineFromX = (state: LayerState, action: SetLineFromX): LayerStat
     currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
   }
   currentState = updateGroupParentBounds(currentState, groupParents);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromX']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y', 'width', 'rotation']);
   if (action.payload.setEdit) {
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
       edit: {
@@ -10263,7 +10249,7 @@ export const setLineFromY = (state: LayerState, action: SetLineFromY): LayerStat
     currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
   }
   currentState = updateGroupParentBounds(currentState, groupParents);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fromY']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y', 'width', 'rotation']);
   if (action.payload.setEdit) {
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
       edit: {
@@ -10376,7 +10362,7 @@ export const setLineToX = (state: LayerState, action: SetLineToX): LayerState =>
     currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
   }
   currentState = updateGroupParentBounds(currentState, groupParents);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['toX']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y', 'width', 'rotation']);
   if (action.payload.setEdit) {
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
       edit: {
@@ -10459,7 +10445,7 @@ export const setLineToY = (state: LayerState, action: SetLineToY): LayerState =>
     currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
   }
   currentState = updateGroupParentBounds(currentState, groupParents);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['toY']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y', 'width', 'rotation']);
   if (action.payload.setEdit) {
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
       edit: {
@@ -10518,7 +10504,7 @@ export const setLineTo = (state: LayerState, action: SetLineTo): LayerState => {
     bounds,
     rotation
   }) as SetLineToY);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['toX', 'toY']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y', 'width', 'rotation']);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,

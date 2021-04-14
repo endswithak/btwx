@@ -2159,7 +2159,6 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
           ...paragraphs,
           [id]: nextParagraphs
         }
-        // point.push(nextPoint);
         contentHeight = {
           ...contentHeight,
           [id]: nextContentHeight

@@ -83,6 +83,10 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
   const clearLayerScale = (paperLayer: paper.Item): void => {
     const originalLayer = originalSelection[paperLayer.data.id];
     paperLayer.replaceWith(originalLayer.clone());
+    if (originalSelection[`${paperLayer.data.id}-mask`]) {
+      const maskClone = originalSelection[`${paperLayer.data.id}-mask`];
+      paperLayer.previousSibling.replaceWith(maskClone.clone());
+    }
   }
 
   const clearLayerPivots = (): void => {
@@ -94,7 +98,8 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
   }
 
   const clearLayerPivot = (id: string): void => {
-    const artboardItem = layersById[layersById[id].artboard] as Btwx.Artboard;
+    const layerItem = layersById[id];
+    const artboardItem = layersById[layerItem.artboard] as Btwx.Artboard;
     const projectIndex = artboardItem.projectIndex;
     const paperLayer = getPaperLayer(id, projectIndex);
     if (paperLayer) {
@@ -109,14 +114,19 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
         case 'Text': {
           const background = paperLayer.getItem({data: { id: 'textBackground' }});
           const mask = paperLayer.getItem({data: { id: 'textMask' }});
-          // const content = paperLayer.getItem({data: { id: 'textContent' }});
           background.pivot = null;
           mask.pivot = null;
           paperLayer.pivot = null;
-          // content.pivot = null;
           break;
         }
-        case 'Shape':
+        case 'Shape': {
+          const isMask = (layerItem as Btwx.Shape).mask;
+          paperLayer.pivot = null;
+          if (isMask) {
+            paperLayer.previousSibling.pivot = null;
+          }
+          break;
+        }
         case 'Image': {
           paperLayer.pivot = null;
           break;
@@ -165,17 +175,25 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
         break;
       }
       case 'Shape': {
+        const isMask = (layerItem as Btwx.Shape).mask;
         switch(paperLayer.data.shapeType) {
           case 'Ellipse':
           case 'Polygon':
           case 'Rectangle':
           case 'Star':
           case 'Line':
-          case 'Custom':
+          case 'Custom': {
             paperLayer.scale(hor, ver);
+            if (isMask) {
+              paperLayer.previousSibling.scale(hor, ver);
+            }
             break;
+          }
           case 'Rounded': {
             paperLayer.scale(hor, ver);
+            if (isMask) {
+              paperLayer.previousSibling.scale(hor, ver);
+            }
             if (!preserveAspectRatio) {
               const newShape = new paperMain.Path.Rectangle({
                 from: paperLayer.bounds.topLeft,
@@ -184,6 +202,9 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
                 insert: false
               });
               (paperLayer as paper.Path).pathData = newShape.pathData;
+              if (isMask) {
+                (paperLayer.previousSibling as paper.Path).pathData = newShape.pathData;
+              }
             }
             break;
           }
@@ -198,10 +219,10 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
   }
 
   const flipLayer = (id: string, hor: number, ver: number): void => {
-    const artboardItem = layersById[layersById[id].artboard] as Btwx.Artboard;
+    const layerItem = layersById[id];
+    const artboardItem = layersById[layerItem.artboard] as Btwx.Artboard;
     const projectIndex = artboardItem.projectIndex;
     const paperLayer = getPaperLayer(id, projectIndex);
-    const layerItem = layersById[id];
     switch(paperLayer.data.layerType) {
       case 'Artboard': {
         const background = paperLayer.getItem({data: { id: 'artboardBackground' }});
@@ -211,6 +232,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
         break;
       }
       case 'Shape': {
+        const isMask = (layerItem as Btwx.Shape).mask;
         switch(paperLayer.data.shapeType) {
           case 'Ellipse':
           case 'Polygon':
@@ -219,9 +241,15 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
           case 'Line':
           case 'Custom':
             paperLayer.scale(hor, ver);
+            if (isMask) {
+              paperLayer.previousSibling.scale(hor, ver);
+            }
             break;
           case 'Rounded': {
             paperLayer.scale(hor, ver);
+            if (isMask) {
+              paperLayer.previousSibling.scale(hor, ver);
+            }
             if (!preserveAspectRatio) {
               const newShape = new paperMain.Path.Rectangle({
                 from: paperLayer.bounds.topLeft,
@@ -230,6 +258,9 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
                 insert: false
               });
               (paperLayer as paper.Path).pathData = newShape.pathData;
+              if (isMask) {
+                (paperLayer.previousSibling as paper.Path).pathData = newShape.pathData;
+              }
             }
             break;
           }
@@ -270,7 +301,8 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
   }
 
   const setLayerPivot = (id: string, pivot = fromPivot): void => {
-    const artboardItem = layersById[layersById[id].artboard] as Btwx.Artboard;
+    const layerItem = layersById[id];
+    const artboardItem = layersById[layerItem.artboard] as Btwx.Artboard;
     const projectIndex = artboardItem.projectIndex;
     const paperLayer = getPaperLayer(id, projectIndex);
     switch(paperLayer.data.layerType) {
@@ -284,15 +316,19 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
       case 'Text': {
         const background = paperLayer.getItem({data: { id: 'textBackground' }});
         const mask = paperLayer.getItem({data: { id: 'textMask' }});
-        // const content = paperLayer.getItem({data: { id: 'textContent' }});
         background.pivot = pivot;
         mask.pivot = pivot;
-        // content.pivot = pivot;
         paperLayer.pivot = pivot;
         break;
       }
-      // case 'Text':
-      case 'Shape':
+      case 'Shape': {
+        const isMask = (layerItem as Btwx.Shape).mask;
+        paperLayer.pivot = pivot;
+        if (isMask) {
+          paperLayer.previousSibling.pivot = pivot;
+        }
+        break;
+      }
       case 'Image': {
         paperLayer.pivot = pivot;
         break;
@@ -579,12 +615,19 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
             const projectIndex = artboardItem.projectIndex;
             const layerItem = layersById[id];
             if (layerItem.type !== 'Group') {
+              const clone = getPaperLayer(id, projectIndex).clone({insert: false});
               nextOriginalSelection = {
                 ...nextOriginalSelection,
-                [id]: getPaperLayer(id, projectIndex).clone({insert: false})
+                [id]: clone
               }
               setLayerPivot(id, nextFromPivot);
               compiledSelected.push(id);
+              if (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask) {
+                nextOriginalSelection = {
+                  ...nextOriginalSelection,
+                  [`${id}-mask`]: clone.previousSibling
+                }
+              }
             } else {
               const descendents = getLayerDescendants({byId: layersById} as any, id, false);
               handleLayers(descendents);

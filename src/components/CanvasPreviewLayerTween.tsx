@@ -166,7 +166,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           transform: {
             ...originLayerItem.transform,
             rotation: startRotation,
-            horzontalFlip: startScaleX,
+            horizontalFlip: startScaleX,
             verticalFlip: startScaleY
           } as any,
           variable: true
@@ -181,7 +181,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           transform: {
             ...originLayerItem.transform,
             rotation: startRotation,
-            horzontalFlip: startScaleX,
+            horizontalFlip: startScaleX,
             verticalFlip: startScaleY
           } as any,
           variable: true
@@ -202,14 +202,24 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   const addShapeTween = (): void => {
     const originWithoutRotation = new paperPreview.Path({
       pathData: (originLayerItem as Btwx.Shape).pathData,
-      rotation: -originLayerItem.transform.rotation,
+      // rotation: -originLayerItem.transform.rotation,
       insert: false
     });
+    originWithoutRotation.scale(
+      originLayerItem.transform.horizontalFlip ? -1 : 1,
+      originLayerItem.transform.verticalFlip ? -1 : 1
+    );
+    originWithoutRotation.rotation = -originLayerItem.transform.rotation;
     const destinationWithoutRotation = new paperPreview.Path({
       pathData: (destinationLayerItem as Btwx.Shape).pathData,
-      rotation: -destinationLayerItem.transform.rotation,
+      // rotation: -destinationLayerItem.transform.rotation,
       insert: false
     });
+    destinationWithoutRotation.scale(
+      destinationLayerItem.transform.horizontalFlip ? -1 : 1,
+      destinationLayerItem.transform.verticalFlip ? -1 : 1
+    );
+    destinationWithoutRotation.rotation = -destinationLayerItem.transform.rotation;
     // get morph data
     const morphData = [
       originWithoutRotation.pathData,
@@ -223,9 +233,11 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       duration: tween.duration,
       [tween.prop]: morphData[1],
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, artboardBackground, textContent, textBackground, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
         const innerWidth = paperLayer.data.innerWidth ? paperLayer.data.innerWidth : originLayerItem.frame.innerWidth;
         const innerHeight = paperLayer.data.innerHeight ? paperLayer.data.innerHeight : originLayerItem.frame.innerHeight;
+        const width = paperLayer.data.width ? paperLayer.data.width : (originLayerItem as Btwx.Text).frame.width;
+        const height = paperLayer.data.height ? paperLayer.data.height : (originLayerItem as Btwx.Text).frame.height;
         const startRotation = paperLayer.data.rotation || paperLayer.data.rotation === 0 ? paperLayer.data.rotation : originLayerItem.transform.rotation;
         const startScaleX = paperLayer.data.scaleX || paperLayer.data.scaleX === 0 ? paperLayer.data.scaleX : 1;
         const startScaleY = paperLayer.data.scaleY || paperLayer.data.scaleY === 0 ? paperLayer.data.scaleY : 1;
@@ -235,21 +247,30 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           transform: {
             ...originLayerItem.transform,
             rotation: startRotation,
-            horzontalFlip: startScaleX,
+            horizontalFlip: startScaleX,
             verticalFlip: startScaleY
           } as any,
-          variable: true
+          variable: true,
+          width,
+          height
         });
         // apply final clone path data to tweenPaperLayer
         (paperLayer as paper.Path).pathData = eventTimeline.data[tween.layer][tween.prop];
+        if (shapeMask) {
+          (shapeMask as paper.Path).pathData = eventTimeline.data[tween.layer][tween.prop];
+        }
         paperLayer.bounds.width = innerWidth;
         paperLayer.bounds.height = innerHeight;
+        paperLayer.rotation = startRotation;
+        paperLayer.data.width = paperLayer.bounds.width;
+        paperLayer.data.height = paperLayer.bounds.height;
+        paperLayer.rotation = -startRotation;
         applyLayerTransforms({
           paperLayer,
           transform: {
             ...originLayerItem.transform,
             rotation: startRotation,
-            horzontalFlip: startScaleX,
+            horizontalFlip: startScaleX,
             verticalFlip: startScaleY
           } as any,
           variable: true
@@ -751,7 +772,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
         const paperLayerRef = isText ? textContent : paperLayer;
-        paperLayerRef.dashArray = [eventTimeline.data[tween.layer][tween.prop], paperLayerRef.dashArray[1]];
+        paperLayerRef.dashArray = [eventTimeline.data[tween.layer][tween.prop] < 1 ? 0 : eventTimeline.data[tween.layer][tween.prop], paperLayerRef.dashArray[1] < 1 ? 0 : paperLayerRef.dashArray[1]];
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -767,7 +788,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
         const paperLayerRef = isText ? textContent : paperLayer;
-        paperLayerRef.dashArray = [paperLayerRef.dashArray[0], eventTimeline.data[tween.layer][tween.prop]];
+        paperLayerRef.dashArray = [paperLayerRef.dashArray[0] < 1 ? 0 : paperLayerRef.dashArray[0], eventTimeline.data[tween.layer][tween.prop] < 1 ? 0 : eventTimeline.data[tween.layer][tween.prop]];
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -796,8 +817,11 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       duration: tween.duration,
       [tween.prop]: `+=${tween.ease === 'customWiggle' ? tween.customWiggle.strength : destinationLayerItem.frame.x - originLayerItem.frame.x}`,
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, artboardBackground, textContent, textBackground, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
         paperLayer.position.x = eventTimeline.data[tween.layer][tween.prop];
+        if (shapeMask) {
+          shapeMask.position.x = eventTimeline.data[tween.layer][tween.prop];
+        }
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -810,8 +834,11 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       duration: tween.duration,
       [tween.prop]: `+=${tween.ease === 'customWiggle' ? tween.customWiggle.strength : destinationLayerItem.frame.y - originLayerItem.frame.y}`,
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, artboardBackground, textContent, textBackground, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
         paperLayer.position.y = eventTimeline.data[tween.layer][tween.prop];
+        if (shapeMask) {
+          shapeMask.position.y = eventTimeline.data[tween.layer][tween.prop];
+        }
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -824,7 +851,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       duration: tween.duration,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.frame.innerWidth,
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground, textMask } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, artboardBackground, textContent, textBackground, textMask, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
         const startRotation = paperLayer.data.rotation || paperLayer.data.rotation === 0 ? paperLayer.data.rotation : originLayerItem.transform.rotation;
         const startScaleX = paperLayer.data.scaleX ? paperLayer.data.scaleX : originLayerItem.transform.horizontalFlip ? -1 : 1;
         const startScaleY = paperLayer.data.scaleY ? paperLayer.data.scaleY : originLayerItem.transform.verticalFlip ? -1 : 1;
@@ -843,6 +870,20 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           width,
           height
         });
+        if (shapeMask) {
+          clearLayerTransforms({
+            paperLayer: shapeMask,
+            transform: {
+              ...originLayerItem.transform,
+              rotation: startRotation,
+              horizontalFlip: startScaleX,
+              verticalFlip: startScaleY
+            } as any,
+            variable: true,
+            width,
+            height
+          });
+        }
         if (originLayerItem.type === 'Text') {
           const text = paperLayer.data.text ? paperLayer.data.text : (originLayerItem as Btwx.Text).text;
           const nextParagraphs = getParagraphs({
@@ -887,6 +928,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           });
         } else {
           paperLayer.bounds.width = eventTimeline.data[tween.layer][tween.prop];
+          if (shapeMask) {
+            shapeMask.bounds.width = eventTimeline.data[tween.layer][tween.prop];
+          }
         }
         paperLayer.rotation = startRotation;
         paperLayer.data.width = paperLayer.bounds.width;
@@ -902,8 +946,23 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           } as any,
           variable: true
         });
+        if (shapeMask) {
+          applyLayerTransforms({
+            paperLayer: shapeMask,
+            transform: {
+              ...originLayerItem.transform,
+              rotation: startRotation,
+              horizontalFlip: startScaleX,
+              verticalFlip: startScaleY
+            } as any,
+            variable: true
+          });
+        }
         paperLayer.data.innerWidth = eventTimeline.data[tween.layer][tween.prop];
         paperLayer.position = startPosition;
+        if (shapeMask) {
+          shapeMask.position = startPosition;
+        }
         if (originLayerItem.type === 'Shape' && (originLayerItem as Btwx.Shape).shapeType === 'Rounded' && destinationLayerItem.type === 'Shape' && (destinationLayerItem as Btwx.Shape).shapeType === 'Rounded') {
           clearLayerTransforms({
             paperLayer,
@@ -917,6 +976,20 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             width: paperLayer.data.width,
             height
           });
+          if (shapeMask) {
+            clearLayerTransforms({
+              paperLayer: shapeMask,
+              transform: {
+                ...originLayerItem.transform,
+                rotation: startRotation,
+                horizontalFlip: startScaleX,
+                verticalFlip: startScaleY
+              } as any,
+              variable: true,
+              width: paperLayer.data.width,
+              height
+            });
+          }
           const newShape = new paperPreview.Path.Rectangle({
             from: paperLayer.bounds.topLeft,
             to: paperLayer.bounds.bottomRight,
@@ -924,6 +997,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             insert: false
           });
           (paperLayer as paper.Path).pathData = newShape.pathData;
+          if (shapeMask) {
+            (shapeMask as paper.Path).pathData = newShape.pathData;
+          }
           applyLayerTransforms({
             paperLayer,
             transform: {
@@ -934,6 +1010,18 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             } as any,
             variable: true
           });
+          if (shapeMask) {
+            applyLayerTransforms({
+              paperLayer: shapeMask,
+              transform: {
+                ...originLayerItem.transform,
+                rotation: startRotation,
+                horizontalFlip: startScaleX,
+                verticalFlip: startScaleY
+              } as any,
+              variable: true
+            });
+          }
         }
         updateGradients({ paperLayer, textContent, textBackground });
       },
@@ -948,7 +1036,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       duration: tween.duration,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.frame.innerHeight,
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textMask, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, artboardBackground, textContent, textMask, shapeMask, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
         const startRotation = paperLayer.data.rotation || paperLayer.data.rotation === 0 ? paperLayer.data.rotation : originLayerItem.transform.rotation;
         const startScaleX = paperLayer.data.scaleX ? paperLayer.data.scaleX : originLayerItem.transform.horizontalFlip ? -1 : 1;
         const startScaleY = paperLayer.data.scaleY ? paperLayer.data.scaleY : originLayerItem.transform.verticalFlip ? -1 : 1;
@@ -967,6 +1055,20 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           width,
           height
         });
+        if (shapeMask) {
+          clearLayerTransforms({
+            paperLayer: shapeMask,
+            transform: {
+              ...originLayerItem.transform,
+              rotation: startRotation,
+              horizontalFlip: startScaleX,
+              verticalFlip: startScaleY
+            } as any,
+            variable: true,
+            width,
+            height
+          });
+        }
         if (originLayerItem.type === 'Text') {
           switch((originLayerItem as Btwx.Text).textStyle.verticalAlignment) {
             case 'top':
@@ -988,6 +1090,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           textBackground.pivot = null;
         } else {
           paperLayer.bounds.height = eventTimeline.data[tween.layer][tween.prop];
+          if (shapeMask) {
+            shapeMask.bounds.height = eventTimeline.data[tween.layer][tween.prop];
+          }
         }
         paperLayer.rotation = startRotation;
         paperLayer.data.height = paperLayer.bounds.height;
@@ -1003,8 +1108,23 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           } as any,
           variable: true
         });
+        if (shapeMask) {
+          applyLayerTransforms({
+            paperLayer: shapeMask,
+            transform: {
+              ...originLayerItem.transform,
+              rotation: startRotation,
+              horizontalFlip: startScaleX,
+              verticalFlip: startScaleY
+            } as any,
+            variable: true
+          });
+        }
         paperLayer.data.innerHeight = eventTimeline.data[tween.layer][tween.prop];
         paperLayer.position = startPosition;
+        if (shapeMask) {
+          shapeMask.position = startPosition;
+        }
         if (originLayerItem.type === 'Shape' && (originLayerItem as Btwx.Shape).shapeType === 'Rounded' && destinationLayerItem.type === 'Shape' && (destinationLayerItem as Btwx.Shape).shapeType === 'Rounded') {
           clearLayerTransforms({
             paperLayer,
@@ -1018,6 +1138,20 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             width,
             height: paperLayer.data.height
           });
+          if (shapeMask) {
+            clearLayerTransforms({
+              paperLayer: shapeMask,
+              transform: {
+                ...originLayerItem.transform,
+                rotation: startRotation,
+                horizontalFlip: startScaleX,
+                verticalFlip: startScaleY
+              } as any,
+              variable: true,
+              width,
+              height: paperLayer.data.height
+            });
+          }
           const newShape = new paperPreview.Path.Rectangle({
             from: paperLayer.bounds.topLeft,
             to: paperLayer.bounds.bottomRight,
@@ -1025,6 +1159,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             insert: false
           });
           (paperLayer as paper.Path).pathData = newShape.pathData;
+          if (shapeMask) {
+            (shapeMask as paper.Path).pathData = newShape.pathData;
+          }
           applyLayerTransforms({
             paperLayer,
             transform: {
@@ -1035,6 +1172,18 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             } as any,
             variable: true
           });
+          if (shapeMask) {
+            applyLayerTransforms({
+              paperLayer: shapeMask,
+              transform: {
+                ...originLayerItem.transform,
+                rotation: startRotation,
+                horizontalFlip: startScaleX,
+                verticalFlip: startScaleY
+              } as any,
+              variable: true
+            });
+          }
         }
         updateGradients({ paperLayer, textContent, textBackground });
       },
@@ -1049,7 +1198,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       duration: tween.duration,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.transform.rotation,
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, artboardBackground, textContent, textBackground, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
         const startRotation = paperLayer.data.rotation || paperLayer.data.rotation === 0 ? paperLayer.data.rotation : originLayerItem.transform.rotation;
         const startScaleX = paperLayer.data.scaleX ? paperLayer.data.scaleX : originLayerItem.transform.horizontalFlip ? -1 : 1;
         const startScaleY = paperLayer.data.scaleY ? paperLayer.data.scaleY : originLayerItem.transform.verticalFlip ? -1 : 1;
@@ -1067,6 +1216,20 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           width,
           height
         });
+        if (shapeMask) {
+          clearLayerTransforms({
+            paperLayer: shapeMask,
+            transform: {
+              ...originLayerItem.transform,
+              rotation: startRotation,
+              horizontalFlip: startScaleX,
+              verticalFlip: startScaleY
+            } as any,
+            variable: true,
+            width,
+            height
+          });
+        }
         paperLayer.rotation = eventTimeline.data[tween.layer][tween.prop];
         paperLayer.data.width = paperLayer.bounds.width;
         paperLayer.data.height = paperLayer.bounds.height;
@@ -1081,6 +1244,18 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           } as any,
           variable: true
         });
+        if (shapeMask) {
+          applyLayerTransforms({
+            paperLayer: shapeMask,
+            transform: {
+              ...originLayerItem.transform,
+              rotation: eventTimeline.data[tween.layer][tween.prop],
+              horizontalFlip: startScaleX,
+              verticalFlip: startScaleY
+            } as any,
+            variable: true
+          });
+        }
         paperLayer.data.rotation = eventTimeline.data[tween.layer][tween.prop];
         updateGradients({ paperLayer, textContent, textBackground });
       },
@@ -1739,85 +1914,6 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     }, tween.delay);
   };
 
-  const addFromXTween = (): void => {
-    const originLineItem = originLayerItem as Btwx.Line;
-    const destinationLineItem = destinationLayerItem as Btwx.Line;
-    const diff = destinationLineItem.from.x - originLineItem.from.x;
-    eventTimeline.data[tween.layer][tween.prop] = originLineItem.from.x + originArtboardItem.frame.x;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
-      duration: tween.duration,
-      [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : `+=${diff}`,
-      onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
-        ((paperLayer as paper.CompoundPath).children[0] as paper.Path).firstSegment.point.x = eventTimeline.data[tween.layer][tween.prop];
-        paperLayer.data.innerWidth = paperLayer.bounds.width;
-        paperLayer.data.innerHeight = paperLayer.bounds.height;
-        updateGradients({ paperLayer, textContent, textBackground });
-      },
-      ease: getEaseString(tween),
-    }, tween.delay);
-  };
-
-  const addFromYTween = (): void => {
-    const originLineItem = originLayerItem as Btwx.Line;
-    const destinationLineItem = destinationLayerItem as Btwx.Line;
-    const diff = destinationLineItem.from.y - originLineItem.from.y;
-    eventTimeline.data[tween.layer][tween.prop] = originLineItem.from.y + originArtboardItem.frame.y;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
-      id: tweenId,
-      duration: tween.duration,
-      [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : `+=${diff}`,
-      onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
-        ((paperLayer as paper.CompoundPath).children[0] as paper.Path).firstSegment.point.y = eventTimeline.data[tween.layer][tween.prop];
-        paperLayer.data.innerWidth = paperLayer.bounds.width;
-        paperLayer.data.innerHeight = paperLayer.bounds.height;
-        updateGradients({ paperLayer, textContent, textBackground });
-      },
-      ease: getEaseString(tween),
-    }, tween.delay);
-  };
-
-  const addToXTween = (): void => {
-    const originLineItem = originLayerItem as Btwx.Line;
-    const destinationLineItem = destinationLayerItem as Btwx.Line;
-    const diff = destinationLineItem.to.x - originLineItem.to.x;
-    eventTimeline.data[tween.layer][tween.prop] = originLineItem.to.x + originArtboardItem.frame.x;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
-      id: tweenId,
-      duration: tween.duration,
-      [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : `+=${diff}`,
-      onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
-        ((paperLayer as paper.CompoundPath).children[0] as paper.Path).lastSegment.point.x = eventTimeline.data[tween.layer][tween.prop];
-        paperLayer.data.innerWidth = paperLayer.bounds.width;
-        paperLayer.data.innerHeight = paperLayer.bounds.height;
-        updateGradients({ paperLayer, textContent, textBackground });
-      },
-      ease: getEaseString(tween),
-    }, tween.delay);
-  };
-
-  const addToYTween = (): void => {
-    const originLineItem = originLayerItem as Btwx.Line;
-    const destinationLineItem = destinationLayerItem as Btwx.Line;
-    const diff = destinationLineItem.to.y - originLineItem.to.y;
-    eventTimeline.data[tween.layer][tween.prop] = originLineItem.to.y + originArtboardItem.frame.y;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
-      id: tweenId,
-      duration: tween.duration,
-      [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : `+=${diff}`,
-      onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
-        ((paperLayer as paper.CompoundPath).children[0] as paper.Path).lastSegment.point.y = eventTimeline.data[tween.layer][tween.prop];
-        paperLayer.data.innerWidth = paperLayer.bounds.width;
-        paperLayer.data.innerHeight = paperLayer.bounds.height;
-        updateGradients({ paperLayer, textContent, textBackground });
-      },
-      ease: getEaseString(tween),
-    }, tween.delay);
-  };
-
   const addScaleXTween = (): void => {
     eventTimeline.data[tween.layer][tween.prop] = originLayerItem.transform.horizontalFlip ? -1 : 1;
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
@@ -1825,7 +1921,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       duration: tween.duration,
       [tween.prop]: tween.ease === 'customWiggle' ? ((originLayerItem.transform.horizontalFlip ? 1 : -1) * tween.customWiggle.strength) : destinationLayerItem.transform.horizontalFlip ? -1 : 1,
       onUpdate: () => {
-        const { paperLayer, textMask, textContent } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, textMask, textContent, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
         const startRotation = paperLayer.data.rotation || paperLayer.data.rotation === 0 ? paperLayer.data.rotation : originLayerItem.transform.rotation;
         const startScaleX = paperLayer.data.scaleX || paperLayer.data.scaleX === 0 ? paperLayer.data.scaleX === 0 ? 0.01 : paperLayer.data.scaleX : originLayerItem.transform.horizontalFlip ? -1 : 1;
         const startScaleY = paperLayer.data.scaleY || paperLayer.data.scaleY === 0 ? paperLayer.data.scaleY === 0 ? 0.01 : paperLayer.data.scaleY : originLayerItem.transform.verticalFlip ? -1 : 1;
@@ -1847,6 +1943,20 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           width,
           height
         });
+        if (shapeMask) {
+          clearLayerTransforms({
+            paperLayer: shapeMask,
+            transform: {
+              ...originLayerItem.transform,
+              rotation: startRotation,
+              horizontalFlip: startScaleX,
+              verticalFlip: startScaleY
+            } as any,
+            variable: true,
+            width,
+            height
+          });
+        }
         applyLayerTransforms({
           paperLayer,
           transform: {
@@ -1857,6 +1967,18 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           } as any,
           variable: true
         });
+        if (shapeMask) {
+          applyLayerTransforms({
+            paperLayer: shapeMask,
+            transform: {
+              ...originLayerItem.transform,
+              rotation: startRotation,
+              horizontalFlip: nextScaleX,
+              verticalFlip: startScaleY
+            } as any,
+            variable: true
+          });
+        }
         paperLayer.data.scaleX = nextScaleX;
       },
       ease: getEaseString(tween),
@@ -1870,7 +1992,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       duration: tween.duration,
       [tween.prop]: tween.ease === 'customWiggle' ? ((originLayerItem.transform.verticalFlip ? 1 : -1) * tween.customWiggle.strength) : destinationLayerItem.transform.verticalFlip ? -1 : 1,
       onUpdate: () => {
-        const { paperLayer } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
         const startRotation = paperLayer.data.rotation || paperLayer.data.rotation === 0 ? paperLayer.data.rotation : originLayerItem.transform.rotation;
         const startScaleX = paperLayer.data.scaleX || paperLayer.data.scaleX === 0 ? paperLayer.data.scaleX === 0.01 ? 1 : paperLayer.data.scaleX : originLayerItem.transform.horizontalFlip ? -1 : 1;
         const startScaleY = paperLayer.data.scaleY || paperLayer.data.scaleY === 0 ? paperLayer.data.scaleY === 0.01 ? 1 : paperLayer.data.scaleY : originLayerItem.transform.verticalFlip ? -1 : 1;
@@ -1892,6 +2014,20 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           width,
           height
         });
+        if (shapeMask) {
+          clearLayerTransforms({
+            paperLayer: shapeMask,
+            transform: {
+              ...originLayerItem.transform,
+              rotation: startRotation,
+              horizontalFlip: startScaleX,
+              verticalFlip: startScaleY
+            } as any,
+            variable: true,
+            width,
+            height
+          });
+        }
         applyLayerTransforms({
           paperLayer,
           transform: {
@@ -1902,6 +2038,18 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           } as any,
           variable: true
         });
+        if (shapeMask) {
+          applyLayerTransforms({
+            paperLayer: shapeMask,
+            transform: {
+              ...originLayerItem.transform,
+              rotation: startRotation,
+              horizontalFlip: startScaleX,
+              verticalFlip: nextScaleY
+            } as any,
+            variable: true
+          });
+        }
         paperLayer.data.scaleY = nextScaleY;
       },
       ease: getEaseString(tween),
@@ -2006,18 +2154,6 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       case 'text':
         addTextTween();
         break;
-      case 'fromX':
-        addFromXTween();
-        break;
-      case 'fromY':
-        addFromYTween();
-        break;
-      case 'toX':
-        addToXTween();
-        break;
-      case 'toY':
-        addToYTween();
-        break;
       case 'scaleX':
         addScaleXTween();
         break;
@@ -2058,3 +2194,82 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
 }
 
 export default CanvasPreviewLayerTween;
+
+// const addFromXTween = (): void => {
+  //   const originLineItem = originLayerItem as Btwx.Line;
+  //   const destinationLineItem = destinationLayerItem as Btwx.Line;
+  //   const diff = destinationLineItem.from.x - originLineItem.from.x;
+  //   eventTimeline.data[tween.layer][tween.prop] = originLineItem.from.x + originArtboardItem.frame.x;
+  //   eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+  //     duration: tween.duration,
+  //     [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : `+=${diff}`,
+  //     onUpdate: () => {
+  //       const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+  //       ((paperLayer as paper.CompoundPath).children[0] as paper.Path).firstSegment.point.x = eventTimeline.data[tween.layer][tween.prop];
+  //       paperLayer.data.innerWidth = paperLayer.bounds.width;
+  //       paperLayer.data.innerHeight = paperLayer.bounds.height;
+  //       updateGradients({ paperLayer, textContent, textBackground });
+  //     },
+  //     ease: getEaseString(tween),
+  //   }, tween.delay);
+  // };
+
+  // const addFromYTween = (): void => {
+  //   const originLineItem = originLayerItem as Btwx.Line;
+  //   const destinationLineItem = destinationLayerItem as Btwx.Line;
+  //   const diff = destinationLineItem.from.y - originLineItem.from.y;
+  //   eventTimeline.data[tween.layer][tween.prop] = originLineItem.from.y + originArtboardItem.frame.y;
+  //   eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+  //     id: tweenId,
+  //     duration: tween.duration,
+  //     [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : `+=${diff}`,
+  //     onUpdate: () => {
+  //       const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+  //       ((paperLayer as paper.CompoundPath).children[0] as paper.Path).firstSegment.point.y = eventTimeline.data[tween.layer][tween.prop];
+  //       paperLayer.data.innerWidth = paperLayer.bounds.width;
+  //       paperLayer.data.innerHeight = paperLayer.bounds.height;
+  //       updateGradients({ paperLayer, textContent, textBackground });
+  //     },
+  //     ease: getEaseString(tween),
+  //   }, tween.delay);
+  // };
+
+  // const addToXTween = (): void => {
+  //   const originLineItem = originLayerItem as Btwx.Line;
+  //   const destinationLineItem = destinationLayerItem as Btwx.Line;
+  //   const diff = destinationLineItem.to.x - originLineItem.to.x;
+  //   eventTimeline.data[tween.layer][tween.prop] = originLineItem.to.x + originArtboardItem.frame.x;
+  //   eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+  //     id: tweenId,
+  //     duration: tween.duration,
+  //     [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : `+=${diff}`,
+  //     onUpdate: () => {
+  //       const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+  //       ((paperLayer as paper.CompoundPath).children[0] as paper.Path).lastSegment.point.x = eventTimeline.data[tween.layer][tween.prop];
+  //       paperLayer.data.innerWidth = paperLayer.bounds.width;
+  //       paperLayer.data.innerHeight = paperLayer.bounds.height;
+  //       updateGradients({ paperLayer, textContent, textBackground });
+  //     },
+  //     ease: getEaseString(tween),
+  //   }, tween.delay);
+  // };
+
+  // const addToYTween = (): void => {
+  //   const originLineItem = originLayerItem as Btwx.Line;
+  //   const destinationLineItem = destinationLayerItem as Btwx.Line;
+  //   const diff = destinationLineItem.to.y - originLineItem.to.y;
+  //   eventTimeline.data[tween.layer][tween.prop] = originLineItem.to.y + originArtboardItem.frame.y;
+  //   eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+  //     id: tweenId,
+  //     duration: tween.duration,
+  //     [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : `+=${diff}`,
+  //     onUpdate: () => {
+  //       const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+  //       ((paperLayer as paper.CompoundPath).children[0] as paper.Path).lastSegment.point.y = eventTimeline.data[tween.layer][tween.prop];
+  //       paperLayer.data.innerWidth = paperLayer.bounds.width;
+  //       paperLayer.data.innerHeight = paperLayer.bounds.height;
+  //       updateGradients({ paperLayer, textContent, textBackground });
+  //     },
+  //     ease: getEaseString(tween),
+  //   }, tween.delay);
+  // };

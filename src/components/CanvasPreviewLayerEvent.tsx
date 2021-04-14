@@ -22,6 +22,7 @@ export interface EventLayerTimelineData {
   textContent: paper.PointText;
   textBackground: paper.Path.Rectangle;
   textMask: paper.Path.Rectangle;
+  shapeMask?: paper.CompoundPath;
 }
 
 const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElement => {
@@ -95,6 +96,9 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
           : null,
         textBackground: paperLayer.data.layerType === 'Text'
           ? paperLayer.getItem({ data: { id: 'textBackground' } }) as paper.Path.Rectangle
+          : null,
+        shapeMask: paperLayer.data.layerType === 'Shape' && paperLayer.parent.data && paperLayer.parent.data.id === 'maskGroup'
+          ? paperLayer.parent.getItem({ data: { id: 'mask' } }) as paper.CompoundPath
           : null
       };
     }

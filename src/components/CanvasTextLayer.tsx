@@ -3,8 +3,8 @@ import { useSelector } from 'react-redux';
 import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
 import {
-  getPaperStyle, getPaperParent, getTextAbsPoint, getLayerAbsBounds, getPaperLayerIndex,
-  getLayerTextContent, getPaperStrokeColor, getPaperFillColor, clearTextOblique, applyTextOblique,
+  getPaperStyle, getPaperParent, getPaperLayerIndex,
+  getPaperStrokeColor, getPaperFillColor,
   clearLayerTransforms, applyLayerTransforms
 } from '../store/utils/paper';
 import { paperMain, paperPreview } from '../canvas';

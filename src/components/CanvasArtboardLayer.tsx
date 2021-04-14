@@ -172,7 +172,8 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
           id,
           type: 'Layer',
           layerType: 'Artboard',
-          scope: ['root']
+          scope: ['root'],
+          layerId: id
         };
         background.replaceWith(new paperLayerScope.Path.Rectangle({
           name: 'Artboard Background',
