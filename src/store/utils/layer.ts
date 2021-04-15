@@ -5378,6 +5378,8 @@ export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerSt
   const textResize = action.payload.textResize;
   const paragraphs = action.payload.paragraphs;
   const contentHeight = action.payload.contentHeight;
+  const from = action.payload.from;
+  const to = action.payload.to;
   if (pathData) {
     currentState = {
       ...currentState,
@@ -5440,6 +5442,36 @@ export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerSt
           ...currentState.byId[action.payload.id],
           lines: lines
         } as Btwx.Text
+      }
+    }
+  }
+  if (from) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id] as Btwx.Line,
+          from: {
+            ...(currentState.byId[action.payload.id] as Btwx.Line).from,
+            ...from
+          }
+        } as Btwx.Line
+      }
+    }
+  }
+  if (to) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id] as Btwx.Line,
+          to: {
+            ...(currentState.byId[action.payload.id] as Btwx.Line).to,
+            ...to
+          }
+        } as Btwx.Line
       }
     }
   }
@@ -5484,6 +5516,8 @@ export const setLayersWidth = (state: LayerState, action: SetLayersWidth): Layer
     const lines = action.payload.lines ? action.payload.lines[current] : null;
     const contentHeight = action.payload.contentHeight ? action.payload.contentHeight[current] : null;
     const textResize = action.payload.textResize ? action.payload.textResize[current] : null;
+    const from = action.payload.from ? action.payload.from[current] : null;
+    const to = action.payload.to ? action.payload.to[current] : null;
     return setLayerWidth(result, layerActions.setLayerWidth({
       id: current,
       width: action.payload.width,
@@ -5492,7 +5526,9 @@ export const setLayersWidth = (state: LayerState, action: SetLayersWidth): Layer
       paragraphs,
       lines,
       contentHeight,
-      textResize
+      textResize,
+      from,
+      to
     }) as SetLayerWidth);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
@@ -5517,6 +5553,8 @@ export const setLayerHeight = (state: LayerState, action: SetLayerHeight): Layer
   const textResize = action.payload.textResize;
   const paragraphs = action.payload.paragraphs;
   const contentHeight = action.payload.contentHeight;
+  const from = action.payload.from;
+  const to = action.payload.to;
   if (pathData) {
     currentState = {
       ...currentState,
@@ -5582,6 +5620,36 @@ export const setLayerHeight = (state: LayerState, action: SetLayerHeight): Layer
       }
     }
   }
+  if (from) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id] as Btwx.Line,
+          from: {
+            ...(currentState.byId[action.payload.id] as Btwx.Line).from,
+            ...from
+          }
+        } as Btwx.Line
+      }
+    }
+  }
+  if (to) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id] as Btwx.Line,
+          to: {
+            ...(currentState.byId[action.payload.id] as Btwx.Line).to,
+            ...to
+          }
+        } as Btwx.Line
+      }
+    }
+  }
   if (bounds) {
     currentState = {
       ...currentState,
@@ -5623,6 +5691,8 @@ export const setLayersHeight = (state: LayerState, action: SetLayersHeight): Lay
     const lines = action.payload.lines ? action.payload.lines[current] : null;
     const contentHeight = action.payload.contentHeight ? action.payload.contentHeight[current] : null;
     const textResize = action.payload.textResize ? action.payload.textResize[current] : null;
+    const from = action.payload.from ? action.payload.from[current] : null;
+    const to = action.payload.to ? action.payload.to[current] : null;
     return setLayerHeight(result, layerActions.setLayerHeight({
       id: current,
       height: action.payload.height,
@@ -5631,7 +5701,9 @@ export const setLayersHeight = (state: LayerState, action: SetLayersHeight): Lay
       paragraphs,
       lines,
       contentHeight,
-      textResize
+      textResize,
+      from,
+      to
     }) as SetLayerHeight);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({

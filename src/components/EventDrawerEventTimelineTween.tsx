@@ -69,7 +69,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
       type: 'x',
       zIndexBoost: false,
       cursor: 'ew-resize',
-      autoScroll: 1,
+      // autoScroll: 1,
       bounds: {
         minX: 0,
         maxX: gsap.getProperty(rightHandleElement, 'x') as number,
@@ -130,7 +130,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
       type: 'x',
       zIndexBoost: false,
       cursor: 'ew-resize',
-      autoScroll: 1,
+      // autoScroll: 1,
       bounds: {
         minX: gsap.getProperty(leftHandleElement, 'x') as number,
         maxX: timelineElement.clientWidth - (theme.unit * 4),
@@ -195,7 +195,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
         minY: timelineElement.clientHeight,
         maxY: timelineElement.clientHeight
       },
-      autoScroll: 1,
+      // autoScroll: 1,
       liveSnap: {
         x: function(value): number {
           return Math.round(value / theme.unit) * theme.unit;

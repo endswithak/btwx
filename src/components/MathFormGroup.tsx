@@ -28,7 +28,7 @@ const MathFormGroup = forwardRef(function MathFormGroup(props: MathFormGroupProp
   const validInitialEval = initialEval !== null;
   const aboveRange = max !== undefined && validInitialEval && initialEval > max;
   const belowRange = min !== undefined && validInitialEval && initialEval < min;
-  const [currentValue, setCurrentValue] = useState(value);
+  const [currentValue, setCurrentValue] = useState(validInitialEval && value !== 'multi' ? Number(value.toFixed(1)) : value);
   const [evaluation, setEvaluation] = useState(initialEval);
   const [valid, setValid] = useState(validInitialEval && !aboveRange && !belowRange);
   const [dirty, setDirty] = useState(false);
@@ -47,8 +47,8 @@ const MathFormGroup = forwardRef(function MathFormGroup(props: MathFormGroupProp
 
   const handleSubmit = (e: any): void => {
     if (valid && dirty) {
-      setCurrentValue(Math.round(evaluation));
-      onSubmitSuccess(Math.round(evaluation));
+      setCurrentValue(Number(evaluation.toFixed(1)));
+      onSubmitSuccess(evaluation);
     } else {
       if (onSubmitError) {
         onSubmitError();
@@ -64,7 +64,7 @@ const MathFormGroup = forwardRef(function MathFormGroup(props: MathFormGroupProp
     const validEval = initialEval !== null;
     const aboveRange = max !== undefined && validEval && nextEval > max;
     const belowRange = min !== undefined && validEval && nextEval < min;
-    setCurrentValue(value);
+    setCurrentValue(validEval && value !== 'multi' ? Number(value.toFixed(1)) : value);
     setEvaluation(nextEval);
     setValid(validEval && !aboveRange && !belowRange);
   }, [value]);

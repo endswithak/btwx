@@ -312,6 +312,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
       paperLayer: textContainer,
       transform: layerItem.transform
     });
+    (textContainer.lastChild as paper.PointText).point = getAbsPoint();
     return textContainer;
   }
 
@@ -461,11 +462,11 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
       textContent.content = content;
       textBackground.bounds = bounds;
       textMask.bounds = bounds;
-      textContent.point = getAbsPoint();
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
+      textContent.point = getAbsPoint();
     }
   }, [layerItem.textStyle.textResize]);
 
@@ -818,26 +819,6 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
       textContent.point = getAbsPoint();
     }
   }, [layerItem.textStyle.leading]);
-
-  // useEffect(() => {
-  //   if (rendered) {
-  //     const { paperLayer, textContent, textBackground, textMask } = getPaperLayer();
-  //     clearLayerTransforms({
-  //       paperLayer,
-  //       transform: layerItem.transform
-  //     });
-  //     const bounds = getAreaTextRectangle();
-  //     textContent.paragraph = layerItem.textStyle.paragraph;
-  //     textContent.content = content;
-  //     textBackground.bounds = bounds;
-  //     textMask.bounds = bounds;
-  //     textContent.point = getAbsPoint();
-  //     applyLayerTransforms({
-  //       paperLayer,
-  //       transform: layerItem.transform
-  //     });
-  //   }
-  // }, [layerItem.textStyle.paragraph]);
 
   ///////////////////////////////////////////////////////
   // EVENTS

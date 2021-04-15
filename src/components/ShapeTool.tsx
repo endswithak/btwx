@@ -105,16 +105,13 @@ const ShapeTool = (props: PaperToolProps): ReactElement => {
         return shape;
       }
       case 'Line': {
-        const isHorizontal = isBetween(vector.angle, 0, 45) || isBetween(vector.angle, -45, 0) || isBetween(vector.angle, 135, 180) || isBetween(vector.angle, -180, -135);
-        const isVertical = isBetween(vector.angle, -90, -45) || isBetween(vector.angle, -135, -90) || isBetween(vector.angle, 45, 90) || isBetween(vector.angle, 90, 135);
+        const isHorizontal = isBetween(Math.abs(vector.angle), 0, 45) || isBetween(Math.abs(vector.angle), 135, 180);
         const lineTo = (() => {
           if (shiftModifier) {
             if (isHorizontal) {
               return new paperMain.Point(toBounds[handle].x, fromPoint.y);
-            } else if (isVertical) {
-              return new paperMain.Point(fromPoint.x, toBounds[handle].y);
             } else {
-              return toBounds[handle];
+              return new paperMain.Point(fromPoint.x, toBounds[handle].y);
             }
           } else {
             return toBounds[handle];
@@ -126,11 +123,10 @@ const ShapeTool = (props: PaperToolProps): ReactElement => {
           ...shapeOpts
         });
         if (shiftModifier) {
-          if (isVertical) {
-            toBounds.width = 1;
-          }
           if (isHorizontal) {
             toBounds.height = 1;
+          } else {
+            toBounds.width = 1;
           }
         } else {
           shape.bounds.width = toBounds.width;
@@ -365,7 +361,7 @@ const ShapeTool = (props: PaperToolProps): ReactElement => {
               y: paperLayer.position.y - parentItem.paperLayer.position.y,
               width: paperLayer.bounds.width,
               height: paperLayer.bounds.height,
-              innerWidth: shapeType === 'Line' ? Math.round(lineVector.length) : paperLayer.bounds.width,
+              innerWidth: shapeType === 'Line' ? lineVector.length : paperLayer.bounds.width,
               innerHeight: shapeType === 'Line' ? 0 : paperLayer.bounds.height
             },
             shapeType: shapeType,

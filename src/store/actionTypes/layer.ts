@@ -1859,6 +1859,8 @@ export interface SetLayerWidthPayload {
   paragraphs?: string[][];
   contentHeight?: number;
   textResize?: Btwx.TextResize;
+  from?: Btwx.Point;
+  to?: Btwx.Point;
 }
 
 export interface SetLayerWidth {
@@ -1887,6 +1889,12 @@ export interface SetLayersWidthPayload {
   textResize?: {
     [id: string]: Btwx.TextResize;
   };
+  from?: {
+    [id: string]: Btwx.Point;
+  };
+  to?: {
+    [id: string]: Btwx.Point;
+  };
 }
 
 export interface SetLayersWidth {
@@ -1903,6 +1911,8 @@ export interface SetLayerHeightPayload {
   paragraphs?: string[][];
   contentHeight?: number;
   textResize?: Btwx.TextResize;
+  from?: Btwx.Point;
+  to?: Btwx.Point;
 }
 
 export interface SetLayerHeight {
@@ -1930,6 +1940,12 @@ export interface SetLayersHeightPayload {
   };
   textResize?: {
     [id: string]: Btwx.TextResize;
+  };
+  from?: {
+    [id: string]: Btwx.Point;
+  };
+  to?: {
+    [id: string]: Btwx.Point;
   };
 }
 

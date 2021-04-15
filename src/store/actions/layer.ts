@@ -15,7 +15,7 @@ import {
 import {
   getTextAbsPoint, clearTextOblique, applyTextOblique, measureTextLine,
   clearLayerTransforms, applyLayerTransforms, getTextLines, getLayerTextContent,
-  positionTextContent, getTextInnerBounds, resizeTextBoundingBox, pointChanged
+  positionTextContent, getTextInnerBounds, resizeTextBoundingBox, getPaperStyle
 } from '../utils/paper';
 import {
   getLayerAndDescendants, getLayersBounds, getNearestScopeAncestor, getArtboardEventItems, canPasteSVG,
@@ -34,6 +34,7 @@ import { openColorEditor, closeColorEditor } from './colorEditor';
 import { openGradientEditor, closeGradientEditor } from './gradientEditor';
 import { RootState } from '../reducers';
 import { getContent, getParagraphs } from '../../components/CanvasTextLayer';
+import { getIconData } from '../../components/Icon';
 
 gsap.registerPlugin(ScrollToPlugin);
 
@@ -684,9 +685,9 @@ export const addArtboard = (payload: AddArtboardPayload): LayerTypes => ({
   payload
 });
 
-export const addArtboardThunk = (payload: AddArtboardPayload, providedState?: RootState) => {
+export const addArtboardThunk = (payload: AddArtboardPayload) => {
   return (dispatch: any, getState: any): Promise<Btwx.Artboard> => {
-    const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
+    const state = getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const name = payload.layer.name ? payload.layer.name : 'Artboard';
     const projectIndex = Math.floor((state.layer.present.byId.root.children.length) / ARTBOARDS_PER_PROJECT) + 1;
@@ -735,9 +736,9 @@ export const addGroup = (payload: AddGroupPayload): LayerTypes => ({
   payload
 });
 
-export const addGroupThunk = (payload: AddGroupPayload, providedState?: RootState) => {
+export const addGroupThunk = (payload: AddGroupPayload) => {
   return (dispatch: any, getState: any): Promise<Btwx.Group> => {
-    const state = getState() as RootState // providedState ? providedState : getState() as RootState;
+    const state = getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const style = getLayerStyle(payload, {}, { fill: { enabled: false } as Btwx.Fill, stroke: { enabled: false } as Btwx.Stroke, shadow: { enabled: false } as Btwx.Shadow });
     const name = payload.layer.name ? payload.layer.name : 'Group';
@@ -791,9 +792,9 @@ export const addShape = (payload: AddShapePayload): LayerTypes => ({
   payload
 });
 
-export const addShapeThunk = (payload: AddShapePayload, providedState?: RootState) => {
+export const addShapeThunk = (payload: AddShapePayload) => {
   return (dispatch: any, getState: any): Promise<Btwx.Shape> => {
-    const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
+    const state = getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const parent = payload.layer.parent ? payload.layer.parent : state.layer.present.activeArtboard;
     const parentItem = state.layer.present.byId[parent];
@@ -849,112 +850,6 @@ export const addShapeThunk = (payload: AddShapePayload, providedState?: RootStat
   }
 };
 
-// export const addShapeGroupThunk = (payload: AddShapePayload, providedState?: RootState) => {
-//   return (dispatch: any, getState: any): Promise<Btwx.Shape> => {
-//     const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
-//     const id = payload.layer.id ? payload.layer.id : uuidv4();
-//     const parent = payload.layer.parent ? payload.layer.parent : state.layer.present.activeArtboard;
-//     const parentItem = state.layer.present.byId[parent];
-//     const scope = [...parentItem.scope, parent];
-//     const artboard = scope[1];
-//     const artboardItem = state.layer.present.byId[artboard] as Btwx.Artboard;
-//     const index = artboardItem.children.length;
-//     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
-//     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
-//     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-//     const parentPaperLayer = getParentPaperLayer(state.layer.present, parent, ignoreUnderlyingMask);
-//     const shapeType = payload.layer.shapeType ? payload.layer.shapeType : 'Rectangle';
-//     const name = payload.layer.name ? payload.layer.name : shapeType;
-//     const frame = getLayerFrame(payload);
-//     let position = new paperMain.Point(frame.x, frame.y);
-//     if (artboard) {
-//       position = position.add(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y))
-//     }
-//     const shapeOpts = getLayerShapeOpts(payload);
-//     const style = getLayerStyle(payload);
-//     const transform = getLayerTransform(payload);
-//     const paperShadowColor = style.shadow.enabled ? getPaperShadowColor(style.shadow as Btwx.Shadow) : null;
-//     const paperShadowOffset = style.shadow.enabled ? new paperMain.Point(style.shadow.offset.x, style.shadow.offset.y) : null;
-//     const paperShadowBlur = style.shadow.enabled ? style.shadow.blur : null;
-//     const paperFillColor = style.fill.enabled ? getPaperFillColor(style.fill, frame) as Btwx.PaperGradientFill : null;
-//     const paperStrokeColor = style.stroke.enabled ? getPaperStrokeColor(style.stroke, frame) as Btwx.PaperGradientFill : null;
-//     const mask = payload.layer.mask ? payload.layer.mask : false;
-//     const shapeContainer = renderShapeGroup((payload.layer as any).sketchLayer);
-//     const paperLayer = new paperMain.CompoundPath({
-//       name: name,
-//       pathData: shapeContainer.lastChild.pathData,
-//       closed: payload.layer.closed,
-//       strokeWidth: style.stroke.width,
-//       shadowColor: paperShadowColor,
-//       shadowOffset: paperShadowOffset,
-//       shadowBlur: paperShadowBlur,
-//       blendMode: style.blendMode,
-//       opacity: style.opacity,
-//       dashArray: style.strokeOptions.dashArray,
-//       dashOffset: style.strokeOptions.dashOffset,
-//       strokeCap: style.strokeOptions.cap,
-//       strokeJoin: style.strokeOptions.join,
-//       clipMask: mask,
-//       data: { id, type: 'Layer', layerType: 'Shape', shapeType: 'Custom', scope: scope },
-//       parent: parentPaperLayer
-//     });
-//     paperLayer.children.forEach((item) => item.data = { id: 'shapePartial', type: 'LayerChild', layerType: 'Shape' });
-//     paperLayer.position = position;
-//     // wonky fix to make sure gradient destination and origin are in correct place
-//     paperLayer.rotation = -transform.rotation;
-//     paperLayer.scale(transform.horizontalFlip ? -1 : 1, transform.verticalFlip ? -1 : 1);
-//     paperLayer.fillColor = paperFillColor;
-//     paperLayer.strokeColor = paperStrokeColor;
-//     paperLayer.rotation = transform.rotation;
-//     paperLayer.scale(transform.horizontalFlip ? -1 : 1, transform.verticalFlip ? -1 : 1);
-//     //
-//     if (mask) {
-//       const maskGroup = new paperMain.Group({
-//         name: 'MaskGroup',
-//         data: { id: 'maskGroup', type: 'LayerContainer', layerType: 'Shape' },
-//         children: [paperLayer.clone()]
-//       });
-//       paperLayer.replaceWith(maskGroup);
-//     }
-//     //
-//     const newLayer = {
-//       type: 'Shape',
-//       id: id,
-//       name: name,
-//       artboard: artboard,
-//       parent: parent,
-//       children: null,
-//       scope: scope,
-//       frame: frame,
-//       underlyingMask: underlyingMask,
-//       ignoreUnderlyingMask: ignoreUnderlyingMask,
-//       masked: masked,
-//       showChildren: null,
-//       selected: false,
-//       hover: false,
-//       events: [],
-//       tweens: {
-//         allIds: [],
-//         asOrigin: [],
-//         asDestination: [],
-//         byProp: TWEEN_PROPS_MAP
-//       },
-//       transform: transform,
-//       style: style,
-//       closed: true,
-//       mask: mask,
-//       shapeType: 'Custom',
-//       pathData: shapeContainer.lastChild.pathData,
-//       ...shapeOpts
-//     } as Btwx.Shape;
-//     dispatch(addShape({
-//       layer: newLayer,
-//       batch: payload.batch
-//     }));
-//     return Promise.resolve(newLayer);
-//   }
-// };
-
 // Text
 
 export const addText = (payload: AddTextPayload): LayerTypes => ({
@@ -962,9 +857,9 @@ export const addText = (payload: AddTextPayload): LayerTypes => ({
   payload
 });
 
-export const addTextThunk = (payload: AddTextPayload, providedState?: RootState) => {
+export const addTextThunk = (payload: AddTextPayload) => {
   return (dispatch: any, getState: any): Promise<Btwx.Text> => {
-    const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
+    const state = getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
     const text = payload.layer.text ? payload.layer.text : DEFAULT_TEXT_VALUE;
     const lines = text.split(/\r\n|\r|\n/).reduce((result, current) => {
@@ -1079,7 +974,7 @@ export const insertImageThunk = () => {
 
 export const addImageThunk = (payload: AddImagePayload) => {
   return (dispatch: any, getState: any): Promise<Btwx.Image> => {
-    const state = getState() as RootState; // providedState ? providedState : getState() as RootState;
+    const state = getState() as RootState;
     const buffer = Buffer.from(payload.buffer);
     const exists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(buffer));
     const id = payload.layer.id ? payload.layer.id : uuidv4();
@@ -2064,6 +1959,8 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
     let contentHeight: { [id: string]: number } = {};
     let lines: { [id: string]: Btwx.TextLine[] } = {};
     let textResize: { [id: string]: Btwx.TextResize } = {};
+    let from: { [id: string]: Btwx.Point } = {};
+    let to: { [id: string]: Btwx.Point } = {};
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
@@ -2071,6 +1968,7 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
       const clone = paperLayer.clone({insert: false}) as paper.Item;
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       if (layerItem.type === 'Shape' || layerItem.type === 'Image') {
+        const startPosition = clone.position;
         clearLayerTransforms({
           paperLayer: clone,
           transform: layerItem.transform
@@ -2085,11 +1983,31 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
             ...pathData,
             [id]: (clone as paper.CompoundPath).pathData
           }
+          if ((layerItem as Btwx.Shape).shapeType === 'Line') {
+            clone.position = startPosition;
+            const fromPoint = (clone as paper.Path).firstSegment.point.subtract(artboardPosition);
+            const toPoint = (clone as paper.Path).lastSegment.point.subtract(artboardPosition);
+            from = {
+              ...from,
+              [id]: {
+                x: fromPoint.x,
+                y: fromPoint.y
+              }
+            }
+            to = {
+              ...to,
+              [id]: {
+                x: toPoint.x,
+                y: toPoint.y
+              }
+            }
+          }
         }
         bounds = {
           ...bounds,
           [id]: {
             ...layerItem.frame,
+            innerWidth: payload.width,
             width: clone.bounds.width,
             height: clone.bounds.height
           }
@@ -2189,7 +2107,9 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
         contentHeight,
         paragraphs,
         lines,
-        textResize
+        textResize,
+        from,
+        to
       })
     )
   }
@@ -2214,31 +2134,59 @@ export const setLayersHeightThunk = (payload: SetLayersHeightPayload) => {
     let contentHeight: { [id: string]: number } = {};
     let lines: { [id: string]: Btwx.TextLine[] } = {};
     let textResize: { [id: string]: Btwx.TextResize } = {};
+    let from: { [id: string]: Btwx.Point } = {};
+    let to: { [id: string]: Btwx.Point } = {};
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
       const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
       const clone = paperLayer.clone({insert: false});
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
-      if (layerItem.type !== 'Text') {
-        clone.rotation = -layerItem.transform.rotation;
+      if (layerItem.type === 'Shape' || layerItem.type === 'Image') {
+        clearLayerTransforms({
+          paperLayer: clone,
+          transform: layerItem.transform
+        });
         clone.bounds.height = payload.height;
-        clone.rotation = layerItem.transform.rotation;
+        applyLayerTransforms({
+          paperLayer: clone,
+          transform: layerItem.transform
+        });
         if (layerItem.type === 'Shape') {
           pathData = {
             ...pathData,
             [id]: (clone as paper.CompoundPath).pathData
+          }
+          if ((layerItem as Btwx.Shape).shapeType === 'Line') {
+            const fromPoint = (clone as paper.Path).firstSegment.point.subtract(artboardPosition);
+            const toPoint = (clone as paper.Path).lastSegment.point.subtract(artboardPosition);
+            from = {
+              ...from,
+              [id]: {
+                x: fromPoint.x,
+                y: fromPoint.y
+              }
+            }
+            to = {
+              ...to,
+              [id]: {
+                x: toPoint.x,
+                y: toPoint.y
+              }
+            }
           }
         }
         bounds = {
           ...bounds,
           [id]: {
             ...layerItem.frame,
+            innerHeight: payload.height,
             width: clone.bounds.width,
             height: clone.bounds.height
           }
         }
-      } else {
+      }
+      if (layerItem.type === 'Text') {
         const textContent = clone.getItem({data: {id: 'textContent'}}) as paper.PointText;
         const textItem: Btwx.Text = layerItem as Btwx.Text;
         const nextTextResize = 'fixed';
@@ -2297,7 +2245,9 @@ export const setLayersHeightThunk = (payload: SetLayersHeightPayload) => {
         pathData,
         bounds,
         lines,
-        textResize
+        textResize,
+        from,
+        to
       })
     )
   }
@@ -3090,8 +3040,6 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
     let lines = {} as { [id: string]: Btwx.TextLine[] };
     let paragraphs = {} as { [id: string]: string[][] };
     let contentHeight = {} as { [id: string]: number };
-    let innerWidth: number;
-    let innerHeight: number;
     payload.layers.forEach((id, index) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
@@ -3104,25 +3052,52 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
       const isText = layerItem.type === 'Text';
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       const paperPosition = paperLayer.position;
-      // reset flips until they reach component
+      let innerWidth: number;
+      let innerHeight: number;
       if (isShape) {
         pathData = {
           ...pathData,
           [id]: (paperLayer as paper.CompoundPath).pathData
+        }
+        if (isLine) {
+          const fromPoint = (paperLayer as paper.Path).firstSegment.point.subtract(artboardPosition);
+          const toPoint = (paperLayer as paper.Path).lastSegment.point.subtract(artboardPosition);
+          const vector = toPoint.subtract(fromPoint);
+          innerWidth = vector.length;
+          innerHeight = 0;
+          from = {
+            ...from,
+            [id]: {
+              x: fromPoint.x,
+              y: fromPoint.y
+            }
+          }
+          to = {
+            ...to,
+            [id]: {
+              x: toPoint.x,
+              y: toPoint.y
+            }
+          }
+          rotation = {
+            ...rotation,
+            [id]: vector.angle
+          }
         }
       }
       if (isText) {
         const duplicate = paperLayer.clone({insert: false}) as paper.Group;
         const textContent = duplicate.getItem({ data: { id: 'textContent' } }) as paper.PointText;
         const textBackground = duplicate.getItem({ data: { id: 'textBackground' } });
-        const width = duplicate.bounds.width;
-        const height = duplicate.bounds.height;
-        const nextPoint = textContent.point.subtract(artboardPosition);
-        duplicate.scale(
-          (payload.horizontalFlip && !layerItem.transform.horizontalFlip) || (!payload.horizontalFlip && layerItem.transform.horizontalFlip) ? -1 : 1,
-          (payload.verticalFlip && !layerItem.transform.verticalFlip) || (!payload.verticalFlip && layerItem.transform.verticalFlip) ? -1 : 1
-        );
-        duplicate.rotation = -layerItem.transform.rotation;
+        clearLayerTransforms({
+          paperLayer: duplicate,
+          transform: {
+            ...layerItem.transform,
+            rotation: layerItem.transform.rotation,
+            horizontalFlip: (payload.horizontalFlip && !layerItem.transform.horizontalFlip) || (!payload.horizontalFlip && layerItem.transform.horizontalFlip),
+            verticalFlip: (payload.verticalFlip && !layerItem.transform.verticalFlip) || (!payload.verticalFlip && layerItem.transform.verticalFlip)
+          }
+        });
         const horizontalOnlyScale = payload.scale.x !== 1 && payload.scale.y === 1;
         const nextResize = horizontalOnlyScale && (layerItem as Btwx.Text).textStyle.textResize !== 'fixed'  ? 'autoHeight' : 'fixed';
         // get next paragraphs
@@ -3151,7 +3126,6 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
           textResize: nextResize
         });
         // get next point, inner bounds, and lines
-        // const nextPoint = textContent.point.subtract(artboardPosition);
         const nextContentHeight = Math.round(textContent.bounds.height);
         const nextInnerBounds = getTextInnerBounds({
           paperLayer: duplicate,
@@ -3171,6 +3145,22 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
           artboardPosition: artboardPosition,
           paragraphs: nextParagraphs
         });
+        resizeTextBoundingBox({
+          paperLayer: duplicate,
+          innerBounds: nextInnerBounds,
+          artboardPosition
+        });
+        // apply layer transforms
+        applyLayerTransforms({
+          paperLayer: duplicate,
+          transform: {
+            ...layerItem.transform,
+            rotation: layerItem.transform.rotation,
+            horizontalFlip: (payload.horizontalFlip && !layerItem.transform.horizontalFlip) || (!payload.horizontalFlip && layerItem.transform.horizontalFlip),
+            verticalFlip: (payload.verticalFlip && !layerItem.transform.verticalFlip) || (!payload.verticalFlip && layerItem.transform.verticalFlip)
+          }
+        });
+        const nextPoint = textContent.point.subtract(artboardPosition);
         lines = {
           ...lines,
           [id]: nextTextLines
@@ -3179,8 +3169,8 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
           ...bounds,
           [id]: {
             ...nextInnerBounds,
-            width,
-            height
+            width: duplicate.bounds.width,
+            height: duplicate.bounds.height
           }
         }
         point = {
@@ -3202,39 +3192,13 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
           ...contentHeight,
           [id]: nextContentHeight
         }
-      }
-      if (isLine && (payload.horizontalFlip || payload.verticalFlip)) {
-        const fromPoint = (paperLayer as paper.Path).firstSegment.point.subtract(artboardPosition);
-        const toPoint = (paperLayer as paper.Path).lastSegment.point.subtract(artboardPosition);
-        const vector = toPoint.subtract(fromPoint);
-        innerWidth = Math.round(vector.length);
-        innerHeight = 0;
-        from = {
-          ...from,
-          [id]: {
-            x: fromPoint.x,
-            y: fromPoint.y
-          }
+      } else {
+        paperLayer.rotation = -layerItem.transform.rotation;
+        if (!isLine) {
+          innerWidth = paperLayer.bounds.width;
+          innerHeight = paperLayer.bounds.height;
         }
-        to = {
-          ...to,
-          [id]: {
-            x: toPoint.x,
-            y: toPoint.y
-          }
-        }
-        rotation = {
-          ...rotation,
-          [id]: vector.angle
-        }
-      }
-      paperLayer.rotation = -layerItem.transform.rotation;
-      if (!isLine) {
-        innerWidth = paperLayer.bounds.width;
-        innerHeight = paperLayer.bounds.height;
-      }
-      paperLayer.rotation = layerItem.transform.rotation;
-      if (!isText) {
+        paperLayer.rotation = layerItem.transform.rotation;
         bounds = {
           ...bounds,
           [id]: {
@@ -5464,88 +5428,6 @@ export const replaceSelectedImagesThunk = () => {
   }
 };
 
-// export const copyLayersThunk = () => {
-//   return (dispatch: any, getState: any) => {
-//     const state = getState() as RootState;
-//     const copyLayer = (copyState: Btwx.ClipboardLayers, layer: string, isChild?: boolean): Btwx.ClipboardLayers => {
-//       let currentCopyState = copyState;
-//       const { layerItem, paperLayer } = getItemLayers(state.layer.present, layer);
-//       const isMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
-//       const layerBounds = getLayerBounds(state.layer.present, layer);
-//       const nextTopLeft = copyState.bounds ? paper.Point.min((currentCopyState.bounds as paper.Rectangle).topLeft, layerBounds.topLeft) : layerBounds.topLeft;
-//       const nextBottomRight = copyState.bounds ? paper.Point.max((currentCopyState.bounds as paper.Rectangle).bottomRight, layerBounds.bottomRight) : layerBounds.bottomRight;
-//       // ids
-//       currentCopyState.allIds = [...currentCopyState.allIds, layer];
-//       // bounds
-//       currentCopyState.bounds = new paperMain.Rectangle({
-//         from: nextTopLeft,
-//         to: nextBottomRight
-//       });
-//       // children
-//       if (layerItem.children && layerItem.children.length > 0) {
-//         currentCopyState = copyLayers(currentCopyState, layerItem.children, true);
-//       }
-//       // main && json
-//       if (!isChild) {
-//         currentCopyState.main = [...currentCopyState.main, layer];
-//         const pl = isMask ? paperLayer.parent : paperLayer;
-//         const clone = pl.clone({insert: false});
-//         currentCopyState.json = {
-//           ...currentCopyState.json,
-//           [layer]: clone.exportJSON()
-//         }
-//       }
-//       // byId
-//       currentCopyState.byId = {
-//         ...currentCopyState.byId,
-//         [layer]: {
-//           ...layerItem,
-//           events: [],
-//           tweens: {
-//             allIds: [],
-//             asOrigin: [],
-//             asDestination: [],
-//             byProp: TWEEN_PROPS_MAP
-//           },
-//           ...(() => {
-//             switch(layerItem.type) {
-//               case 'Artboard':
-//                 return {
-//                   originArtboardForEvents: [],
-//                   destinationArtboardForEvents: []
-//                 }
-//               default:
-//                 return {};
-//             }
-//           })()
-//         }
-//       };
-//       // images
-//       if (layerItem.type === 'Image') {
-//         const imageId = (layerItem as Btwx.Image).imageId;
-//         if (!Object.keys(currentCopyState.images).includes(imageId)) {
-//           currentCopyState.images[imageId] = state.documentSettings.images.byId[imageId];
-//         }
-//       }
-//       return currentCopyState;
-//     };
-//     const copyLayers = (copyState: Btwx.ClipboardLayers, layers: string[], isChild?: boolean): Btwx.ClipboardLayers => {
-//       let currentCopyState = copyState;
-//       currentCopyState = layers.reduce((result, current) => {
-//         result = copyLayer(result, current, isChild);
-//         return result;
-//       }, currentCopyState);
-//       return currentCopyState;
-//     };
-//     if (state.canvasSettings.focusing && state.layer.present.selected.length > 0) {
-//       const nextCopyState = { type: 'layers', main: [], allIds: [], byId: {}, images: {}, bounds: null, json: {} } as Btwx.ClipboardLayers;
-//       const copyState = copyLayers(nextCopyState, state.layer.present.selected, false);
-//       // copyState.paperLayers = groupThing.exportJSON();
-//       clipboard.writeText(JSON.stringify(copyState));
-//     }
-//   }
-// };
-
 // need to copy events if artboards are copied
 // need to change copied names so copied events work
 export const copySelectedToClipboardThunk = () => {
@@ -5801,6 +5683,102 @@ export const pasteLayersThunk = (props?: { overSelection?: boolean; overPoint?: 
               }
             });
             if (clipboardLayers.type === 'sketch-layers') {
+              // Dont have galaxy brain math skillz to figure out point in plugin...
+              // so I do it here
+              clipboardLayers = clipboardLayers.allTextIds.reduce((result, current) => {
+                const textItem = clipboardLayers.byId[current] as Btwx.Text;
+                const artboardItem = (clipboardLayers.byId[textItem.artboard] ? clipboardLayers.byId[textItem.artboard] : state.layer.present.byId[textItem.artboard]) as Btwx.Artboard;
+                const point = new paperMain.Point(textItem.point.x, textItem.point.y);
+                const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
+                const getAreaTextRectangle = () => {
+                  const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
+                  const textPosition = new paperMain.Point(textItem.frame.x, textItem.frame.y);
+                  const absPosition = textPosition.add(artboardPosition);
+                  const topLeft = new paperMain.Point(
+                    absPosition.x - (textItem.frame.innerWidth / 2),
+                    absPosition.y - (textItem.frame.innerHeight / 2)
+                  );
+                  const bottomRight = new paperMain.Point(
+                    absPosition.x + (textItem.frame.innerWidth / 2),
+                    absPosition.y + (textItem.frame.innerHeight / 2)
+                  );
+                  return new paperMain.Rectangle({
+                    from: topLeft,
+                    to: bottomRight
+                  });
+                }
+                const textContainer = new paperMain.Group({
+                  insert: false,
+                  children: [
+                    new paperMain.Path.Rectangle({
+                      rectangle: getAreaTextRectangle(),
+                      // fillColor: tinyColor('#fff').setAlpha(0.01).toRgbString(),
+                      // blendMode: 'multiply',
+                      fillColor: '#000',
+                      data: {
+                        id: 'textMask',
+                        type: 'LayerChild',
+                        layerType: 'Text'
+                      },
+                      clipMask: true
+                    }),
+                    new paperMain.Path.Rectangle({
+                      rectangle: getAreaTextRectangle(),
+                      // fillColor: tinyColor('#fff').setAlpha(0.01).toRgbString(),
+                      // blendMode: 'multiply',
+                      fillColor: tinyColor('red').setAlpha(0.25).toRgbString(),
+                      data: {
+                        id: 'textBackground',
+                        type: 'LayerChild',
+                        layerType: 'Text'
+                      }
+                    }),
+                    new paperMain.PointText({
+                      point: point.add(artboardPosition),
+                      data: {
+                        id: 'textContent',
+                        type: 'LayerChild',
+                        layerType: 'Text'
+                      },
+                      content: getContent({
+                        paragraphs: textItem.paragraphs
+                      }),
+                      ...getPaperStyle({
+                        style: textItem.style,
+                        textStyle: textItem.textStyle,
+                        isLine: false,
+                        layerFrame: textItem.frame,
+                        artboardFrame: artboardItem.frame
+                      })
+                    })
+                  ]
+                });
+                positionTextContent({
+                  paperLayer: textContainer,
+                  verticalAlignment: textItem.textStyle.verticalAlignment,
+                  justification: textItem.textStyle.justification,
+                  textResize: textItem.textStyle.textResize
+                });
+                applyLayerTransforms({
+                  paperLayer: textContainer,
+                  transform: textItem.transform
+                });
+                const pointWithTransforms = (textContainer.getItem({data:{id:'textContent'}}) as paper.PointText).point.subtract(artboardPosition);
+                return {
+                  ...result,
+                  byId: {
+                    ...result.byId,
+                    [current]: {
+                      ...result.byId[current],
+                      point: {
+                        x: pointWithTransforms.x,
+                        y: pointWithTransforms.y
+                      }
+                    } as Btwx.Text
+                  }
+                }
+              }, clipboardLayers);
+              // same goes for shape icons
               clipboardLayers = clipboardLayers.allShapeIds.reduce((result, current) => {
                 const icon = new paperMain.CompoundPath({
                   pathData: (clipboardLayers.byId[current] as Btwx.Shape).pathData,
@@ -5853,79 +5831,6 @@ export const setLayerTreeStickyArtboard = (payload: SetLayerTreeStickyArtboardPa
   payload
 });
 
-// const updateEditors = (dispatch: any, state: RootState, type: 'redo' | 'undo') => {
-//   if (state.colorEditor.isOpen) {
-//     // const layerItem = state.layer.present.byId[state.colorEditor.layer];
-//     const layerItems = state.colorEditor.layers.reduce((result, current) => {
-//       return [...result, state.layer.present.byId[current]];
-//     }, []);
-//     // const prevLayerItem = type === 'redo' ? state.layer.past[state.layer.past.length - 1].byId[state.colorEditor.layer] : state.layer.future[0].byId[state.colorEditor.layer];
-//     const prevLayerItems = type === 'redo' ? state.colorEditor.layers.reduce((result, current) => {
-//       return [...result, state.layer.past[state.layer.past.length - 1].byId[current]];
-//     }, []) : state.colorEditor.layers.reduce((result, current) => {
-//       return [...result, state.layer.future[0].byId[current]];
-//     }, []);
-//     // check if items exist and matches selection
-//     if (layerItems.every((id) => id) && prevLayerItems.every((id) => id) && state.layer.present.selected.every((id, index) => state.layer.present.selected[index] === state.colorEditor.layers[index])) {
-//       const style = layerItems[0].style[state.colorEditor.prop];
-//       const prevStyle = prevLayerItems[0].style[state.colorEditor.prop];
-//       // check if fill types match
-//       if (style.fillType === prevStyle.fillType) {
-//         // check if prev action creator was for color
-//         if (colorsMatch(style.color, prevStyle.color)) {
-//           dispatch(closeColorEditor());
-//         }
-//       } else {
-//         // if fill types dont match, open relevant editor
-//         switch(style.fillType) {
-//           case 'gradient': {
-//             dispatch(closeColorEditor());
-//             dispatch(openGradientEditor({layers: state.colorEditor.layers, x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
-//           }
-//         }
-//       }
-//     } else {
-//       dispatch(closeColorEditor());
-//     }
-//   }
-//   if (state.gradientEditor.isOpen) {
-//     // const layerItem = state.layer.present.byId[state.gradientEditor.layer];
-//     const layerItems = state.gradientEditor.layers.reduce((result, current) => {
-//       return [...result, state.layer.present.byId[current]];
-//     }, []);
-//     // const prevLayerItem = type === 'redo' ? state.layer.past[state.layer.past.length - 1].byId[state.gradientEditor.layer] : state.layer.future[0].byId[state.gradientEditor.layer];
-//     const prevLayerItems = type === 'redo' ? state.gradientEditor.layers.reduce((result, current) => {
-//       return [...result, state.layer.past[state.layer.past.length - 1].byId[current]];
-//     }, []) : state.gradientEditor.layers.reduce((result, current) => {
-//       return [...result, state.layer.future[0].byId[current]];
-//     }, []);
-//     // check if items exist and matches selection
-//     if (layerItems.every((id) => id) && prevLayerItems.every((id) => id) && state.layer.present.selected.every((id, index) => state.layer.present.selected[index] === state.gradientEditor.layers[index])) {
-//       const style = layerItems[0].style[state.gradientEditor.prop];
-//       const prevStyle = prevLayerItems[0].style[state.gradientEditor.prop];
-//       // check if fill types match
-//       if (style.fillType === prevStyle.fillType) {
-//         updateGradientFrame(layerItems[0], (style as Btwx.Fill | Btwx.Stroke).gradient);
-//         // check if prev action creator was for gradient
-//         if (gradientsMatch((style as Btwx.Fill | Btwx.Stroke).gradient, (prevStyle as Btwx.Fill | Btwx.Stroke).gradient)) {
-//           dispatch(closeGradientEditor());
-//         }
-//       } else {
-//         // if fill types dont match, open relevant editor
-//         switch(style.fillType) {
-//           case 'color': {
-//             dispatch(closeGradientEditor());
-//             dispatch(openColorEditor({layers: state.gradientEditor.layers, x: state.gradientEditor.x, y: state.gradientEditor.y, prop: state.gradientEditor.prop}));
-//             break;
-//           }
-//         }
-//       }
-//     } else {
-//       dispatch(closeGradientEditor());
-//     }
-//   }
-// };
-
 export const undoThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
@@ -5944,26 +5849,6 @@ export const undoThunk = () => {
       }
       // undo
       dispatch(ActionCreators.undo());
-      //
-      // if (state.layer.present.edit.projects) {
-      //   const documentImages = state.documentSettings.images.byId;
-      //   state.layer.present.edit.projects.forEach((id) => {
-      //     const currentArtboardItem = state.layer.present.byId[id];
-      //     const pastArtboardItem = layerState.byId[id] as Btwx.Artboard;
-      //     if (currentArtboardItem && pastArtboardItem) {
-      //       const projectIndex = pastArtboardItem.projectIndex;
-      //       const project = paperMain.projects[projectIndex];
-      //       const json = pastArtboardItem.json;
-      //       const paperLayer = project.getItem({data: {id}});
-      //       const newPaperLayer = importProjectJSON({
-      //         project,
-      //         json,
-      //         documentImages
-      //       });
-      //       paperLayer.replaceWith(newPaperLayer);
-      //     }
-      //   });
-      // }
       // update editors
       switch(state.layer.present.edit.actionType) {
         case SET_LAYERS_FILL_COLOR: {
@@ -6068,26 +5953,6 @@ export const redoThunk = () => {
       }
       // redo
       dispatch(ActionCreators.redo());
-      //
-      // if (state.layer.present.edit.projects && layerState.edit.projects) {
-      //   const documentImages = state.documentSettings.images.byId;
-      //   layerState.edit.projects.forEach((id) => {
-      //     const currentArtboardItem = state.layer.present.byId[id];
-      //     const futureArtboardItem = layerState.byId[id] as Btwx.Artboard;
-      //     if (currentArtboardItem && futureArtboardItem) {
-      //       const projectIndex = futureArtboardItem.projectIndex;
-      //       const project = paperMain.projects[projectIndex];
-      //       const json = futureArtboardItem.json;
-      //       const paperLayer = project.getItem({data: {id}});
-      //       const newPaperLayer = importProjectJSON({
-      //         project,
-      //         json,
-      //         documentImages
-      //       });
-      //       paperLayer.replaceWith(newPaperLayer);
-      //     }
-      //   });
-      // }
       // update editors
       switch(layerState.edit.actionType) {
         case SET_LAYERS_FILL_COLOR: {
@@ -6327,160 +6192,6 @@ export const updateGradientFrame = (origin: { position: paper.Point; color: Btwx
     });
   }
 }
-
-// export const updateGradientFrame = (layerItem: Btwx.Layer, gradient: Btwx.Gradient) => {
-//   const gradientFrame = paperMain.project.getItem({ data: { id: 'gradientFrame' } });
-//   gradientFrame.removeChildren();
-//   const stopsWithIndex = gradient.stops.map((stop, index) => {
-//     return {
-//       ...stop,
-//       index
-//     }
-//   });
-//   const sortedStops = stopsWithIndex.sort((a,b) => { return a.position - b.position });
-//   const originStop = sortedStops[0];
-//   const destStop = sortedStops[sortedStops.length - 1];
-//   const gradientFrameHandleBgProps = {
-//     radius: 8 / paperMain.view.zoom,
-//     fillColor: '#fff',
-//     shadowColor: new paperMain.Color(0, 0, 0, 0.5),
-//     shadowBlur: 2,
-//     insert: false,
-//     strokeWidth: 1 / paperMain.view.zoom
-//   }
-//   const gradientFrameHandleSwatchProps = {
-//     radius: 6 / paperMain.view.zoom,
-//     fillColor: '#fff',
-//     insert: false
-//   }
-//   const gradientFrameLineProps = {
-//     from: getGradientOriginPoint(layerItem, gradient.origin),
-//     to: getGradientDestinationPoint(layerItem, gradient.destination),
-//     insert: false
-//   }
-//   const gradientFrameOriginHandleBg = new paperMain.Shape.Circle({
-//     ...gradientFrameHandleBgProps,
-//     center: getGradientOriginPoint(layerItem, gradient.origin),
-//     data: {
-//       type: 'UIElementChild',
-//       interactive: true,
-//       interactiveType: 'origin',
-//       elementId: 'gradientFrame'
-//     },
-//     strokeColor: originStop.index === gradient.activeStopIndex ? THEME_PRIMARY_COLOR : null
-//   });
-//   const gradientFrameOriginHandleSwatch  = new paperMain.Shape.Circle({
-//     ...gradientFrameHandleSwatchProps,
-//     fillColor: {
-//       hue: originStop.color.h,
-//       saturation: originStop.color.s,
-//       lightness: originStop.color.l,
-//       alpha: originStop.color.a
-//     },
-//     center: getGradientOriginPoint(layerItem, gradient.origin),
-//     data: {
-//       type: 'UIElementChild',
-//       interactive: true,
-//       interactiveType: 'origin',
-//       elementId: 'gradientFrame'
-//     }
-//   });
-//   const gradientFrameDestinationHandleBg = new paperMain.Shape.Circle({
-//     ...gradientFrameHandleBgProps,
-//     center: getGradientDestinationPoint(layerItem, gradient.destination),
-//     data: {
-//       type: 'UIElementChild',
-//       interactive: true,
-//       interactiveType: 'destination',
-//       elementId: 'gradientFrame'
-//     },
-//     strokeColor: destStop.index === gradient.activeStopIndex ? THEME_PRIMARY_COLOR : null
-//   });
-//   const gradientFrameDestinationHandleSwatch = new paperMain.Shape.Circle({
-//     ...gradientFrameHandleSwatchProps,
-//     fillColor: {
-//       hue: destStop.color.h,
-//       saturation: destStop.color.s,
-//       lightness: destStop.color.l,
-//       alpha: destStop.color.a
-//     },
-//     center: getGradientDestinationPoint(layerItem, gradient.destination),
-//     data: {
-//       type: 'UIElementChild',
-//       interactive: true,
-//       interactiveType: 'destination',
-//       elementId: 'gradientFrame'
-//     }
-//   });
-//   const gradientFrameLineDark = new paperMain.Path.Line({
-//     ...gradientFrameLineProps,
-//     strokeColor: new paperMain.Color(0, 0, 0, 0.25),
-//     strokeWidth: 3 / paperMain.view.zoom,
-//     data: {
-//       id: 'GradientFrameLine',
-//       type: 'UIElementChild',
-//       interactive: false,
-//       interactiveType: null,
-//       elementId: 'gradientFrame'
-//     }
-//   });
-//   const gradientFrameLineLight = new paperMain.Path.Line({
-//     ...gradientFrameLineProps,
-//     strokeColor: '#fff',
-//     strokeWidth: 1 / paperMain.view.zoom,
-//     data: {
-//       id: 'GradientFrameLine',
-//       type: 'UIElementChild',
-//       interactive: false,
-//       interactiveType: null,
-//       elementId: 'gradientFrame'
-//     }
-//   });
-//   const gradientFrameOriginHandle = new paperMain.Group({
-//     data: {
-//       id: 'GradientFrameOriginHandle',
-//       type: 'UIElementChild',
-//       interactive: true,
-//       interactiveType: 'origin',
-//       elementId: 'gradientFrame'
-//     },
-//     insert: false,
-//     children: [gradientFrameOriginHandleBg, gradientFrameOriginHandleSwatch]
-//   });
-//   const gradientFrameDestinationHandle = new paperMain.Group({
-//     data: {
-//       id: 'GradientFrameDestinationHandle',
-//       type: 'UIElementChild',
-//       interactive: true,
-//       interactiveType: 'destination',
-//       elementId: 'gradientFrame'
-//     },
-//     insert: false,
-//     children: [gradientFrameDestinationHandleBg, gradientFrameDestinationHandleSwatch]
-//   });
-//   const gradientFrameLines = new paperMain.Group({
-//     data: {
-//       id: 'GradientFrameLines',
-//       type: 'UIElementChild',
-//       interactive: false,
-//       interactiveType: null,
-//       elementId: 'gradientFrame'
-//     },
-//     insert: false,
-//     children: [gradientFrameLineDark, gradientFrameLineLight]
-//   });
-//   new paperMain.Group({
-//     data: {
-//       id: 'GradientFrame',
-//       type: 'UIElement',
-//       interactive: false,
-//       interactiveType: null,
-//       elementId: 'gradientFrame'
-//     },
-//     children: [gradientFrameLines, gradientFrameOriginHandle, gradientFrameDestinationHandle],
-//     parent: gradientFrame
-//   });
-// }
 
 export const updateActiveArtboardFrame = (bounds: paper.Rectangle): void => {
   if (paperMain.project.activeLayer.data.id !== 'ui') {
@@ -6946,15 +6657,34 @@ export const updateEventsFrame = (state: RootState): void => {
         pathData: ((): string => {
           switch(eventLayerItem.type) {
             case 'Artboard':
-              return 'M12.4743416,2.84188612 L12.859,3.99988612 L21,4 L21,15 L22,15 L22,16 L16.859,15.9998861 L18.4743416,20.8418861 L17.5256584,21.1581139 L16.805,18.9998861 L7.193,18.9998861 L6.47434165,21.1581139 L5.52565835,20.8418861 L7.139,15.9998861 L2,16 L2,15 L3,15 L3,4 L11.139,3.99988612 L11.5256584,2.84188612 L12.4743416,2.84188612 Z M15.805,15.9998861 L8.193,15.9998861 L7.526,17.9998861 L16.472,17.9998861 L15.805,15.9998861 Z M20,5 L4,5 L4,15 L20,15 L20,5 Z';
+              return getIconData({
+                name: 'artboard'
+              }).fill;
             case 'Group':
-              return 'M21,9 L21,20 L3,20 L3,9 L21,9 Z M9,4 C10.480515,4 11.7731656,4.80434324 12.4648015,5.99987956 L21,6 L21,8 L3,8 L3,4 L9,4 Z';
+              return `${getIconData({
+                name: 'group',
+                theme: state.preferences.theme
+              }).fill}, ${getIconData({
+                name: 'group',
+                theme: state.preferences.theme
+              }).opacity}`;
             case 'Shape':
-              return (eventLayerItem as Btwx.Shape).pathData;
+              return getIconData({
+                name: 'shape',
+                pathData: (eventLayerItem as Btwx.Shape).pathData
+              }).fill;
             case 'Text':
-              return 'M2.86645508,18 L4.1003418,14.4467773 L9.20288086,14.4467773 L10.4274902,18 L12.635498,18 L7.80200195,4.61279297 L5.56616211,4.61279297 L0.732666016,18 L2.86645508,18 Z M8.67407227,12.7026367 L4.62915039,12.7026367 L6.57739258,7.04345703 L6.73510742,7.04345703 L8.67407227,12.7026367 Z M17.4133301,18.1669922 C18.7399902,18.1669922 19.8439941,17.5917969 20.4470215,16.5805664 L20.6047363,16.5805664 L20.6047363,18 L22.5251465,18 L22.5251465,11.0976562 C22.5251465,8.96386719 21.0964355,7.70214844 18.5637207,7.70214844 C16.2722168,7.70214844 14.6394043,8.81542969 14.4353027,10.550293 L16.3649902,10.550293 C16.5876465,9.8359375 17.357666,9.42773438 18.4709473,9.42773438 C19.8347168,9.42773438 20.5397949,10.0307617 20.5397949,11.0976562 L20.5397949,11.9697266 L17.8029785,12.1274414 C15.4001465,12.2758789 14.0456543,13.3242188 14.0456543,15.1425781 C14.0456543,16.9887695 15.4650879,18.1669922 17.4133301,18.1669922 Z M17.923584,16.487793 C16.8381348,16.487793 16.0495605,15.9589844 16.0495605,15.0498047 C16.0495605,14.1591797 16.6804199,13.6860352 18.0720215,13.5932617 L20.5397949,13.4355469 L20.5397949,14.2797852 C20.5397949,15.5322266 19.4265137,16.487793 17.923584,16.487793 Z';
+              return getIconData({
+                name: 'text'
+              }).fill;
             case 'Image':
-              return state.preferences.theme === 'dark' ? 'M21,4 L21,20 L3,20 L3,4 L21,4 Z M20,5 L4,5 L4,14.916 L7.55555556,11 L12.7546667,16.728 L16,13.6703297 L20,17.44 L20,5 Z M16.6243657,6.71118154 C16.9538983,6.79336861 17.2674833,6.9606172 17.5297066,7.21384327 C18.3242674,7.98114172 18.3463679,9.24727881 17.5790695,10.0418396 C16.811771,10.8364004 15.5456339,10.8585009 14.7510731,10.0912025 C14.4888499,9.8379764 14.3107592,9.53041925 14.21741,9.2034121 C14.8874902,9.37067575 15.6260244,9.1851639 16.1403899,8.65252287 C16.6547553,8.11988184 16.8143797,7.37532327 16.6243657,6.71118154 Z' : 'M21,4 L21,20 L3,20 L3,4 L21,4 Z M20,5 L4,5 L4,14.916 L7.55555556,11 L12.7546667,16.728 L16,13.6703297 L20,17.44 L20,5 Z M16,7 C17.1045695,7 18,7.8954305 18,9 C18,10.1045695 17.1045695,11 16,11 C14.8954305,11 14,10.1045695 14,9 C14,7.8954305 14.8954305,7 16,7 Z';
+              return `${getIconData({
+                name: 'image',
+                theme: state.preferences.theme
+              }).fill}, ${getIconData({
+                name: 'image',
+                theme: state.preferences.theme
+              }).opacity}`;
           }
         })(),
         fillColor: elementColor,
@@ -6984,7 +6714,10 @@ export const updateEventsFrame = (state: RootState): void => {
       });
       const tweenEventText = new paperMain.PointText({
         content: DEFAULT_TWEEN_EVENTS.find((tweenEvent) => event.event === tweenEvent.event).titleCase,
-        point: new paperMain.Point(tweenEventConnector.bounds.center.x, tweenEventDestinationIndicator.bounds.top - ((1 / paperMain.view.zoom) * 10)),
+        point: new paperMain.Point(
+          tweenEventConnector.bounds.center.x,
+          tweenEventDestinationIndicator.bounds.top - ((1 / paperMain.view.zoom) * 10)
+        ),
         justification: 'center',
         fontSize: 10 / paperMain.view.zoom,
         fillColor: elementColor,

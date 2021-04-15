@@ -309,67 +309,65 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
   // FRAME
   ///////////////////////////////////////////////////////
 
-  if (layerItem.shapeType !== 'Line') {
-    useEffect(() => {
-      if (rendered) {
-        const absoluteX = layerItem.frame.x + artboardItem.frame.x;
-        const paperLayer = paperProject.getItem({ data: { id } });
-        paperLayer.position.x = absoluteX;
-        if (layerItem.mask) {
-          const maskGroup = paperLayer.parent;
-          const mask = maskGroup.children[0];
-          mask.position = paperLayer.position;
-        }
+  useEffect(() => {
+    if (rendered) {
+      const absPosition = getLayerAbsPosition(layerItem.frame, artboardItem.frame);
+      const paperLayer = paperProject.getItem({ data: { id } });
+      paperLayer.position = absPosition;
+      if (layerItem.mask) {
+        const maskGroup = paperLayer.parent;
+        const mask = maskGroup.children[0];
+        mask.position = paperLayer.position;
       }
-    }, [layerItem.frame.x, artboardItem.frame.innerWidth]);
+    }
+  }, [layerItem.frame.x, layerItem.frame.y, artboardItem.frame.innerWidth, artboardItem.frame.innerHeight]);
 
-    useEffect(() => {
-      if (rendered) {
-        const absoluteY = layerItem.frame.y + artboardItem.frame.y;
-        const paperLayer = paperProject.getItem({ data: { id } });
-        paperLayer.position.y = absoluteY;
-        if (layerItem.mask) {
-          const maskGroup = paperLayer.parent;
-          const mask = maskGroup.children[0];
-          mask.position = paperLayer.position;
-        }
-      }
-    }, [layerItem.frame.y, artboardItem.frame.innerHeight]);
-  }
+  // useEffect(() => {
+  //   if (rendered) {
+  //     const absoluteY = layerItem.frame.y + artboardItem.frame.y;
+  //     const paperLayer = paperProject.getItem({ data: { id } });
+  //     paperLayer.position.y = absoluteY;
+  //     if (layerItem.mask) {
+  //       const maskGroup = paperLayer.parent;
+  //       const mask = maskGroup.children[0];
+  //       mask.position = paperLayer.position;
+  //     }
+  //   }
+  // }, [layerItem.frame.y, artboardItem.frame.innerHeight]);
 
   ///////////////////////////////////////////////////////
   // LINE FROM & LINE TO
   ///////////////////////////////////////////////////////
 
-  if (layerItem.shapeType === 'Line') {
-    useEffect(() => {
-      if (rendered) {
-        const paperLayer = paperProject.getItem({ data: { id } }) as paper.Path;
-        paperLayer.firstSegment.point.x = (layerItem as Btwx.Line).from.x + artboardItem.frame.x;
-      }
-    }, [(layerItem as Btwx.Line).from.x, artboardItem.frame.innerWidth]);
+  // if (layerItem.shapeType === 'Line') {
+  //   useEffect(() => {
+  //     if (rendered) {
+  //       const paperLayer = paperProject.getItem({ data: { id } }) as paper.Path;
+  //       paperLayer.firstSegment.point.x = (layerItem as Btwx.Line).from.x + artboardItem.frame.x;
+  //     }
+  //   }, [(layerItem as Btwx.Line).from.x, artboardItem.frame.innerWidth]);
 
-    useEffect(() => {
-      if (rendered) {
-        const paperLayer = paperProject.getItem({ data: { id } }) as paper.Path;
-        paperLayer.firstSegment.point.y = (layerItem as Btwx.Line).from.y + artboardItem.frame.y;
-      }
-    }, [(layerItem as Btwx.Line).from.y, artboardItem.frame.innerHeight]);
+  //   useEffect(() => {
+  //     if (rendered) {
+  //       const paperLayer = paperProject.getItem({ data: { id } }) as paper.Path;
+  //       paperLayer.firstSegment.point.y = (layerItem as Btwx.Line).from.y + artboardItem.frame.y;
+  //     }
+  //   }, [(layerItem as Btwx.Line).from.y, artboardItem.frame.innerHeight]);
 
-    useEffect(() => {
-      if (rendered) {
-        const paperLayer = paperProject.getItem({ data: { id } }) as paper.Path;
-        paperLayer.lastSegment.point.x = (layerItem as Btwx.Line).to.x + artboardItem.frame.x;
-      }
-    }, [(layerItem as Btwx.Line).to.x, artboardItem.frame.innerWidth]);
+  //   useEffect(() => {
+  //     if (rendered) {
+  //       const paperLayer = paperProject.getItem({ data: { id } }) as paper.Path;
+  //       paperLayer.lastSegment.point.x = (layerItem as Btwx.Line).to.x + artboardItem.frame.x;
+  //     }
+  //   }, [(layerItem as Btwx.Line).to.x, artboardItem.frame.innerWidth]);
 
-    useEffect(() => {
-      if (rendered) {
-        const paperLayer = paperProject.getItem({ data: { id } }) as paper.Path;
-        paperLayer.lastSegment.point.y = (layerItem as Btwx.Line).to.y + artboardItem.frame.y;
-      }
-    }, [(layerItem as Btwx.Line).to.y, artboardItem.frame.innerHeight]);
-  }
+  //   useEffect(() => {
+  //     if (rendered) {
+  //       const paperLayer = paperProject.getItem({ data: { id } }) as paper.Path;
+  //       paperLayer.lastSegment.point.y = (layerItem as Btwx.Line).to.y + artboardItem.frame.y;
+  //     }
+  //   }, [(layerItem as Btwx.Line).to.y, artboardItem.frame.innerHeight]);
+  // }
 
   ///////////////////////////////////////////////////////
   // CONTEXT STYLE

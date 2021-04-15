@@ -4,7 +4,7 @@ import thunk from 'redux-thunk';
 import logger from 'redux-logger';
 import rootReducer, { RootState } from './reducers';
 import { closePreview, startPreviewRecording, stopPreviewRecording, setPreviewFocusing, openPreview, setPreviewTweening } from './actions/preview';
-import { enableLightTheme, enableDarkTheme, hydratePreferences } from './actions/preferences';
+import { hydratePreferences } from './actions/preferences';
 import { setEventDrawerEvent, setEventDrawerEventThunk } from './actions/eventDrawer';
 import { hydrateLayers, addLayerTween, removeLayerTweens, removeLayerTween, removeLayersEvent } from './actions/layer';
 import { openEaseEditorThunk, closeEaseEditorThunk } from './actions/easeEditor';

@@ -7,7 +7,7 @@ import { getPaperLayer, getSelectedBounds, getLayerDescendants } from '../store/
 import { paperMain } from '../canvas';
 import { setCanvasResizing, setCanvasCursor, setCanvasActiveTool } from '../store/actions/canvasSettings';
 import { scaleLayersThunk, updateSelectionFrame } from '../store/actions/layer';
-import { positionTextContent, getTextInnerBounds } from '../store/utils/paper';
+import { positionTextContent } from '../store/utils/paper';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
 import { getContent, getParagraphs } from './CanvasTextLayer';
@@ -267,15 +267,6 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
         }
         break;
       }
-      // case 'Text': {
-      //   const textBackground = paperLayer.getItem({data: { id: 'textBackground' }});
-      //   const textMask = paperLayer.getItem({data: { id: 'textMask' }});
-      //   // const content = paperLayer.getItem({data: { id: 'textContent' }});
-      //   textBackground.scale(hor, ver);
-      //   textMask.scale(hor, ver);
-      //   // content.scale(hor, ver);
-      //   break;
-      // }
       case 'Text':
       case 'Image': {
         paperLayer.scale(hor, ver);
