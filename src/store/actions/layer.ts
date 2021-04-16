@@ -4,23 +4,20 @@ import tinyColor from 'tinycolor2';
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCreators } from 'redux-undo';
 import { clipboard } from 'electron';
-import { gsap } from 'gsap';
-import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { paperMain } from '../../canvas';
 import MeasureGuide from '../../canvas/measureGuide';
 import {
-  ARTBOARDS_PER_PROJECT, DEFAULT_STYLE, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR,
-  DEFAULT_TEXT_VALUE, THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS, TWEEN_PROPS_MAP, DEFAULT_TEXT_RESIZE
+  ARTBOARDS_PER_PROJECT, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR,
+  DEFAULT_TEXT_VALUE, THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS, TWEEN_PROPS_MAP
 } from '../../constants';
 import {
-  getTextAbsPoint, clearTextOblique, applyTextOblique, measureTextLine,
-  clearLayerTransforms, applyLayerTransforms, getTextLines, getLayerTextContent,
-  positionTextContent, getTextInnerBounds, resizeTextBoundingBox, getPaperStyle
+  clearLayerTransforms, applyLayerTransforms, getTextLines, positionTextContent, getTextInnerBounds,
+  resizeTextBoundingBox, getPaperStyle
 } from '../utils/paper';
 import {
   getLayerAndDescendants, getLayersBounds, getNearestScopeAncestor, getArtboardEventItems, canPasteSVG,
   getArtboardsTopTop, getSelectedBounds, getPaperLayer, getItemLayers, getSelectedProjectIndices, getAbsolutePosition,
-  getActiveArtboardBounds, getAllArtboardItems, getSelectedAndDescendentsFull, getLayerDescendants
+  getActiveArtboardBounds, getAllArtboardItems, getSelectedAndDescendentsFull, getLayerDescendants, getSelectedRotation
 } from '../selectors/layer';
 import {
   getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle,
@@ -35,8 +32,6 @@ import { openGradientEditor, closeGradientEditor } from './gradientEditor';
 import { RootState } from '../reducers';
 import { getContent, getParagraphs } from '../../components/CanvasTextLayer';
 import { getIconData } from '../../components/Icon';
-
-gsap.registerPlugin(ScrollToPlugin);
 
 import {
   ADD_ARTBOARD,
@@ -3561,7 +3556,9 @@ export const setLayersLeadingThunk = (payload: SetLayersLeadingPayload) => {
       const projectIndex = artboardItem.projectIndex;
       const paperLayer = paperMain.projects[projectIndex].getItem({data:{id}});
       const clone = paperLayer.clone({insert:false}) as paper.Group;
-      const textContent = clone.getItem({data:{id:'textContent'}}) as paper.AreaText;
+      const textContent = clone.getItem({data:{id:'textContent'}}) as paper.PointText;
+      const textBackground = clone.getItem({data:{id:'textBackground'}}) as paper.Path.Rectangle;
+      const textMask = clone.getItem({data:{id:'textMask'}}) as paper.Path.Rectangle;
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       // clear layer transforms
       clearLayerTransforms({
@@ -3578,16 +3575,24 @@ export const setLayersLeadingThunk = (payload: SetLayersLeadingPayload) => {
         case 'autoWidth':
           nextInnerHeight = textContent.bounds.height;
           nextY = textContent.position.y - artboardPosition.y;
+          textBackground.bounds = textContent.bounds;
+          textMask.bounds = textContent.bounds;
           break;
         case 'autoHeight':
           nextInnerHeight = textContent.bounds.height;
           nextY = textContent.position.y - artboardPosition.y;
+          textBackground.bounds.height = textContent.bounds.height;
+          textMask.bounds.height = textContent.bounds.height;
+          textBackground.position.y = textContent.position.y;
+          textMask.position.y = textMask.position.y;
           break;
         case 'fixed':
           switch(layerItem.textStyle.verticalAlignment) {
             case 'top':
               nextY = layerItem.frame.y - diff;
               nextInnerHeight = layerItem.frame.innerHeight;
+              textBackground.position.y -= diff;
+              textMask.position.y -= diff;
               break;
             case 'middle':
             case 'bottom':
@@ -6368,13 +6373,32 @@ export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artb
   }
 };
 
-export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btwx.SelectionFrameHandle = 'all', lineHandles?: { from: Btwx.Point; to: Btwx.Point }): void => {
+interface UpdateSelectionFrame {
+  bounds: paper.Rectangle;
+  handle?: Btwx.SelectionFrameHandle;
+  rotation?: number;
+  lineHandles?: {
+    from: Btwx.Point;
+    to: Btwx.Point;
+  };
+}
+
+export const updateSelectionFrame = ({bounds, handle = 'all', rotation, lineHandles}: UpdateSelectionFrame): void => {
   if (paperMain.project.activeLayer.data.id !== 'ui') {
     paperMain.projects[0].activate();
   }
   const selectionFrame = paperMain.project.getItem({ data: { id: 'selectionFrame' } });
   selectionFrame.removeChildren();
   if (bounds) {
+    const frameWithResizeHandles = new paperMain.Group({
+      data: {
+        type: 'UIElementChild',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'selectionFrame'
+      },
+      parent: selectionFrame
+    });
     const resizeDisabled = false;
     const baseProps = {
       point: bounds.topLeft,
@@ -6385,7 +6409,7 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.5 },
       shadowBlur: 1 / paperMain.view.zoom,
       opacity: resizeDisabled ? 1 : 1,
-      parent: selectionFrame
+      parent: frameWithResizeHandles
     }
     const selectionTopLeft = bounds.topLeft; // bounds ? bounds.topLeft : getSelectedTopLeft(state);
     const selectionBottomRight = bounds.bottomRight; // bounds ? bounds.bottomRight : getSelectedBottomRight(state);
@@ -6397,7 +6421,7 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
         interactiveType: null,
         elementId: 'selectionFrame'
       },
-      parent: selectionFrame
+      parent: frameWithResizeHandles
     });
     const baseFrameOverlay = new paperMain.Path.Rectangle({
       from: selectionTopLeft,
@@ -6430,13 +6454,14 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
     const moveHandle = new paperMain.Path.Ellipse({
       ...baseProps,
       opacity: 1,
-      visible: visibleHandle === 'all' || visibleHandle === 'move',
+      visible: handle === 'all' || handle === 'move',
       data: {
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'move',
         elementId: 'selectionFrame'
-      }
+      },
+      parent: selectionFrame
     });
     moveHandle.position = new paperMain.Point(baseFrame.bounds.topCenter.x, baseFrame.bounds.topCenter.y - ((1 / paperMain.view.zoom) * 20));
     moveHandle.scaling.x = 1 / paperMain.view.zoom;
@@ -6445,7 +6470,7 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
     if (lineHandles) {
       const fromHandle = new paperMain.Path.Rectangle({
         ...baseProps,
-        visible: visibleHandle === 'lineFrom' || visibleHandle === 'all',
+        visible: handle === 'lineFrom' || handle === 'all',
         data: {
           type: 'UIElementChild',
           interactive: true,
@@ -6458,7 +6483,7 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       fromHandle.scaling.y = 1 / paperMain.view.zoom;
       const toHandle = new paperMain.Path.Rectangle({
         ...baseProps,
-        visible: visibleHandle === 'lineTo' || visibleHandle === 'all',
+        visible: handle === 'lineTo' || handle === 'all',
         data: {
           type: 'UIElementChild',
           interactive: true,
@@ -6472,7 +6497,7 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
     } else {
       const topLeftHandle = new paperMain.Path.Rectangle({
         ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'topLeft',
+        visible: handle === 'all' || handle === 'topLeft',
         data: {
           type: 'UIElementChild',
           interactive: true,
@@ -6485,7 +6510,7 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       topLeftHandle.scaling.y = 1 / paperMain.view.zoom;
       const topCenterHandle = new paperMain.Path.Rectangle({
         ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'topCenter',
+        visible: handle === 'all' || handle === 'topCenter',
         data: {
           type: 'UIElementChild',
           interactive: true,
@@ -6498,7 +6523,7 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       topCenterHandle.scaling.y = 1 / paperMain.view.zoom;
       const topRightHandle = new paperMain.Path.Rectangle({
         ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'topRight',
+        visible: handle === 'all' || handle === 'topRight',
         data: {
           type: 'UIElementChild',
           interactive: true,
@@ -6511,7 +6536,7 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       topRightHandle.scaling.y = 1 / paperMain.view.zoom;
       const bottomLeftHandle = new paperMain.Path.Rectangle({
         ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'bottomLeft',
+        visible: handle === 'all' || handle === 'bottomLeft',
         data: {
           type: 'UIElementChild',
           interactive: true,
@@ -6524,7 +6549,7 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       bottomLeftHandle.scaling.y = 1 / paperMain.view.zoom;
       const bottomCenterHandle = new paperMain.Path.Rectangle({
         ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'bottomCenter',
+        visible: handle === 'all' || handle === 'bottomCenter',
         data: {
           type: 'UIElementChild',
           interactive: true,
@@ -6537,7 +6562,7 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       bottomCenterHandle.scaling.y = 1 / paperMain.view.zoom;
       const bottomRightHandle = new paperMain.Path.Rectangle({
         ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'bottomRight',
+        visible: handle === 'all' || handle === 'bottomRight',
         data: {
           type: 'UIElementChild',
           interactive: true,
@@ -6550,7 +6575,7 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       bottomRightHandle.scaling.y = 1 / paperMain.view.zoom;
       const rightCenterHandle = new paperMain.Path.Rectangle({
         ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'rightCenter',
+        visible: handle === 'all' || handle === 'rightCenter',
         data: {
           type: 'UIElementChild',
           interactive: true,
@@ -6563,7 +6588,7 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       rightCenterHandle.scaling.y = 1 / paperMain.view.zoom;
       const leftCenterHandle = new paperMain.Path.Rectangle({
         ...baseProps,
-        visible: visibleHandle === 'all' || visibleHandle === 'leftCenter',
+        visible: handle === 'all' || handle === 'leftCenter',
         data: {
           type: 'UIElementChild',
           interactive: true,
@@ -6575,6 +6600,12 @@ export const updateSelectionFrame = (bounds: paper.Rectangle, visibleHandle: Btw
       leftCenterHandle.scaling.x = 1 / paperMain.view.zoom;
       leftCenterHandle.scaling.y = 1 / paperMain.view.zoom;
     }
+    // if (rotation) {
+    //   frameWithResizeHandles.rotation = rotation;
+    //   moveHandle.visible = false;
+    // } else {
+    //   frameWithResizeHandles.rotation = 0;
+    // }
   }
 };
 
@@ -6876,7 +6907,9 @@ export const updateFramesThunk = () => {
     const state = getState() as RootState;
     const artboardItems = getAllArtboardItems(state);
     const activeArtboardBounds = getActiveArtboardBounds(state);
+    const selectedInnerBounds = getSelectedBounds(state);
     const selectedBounds = getSelectedBounds(state);
+    const selectedRotation = getSelectedRotation(state);
     const selectedPaperScopes = getSelectedProjectIndices(state);
     const singleSelection = state.layer.present.selected.length === 1;
     const isLine = singleSelection && state.layer.present.byId[state.layer.present.selected[0]].type === 'Shape' && (state.layer.present.byId[state.layer.present.selected[0]] as Btwx.Shape).shapeType === 'Line';
@@ -6888,10 +6921,16 @@ export const updateFramesThunk = () => {
       paperMain.projects[index].view.viewSize = new paperMain.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
       paperMain.projects[index].view.matrix.set(state.documentSettings.matrix);
     });
-    updateSelectionFrame(selectedBounds, 'all', isLine ? {
-      from: { x: artboardItem.frame.x + lineItem.from.x, y: artboardItem.frame.y + lineItem.from.y },
-      to: { x: artboardItem.frame.x + lineItem.to.x, y: artboardItem.frame.y + lineItem.to.y }
-    } : null);
+    updateSelectionFrame({
+      // bounds: selectedRotation !== 'multi' && selectedRotation !== 0 ? selectedInnerBounds : selectedBounds,
+      bounds: selectedBounds,
+      handle: 'all',
+      lineHandles: isLine ? {
+        from: { x: artboardItem.frame.x + lineItem.from.x, y: artboardItem.frame.y + lineItem.from.y },
+        to: { x: artboardItem.frame.x + lineItem.to.x, y: artboardItem.frame.y + lineItem.to.y }
+      } : null,
+      // rotation: selectedRotation !== 'multi' && selectedRotation !== 0 ? selectedRotation : null
+    });
     updateActiveArtboardFrame(activeArtboardBounds);
     updateEventsFrame(state);
     updateNameFrame(artboardItems);

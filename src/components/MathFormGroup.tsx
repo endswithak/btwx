@@ -22,13 +22,16 @@ export interface MathFormGroupProps {
   onFocus?(e: any): void;
 }
 
+const getFixedValue = (v) =>
+    !isNaN(v) ? Number(Number(v).toFixed(1)) : v;
+
 const MathFormGroup = forwardRef(function MathFormGroup(props: MathFormGroupProps, ref: any) {
   const { controlId, disabled, size, inline, min, max, submitOnBlur, canvasAutoFocus, right, left, label, value, onSubmitSuccess, onSubmitError, onBlur, onFocus } = props;
   const initialEval = evaluateExp(value);
   const validInitialEval = initialEval !== null;
   const aboveRange = max !== undefined && validInitialEval && initialEval > max;
   const belowRange = min !== undefined && validInitialEval && initialEval < min;
-  const [currentValue, setCurrentValue] = useState(validInitialEval && value !== 'multi' ? Number(value.toFixed(1)) : value);
+  const [currentValue, setCurrentValue] = useState(getFixedValue(value));
   const [evaluation, setEvaluation] = useState(initialEval);
   const [valid, setValid] = useState(validInitialEval && !aboveRange && !belowRange);
   const [dirty, setDirty] = useState(false);
@@ -47,13 +50,13 @@ const MathFormGroup = forwardRef(function MathFormGroup(props: MathFormGroupProp
 
   const handleSubmit = (e: any): void => {
     if (valid && dirty) {
-      setCurrentValue(Number(evaluation.toFixed(1)));
-      onSubmitSuccess(evaluation);
+      setCurrentValue(getFixedValue(evaluation));
+      onSubmitSuccess(Number(evaluation));
     } else {
       if (onSubmitError) {
         onSubmitError();
       }
-      setCurrentValue(value);
+      setCurrentValue(getFixedValue(value));
       setValid(true);
     }
     setDirty(false);
@@ -64,7 +67,7 @@ const MathFormGroup = forwardRef(function MathFormGroup(props: MathFormGroupProp
     const validEval = initialEval !== null;
     const aboveRange = max !== undefined && validEval && nextEval > max;
     const belowRange = min !== undefined && validEval && nextEval < min;
-    setCurrentValue(validEval && value !== 'multi' ? Number(value.toFixed(1)) : value);
+    setCurrentValue(getFixedValue(value));
     setEvaluation(nextEval);
     setValid(validEval && !aboveRange && !belowRange);
   }, [value]);

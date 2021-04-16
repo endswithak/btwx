@@ -56,7 +56,14 @@ const LineTool = (props: PaperToolProps): ReactElement => {
         setToHandlePosition(toHandle.position);
         setHandle(initialHandle as Btwx.LineHandle);
         setOriginalPaperSelection(selectedPaperLayer.children[0] as paper.Path);
-        updateSelectionFrame(selectedPaperLayer.bounds, initialHandle, { from: fromHandle.position, to: toHandle.position });
+        updateSelectionFrame({
+          bounds: selectedPaperLayer.bounds,
+          handle: initialHandle,
+          lineHandles: {
+            from: fromHandle.position,
+            to: toHandle.position
+          }
+        });
       }
     } catch(err) {
       console.error(`Line Tool Error -- On Mouse Down -- ${err}`);
@@ -221,7 +228,11 @@ const LineTool = (props: PaperToolProps): ReactElement => {
           break;
         }
       }
-      updateSelectionFrame(selectedPaperLayer.bounds, initialHandle, lineHandles);
+      updateSelectionFrame({
+        bounds: selectedPaperLayer.bounds,
+        handle: initialHandle,
+        lineHandles
+      });
     }
   }, [toBounds]);
 

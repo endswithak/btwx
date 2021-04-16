@@ -1569,6 +1569,13 @@ export const getSelectedBounds = createSelector(
   }
 );
 
+export const getSelectedInnerBounds = createSelector(
+  [ getSelected, getLayersById ],
+  (selected, byId) => {
+    return getLayersInnerBounds({byId} as LayerState, selected);
+  }
+);
+
 export const getHoverBounds = createSelector(
   [ getHover, getLayersById ],
   (hover, byId) => {
@@ -3178,9 +3185,39 @@ export const getLayerBounds = (store: LayerState, id: string): paper.Rectangle =
   });
 };
 
+export const getLayerInnerBounds = (store: LayerState, id: string): paper.Rectangle => {
+  const layerItem = store.byId[id] as Btwx.Layer;
+  const layerPosition = getAbsolutePosition(store, id);
+  const topLeft = new paperMain.Point(layerPosition.x - (layerItem.frame.innerWidth / 2), layerPosition.y - (layerItem.frame.innerHeight / 2));
+  const bottomRight = new paperMain.Point(layerPosition.x + (layerItem.frame.innerWidth / 2), layerPosition.y + (layerItem.frame.innerHeight / 2));
+  return new paperMain.Rectangle({
+    from: topLeft,
+    to: bottomRight
+  });
+};
+
 export const getLayersBounds = (store: LayerState, layers: string[]): paper.Rectangle => {
   return layers.reduce((result: paper.Rectangle, current, index) => {
     const layerBounds = getLayerBounds(store, current);
+    let nextTopLeft;
+    let nextBottomRight;
+    if (index === 0) {
+      nextTopLeft = layerBounds.topLeft;
+      nextBottomRight = layerBounds.bottomRight;
+    } else {
+      nextTopLeft = paper.Point.min(result.topLeft, layerBounds.topLeft);
+      nextBottomRight = paper.Point.max(result.bottomRight, layerBounds.bottomRight);
+    }
+    return new paperMain.Rectangle({
+      from: nextTopLeft,
+      to: nextBottomRight
+    });
+  }, null);
+};
+
+export const getLayersInnerBounds = (store: LayerState, layers: string[]): paper.Rectangle => {
+  return layers.reduce((result: paper.Rectangle, current, index) => {
+    const layerBounds = getLayerInnerBounds(store, current);
     let nextTopLeft;
     let nextBottomRight;
     if (index === 0) {

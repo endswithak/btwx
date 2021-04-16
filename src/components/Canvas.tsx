@@ -139,6 +139,9 @@ const Canvas = (): ReactElement => {
     if (!focusing) {
       dispatch(setCanvasFocusing({focusing: true}));
     }
+    if (measuring) {
+      dispatch(setCanvasMeasuring({measuring: false}));
+    }
     handleHitResult(e, 'mouseDown');
   }
 
@@ -158,7 +161,9 @@ const Canvas = (): ReactElement => {
 
   const handleKeyUp = (e: any): void => {
     if (e.key === 'Alt') {
-      dispatch(setCanvasMeasuring({measuring: false}));
+      if (measuring) {
+        dispatch(setCanvasMeasuring({measuring: false}));
+      }
     }
   }
 
@@ -194,7 +199,6 @@ const Canvas = (): ReactElement => {
   }, [focusing, measuring]);
 
   useEffect(() => {
-    console.log('CANVAS');
     dispatch(setCanvasReady());
   }, []);
 

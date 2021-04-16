@@ -2,7 +2,7 @@
 import React, { useEffect, ReactElement, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getLayerProjectIndex, getPaperLayer, getPaperLayersBounds, getSelectedProjectIndices } from '../store/selectors/layer';
+import { getLayerProjectIndex, getPaperLayer, getPaperLayersBounds, getSelectedProjectIndices, getSelectedRotation } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
 import { setCanvasDragging } from '../store/actions/canvasSettings';
 import { moveLayersBy, duplicateLayers, updateSelectionFrame } from '../store/actions/layer';
@@ -13,6 +13,7 @@ const DragTool = (props: PaperToolProps): ReactElement => {
   const { tool, downEvent, dragEvent, upEvent, keyDownEvent, keyUpEvent } = props;
   const blacklistedLayers = useSelector((state: RootState) => state.layer.present.selected.some(id => state.layer.present.allArtboardIds.includes(id)) ? state.layer.present.selected : [...state.layer.present.allArtboardIds.filter(id => id !== state.layer.present.activeArtboard), ...state.layer.present.selected]);
   const hover = useSelector((state: RootState) => state.layer.present.hover);
+  const selectedRotation = useSelector((state: RootState) => getSelectedRotation(state));
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const isEnabled = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Drag');
   const dragging = useSelector((state: RootState) => state.canvasSettings.dragging);
@@ -68,7 +69,11 @@ const DragTool = (props: PaperToolProps): ReactElement => {
           }
         }
       });
-      updateSelectionFrame(toBounds, dragHandle ? 'move' : 'none');
+      updateSelectionFrame({
+        bounds: toBounds,
+        handle: dragHandle ? 'move' : 'none',
+        // rotation: selectedRotation !== 'multi' && selectedRotation !== 0 ? selectedRotation : null
+      });
     }
   }
 

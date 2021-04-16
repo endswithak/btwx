@@ -4,7 +4,7 @@ import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
 import {
   getPaperStyle, getPaperParent, getPaperLayerIndex,
-  getPaperStrokeColor, getPaperFillColor,
+  getPaperStrokeColor, getPaperFillColor, positionTextContent,
   clearLayerTransforms, applyLayerTransforms
 } from '../store/utils/paper';
 import { paperMain, paperPreview } from '../canvas';
@@ -211,6 +211,12 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
     });
   }
 
+  const applyTextBounds = ({textBackground, textMask}) => {
+    const bounds = getAreaTextRectangle();
+    textBackground.bounds = bounds;
+    textMask.bounds = bounds;
+  }
+
   const getAbsPoint = () => {
     const point = new paperMain.Point(layerItem.point.x, layerItem.point.y);
     const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
@@ -308,11 +314,16 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         })
       ]
     });
+    positionTextContent({
+      paperLayer: textContainer,
+      verticalAlignment: layerItem.textStyle.verticalAlignment,
+      justification: layerItem.textStyle.justification,
+      textResize: layerItem.textStyle.textResize
+    });
     applyLayerTransforms({
       paperLayer: textContainer,
       transform: layerItem.transform
     });
-    (textContainer.lastChild as paper.PointText).point = getAbsPoint();
     return textContainer;
   }
 
@@ -448,7 +459,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   }, [layerItem.transform.verticalFlip]);
 
   ///////////////////////////////////////////////////////
-  // TEXT
+  // FRAME / TEXT / TEXTRESIZE
   ///////////////////////////////////////////////////////
 
   useEffect(() => {
@@ -458,74 +469,27 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         paperLayer,
         transform: layerItem.transform
       });
-      const bounds = getAreaTextRectangle();
       textContent.content = content;
-      textBackground.bounds = bounds;
-      textMask.bounds = bounds;
+      applyTextBounds({
+        textBackground,
+        textMask
+      });
+      positionTextContent({
+        paperLayer: paperLayer,
+        verticalAlignment: layerItem.textStyle.verticalAlignment,
+        justification: layerItem.textStyle.justification,
+        textResize: layerItem.textStyle.textResize
+      });
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
-      textContent.point = getAbsPoint();
     }
-  }, [layerItem.textStyle.textResize]);
-
-  useEffect(() => {
-    if (rendered) {
-      const { paperLayer, textContent, textBackground, textMask } = getPaperLayer();
-      clearLayerTransforms({
-        paperLayer,
-        transform: layerItem.transform
-      });
-      const bounds = getAreaTextRectangle();
-      textContent.content = content;
-      textBackground.bounds = bounds;
-      textMask.bounds = bounds;
-      applyLayerTransforms({
-        paperLayer,
-        transform: layerItem.transform
-      });
-      textContent.point = getAbsPoint();
-    }
-  }, [layerItem.text]);
-
-  useEffect(() => {
-    if (rendered) {
-      const { paperLayer, textContent, textBackground, textMask } = getPaperLayer();
-      clearLayerTransforms({
-        paperLayer,
-        transform: layerItem.transform
-      });
-      const bounds = getAreaTextRectangle();
-      textContent.content = content;
-      textBackground.bounds = bounds;
-      textMask.bounds = bounds;
-      applyLayerTransforms({
-        paperLayer,
-        transform: layerItem.transform
-      });
-      textContent.point = getAbsPoint();
-    }
-  }, [layerItem.frame.innerWidth, layerItem.frame.innerHeight]);
-
-  useEffect(() => {
-    if (rendered) {
-      const { paperLayer, textContent, textBackground, textMask } = getPaperLayer();
-      clearLayerTransforms({
-        paperLayer,
-        transform: layerItem.transform
-      });
-      const bounds = getAreaTextRectangle();
-      textContent.content = content;
-      textBackground.bounds = bounds;
-      textMask.bounds = bounds;
-      applyLayerTransforms({
-        paperLayer,
-        transform: layerItem.transform
-      });
-      textContent.point = getAbsPoint();
-    }
-  }, [layerItem.frame.x, layerItem.frame.y, artboardItem.frame.innerWidth, artboardItem.frame.innerHeight]);
+  }, [
+    layerItem.frame.x, layerItem.frame.y, layerItem.frame.innerWidth,
+    layerItem.frame.innerHeight, layerItem.textStyle.textResize, layerItem.text,
+    artboardItem.frame.innerWidth, artboardItem.frame.innerHeight
+  ]);
 
   ///////////////////////////////////////////////////////
   // CONTEXT
@@ -656,16 +620,22 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         paperLayer,
         transform: layerItem.transform
       });
-      const bounds = getAreaTextRectangle();
       textContent.fontFamily = layerItem.textStyle.fontFamily;
       textContent.content = content;
-      textBackground.bounds = bounds;
-      textMask.bounds = bounds;
+      applyTextBounds({
+        textBackground,
+        textMask
+      });
+      positionTextContent({
+        paperLayer: paperLayer,
+        verticalAlignment: layerItem.textStyle.verticalAlignment,
+        justification: layerItem.textStyle.justification,
+        textResize: layerItem.textStyle.textResize
+      });
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
-      textContent.point = getAbsPoint();
     }
   }, [layerItem.textStyle.fontFamily]);
 
@@ -676,16 +646,22 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         paperLayer,
         transform: layerItem.transform
       });
-      const bounds = getAreaTextRectangle();
       textContent.fontWeight = layerItem.textStyle.fontWeight;
       textContent.content = content;
-      textBackground.bounds = bounds;
-      textMask.bounds = bounds;
+      applyTextBounds({
+        textBackground,
+        textMask
+      });
+      positionTextContent({
+        paperLayer: paperLayer,
+        verticalAlignment: layerItem.textStyle.verticalAlignment,
+        justification: layerItem.textStyle.justification,
+        textResize: layerItem.textStyle.textResize
+      });
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
-      textContent.point = getAbsPoint();
     }
   }, [layerItem.textStyle.fontWeight]);
 
@@ -696,16 +672,22 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         paperLayer,
         transform: layerItem.transform
       });
-      const bounds = getAreaTextRectangle();
       textContent.fontStyle = layerItem.textStyle.fontStyle;
       textContent.content = content;
-      textBackground.bounds = bounds;
-      textMask.bounds = bounds;
+      applyTextBounds({
+        textBackground,
+        textMask
+      });
+      positionTextContent({
+        paperLayer: paperLayer,
+        verticalAlignment: layerItem.textStyle.verticalAlignment,
+        justification: layerItem.textStyle.justification,
+        textResize: layerItem.textStyle.textResize
+      });
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
-      textContent.point = getAbsPoint();
     }
   }, [layerItem.textStyle.fontStyle]);
 
@@ -716,16 +698,22 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         paperLayer,
         transform: layerItem.transform
       });
-      const bounds = getAreaTextRectangle();
       textContent.letterSpacing = layerItem.textStyle.letterSpacing;
       textContent.content = content;
-      textBackground.bounds = bounds;
-      textMask.bounds = bounds;
+      applyTextBounds({
+        textBackground,
+        textMask
+      });
+      positionTextContent({
+        paperLayer: paperLayer,
+        verticalAlignment: layerItem.textStyle.verticalAlignment,
+        justification: layerItem.textStyle.justification,
+        textResize: layerItem.textStyle.textResize
+      });
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
-      textContent.point = getAbsPoint();
     }
   }, [layerItem.textStyle.letterSpacing]);
 
@@ -736,16 +724,22 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         paperLayer,
         transform: layerItem.transform
       });
-      const bounds = getAreaTextRectangle();
       textContent.textTransform = layerItem.textStyle.textTransform;
       textContent.content = content;
-      textBackground.bounds = bounds;
-      textMask.bounds = bounds;
+      applyTextBounds({
+        textBackground,
+        textMask
+      });
+      positionTextContent({
+        paperLayer: paperLayer,
+        verticalAlignment: layerItem.textStyle.verticalAlignment,
+        justification: layerItem.textStyle.justification,
+        textResize: layerItem.textStyle.textResize
+      });
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
-      textContent.point = getAbsPoint();
     }
   }, [layerItem.textStyle.textTransform]);
 
@@ -756,16 +750,22 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         paperLayer,
         transform: layerItem.transform
       });
-      const bounds = getAreaTextRectangle();
       textContent.fontSize = layerItem.textStyle.fontSize;
       textContent.content = content;
-      textBackground.bounds = bounds;
-      textMask.bounds = bounds;
+      applyTextBounds({
+        textBackground,
+        textMask
+      });
+      positionTextContent({
+        paperLayer: paperLayer,
+        verticalAlignment: layerItem.textStyle.verticalAlignment,
+        justification: layerItem.textStyle.justification,
+        textResize: layerItem.textStyle.textResize
+      });
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
-      textContent.point = getAbsPoint();
     }
   }, [layerItem.textStyle.fontSize]);
 
@@ -777,11 +777,16 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         transform: layerItem.transform
       });
       textContent.justification = layerItem.textStyle.justification;
+      positionTextContent({
+        paperLayer: paperLayer,
+        verticalAlignment: layerItem.textStyle.verticalAlignment,
+        justification: layerItem.textStyle.justification,
+        textResize: layerItem.textStyle.textResize
+      });
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
-      textContent.point = getAbsPoint();
     }
   }, [layerItem.textStyle.justification]);
 
@@ -792,11 +797,16 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         paperLayer,
         transform: layerItem.transform
       });
+      positionTextContent({
+        paperLayer: paperLayer,
+        verticalAlignment: layerItem.textStyle.verticalAlignment,
+        justification: layerItem.textStyle.justification,
+        textResize: layerItem.textStyle.textResize
+      });
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
-      textContent.point = getAbsPoint();
     }
   }, [layerItem.textStyle.verticalAlignment]);
 
@@ -807,16 +817,22 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         paperLayer,
         transform: layerItem.transform
       });
-      const bounds = getAreaTextRectangle();
       textContent.leading = layerItem.textStyle.leading;
       textContent.content = content;
-      textBackground.bounds = bounds;
-      textMask.bounds = bounds;
+      applyTextBounds({
+        textBackground,
+        textMask
+      });
+      positionTextContent({
+        paperLayer: paperLayer,
+        verticalAlignment: layerItem.textStyle.verticalAlignment,
+        justification: layerItem.textStyle.justification,
+        textResize: layerItem.textStyle.textResize
+      });
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
-      textContent.point = getAbsPoint();
     }
   }, [layerItem.textStyle.leading]);
 

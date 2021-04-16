@@ -1,13 +1,15 @@
 import React, { ReactElement, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getSelectedBounds, getSelectedProjectIndices } from '../store/selectors/layer';
+import { getSelectedBounds, getSelectedInnerBounds, getSelectedProjectIndices, getSelectedRotation } from '../store/selectors/layer';
 import { updateSelectionFrame } from '../store/actions/layer';
 import { paperMain } from '../canvas';
 
 const SelectionFrame = (): ReactElement => {
   const theme = useSelector((state: RootState) => state.preferences.theme);
   const selectedBounds = useSelector((state: RootState) => getSelectedBounds(state));
+  const selectedInnerBounds = useSelector((state: RootState) => getSelectedInnerBounds(state));
+  const selectedRotation = useSelector((state: RootState) => getSelectedRotation(state));
   const selectedPaperScopes = useSelector((state: RootState) => getSelectedProjectIndices(state));
   const singleLineHandles = useSelector((state: RootState) => {
     const singleItemSelected = state.layer.present.selected.length === 1;
@@ -34,12 +36,30 @@ const SelectionFrame = (): ReactElement => {
   const zoom = useSelector((state: RootState) => state.documentSettings.zoom);
 
   useEffect(() => {
-    updateSelectionFrame(selectedBounds, 'all', singleLineHandles);
+    // if (selectedRotation !== 'multi' && selectedRotation !== 0) {
+    //   updateSelectionFrame({
+    //     bounds: selectedInnerBounds,
+    //     rotation: selectedRotation,
+    //     handle: 'all',
+    //     lineHandles: singleLineHandles
+    //   });
+    // } else {
+    //   updateSelectionFrame({
+    //     bounds: selectedBounds,
+    //     handle: 'all',
+    //     lineHandles: singleLineHandles
+    //   });
+    // }
+    updateSelectionFrame({
+      bounds: selectedBounds,
+      handle: 'all',
+      lineHandles: singleLineHandles
+    });
     return () => {
       const selectionFrame = paperMain.projects[0].getItem({ data: { id: 'selectionFrame' } });
       selectionFrame.removeChildren();
     }
-  }, [theme, selectedBounds, singleLineHandles, selectedPaperScopes, zoom]);
+  }, [theme, selectedBounds, selectedInnerBounds, singleLineHandles, selectedPaperScopes, selectedRotation, zoom]);
 
   return null;
 }

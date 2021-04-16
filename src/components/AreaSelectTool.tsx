@@ -47,7 +47,8 @@ const AreaSelectTool = (props: PaperToolProps): ReactElement => {
 
   useEffect(() => {
     try {
-      if (downEvent && isEnabled && (downEvent as any).event.which !== 3 && (downEvent as any).event.buttons === 1) {
+      if (downEvent && isEnabled && !(downEvent as any).event.ctrlKey && (downEvent as any).event.which !== 3 && (downEvent as any).event.buttons === 1) {
+        console.log('wpodkwpokwopkwpodkweopdkwepokwoekfwpoefopwe');
         if (paperMain.project.activeLayer.data.id !== 'ui') {
           paperMain.projects[0].activate();
         }
@@ -137,8 +138,8 @@ const AreaSelectTool = (props: PaperToolProps): ReactElement => {
             }));
           }
         }
-        resetState();
       }
+      resetState();
     } catch(err) {
       console.error(`Area Select Tool Error -- On Mouse Up -- ${err}`);
       resetState();

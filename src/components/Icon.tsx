@@ -1,7 +1,6 @@
-import React, { ReactElement, useContext } from 'react';
+import React, { ReactElement } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { ThemeContext } from './ThemeProvider';
 
 interface IconProps {
   name?: string;
@@ -168,7 +167,7 @@ export const getIconData = ({name, pathData, theme}: { name: string; pathData?: 
     case 'vertical-alignment-middle':
       return {
         name: 'vertical-alignment-middle',
-        fill: 'M11,15 L17,20.6098793 L15.5132079,22 L12,18.717 L12,24 L9.913,24 L9.913,18.798 L6.48679212,22 L5,20.6098793 L11,15 Z M21,11 L21,13 L2,13 L2,11 L21,11 Z M12.087,0 L12.087,5.202 L15.5132079,2 L17,3.39012072 L11,9 L5,3.39012072 L6.48679212,2 L10,5.283 L10,0 L12.087,0 Z',
+        fill: 'M12,15 L17,19.5580269 L15.7610066,20.6875 L12.8333333,18.01925 L12.8333333,24 L11.0941667,24 L11.0941667,18.085875 L8.23899343,20.6875 L7,19.5580269 L12,15 Z M22,11 L22,13 L2,13 L2,11 L22,11 Z M12.9058333,0 L12.9058333,5.914125 L15.7610066,3.3125 L17,4.44197308 L12,9 L7,4.44197308 L8.23899343,3.3125 L11.1666667,5.98075 L11.1666667,0 L12.9058333,0 Z',
         opacity: null
       }
     case 'vertical-alignment-bottom':
@@ -222,38 +221,38 @@ export const getIconData = ({name, pathData, theme}: { name: string; pathData?: 
     case 'align-bottom':
       return {
         name: 'align-bottom',
-        fill: 'M21,19 L21,20 L3,20 L3,19 L21,19 Z M15,5 L15,17 L9,17 L9,5 L15,5 Z',
-        opacity: null
+        fill: 'M15,5.01 L15,17 L9,17 L9,5 L14.99,5 C14.9955228,5 15,5.00447715 15,5.01 Z', // 'M21,19 L21,20 L3,20 L3,19 L21,19 Z M15,5 L15,17 L9,17 L9,5 L15,5 Z',
+        opacity: 'M21,19.01 L21,21 L3,21 L3,19 L20.99,19 C20.9955228,19 21,19.0044772 21,19.01 Z'
       }
     case 'align-center':
       return {
         name: 'align-center',
-        fill: 'M12,3 L12,9 L17.999,9 C17.9995523,9 18,9.00044772 18,9.001 L18,15 L18,15 L12,15 L12,21 L11,21 L11,15 L5,15 L5,9 L11,9 L11,3 L12,3 Z',
-        opacity: null
+        fill: 'M5,9 L18.99,9 C18.9955228,9 19,9.00447715 19,9.01 L19,15 L5,15 L5,9 Z', // 'M12,3 L12,9 L17.999,9 C17.9995523,9 18,9.00044772 18,9.001 L18,15 L18,15 L12,15 L12,21 L11,21 L11,15 L5,15 L5,9 L11,9 L11,3 L12,3 Z',
+        opacity: 'M11,3 L12.99,3 C12.9955228,3 13,3.00447715 13,3.01 L13,21 L11,21 L11,3 Z'
       }
     case 'align-left':
       return {
         name: 'align-left',
-        fill: 'M5,3 L5,21 L4,21 L4,3 L5,3 Z M19,9 L19,15 L7,15 L7,9 L19,9 Z',
-        opacity: null
+        fill: 'M7,9 L18.99,9 C18.9955228,9 19,9.00447715 19,9.01 L19,15 L7,15 L7,9 Z', // 'M5,3 L5,21 L4,21 L4,3 L5,3 Z M19,9 L19,15 L7,15 L7,9 L19,9 Z',
+        opacity: 'M3,3 L4.99,3 C4.99552285,3 5,3.00447715 5,3.01 L5,21 L3,21 L3,3 Z'
       }
     case 'align-middle':
       return {
         name: 'align-middle',
-        fill: 'M15,5.001 L15,10.999 L15,10.999 L21,11 L21,12 L15,11.999 L15,18 L9,18 L9,12 L3,12 L3,11 L9,11 L9,5 L14.999,5 C14.9995523,5 15,5.00044772 15,5.001 Z',
-        opacity: null
+        fill: 'M15,5.01 L15,19 L9,19 L9,5 L14.99,5 C14.9955228,5 15,5.00447715 15,5.01 Z', // 'M15,5.001 L15,10.999 L15,10.999 L21,11 L21,12 L15,11.999 L15,18 L9,18 L9,12 L3,12 L3,11 L9,11 L9,5 L14.999,5 C14.9995523,5 15,5.00044772 15,5.001 Z',
+        opacity: 'M21,11.01 L21,13 L3,13 L3,11 L20.99,11 C20.9955228,11 21,11.0044772 21,11.01 Z'
       }
     case 'align-right':
       return {
         name: 'align-right',
-        fill: 'M20,3 L20,21 L19,21 L19,3 L20,3 Z M17,9 L17,15 L5,15 L5,9 L17,9 Z',
-        opacity: null
+        fill: 'M5,9 L16.99,9 C16.9955228,9 17,9.00447715 17,9.01 L17,15 L5,15 L5,9 Z', // 'M20,3 L20,21 L19,21 L19,3 L20,3 Z M17,9 L17,15 L5,15 L5,9 L17,9 Z',
+        opacity: 'M19,3 L20.99,3 C20.9955228,3 21,3.00447715 21,3.01 L21,21 L19,21 L19,3 Z'
       }
     case 'align-top':
       return {
         name: 'align-top',
-        fill: 'M15,7 L15,19 L9,19 L9,7 L15,7 Z M21,4 L21,5 L3,5 L3,4 L21,4 Z',
-        opacity: null
+        fill: 'M15,7.01 L15,19 L9,19 L9,7 L14.99,7 C14.9955228,7 15,7.00447715 15,7.01 Z', // 'M15,7 L15,19 L9,19 L9,7 L15,7 Z M21,4 L21,5 L3,5 L3,4 L21,4 Z',
+        opacity: 'M21,3.01 L21,5 L3,5 L3,3 L20.99,3 C20.9955228,3 21,3.00447715 21,3.01 Z'
       }
     case 'group':
       return {
@@ -374,14 +373,14 @@ export const getIconData = ({name, pathData, theme}: { name: string; pathData?: 
     case 'distribute-vertically':
       return {
         name: 'distribute-vertically',
-        fill: 'M21,19 L21,20 L3,20 L3,19 L21,19 Z M18,9 L18,15 L6,15 L6,9 L18,9 Z M21,4 L21,5 L3,5 L3,4 L21,4 Z',
-        opacity: null
+        fill: 'M6,9 L17.99,9 C17.9955228,9 18,9.00447715 18,9.01 L18,15 L6,15 L6,9 Z', // 'M21,19 L21,20 L3,20 L3,19 L21,19 Z M18,9 L18,15 L6,15 L6,9 L18,9 Z M21,4 L21,5 L3,5 L3,4 L21,4 Z',
+        opacity: 'M20.99,19 C20.9955228,19 21,19.0044772 21,19.01 L21,21 L3,21 L3,19 L20.99,19 Z M20.99,3 C20.9955228,3 21,3.00447715 21,3.01 L21,5 L3,5 L3,3 L20.99,3 Z'
       }
     case 'distribute-horizontally':
       return {
         name: 'distribute-horizontally',
-        fill: 'M5,3 L5,21 L4,21 L4,3 L5,3 Z M20,3 L20,21 L19,21 L19,3 L20,3 Z M15,6 L15,18 L9,18 L9,6 L15,6 Z',
-        opacity: null
+        fill: 'M15,6.01 L15,18 L9,18 L9,6 L14.99,6 C14.9955228,6 15,6.00447715 15,6.01 Z', // 'M5,3 L5,21 L4,21 L4,3 L5,3 Z M20,3 L20,21 L19,21 L19,3 L20,3 Z M15,6 L15,18 L9,18 L9,6 L15,6 Z',
+        opacity: 'M4.99,3 C4.99552285,3 5,3.00447715 5,3.01 L5,21 L3,21 L3,3 L4.99,3 Z M20.99,3 C20.9955228,3 21,3.00447715 21,3.01 L21,21 L19,21 L19,3 L20.99,3 Z'
       }
     case 'trash-can':
       return {
