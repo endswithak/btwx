@@ -1,9 +1,9 @@
-import React, { ReactElement, memo, useRef, useState, useEffect } from 'react';
+import React, { ReactElement, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getSelectedFontFamily } from '../store/selectors/layer';
 import { setLayersFontFamilyThunk } from '../store/actions/layer';
-import LoadingIndicator from './LoadingIndicator';
+import { setTextSettingsFontFamily } from '../store/actions/textSettings';
 import EmptyState from './EmptyState';
 import Form from './Form';
 
@@ -25,6 +25,7 @@ const FontFamilySelectorItems = (props: FontFamilySelectorItemsProps): ReactElem
     if (e.target.value !== 'multi') {
       setFontFamily(e.target.value);
       dispatch(setLayersFontFamilyThunk({layers: selected, fontFamily: e.target.value}));
+      dispatch(setTextSettingsFontFamily({fontFamily: e.target.value}));
     }
   }
 

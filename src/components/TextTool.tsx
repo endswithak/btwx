@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useEffect, ReactElement, useState } from 'react';
 import { connect } from 'react-redux';
-import paper from 'paper';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
 import { setCanvasDrawing } from '../store/actions/canvasSettings';
@@ -109,19 +108,17 @@ const TextTool = (props: TextToolProps): ReactElement => {
               leading: textSettings.leading,
               fontWeight: textSettings.fontWeight,
               fontFamily: textSettings.fontFamily,
-              // oblique: 0,
               justification: textSettings.justification,
               letterSpacing: textSettings.letterSpacing,
-              textTransform: 'none',
-              paragraph: 0,
+              textTransform: textSettings.textTransform,
               textResize: 'autoWidth',
-              verticalAlignment: 'top'
+              verticalAlignment: 'top',
+              fontStyle: textSettings.fontStyle
             },
             point: {
               x: point.x,
               y: point.y
-            },
-            contentHeight: Math.round(paperLayer.bounds.height)
+            }
           }
         }).then((textLayer) => {
           toggleTextToolThunk();

@@ -1857,7 +1857,6 @@ export interface SetLayerWidthPayload {
   bounds?: Btwx.Frame;
   lines?: Btwx.TextLine[];
   paragraphs?: string[][];
-  contentHeight?: number;
   textResize?: Btwx.TextResize;
   from?: Btwx.Point;
   to?: Btwx.Point;
@@ -1883,9 +1882,6 @@ export interface SetLayersWidthPayload {
   paragraphs?: {
     [id: string]: string[][];
   };
-  contentHeight?: {
-    [id: string]: number;
-  };
   textResize?: {
     [id: string]: Btwx.TextResize;
   };
@@ -1909,7 +1905,6 @@ export interface SetLayerHeightPayload {
   bounds?: Btwx.Frame;
   lines?: Btwx.TextLine[];
   paragraphs?: string[][];
-  contentHeight?: number;
   textResize?: Btwx.TextResize;
   from?: Btwx.Point;
   to?: Btwx.Point;
@@ -1934,9 +1929,6 @@ export interface SetLayersHeightPayload {
   };
   paragraphs?: {
     [id: string]: string[][];
-  };
-  contentHeight?: {
-    [id: string]: number;
   };
   textResize?: {
     [id: string]: Btwx.TextResize;
@@ -2860,7 +2852,6 @@ export interface ScaleLayerPayload {
   rotation?: number;
   resize?: Btwx.TextResize;
   paragraphs?: string[][];
-  contentHeight?: number;
 }
 
 export interface ScaleLayer {
@@ -2900,9 +2891,6 @@ export interface ScaleLayersPayload {
   paragraphs?: {
     [id: string]: string[][];
   }
-  contentHeight?: {
-    [id: string]: number;
-  }
 }
 
 export interface ScaleLayers {
@@ -2916,7 +2904,6 @@ export interface SetLayerTextPayload {
   lines?: Btwx.TextLine[];
   bounds?: Btwx.Frame;
   paragraphs?: string[][];
-  contentHeight?: number;
   point?: Btwx.Point;
 }
 
@@ -2931,7 +2918,6 @@ export interface SetLayerTextResizePayload {
   lines?: Btwx.TextLine[];
   bounds?: Btwx.Frame;
   paragraphs?: string[][];
-  contentHeight?: number;
   point?: Btwx.Point;
 }
 
@@ -2946,7 +2932,6 @@ export interface SetLayersTextResizePayload {
   lines?: Btwx.TextLine[][];
   bounds?: Btwx.Frame[];
   paragraphs?: string[][][];
-  contentHeight?: number[];
   point?: Btwx.Point[];
 }
 
@@ -2961,7 +2946,6 @@ export interface SetLayerFontSizePayload {
   lines?: Btwx.TextLine[];
   bounds?: Btwx.Frame;
   paragraphs?: string[][];
-  contentHeight?: number;
   point?: Btwx.Point;
 }
 
@@ -2976,7 +2960,6 @@ export interface SetLayersFontSizePayload {
   lines?: Btwx.TextLine[][];
   bounds?: Btwx.Frame[];
   paragraphs?: string[][][];
-  contentHeight?: number[];
   point?: Btwx.Point[];
 }
 
@@ -2990,7 +2973,6 @@ export interface SetLayerLeadingPayload {
   leading: number;
   bounds?: Btwx.Frame;
   lines?: Btwx.TextLine[];
-  contentHeight?: number;
   point?: Btwx.Point;
 }
 
@@ -3004,7 +2986,6 @@ export interface SetLayersLeadingPayload {
   leading: number;
   bounds?: Btwx.Frame[];
   lines?: Btwx.TextLine[][];
-  contentHeight?: number[];
   point?: Btwx.Point[];
 }
 
@@ -3019,7 +3000,6 @@ export interface SetLayerFontWeightPayload {
   lines?: Btwx.TextLine[];
   bounds?: Btwx.Frame;
   paragraphs?: string[][];
-  contentHeight?: number;
   point?: Btwx.Point;
 }
 
@@ -3034,7 +3014,6 @@ export interface SetLayersFontWeightPayload {
   lines?: Btwx.TextLine[][];
   bounds?: Btwx.Frame[];
   paragraphs?: string[][][];
-  contentHeight?: number[];
   point?: Btwx.Point[];
 }
 
@@ -3049,7 +3028,6 @@ export interface SetLayerFontFamilyPayload {
   lines?: Btwx.TextLine[];
   bounds?: Btwx.Frame;
   paragraphs?: string[][];
-  contentHeight?: number;
   point?: Btwx.Point;
 }
 
@@ -3064,7 +3042,6 @@ export interface SetLayersFontFamilyPayload {
   lines?: Btwx.TextLine[][];
   bounds?: Btwx.Frame[];
   paragraphs?: string[][][];
-  contentHeight?: number[];
   point?: Btwx.Point[];
 }
 
@@ -3131,7 +3108,6 @@ export interface SetLayerFontStylePayload {
   lines?: Btwx.TextLine[];
   bounds?: Btwx.Frame;
   paragraphs?: string[][];
-  contentHeight?: number;
   point?: Btwx.Point;
 }
 
@@ -3146,7 +3122,6 @@ export interface SetLayersFontStylePayload {
   lines?: Btwx.TextLine[][];
   bounds?: Btwx.Frame[];
   paragraphs?: string[][][];
-  contentHeight?: number[];
   point?: Btwx.Point[];
 }
 
@@ -3201,7 +3176,6 @@ export interface SetLayerLetterSpacingPayload {
   lines?: Btwx.TextLine[];
   bounds?: Btwx.Frame;
   paragraphs?: string[][];
-  contentHeight?: number;
   point?: Btwx.Point;
 }
 
@@ -3216,7 +3190,6 @@ export interface SetLayersLetterSpacingPayload {
   lines?: Btwx.TextLine[][];
   bounds?: Btwx.Frame[];
   paragraphs?: string[][][];
-  contentHeight?: number[];
   point?: Btwx.Point[];
 }
 
@@ -3231,7 +3204,6 @@ export interface SetLayerTextTransformPayload {
   lines?: Btwx.TextLine[];
   bounds?: Btwx.Frame;
   paragraphs?: string[][];
-  contentHeight?: number;
   point?: Btwx.Point;
 }
 
@@ -3246,7 +3218,6 @@ export interface SetLayersTextTransformPayload {
   lines?: Btwx.TextLine[][];
   bounds?: Btwx.Frame[];
   paragraphs?: string[][][];
-  contentHeight?: number[];
   point?: Btwx.Point[];
 }
 

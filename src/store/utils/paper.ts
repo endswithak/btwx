@@ -348,7 +348,10 @@ export const getPaperStyle = ({ style, textStyle, layerFrame, artboardFrame, isL
           fontFamily: textStyle.fontFamily,
           justification: textStyle.justification,
           letterSpacing: textStyle.letterSpacing,
-          fontStyle: textStyle.fontStyle
+          fontStyle: textStyle.fontStyle,
+          textTransform: textStyle.textTransform,
+          verticalAlignment: textStyle.verticalAlignment,
+          textResize: textStyle.textResize
         }
       } else {
         return {};

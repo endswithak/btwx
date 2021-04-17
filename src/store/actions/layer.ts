@@ -914,7 +914,6 @@ export const addTextThunk = (payload: AddTextPayload) => {
       point: point,
       text: text,
       lines: lines,
-      contentHeight: payload.layer.contentHeight,
       paragraphs: nextParagraphs
     } as Btwx.Text;
     dispatch(addText({
@@ -1951,7 +1950,6 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
     let pathData: { [id: string]: string } = {};
     let bounds: { [id: string]: Btwx.Frame } = {};
     let paragraphs: { [id: string]: string[][] } = {};
-    let contentHeight: { [id: string]: number } = {};
     let lines: { [id: string]: Btwx.TextLine[] } = {};
     let textResize: { [id: string]: Btwx.TextResize } = {};
     let from: { [id: string]: Btwx.Point } = {};
@@ -2031,7 +2029,6 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
           paragraphs: nextParagraphs
         });
         textContent.content = nextContent;
-        const nextContentHeight = Math.round(textContent.bounds.height);
         const nextInnerBounds = getTextInnerBounds({
           paperLayer: clone as paper.Group,
           frame: {
@@ -2072,10 +2069,6 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
           ...paragraphs,
           [id]: nextParagraphs
         }
-        contentHeight = {
-          ...contentHeight,
-          [id]: nextContentHeight
-        }
         lines = {
           ...lines,
           [id]: textLines
@@ -2099,7 +2092,6 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
         ...payload,
         pathData,
         bounds,
-        contentHeight,
         paragraphs,
         lines,
         textResize,
@@ -2126,7 +2118,6 @@ export const setLayersHeightThunk = (payload: SetLayersHeightPayload) => {
     let pathData: { [id: string]: string } = {};
     let bounds: { [id: string]: Btwx.Frame } = {};
     let paragraphs: { [id: string]: string[][] } = {};
-    let contentHeight: { [id: string]: number } = {};
     let lines: { [id: string]: Btwx.TextLine[] } = {};
     let textResize: { [id: string]: Btwx.TextResize } = {};
     let from: { [id: string]: Btwx.Point } = {};
@@ -3034,7 +3025,6 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
     let point = {} as { [id: string]: Btwx.Point };
     let lines = {} as { [id: string]: Btwx.TextLine[] };
     let paragraphs = {} as { [id: string]: string[][] };
-    let contentHeight = {} as { [id: string]: number };
     payload.layers.forEach((id, index) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
@@ -3121,7 +3111,6 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
           textResize: nextResize
         });
         // get next point, inner bounds, and lines
-        const nextContentHeight = Math.round(textContent.bounds.height);
         const nextInnerBounds = getTextInnerBounds({
           paperLayer: duplicate,
           frame: {
@@ -3183,10 +3172,6 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
           ...resize,
           [id]: nextResize
         }
-        contentHeight = {
-          ...contentHeight,
-          [id]: nextContentHeight
-        }
       } else {
         paperLayer.rotation = -layerItem.transform.rotation;
         if (!isLine) {
@@ -3222,8 +3207,7 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
         rotation,
         resize,
         lines,
-        paragraphs,
-        contentHeight
+        paragraphs
       })
     )
   }
@@ -3275,7 +3259,6 @@ export const setLayerTextThunk = (payload: SetLayerTextPayload) => {
       textResize: (layerItem as Btwx.Text).textStyle.textResize
     });
     // get next point, inner bounds, and lines
-    const nextContentHeight = Math.round(textContent.bounds.height);
     const nextInnerBounds = getTextInnerBounds({
       paperLayer: clone,
       frame: (layerItem as Btwx.Text).frame,
@@ -3310,7 +3293,6 @@ export const setLayerTextThunk = (payload: SetLayerTextPayload) => {
         },
         lines: nextTextLines,
         paragraphs: nextParagraphs,
-        contentHeight: nextContentHeight,
         point: {
           x: nextPoint.x,
           y: nextPoint.y
@@ -3336,7 +3318,6 @@ export const setLayersTextResizeThunk = (payload: SetLayersTextResizePayload) =>
     const lines: Btwx.TextLine[][] = [];
     const bounds: Btwx.Frame[] = [];
     const point: Btwx.Point[] = [];
-    const contentHeight: number[] = [];
     const paragraphs: string[][][] = [];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id] as Btwx.Text;
@@ -3377,7 +3358,6 @@ export const setLayersTextResizeThunk = (payload: SetLayersTextResizePayload) =>
         textResize: payload.resize
       });
       // get next point, inner bounds, and lines
-      const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
         frame: (layerItem as Btwx.Text).frame,
@@ -3405,7 +3385,6 @@ export const setLayersTextResizeThunk = (payload: SetLayersTextResizePayload) =>
       paragraphs.push(nextParagraphs);
       const nextPoint = textContent.point.subtract(artboardPosition);
       point.push({x: nextPoint.x, y: nextPoint.y});
-      contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
         ...nextInnerBounds,
@@ -3418,7 +3397,6 @@ export const setLayersTextResizeThunk = (payload: SetLayersTextResizePayload) =>
         ...payload,
         bounds,
         lines,
-        contentHeight,
         paragraphs,
         point
       })
@@ -3442,7 +3420,6 @@ export const setLayersFontSizeThunk = (payload: SetLayersFontSizePayload) => {
     const lines: Btwx.TextLine[][] = [];
     const bounds: Btwx.Frame[] = [];
     const point: Btwx.Point[] = [];
-    const contentHeight: number[] = [];
     const paragraphs: string[][][] = [];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id] as Btwx.Text;
@@ -3484,7 +3461,6 @@ export const setLayersFontSizeThunk = (payload: SetLayersFontSizePayload) => {
         textResize: (layerItem as Btwx.Text).textStyle.textResize
       });
       // get next point, inner bounds, and lines
-      const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
         frame: (layerItem as Btwx.Text).frame,
@@ -3512,7 +3488,6 @@ export const setLayersFontSizeThunk = (payload: SetLayersFontSizePayload) => {
       paragraphs.push(nextParagraphs);
       const nextPoint = textContent.point.subtract(artboardPosition);
       point.push({x: nextPoint.x, y: nextPoint.y});
-      contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
         ...nextInnerBounds,
@@ -3526,7 +3501,6 @@ export const setLayersFontSizeThunk = (payload: SetLayersFontSizePayload) => {
         bounds,
         lines,
         point,
-        contentHeight,
         paragraphs
       })
     )
@@ -3548,7 +3522,6 @@ export const setLayersLeadingThunk = (payload: SetLayersLeadingPayload) => {
     const state = getState() as RootState;
     const lines: Btwx.TextLine[][] = [];
     const bounds: Btwx.Frame[] = [];
-    const contentHeight: number[] = [];
     const point: Btwx.Point[] = [];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id] as Btwx.Text;
@@ -3610,7 +3583,6 @@ export const setLayersLeadingThunk = (payload: SetLayersLeadingPayload) => {
         textResize: (layerItem as Btwx.Text).textStyle.textResize
       });
       // get next point, inner bounds, and lines
-      const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
         frame: {
@@ -3639,7 +3611,6 @@ export const setLayersLeadingThunk = (payload: SetLayersLeadingPayload) => {
         transform: layerItem.transform
       });
       // push updates
-      contentHeight.push(nextContentHeight);
       const nextPoint = textContent.point.subtract(artboardPosition);
       point.push({x: nextPoint.x, y: nextPoint.y});
       lines.push(textLines);
@@ -3654,7 +3625,6 @@ export const setLayersLeadingThunk = (payload: SetLayersLeadingPayload) => {
         ...payload,
         bounds,
         lines,
-        contentHeight,
         point
       })
     )
@@ -3677,7 +3647,6 @@ export const setLayersFontWeightThunk = (payload: SetLayersFontWeightPayload) =>
     const lines: Btwx.TextLine[][] = [];
     const point: Btwx.Point[] = [];
     const bounds: Btwx.Frame[] = [];
-    const contentHeight: number[] = [];
     const paragraphs: string[][][] = [];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id] as Btwx.Text;
@@ -3719,7 +3688,6 @@ export const setLayersFontWeightThunk = (payload: SetLayersFontWeightPayload) =>
         textResize: (layerItem as Btwx.Text).textStyle.textResize
       });
       // get next point, inner bounds, and lines
-      const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
         frame: (layerItem as Btwx.Text).frame,
@@ -3747,7 +3715,6 @@ export const setLayersFontWeightThunk = (payload: SetLayersFontWeightPayload) =>
       paragraphs.push(nextParagraphs);
       const nextPoint = textContent.point.subtract(artboardPosition);
       point.push({x: nextPoint.x, y: nextPoint.y});
-      contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
         ...nextInnerBounds,
@@ -3761,7 +3728,6 @@ export const setLayersFontWeightThunk = (payload: SetLayersFontWeightPayload) =>
         bounds,
         lines,
         point,
-        contentHeight,
         paragraphs
       })
     )
@@ -3784,7 +3750,6 @@ export const setLayersFontFamilyThunk = (payload: SetLayersFontFamilyPayload) =>
     const lines: Btwx.TextLine[][] = [];
     const bounds: Btwx.Frame[] = [];
     const point: Btwx.Point[] = [];
-    const contentHeight: number[] = [];
     const paragraphs: string[][][] = [];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id] as Btwx.Text;
@@ -3826,7 +3791,6 @@ export const setLayersFontFamilyThunk = (payload: SetLayersFontFamilyPayload) =>
         textResize: (layerItem as Btwx.Text).textStyle.textResize
       });
       // get next point, inner bounds, and lines
-      const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
         frame: (layerItem as Btwx.Text).frame,
@@ -3854,7 +3818,6 @@ export const setLayersFontFamilyThunk = (payload: SetLayersFontFamilyPayload) =>
       paragraphs.push(nextParagraphs);
       const nextPoint = textContent.point.subtract(artboardPosition);
       point.push({x: nextPoint.x, y: nextPoint.y});
-      contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
         ...nextInnerBounds,
@@ -3868,8 +3831,7 @@ export const setLayersFontFamilyThunk = (payload: SetLayersFontFamilyPayload) =>
         bounds,
         lines,
         paragraphs,
-        point,
-        contentHeight
+        point
       })
     )
   }
@@ -3891,7 +3853,6 @@ export const setLayersLetterSpacingThunk = (payload: SetLayersLetterSpacingPaylo
     const lines: Btwx.TextLine[][] = [];
     const bounds: Btwx.Frame[] = [];
     const point: Btwx.Point[] = [];
-    const contentHeight: number[] = [];
     const paragraphs: string[][][] = [];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id] as Btwx.Text;
@@ -3933,7 +3894,6 @@ export const setLayersLetterSpacingThunk = (payload: SetLayersLetterSpacingPaylo
         textResize: (layerItem as Btwx.Text).textStyle.textResize
       });
       // get next point, inner bounds, and lines
-      const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
         frame: (layerItem as Btwx.Text).frame,
@@ -3961,7 +3921,6 @@ export const setLayersLetterSpacingThunk = (payload: SetLayersLetterSpacingPaylo
       paragraphs.push(nextParagraphs);
       const nextPoint = textContent.point.subtract(artboardPosition);
       point.push({x: nextPoint.x, y: nextPoint.y});
-      contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
         ...nextInnerBounds,
@@ -3975,7 +3934,6 @@ export const setLayersLetterSpacingThunk = (payload: SetLayersLetterSpacingPaylo
         bounds,
         lines,
         point,
-        contentHeight,
         paragraphs
       })
     )
@@ -3998,7 +3956,6 @@ export const setLayersTextTransformThunk = (payload: SetLayersTextTransformPaylo
     const lines: Btwx.TextLine[][] = [];
     const bounds: Btwx.Frame[] = [];
     const point: Btwx.Point[] = [];
-    const contentHeight: number[] = [];
     const paragraphs: string[][][] = [];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id] as Btwx.Text;
@@ -4040,7 +3997,6 @@ export const setLayersTextTransformThunk = (payload: SetLayersTextTransformPaylo
         textResize: (layerItem as Btwx.Text).textStyle.textResize
       });
       // get next point, inner bounds, and lines
-      const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
         frame: (layerItem as Btwx.Text).frame,
@@ -4068,7 +4024,6 @@ export const setLayersTextTransformThunk = (payload: SetLayersTextTransformPaylo
       paragraphs.push(nextParagraphs);
       const nextPoint = textContent.point.subtract(artboardPosition);
       point.push({x: nextPoint.x, y: nextPoint.y});
-      contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
         ...nextInnerBounds,
@@ -4082,7 +4037,6 @@ export const setLayersTextTransformThunk = (payload: SetLayersTextTransformPaylo
         bounds,
         lines,
         paragraphs,
-        contentHeight,
         point
       })
     )
@@ -4105,7 +4059,6 @@ export const setLayersJustificationThunk = (payload: SetLayersJustificationPaylo
     const lines: Btwx.TextLine[][] = [];
     const bounds: Btwx.Frame[] = [];
     const points: Btwx.Point[] = [];
-    const contentHeight: number[] = [];
     const paragraphs: string[][][] = [];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id] as Btwx.Text;
@@ -4173,7 +4126,6 @@ export const setLayersJustificationThunk = (payload: SetLayersJustificationPaylo
       //   textResize: (layerItem as Btwx.Text).textStyle.textResize
       // });
       // get next point, inner bounds, and lines
-      const nextContentHeight = Math.round(textContent.bounds.height);
       const textLines = getTextLines({
         paperLayer: textContent,
         leading: (layerItem as Btwx.Text).textStyle.leading,
@@ -4188,7 +4140,6 @@ export const setLayersJustificationThunk = (payload: SetLayersJustificationPaylo
       // push updates
       const nextPoint = textContent.point.subtract(artboardPosition);
       points.push({x: nextPoint.x, y: nextPoint.y});
-      contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push(layerItem.frame);
     });
@@ -4219,7 +4170,6 @@ export const setLayersVerticalAlignmentThunk = (payload: SetLayersVerticalAlignm
     const lines: Btwx.TextLine[][] = [];
     const bounds: Btwx.Frame[] = [];
     const points: Btwx.Point[] = [];
-    const contentHeight: number[] = [];
     const paragraphs: string[][][] = [];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id] as Btwx.Text;
@@ -4302,7 +4252,6 @@ export const setLayersFontStyleThunk = (payload: SetLayersFontStylePayload) => {
     const lines: Btwx.TextLine[][] = [];
     const bounds: Btwx.Frame[] = [];
     const point: Btwx.Point[] = [];
-    const contentHeight: number[] = [];
     const paragraphs: string[][][] = [];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id] as Btwx.Text;
@@ -4344,7 +4293,6 @@ export const setLayersFontStyleThunk = (payload: SetLayersFontStylePayload) => {
         textResize: (layerItem as Btwx.Text).textStyle.textResize
       });
       // get next point, inner bounds, and lines
-      const nextContentHeight = Math.round(textContent.bounds.height);
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
         frame: (layerItem as Btwx.Text).frame,
@@ -4372,7 +4320,6 @@ export const setLayersFontStyleThunk = (payload: SetLayersFontStylePayload) => {
       paragraphs.push(nextParagraphs);
       const nextPoint = textContent.point.subtract(artboardPosition);
       point.push({x: nextPoint.x, y: nextPoint.y});
-      contentHeight.push(nextContentHeight);
       lines.push(textLines);
       bounds.push({
         ...nextInnerBounds,
@@ -4386,7 +4333,6 @@ export const setLayersFontStyleThunk = (payload: SetLayersFontStylePayload) => {
         bounds,
         lines,
         paragraphs,
-        contentHeight,
         point
       })
     )
@@ -4451,12 +4397,20 @@ export const toggleLayersIgnoreUnderlyingMask = (payload: ToggleLayersIgnoreUnde
 export const toggleSelectionIgnoreUnderlyingMask = () => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
-    const mixed = !state.layer.present.selected.every((id) => (state.layer.present.byId[id] as Btwx.MaskableLayer).ignoreUnderlyingMask);
+    const mixed = !state.layer.present.selected.every((id) =>
+      (state.layer.present.byId[id] as Btwx.MaskableLayer).ignoreUnderlyingMask
+    );
     if (mixed) {
-      const disabled = state.layer.present.selected.filter((id) => !(state.layer.present.byId[id] as Btwx.MaskableLayer).ignoreUnderlyingMask);
-      dispatch(toggleLayersIgnoreUnderlyingMask({layers: disabled}));
+      const disabled = state.layer.present.selected.filter((id) =>
+        !(state.layer.present.byId[id] as Btwx.MaskableLayer).ignoreUnderlyingMask
+      );
+      dispatch(toggleLayersIgnoreUnderlyingMask({
+        layers: disabled
+      }));
     } else {
-      dispatch(toggleLayersIgnoreUnderlyingMask({layers: state.layer.present.selected}));
+      dispatch(toggleLayersIgnoreUnderlyingMask({
+        layers: state.layer.present.selected
+      }));
     }
   }
 };
@@ -4875,10 +4829,13 @@ export const setRoundedRadiiThunk = (payload: SetRoundedRadiiPayload) => {
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
-      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
+      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data:{id}});
       const clone = paperLayer.clone({insert: false}) as paper.CompoundPath;
       const paperLayerPath = clone.children[0] as paper.Path;
-      paperLayerPath.rotation = -layerItem.transform.rotation;
+      clearLayerTransforms({
+        paperLayer: clone,
+        transform: layerItem.transform
+      });
       const maxDim = Math.max(paperLayerPath.bounds.width, paperLayerPath.bounds.height);
       const newShape = new paperMain.Path.Rectangle({
         from: paperLayerPath.bounds.topLeft,
@@ -4886,8 +4843,11 @@ export const setRoundedRadiiThunk = (payload: SetRoundedRadiiPayload) => {
         radius: (maxDim / 2) * payload.radius,
         insert: false
       });
+      applyLayerTransforms({
+        paperLayer: newShape,
+        transform: layerItem.transform
+      });
       paperLayerPath.pathData = newShape.pathData;
-      paperLayerPath.rotation = layerItem.transform.rotation;
       pathData.push(clone.pathData);
       bounds.push({
         ...layerItem.frame,
@@ -4923,11 +4883,14 @@ export const setPolygonsSidesThunk = (payload: SetPolygonsSidesPayload) => {
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
-      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
+      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data:{id}});
       const clone = paperLayer.clone({insert: false}) as paper.CompoundPath;
       const paperLayerPath = clone.children[0] as paper.Path;
       const startPosition = paperLayerPath.position;
-      paperLayerPath.rotation = -layerItem.transform.rotation;
+      clearLayerTransforms({
+        paperLayer: clone,
+        transform: layerItem.transform
+      });
       const newShape = new paperMain.Path.RegularPolygon({
         center: paperLayerPath.bounds.center,
         radius: Math.max(paperLayerPath.bounds.width, paperLayerPath.bounds.height) / 2,
@@ -4936,7 +4899,10 @@ export const setPolygonsSidesThunk = (payload: SetPolygonsSidesPayload) => {
       });
       newShape.bounds.width = paperLayerPath.bounds.width;
       newShape.bounds.height = paperLayerPath.bounds.height;
-      newShape.rotation = layerItem.transform.rotation;
+      applyLayerTransforms({
+        paperLayer: newShape,
+        transform: layerItem.transform
+      });
       newShape.position = startPosition;
       paperLayerPath.pathData = newShape.pathData;
       pathData.push(clone.pathData);
@@ -4974,11 +4940,14 @@ export const setStarsPointsThunk = (payload: SetStarsPointsPayload) => {
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
-      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
+      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data:{id}});
       const clone = paperLayer.clone({insert: false}) as paper.CompoundPath;
       const paperLayerPath = clone.children[0] as paper.Path;
       const startPosition = paperLayerPath.position;
-      paperLayerPath.rotation = -layerItem.transform.rotation;
+      clearLayerTransforms({
+        paperLayer: clone,
+        transform: layerItem.transform
+      });
       const maxDim = Math.max(paperLayerPath.bounds.width, paperLayerPath.bounds.height);
       const newShape = new paperMain.Path.Star({
         center: paperLayerPath.bounds.center,
@@ -4989,7 +4958,10 @@ export const setStarsPointsThunk = (payload: SetStarsPointsPayload) => {
       });
       newShape.bounds.width = paperLayerPath.bounds.width;
       newShape.bounds.height = paperLayerPath.bounds.height;
-      newShape.rotation = layerItem.transform.rotation;
+      applyLayerTransforms({
+        paperLayer: newShape,
+        transform: layerItem.transform
+      });
       newShape.position = startPosition;
       paperLayerPath.pathData = newShape.pathData;
       pathData.push(clone.pathData);
@@ -5027,11 +4999,14 @@ export const setStarsRadiusThunk = (payload: SetStarsRadiusPayload) => {
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
-      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
+      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data:{id}});
       const clone = paperLayer.clone({insert: false}) as paper.CompoundPath;
       const paperLayerPath = clone.children[0] as paper.Path;
       const startPosition = paperLayerPath.position;
-      paperLayerPath.rotation = -layerItem.transform.rotation;
+      clearLayerTransforms({
+        paperLayer: clone,
+        transform: layerItem.transform
+      });
       const maxDim = Math.max(paperLayerPath.bounds.width, paperLayerPath.bounds.height);
       const newShape = new paperMain.Path.Star({
         center: paperLayerPath.bounds.center,
@@ -5042,7 +5017,10 @@ export const setStarsRadiusThunk = (payload: SetStarsRadiusPayload) => {
       });
       newShape.bounds.width = paperLayerPath.bounds.width;
       newShape.bounds.height = paperLayerPath.bounds.height;
-      newShape.rotation = layerItem.transform.rotation;
+      applyLayerTransforms({
+        paperLayer: newShape,
+        transform: layerItem.transform
+      });
       newShape.position = startPosition;
       paperLayerPath.pathData = newShape.pathData;
       pathData.push(clone.pathData);

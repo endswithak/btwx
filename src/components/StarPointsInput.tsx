@@ -6,6 +6,7 @@ import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
 import { setStarsPointsThunk } from '../store/actions/layer';
 import { getPaperLayer, getSelectedProjectIndices, getSelectedStarPoints, getSelectedById } from '../store/selectors/layer';
+import { clearLayerTransforms, applyLayerTransforms } from '../store/utils/paper';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import MathFormGroup from './MathFormGroup';
@@ -43,7 +44,10 @@ const StarPointsInput = (): ReactElement => {
       const paperLayerCompound = getPaperLayer(layerItem.id, selectedProjectIndices[layerItem.id]) as paper.CompoundPath;
       const paperLayer = paperLayerCompound.children[0] as paper.Path;
       const startPosition = paperLayer.position;
-      paperLayer.rotation = -layerItem.transform.rotation;
+      clearLayerTransforms({
+        paperLayer,
+        transform: layerItem.transform
+      });
       const maxDim = Math.max(paperLayer.bounds.width, paperLayer.bounds.height);
       const newShape = new paperMain.Path.Star({
         center: paperLayer.bounds.center,
@@ -54,7 +58,10 @@ const StarPointsInput = (): ReactElement => {
       });
       newShape.bounds.width = paperLayer.bounds.width;
       newShape.bounds.height = paperLayer.bounds.height;
-      newShape.rotation = layerItem.transform.rotation;
+      applyLayerTransforms({
+        paperLayer: newShape,
+        transform: layerItem.transform
+      });
       newShape.position = startPosition;
       paperLayer.pathData = newShape.pathData;
       if (isMask) {

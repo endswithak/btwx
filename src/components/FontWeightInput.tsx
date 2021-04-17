@@ -3,6 +3,7 @@ import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setLayersFontWeightThunk } from '../store/actions/layer';
+import { setTextSettingsFontWeight } from '../store/actions/textSettings';
 import { getSelectedFontWeight } from '../store/selectors/layer';
 import Form from './Form';
 import Icon from './Icon';
@@ -41,6 +42,7 @@ const FontWeightInput = (): ReactElement => {
   const handleChange = (e: any): void => {
     setFontWeight(e.target.value);
     dispatch(setLayersFontWeightThunk({layers: selected, fontWeight: e.target.value}));
+    dispatch(setTextSettingsFontWeight({fontWeight: e.target.value}));
   }
 
   return (

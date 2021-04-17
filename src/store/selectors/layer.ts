@@ -729,11 +729,12 @@ export const getLayersWithSearch = createSelector(
 );
 
 export const getSearchTreeWalker = createSelector(
-  [ getLayersWithSearch ],
-  (searchLayers) => {
+  [ getTree, getLayersWithSearch ],
+  (tree, searchLayers) => {
     const getNodeData = (node: any, nestingLevel: number): any => ({
       data: {
         id: node.id, // mandatory
+        artboard: tree[node.id].artboard,
         isLeaf: true,
         isOpenByDefault: false,
         nestingLevel

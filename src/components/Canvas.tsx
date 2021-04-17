@@ -41,6 +41,8 @@ type CanvasEventType = 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | '
 const Canvas = (): ReactElement => {
   const ref = useRef<HTMLDivElement>(null);
   const ready = useSelector((state: RootState) => state.canvasSettings.ready);
+  const searching = useSelector((state: RootState) => state.leftSidebar.searching);
+  const editing = useSelector((state: RootState) => state.leftSidebar.editing);
   const focusing = useSelector((state: RootState) => state.canvasSettings.focusing);
   const measuring = useSelector((state: RootState) => state.canvasSettings.measuring);
   const waiting = useSelector((state: RootState) => state.canvasSettings.waiting);
@@ -141,6 +143,12 @@ const Canvas = (): ReactElement => {
     }
     if (measuring) {
       dispatch(setCanvasMeasuring({measuring: false}));
+    }
+    if (searching) {
+      (document.getElementById(`control-layers-search`) as HTMLInputElement).blur();
+    }
+    if (editing) {
+      (document.getElementById(`control-${editing}-name`) as HTMLInputElement).blur();
     }
     handleHitResult(e, 'mouseDown');
   }

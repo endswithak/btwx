@@ -33,7 +33,7 @@ const MenuEditFind = (props: MenuEditFindProps): ReactElement => {
       }
     });
     (window as any)[MENU_ITEM_ID] = () => {
-      const layersSearchInput = document.getElementById('layers-search-input');
+      const layersSearchInput = document.getElementById('control-layers-search');
       dispatch(setSearching({searching: true}));
       layersSearchInput.focus();
     }

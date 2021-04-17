@@ -33,7 +33,7 @@ const SidebarLayersSearch = (): ReactElement => {
       inline
       canvasAutoFocus>
       <SearchFormControl
-        id='layers-search-input'
+        id='control-layers-search'
         ref={inputRef}
         value={search}
         isActive={searching}

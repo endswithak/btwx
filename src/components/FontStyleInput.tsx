@@ -3,6 +3,7 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch  } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setLayersFontStyleThunk } from '../store/actions/layer';
+import { setTextSettingsFontStyle } from '../store/actions/textSettings';
 import { getSelectedFontStyle } from '../store/selectors/layer';
 import { DEFAULT_FONT_STYLE_OPTIONS } from '../constants';
 import Form from './Form';
@@ -21,7 +22,8 @@ const FontStyleInput = (): ReactElement => {
 
   const handleChange = (e: any): void => {
     if (e.target.value !== fontStyleValue) {
-      dispatch(setLayersFontStyleThunk({layers: selected, fontStyle: e.target.value }));
+      dispatch(setLayersFontStyleThunk({layers: selected, fontStyle: e.target.value}));
+      dispatch(setTextSettingsFontStyle({fontStyle: e.target.value as Btwx.FontStyle}));
       setFontStyle(e.target.value);
     }
   };

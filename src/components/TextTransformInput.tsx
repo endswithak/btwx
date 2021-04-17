@@ -4,6 +4,7 @@ import { useSelector, useDispatch  } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { DEFAULT_TEXT_TRANSFORM_OPTIONS } from '../constants';
 import { setLayersTextTransformThunk } from '../store/actions/layer';
+import { setTextSettingsTextTransform } from '../store/actions/textSettings';
 import { getSelectedTextTransform } from '../store/selectors/layer';
 import Form from './Form';
 import ToggleButtonGroup from './ToggleButtonGroup';
@@ -73,6 +74,7 @@ const TextTransformInput = (): ReactElement => {
   const handleChange = (e: any): void => {
     if (e.target.value !== textTransform) {
       dispatch(setLayersTextTransformThunk({layers: selected, textTransform: e.target.value as Btwx.TextTransform}));
+      dispatch(setTextSettingsTextTransform({textTransform: e.target.value as Btwx.TextTransform}));
       setTextTransform(e.target.value);
     }
     // if (isMac) {

@@ -15,14 +15,14 @@ import { getSelectionFrameCursor } from './CanvasUIEvents';
 
 const ResizeTool = (props: PaperToolProps): ReactElement => {
   const { tool, keyDownEvent, keyUpEvent, downEvent, dragEvent, upEvent } = props;
-  const selectedRotation = useSelector((state: RootState) => getSelectedRotation(state));
+  // const selectedRotation = useSelector((state: RootState) => getSelectedRotation(state));
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const isEnabled = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Resize');
   const resizing = useSelector((state: RootState) => state.canvasSettings.resizing);
   const initialHandle = useSelector((state: RootState) => state.canvasSettings.resizeHandle as Btwx.ResizeHandle);
   const layersById = useSelector((state: RootState) => state.layer.present.byId);
   const selectedBounds = useSelector((state: RootState) => getSelectedBounds(state));
-  const selectedInnerBounds = useSelector((state: RootState) => getSelectedInnerBounds(state));
+  // const selectedInnerBounds = useSelector((state: RootState) => getSelectedInnerBounds(state));
   const [originalSelection, setOriginalSelection] = useState<any>(null);
   const [selectedAndChildren, setSelectedAndChildren] = useState<any>(null);
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
@@ -30,7 +30,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
   const [verticalFlip, setVerticalFlip] = useState<boolean>(false);
   const [preserveAspectRatio, setPreserveAspectRatio] = useState<boolean>(false);
   const [handle, setHandle] = useState<Btwx.ResizeHandle>(null);
-  const [pivotHandle, setPivotHandle] = useState<Btwx.ResizeHandle>(null);
+  // const [pivotHandle, setPivotHandle] = useState<Btwx.ResizeHandle>(null);
   const [shiftModifier, setShiftModifier] = useState<boolean>(false);
   const [fromBounds, setFromBounds] = useState<paper.Rectangle>(null);
   const [fromPivot, setFromPivot] = useState<paper.Point>(null);
@@ -156,6 +156,12 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
         const textMask = paperLayer.getItem({data: { id: 'textMask' }});
         const hFlip = (horizontalFlip && !layerItem.transform.horizontalFlip) || (!horizontalFlip && layerItem.transform.horizontalFlip);
         const vFlip = (verticalFlip && !layerItem.transform.verticalFlip) || (!verticalFlip && layerItem.transform.verticalFlip);
+        if (layerItem.transform.rotation !== 0) {
+          const scaleClone = textBackground.clone({insert: false});
+          scaleClone.scale(hor, ver);
+          textBackground.fitBounds(scaleClone.bounds);
+          textMask.fitBounds(scaleClone.bounds);
+        }
         if (hFlip || vFlip) {
           paperLayer.scale(hFlip ? -1 : 1, vFlip ? -1 : 1);
         }
@@ -164,8 +170,10 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
           paperLayer.rotation = -layerItem.transform.rotation;
           paperLayer.pivot = fromPivot;
         }
-        textBackground.scale(hor, ver);
-        textMask.scale(hor, ver);
+        if (layerItem.transform.rotation === 0) {
+          textBackground.scale(hor, ver);
+          textMask.scale(hor, ver);
+        }
         resizeTextContent(textBackground.bounds, layerItem, paperLayer, handle);
         if (layerItem.transform.rotation !== 0) {
           paperLayer.pivot = null;
@@ -178,44 +186,42 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
         break;
       }
       case 'Shape': {
-        const isMask = (layerItem as Btwx.Shape).mask;
-        switch(paperLayer.data.shapeType) {
+        switch((layerItem as Btwx.Shape).shapeType) {
+          case 'Line':
+          case 'Custom':
+            paperLayer.scale(hor, ver);
+            break;
           case 'Ellipse':
           case 'Polygon':
           case 'Rectangle':
-          case 'Star':
-          case 'Line':
-          case 'Custom': {
-            paperLayer.scale(hor, ver);
-            if (isMask) {
-              paperLayer.previousSibling.scale(hor, ver);
-            }
-            break;
-          }
-          case 'Rounded': {
-            paperLayer.scale(hor, ver);
-            if (isMask) {
-              paperLayer.previousSibling.scale(hor, ver);
-            }
-            if (!preserveAspectRatio) {
-              const newShape = new paperMain.Path.Rectangle({
-                from: paperLayer.bounds.topLeft,
-                to: paperLayer.bounds.bottomRight,
-                radius: (Math.max(paperLayer.bounds.width, paperLayer.bounds.height) / 2) * (layerItem as Btwx.Rounded).radius,
-                insert: false
-              });
-              (paperLayer as paper.Path).pathData = newShape.pathData;
+          case 'Rounded':
+          case 'Star': {
+            const isMask = (layerItem as Btwx.Shape).mask;
+            if (layerItem.transform.rotation !== 0) {
+              const scaleClone = paperLayer.clone({insert: false});
+              scaleClone.scale(hor, ver);
+              paperLayer.fitBounds(scaleClone.bounds);
               if (isMask) {
-                (paperLayer.previousSibling as paper.Path).pathData = newShape.pathData;
+                paperLayer.previousSibling.fitBounds(scaleClone.bounds);
+              }
+            } else {
+              paperLayer.scale(hor, ver);
+              if (isMask) {
+                paperLayer.previousSibling.scale(hor, ver);
               }
             }
-            break;
           }
         }
         break;
       }
       case 'Image': {
-        paperLayer.scale(hor, ver);
+        if (layerItem.transform.rotation !== 0) {
+          const scaleClone = paperLayer.clone({insert: false});
+          scaleClone.scale(hor, ver);
+          paperLayer.fitBounds(scaleClone.bounds);
+        } else {
+          paperLayer.scale(hor, ver);
+        }
         break;
       }
     }
@@ -236,38 +242,42 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
       }
       case 'Shape': {
         const isMask = (layerItem as Btwx.Shape).mask;
-        switch(paperLayer.data.shapeType) {
-          case 'Ellipse':
-          case 'Polygon':
-          case 'Rectangle':
-          case 'Star':
-          case 'Line':
-          case 'Custom':
-            paperLayer.scale(hor, ver);
-            if (isMask) {
-              paperLayer.previousSibling.scale(hor, ver);
-            }
-            break;
-          case 'Rounded': {
-            paperLayer.scale(hor, ver);
-            if (isMask) {
-              paperLayer.previousSibling.scale(hor, ver);
-            }
-            if (!preserveAspectRatio) {
-              const newShape = new paperMain.Path.Rectangle({
-                from: paperLayer.bounds.topLeft,
-                to: paperLayer.bounds.bottomRight,
-                radius: (Math.max(paperLayer.bounds.width, paperLayer.bounds.height) / 2) * (layerItem as Btwx.Rounded).radius,
-                insert: false
-              });
-              (paperLayer as paper.Path).pathData = newShape.pathData;
-              if (isMask) {
-                (paperLayer.previousSibling as paper.Path).pathData = newShape.pathData;
-              }
-            }
-            break;
-          }
+        paperLayer.scale(hor, ver);
+        if (isMask) {
+          paperLayer.previousSibling.scale(hor, ver);
         }
+        // switch(paperLayer.data.shapeType) {
+        //   case 'Ellipse':
+        //   case 'Polygon':
+        //   case 'Rectangle':
+        //   case 'Star':
+        //   case 'Line':
+        //   case 'Custom':
+        //     paperLayer.scale(hor, ver);
+        //     if (isMask) {
+        //       paperLayer.previousSibling.scale(hor, ver);
+        //     }
+        //     break;
+        //   case 'Rounded': {
+        //     paperLayer.scale(hor, ver);
+        //     if (isMask) {
+        //       paperLayer.previousSibling.scale(hor, ver);
+        //     }
+        //     if (!preserveAspectRatio) {
+        //       const newShape = new paperMain.Path.Rectangle({
+        //         from: paperLayer.bounds.topLeft,
+        //         to: paperLayer.bounds.bottomRight,
+        //         radius: (Math.max(paperLayer.bounds.width, paperLayer.bounds.height) / 2) * (layerItem as Btwx.Rounded).radius,
+        //         insert: false
+        //       });
+        //       (paperLayer as paper.Path).pathData = newShape.pathData;
+        //       if (isMask) {
+        //         (paperLayer.previousSibling as paper.Path).pathData = newShape.pathData;
+        //       }
+        //     }
+        //     break;
+        //   }
+        // }
         break;
       }
       case 'Text':
@@ -656,7 +666,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
         setSelectedAndChildren(compiledSelected);
         setOriginalSelection(nextOriginalSelection);
         setHandle(initialHandle);
-        setPivotHandle(getPivotHandle(initialHandle));
+        // setPivotHandle(getPivotHandle(initialHandle));
         updateSelectionFrame({
           bounds: nextFromBounds,
           // rotation: selectedRotation !== 'multi' && selectedRotation !== 0 ? selectedRotation : null,
@@ -827,7 +837,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
         // const nextSnapBounds = getNextSnapBounds(dragEvent, nextHandle, nextHorizontalFlip, nextVerticalFlip);
         setSnapBounds(getNextSnapBounds(dragEvent, nextHandle, nextHorizontalFlip, nextVerticalFlip));
         setHandle(nextHandle);
-        setPivotHandle(getPivotHandle(nextHandle));
+        // setPivotHandle(getPivotHandle(nextHandle));
         setHorizontalFlip(nextHorizontalFlip);
         setVerticalFlip(nextVerticalFlip);
         if (nextHandle !== handle) {

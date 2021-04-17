@@ -7,6 +7,8 @@ import {
   SET_TEXT_SETTINGS_LETTER_SPACING,
   SET_TEXT_SETTINGS_LEADING,
   SET_TEXT_SETTINGS_JUSTIFICATION,
+  SET_TEXT_SETTINGS_FONT_STYLE,
+  SET_TEXT_SETTINGS_TEXT_TRANSFORM,
   SET_TEXT_SETTINGS_SYSTEM_FONTS,
   SET_TEXT_SETTINGS_READY,
   TextSettingsTypes,
@@ -78,6 +80,18 @@ export default (state = initialState, action: TextSettingsTypes): TextSettingsSt
       return {
         ...state,
         justification: action.payload.justification
+      };
+    }
+    case SET_TEXT_SETTINGS_FONT_STYLE: {
+      return {
+        ...state,
+        fontStyle: action.payload.fontStyle
+      };
+    }
+    case SET_TEXT_SETTINGS_TEXT_TRANSFORM: {
+      return {
+        ...state,
+        textTransform: action.payload.textTransform
       };
     }
     case SET_TEXT_SETTINGS_SYSTEM_FONTS: {

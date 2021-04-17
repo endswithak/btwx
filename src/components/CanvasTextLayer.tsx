@@ -152,8 +152,6 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
   const [rendered, setRendered] = useState<boolean>(false);
   const [prevRotation, setPrevRotation] = useState(layerItem.transform.rotation);
-  // const [prevHorizontalFlip, setPrevHorizontalFlip] = useState(layerItem.transform.horizontalFlip);
-  // const [prevVerticalFlip, setPrevVerticalFlip] = useState(layerItem.transform.verticalFlip);
   const [prevTweening, setPrevTweening] = useState(tweening);
   const [eventInstance, setEventInstance] = useState(0);
   const content = useMemo(() =>
@@ -567,7 +565,10 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   }, [
     layerItem.transform.rotation, layerItem.frame.innerWidth, layerItem.frame.innerHeight,
     layerItem.text, layerItem.textStyle.fontFamily, layerItem.textStyle.fontWeight,
-    layerItem.textStyle.fontSize, layerItem.textStyle.justification, layerItem.textStyle.leading
+    layerItem.textStyle.fontSize, layerItem.textStyle.justification,
+    layerItem.textStyle.leading, layerItem.textStyle.textTransform,
+    layerItem.textStyle.verticalAlignment, layerItem.textStyle.textResize,
+    layerItem.textStyle.letterSpacing
   ]);
 
   useEffect(() => {
@@ -771,7 +772,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
 
   useEffect(() => {
     if (rendered) {
-      const { paperLayer, textContent, textBackground, textMask } = getPaperLayer();
+      const { paperLayer, textContent } = getPaperLayer();
       clearLayerTransforms({
         paperLayer,
         transform: layerItem.transform
@@ -792,7 +793,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
 
   useEffect(() => {
     if (rendered) {
-      const { paperLayer, textContent, textBackground } = getPaperLayer();
+      const { paperLayer } = getPaperLayer();
       clearLayerTransforms({
         paperLayer,
         transform: layerItem.transform

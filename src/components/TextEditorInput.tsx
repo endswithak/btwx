@@ -15,12 +15,6 @@ const TextEditorInput = (): ReactElement => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const textSpanRef = useRef<HTMLTextAreaElement>(null);
   const textEditor = useSelector((state: RootState) => state.textEditor);
-  const justification = useSelector((state: RootState) => state.textSettings.justification);
-  const fontWeight = useSelector((state: RootState) => state.textSettings.fontWeight);
-  const fontSize = useSelector((state: RootState) => state.textSettings.fontSize);
-  const leading = useSelector((state: RootState) => state.textSettings.leading);
-  const fontFamily = useSelector((state: RootState) => state.textSettings.fontFamily);
-  const fillColor = useSelector((state: RootState) => state.textSettings.fillColor);
   const layerItem = useSelector((state: RootState) => state.layer.present.byId[state.textEditor.layer] as Btwx.Text);
   const textValue = useSelector((state: RootState) => (state.layer.present.byId[state.textEditor.layer] as Btwx.Text).text);
   const [text, setText] = useState(textValue);
@@ -70,7 +64,7 @@ const TextEditorInput = (): ReactElement => {
       const topRight = paperMain.view.projectToView(paperLayer.bounds.topRight);
       setPos({
         x: (() => {
-          switch(justification) {
+          switch(layerItem.textStyle.justification) {
             case 'left':
               return topLeft.x;
             case 'center':
@@ -80,7 +74,7 @@ const TextEditorInput = (): ReactElement => {
           }
         })(),
         y: (() => {
-          switch(justification) {
+          switch(layerItem.textStyle.justification) {
             case 'left':
               return topLeft.y;
             case 'center':
@@ -115,22 +109,24 @@ const TextEditorInput = (): ReactElement => {
           left: pos.x,
           top: pos.y,
           position: 'absolute',
-          fontFamily: fontFamily,
-          fontSize: fontSize,
-          minHeight: leading,
-          fontWeight: fontWeight,
-          lineHeight: `${leading}px`,
+          fontFamily: layerItem.textStyle.fontFamily,
+          fontSize: layerItem.textStyle.fontSize,
+          minHeight: layerItem.textStyle.leading,
+          fontWeight: layerItem.textStyle.fontWeight,
+          lineHeight: `${layerItem.textStyle.leading}px`,
           letterSpacing: layerItem.textStyle.letterSpacing,
-          color: tinyColor({
-            h: fillColor.h,
-            s: fillColor.s,
-            l: fillColor.l,
-            a: fillColor.a
-          }).toRgbString(),
-          textAlign: justification,
+          fontStyle: layerItem.textStyle.fontStyle,
+          textAlign: layerItem.textStyle.justification,
+          textTransform: layerItem.textStyle.textTransform,
           transformOrigin: 'left top',
+          color: tinyColor({
+            h: layerItem.style.fill.color.h,
+            s: layerItem.style.fill.color.s,
+            l: layerItem.style.fill.color.l,
+            a: layerItem.style.fill.color.a
+          }).toRgbString(),
           transform: (() => {
-            switch(justification) {
+            switch(layerItem.textStyle.justification) {
               case 'left':
                 return `scale(${paperMain.view.zoom})`;
               case 'center':
@@ -153,12 +149,14 @@ const TextEditorInput = (): ReactElement => {
         className='c-text-editor__span'
         ref={textSpanRef}
         style={{
-          fontFamily: fontFamily,
-          fontSize: fontSize,
-          fontWeight: fontWeight,
-          lineHeight: `${leading}px`,
-          textAlign: justification,
-          letterSpacing: layerItem.textStyle.letterSpacing
+          fontFamily: layerItem.textStyle.fontFamily,
+          fontSize: layerItem.textStyle.fontSize,
+          fontWeight: layerItem.textStyle.fontWeight,
+          lineHeight: `${layerItem.textStyle.leading}px`,
+          textAlign: layerItem.textStyle.justification,
+          letterSpacing: layerItem.textStyle.letterSpacing,
+          textTransform: layerItem.textStyle.textTransform,
+          fontStyle: layerItem.textStyle.fontStyle
         }}>
         {text}
       </span>

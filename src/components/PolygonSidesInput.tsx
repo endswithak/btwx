@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { ReactElement, useEffect, useState, useRef, useCallback } from 'react';
-import debounce from 'lodash.debounce';
+import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { paperMain } from '../canvas';
 import { RootState } from '../store/reducers';
 import { setPolygonsSidesThunk } from '../store/actions/layer';
 import { getPaperLayer, getSelectedProjectIndices, getSelectedPolygonSides, getSelectedById } from '../store/selectors/layer';
+import { clearLayerTransforms, applyLayerTransforms } from '../store/utils/paper';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import MathFormGroup from './MathFormGroup';
@@ -43,7 +43,10 @@ const PolygonSidesInput = (): ReactElement => {
       const paperLayerCompound = getPaperLayer(layerItem.id, selectedProjectIndices[layerItem.id]) as paper.CompoundPath;
       const paperLayer = paperLayerCompound.children[0] as paper.Path;
       const startPosition = paperLayer.position;
-      paperLayer.rotation = -layerItem.transform.rotation;
+      clearLayerTransforms({
+        paperLayer,
+        transform: layerItem.transform
+      });
       const newShape = new paperMain.Path.RegularPolygon({
         center: paperLayer.bounds.center,
         radius: Math.max(paperLayer.bounds.width, paperLayer.bounds.height) / 2,
@@ -52,7 +55,10 @@ const PolygonSidesInput = (): ReactElement => {
       });
       newShape.bounds.width = paperLayer.bounds.width;
       newShape.bounds.height = paperLayer.bounds.height;
-      newShape.rotation = layerItem.transform.rotation;
+      applyLayerTransforms({
+        paperLayer: newShape,
+        transform: layerItem.transform
+      });
       newShape.position = startPosition;
       paperLayer.pathData = newShape.pathData;
       if (isMask) {

@@ -15,8 +15,7 @@ const SidebarLayerTree = (): ReactElement => {
 
   useEffect(() => {
     if (ref.current) {
-      console.log('search scrollto');
-      ref.current.scrollToItem(`search-tree-${scroll}`, 'start');
+      ref.current.scrollToItem(scroll, 'start');
     }
   }, [scroll]);
 

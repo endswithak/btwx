@@ -8,6 +8,8 @@ export const SET_TEXT_SETTINGS_LEADING = 'SET_TEXT_SETTINGS_LEADING';
 export const SET_TEXT_SETTINGS_JUSTIFICATION = 'SET_TEXT_SETTINGS_JUSTIFICATION';
 export const SET_TEXT_SETTINGS_SYSTEM_FONTS = 'SET_TEXT_SETTINGS_SYSTEM_FONTS';
 export const SET_TEXT_SETTINGS_READY = 'SET_TEXT_SETTINGS_READY';
+export const SET_TEXT_SETTINGS_TEXT_TRANSFORM = 'SET_TEXT_SETTINGS_TEXT_TRANSFORM';
+export const SET_TEXT_SETTINGS_FONT_STYLE = 'SET_TEXT_SETTINGS_FONT_STYLE';
 
 export type SetTextSettingsPayload = {
   [P in keyof Btwx.TextStyle]?: Btwx.TextStyle[P];
@@ -72,6 +74,24 @@ export interface SetTextSettingsLeading {
   payload: SetTextSettingsLeadingPayload;
 }
 
+export interface SetTextSettingsTextTransformPayload {
+  textTransform: Btwx.TextTransform;
+}
+
+export interface SetTextSettingsTextTransform {
+  type: typeof SET_TEXT_SETTINGS_TEXT_TRANSFORM;
+  payload: SetTextSettingsTextTransformPayload;
+}
+
+export interface SetTextSettingsFontStylePayload {
+  fontStyle: Btwx.FontStyle;
+}
+
+export interface SetTextSettingsFontStyle {
+  type: typeof SET_TEXT_SETTINGS_FONT_STYLE;
+  payload: SetTextSettingsFontStylePayload;
+}
+
 export interface SetTextSettingsJustificationPayload {
   justification: Btwx.Jusftification;
 }
@@ -102,5 +122,7 @@ export type TextSettingsTypes = SetTextSettings |
                                 SetTextSettingsLetterSpacing |
                                 SetTextSettingsLeading |
                                 SetTextSettingsJustification |
+                                SetTextSettingsTextTransform |
+                                SetTextSettingsFontStyle |
                                 SetTextSettingsSystemFonts |
                                 SetTextSettingsReady;

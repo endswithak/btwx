@@ -7,6 +7,8 @@ import {
   SET_TEXT_SETTINGS_LETTER_SPACING,
   SET_TEXT_SETTINGS_LEADING,
   SET_TEXT_SETTINGS_JUSTIFICATION,
+  SET_TEXT_SETTINGS_TEXT_TRANSFORM,
+  SET_TEXT_SETTINGS_FONT_STYLE,
   SET_TEXT_SETTINGS_SYSTEM_FONTS,
   SET_TEXT_SETTINGS_READY,
   SetTextSettingsPayload,
@@ -17,6 +19,8 @@ import {
   SetTextSettingsLetterSpacingPayload,
   SetTextSettingsLeadingPayload,
   SetTextSettingsJustificationPayload,
+  SetTextSettingsFontStylePayload,
+  SetTextSettingsTextTransformPayload,
   SetTextSettingsSystemFontsPayload,
   TextSettingsTypes
 } from '../actionTypes/textSettings';
@@ -58,6 +62,16 @@ export const setTextSettingsLeading = (payload: SetTextSettingsLeadingPayload): 
 
 export const setTextSettingsJustification = (payload: SetTextSettingsJustificationPayload): TextSettingsTypes => ({
   type: SET_TEXT_SETTINGS_JUSTIFICATION,
+  payload
+});
+
+export const setTextSettingsTextTransform = (payload: SetTextSettingsTextTransformPayload): TextSettingsTypes => ({
+  type: SET_TEXT_SETTINGS_TEXT_TRANSFORM,
+  payload
+});
+
+export const setTextSettingsFontStyle = (payload: SetTextSettingsFontStylePayload): TextSettingsTypes => ({
+  type: SET_TEXT_SETTINGS_FONT_STYLE,
   payload
 });
 

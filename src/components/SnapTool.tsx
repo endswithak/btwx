@@ -32,6 +32,20 @@ interface SnapToolProps {
 
 const snapToolDebug = false;
 
+// Takes a bounds and returns a snapped bounds
+// also displays guides when snapped
+//
+// @param {bounds} the bounds to snap
+// @param {hitTestZones} the zones of the {bounds} you want to snap
+// @param {snapRule} defines how the {bounds} is transformed
+// @param {resizeHandle} defines how the {bounds} is transformed when {snapRule === 'resize'}
+// @param {preserveAspectRatio} preserves {bounds} aspect ratio when {snapRule === 'resize'}
+// @param {aspectRatio} aspectRatio to preserve for {preserveAspectRatio}
+// @param {whiteListLayers} whitelist snap to layers
+// @param {blackListLayers} blacklist snap to layers
+// @param {measure} add measurments to guides
+// @param {onUpdate} callback with snapBounds and snap points
+
 const SnapTool = (props: SnapToolProps): ReactElement => {
   const { toolEvent, bounds, onUpdate, hitTestZones, snapRule, whiteListLayers, blackListLayers, preserveAspectRatio, aspectRatio, resizeHandle, measure } = props;
   const scope = useSelector((state: RootState) => state.layer.present.scope);

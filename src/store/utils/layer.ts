@@ -5377,7 +5377,6 @@ export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerSt
   const lines = action.payload.lines;
   const textResize = action.payload.textResize;
   const paragraphs = action.payload.paragraphs;
-  const contentHeight = action.payload.contentHeight;
   const from = action.payload.from;
   const to = action.payload.to;
   if (pathData) {
@@ -5417,18 +5416,6 @@ export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerSt
         [action.payload.id]: {
           ...currentState.byId[action.payload.id],
           paragraphs: paragraphs
-        } as Btwx.Text
-      }
-    }
-  }
-  if (contentHeight) {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          contentHeight: contentHeight
         } as Btwx.Text
       }
     }
@@ -5514,7 +5501,6 @@ export const setLayersWidth = (state: LayerState, action: SetLayersWidth): Layer
     const bounds = action.payload.bounds ? action.payload.bounds[current] : null;
     const paragraphs = action.payload.paragraphs ? action.payload.paragraphs[current] : null;
     const lines = action.payload.lines ? action.payload.lines[current] : null;
-    const contentHeight = action.payload.contentHeight ? action.payload.contentHeight[current] : null;
     const textResize = action.payload.textResize ? action.payload.textResize[current] : null;
     const from = action.payload.from ? action.payload.from[current] : null;
     const to = action.payload.to ? action.payload.to[current] : null;
@@ -5525,7 +5511,6 @@ export const setLayersWidth = (state: LayerState, action: SetLayersWidth): Layer
       bounds,
       paragraphs,
       lines,
-      contentHeight,
       textResize,
       from,
       to
@@ -5552,7 +5537,6 @@ export const setLayerHeight = (state: LayerState, action: SetLayerHeight): Layer
   const lines = action.payload.lines;
   const textResize = action.payload.textResize;
   const paragraphs = action.payload.paragraphs;
-  const contentHeight = action.payload.contentHeight;
   const from = action.payload.from;
   const to = action.payload.to;
   if (pathData) {
@@ -5592,18 +5576,6 @@ export const setLayerHeight = (state: LayerState, action: SetLayerHeight): Layer
         [action.payload.id]: {
           ...currentState.byId[action.payload.id],
           paragraphs: paragraphs
-        } as Btwx.Text
-      }
-    }
-  }
-  if (contentHeight) {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          contentHeight: contentHeight
         } as Btwx.Text
       }
     }
@@ -5689,7 +5661,6 @@ export const setLayersHeight = (state: LayerState, action: SetLayersHeight): Lay
     const bounds = action.payload.bounds ? action.payload.bounds[current] : null;
     const paragraphs = action.payload.paragraphs ? action.payload.paragraphs[current] : null;
     const lines = action.payload.lines ? action.payload.lines[current] : null;
-    const contentHeight = action.payload.contentHeight ? action.payload.contentHeight[current] : null;
     const textResize = action.payload.textResize ? action.payload.textResize[current] : null;
     const from = action.payload.from ? action.payload.from[current] : null;
     const to = action.payload.to ? action.payload.to[current] : null;
@@ -5700,7 +5671,6 @@ export const setLayersHeight = (state: LayerState, action: SetLayersHeight): Lay
       bounds,
       paragraphs,
       lines,
-      contentHeight,
       textResize,
       from,
       to
@@ -7928,7 +7898,6 @@ export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState =>
   const lines = action.payload.lines;
   const resize = action.payload.resize;
   const paragraphs = action.payload.paragraphs;
-  const contentHeight = action.payload.contentHeight;
   const isArtboard = layerItem.type === 'Artboard';
   const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
   currentState = {
@@ -8039,18 +8008,6 @@ export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState =>
       }
     }
   }
-  if (contentHeight) {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          contentHeight: contentHeight
-        } as Btwx.Text
-      }
-    }
-  }
   if (lines) {
     currentState = {
       ...currentState,
@@ -8095,7 +8052,6 @@ export const scaleLayers = (state: LayerState, action: ScaleLayers): LayerState 
     const to = action.payload.to ? action.payload.to[current] : null;
     const resize = action.payload.resize ? action.payload.resize[current] : null;
     const paragraphs = action.payload.paragraphs ? action.payload.paragraphs[current] : null;
-    const contentHeight = action.payload.contentHeight ? action.payload.contentHeight[current] : null;
     const scale = action.payload.scale;
     const verticalFlip = action.payload.verticalFlip;
     const horizontalFlip = action.payload.horizontalFlip;
@@ -8112,8 +8068,7 @@ export const scaleLayers = (state: LayerState, action: ScaleLayers): LayerState 
       bounds,
       from,
       to,
-      paragraphs,
-      contentHeight
+      paragraphs
     }) as ScaleLayer);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
@@ -8147,7 +8102,6 @@ export const setLayerText = (state: LayerState, action: SetLayerText): LayerStat
             text: current
           }];
         }, []),
-        contentHeight: action.payload.contentHeight ? action.payload.contentHeight : (currentState.byId[action.payload.id] as Btwx.Text).contentHeight,
         paragraphs: action.payload.paragraphs ? action.payload.paragraphs : (currentState.byId[action.payload.id] as Btwx.Text).paragraphs,
         point: {
           ...(currentState.byId[action.payload.id] as Btwx.Text).point,
@@ -8188,7 +8142,6 @@ export const setLayerTextResize = (state: LayerState, action: SetLayerTextResize
           textResize: action.payload.resize
         },
         lines: action.payload.lines ? action.payload.lines : (currentState.byId[action.payload.id] as Btwx.Text).lines,
-        contentHeight: action.payload.contentHeight ? action.payload.contentHeight : (currentState.byId[action.payload.id] as Btwx.Text).contentHeight,
         paragraphs: action.payload.paragraphs ? action.payload.paragraphs : (currentState.byId[action.payload.id] as Btwx.Text).paragraphs,
         point: {
           ...(currentState.byId[action.payload.id] as Btwx.Text).point,
@@ -8216,7 +8169,6 @@ export const setLayersTextResize = (state: LayerState, action: SetLayersTextResi
     const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
     const lines = action.payload.lines ? action.payload.lines[index] : null;
     const paragraphs = action.payload.paragraphs ? action.payload.paragraphs[index] : null;
-    const contentHeight = action.payload.contentHeight ? action.payload.contentHeight[index] : null;
     const point = action.payload.point ? action.payload.point[index] : null;
     return setLayerTextResize(result, layerActions.setLayerTextResize({
       id: current,
@@ -8224,7 +8176,6 @@ export const setLayersTextResize = (state: LayerState, action: SetLayersTextResi
       bounds,
       lines,
       paragraphs,
-      contentHeight,
       point
     }) as SetLayerTextResize);
   }, currentState);
@@ -8258,7 +8209,6 @@ export const setLayerFontSize = (state: LayerState, action: SetLayerFontSize): L
           fontSize: action.payload.fontSize
         },
         lines: action.payload.lines ? action.payload.lines : (currentState.byId[action.payload.id] as Btwx.Text).lines,
-        contentHeight: action.payload.contentHeight ? action.payload.contentHeight : (currentState.byId[action.payload.id] as Btwx.Text).contentHeight,
         paragraphs: action.payload.paragraphs ? action.payload.paragraphs : (currentState.byId[action.payload.id] as Btwx.Text).paragraphs,
         point: {
           ...(currentState.byId[action.payload.id] as Btwx.Text).point,
@@ -8278,7 +8228,6 @@ export const setLayersFontSize = (state: LayerState, action: SetLayersFontSize):
     const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
     const lines = action.payload.lines ? action.payload.lines[index] : null;
     const paragraphs = action.payload.paragraphs ? action.payload.paragraphs[index] : null;
-    const contentHeight = action.payload.contentHeight ? action.payload.contentHeight[index] : null;
     const point = action.payload.point ? action.payload.point[index] : null;
     return setLayerFontSize(result, layerActions.setLayerFontSize({
       id: current,
@@ -8286,7 +8235,6 @@ export const setLayersFontSize = (state: LayerState, action: SetLayersFontSize):
       bounds,
       lines,
       paragraphs,
-      contentHeight,
       point
     }) as SetLayerFontSize);
   }, currentState);
@@ -8320,7 +8268,6 @@ export const setLayerFontWeight = (state: LayerState, action: SetLayerFontWeight
           fontWeight: action.payload.fontWeight
         },
         lines: action.payload.lines ? action.payload.lines : (currentState.byId[action.payload.id] as Btwx.Text).lines,
-        contentHeight: action.payload.contentHeight ? action.payload.contentHeight : (currentState.byId[action.payload.id] as Btwx.Text).contentHeight,
         paragraphs: action.payload.paragraphs ? action.payload.paragraphs : (currentState.byId[action.payload.id] as Btwx.Text).paragraphs,
         point: {
           ...(currentState.byId[action.payload.id] as Btwx.Text).point,
@@ -8340,7 +8287,6 @@ export const setLayersFontWeight = (state: LayerState, action: SetLayersFontWeig
     const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
     const lines = action.payload.lines ? action.payload.lines[index] : null;
     const paragraphs = action.payload.paragraphs ? action.payload.paragraphs[index] : null;
-    const contentHeight = action.payload.contentHeight ? action.payload.contentHeight[index] : null;
     const point = action.payload.point ? action.payload.point[index] : null;
     return setLayerFontWeight(result, layerActions.setLayerFontWeight({
       id: current,
@@ -8348,7 +8294,6 @@ export const setLayersFontWeight = (state: LayerState, action: SetLayersFontWeig
       bounds,
       lines,
       paragraphs,
-      contentHeight,
       point
     }) as SetLayerFontWeight);
   }, currentState);
@@ -8382,7 +8327,6 @@ export const setLayerLetterSpacing = (state: LayerState, action: SetLayerLetterS
           letterSpacing: action.payload.letterSpacing
         },
         lines: action.payload.lines ? action.payload.lines : (currentState.byId[action.payload.id] as Btwx.Text).lines,
-        contentHeight: action.payload.contentHeight ? action.payload.contentHeight : (currentState.byId[action.payload.id] as Btwx.Text).contentHeight,
         paragraphs: action.payload.paragraphs ? action.payload.paragraphs : (currentState.byId[action.payload.id] as Btwx.Text).paragraphs,
         point: {
           ...(currentState.byId[action.payload.id] as Btwx.Text).point,
@@ -8402,7 +8346,6 @@ export const setLayersLetterSpacing = (state: LayerState, action: SetLayersLette
     const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
     const lines = action.payload.lines ? action.payload.lines[index] : null;
     const paragraphs = action.payload.paragraphs ? action.payload.paragraphs[index] : null;
-    const contentHeight = action.payload.contentHeight ? action.payload.contentHeight[index] : null;
     const point = action.payload.point ? action.payload.point[index] : null;
     return setLayerLetterSpacing(result, layerActions.setLayerLetterSpacing({
       id: current,
@@ -8410,7 +8353,6 @@ export const setLayersLetterSpacing = (state: LayerState, action: SetLayersLette
       bounds,
       lines,
       paragraphs,
-      contentHeight,
       point
     }) as SetLayerLetterSpacing);
   }, currentState);
@@ -8444,7 +8386,6 @@ export const setLayerTextTransform = (state: LayerState, action: SetLayerTextTra
           textTransform: action.payload.textTransform
         },
         lines: action.payload.lines ? action.payload.lines : (currentState.byId[action.payload.id] as Btwx.Text).lines,
-        contentHeight: action.payload.contentHeight ? action.payload.contentHeight : (currentState.byId[action.payload.id] as Btwx.Text).contentHeight,
         paragraphs: action.payload.paragraphs ? action.payload.paragraphs : (currentState.byId[action.payload.id] as Btwx.Text).paragraphs,
         point: {
           ...(currentState.byId[action.payload.id] as Btwx.Text).point,
@@ -8463,7 +8404,6 @@ export const setLayersTextTransform = (state: LayerState, action: SetLayersTextT
     const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
     const lines = action.payload.lines ? action.payload.lines[index] : null;
     const paragraphs = action.payload.paragraphs ? action.payload.paragraphs[index] : null;
-    const contentHeight = action.payload.contentHeight ? action.payload.contentHeight[index] : null;
     const point = action.payload.point ? action.payload.point[index] : null;
     return setLayerTextTransform(result, layerActions.setLayerTextTransform({
       id: current,
@@ -8471,7 +8411,6 @@ export const setLayersTextTransform = (state: LayerState, action: SetLayersTextT
       bounds,
       lines,
       paragraphs,
-      contentHeight,
       point
     }) as SetLayerTextTransform);
   }, currentState);
@@ -8505,7 +8444,6 @@ export const setLayerFontFamily = (state: LayerState, action: SetLayerFontFamily
           fontFamily: action.payload.fontFamily
         },
         lines: action.payload.lines ? action.payload.lines : (currentState.byId[action.payload.id] as Btwx.Text).lines,
-        contentHeight: action.payload.contentHeight ? action.payload.contentHeight : (currentState.byId[action.payload.id] as Btwx.Text).contentHeight,
         paragraphs: action.payload.paragraphs ? action.payload.paragraphs : (currentState.byId[action.payload.id] as Btwx.Text).paragraphs,
         point: {
           ...(currentState.byId[action.payload.id] as Btwx.Text).point,
@@ -8525,7 +8463,6 @@ export const setLayersFontFamily = (state: LayerState, action: SetLayersFontFami
     const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
     const lines = action.payload.lines ? action.payload.lines[index] : null;
     const paragraphs = action.payload.paragraphs ? action.payload.paragraphs[index] : null;
-    const contentHeight = action.payload.contentHeight ? action.payload.contentHeight[index] : null;
     const point = action.payload.point ? action.payload.point[index] : null;
     return setLayerFontFamily(result, layerActions.setLayerFontFamily({
       id: current,
@@ -8533,7 +8470,6 @@ export const setLayersFontFamily = (state: LayerState, action: SetLayersFontFami
       bounds,
       lines,
       paragraphs,
-      contentHeight,
       point
     }) as SetLayerFontFamily);
   }, currentState);
@@ -8570,8 +8506,7 @@ export const setLayerLeading = (state: LayerState, action: SetLayerLeading): Lay
         point: {
           ...(currentState.byId[action.payload.id] as Btwx.Text).point,
           ...action.payload.point
-        },
-        contentHeight: action.payload.contentHeight ? action.payload.contentHeight : (currentState.byId[action.payload.id] as Btwx.Text).contentHeight
+        }
       } as Btwx.Text
     }
   }
@@ -8586,13 +8521,11 @@ export const setLayersLeading = (state: LayerState, action: SetLayersLeading): L
     const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
     const lines = action.payload.lines ? action.payload.lines[index] : null;
     const point = action.payload.point ? action.payload.point[index] : null;
-    const contentHeight = action.payload.contentHeight ? action.payload.contentHeight[index] : null;
     return setLayerLeading(result, layerActions.setLayerLeading({
       id: current,
       leading: action.payload.leading,
       bounds,
       lines,
-      contentHeight,
       point
     }) as SetLayerLeading);
   }, currentState);
@@ -8732,7 +8665,6 @@ export const setLayerFontStyle = (state: LayerState, action: SetLayerFontStyle):
           fontStyle: action.payload.fontStyle
         },
         lines: action.payload.lines ? action.payload.lines : (currentState.byId[action.payload.id] as Btwx.Text).lines,
-        contentHeight: action.payload.contentHeight ? action.payload.contentHeight : (currentState.byId[action.payload.id] as Btwx.Text).contentHeight,
         paragraphs: action.payload.paragraphs ? action.payload.paragraphs : (currentState.byId[action.payload.id] as Btwx.Text).paragraphs,
         point: {
           ...(currentState.byId[action.payload.id] as Btwx.Text).point,
@@ -8752,7 +8684,6 @@ export const setLayersFontStyle = (state: LayerState, action: SetLayersFontStyle
     const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
     const lines = action.payload.lines ? action.payload.lines[index] : null;
     const paragraphs = action.payload.paragraphs ? action.payload.paragraphs[index] : null;
-    const contentHeight = action.payload.contentHeight ? action.payload.contentHeight[index] : null;
     const point = action.payload.point ? action.payload.point[index] : null;
     return setLayerFontStyle(result, layerActions.setLayerFontStyle({
       id: current,
@@ -8760,7 +8691,6 @@ export const setLayersFontStyle = (state: LayerState, action: SetLayersFontStyle
       bounds,
       lines,
       paragraphs,
-      contentHeight,
       point
     }) as SetLayerFontStyle);
   }, currentState);

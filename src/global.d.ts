@@ -294,12 +294,10 @@ declare namespace Btwx {
     leading: number;
     fontWeight: FontWeight;
     fontFamily: string;
-    // oblique: number;
     fontStyle: FontStyle;
     justification: Jusftification;
     letterSpacing: number;
     textTransform: TextTransform;
-    // paragraph: number;
     verticalAlignment: VerticalAlignment;
     textResize: TextResize;
   }
@@ -412,7 +410,6 @@ declare namespace Btwx {
     paragraphs: string[][];
     point: Btwx.Point;
     textStyle: TextStyle;
-    contentHeight?: number;
   }
 
   interface TextLine {
