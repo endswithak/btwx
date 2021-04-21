@@ -16,10 +16,16 @@ const PreviewButton = (): ReactElement => {
   const dispatch = useDispatch();
 
   const handlePreviewClick = (): void => {
-    ipcRenderer.send('openPreview', JSON.stringify({
-      instanceId: instance,
-      stick: isEaseEditorOpen
-    }));
+    if (recording) {
+      ipcRenderer.send('setPreviewRecordingStopped', JSON.stringify({
+        instanceId: instance
+      }));
+    } else {
+      ipcRenderer.send('openPreview', JSON.stringify({
+        instanceId: instance,
+        stick: isEaseEditorOpen
+      }));
+    }
   }
 
   const buttonIcon = (): string => {
@@ -45,8 +51,7 @@ const PreviewButton = (): ReactElement => {
       onClick={handlePreviewClick}
       size='small'
       isActive={isOpen}
-      // recording={recording}
-      >
+      recording={recording}>
       <Icon
         name={buttonIcon()}
         size='small' />

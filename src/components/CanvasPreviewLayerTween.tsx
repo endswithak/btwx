@@ -202,24 +202,20 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   const addShapeTween = (): void => {
     const originWithoutRotation = new paperPreview.Path({
       pathData: (originLayerItem as Btwx.Shape).pathData,
-      // rotation: -originLayerItem.transform.rotation,
       insert: false
     });
-    originWithoutRotation.scale(
-      originLayerItem.transform.horizontalFlip ? -1 : 1,
-      originLayerItem.transform.verticalFlip ? -1 : 1
-    );
-    originWithoutRotation.rotation = -originLayerItem.transform.rotation;
+    clearLayerTransforms({
+      paperLayer: originWithoutRotation,
+      transform: originLayerItem.transform
+    });
     const destinationWithoutRotation = new paperPreview.Path({
       pathData: (destinationLayerItem as Btwx.Shape).pathData,
-      // rotation: -destinationLayerItem.transform.rotation,
       insert: false
     });
-    destinationWithoutRotation.scale(
-      destinationLayerItem.transform.horizontalFlip ? -1 : 1,
-      destinationLayerItem.transform.verticalFlip ? -1 : 1
-    );
-    destinationWithoutRotation.rotation = -destinationLayerItem.transform.rotation;
+    clearLayerTransforms({
+      paperLayer: destinationWithoutRotation,
+      transform: destinationLayerItem.transform
+    });
     // get morph data
     const morphData = [
       originWithoutRotation.pathData,
@@ -1204,6 +1200,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         const startScaleY = paperLayer.data.scaleY ? paperLayer.data.scaleY : originLayerItem.transform.verticalFlip ? -1 : 1;
         const width = paperLayer.data.width ? paperLayer.data.width : (originLayerItem as Btwx.Text).frame.width;
         const height = paperLayer.data.height ? paperLayer.data.height : (originLayerItem as Btwx.Text).frame.height;
+        const startPosition = paperLayer.position;
         clearLayerTransforms({
           paperLayer,
           transform: {
@@ -1256,6 +1253,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             variable: true
           });
         }
+        paperLayer.position = startPosition;
         paperLayer.data.rotation = eventTimeline.data[tween.layer][tween.prop];
         updateGradients({ paperLayer, textContent, textBackground });
       },
@@ -1927,6 +1925,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         const startScaleY = paperLayer.data.scaleY || paperLayer.data.scaleY === 0 ? paperLayer.data.scaleY === 0 ? 0.01 : paperLayer.data.scaleY : originLayerItem.transform.verticalFlip ? -1 : 1;
         const width = paperLayer.data.width ? paperLayer.data.width : (originLayerItem as Btwx.Text).frame.width;
         const height = paperLayer.data.height ? paperLayer.data.height : (originLayerItem as Btwx.Text).frame.height;
+        const startPosition = paperLayer.position;
         let nextScaleX = eventTimeline.data[tween.layer][tween.prop];
         if (nextScaleX === 0) {
           nextScaleX = 0.01;
@@ -1979,6 +1978,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             variable: true
           });
         }
+        paperLayer.position = startPosition;
         paperLayer.data.scaleX = nextScaleX;
       },
       ease: getEaseString(tween),
@@ -1998,6 +1998,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         const startScaleY = paperLayer.data.scaleY || paperLayer.data.scaleY === 0 ? paperLayer.data.scaleY === 0.01 ? 1 : paperLayer.data.scaleY : originLayerItem.transform.verticalFlip ? -1 : 1;
         const width = paperLayer.data.width ? paperLayer.data.width : (originLayerItem as Btwx.Text).frame.width;
         const height = paperLayer.data.height ? paperLayer.data.height : (originLayerItem as Btwx.Text).frame.height;
+        const startPosition = paperLayer.position;
         let nextScaleY = eventTimeline.data[tween.layer][tween.prop];
         if (nextScaleY === 0) {
           nextScaleY = 0.01;
@@ -2050,6 +2051,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             variable: true
           });
         }
+        paperLayer.position = startPosition;
         paperLayer.data.scaleY = nextScaleY;
       },
       ease: getEaseString(tween),

@@ -104,7 +104,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   const handleContextMenu = (e: any): void => {
     dispatch(openContextMenu({
       type: 'layer',
-      id: id
+      id
     }));
   }
 

@@ -16,6 +16,7 @@ const PreviewTopbar = ({
   setTouchCursor
 }: PreviewTopbarProps): ReactElement => (
   <div
+    id='preview-topbar'
     className='c-preview-topbar'
     style={{
       height: PREVIEW_TOPBAR_HEIGHT
@@ -26,7 +27,7 @@ const PreviewTopbar = ({
     <PreviewTouchCursorButton
       touchCursor={touchCursor}
       setTouchCursor={setTouchCursor} />
-    {/* <PreviewRecordButton /> */}
+    <PreviewRecordButton />
   </div>
 );
 

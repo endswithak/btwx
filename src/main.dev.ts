@@ -1075,6 +1075,79 @@ ipcMain.on('openPreviewDeviceContextMenu', (event, args) => {
   Menu.buildFromTemplate(template).popup();
 });
 
+ipcMain.handle('getPreviewWindowSize', (event, args) => {
+  const { instanceId } = JSON.parse(args);
+  const instance = btwxElectron.instance.byId[instanceId];
+  const previewSize = instance.preview.getSize();
+  return JSON.stringify({
+    width: previewSize[0],
+    height: previewSize[1]
+  });
+});
+
+ipcMain.on('setPreviewWindowSize', (event, args) => {
+  const { instanceId, width, height, animate = false } = JSON.parse(args);
+  const instance = btwxElectron.instance.byId[instanceId];
+  instance.preview.setSize(Math.round(width), Math.round(height), animate);
+});
+
+ipcMain.on('hidePreviewTrafficLights', (event, args) => {
+  const { instanceId } = JSON.parse(args);
+  if (process.platform === 'darwin') {
+    const instance = btwxElectron.instance.byId[instanceId];
+    instance.preview.setWindowButtonVisibility(false);
+  }
+});
+
+ipcMain.on('showPreviewTrafficLights', (event, args) => {
+  const { instanceId } = JSON.parse(args);
+  if (process.platform === 'darwin') {
+    const instance = btwxElectron.instance.byId[instanceId];
+    instance.preview.setWindowButtonVisibility(true);
+  }
+});
+
+ipcMain.handle('getPreviewMediaSource', (event, args) => {
+  const { instanceId } = JSON.parse(args);
+  const instance = btwxElectron.instance.byId[instanceId];
+  return instance.preview.getMediaSourceId();
+});
+
+ipcMain.on('setDocumentRecordingStarted', (event, args) => {
+  const { instanceId } = JSON.parse(args);
+  const instance = btwxElectron.instance.byId[instanceId];
+  instance.document.webContents.executeJavaScript(`startPreviewRecording()`);
+});
+
+// ipcMain.on('setDocumentRecordingStopped', (event, args) => {
+//   const { instanceId } = JSON.parse(args);
+//   const instance = btwxElectron.instance.byId[instanceId];
+//   instance.document.webContents.executeJavaScript(`stopPreviewRecording()`);
+// });
+
+ipcMain.handle('setDocumentRecordingStopped', (event, args) => {
+  const { instanceId, buffer } = JSON.parse(args);
+  const instance = btwxElectron.instance.byId[instanceId];
+  const videoBuffer = Buffer.from(buffer);
+  instance.document.webContents.executeJavaScript(`stopPreviewRecording()`).then(() => {
+    return new Promise((resolve, reject) => {
+      dialog.showSaveDialog(instance.document, {
+        buttonLabel: 'Save video',
+        defaultPath: `vid-${Date.now()}.webm`
+      }).then((res) => {
+        if (!res.canceled && res.filePath) {
+          fs.writeFile(res.filePath, videoBuffer, (err) => {
+            if(err) {
+              return console.log(err);
+            }
+          });
+        }
+        resolve(null);
+      });
+    });
+  });
+});
+
 ////////////////////////////////////////////////////////////
 // INSTANCE => FROM DOCUMENT RENDERER
 ////////////////////////////////////////////////////////////
@@ -1148,6 +1221,15 @@ ipcMain.on('initPasteErrorAlert', (event, args) => {
       resolve(null);
     });
   });
+});
+
+ipcMain.on('setPreviewRecordingStopped', (event, args) => {
+  const { instanceId } = JSON.parse(args);
+  const instance = btwxElectron.instance.byId[instanceId];
+  instance.preview.webContents.send('setPreviewRecordingStopped', JSON.stringify({
+    instanceId: instanceId,
+    platform: process.platform
+  }));
 });
 
 ////////////////////////////////////////////////////////////

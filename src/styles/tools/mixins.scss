@@ -263,6 +263,22 @@
         .c-text {
           color: theme-prop(text-light-on-primary) !important;
         }
+
+        &.c-stacked-button__top--recording {
+          background: theme-prop(recording);
+
+          .c-icon svg {
+            fill: theme-prop(text-light-on-recording);
+          }
+
+          .c-icon--outline svg {
+            stroke: theme-prop(text-light-on-recording);
+          }
+
+          .c-text {
+            color: theme-prop(text-light-on-recording) !important;
+          }
+        }
       }
 
       &:hover {
@@ -282,6 +298,22 @@
 
           .c-text {
             color: theme-prop(text-base-on-primary) !important;
+          }
+
+          &.c-stacked-button__top--recording {
+            background: theme-prop(recording-active);
+
+            .c-icon svg {
+              fill: theme-prop(text-base-on-recording);
+            }
+
+            .c-icon--outline svg {
+              stroke: theme-prop(text-base-on-recording);
+            }
+
+            .c-text {
+              color: theme-prop(text-base-on-recording) !important;
+            }
           }
         }
       }

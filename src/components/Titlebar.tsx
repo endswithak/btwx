@@ -48,6 +48,7 @@ const Titlebar = (): ReactElement => {
 
   return (
     <div
+      id={`${instanceId}-${windowType}-titlebar`}
       className={`c-titlebar${
         recording && windowType === 'document'
         ? `${' '}c-titlebar--recording`

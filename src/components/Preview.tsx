@@ -55,12 +55,12 @@ const Preview = (): ReactElement => {
                 touchCursor={touchCursor} />
               <PreviewDevice />
             </div>
-            {/* <video
+            <video
               id='preview-video'
               style={{
               position: 'absolute',
               opacity: 0
-            }} /> */}
+            }} />
           </>
         : <EmptyState
             icon='preview'
