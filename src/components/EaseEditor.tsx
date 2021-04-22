@@ -6,7 +6,7 @@ import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 import { MotionPathHelper } from 'gsap/MotionPathHelper';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import { RootState } from '../store/reducers';
-import { closeEaseEditorThunk } from '../store/actions/easeEditor';
+import { closeEaseEditor } from '../store/actions/easeEditor';
 import { setEventDrawerTweenEditing, setEventDrawerTweenHoverThunk } from '../store/actions/eventDrawer';
 import { setCanvasFocusing } from '../store/actions/canvasSettings';
 import EaseEditorVisualizer from './EaseEditorVisualizer';
@@ -24,7 +24,7 @@ const EaseEditor = (): ReactElement => {
   const onMouseDown = (event: any): void => {
     const previewButton = document.getElementById('preview-button');
     if (editorRef.current && !editorRef.current.contains(event.target) && !previewButton.contains(event.target)) {
-      dispatch(closeEaseEditorThunk());
+      dispatch(closeEaseEditor());
     }
   }
 
@@ -37,7 +37,7 @@ const EaseEditor = (): ReactElement => {
     dispatch(setEventDrawerTweenEditing({id: tween.id}));
     return (): void => {
       if (easeEditor.isOpen) {
-        dispatch(closeEaseEditorThunk());
+        dispatch(closeEaseEditor());
       }
       dispatch(setEventDrawerTweenEditing({id: null}));
       dispatch(setCanvasFocusing({focusing: true}));

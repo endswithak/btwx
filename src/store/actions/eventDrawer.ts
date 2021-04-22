@@ -47,6 +47,15 @@ export const setEventDrawerEventThunk = (payload: SetEventDrawerEventPayload) =>
       instanceId: instance,
       eventId: payload.id
     }));
+    if (payload.id) {
+      ipcRenderer.send('stickPreview', JSON.stringify({
+        instanceId: state.session.instance
+      }));
+    } else {
+      ipcRenderer.send('unStickPreview', JSON.stringify({
+        instanceId: state.session.instance
+      }));
+    }
   }
 };
 

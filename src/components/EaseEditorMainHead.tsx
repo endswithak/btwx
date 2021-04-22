@@ -5,7 +5,7 @@ import { RoughEase, SlowMo } from 'gsap/EasePack';
 import { CustomBounce } from 'gsap/CustomBounce';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { closeEaseEditorThunk } from '../store/actions/easeEditor';
+import { closeEaseEditor } from '../store/actions/easeEditor';
 import { allTextTweensSelected, getSelectedTextTweensScramble, getSelectedTweensEase, getSelectedTweensPower } from '../store/selectors/layer';
 import Icon from './Icon';
 import Button from './Button';
@@ -65,7 +65,7 @@ const EaseEditorMainHead = (props: EaseEditorMainHeadProps): ReactElement => {
         }
       </div>
       <Button
-        onClick={() => dispatch(closeEaseEditorThunk())}
+        onClick={() => dispatch(closeEaseEditor())}
         size='large'>
         <Icon
           name='close' />

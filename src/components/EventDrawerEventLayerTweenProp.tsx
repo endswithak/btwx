@@ -64,7 +64,7 @@ const EventDrawerEventLayerTweenProp = (props: EventDrawerEventLayerTweenPropPro
       template: [{
         label: `Edit...`,
         click: {
-          id: 'openEaseEditorThunk',
+          id: 'openEaseEditor',
           params: {
             tween: tweenId
           }

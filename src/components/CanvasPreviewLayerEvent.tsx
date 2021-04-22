@@ -28,7 +28,7 @@ export interface EventLayerTimelineData {
 const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElement => {
   const { eventId, instanceId } = props;
   const event = useSelector((state: RootState) => state.layer.present.events.byId[eventId]);
-  const instance = useSelector((state: RootState) => state.session.instance);
+  const electronInstanceId = useSelector((state: RootState) => state.session.instance);
   const originArtboardItem = useSelector((state: RootState) => state.layer.present.byId[event.artboard] as Btwx.Artboard);
   const originArtboardPosition = new paperPreview.Point(originArtboardItem.frame.x, originArtboardItem.frame.y);
   const destinationArtboardItem = useSelector((state: RootState) => state.layer.present.byId[event.destinationArtboard] as Btwx.Artboard);
@@ -59,7 +59,7 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
   const handleEventStart = () => {
     dispatch(setPreviewTweening({tweening: event.artboard}));
     ipcRenderer.send('setDocumentPreviewTweening', JSON.stringify({
-      instanceId: instance,
+      instanceId: electronInstanceId,
       tweening: event.artboard
     }));
   }
@@ -69,11 +69,11 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
     dispatch(setActiveArtboard({id: event.destinationArtboard}));
     dispatch(setPreviewTweening({tweening: null}));
     ipcRenderer.send('setDocumentActiveArtboard', JSON.stringify({
-      instanceId: instance,
+      instanceId: electronInstanceId,
       activeArtboard: event.destinationArtboard
     }));
     ipcRenderer.send('setDocumentPreviewTweening', JSON.stringify({
-      instanceId: instance,
+      instanceId: electronInstanceId,
       tweening: event.artboard
     }));
   }
@@ -128,17 +128,27 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
     setEventTimeline(newTimeline);
   }, [instanceId]);
 
-  // useEffect(() => {
-  //   if (tweenEdit && prevEdit) {
-  //     paperPreview.view.center = originArtboardPosition;
-  //     dispatch(setActiveArtboard({id: event.artboard}));
-  //     ipcRenderer.send('setDocumentActiveArtboard', JSON.stringify({
-  //       instanceId: instance,
-  //       activeArtboard: event.artboard
-  //     }));
-  //     eventTimeline.play();
-  //   }
-  // }, [edit]);
+  useEffect(() => {
+    if (tweenEdit && prevEdit) {
+      // animations can get throttled when preview window is not focused
+      // disabling backgroundThrottling does not seem to have an effect
+      ipcRenderer.send('focusInstancePreview', JSON.stringify({
+        instanceId: electronInstanceId
+      }));
+      paperPreview.view.center = originArtboardPosition;
+      dispatch(setActiveArtboard({id: event.artboard}));
+      ipcRenderer.invoke('setDocumentActiveArtboard', JSON.stringify({
+        instanceId: electronInstanceId,
+        activeArtboard: event.artboard
+      })).then(() => {
+        eventTimeline.play().then(() => {
+          ipcRenderer.send('focusInstanceDocument', JSON.stringify({
+            instanceId: electronInstanceId
+          }));
+        });
+      });
+    }
+  }, [edit]);
 
   // attach tweens to event layer timelines
   return (

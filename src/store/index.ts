@@ -7,7 +7,7 @@ import { closePreview, startPreviewRecording, stopPreviewRecording, setPreviewFo
 import { hydratePreferences } from './actions/preferences';
 import { setEventDrawerEvent, setEventDrawerEventThunk } from './actions/eventDrawer';
 import { hydrateLayers, addLayerTween, removeLayerTweens, removeLayerTween, removeLayersEvent } from './actions/layer';
-import { openEaseEditorThunk, closeEaseEditorThunk } from './actions/easeEditor';
+import { openEaseEditor, closeEaseEditor } from './actions/easeEditor';
 import { hydrateKeyBindings } from './actions/keyBindings';
 import { hydrateArtboardPresets } from './actions/artboardPresets';
 import { setActiveArtboard } from './actions/layer';
@@ -104,11 +104,11 @@ const configureStore: any = (preloadedState, isDocumentWindow = false): typeof s
   (window as any).removeLayersEvent = (params: any): void => {
     store.dispatch(removeLayersEvent(params));
   };
-  (window as any).openEaseEditorThunk = (params: any): void => {
-    store.dispatch(openEaseEditorThunk(params) as any);
+  (window as any).openEaseEditor = (params: any): void => {
+    store.dispatch(openEaseEditor(params) as any);
   };
-  (window as any).closeEaseEditorThunk = (): void => {
-    store.dispatch(closeEaseEditorThunk() as any);
+  (window as any).closeEaseEditor = (): void => {
+    store.dispatch(closeEaseEditor() as any);
   };
   (window as any).openPreview = (): void => {
     store.dispatch(openPreview());

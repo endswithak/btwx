@@ -1046,6 +1046,18 @@ ipcMain.on('openEventContextMenu', (event, args) => {
   Menu.buildFromTemplate(template).popup();
 });
 
+ipcMain.on('focusInstancePreview', (event, args) => {
+  const { instanceId } = JSON.parse(args);
+  const instance = btwxElectron.instance.byId[instanceId];
+  instance.preview.focus();
+});
+
+ipcMain.on('focusInstanceDocument', (event, args) => {
+  const { instanceId } = JSON.parse(args);
+  const instance = btwxElectron.instance.byId[instanceId];
+  instance.document.focus();
+});
+
 ////////////////////////////////////////////////////////////
 // INSTANCE => FROM PREVIEW RENDERER
 ////////////////////////////////////////////////////////////
@@ -1056,10 +1068,12 @@ ipcMain.on('setDocumentPreviewTweening', (event, args) => {
   instance.document.webContents.executeJavaScript(`setPreviewTweening(${JSON.stringify(tweening)})`);
 });
 
-ipcMain.on('setDocumentActiveArtboard', (event, args) => {
+ipcMain.handle('setDocumentActiveArtboard', (event, args) => {
   const { instanceId, activeArtboard } = JSON.parse(args);
   const instance = btwxElectron.instance.byId[instanceId];
-  instance.document.webContents.executeJavaScript(`setActiveArtboard(${JSON.stringify(activeArtboard)})`);
+  instance.document.webContents.executeJavaScript(`setActiveArtboard(${JSON.stringify(activeArtboard)})`).then(() => {
+    return Promise.resolve();
+  });
 });
 
 ipcMain.on('resizePreview', (event, args) => {

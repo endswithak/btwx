@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { openEaseEditorThunk } from '../store/actions/easeEditor';
+import { openEaseEditor } from '../store/actions/easeEditor';
 import IconButton from './IconButton';
 
 interface EventDrawerEventEditEaseProps {
@@ -13,7 +13,7 @@ const EventDrawerEventEditEase = ({ tweenId }: EventDrawerEventEditEaseProps): R
   const dispatch = useDispatch();
 
   const handleClick = (): void => {
-    dispatch(openEaseEditorThunk({tween: tweenId}));
+    dispatch(openEaseEditor({tween: tweenId}));
   }
 
   return (
