@@ -7,7 +7,6 @@ import { DocumentSettingsTypes } from './documentSettings';
 import { ViewSettingsTypes } from './viewSettings';
 import { EaseEditorTypes } from './easeEditor';
 import { GradientEditorTypes } from './gradientEditor';
-import { InsertKnobTypes } from './insertKnob';
 import { LayerTypes } from './layer';
 import { PreviewTypes } from './preview';
 import { RightSidebarTypes } from './rightSidebar';
@@ -31,7 +30,6 @@ export type RootAction = ArtboardPresetEditorTypes |
                          DocumentSettingsTypes |
                          EaseEditorTypes |
                          GradientEditorTypes |
-                         InsertKnobTypes |
                          LayerTypes |
                          PreviewTypes |
                          RightSidebarTypes |

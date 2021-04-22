@@ -16,7 +16,6 @@ import viewSettings from './viewSettings';
 import rightSidebar from './rightSidebar';
 import leftSidebar from './leftSidebar';
 import preview from './preview';
-import insertKnob from './insertKnob';
 import shapeTool from './shapeTool';
 import artboardTool from './artboardTool';
 import textTool from './textTool';
@@ -42,7 +41,6 @@ export const reducers = {
   rightSidebar,
   leftSidebar,
   preview,
-  insertKnob,
   shapeTool,
   artboardTool,
   textTool,

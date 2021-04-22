@@ -8,10 +8,6 @@ const SidebarLeftEmptyState = (): ReactElement => {
   const activeTool = useSelector((state: RootState) => state.canvasSettings.activeTool);
   const shapeToolShapeType = useSelector((state: RootState) => state.shapeTool.shapeType);
 
-  // const handleEmptyStateActionClick = () => {
-  //   activateInsertKnob();
-  // }
-
   const getEmptyStateIcon = () => {
     switch(activeTool) {
       case 'Shape':
@@ -65,28 +61,11 @@ const SidebarLeftEmptyState = (): ReactElement => {
     }
   }
 
-  // const getEmptyStateActionText = () => {
-  //   switch(activeTool) {
-  //     case 'Shape':
-  //       return `Adding ${shapeToolShapeType}...`;
-  //     case 'Text':
-  //     case 'Artboard':
-  //       return `Adding ${activeTool}...`;
-  //     default:
-  //       return 'Add Layer';
-  //   }
-  // }
-
   return (
     <EmptyState
       icon={getEmptyStateIcon()}
       text={getEmptyStateText()}
       detail={getEmptyStateDetail()}
-      // action
-      // actionText={getEmptyStateActionText()}
-      // actionActive={activeTool === 'Artboard' || activeTool === 'Shape' || activeTool === 'Text' || insertKnobOpen}
-      // actionDisabled={insertKnobOpen}
-      // actionClick={handleEmptyStateActionClick}
       style={{width: 211}} />
   );
 }
