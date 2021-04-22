@@ -10,14 +10,12 @@ import { PREVIEW_TOPBAR_HEIGHT, MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT } f
 import StackedButton from './StackedButton';
 import Icon from './Icon';
 
-const getTitlebarHeight = (platform) => {
-  return platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT;
-}
+const getTitlebarHeight = (platform) =>
+  platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT;
 
 let previewMediaRecorder: MediaRecorder;
 let previewVideoChunks: any[] = [];
 let windowSize: { width: number; height: number } = { width: null, height: null };
-// const titlebarHeight = remote.process.platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT;
 const topbarHeight = PREVIEW_TOPBAR_HEIGHT;
 
 ipcRenderer.on('setPreviewRecordingStopped', (event, args) => {

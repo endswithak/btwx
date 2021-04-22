@@ -1,3 +1,31 @@
+@font-face {
+  font-family: 'Space Mono';
+  src: url('../assets/typefaces/space-mono/SpaceMono-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Space Mono';
+  src: url('../assets/typefaces/space-mono/SpaceMono-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Space Mono';
+  src: url('../assets/typefaces/space-mono/SpaceMono-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Space Mono';
+  src: url('../assets/typefaces/space-mono/SpaceMono-BoldItalic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+}
+
 $font-family: 'Space Mono', system-ui, -apple-system, Menlo, Helvetica, Arial, sans-serif;
 
 $aspect-ratios: (

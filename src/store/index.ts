@@ -18,7 +18,7 @@ import { hydrateDocumentThunk, saveDocumentAs, saveDocument } from './actions/do
 import { HydrateDocumentPayload, SaveDocumentAsPayload, SaveDocumentPayload } from './actionTypes/documentSettings';
 import { LayerState } from './reducers/layer';
 
-const configureStore = (preloadedState, isDocumentWindow = false): typeof store => {
+const configureStore: any = (preloadedState, isDocumentWindow = false): typeof store => {
   const store = createStore(rootReducer, preloadedState, applyMiddleware(logger, thunk));
   let currentEdit: string = null;
   // let currentActiveArtboard: string = null;

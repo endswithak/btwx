@@ -3488,23 +3488,23 @@ export const hasStrokeGradientDestinationYTween = (layerItem: Btwx.Layer, equiva
 
 export const hasDashOffsetTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
-  const enabledMatch = validType && (layerItem.style.stroke.enabled === equivalentLayerItem.style.stroke.enabled);
+  const oneEnabled = validType && (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled);
   const dashOffsetMatch = validType && layerItem.style.strokeOptions.dashOffset === equivalentLayerItem.style.strokeOptions.dashOffset;
-  return validType && (!enabledMatch || !dashOffsetMatch);
+  return validType && oneEnabled && !dashOffsetMatch;
 };
 
 export const hasDashArrayWidthTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
-  const enabledMatch = validType && (layerItem.style.stroke.enabled === equivalentLayerItem.style.stroke.enabled);
+  const oneEnabled = validType && (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled);
   const dashArrayWidthMatch = validType && layerItem.style.strokeOptions.dashArray[0] === equivalentLayerItem.style.strokeOptions.dashArray[0];
-  return validType && (!enabledMatch || !dashArrayWidthMatch);
+  return validType && oneEnabled && !dashArrayWidthMatch;
 };
 
 export const hasDashArrayGapTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
-  const enabledMatch = validType && (layerItem.style.stroke.enabled === equivalentLayerItem.style.stroke.enabled);
+  const oneEnabled = validType && (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled);
   const dashArrayGapMatch = validType && layerItem.style.strokeOptions.dashArray[1] === equivalentLayerItem.style.strokeOptions.dashArray[1];
-  return validType && (!enabledMatch || !dashArrayGapMatch);
+  return validType && oneEnabled && !dashArrayGapMatch;
 };
 
 export const hasStrokeWidthTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {

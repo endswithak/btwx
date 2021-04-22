@@ -17,7 +17,7 @@ import { positionTextContent, clearLayerTransforms, applyLayerTransforms, getSca
 import { EventLayerTimelineData } from './CanvasPreviewLayerEvent';
 import { getParagraphs, getContent } from './CanvasTextLayer';
 
-gsap.registerPlugin(MorphSVGPlugin, RoughEase, SlowMo, CustomBounce, CustomWiggle, ScrambleTextPlugin, TextPlugin);
+gsap.registerPlugin(MorphSVGPlugin, RoughEase, SlowMo, CustomBounce, CustomEase, CustomWiggle, ScrambleTextPlugin, TextPlugin);
 
 interface CanvasPreviewLayerTweenProps {
   tweenId: string;
@@ -250,7 +250,6 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           width,
           height
         });
-        // apply final clone path data to tweenPaperLayer
         (paperLayer as paper.Path).pathData = eventTimeline.data[tween.layer][tween.prop];
         if (shapeMask) {
           (shapeMask as paper.Path).pathData = eventTimeline.data[tween.layer][tween.prop];
@@ -280,13 +279,13 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   };
 
   const addColorToColorFSTween = (style: 'fill' | 'stroke'): void => {
-    const ofc = originLayerItem.style.fill.color;
-    const dfc = destinationLayerItem.style.fill.color;
+    const ofc = originLayerItem.style[style].color;
+    const dfc = destinationLayerItem.style[style].color;
     eventTimeline.data[tween.layer][tween.prop] = tinyColor(ofc).toRgbString();
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
-      [tween.prop]: tween.ease === 'customWiggle' ? tinyColor(tween.customWiggle.strength).toRgbString() : tinyColor({h: dfc.h, s: dfc.s, l: dfc.l, a: dfc.a}).toRgbString(),
+      [tween.prop]: tween.ease === 'customWiggle' ? tinyColor(tween.customWiggle.strength).toRgbString() : tinyColor(dfc).toRgbString(),
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
         const nextFS = eventTimeline.data[tween.layer][tween.prop];
@@ -306,7 +305,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   };
 
   const addNullToColorFSTween = (style: 'fill' | 'stroke'): void => {
-    const dfc = destinationLayerItem.style.fill.color;
+    const dfc = destinationLayerItem.style[style].color;
     eventTimeline.data[tween.layer][tween.prop] = tinyColor({h: dfc.h, s: dfc.s, l: dfc.l, a: 0}).toRgbString();
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
@@ -331,7 +330,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   };
 
   const addColorToNullFSTween = (style: 'fill' | 'stroke'): void => {
-    const ofc = originLayerItem.style.fill.color;
+    const ofc = originLayerItem.style[style].color;
     eventTimeline.data[tween.layer][tween.prop] = ofc.a;
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
