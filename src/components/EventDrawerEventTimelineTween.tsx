@@ -296,19 +296,20 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
     }));
   }
 
-  const updateDraggables = (allIds: string[], handles: { [id: string]: Btwx.EventTweenHandle }, e) => {
+  const updateDraggables = (allIds: string[], handles: { [id: string]: Btwx.EventTweenHandle }, guideHandle: string, e) => {
     allIds.forEach((id) => {
       const isLastSelected = id === allIds[allIds.length - 1];
+      const isGuideHandle = id === guideHandle;
       let draggable: globalThis.Draggable[];
       switch(handles[id]) {
         case 'both':
-          draggable = setupLeftDraggableHandle(id, isLastSelected);
+          draggable = setupLeftDraggableHandle(id, isGuideHandle);
           break;
         case 'duration':
-          draggable = setupRightDraggableHandle(id, isLastSelected);
+          draggable = setupRightDraggableHandle(id, isGuideHandle);
           break;
         case 'delay':
-          draggable = setupTweenDraggableHandle(id, isLastSelected);
+          draggable = setupTweenDraggableHandle(id, isGuideHandle);
           break;
       }
       draggable[0].startDrag(e);
@@ -373,7 +374,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
         newSelectionHandles = selected.handle;
       }
     }
-    updateDraggables(newSelection, newSelectionHandles, e);
+    updateDraggables(newSelection, newSelectionHandles, tweenId, e);
   }
 
   useEffect(() => {

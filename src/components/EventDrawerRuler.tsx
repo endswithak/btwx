@@ -19,7 +19,7 @@ const EventDrawerRuler = (): ReactElement => (
             ? `${' '}c-event-drawer-ruler__unit--quarter-second`
             : ''
           }${
-            index === 219
+            index === ((MAX_TWEEN_DURATION * TWEEN_RULER_SECOND_SEGMENTS) - 1)
             ? `${' '}c-event-drawer-ruler__unit--end`
             : ''
           }`}

@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setLayersTweenDelay } from '../store/actions/layer';
 import { getSelectedTweensDelay, getSelectedTweensLongestDuration } from '../store/selectors/layer';
+import { MAX_TWEEN_DURATION } from '../constants';
 import MathFormGroup from './MathFormGroup';
 
 const EaseEditorDelayInput = (): ReactElement => {
@@ -13,8 +14,8 @@ const EaseEditorDelayInput = (): ReactElement => {
   const dispatch = useDispatch();
 
   const handleSubmitSuccess = (newDelay: any): void => {
-    if (newDelay + longestDuration > 10) {
-      const diff = (newDelay + longestDuration) - 10;
+    if (newDelay + longestDuration > MAX_TWEEN_DURATION) {
+      const diff = (newDelay + longestDuration) - MAX_TWEEN_DURATION;
       newDelay = newDelay - diff;
     }
     if (newDelay < 0) {
@@ -34,7 +35,7 @@ const EaseEditorDelayInput = (): ReactElement => {
       size='small'
       label='Delay'
       min={0}
-      max={10 - longestDuration}
+      max={MAX_TWEEN_DURATION - longestDuration}
       onSubmitSuccess={handleSubmitSuccess}
       submitOnBlur />
   );

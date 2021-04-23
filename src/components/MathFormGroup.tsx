@@ -22,8 +22,7 @@ export interface MathFormGroupProps {
   onFocus?(e: any): void;
 }
 
-const getFixedValue = (v) =>
-    !isNaN(v) ? Number(Number(v).toFixed(1)) : v;
+const getFixedValue = (v) => !isNaN(v) ? Number(Number(v).toFixed(2)) : v;
 
 const MathFormGroup = forwardRef(function MathFormGroup(props: MathFormGroupProps, ref: any) {
   const { controlId, disabled, size, inline, min, max, submitOnBlur, canvasAutoFocus, right, left, label, value, onSubmitSuccess, onSubmitError, onBlur, onFocus } = props;

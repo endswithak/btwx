@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-export const MAX_TWEEN_DURATION = 11;
+export const MAX_TWEEN_DURATION = 60;
 export const TWEEN_RULER_SECOND_SEGMENTS = 20;
 export const MIN_DOCUMENT_WIDTH = 1024;
 export const MIN_DOCUMENT_HEIGHT = 768;
