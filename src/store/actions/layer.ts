@@ -6280,8 +6280,14 @@ export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artb
       hoverPosition = hoverPosition.add(artboardPosition);
     }
     const hoverItemBounds = new paperMain.Rectangle({
-      from: new paperMain.Point(hoverPosition.x - (hoverItem.frame.width / 2), hoverPosition.y - (hoverItem.frame.height / 2)),
-      to: new paperMain.Point(hoverPosition.x + (hoverItem.frame.width / 2), hoverPosition.y + (hoverItem.frame.height / 2))
+      from: new paperMain.Point(
+        hoverPosition.x - (hoverItem.frame.width / 2),
+        hoverPosition.y - (hoverItem.frame.height / 2)
+      ),
+      to: new paperMain.Point(
+        hoverPosition.x + (hoverItem.frame.width / 2),
+        hoverPosition.y + (hoverItem.frame.height / 2)
+      )
     });
     switch(hoverItem.type) {
       case 'Shape': {

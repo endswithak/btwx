@@ -15,6 +15,7 @@ export interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
   toggle?: boolean;
   stacked?: boolean;
   icon?: boolean;
+  classNames?: string;
   aspectRatio?: Btwx.AspectRatio;
 }
 
@@ -32,6 +33,7 @@ const Button: RefForwardingComponent<'button', ButtonProps> = forwardRef(functio
   stacked,
   clear,
   aspectRatio,
+  classNames,
   ...rest
 }: ButtonProps, ref: any) {
   return (
@@ -78,6 +80,10 @@ const Button: RefForwardingComponent<'button', ButtonProps> = forwardRef(functio
       }${
         disabled
         ? `${' '}c-button--disabled`
+        : ''
+      }${
+        classNames
+        ? `${' '}${classNames}`
         : ''
       }`}>
       { children }

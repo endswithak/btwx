@@ -101,6 +101,7 @@ const TextEditorInput = (): ReactElement => {
       ref={containerRef}>
       <textarea
         className='c-text-editor__textarea'
+        spellCheck={false}
         ref={textAreaRef}
         value={text}
         onChange={handleTextChange}

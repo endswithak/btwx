@@ -69,8 +69,8 @@
 
 .c-event-drawer-event__layers-timeline
   height: 100%
-  min-width: $unit * 1000
-  width: $unit * 1000 // 4000 // 10 sec max
+  min-width: $tween-ruler-width
+  width: $tween-ruler-width
   display: flex
   flex-direction: column
   flex-grow: 2
@@ -173,8 +173,8 @@
 .c-event-drawer-ruler__unit
   @include themed()
     box-shadow: -1px 0 0 0 theme-prop(event-drawer-measure) inset
-  width: $unit * 5
-  min-width: $unit * 5
+  width: $tween-ruler-second-segment-width
+  min-width: $tween-ruler-second-segment-width
   position: relative
   flex-shrink: 0
   display: flex

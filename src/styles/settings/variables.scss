@@ -46,15 +46,10 @@ $text-style-names: 'body-1', 'body-2';
 
 $theme-color-names: 'primary', 'accent', 'success', 'info', 'error', 'recording', 'warn';
 $theme-text-color-names: 'base', 'light', 'lighter', 'lightest',
-  'base-on-primary', 'base-on-accent', 'base-on-success', 'base-on-info',
-  'base-on-error', 'base-on-recording', 'base-on-warn', 'light-on-primary',
-  'light-on-accent', 'light-on-success', 'light-on-info', 'light-on-error',
-  'light-on-recording', 'light-on-warn', 'lighter-on-primary',
-  'lighter-on-accent', 'lighter-on-success', 'lighter-on-info',
-  'lighter-on-error', 'lighter-on-recording', 'lighter-on-warn',
-  'lightest-on-primary', 'lightest-on-accent', 'lightest-on-success',
-  'lightest-on-info', 'lightest-on-error', 'lightest-on-recording',
-  'lightest-on-warn';
+'base-on-primary', 'base-on-accent', 'base-on-success', 'base-on-info', 'base-on-error', 'base-on-recording', 'base-on-warn',
+'light-on-primary', 'light-on-accent', 'light-on-success', 'light-on-info', 'light-on-error', 'light-on-recording', 'light-on-warn',
+'lighter-on-primary', 'lighter-on-accent', 'lighter-on-success', 'lighter-on-info', 'lighter-on-error', 'lighter-on-recording', 'lighter-on-warn',
+'lightest-on-primary', 'lightest-on-accent', 'lightest-on-success', 'lightest-on-info', 'lightest-on-error', 'lightest-on-recording', 'lightest-on-warn';
 $theme-active-color-weight: 10%;
 
 // theme light palette
@@ -93,8 +88,11 @@ $theme-light-warn-active: color-shade(
   $theme-light-warn,
   $theme-active-color-weight
 );
-$theme-light-recording: $theme-light-error;
-$theme-light-recording-active: $theme-light-error-active;
+$theme-light-recording: #ff3b30;
+$theme-light-recording-active: color-shade(
+  $theme-light-recording,
+  $theme-active-color-weight
+);
 // theme light text
 $theme-light-text-base: #000000;
 $theme-light-text-light: rgba($theme-light-text-base, $text-light-opacity);
@@ -110,7 +108,7 @@ $theme-light-text-base-on-success: color-contrast($theme-light-success);
 $theme-light-text-base-on-info: color-contrast($theme-light-info);
 $theme-light-text-base-on-error: color-contrast($theme-light-error);
 $theme-light-text-base-on-warn: color-contrast($theme-light-warn);
-$theme-light-text-base-on-recording: $theme-light-text-base-on-error;
+$theme-light-text-base-on-recording: color-contrast($theme-light-recording);
 // theme light text light on color
 $theme-light-text-light-on-primary: rgba(
   $theme-light-text-base-on-primary,
@@ -136,7 +134,10 @@ $theme-light-text-light-on-warn: rgba(
   $theme-light-text-base-on-warn,
   $text-light-opacity
 );
-$theme-light-text-light-on-recording: $theme-light-text-light-on-error;
+$theme-light-text-light-on-recording: rgba(
+  $theme-light-text-base-on-recording,
+  $text-light-opacity
+);
 // theme light text lighter on color
 $theme-light-text-lighter-on-primary: rgba(
   $theme-light-text-base-on-primary,
@@ -162,7 +163,10 @@ $theme-light-text-lighter-on-warn: rgba(
   $theme-light-text-base-on-warn,
   $text-lighter-opacity
 );
-$theme-light-text-lighter-on-recording: $theme-light-text-lighter-on-error;
+$theme-light-text-lighter-on-recording: rgba(
+  $theme-light-text-base-on-recording,
+  $text-lighter-opacity
+);
 // theme light text lightest on color
 $theme-light-text-lightest-on-primary: rgba(
   $theme-light-text-base-on-primary,
@@ -188,7 +192,10 @@ $theme-light-text-lightest-on-warn: rgba(
   $theme-light-text-base-on-warn,
   $text-lightest-opacity
 );
-$theme-light-text-lightest-on-recording: $theme-light-text-lightest-on-error;
+$theme-light-text-lightest-on-recording: rgba(
+  $theme-light-text-base-on-recording,
+  $text-lightest-opacity
+);
 // theme light backgrounds
 $theme-light-background-z0: color-tint($theme-light-gray, 90%);
 $theme-light-background-z1: color-tint($theme-light-gray, 80%);
@@ -235,8 +242,11 @@ $theme-dark-warn-active: color-tint(
   $theme-dark-warn,
   $theme-active-color-weight
 );
-$theme-dark-recording: $theme-dark-error;
-$theme-dark-recording-active: $theme-dark-error-active;
+$theme-dark-recording: #ff453a;
+$theme-dark-recording-active: color-tint(
+  $theme-dark-recording,
+  $theme-active-color-weight
+);
 // theme dark text
 $theme-dark-text-base: #ffffff;
 $theme-dark-text-light: rgba($theme-dark-text-base, $text-light-opacity);
@@ -249,7 +259,7 @@ $theme-dark-text-base-on-success: color-contrast($theme-dark-success);
 $theme-dark-text-base-on-info: color-contrast($theme-dark-info);
 $theme-dark-text-base-on-error: color-contrast($theme-dark-error);
 $theme-dark-text-base-on-warn: color-contrast($theme-dark-warn);
-$theme-dark-text-base-on-recording: $theme-dark-text-base-on-error;
+$theme-dark-text-base-on-recording: color-contrast($theme-dark-recording);
 // theme dark text light on color
 $theme-dark-text-light-on-primary: rgba(
   $theme-dark-text-base-on-primary,
@@ -275,7 +285,10 @@ $theme-dark-text-light-on-warn: rgba(
   $theme-dark-text-base-on-warn,
   $text-light-opacity
 );
-$theme-dark-text-light-on-recording: $theme-dark-text-light-on-error;
+$theme-dark-text-light-on-recording: rgba(
+  $theme-dark-text-base-on-recording,
+  $text-light-opacity
+);
 // theme dark text lighter on color
 $theme-dark-text-lighter-on-primary: rgba(
   $theme-dark-text-base-on-primary,
@@ -301,7 +314,10 @@ $theme-dark-text-lighter-on-warn: rgba(
   $theme-dark-text-base-on-warn,
   $text-lighter-opacity
 );
-$theme-dark-text-lighter-on-recording: $theme-dark-text-lighter-on-error;
+$theme-dark-text-lighter-on-recording: rgba(
+  $theme-dark-text-base-on-recording,
+  $text-lighter-opacity
+);
 // theme dark text lightest on color
 $theme-dark-text-lightest-on-primary: rgba(
   $theme-dark-text-base-on-primary,
@@ -327,7 +343,10 @@ $theme-dark-text-lightest-on-warn: rgba(
   $theme-dark-text-base-on-warn,
   $text-lightest-opacity
 );
-$theme-dark-text-lightest-on-recording: $theme-dark-text-lightest-on-error;
+$theme-dark-text-lightest-on-recording: rgba(
+  $theme-dark-text-base-on-recording,
+  $text-lightest-opacity
+);
 // theme dark backgrounds
 $theme-dark-background-z0: color-shade($theme-dark-gray, 90%);
 $theme-dark-background-z1: color-shade($theme-dark-gray, 80%);
@@ -580,3 +599,9 @@ $list-item-double-size-small: $list-item-single-size-small * 2;
 $list-item-double-size-large: $list-item-single-size-large * 2;
 
 $icon-size: $unit * 6;
+
+$max-tween-duration: 11;
+$tween-ruler-second-segments: 20;
+$tween-ruler-second-segment-width: 20px;
+$tween-ruler-second-width: $tween-ruler-second-segments * $tween-ruler-second-segment-width;
+$tween-ruler-width: $max-tween-duration * $tween-ruler-second-width;

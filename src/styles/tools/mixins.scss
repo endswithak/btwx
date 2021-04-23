@@ -424,6 +424,98 @@
   }
 }
 
+@mixin preview-record-button() {
+  @include themed() {
+    color: theme-prop(text-lighter);
+    background: theme-prop(button-background);
+    box-shadow: 0 0 0 1px theme-prop(button-border) inset;
+
+    .c-icon svg {
+      fill: theme-prop(text-lighter);
+    }
+
+    .c-icon--outline svg {
+      stroke: theme-prop(text-lighter);
+    }
+
+    &:hover {
+      color: theme-prop(text-base-on-recording);
+      box-shadow: 0 0 0 1px theme-prop(button-border-active) inset;
+
+      .c-icon svg {
+        fill: theme-prop(recording) !important;
+      }
+
+      .c-icon--outline svg {
+        stroke: theme-prop(recording) !important;
+      }
+    }
+
+    &.c-button--active {
+      color: theme-prop(text-light-on-recording);
+      background: theme-prop(recording);
+      box-shadow: 0 0 0 1px theme-prop(recording) inset;
+
+      .c-icon svg {
+        fill: theme-prop(text-light-on-recording);
+      }
+
+      .c-icon--outline svg {
+        stroke: theme-prop(text-light-on-recording);
+      }
+
+      &:hover {
+        color: theme-prop(text-base-on-recording);
+        background: theme-prop(recording-active);
+        box-shadow: 0 0 0 1px theme-prop(recording-active) inset;
+
+        .c-icon svg {
+          fill: theme-prop(text-base-on-recording);
+        }
+
+        .c-icon--outline svg {
+          stroke: theme-prop(text-base-on-recording);
+        }
+      }
+
+      &:disabled,
+      &:disabled &:hover,
+      &.c-button--disabled {
+        cursor: not-allowed;
+        opacity: 50%;
+        color: theme-prop(text-lighter-on-recording);
+        background: theme-prop(recording);
+        box-shadow: 0 0 0 1px theme-prop(recording) inset;
+
+        .c-icon svg {
+          fill: theme-prop(text-lighter-on-recording);
+        }
+
+        .c-icon--outline svg {
+          stroke: theme-prop(text-lighter-on-recording);
+        }
+      }
+    }
+
+    &:disabled,
+    &:disabled &:hover,
+    &.c-button--disabled {
+      cursor: not-allowed;
+      opacity: 50%;
+      color: theme-prop(text-lighter);
+      box-shadow: 0 0 0 1px theme-prop(button-border) inset;
+
+      .c-icon svg {
+        fill: theme-prop(text-lighter);
+      }
+
+      .c-icon--outline svg {
+        stroke: theme-prop(text-lighter);
+      }
+    }
+  }
+}
+
 @mixin theme-button($theme-color) {
   @include themed() {
     color: theme-prop(text-light-on-#{$theme-color});

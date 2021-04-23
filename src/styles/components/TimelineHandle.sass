@@ -5,7 +5,7 @@
   position: absolute
   width: $unit * 4
   height: $unit * 4
-  cursor: ew-resize
+  cursor: pointer
   z-index: 2
 
   &:hover
@@ -22,6 +22,7 @@
       left: 2px
 
   &.c-timeline-handle--selected
+    cursor: grab
     .c-timeline-handle__ellipse
       @include themed()
         background: theme-prop(primary)
@@ -67,10 +68,11 @@
   position: relative
   height: $unit * 4
   border-radius: $unit * 2
-  cursor: ew-resize
+  cursor: pointer
   z-index: 1
 
   &.c-timeline-tween-handle--selected
+    cursor: grab
     @include themed()
       background: theme-prop(primary)
       box-shadow: 0 0 0 1px theme-prop(primary) inset

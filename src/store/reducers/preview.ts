@@ -7,6 +7,8 @@ import {
   SET_PREVIEW_TWEENING,
   SET_PREVIEW_DEVICE,
   TOGGLE_PREVIEW_DEVICE_ORIENTATION,
+  ENABLE_PREVIEW_AUTOPLAY,
+  DISABLE_PREVIEW_AUTOPLAY,
   PreviewTypes
 } from '../actionTypes/preview';
 
@@ -15,6 +17,7 @@ export interface PreviewState {
   recording: boolean;
   focusing: boolean;
   tweening: string;
+  autoplay: boolean;
   device: {
     id: string;
     color: string;
@@ -27,6 +30,7 @@ export const initialState: PreviewState = {
   recording: false,
   focusing: false,
   tweening: null,
+  autoplay: true,
   device: {
     id: null,
     color: null,
@@ -91,6 +95,18 @@ export default (state = initialState, action: PreviewTypes): PreviewState => {
           ...state.device,
           orientation: state.device.orientation === 'Portrait' ? 'Landscape' : 'Portrait'
         }
+      };
+    }
+    case ENABLE_PREVIEW_AUTOPLAY: {
+      return {
+        ...state,
+        autoplay: true
+      };
+    }
+    case DISABLE_PREVIEW_AUTOPLAY: {
+      return {
+        ...state,
+        autoplay: false
       };
     }
     default:

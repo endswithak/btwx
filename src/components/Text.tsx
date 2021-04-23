@@ -5,14 +5,16 @@ interface TextProps {
   size?: Btwx.TextSizeVariant;
   variant?: Btwx.ColorVariant | Btwx.TextColorVariant;
   textStyle?: Btwx.TextStyle | string;
+  style?: any;
   children: any;
 }
 
 const Text = (props: TextProps): ReactElement => {
-  const { children, size, variant, textStyle } = props;
+  const { children, size, variant, textStyle, ...rest } = props;
 
   return (
     <span
+      {...rest}
       className={`c-text${
         size
         ? `${' '}c-text--${size}`

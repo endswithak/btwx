@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperPreview } from '../canvas';
 import CanvasArtboardLayer from './CanvasArtboardLayer';
-import touchCursor from '../../assets/cursor/touch.svg';
+import touchCursorSvg from '../../assets/cursor/touch.svg';
 
 interface PreviewCanvasProps {
   touchCursor: boolean;
@@ -45,7 +45,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
         className='c-canvas'
         ref={canvasContainerRef}
         style={{
-          cursor: touchCursor ? `url(${touchCursor}) 13 13, auto` : 'default'
+          cursor: touchCursor ? `url(${touchCursorSvg}) 13 13, auto` : 'default'
         }}>
         <canvas
           id='canvas-preview'

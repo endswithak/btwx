@@ -296,6 +296,14 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
       const absPosition = getLayerAbsPosition(layerItem.frame, artboardItem.frame);
       const paperLayer = paperProject.getItem({ data: { id } }) as paper.CompoundPath;
       paperLayer.pathData = layerItem.pathData;
+      paperLayer.children.forEach((item) => {
+        item.data = {
+          id: 'shapePartial',
+          type: 'LayerChild',
+          layerType: 'Shape',
+          layerId: id
+        };
+      });
       paperLayer.position = absPosition;
       if (layerItem.mask) {
         const maskGroup = paperProject.getItem({ data: { id } }).parent;

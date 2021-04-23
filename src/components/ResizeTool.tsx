@@ -188,13 +188,13 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
       case 'Shape': {
         switch((layerItem as Btwx.Shape).shapeType) {
           case 'Line':
-          case 'Custom':
+          case 'Custom': {
             paperLayer.scale(hor, ver);
             break;
+          }
           case 'Ellipse':
           case 'Polygon':
           case 'Rectangle':
-          case 'Rounded':
           case 'Star': {
             const isMask = (layerItem as Btwx.Shape).mask;
             if (layerItem.transform.rotation !== 0) {
@@ -210,6 +210,32 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
                 paperLayer.previousSibling.scale(hor, ver);
               }
             }
+            break;
+          }
+          case 'Rounded': {
+            const isMask = (layerItem as Btwx.Shape).mask;
+            if (layerItem.transform.rotation !== 0) {
+              const scaleClone = paperLayer.clone({insert: false});
+              scaleClone.scale(hor, ver);
+              paperLayer.fitBounds(scaleClone.bounds);
+              if (isMask) {
+                paperLayer.previousSibling.fitBounds(scaleClone.bounds);
+              }
+            } else {
+              paperLayer.scale(hor, ver);
+              const maxDim = Math.max(paperLayer.bounds.width, paperLayer.bounds.height);
+              const newShape = new paperMain.Path.Rectangle({
+                from: paperLayer.bounds.topLeft,
+                to: paperLayer.bounds.bottomRight,
+                radius: (maxDim / 2) * (layerItem as Btwx.Rounded).radius,
+                insert: false
+              });
+              (paperLayer as paper.CompoundPath).pathData = newShape.pathData;
+              if (isMask) {
+                (paperLayer.previousSibling as paper.CompoundPath).pathData = newShape.pathData;
+              }
+            }
+            break;
           }
         }
         break;

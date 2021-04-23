@@ -107,6 +107,7 @@ const FormControl: RefForwardingComponent<'input', FormControlProps> = forwardRe
       <Tag
         {...rest}
         {...(rest.type && rest.type === 'range' ? { theme, ...sliderProps } : {})}
+        spellCheck={false}
         id={id || fg.controlId}
         size={htmlSize}
         ref={ref}

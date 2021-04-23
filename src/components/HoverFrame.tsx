@@ -18,7 +18,7 @@ const HoverFrame = (): ReactElement => {
       const hoverFrame = paperMain.projects[0].getItem({ data: { id: 'hoverFrame' } });
       hoverFrame.removeChildren();
     }
-  }, [hover, zoom, hoverBounds]);
+  }, [hover, hoverItem, zoom, hoverBounds]);
 
   return null;
 }

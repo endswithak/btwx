@@ -37,6 +37,7 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
   // const easeEditor = useSelector((state: RootState) => state.easeEditor);
   const editingEvent = useSelector((state: RootState) => state.eventDrawer.event === eventId);
   const edit = useSelector((state: RootState) => state.layer.present.edit.id);
+  const autoplay = useSelector((state: RootState) => state.preview.autoplay);
   const payloadString = useSelector((state: RootState) => JSON.stringify(state.layer.present.edit.payload));
   const tweenEdit = event.tweens.some((id) => payloadString.includes(id));
   const [prevEdit, setPrevEdit] = useState(null);
@@ -129,7 +130,7 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
   }, [instanceId]);
 
   useEffect(() => {
-    if (tweenEdit && prevEdit) {
+    if (tweenEdit && prevEdit && autoplay) {
       // animations can get throttled when preview window is not focused
       // disabling backgroundThrottling does not seem to have an effect
       ipcRenderer.send('focusInstancePreview', JSON.stringify({

@@ -1,9 +1,10 @@
 import React, { ReactElement } from 'react';
+import { MAX_TWEEN_DURATION, TWEEN_RULER_SECOND_SEGMENTS } from '../constants';
 
 const EventDrawerRuler = (): ReactElement => (
   <div className='c-event-drawer-ruler'>
     {
-      [...Array(200).keys()].map((item, index) => (
+      [...Array(MAX_TWEEN_DURATION * TWEEN_RULER_SECOND_SEGMENTS).keys()].map((item, index) => (
         <div
           className={`c-event-drawer-ruler__unit${
             (index + 1) % 20 === 0
@@ -18,7 +19,7 @@ const EventDrawerRuler = (): ReactElement => (
             ? `${' '}c-event-drawer-ruler__unit--quarter-second`
             : ''
           }${
-            index === 199
+            index === 219
             ? `${' '}c-event-drawer-ruler__unit--end`
             : ''
           }`}
@@ -26,11 +27,11 @@ const EventDrawerRuler = (): ReactElement => (
           <span>
             {
               (index + 1) % 20 === 0
-              ?  `${(index + 1) / 20}s`
+              ? `${(index + 1) / TWEEN_RULER_SECOND_SEGMENTS}s`
               : (index + 1) % 10 === 0
-                ? `${(index + 1) / 20}s`
+                ? `${(index + 1) / TWEEN_RULER_SECOND_SEGMENTS}s`
                 : (index + 1) % 5 === 0
-                  ? `${(index + 1) / 20}s`
+                  ? `${(index + 1) / TWEEN_RULER_SECOND_SEGMENTS}s`
                   : ''
             }
           </span>

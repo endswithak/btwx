@@ -7,6 +7,8 @@ import {
   SET_PREVIEW_TWEENING,
   SET_PREVIEW_DEVICE,
   TOGGLE_PREVIEW_DEVICE_ORIENTATION,
+  ENABLE_PREVIEW_AUTOPLAY,
+  DISABLE_PREVIEW_AUTOPLAY,
   SetPreviewFocusingPayload,
   SetPreviewTweeningPayload,
   SetPreviewDevicePayload,
@@ -46,4 +48,12 @@ export const setPreviewDevice = (payload: SetPreviewDevicePayload): PreviewTypes
 
 export const togglePreviewDeviceOrientation = (): PreviewTypes => ({
   type: TOGGLE_PREVIEW_DEVICE_ORIENTATION
+});
+
+export const enablePreviewAutoplay = (): PreviewTypes => ({
+  type: ENABLE_PREVIEW_AUTOPLAY
+});
+
+export const disablePreviewAutoplay = (): PreviewTypes => ({
+  type: DISABLE_PREVIEW_AUTOPLAY
 });

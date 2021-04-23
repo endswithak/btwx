@@ -6,6 +6,8 @@ export const SET_PREVIEW_FOCUSING = 'SET_PREVIEW_FOCUSING';
 export const SET_PREVIEW_TWEENING = 'SET_PREVIEW_TWEENING';
 export const SET_PREVIEW_DEVICE = 'SET_PREVIEW_DEVICE';
 export const TOGGLE_PREVIEW_DEVICE_ORIENTATION = 'TOGGLE_PREVIEW_DEVICE_ORIENTATION';
+export const ENABLE_PREVIEW_AUTOPLAY = 'ENABLE_PREVIEW_AUTOPLAY';
+export const DISABLE_PREVIEW_AUTOPLAY = 'DISABLE_PREVIEW_AUTOPLAY';
 
 export interface OpenPreview {
   type: typeof OPEN_PREVIEW;
@@ -55,6 +57,14 @@ export interface TogglePreviewDeviceOrientation {
   type: typeof TOGGLE_PREVIEW_DEVICE_ORIENTATION;
 }
 
+export interface EnablePreviewAutoplay {
+  type: typeof ENABLE_PREVIEW_AUTOPLAY;
+}
+
+export interface DisablePreviewAutoplay {
+  type: typeof DISABLE_PREVIEW_AUTOPLAY;
+}
+
 export type PreviewTypes = OpenPreview |
                            ClosePreview |
                            StartPreviewRecording |
@@ -62,4 +72,6 @@ export type PreviewTypes = OpenPreview |
                            SetPreviewFocusing |
                            SetPreviewTweening |
                            SetPreviewDevice |
-                           TogglePreviewDeviceOrientation;
+                           TogglePreviewDeviceOrientation |
+                           EnablePreviewAutoplay |
+                           DisablePreviewAutoplay;

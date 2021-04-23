@@ -68,7 +68,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
     const handle = Draggable.create(leftHandleElement, {
       type: 'x',
       zIndexBoost: false,
-      cursor: 'ew-resize',
+      // cursor: 'pointer',
       // autoScroll: 1,
       bounds: {
         minX: 0,
@@ -99,7 +99,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
           gsap.set(guide, {x: this.x});
           gsap.set(leftTooltipElement, {display: 'inline'});
           leftTooltipElement.innerText = `${(this.x / 4) / 100}s`;
-          document.body.style.cursor = 'ew-resize';
+          document.body.style.cursor = 'grabbing';
         }
       },
       onDrag: function() {
@@ -129,7 +129,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
     const handle = Draggable.create(rightHandleElement, {
       type: 'x',
       zIndexBoost: false,
-      cursor: 'ew-resize',
+      // cursor: 'pointer',
       // autoScroll: 1,
       bounds: {
         minX: gsap.getProperty(leftHandleElement, 'x') as number,
@@ -159,7 +159,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
           gsap.set(guide, {x: this.x + (theme.unit * 4)});
           gsap.set(rightTooltipElement, {display: 'inline'});
           rightTooltipElement.innerText = `${(tweenHandleElement.clientWidth / 4) / 100}s`;
-          document.body.style.cursor = 'ew-resize';
+          document.body.style.cursor = 'grabbing';
         }
       },
       onDrag: function() {
@@ -188,7 +188,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
     const handle = Draggable.create(tweenHandleElement, {
       type: 'x',
       zIndexBoost: false,
-      cursor: 'ew-resize',
+      // cursor: 'pointer',
       bounds: {
         minX: 0,
         maxX: timelineElement.clientWidth - tweenHandleElement.clientWidth,
@@ -218,7 +218,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
           gsap.set(guide, {x: (gsap.getProperty(rightHandleElement, 'x') as number) + (theme.unit * 4)});
           gsap.set(leftTooltipElement, {display: 'inline'});
           leftTooltipElement.innerText = `${(gsap.getProperty(leftHandleElement, 'x') as number / 4) / 100}s`;
-          document.body.style.cursor = 'ew-resize';
+          document.body.style.cursor = 'grabbing';
         }
       },
       onDrag: function() {

@@ -89,7 +89,11 @@ const EventDrawerStickyHeader = (props: EventDrawerStickyHeaderProps): ReactElem
             id={layerItem.id}
             isDragGhost />
           <ListItem.Body>
-            <ListItem.Text size='small'>
+            <ListItem.Text
+              size='small'
+              style={{
+                fontWeight: 400
+              }}>
               { layerItem.name }
             </ListItem.Text>
           </ListItem.Body>

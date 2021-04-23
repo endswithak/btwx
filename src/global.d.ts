@@ -2,6 +2,7 @@ declare module 'lodash.debounce';
 declare module 'lodash.clonedeep';
 declare module 'react-scroll-sync';
 declare module 'string.prototype.replaceall';
+declare var MediaRecorder: any;
 
 declare namespace Btwx {
 

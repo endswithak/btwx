@@ -7,13 +7,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { startPreviewRecording, stopPreviewRecording } from '../store/actions/preview';
 import { PREVIEW_TOPBAR_HEIGHT, MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT } from '../constants';
-import StackedButton from './StackedButton';
-import Icon from './Icon';
+import IconButton from './IconButton';
 
 const getTitlebarHeight = (platform) =>
   platform === 'darwin' ? MAC_TITLEBAR_HEIGHT : WINDOWS_TITLEBAR_HEIGHT;
 
-let previewMediaRecorder: MediaRecorder;
+let previewMediaRecorder;
 let previewVideoChunks: any[] = [];
 let windowSize: { width: number; height: number } = { width: null, height: null };
 const topbarHeight = PREVIEW_TOPBAR_HEIGHT;
@@ -191,18 +190,12 @@ const PreviewRecordButton = (): ReactElement => {
   }, [isOpen]);
 
   return (
-    <StackedButton
-      onClick={handleRecord}
+    <IconButton
       size='small'
-      label={null}>
-      <Icon
-        name={
-          recording
-          ? 'stop-recording'
-          : 'start-recording'
-        }
-        size='small' />
-    </StackedButton>
+      onClick={handleRecord}
+      iconName='start-recording'
+      label='record'
+      classNames='c-button--preview-record' />
   );
 }
 

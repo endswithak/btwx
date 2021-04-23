@@ -18,6 +18,10 @@
   position: relative;
   cursor: pointer;
 
+  &.c-button--preview-record {
+    @include preview-record-button();
+  }
+
   &.c-button--small {
     min-height: $button-size-small;
     font-size: $font-size-small;

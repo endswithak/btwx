@@ -91,7 +91,10 @@ const EventDrawerEventLayerTweenProp = (props: EventDrawerEventLayerTweenPropPro
       onMouseLeave={handleMouseLeave}
       onContextMenu={handleContextMenu}
       onMouseDown={handleMouseDown}
-      flush>
+      flush
+      style={{
+        cursor: 'pointer'
+      }}>
       {
         tweenId === tweenHover
         ? <EventDrawerEventEditEase tweenId={tweenId} />
