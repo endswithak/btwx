@@ -27,7 +27,6 @@ const SidebarLayerTree = (): ReactElement => {
 
   useEffect(() => {
     if (treeRef.current && !searchActive) {
-      console.log('layers scrollto');
       treeRef.current.scrollToItem(
         scroll,
         scrollType === 'Artboard' ? 'start' : 'center'
@@ -37,7 +36,6 @@ const SidebarLayerTree = (): ReactElement => {
 
   useEffect(() => {
     if (treeRef.current && !searchActive && selected.length > 0) {
-      console.log('search active scrollto');
       treeRef.current.scrollToItem(
         selected[0],
         selectedType === 'Artboard' ? 'start' : 'center'

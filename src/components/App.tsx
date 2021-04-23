@@ -10,7 +10,7 @@ import ArtboardPresetEditorWrap from './ArtboardPresetEditorWrap';
 import DocumentImages from './DocumentImages';
 import Titlebar from './Titlebar';
 import AutoSaver from './AutoSaver';
-import AppMain from './AppMain';
+import Main from './Main';
 
 const App = (): ReactElement => {
   const theme = useSelector((state: RootState) => state.preferences.theme);
@@ -20,13 +20,18 @@ const App = (): ReactElement => {
   useEffect(() => {
     (async () => {
       const fontList = await fontFinder.list();
-      const compiledFontList = [...WEB_SAFE_FONTS, ...Object.keys(fontList)].reduce((result: string[], current) => {
+      const compiledFontList = [
+        ...WEB_SAFE_FONTS,
+        ...Object.keys(fontList)
+      ].reduce((result: string[], current) => {
         if (!result.includes(current) && !current.startsWith('.')) {
           result = [...result, current];
         }
         return result;
       }, []).sort();
-      dispatch(setTextSettingsSystemFonts({systemFonts: compiledFontList}));
+      dispatch(setTextSettingsSystemFonts({
+        systemFonts: compiledFontList
+      }));
       dispatch(setTextSettingsReady());
     })();
   }, []);
@@ -42,7 +47,7 @@ const App = (): ReactElement => {
         {/* flex items */}
         <Titlebar />
         <Topbar />
-        <AppMain />
+        <Main />
         {/* abs elements */}
         <EaseEditorWrap />
         <ArtboardPresetEditorWrap />

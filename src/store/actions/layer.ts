@@ -6308,7 +6308,6 @@ export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artb
               fill: '#fff'
             }),
             ...(hoverItem as Btwx.Text).lines.reduce((result, current) => {
-              console.log(current.anchor.y);
               return [
                 ...result,
                 new paperMain.Path.Line({

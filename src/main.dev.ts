@@ -862,7 +862,6 @@ export const handleOpen = (fullPath: string) => {
       focusedInstanceDocument.focus();
     }
     if (focusedInstanceDocument) {
-      console.log('from focused instance');
       const size = focusedInstanceDocument.getSize();
       focusedInstanceDocument.webContents.executeJavaScript(`getCurrentEdit()`).then((documentJSON: string) => {
         const editState = JSON.parse(documentJSON) as BtwxInstanceEditState;
@@ -888,7 +887,6 @@ export const handleOpen = (fullPath: string) => {
         });
       });
     } else {
-      console.log('from no instance');
       fs.readFile(fullPath, {encoding: 'utf-8'}, (err, data) => {
         if(err) {
           dialog.showMessageBox(focusedInstanceDocument, {

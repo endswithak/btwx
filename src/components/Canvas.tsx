@@ -58,11 +58,31 @@ const Canvas = (): ReactElement => {
   const dispatch = useDispatch();
 
   const validLayerHitResult = (hitResult: paper.HitResult): boolean => {
-    return hitResult && hitResult.item && hitResult.item.data && hitResult.item.data.type && (hitResult.item.data.type === 'Layer' || hitResult.item.data.type === 'LayerChild' || hitResult.item.data.type === 'LayerContainer');
+    return (
+      hitResult &&
+      hitResult.item &&
+      hitResult.item.data &&
+      hitResult.item.data.type &&
+      (
+        hitResult.item.data.type === 'Layer' ||
+        hitResult.item.data.type === 'LayerChild' ||
+        hitResult.item.data.type === 'LayerContainer'
+      )
+    );
   };
 
   const validUIHitResult = (hitResult: paper.HitResult): boolean => {
-    return hitResult && hitResult.item && hitResult.item.data && hitResult.item.data.type && (hitResult.item.data.type === 'UIElement' || hitResult.item.data.type === 'UIElementChild' || hitResult.item.data.type === 'UIElementContainer');
+    return (
+      hitResult &&
+      hitResult.item &&
+      hitResult.item.data &&
+      hitResult.item.data.type &&
+      (
+        hitResult.item.data.type === 'UIElement' ||
+        hitResult.item.data.type === 'UIElementChild' ||
+        hitResult.item.data.type === 'UIElementContainer'
+      )
+    );
   };
 
   const handleHitResult = (e: any, eventType: CanvasEventType): void => {

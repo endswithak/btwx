@@ -36,7 +36,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   const hasChildren = useSelector((state: RootState) => sticky && isArtboard ? state.layer.present.byId[id] ? state.layer.present.byId[id].children.length > 0 : null : null);
   // const hover = useSelector((state: RootState) => state.layer.present.hover);
   // const underlyingMask = useSelector((state: RootState) => state.layer.present.byId[id].type !== 'Artboard' ? (state.layer.present.byId[id] as Btwx.MaskableLayer).underlyingMask : null);
-  // const editing = useSelector((state: RootState) => state.leftSidebar.editing === id);
+  const editing = useSelector((state: RootState) => state.leftSidebar.editing);
   const dispatch = useDispatch();
 
   const debounceDragOver = useCallback(
@@ -86,6 +86,9 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
           newSelection: true
         }));
       }
+    }
+    if (editing && !isEditing) {
+      (document.getElementById(`control-${editing}-name`) as HTMLInputElement).blur();
     }
   }
 

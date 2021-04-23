@@ -28,7 +28,7 @@ const EventDrawerEventLayersDragHandle = (): ReactElement => {
       <DragHandle
         ref={ref}
         side='left'
-        bounds='#main-canvas'
+        bounds='#stage'
         type='x'
         onDrag={handleDrag}
         onRelease={handleRelease}

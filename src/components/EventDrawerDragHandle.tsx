@@ -36,7 +36,7 @@ const EventDrawerDragHandle = (): ReactElement => {
     <DragHandle
       ref={ref}
       side='bottom'
-      bounds='#main-canvas'
+      bounds='#stage'
       type='y'
       onDrag={handleDrag}
       onRelease={handleRelease} />
