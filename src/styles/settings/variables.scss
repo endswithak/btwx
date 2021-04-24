@@ -439,7 +439,10 @@ $themes: (
     glass-background: rgba($theme-light-background-z1, $glass-opacity),
     canvas-default-background: $theme-light-background-z0,
     canvas-dark-background: $theme-dark-background-z0,
-    canvas-light-background: $theme-light-background-z0
+    canvas-light-background: $theme-light-background-z0,
+    barber-pole: url('../assets/barber-pole-light.svg'),
+    barber-pole-active: url('../assets/barber-pole-light-active.svg'),
+    barber-pole-primary: url('../assets/barber-pole-primary-light.svg')
   ),
   dark: (
     primary: $theme-dark-primary,
@@ -521,7 +524,10 @@ $themes: (
     glass-background: rgba($theme-dark-background-z1, $glass-opacity),
     canvas-default-background: $theme-dark-background-z0,
     canvas-dark-background: $theme-dark-background-z0,
-    canvas-light-background: $theme-light-background-z0
+    canvas-light-background: $theme-light-background-z0,
+    barber-pole: url('../assets/barber-pole-dark.svg'),
+    barber-pole-active: url('../assets/barber-pole-dark-active.svg'),
+    barber-pole-primary: url('../assets/barber-pole-primary-dark.svg')
   ),
 );
 

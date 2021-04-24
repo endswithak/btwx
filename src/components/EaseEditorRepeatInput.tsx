@@ -17,7 +17,7 @@ const EaseEditorRepeatInput = (): ReactElement => {
 
   const handleSubmitSuccess = (newRepeat: any): void => {
     if ((longestDuration * newRepeat) + longestDelay > MAX_TWEEN_DURATION) {
-      const diff = ((longestDuration * newRepeat) + longestDelay) - MAX_TWEEN_DURATION;
+      const diff = Math.round((((longestDuration * newRepeat) + longestDelay) - MAX_TWEEN_DURATION) / newRepeat) + 1;
       newRepeat = newRepeat - diff;
     }
     if (newRepeat < 0) {
@@ -39,7 +39,6 @@ const EaseEditorRepeatInput = (): ReactElement => {
       min={0}
       right={<EaseEditorYoyoInput />}
       rightReadOnly={false}
-      // max={MAX_TWEEN_DURATION - longestDelay}
       onSubmitSuccess={handleSubmitSuccess}
       submitOnBlur />
   );

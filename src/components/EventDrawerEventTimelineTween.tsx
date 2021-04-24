@@ -39,6 +39,13 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
     gsap.set(rightHandleElement, {
       x: ((tween.delay * 100) * theme.unit) + ((tween.duration * 100) * theme.unit) - theme.unit * 4
     });
+    if (tween.repeat !== 0) {
+      const repeatHandleElement = document.getElementById(`${tweenId}-handle-repeat`);
+      gsap.set(repeatHandleElement, {
+        x: (gsap.getProperty(rightHandleElement, 'x') as number),
+        width: ((gsap.getProperty(tweenHandleElement, 'width') as number) * tween.repeat) + (gsap.getProperty(rightHandleElement, 'width') as number)
+      });
+    }
   }
 
   const killDraggableHandle = (handle: Btwx.EventTweenHandle, id = tweenId) => {
@@ -107,6 +114,13 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
           x: `+=${this.deltaX}`,
           width: `-=${this.deltaX}`
         });
+        if (tween.repeat !== 0) {
+          const repeatHandleElement = document.getElementById(`${id}-handle-repeat`);
+          gsap.set(repeatHandleElement, {
+            x: (gsap.getProperty(rightHandleElement, 'x') as number),
+            width: ((gsap.getProperty(tweenHandleElement, 'width') as number) * tween.repeat) + (gsap.getProperty(rightHandleElement, 'width') as number)
+          });
+        }
         if (guideHandle) {
           gsap.set(guide, {
             x: `+=${this.deltaX}`
@@ -166,6 +180,13 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
         gsap.set(tweenHandleElement, {
           width: `+=${this.deltaX}`
         });
+        if (tween.repeat !== 0) {
+          const repeatHandleElement = document.getElementById(`${id}-handle-repeat`);
+          gsap.set(repeatHandleElement, {
+            x: (gsap.getProperty(rightHandleElement, 'x') as number),
+            width: ((gsap.getProperty(tweenHandleElement, 'width') as number) * tween.repeat) + (gsap.getProperty(rightHandleElement, 'width') as number)
+          });
+        }
         if (guideHandle) {
           gsap.set(guide, {
             x: `+=${this.deltaX}`
@@ -225,6 +246,12 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
         gsap.set([leftHandleElement, rightHandleElement], {
           x: `+=${this.deltaX}`
         });
+        if (tween.repeat !== 0) {
+          const repeatHandleElement = document.getElementById(`${id}-handle-repeat`);
+          gsap.set(repeatHandleElement, {
+            x: `+=${this.deltaX}`
+          });
+        }
         if (guideHandle) {
           gsap.set(guide, {
             x: `+=${this.deltaX}`
@@ -379,7 +406,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
 
   useEffect(() => {
     positionHandles();
-  }, [tween.delay, tween.duration]);
+  }, [tween.delay, tween.duration, tween.repeat]);
 
   return (
     <div
@@ -430,6 +457,21 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
           id={`${tweenId}-tooltip-duration`}
           className='c-timeline-handle__tooltip' />
       </div>
+      {
+        tween.repeat !== 0
+        ? <div
+            id={`${tweenId}-handle-repeat`}
+            className={`c-timeline-tween-handle c-timeline-tween-handle--ghost${
+              selectedHandle && selectedHandle === 'delay'
+              ? `${' '}${'c-timeline-tween-handle--selected'}`
+              : ''
+            }${
+              selectedHandle && selectedHandle !== 'delay'
+              ? `${' '}${`c-timeline-tween-handle--handle-selected`}`
+              : ''
+            }`} />
+        : null
+      }
     </div>
   );
 }

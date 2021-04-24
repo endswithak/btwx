@@ -71,6 +71,27 @@
   cursor: pointer
   z-index: 1
 
+  &.c-timeline-tween-handle--ghost
+    @include themed()
+      &:after
+        @include content-block
+        background-image: theme-prop(barber-pole)
+        background-repeat: repeat-x
+        border-radius: $unit * 2
+        &:hover
+          background-image: theme-prop(barber-pole-active)
+    transform-origin: left center
+    position: absolute
+    cursor: default !important
+    z-index: 0
+
+    &.c-timeline-tween-handle--selected,
+    &.c-timeline-tween-handle--handle-selected
+      @include themed()
+        background: theme-prop(control-background)
+        &:after
+          background-image: theme-prop(barber-pole-primary)
+
   &.c-timeline-tween-handle--selected
     cursor: grab
     @include themed()
