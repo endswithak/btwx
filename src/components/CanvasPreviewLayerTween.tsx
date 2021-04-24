@@ -153,6 +153,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [`${tween.prop}-before`]: 0,
       [`${tween.prop}-after`]: 1,
       onStart: () => {
@@ -227,6 +229,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: morphData[1],
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -285,6 +289,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? tinyColor(tween.customWiggle.strength).toRgbString() : tinyColor(dfc).toRgbString(),
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -310,6 +316,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tinyColor(dfc).toRgbString(),
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -335,6 +343,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: 0,
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -359,6 +369,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style[style].gradient.origin.x,
       onStart: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -394,6 +406,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style[style].gradient.origin.y,
       onStart: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -429,6 +443,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style[style].gradient.destination.x,
       onStart: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -464,6 +480,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style[style].gradient.destination.y,
       onStart: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -545,6 +563,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-offset`] = sp;
       stopsTimeline.to(eventTimeline.data[tween.layer], {
         duration: tween.duration,
+        repeat: tween.repeat,
+        yoyo: tween.yoyo,
         [`${tween.prop}-stop-${index}-color`]: tween.ease === 'customWiggle' ? tinyColor(tween.customWiggle.strength).toRgbString() : tinyColor(dc).toRgbString(),
         [`${tween.prop}-stop-${index}-offset`]: dp,
         onUpdate: () => {
@@ -580,6 +600,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`] = tinyColor(sc).toRgbString();
       stopsTimeline.to(eventTimeline.data[tween.layer], {
         duration: tween.duration,
+        repeat: tween.repeat,
+        yoyo: tween.yoyo,
         [`${tween.prop}-stop-${index}-color`]: tinyColor(dc).toRgbString(),
         onUpdate: () => {
           const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -637,6 +659,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`] = tinyColor(oc).toRgbString();
       stopsTimeline.to(eventTimeline.data[tween.layer], {
         duration: tween.duration,
+        repeat: tween.repeat,
+        yoyo: tween.yoyo,
         [`${tween.prop}-stop-${index}-color`]: tinyColor(sc).toRgbString(),
         onUpdate: () => {
           const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -666,6 +690,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`] = sc.a;
       stopsTimeline.to(eventTimeline.data[tween.layer], {
         duration: tween.duration,
+        repeat: tween.repeat,
+        yoyo: tween.yoyo,
         [`${tween.prop}-stop-${index}-color`]: 0,
         onUpdate: () => {
           const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -720,6 +746,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`] = 0;
       stopsTimeline.to(eventTimeline.data[tween.layer], {
         duration: tween.duration,
+        repeat: tween.repeat,
+        yoyo: tween.yoyo,
         [`${tween.prop}-stop-${index}-color`]: sc.a,
         onUpdate: () => {
           const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -747,6 +775,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style.strokeOptions.dashOffset,
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -763,6 +793,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style.strokeOptions.dashArray[0],
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -779,6 +811,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style.strokeOptions.dashArray[1],
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -795,6 +829,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style.stroke.width,
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -810,6 +846,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: `+=${tween.ease === 'customWiggle' ? tween.customWiggle.strength : destinationLayerItem.frame.x - originLayerItem.frame.x}`,
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -827,6 +865,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: `+=${tween.ease === 'customWiggle' ? tween.customWiggle.strength : destinationLayerItem.frame.y - originLayerItem.frame.y}`,
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -844,6 +884,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.frame.innerWidth,
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground, textMask, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -1029,6 +1071,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.frame.innerHeight,
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textMask, shapeMask, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -1191,6 +1235,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.transform.rotation,
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -1302,6 +1348,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : dsx,
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -1329,6 +1377,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : dsy,
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -1356,6 +1406,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : dsb,
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -1371,6 +1423,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style.opacity,
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -1385,6 +1439,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : (destinationLayerItem.style.blur.enabled ? destinationLayerItem.style.blur.blur : 0),
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -1401,6 +1457,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationTextItem.textStyle.fontSize,
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textMask, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -1505,6 +1563,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: destinationTextItem.textStyle.fontWeight,
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textMask, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -1609,6 +1669,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationTextItem.textStyle.leading,
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textMask, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -1697,6 +1759,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(textDOM, {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       ...tween.text.scramble ? {
           scrambleText: {
             text: tween.ease === 'customWiggle' ? tween.customWiggle.strength : destinationTextItem.text ? getTransformedText(destinationTextItem.text, destinationTextItem.textStyle.textTransform) : '',
@@ -1821,6 +1885,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationTextItem.textStyle.letterSpacing,
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textMask, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -1916,6 +1982,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? ((originLayerItem.transform.horizontalFlip ? 1 : -1) * tween.customWiggle.strength) : destinationLayerItem.transform.horizontalFlip ? -1 : 1,
       onUpdate: () => {
         const { paperLayer, textMask, textContent, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -1989,6 +2057,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
+      repeat: tween.repeat,
+      yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? ((originLayerItem.transform.verticalFlip ? 1 : -1) * tween.customWiggle.strength) : destinationLayerItem.transform.verticalFlip ? -1 : 1,
       onUpdate: () => {
         const { paperLayer, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;

@@ -99,11 +99,15 @@ import {
   SELECT_LAYER_EVENT_TWEENS,
   DESELECT_LAYER_EVENT_TWEENS,
   SET_LAYER_TWEEN_DURATION,
+  SET_LAYER_TWEEN_REPEAT,
+  SET_LAYER_TWEEN_YOYO,
   SET_LAYER_TWEEN_TIMING,
   SET_LAYER_TWEEN_DELAY,
   SET_LAYER_TWEEN_EASE,
   SET_LAYER_TWEEN_POWER,
   SET_LAYERS_TWEEN_DURATION,
+  SET_LAYERS_TWEEN_REPEAT,
+  SET_LAYERS_TWEEN_YOYO,
   SET_LAYERS_TWEEN_TIMING,
   SET_LAYERS_TWEEN_DELAY,
   SET_LAYERS_TWEEN_EASE,
@@ -414,11 +418,15 @@ import {
   SelectLayerEventTweensPayload,
   DeselectLayerEventTweensPayload,
   SetLayerTweenDurationPayload,
+  SetLayerTweenRepeatPayload,
+  SetLayerTweenYoyoPayload,
   SetLayerTweenTimingPayload,
   SetLayerTweenDelayPayload,
   SetLayerTweenEasePayload,
   SetLayerTweenPowerPayload,
   SetLayersTweenDurationPayload,
+  SetLayersTweenRepeatPayload,
+  SetLayersTweenYoyoPayload,
   SetLayersTweenTimingPayload,
   SetLayersTweenDelayPayload,
   SetLayersTweenEasePayload,
@@ -1547,6 +1555,16 @@ export const setLayerTweenDuration = (payload: SetLayerTweenDurationPayload): La
   payload
 });
 
+export const setLayerTweenRepeat = (payload: SetLayerTweenRepeatPayload): LayerTypes => ({
+  type: SET_LAYER_TWEEN_REPEAT,
+  payload
+});
+
+export const setLayerTweenYoyo = (payload: SetLayerTweenYoyoPayload): LayerTypes => ({
+  type: SET_LAYER_TWEEN_YOYO,
+  payload
+});
+
 export const setLayerTweenTiming = (payload: SetLayerTweenTimingPayload): LayerTypes => ({
   type: SET_LAYER_TWEEN_TIMING,
   payload
@@ -1569,6 +1587,16 @@ export const setLayerTweenPower = (payload: SetLayerTweenPowerPayload): LayerTyp
 
 export const setLayersTweenDuration = (payload: SetLayersTweenDurationPayload): LayerTypes => ({
   type: SET_LAYERS_TWEEN_DURATION,
+  payload
+});
+
+export const setLayersTweenRepeat = (payload: SetLayersTweenRepeatPayload): LayerTypes => ({
+  type: SET_LAYERS_TWEEN_REPEAT,
+  payload
+});
+
+export const setLayersTweenYoyo = (payload: SetLayersTweenYoyoPayload): LayerTypes => ({
+  type: SET_LAYERS_TWEEN_YOYO,
   payload
 });
 

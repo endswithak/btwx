@@ -88,6 +88,38 @@ export const getSelectedTweensDuration = createSelector(
   }
 );
 
+export const getSelectedTweensRepeat = createSelector(
+  [ getSelectedTweens, getTweensById ],
+  (selectedTweens, tweensById) => {
+    return selectedTweens.allIds.reduce((result: number | 'multi', current: string) => {
+      const tweenItem = tweensById[current];
+      if (!result) {
+        result = tweenItem.repeat;
+      }
+      if (result && tweenItem.repeat !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
+export const getSelectedTweensYoyo = createSelector(
+  [ getSelectedTweens, getTweensById ],
+  (selectedTweens, tweensById) => {
+    return selectedTweens.allIds.reduce((result: boolean | 'multi', current: string) => {
+      const tweenItem = tweensById[current];
+      if (!result) {
+        result = tweenItem.yoyo;
+      }
+      if (result && tweenItem.yoyo !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as boolean | 'multi';
+  }
+);
+
 export const getSelectedTweensLongestDuration = createSelector(
   [ getSelectedTweens, getTweensById ],
   (selectedTweens, tweensById) => {
@@ -113,7 +145,7 @@ export const getSelectedTweensLongestDelay = createSelector(
         result = tweenItem.delay;
       }
       if (result && tweenItem.delay > result) {
-        result = tweenItem.duration;
+        result = tweenItem.delay;
       }
       return result;
     }, 0) as number;

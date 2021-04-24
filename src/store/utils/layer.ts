@@ -74,7 +74,7 @@ import {
   SetLayersScrambleTextTweenRightToLeft, SetLayersCustomBounceTweenStrength, SetLayersCustomBounceTweenEndAtStart,
   SetLayersCustomBounceTweenSquash, SetLayersCustomWiggleTweenStrength, SetLayersCustomWiggleTweenWiggles,
   SetLayersCustomWiggleTweenType, RemoveLayerTweens, RemoveLayersEvent, ShowLayersChildren, HideLayersChildren,
-  SetLayerTreeStickyArtboard
+  SetLayerTreeStickyArtboard, SetLayerTweenRepeat, SetLayersTweenRepeat, SetLayerTweenYoyo, SetLayersTweenYoyo
 } from '../actionTypes/layer';
 
 import {
@@ -2608,6 +2608,96 @@ export const setLayersTweenDuration = (state: LayerState, action: SetLayersTween
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Tween Duration',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerTweenRepeat = (state: LayerState, action: SetLayerTweenRepeat): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          repeat: Math.round(action.payload.repeat)
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Tween Repeat',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayersTweenRepeat = (state: LayerState, action: SetLayersTweenRepeat): LayerState => {
+  let currentState = state;
+  currentState = action.payload.tweens.reduce((result, current) => {
+    return setLayerTweenRepeat(result, layerActions.setLayerTweenRepeat({
+      id: current,
+      repeat: action.payload.repeat
+    }) as SetLayerTweenRepeat);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layers Tween Repeat',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerTweenYoyo = (state: LayerState, action: SetLayerTweenYoyo): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          yoyo: action.payload.yoyo
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Tween YoYo',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayersTweenYoyo = (state: LayerState, action: SetLayersTweenYoyo): LayerState => {
+  let currentState = state;
+  currentState = action.payload.tweens.reduce((result, current) => {
+    return setLayerTweenYoyo(result, layerActions.setLayerTweenYoyo({
+      id: current,
+      yoyo: action.payload.yoyo
+    }) as SetLayerTweenYoyo);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layers Tween YoYo',
       undoable: true
     }
   }) as SetLayerEdit);

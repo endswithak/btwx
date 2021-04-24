@@ -389,7 +389,6 @@ declare namespace Btwx {
     originArtboardForEvents: string[];
     destinationArtboardForEvents: string[];
     projectIndex: number;
-    // json: string;
   }
 
   interface MaskableLayer extends Layer {
@@ -540,6 +539,8 @@ declare namespace Btwx {
     power: CubicBezierType;
     duration: number;
     delay: number;
+    repeat: number;
+    yoyo: boolean;
     frozen: boolean;
     text: TextTween;
     scrambleText: ScrambleTextTween;

@@ -85,6 +85,10 @@ export const REMOVE_LAYER_TWEENS = 'REMOVE_LAYER_TWEENS';
 
 export const SET_LAYER_TWEEN_DURATION = 'SET_LAYER_TWEEN_DURATION';
 export const SET_LAYERS_TWEEN_DURATION = 'SET_LAYERS_TWEEN_DURATION';
+export const SET_LAYER_TWEEN_REPEAT = 'SET_LAYER_TWEEN_REPEAT';
+export const SET_LAYERS_TWEEN_REPEAT = 'SET_LAYERS_TWEEN_REPEAT';
+export const SET_LAYER_TWEEN_YOYO = 'SET_LAYER_TWEEN_YOYO';
+export const SET_LAYERS_TWEEN_YOYO = 'SET_LAYERS_TWEEN_YOYO';
 export const SET_LAYER_TWEEN_DELAY = 'SET_LAYER_TWEEN_DELAY';
 export const SET_LAYERS_TWEEN_DELAY = 'SET_LAYERS_TWEEN_DELAY';
 export const SET_LAYER_TWEEN_EASE = 'SET_LAYER_TWEEN_EASE';
@@ -1058,6 +1062,46 @@ export interface SetLayersTweenDurationPayload {
 export interface SetLayersTweenDuration {
   type: typeof SET_LAYERS_TWEEN_DURATION;
   payload: SetLayersTweenDurationPayload;
+}
+
+export interface SetLayerTweenRepeatPayload {
+  id: string;
+  repeat: number;
+}
+
+export interface SetLayerTweenRepeat {
+  type: typeof SET_LAYER_TWEEN_REPEAT;
+  payload: SetLayerTweenRepeatPayload;
+}
+
+export interface SetLayersTweenRepeatPayload {
+  tweens: string[];
+  repeat: number;
+}
+
+export interface SetLayersTweenRepeat {
+  type: typeof SET_LAYERS_TWEEN_REPEAT;
+  payload: SetLayersTweenRepeatPayload;
+}
+
+export interface SetLayerTweenYoyoPayload {
+  id: string;
+  yoyo: boolean;
+}
+
+export interface SetLayerTweenYoyo {
+  type: typeof SET_LAYER_TWEEN_YOYO;
+  payload: SetLayerTweenYoyoPayload;
+}
+
+export interface SetLayersTweenYoyoPayload {
+  tweens: string[];
+  yoyo: boolean;
+}
+
+export interface SetLayersTweenYoyo {
+  type: typeof SET_LAYERS_TWEEN_YOYO;
+  payload: SetLayersTweenYoyoPayload;
 }
 
 export interface SetLayerTweenTimingPayload {
@@ -4017,6 +4061,10 @@ export type LayerTypes = AddArtboard |
                          DeselectLayerEventTweens |
                          SetLayerTweenDuration |
                          SetLayersTweenDuration |
+                         SetLayerTweenRepeat |
+                         SetLayersTweenRepeat |
+                         SetLayerTweenYoyo |
+                         SetLayersTweenYoyo |
                          SetLayerTweenTiming |
                          SetLayersTweenTiming |
                          SetLayerTweenDelay |

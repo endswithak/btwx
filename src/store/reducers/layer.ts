@@ -64,11 +64,15 @@ import {
   SELECT_LAYER_EVENT_TWEENS,
   DESELECT_LAYER_EVENT_TWEENS,
   SET_LAYER_TWEEN_DURATION,
+  SET_LAYER_TWEEN_REPEAT,
+  SET_LAYER_TWEEN_YOYO,
   SET_LAYER_TWEEN_TIMING,
   SET_LAYER_TWEEN_DELAY,
   SET_LAYER_TWEEN_EASE,
   SET_LAYER_TWEEN_POWER,
   SET_LAYERS_TWEEN_DURATION,
+  SET_LAYERS_TWEEN_REPEAT,
+  SET_LAYERS_TWEEN_YOYO,
   SET_LAYERS_TWEEN_TIMING,
   SET_LAYERS_TWEEN_DELAY,
   SET_LAYERS_TWEEN_EASE,
@@ -384,11 +388,15 @@ import {
   deselectLayerEventTweens,
   setLayerName,
   setLayerTweenDuration,
+  setLayerTweenRepeat,
+  setLayerTweenYoyo,
   setLayerTweenTiming,
   setLayerTweenDelay,
   setLayerTweenEase,
   setLayerTweenPower,
   setLayersTweenDuration,
+  setLayersTweenRepeat,
+  setLayersTweenYoyo,
   setLayersTweenTiming,
   setLayersTweenDelay,
   setLayersTweenEase,
@@ -869,6 +877,10 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return deselectLayerEventTweens(state, action);
     case SET_LAYER_TWEEN_DURATION:
       return setLayerTweenDuration(state, action);
+    case SET_LAYER_TWEEN_REPEAT:
+      return setLayerTweenRepeat(state, action);
+    case SET_LAYER_TWEEN_YOYO:
+      return setLayerTweenYoyo(state, action);
     case SET_LAYER_TWEEN_TIMING:
       return setLayerTweenTiming(state, action);
     case SET_LAYER_TWEEN_DELAY:
@@ -879,6 +891,10 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayerTweenPower(state, action);
     case SET_LAYERS_TWEEN_DURATION:
       return setLayersTweenDuration(state, action);
+    case SET_LAYERS_TWEEN_REPEAT:
+      return setLayersTweenRepeat(state, action);
+    case SET_LAYERS_TWEEN_YOYO:
+      return setLayersTweenYoyo(state, action);
     case SET_LAYERS_TWEEN_TIMING:
       return setLayersTweenTiming(state, action);
     case SET_LAYERS_TWEEN_DELAY:
@@ -1420,11 +1436,15 @@ export default undoable(baseReducer, {
       REMOVE_LAYER_TWEEN,
       REMOVE_LAYER_TWEENS,
       SET_LAYER_TWEEN_DURATION,
+      SET_LAYER_TWEEN_REPEAT,
+      SET_LAYER_TWEEN_YOYO,
       SET_LAYER_TWEEN_DELAY,
       SET_LAYER_TWEEN_TIMING,
       SET_LAYER_TWEEN_EASE,
       SET_LAYER_TWEEN_POWER,
       SET_LAYERS_TWEEN_DURATION,
+      SET_LAYERS_TWEEN_REPEAT,
+      SET_LAYERS_TWEEN_YOYO,
       SET_LAYERS_TWEEN_TIMING,
       SET_LAYERS_TWEEN_DELAY,
       SET_LAYERS_TWEEN_EASE,
