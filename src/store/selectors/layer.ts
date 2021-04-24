@@ -136,6 +136,22 @@ export const getSelectedTweensLongestDuration = createSelector(
   }
 );
 
+export const getSelectedTweensLongestRepeat = createSelector(
+  [ getSelectedTweens, getTweensById ],
+  (selectedTweens, tweensById) => {
+    return selectedTweens.allIds.reduce((result: number, current: string) => {
+      const tweenItem = tweensById[current];
+      if (!result) {
+        result = tweenItem.repeat;
+      }
+      if (result && tweenItem.repeat > result) {
+        result = tweenItem.repeat;
+      }
+      return result;
+    }, 0) as number;
+  }
+);
+
 export const getSelectedTweensLongestDelay = createSelector(
   [ getSelectedTweens, getTweensById ],
   (selectedTweens, tweensById) => {

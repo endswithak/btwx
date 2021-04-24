@@ -64,7 +64,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
     }
   }
 
-  const setupLeftDraggableHandle = (id = tweenId, guideHandle = false): globalThis.Draggable[] => {
+  const setupLeftDraggableHandle = (id = tweenId, guideHandle = false, autoScroll = 0): globalThis.Draggable[] => {
     killDraggableHandle('both', id);
     const rightHandleElement = document.getElementById(`${id}-handle-duration`);
     const leftHandleElement = document.getElementById(`${id}-handle-both`);
@@ -76,7 +76,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
       type: 'x',
       zIndexBoost: false,
       // cursor: 'pointer',
-      // autoScroll: 1,
+      autoScroll: autoScroll,
       bounds: {
         minX: 0,
         maxX: gsap.getProperty(rightHandleElement, 'x') as number,
@@ -132,7 +132,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
     return handle;
   }
 
-  const setupRightDraggableHandle = (id = tweenId, guideHandle = false): globalThis.Draggable[] => {
+  const setupRightDraggableHandle = (id = tweenId, guideHandle = false, autoScroll = 0): globalThis.Draggable[] => {
     killDraggableHandle('duration', id);
     const rightHandleElement = document.getElementById(`${id}-handle-duration`);
     const leftHandleElement = document.getElementById(`${id}-handle-both`);
@@ -144,7 +144,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
       type: 'x',
       zIndexBoost: false,
       // cursor: 'pointer',
-      // autoScroll: 1,
+      autoScroll: autoScroll,
       bounds: {
         minX: gsap.getProperty(leftHandleElement, 'x') as number,
         maxX: timelineElement.clientWidth - (theme.unit * 4),
@@ -198,7 +198,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
     return handle;
   }
 
-  const setupTweenDraggableHandle = (id = tweenId, guideHandle = false): globalThis.Draggable[] => {
+  const setupTweenDraggableHandle = (id = tweenId, guideHandle = false, autoScroll = 0): globalThis.Draggable[] => {
     killDraggableHandle('delay', id);
     const rightHandleElement = document.getElementById(`${id}-handle-duration`);
     const leftHandleElement = document.getElementById(`${id}-handle-both`);
@@ -216,7 +216,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
         minY: timelineElement.clientHeight,
         maxY: timelineElement.clientHeight
       },
-      // autoScroll: 1,
+      autoScroll: autoScroll,
       liveSnap: {
         x: function(value): number {
           return Math.round(value / theme.unit) * theme.unit;
@@ -330,13 +330,13 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
       let draggable: globalThis.Draggable[];
       switch(handles[id]) {
         case 'both':
-          draggable = setupLeftDraggableHandle(id, isGuideHandle);
+          draggable = setupLeftDraggableHandle(id, isGuideHandle, allIds.length === 1 ? 1 : 0);
           break;
         case 'duration':
-          draggable = setupRightDraggableHandle(id, isGuideHandle);
+          draggable = setupRightDraggableHandle(id, isGuideHandle, allIds.length === 1 ? 1 : 0);
           break;
         case 'delay':
-          draggable = setupTweenDraggableHandle(id, isGuideHandle);
+          draggable = setupTweenDraggableHandle(id, isGuideHandle, allIds.length === 1 ? 1 : 0);
           break;
       }
       draggable[0].startDrag(e);

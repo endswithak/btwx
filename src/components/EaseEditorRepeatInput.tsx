@@ -16,12 +16,12 @@ const EaseEditorRepeatInput = (): ReactElement => {
   const dispatch = useDispatch();
 
   const handleSubmitSuccess = (newRepeat: any): void => {
-    if ((longestDuration * newRepeat) + longestDelay > MAX_TWEEN_DURATION) {
-      const diff = Math.round((((longestDuration * newRepeat) + longestDelay) - MAX_TWEEN_DURATION) / newRepeat) + 1;
-      newRepeat = newRepeat - diff;
-    }
-    if (newRepeat < 0) {
-      newRepeat = 0;
+    if (((longestDuration + (longestDuration * newRepeat)) + longestDelay) > MAX_TWEEN_DURATION) {
+      let currentRepeat = newRepeat;
+      while((((longestDuration + (longestDuration * currentRepeat)) + longestDelay) > MAX_TWEEN_DURATION) && currentRepeat > 0) {
+        currentRepeat--;
+        newRepeat = currentRepeat;
+      }
     }
     dispatch(setLayersTweenRepeat({
       tweens: selectedTweens,
