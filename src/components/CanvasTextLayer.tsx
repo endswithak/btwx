@@ -143,7 +143,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   const layerItem: Btwx.Text = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Text);
   const parentItem: Btwx.Artboard | Btwx.Group = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.parent] as Btwx.Artboard | Btwx.Group : null);
   const artboardItem: Btwx.Artboard = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null);
-  const tweening = useSelector((state: RootState) => state.preview.tweening === artboardItem.id);
+  // const tweening = useSelector((state: RootState) => state.preview.tweening === artboardItem.id);
   const layerIndex = parentItem.children.indexOf(layerItem.id);
   const underlyingMaskIndex = layerItem.underlyingMask ? parentItem.children.indexOf(layerItem.underlyingMask) : null;
   const maskedIndex = (layerIndex - underlyingMaskIndex) + 1;
@@ -152,8 +152,8 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
   const [rendered, setRendered] = useState<boolean>(false);
   const [prevRotation, setPrevRotation] = useState(layerItem.transform.rotation);
-  const [prevTweening, setPrevTweening] = useState(tweening);
-  const [eventInstance, setEventInstance] = useState(0);
+  // const [prevTweening, setPrevTweening] = useState(tweening);
+  // const [eventInstance, setEventInstance] = useState(0);
   const content = useMemo(() =>
     getContent({paragraphs: layerItem.paragraphs}),
     [layerItem.paragraphs]
@@ -354,16 +354,16 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   // TWEENS
   ///////////////////////////////////////////////////////
 
-  useEffect(() => {
-    if (paperScope === 'preview') {
-      if (!tweening && prevTweening) {
-        const { paperLayer, textContent } = getPaperLayer();
-        paperLayer.replaceWith(createText());
-        setEventInstance(eventInstance + 1);
-      }
-      setPrevTweening(tweening);
-    }
-  }, [tweening]);
+  // useEffect(() => {
+  //   if (paperScope === 'preview') {
+  //     if (!tweening && prevTweening) {
+  //       const { paperLayer, textContent } = getPaperLayer();
+  //       paperLayer.replaceWith(createText());
+  //       setEventInstance(eventInstance + 1);
+  //     }
+  //     setPrevTweening(tweening);
+  //   }
+  // }, [tweening]);
 
   ///////////////////////////////////////////////////////
   // INDEX & MASK
@@ -849,8 +849,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
             layerItem.events.map((eventId) => (
               <CanvasPreviewLayerEvent
                 key={eventId}
-                eventId={eventId}
-                instanceId={`${eventInstance}-${eventId}`} />
+                eventId={eventId} />
             ))
           }
         </>

@@ -13,24 +13,24 @@ const MenuEditCopy = (props: MenuEditCopyProps): ReactElement => {
     label: 'Copy'
   });
   const [copyLayers, setCopyLayers] = useState(undefined);
-  const [copySVG, setCopySVG] = useState(undefined);
+  // const [copySVG, setCopySVG] = useState(undefined);
   const [copyStyle, setCopyStyle] = useState(undefined);
 
   useEffect(() => {
-    if (copyLayers && copyStyle && copySVG) {
+    if (copyLayers && copyStyle) {
       setCopy({
         ...menuItemTemplate,
-        submenu: [copyLayers, copySVG, copyStyle]
+        submenu: [copyLayers, copyStyle]
       });
     }
-  }, [copyLayers, copySVG, copyStyle]);
+  }, [copyLayers, copyStyle]);
 
   return (
     <>
       <MenuEditCopyLayers
         setCopyLayers={setCopyLayers} />
-      <MenuEditCopySVG
-        setCopySVG={setCopySVG} />
+      {/* <MenuEditCopySVG
+        setCopySVG={setCopySVG} /> */}
       <MenuEditCopyStyle
         setCopyStyle={setCopyStyle} />
     </>

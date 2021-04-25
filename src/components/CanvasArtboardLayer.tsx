@@ -17,10 +17,10 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
   const projectIndex: number = useSelector((state: RootState) => state.layer.present.byId[id] ? (state.layer.present.byId[id] as Btwx.Artboard).projectIndex : null);
   const project = paperScope === 'main' ? projectIndex ? paperMain.projects[projectIndex] : null : paperPreview.project;
   const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
-  const tweening = useSelector((state: RootState) => state.preview.tweening === id);
+  // const tweening = useSelector((state: RootState) => state.preview.tweening === id);
   const [rendered, setRendered] = useState<boolean>(false);
-  const [prevTweening, setPrevTweening] = useState(tweening);
-  const [eventInstance, setEventInstance] = useState(0);
+  // const [prevTweening, setPrevTweening] = useState(tweening);
+  // const [eventInstance, setEventInstance] = useState(0);
 
   ///////////////////////////////////////////////////////
   // HELPER FUNCTIONS
@@ -164,41 +164,41 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
   // TWEENING
   ///////////////////////////////////////////////////////
 
-  useEffect(() => {
-    if (paperScope === 'preview') {
-      if (!tweening && prevTweening) {
-        const { paperLayer, background } = getPaperLayer();
-        paperLayer.data = {
-          id,
-          type: 'Layer',
-          layerType: 'Artboard',
-          scope: ['root'],
-          layerId: id
-        };
-        background.replaceWith(new paperLayerScope.Path.Rectangle({
-          name: 'Artboard Background',
-          rectangle: background.bounds,
-          data: {
-            id: 'artboardBackground',
-            type: 'LayerChild',
-            layerType: 'Artboard',
-            layerId: id
-          },
-          fillColor: getPaperFillColor({
-            fill: layerItem.style.fill,
-            isLine: false,
-            layerFrame: layerItem.frame,
-            artboardFrame: null
-          }),
-          shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.20 },
-          shadowOffset: new paperLayerScope.Point(0, 2),
-          shadowBlur: 10
-        }));
-        setEventInstance(eventInstance + 1);
-      }
-      setPrevTweening(tweening);
-    }
-  }, [tweening]);
+  // useEffect(() => {
+  //   if (paperScope === 'preview') {
+  //     if (!tweening && prevTweening) {
+  //       const { paperLayer, background } = getPaperLayer();
+  //       paperLayer.data = {
+  //         id,
+  //         type: 'Layer',
+  //         layerType: 'Artboard',
+  //         scope: ['root'],
+  //         layerId: id
+  //       };
+  //       background.replaceWith(new paperLayerScope.Path.Rectangle({
+  //         name: 'Artboard Background',
+  //         rectangle: background.bounds,
+  //         data: {
+  //           id: 'artboardBackground',
+  //           type: 'LayerChild',
+  //           layerType: 'Artboard',
+  //           layerId: id
+  //         },
+  //         fillColor: getPaperFillColor({
+  //           fill: layerItem.style.fill,
+  //           isLine: false,
+  //           layerFrame: layerItem.frame,
+  //           artboardFrame: null
+  //         }),
+  //         shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.20 },
+  //         shadowOffset: new paperLayerScope.Point(0, 2),
+  //         shadowBlur: 10
+  //       }));
+  //       setEventInstance(eventInstance + 1);
+  //     }
+  //     setPrevTweening(tweening);
+  //   }
+  // }, [tweening]);
 
   ///////////////////////////////////////////////////////
   // FRAME
@@ -276,8 +276,7 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
             layerItem.events.map((eventId) => (
               <CanvasPreviewLayerEvent
                 key={eventId}
-                eventId={eventId}
-                instanceId={`${eventInstance}-${eventId}`} />
+                eventId={eventId} />
             ))
           }
         </>

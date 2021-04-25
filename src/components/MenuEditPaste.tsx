@@ -15,17 +15,17 @@ const MenuEditPaste = (props: MenuEditPasteProps): ReactElement => {
   });
   const [pasteLayers, setPasteLayers] = useState(undefined);
   const [pasteOverSelection, setPasteOverSelection] = useState(undefined);
-  const [pasteSVG, setPasteSVG] = useState(undefined);
+  // const [pasteSVG, setPasteSVG] = useState(undefined);
   const [pasteStyle, setPasteStyle] = useState(undefined);
 
   useEffect(() => {
-    if (pasteLayers && pasteOverSelection && pasteSVG && pasteStyle) {
+    if (pasteLayers && pasteOverSelection && pasteStyle) {
       setPaste({
         ...menuItemTemplate,
-        submenu: [pasteLayers, pasteOverSelection, pasteSVG, pasteStyle]
+        submenu: [pasteLayers, pasteOverSelection, pasteStyle]
       });
     }
-  }, [pasteLayers, pasteOverSelection, pasteSVG, pasteStyle]);
+  }, [pasteLayers, pasteOverSelection, pasteStyle]);
 
   return (
     <>
@@ -33,8 +33,8 @@ const MenuEditPaste = (props: MenuEditPasteProps): ReactElement => {
         setPasteLayers={setPasteLayers} />
       <MenuEditPasteOverSelection
         setPasteOverSelection={setPasteOverSelection} />
-      <MenuEditPasteSVG
-        setPasteSVG={setPasteSVG} />
+      {/* <MenuEditPasteSVG
+        setPasteSVG={setPasteSVG} /> */}
       <MenuEditPasteStyle
         setPasteStyle={setPasteStyle} />
     </>

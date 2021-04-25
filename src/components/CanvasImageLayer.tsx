@@ -16,7 +16,7 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
   const layerItem: Btwx.Image = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Image);
   const parentItem: Btwx.Artboard | Btwx.Group = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.parent] as Btwx.Artboard | Btwx.Group : null);
   const artboardItem: Btwx.Artboard = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null);
-  const tweening = useSelector((state: RootState) => state.preview.tweening === artboardItem.id);
+  // const tweening = useSelector((state: RootState) => state.preview.tweening === artboardItem.id);
   const layerIndex = parentItem.children.indexOf(layerItem.id);
   const underlyingMaskIndex = layerItem.underlyingMask ? parentItem.children.indexOf(layerItem.underlyingMask) : null;
   const maskedIndex = (layerIndex - underlyingMaskIndex) + 1;
@@ -25,8 +25,8 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
   const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
   const [rendered, setRendered] = useState<boolean>(false);
   const [prevRotation, setPrevRotation] = useState(layerItem.transform.rotation);
-  const [prevTweening, setPrevTweening] = useState(tweening);
-  const [eventInstance, setEventInstance] = useState(0);
+  // const [prevTweening, setPrevTweening] = useState(tweening);
+  // const [eventInstance, setEventInstance] = useState(0);
 
   ///////////////////////////////////////////////////////
   // HELPER FUNCTIONS
@@ -170,18 +170,18 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
   // TWEENING
   ///////////////////////////////////////////////////////
 
-  useEffect(() => {
-    if (paperScope === 'preview') {
-      if (!tweening && prevTweening) {
-        const { paperLayer } = getPaperLayer();
-        createImage().then((imageContainer) => {
-          paperLayer.replaceWith(imageContainer);
-        });
-        setEventInstance(eventInstance + 1);
-      }
-      setPrevTweening(tweening);
-    }
-  }, [tweening]);
+  // useEffect(() => {
+  //   if (paperScope === 'preview') {
+  //     if (!tweening && prevTweening) {
+  //       const { paperLayer } = getPaperLayer();
+  //       createImage().then((imageContainer) => {
+  //         paperLayer.replaceWith(imageContainer);
+  //       });
+  //       setEventInstance(eventInstance + 1);
+  //     }
+  //     setPrevTweening(tweening);
+  //   }
+  // }, [tweening]);
 
   ///////////////////////////////////////////////////////
   // IMAGE ID
@@ -452,8 +452,7 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
             layerItem.events.map((eventId, index) => (
               <CanvasPreviewLayerEvent
                 key={eventId}
-                eventId={eventId}
-                instanceId={`${eventInstance}-${eventId}`} />
+                eventId={eventId} />
             ))
           }
         </>
