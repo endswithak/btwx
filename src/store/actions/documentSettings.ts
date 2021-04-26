@@ -10,6 +10,8 @@ import {
   SET_CANVAS_MATRIX,
   SET_CANVAS_COLOR_FORMAT,
   HYDRATE_DOCUMENT,
+  HYDRATE_DOCUMENT_IMAGES,
+  HydrateDocumentImagesPayload,
   HydrateDocumentPayload,
   OpenDocumentPayload,
   SaveDocumentAsPayload,
@@ -63,5 +65,10 @@ export const setCanvasMatrix = (payload: SetCanvasMatrixPayload): DocumentSettin
 
 export const setCanvasColorFormat = (payload: SetCanvasColorFormatPayload): DocumentSettingsTypes => ({
   type: SET_CANVAS_COLOR_FORMAT,
+  payload
+});
+
+export const hydrateDocumentImages = (payload: HydrateDocumentImagesPayload): DocumentSettingsTypes => ({
+  type: HYDRATE_DOCUMENT_IMAGES,
   payload
 });

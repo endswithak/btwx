@@ -1170,6 +1170,13 @@ ipcMain.on('hydratePreviewLayers', (event, args) => {
   instance.preview.webContents.executeJavaScript(`hydrateLayers(${JSON.stringify(state)})`);
 });
 
+ipcMain.on('hydrateDocumentImages', (event, args) => {
+  const { instanceId, images } = JSON.parse(args);
+  const instance = btwxElectron.instance.byId[instanceId];
+  const payload = {images};
+  instance.preview.webContents.executeJavaScript(`hydrateDocumentImages(${JSON.stringify(payload)})`);
+});
+
 ipcMain.on('openPreview', (event, args) => {
   const { instanceId, stick } = JSON.parse(args);
   const instance = btwxElectron.instance.byId[instanceId];

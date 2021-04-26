@@ -9,7 +9,8 @@ const DocumentImages = (): ReactElement => {
   return (
     <>
       {
-        documentImages.allIds.map((id) => {
+        documentImages && documentImages.allIds.length > 0
+        ? documentImages.allIds.map((id) => {
           const documentImage = documentImages.byId[id];
           const base64 = bufferToBase64(Buffer.from(documentImage.buffer));
           const ext = documentImage.ext;
@@ -24,6 +25,7 @@ const DocumentImages = (): ReactElement => {
               }} />
           )
         })
+        : null
       }
     </>
   );

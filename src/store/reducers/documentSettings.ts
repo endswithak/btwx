@@ -6,6 +6,7 @@ import {
   SAVE_DOCUMENT,
   SET_CANVAS_MATRIX,
   SET_CANVAS_COLOR_FORMAT,
+  HYDRATE_DOCUMENT_IMAGES,
   DocumentSettingsTypes
 } from '../actionTypes/documentSettings';
 
@@ -80,6 +81,12 @@ export default (state = initialState, action: DocumentSettingsTypes): DocumentSe
       return {
         ...state,
         colorFormat: action.payload.colorFormat
+      };
+    }
+    case HYDRATE_DOCUMENT_IMAGES: {
+      return {
+        ...state,
+        images: action.payload.images
       };
     }
     default:

@@ -14,13 +14,14 @@ import { setActiveArtboard } from './actions/layer';
 import { KeyBindingsState } from './reducers/keyBindings';
 import { PreferencesState } from './reducers/preferences';
 import { ArtboardPresetsState } from './reducers/artboardPresets';
-import { hydrateDocumentThunk, saveDocumentAs, saveDocument } from './actions/documentSettings';
+import { hydrateDocumentThunk, saveDocumentAs, saveDocument, hydrateDocumentImages } from './actions/documentSettings';
 import { HydrateDocumentPayload, SaveDocumentAsPayload, SaveDocumentPayload } from './actionTypes/documentSettings';
 import { LayerState } from './reducers/layer';
 
 const configureStore: any = (preloadedState, isDocumentWindow = false): typeof store => {
   const store = createStore(rootReducer, preloadedState, applyMiddleware(logger, thunk));
   let currentEdit: string = null;
+  let currentDocumentImages: string[] = [];
   // let currentActiveArtboard: string = null;
   const handleChange = () => {
     const currentState = store.getState() as RootState;
@@ -30,6 +31,14 @@ const configureStore: any = (preloadedState, isDocumentWindow = false): typeof s
     currentEdit = currentState.layer.present.edit.id;
     // currentActiveArtboard = currentState.layer.present.activeArtboard;
     if (previousEdit !== currentEdit) {
+      const cdi = currentState.documentSettings.images.allIds;
+      if (cdi.length !== currentDocumentImages.length || cdi.every((id) => currentDocumentImages.includes(id))) {
+        ipcRenderer.send('hydrateDocumentImages', JSON.stringify({
+          instanceId: instanceId,
+          images: currentState.documentSettings.images
+        }));
+        currentDocumentImages = cdi;
+      }
       ipcRenderer.send('hydratePreviewLayers', JSON.stringify({
         instanceId: instanceId,
         state: currentState.layer.present
@@ -79,6 +88,9 @@ const configureStore: any = (preloadedState, isDocumentWindow = false): typeof s
   };
   (window as any).hydrateDocument = (state: HydrateDocumentPayload): void => {
     store.dispatch(hydrateDocumentThunk(state) as any);
+  };
+  (window as any).hydrateDocumentImages = (params: any): void => {
+    store.dispatch(hydrateDocumentImages(params));
   };
   (window as any).hydratePreferences = (state: PreferencesState): void => {
     store.dispatch(hydratePreferences(state));

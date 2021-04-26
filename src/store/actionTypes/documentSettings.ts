@@ -13,6 +13,7 @@ export const SET_CANVAS_MATRIX = 'SET_CANVAS_MATRIX';
 export const SET_CANVAS_COLOR_FORMAT = 'SET_CANVAS_COLOR_FORMAT';
 
 export const ADD_DOCUMENT_IMAGE = 'ADD_DOCUMENT_IMAGE';
+export const HYDRATE_DOCUMENT_IMAGES = 'HYDRATE_DOCUMENT_IMAGES';
 
 export interface OpenDocumentPayload {
   layer: StateWithHistory<LayerState>;
@@ -86,10 +87,25 @@ export interface AddDocumentImage {
   payload: AddDocumentImagePayload;
 }
 
+export interface HydrateDocumentImagesPayload {
+  images: {
+    allIds: string[];
+    byId: {
+      [id: string]: Btwx.DocumentImage;
+    };
+  };
+}
+
+export interface HydrateDocumentImages {
+  type: typeof HYDRATE_DOCUMENT_IMAGES;
+  payload: HydrateDocumentImagesPayload;
+}
+
 export type DocumentSettingsTypes = OpenDocument |
                                     SaveDocumentAs |
                                     SaveDocument |
                                     SetCanvasMatrix |
                                     SetCanvasColorFormat |
                                     AddDocumentImage |
-                                    HydrateDocument;
+                                    HydrateDocument |
+                                    HydrateDocumentImages;

@@ -159,6 +159,10 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       [`${tween.prop}-after`]: 1,
       onStart: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const innerWidth = paperLayer.data.innerWidth ? paperLayer.data.innerWidth : originLayerItem.frame.innerWidth;
+        const innerHeight = paperLayer.data.innerHeight ? paperLayer.data.innerHeight : originLayerItem.frame.innerHeight;
+        const width = paperLayer.data.width ? paperLayer.data.width : (originLayerItem as Btwx.Text).frame.width;
+        const height = paperLayer.data.height ? paperLayer.data.height : (originLayerItem as Btwx.Text).frame.height;
         const startRotation = paperLayer.data.rotation || paperLayer.data.rotation === 0 ? paperLayer.data.rotation : originLayerItem.transform.rotation;
         const startScaleX = paperLayer.data.scaleX || paperLayer.data.scaleX === 0 ? paperLayer.data.scaleX : 1;
         const startScaleY = paperLayer.data.scaleY || paperLayer.data.scaleY === 0 ? paperLayer.data.scaleY : 1;
@@ -171,9 +175,11 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             horizontalFlip: startScaleX,
             verticalFlip: startScaleY
           } as any,
-          variable: true
+          variable: true,
+          width,
+          height
         });
-        const beforeRaster = paperLayer.getItem({data: {id: 'raster'}}) as paper.Raster;
+        const beforeRaster = paperLayer.getItem({data: {id: 'imageRaster'}}) as paper.Raster;
         const afterRaster = beforeRaster.clone() as paper.Raster;
         afterRaster.source = (paperPreview.project.getItem({data:{id: tween.destinationLayer}}).children[0] as paper.Raster).source;
         afterRaster.bounds = beforeRaster.bounds;
@@ -199,6 +205,11 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       },
       ease: getEaseString(tween),
     }, tween.delay);
+    eventTimeline.then(() => {
+      const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+      const afterRaster = paperLayer.children[1];
+      afterRaster.remove();
+    });
   };
 
   const addShapeTween = (): void => {
