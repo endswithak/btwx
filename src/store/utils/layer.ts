@@ -74,7 +74,8 @@ import {
   SetLayersScrambleTextTweenRightToLeft, SetLayersCustomBounceTweenStrength, SetLayersCustomBounceTweenEndAtStart,
   SetLayersCustomBounceTweenSquash, SetLayersCustomWiggleTweenStrength, SetLayersCustomWiggleTweenWiggles,
   SetLayersCustomWiggleTweenType, RemoveLayerTweens, RemoveLayersEvent, ShowLayersChildren, HideLayersChildren,
-  SetLayerTreeStickyArtboard, SetLayerTweenRepeat, SetLayersTweenRepeat, SetLayerTweenYoyo, SetLayersTweenYoyo
+  SetLayerTreeStickyArtboard, SetLayerTweenRepeat, SetLayersTweenRepeat, SetLayerTweenYoyo, SetLayersTweenYoyo,
+  SetLayerTweenRepeatDelay, SetLayersTweenRepeatDelay, SetLayerTweenYoyoEase, SetLayersTweenYoyoEase
 } from '../actionTypes/layer';
 
 import {
@@ -2659,6 +2660,51 @@ export const setLayersTweenRepeat = (state: LayerState, action: SetLayersTweenRe
   return currentState;
 };
 
+export const setLayerTweenRepeatDelay = (state: LayerState, action: SetLayerTweenRepeatDelay): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          repeatDelay: Math.round((action.payload.repeatDelay + Number.EPSILON) * 100) / 100
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Tween Repeat Delay',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayersTweenRepeatDelay = (state: LayerState, action: SetLayersTweenRepeatDelay): LayerState => {
+  let currentState = state;
+  currentState = action.payload.tweens.reduce((result, current) => {
+    return setLayerTweenRepeatDelay(result, layerActions.setLayerTweenRepeatDelay({
+      id: current,
+      repeatDelay: action.payload.repeatDelay
+    }) as SetLayerTweenRepeatDelay);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layers Tween Repeat Delay',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
 export const setLayerTweenYoyo = (state: LayerState, action: SetLayerTweenYoyo): LayerState => {
   let currentState = state;
   currentState = {
@@ -2698,6 +2744,51 @@ export const setLayersTweenYoyo = (state: LayerState, action: SetLayersTweenYoyo
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Tween YoYo',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerTweenYoyoEase = (state: LayerState, action: SetLayerTweenYoyoEase): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    tweens: {
+      ...currentState.tweens,
+      byId: {
+        ...currentState.tweens.byId,
+        [action.payload.id]: {
+          ...currentState.tweens.byId[action.payload.id],
+          yoyoEase: action.payload.yoyoEase
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Tween YoYo Ease',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayersTweenYoyoEase = (state: LayerState, action: SetLayersTweenYoyoEase): LayerState => {
+  let currentState = state;
+  currentState = action.payload.tweens.reduce((result, current) => {
+    return setLayerTweenYoyoEase(result, layerActions.setLayerTweenYoyoEase({
+      id: current,
+      yoyoEase: action.payload.yoyoEase
+    }) as SetLayerTweenYoyoEase);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layers Tween YoYo Ease',
       undoable: true
     }
   }) as SetLayerEdit);

@@ -9,11 +9,14 @@ import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 import { MotionPathHelper } from 'gsap/MotionPathHelper';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import {
-  getSelectedTweensDuration, getSelectedTweensEase, getSelectedTweensPower, getSelectedCustomBounceTweensStrength,
+  getSelectedTweensDuration, getSelectedTweensEase, getSelectedTweensPower,
   getSelectedCustomBounceTweensSquash, getSelectedCustomBounceTweensEndAtStart,
   getSelectedCustomWiggleTweensStrength, getSelectedCustomWiggleTweensWiggles,
   getSelectedStepTweensSteps, getSelectedSlowTweensLinearRatio, getSelectedSlowTweensPower,
-  getSelectedSlowTweensYoyoMode, selectedTweensEaseCurvesMatch, getSelectedCustomWiggleTweensType
+  getSelectedSlowTweensYoyoMode, selectedTweensEaseCurvesMatch, getSelectedCustomWiggleTweensType,
+  getSelectedCustomBounceTweensStrength, getSelectedRoughTweensRef, getSelectedRoughTweensClamp,
+  getSelectedRoughTweensPoints, getSelectedRoughTweensRandomize, getSelectedRoughTweensStrength,
+  getSelectedRoughTweensTaper
 } from '../store/selectors/layer';
 import { RootState } from '../store/reducers';
 import EaseEditorCopyPathButton from './EaseEditorCopyPathButton';
@@ -30,6 +33,12 @@ const EaseEditorVisualizer = (): ReactElement => {
   const ease = useSelector((state: RootState) => getSelectedTweensEase(state));
   const power = useSelector((state: RootState) => getSelectedTweensPower(state));
   const duration = useSelector((state: RootState) => getSelectedTweensDuration(state));
+  const roughClamp = useSelector((state: RootState) => getSelectedRoughTweensClamp(state));
+  const roughPoints = useSelector((state: RootState) => getSelectedRoughTweensPoints(state));
+  const roughRandomize = useSelector((state: RootState) => getSelectedRoughTweensRandomize(state));
+  const roughStrength = useSelector((state: RootState) => getSelectedRoughTweensStrength(state));
+  const roughTaper = useSelector((state: RootState) => getSelectedRoughTweensTaper(state));
+  const roughRef = useSelector((state: RootState) => getSelectedRoughTweensRef(state));
   const customBounceStrength = useSelector((state: RootState) => getSelectedCustomBounceTweensStrength(state));
   const customBounceSquash = useSelector((state: RootState) => getSelectedCustomBounceTweensSquash(state));
   const customBounceEndAtStart = useSelector((state: RootState) => getSelectedCustomBounceTweensEndAtStart(state));
@@ -40,8 +49,7 @@ const EaseEditorVisualizer = (): ReactElement => {
   const slowLinearRatio = useSelector((state: RootState) => getSelectedSlowTweensLinearRatio(state));
   const slowPower = useSelector((state: RootState) => getSelectedSlowTweensPower(state));
   const slowYoYoMode = useSelector((state: RootState) => getSelectedSlowTweensYoyoMode(state));
-  const tween = useSelector((state: RootState) => state.layer.present.tweens.byId[state.easeEditor.tween]);
-  const [pathData, setPathData] = useState();
+  const [pathData, setPathData] = useState(null);
 
   const getEaseString = () => {
     if (selectedTweensMatch) {
@@ -53,7 +61,7 @@ const EaseEditorVisualizer = (): ReactElement => {
         case 'slow':
           return `slow(${slowLinearRatio}, ${slowPower}, ${slowYoYoMode})`;
         case 'rough':
-          return tween.rough.ref;
+          return CustomEase.create('customRough', roughRef);
         case 'steps':
           return `steps(${stepSteps})`;
         default:
@@ -66,26 +74,51 @@ const EaseEditorVisualizer = (): ReactElement => {
 
   const setAndAnimate = (): void => {
     const easeString = getEaseString();
-    gsap.killTweensOf([pathRevealRef.current, valueBarRef.current, valueHeadRef.current]);
-    gsap.set(pathRevealRef.current, {clearProps: 'all'});
-    gsap.set(valueBarRef.current, {scaleY: 0});
-    gsap.set(valueHeadRef.current, {clearProps: 'y'});
+    gsap.killTweensOf([
+      pathRevealRef.current, valueBarRef.current, valueHeadRef.current
+    ]);
+    gsap.set(pathRevealRef.current, {
+      clearProps: 'all'
+    });
+    gsap.set(valueBarRef.current, {
+      scaleY: 0
+    });
+    gsap.set(valueHeadRef.current, {
+      clearProps: 'y'
+    });
     if (ease === 'customWiggle') {
-      gsap.set(valueHeadRef.current, {y: '-=200'});
+      gsap.set(valueHeadRef.current, {
+        y: '-=200'
+      });
     }
     if (easeString) {
-      // const pathData = CustomEase.getSVGData(ease, {width: 400, height: 400});
-      // CustomEase.getSVGData(ease, {width: 400, height: 400, path: pathRevealRef.current});
       if (duration !== 'multi') {
-        gsap.to(valueBarRef.current, {scaleY: 1, duration: duration, ease: easeString });
-        gsap.to(valueHeadRef.current, {y: (ease === 'customWiggle' ? `-=200` : `-=400`), duration: duration, ease: easeString });
+        gsap.to(valueBarRef.current, {
+          scaleY: 1,
+          duration: duration,
+          ease: easeString
+        });
+        gsap.to(valueHeadRef.current, {
+          y: (ease === 'customWiggle' ? `-=200` : `-=400`),
+          duration: duration,
+          ease: easeString
+        });
         gsap.from(pathRevealRef.current, {
           duration: duration,
           drawSVG: 0,
           ease: easeString
         });
       }
-      setPathData(CustomEase.getSVGData(easeString, {width: 400, height: ease === 'customWiggle' ? 200 : 400}));
+      setPathData(
+        ease === 'rough'
+        ? roughRef
+        : CustomEase.getSVGData(easeString, {
+            width: 400,
+            height: ease === 'customWiggle' ? 200 : 400
+          })
+      );
+    } else {
+      setPathData(null);
     }
   }
 
@@ -94,7 +127,8 @@ const EaseEditorVisualizer = (): ReactElement => {
   }, [
     customBounceStrength, customBounceEndAtStart, customBounceSquash,
     customWiggleType, customWiggleWiggles, slowLinearRatio,
-    slowPower, slowYoYoMode, stepSteps, ease, power
+    slowPower, slowYoYoMode, stepSteps, ease, power, roughRef,
+    roughClamp, roughPoints, roughRandomize, roughStrength, roughTaper
   ]);
 
   return (

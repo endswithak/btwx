@@ -208,7 +208,7 @@
   flex-grow: 0
 
 .c-ease-editor__params
-  min-height: $unit * 28
+  min-height: $unit * 30
   padding-bottom: $unit * 2
 
 .c-ease-editor-body__powers
@@ -270,6 +270,7 @@
 .c-ease-editor-selector__input
   font-size: $font-size-large
   font-family: $font-family
+  font-weight: $font-weight-bold
   height: $unit * 8
   display: flex
   justify-content: center
@@ -325,17 +326,13 @@
   flex-grow: 2
 
 .c-ease-editor__copy-ease
-  font-family: $font-family
-  font-size: $font-size
-  font-weight: $font-weight-bold
-  line-height: $unit * 6
-  text-align: right
-  padding: 0
   position: absolute
   bottom: 28px
   right: 0
 
 .c-ease-editor__copied-indicator
+  @include themed()
+    color: theme-prop(text-base)
   font-family: $font-family
   font-size: $font-size-extra-small
   line-height: $unit * 6
@@ -343,5 +340,5 @@
   text-align: right
   padding: 0
   position: absolute
-  bottom: 0
+  top: 24px
   right: 0

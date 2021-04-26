@@ -100,14 +100,18 @@ import {
   DESELECT_LAYER_EVENT_TWEENS,
   SET_LAYER_TWEEN_DURATION,
   SET_LAYER_TWEEN_REPEAT,
+  SET_LAYER_TWEEN_REPEAT_DELAY,
   SET_LAYER_TWEEN_YOYO,
+  SET_LAYER_TWEEN_YOYO_EASE,
   SET_LAYER_TWEEN_TIMING,
   SET_LAYER_TWEEN_DELAY,
   SET_LAYER_TWEEN_EASE,
   SET_LAYER_TWEEN_POWER,
   SET_LAYERS_TWEEN_DURATION,
   SET_LAYERS_TWEEN_REPEAT,
+  SET_LAYERS_TWEEN_REPEAT_DELAY,
   SET_LAYERS_TWEEN_YOYO,
+  SET_LAYERS_TWEEN_YOYO_EASE,
   SET_LAYERS_TWEEN_TIMING,
   SET_LAYERS_TWEEN_DELAY,
   SET_LAYERS_TWEEN_EASE,
@@ -419,14 +423,18 @@ import {
   DeselectLayerEventTweensPayload,
   SetLayerTweenDurationPayload,
   SetLayerTweenRepeatPayload,
+  SetLayerTweenRepeatDelayPayload,
   SetLayerTweenYoyoPayload,
+  SetLayerTweenYoyoEasePayload,
   SetLayerTweenTimingPayload,
   SetLayerTweenDelayPayload,
   SetLayerTweenEasePayload,
   SetLayerTweenPowerPayload,
   SetLayersTweenDurationPayload,
   SetLayersTweenRepeatPayload,
+  SetLayersTweenRepeatDelayPayload,
   SetLayersTweenYoyoPayload,
+  SetLayersTweenYoyoEasePayload,
   SetLayersTweenTimingPayload,
   SetLayersTweenDelayPayload,
   SetLayersTweenEasePayload,
@@ -1560,8 +1568,18 @@ export const setLayerTweenRepeat = (payload: SetLayerTweenRepeatPayload): LayerT
   payload
 });
 
+export const setLayerTweenRepeatDelay = (payload: SetLayerTweenRepeatDelayPayload): LayerTypes => ({
+  type: SET_LAYER_TWEEN_REPEAT_DELAY,
+  payload
+});
+
 export const setLayerTweenYoyo = (payload: SetLayerTweenYoyoPayload): LayerTypes => ({
   type: SET_LAYER_TWEEN_YOYO,
+  payload
+});
+
+export const setLayerTweenYoyoEase = (payload: SetLayerTweenYoyoEasePayload): LayerTypes => ({
+  type: SET_LAYER_TWEEN_YOYO_EASE,
   payload
 });
 
@@ -1595,8 +1613,18 @@ export const setLayersTweenRepeat = (payload: SetLayersTweenRepeatPayload): Laye
   payload
 });
 
+export const setLayersTweenRepeatDelay = (payload: SetLayersTweenRepeatDelayPayload): LayerTypes => ({
+  type: SET_LAYERS_TWEEN_REPEAT_DELAY,
+  payload
+});
+
 export const setLayersTweenYoyo = (payload: SetLayersTweenYoyoPayload): LayerTypes => ({
   type: SET_LAYERS_TWEEN_YOYO,
+  payload
+});
+
+export const setLayersTweenYoyoEase = (payload: SetLayersTweenYoyoEasePayload): LayerTypes => ({
+  type: SET_LAYERS_TWEEN_YOYO_EASE,
   payload
 });
 

@@ -1479,6 +1479,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         const innerWidth = paperLayer.data.innerWidth ? paperLayer.data.innerWidth : (originLayerItem as Btwx.Text).frame.innerWidth;
         const width = paperLayer.data.width ? paperLayer.data.width : (originLayerItem as Btwx.Text).frame.width;
         const height = paperLayer.data.height ? paperLayer.data.height : (originLayerItem as Btwx.Text).frame.height;
+        const startFontWeight = eventTimeline.data[tween.layer]['fontWeight'] ? eventTimeline.data[tween.layer]['fontWeight'] : (originLayerItem as Btwx.Text).textStyle.fontWeight;
+        const startLetterSpacing = eventTimeline.data[tween.layer]['letterSpacing'] ? eventTimeline.data[tween.layer]['letterSpacing'] : (originLayerItem as Btwx.Text).textStyle.letterSpacing;
         const startPosition = paperLayer.position;
         clearLayerTransforms({
           paperLayer,
@@ -1496,11 +1498,11 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         const nextParagraphs = getParagraphs({
           text: text,
           fontSize: eventTimeline.data[tween.layer][tween.prop] as number,
-          fontWeight: textContent.fontWeight as number,
+          fontWeight: startFontWeight, // textContent.fontWeight as number,
           fontFamily: textContent.fontFamily,
           textResize: originTextItem.textStyle.textResize,
           innerWidth: innerWidth,
-          letterSpacing: textContent.letterSpacing as number,
+          letterSpacing: startLetterSpacing, // textContent.letterSpacing as number,
           textTransform: textContent.textTransform,
           fontStyle: textContent.fontStyle,
           preview: true
@@ -1513,15 +1515,12 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         switch(originTextItem.textStyle.textResize) {
           case 'autoWidth':
             paperLayer.data.innerWidth = textContent.bounds.width;
-            paperLayer.data.x = textContent.position.x;
             paperLayer.data.innerHeight = textContent.bounds.height;
-            paperLayer.data.y = textContent.position.y;
             textMask.bounds = textContent.bounds;
             textBackground.bounds = textContent.bounds;
             break;
           case 'autoHeight':
             paperLayer.data.innerHeight = textContent.bounds.height;
-            paperLayer.data.y = textContent.position.y;
             textMask.bounds.top = textContent.bounds.top;
             textBackground.bounds.top = textContent.bounds.top;
             textMask.pivot = textContent.bounds.topCenter;
@@ -1585,6 +1584,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         const innerWidth = paperLayer.data.innerWidth ? paperLayer.data.innerWidth : (originLayerItem as Btwx.Text).frame.innerWidth;
         const width = paperLayer.data.width ? paperLayer.data.width : (originLayerItem as Btwx.Text).frame.width;
         const height = paperLayer.data.height ? paperLayer.data.height : (originLayerItem as Btwx.Text).frame.height;
+        const startFontSize = eventTimeline.data[tween.layer]['fontSize'] ? eventTimeline.data[tween.layer]['fontSize'] : (originLayerItem as Btwx.Text).textStyle.fontSize;
+        const startLetterSpacing = eventTimeline.data[tween.layer]['letterSpacing'] ? eventTimeline.data[tween.layer]['letterSpacing'] : (originLayerItem as Btwx.Text).textStyle.letterSpacing;
         const startPosition = paperLayer.position;
         clearLayerTransforms({
           paperLayer,
@@ -1601,12 +1602,12 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         const text = paperLayer.data.text ? paperLayer.data.text : (originLayerItem as Btwx.Text).text;
         const nextParagraphs = getParagraphs({
           text: text,
-          fontSize: textContent.fontSize as number,
+          fontSize: startFontSize, // textContent.fontSize as number,
           fontWeight: eventTimeline.data[tween.layer][tween.prop] as number,
           fontFamily: textContent.fontFamily,
           textResize: originTextItem.textStyle.textResize,
           innerWidth: innerWidth,
-          letterSpacing: textContent.letterSpacing as number,
+          letterSpacing: startLetterSpacing, // textContent.letterSpacing as number,
           textTransform: textContent.textTransform,
           fontStyle: textContent.fontStyle,
           preview: true
@@ -1619,15 +1620,12 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         switch(originTextItem.textStyle.textResize) {
           case 'autoWidth':
             paperLayer.data.innerWidth = textContent.bounds.width;
-            paperLayer.data.x = textContent.position.x;
             paperLayer.data.innerHeight = textContent.bounds.height;
-            paperLayer.data.y = textContent.position.y;
             textMask.bounds = textContent.bounds;
             textBackground.bounds = textContent.bounds;
             break;
           case 'autoHeight':
             paperLayer.data.innerHeight = textContent.bounds.height;
-            paperLayer.data.y = textContent.position.y;
             textMask.bounds.top = textContent.bounds.top;
             textBackground.bounds.top = textContent.bounds.top;
             textMask.pivot = textContent.bounds.topCenter;
@@ -1690,6 +1688,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         const startScaleY = paperLayer.data.scaleY ? paperLayer.data.scaleY : originLayerItem.transform.verticalFlip ? -1 : 1;
         const width = paperLayer.data.width ? paperLayer.data.width : (originLayerItem as Btwx.Text).frame.width;
         const height = paperLayer.data.height ? paperLayer.data.height : (originLayerItem as Btwx.Text).frame.height;
+        // const startFontSize = eventTimeline.data[tween.layer]['fontSize'] ? eventTimeline.data[tween.layer]['fontSize'] : (originLayerItem as Btwx.Text).textStyle.fontSize;
+        // const startFontWeight = eventTimeline.data[tween.layer]['fontWeight'] ? eventTimeline.data[tween.layer]['fontWeight'] : (originLayerItem as Btwx.Text).textStyle.fontWeight;
+        // const startLetterSpacing = eventTimeline.data[tween.layer]['letterSpacing'] ? eventTimeline.data[tween.layer]['letterSpacing'] : (originLayerItem as Btwx.Text).textStyle.letterSpacing;
         const startPosition = paperLayer.position;
         clearLayerTransforms({
           paperLayer,
@@ -1708,13 +1709,11 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         switch(originTextItem.textStyle.textResize) {
           case 'autoWidth':
             paperLayer.data.innerHeight = textContent.bounds.height;
-            paperLayer.data.y = textContent.position.y;
             textMask.bounds = textContent.bounds;
             textBackground.bounds = textContent.bounds;
             break;
           case 'autoHeight':
             paperLayer.data.innerHeight = textContent.bounds.height;
-            paperLayer.data.y = textContent.position.y;
             textMask.bounds.top = textContent.bounds.top;
             textBackground.bounds.top = textContent.bounds.top;
             textMask.pivot = textContent.bounds.topCenter;
@@ -1774,8 +1773,14 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       ...tween.text.scramble ? {
           scrambleText: {
-            text: tween.ease === 'customWiggle' ? tween.customWiggle.strength : destinationTextItem.text ? getTransformedText(destinationTextItem.text, destinationTextItem.textStyle.textTransform) : '',
-            chars: tween.scrambleText.characters === 'custom' ? tween.scrambleText.customCharacters : tween.scrambleText.characters,
+            text: tween.ease === 'customWiggle'
+            ? tween.customWiggle.strength
+            : destinationTextItem.text
+              ? getTransformedText(destinationTextItem.text, destinationTextItem.textStyle.textTransform)
+              : '',
+            chars: tween.scrambleText.characters === 'custom'
+            ? tween.scrambleText.customCharacters
+            : tween.scrambleText.characters,
             revealDelay: tween.scrambleText.revealDelay,
             speed: tween.scrambleText.speed,
             delimiter: tween.scrambleText.delimiter,
@@ -1784,14 +1789,19 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         }
       : {
           text: {
-            value: tween.ease === 'customWiggle' ? tween.customWiggle.strength : destinationTextItem.text ? getTransformedText(destinationTextItem.text, destinationTextItem.textStyle.textTransform) : '',
+            value: tween.ease === 'customWiggle'
+            ? tween.customWiggle.strength
+            : destinationTextItem.text
+              ? getTransformedText(destinationTextItem.text, destinationTextItem.textStyle.textTransform)
+              : '',
             delimiter: tween.text.delimiter,
             speed: tween.text.speed,
             type: tween.text.diff ? 'diff' : null
           }
         },
       onComplete: () => {
-        textDOM.innerHTML = (originLayerItem as Btwx.Text).text
+        // should be innerText
+        textDOM.innerText === (originLayerItem as Btwx.Text).text
         ? getTransformedText(
             (originLayerItem as Btwx.Text).text,
             (originLayerItem as Btwx.Text).textStyle.textTransform
@@ -1806,6 +1816,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         const innerWidth = paperLayer.data.innerWidth ? paperLayer.data.innerWidth : (originLayerItem as Btwx.Text).frame.innerWidth;
         const width = paperLayer.data.width ? paperLayer.data.width : (originLayerItem as Btwx.Text).frame.width;
         const height = paperLayer.data.height ? paperLayer.data.height : (originLayerItem as Btwx.Text).frame.height;
+        const startFontSize = eventTimeline.data[tween.layer]['fontSize'] ? eventTimeline.data[tween.layer]['fontSize'] : (originLayerItem as Btwx.Text).textStyle.fontSize;
+        const startFontWeight = eventTimeline.data[tween.layer]['fontWeight'] ? eventTimeline.data[tween.layer]['fontWeight'] : (originLayerItem as Btwx.Text).textStyle.fontWeight;
+        const startLetterSpacing = eventTimeline.data[tween.layer]['letterSpacing'] ? eventTimeline.data[tween.layer]['letterSpacing'] : (originLayerItem as Btwx.Text).textStyle.letterSpacing;
         const startPosition = paperLayer.position;
         clearLayerTransforms({
           paperLayer,
@@ -1821,13 +1834,14 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         });
         // get next paragraphs
         const nextParagraphs = getParagraphs({
+          // should be innerText
           text: textDOM.innerText,
-          fontSize: textContent.fontSize as number,
-          fontWeight: textContent.fontWeight as number,
+          fontSize: startFontSize, // textContent.fontSize as number,
+          fontWeight: startFontWeight, // textContent.fontWeight as number,
           fontFamily: textContent.fontFamily,
           textResize: originTextItem.textStyle.textResize,
           innerWidth: innerWidth,
-          letterSpacing: textContent.letterSpacing as number,
+          letterSpacing: startLetterSpacing, // textContent.letterSpacing as number,
           textTransform: textContent.textTransform,
           fontStyle: textContent.fontStyle,
           preview: true
@@ -1840,15 +1854,12 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         switch(destinationTextItem.textStyle.textResize) {
           case 'autoWidth':
             paperLayer.data.innerWidth = textContent.bounds.width;
-            paperLayer.data.x = textContent.position.x;
             paperLayer.data.innerHeight = textContent.bounds.height;
-            paperLayer.data.y = textContent.position.y;
             textMask.bounds = textContent.bounds;
             textBackground.bounds = textContent.bounds;
             break;
           case 'autoHeight':
             paperLayer.data.innerHeight = textContent.bounds.height;
-            paperLayer.data.y = textContent.position.y;
             textMask.bounds.top = textContent.bounds.top;
             textBackground.bounds.top = textContent.bounds.top;
             textMask.pivot = textContent.bounds.topCenter;
@@ -1882,6 +1893,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           variable: true
         });
         paperLayer.position = startPosition;
+        // should be innerText
         paperLayer.data.text = textDOM.innerText;
         updateGradients({ paperLayer, textContent, textBackground });
       },
@@ -1907,6 +1919,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         const innerWidth = paperLayer.data.innerWidth ? paperLayer.data.innerWidth : (originLayerItem as Btwx.Text).frame.innerWidth;
         const width = paperLayer.data.width ? paperLayer.data.width : (originLayerItem as Btwx.Text).frame.width;
         const height = paperLayer.data.height ? paperLayer.data.height : (originLayerItem as Btwx.Text).frame.height;
+        const startFontSize = eventTimeline.data[tween.layer]['fontSize'] ? eventTimeline.data[tween.layer]['fontSize'] : (originLayerItem as Btwx.Text).textStyle.fontSize;
+        const startFontWeight = eventTimeline.data[tween.layer]['fontWeight'] ? eventTimeline.data[tween.layer]['fontWeight'] : (originLayerItem as Btwx.Text).textStyle.fontWeight;
         const startPosition = paperLayer.position;
         clearLayerTransforms({
           paperLayer,
@@ -1923,8 +1937,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         const text = paperLayer.data.text ? paperLayer.data.text : (originLayerItem as Btwx.Text).text;
         const nextParagraphs = getParagraphs({
           text: text,
-          fontSize: textContent.fontSize as number,
-          fontWeight: textContent.fontWeight as number,
+          fontSize: startFontSize, // textContent.fontSize as number,
+          fontWeight: startFontWeight, // textContent.fontWeight as number,
           fontFamily: textContent.fontFamily,
           textResize: originTextItem.textStyle.textResize,
           innerWidth: innerWidth,
@@ -1941,15 +1955,12 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         switch(destinationTextItem.textStyle.textResize) {
           case 'autoWidth':
             paperLayer.data.innerWidth = textContent.bounds.width;
-            paperLayer.data.x = textContent.position.x;
             paperLayer.data.innerHeight = textContent.bounds.height;
-            paperLayer.data.y = textContent.position.y;
             textMask.bounds = textContent.bounds;
             textBackground.bounds = textContent.bounds;
             break;
           case 'autoHeight':
             paperLayer.data.innerHeight = textContent.bounds.height;
-            paperLayer.data.y = textContent.position.y;
             textMask.bounds.top = textContent.bounds.top;
             textBackground.bounds.top = textContent.bounds.top;
             textMask.pivot = textContent.bounds.topCenter;
@@ -1982,6 +1993,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           } as any,
           variable: true
         });
+        paperLayer.position = startPosition;
         updateGradients({ paperLayer, textContent, textBackground });
       },
       ease: getEaseString(tween),

@@ -540,7 +540,9 @@ declare namespace Btwx {
     duration: number;
     delay: number;
     repeat: number;
+    repeatDelay: number;
     yoyo: boolean;
+    yoyoEase: boolean | string;
     frozen: boolean;
     text: TextTween;
     scrambleText: ScrambleTextTween;

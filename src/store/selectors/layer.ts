@@ -312,6 +312,22 @@ export const getSelectedRoughTweensTaper = createSelector(
   }
 );
 
+export const getSelectedRoughTweensRef = createSelector(
+  [ getSelectedTweens, getTweensById ],
+  (selectedTweens, tweensById) => {
+    return selectedTweens.allIds.reduce((result: string | 'multi', current: string) => {
+      const tweenItem = tweensById[current];
+      if (!result) {
+        result = tweenItem.rough.ref;
+      }
+      if (result && tweenItem.rough.ref !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as string | 'multi';
+  }
+);
+
 export const getSelectedRoughTweensTemplate = createSelector(
   [ getSelectedTweens, getTweensById ],
   (selectedTweens, tweensById) => {
@@ -325,6 +341,21 @@ export const getSelectedRoughTweensTemplate = createSelector(
       }
       return result;
     }, null) as string | 'multi';
+  }
+);
+
+export const getSelectedRoughTweenPropsMatch = createSelector(
+  [
+    getSelectedRoughTweensPoints, getSelectedRoughTweensStrength, getSelectedRoughTweensClamp,
+    getSelectedRoughTweensRandomize, getSelectedRoughTweensTaper, getSelectedRoughTweensTemplate
+  ],
+  (points, strength, clamp, randomize, taper, template) => {
+    return strength !== 'multi' &&
+           points !== 'multi' &&
+           clamp !== 'multi' &&
+           taper !== 'multi' &&
+           template !== 'multi' &&
+           randomize !== 'multi';
   }
 );
 
@@ -632,17 +663,20 @@ export const getSelectedCustomWiggleTweensType = createSelector(
   }
 );
 
+// TS config is all wonky...
+// this should not be red
 export const selectedTweensEaseCurvesMatch = createSelector(
   [
     getSelectedTweensEase, getSelectedTweensPower, getSelectedCustomBounceTweensStrength,
     getSelectedCustomBounceTweensSquash, getSelectedCustomBounceTweensEndAtStart,
-    getSelectedCustomWiggleTweensStrength, getSelectedCustomWiggleTweensWiggles, getSelectedCustomWiggleTweensType,
-    getSelectedStepTweensSteps, getSelectedSlowTweensLinearRatio, getSelectedSlowTweensPower,
-    getSelectedSlowTweensYoyoMode
+    getSelectedCustomWiggleTweensStrength, getSelectedCustomWiggleTweensWiggles,
+    getSelectedCustomWiggleTweensType, getSelectedStepTweensSteps, getSelectedSlowTweensLinearRatio,
+    getSelectedSlowTweensPower, getSelectedSlowTweensYoyoMode, getSelectedRoughTweensRef
   ],
   (
     ease, power, customBounceStrength, customBounceSquash, customBounceEndAtStart,
-    customWiggleStrength, customWiggleWiggles, customWiggleType, steps, slowLinearRation, slowPower, slowYoYo
+    customWiggleStrength, customWiggleWiggles, customWiggleType, steps, slowLinearRation, slowPower,
+    slowYoYo, roughRef
   ) => {
     switch(ease) {
       case 'linear':
@@ -658,7 +692,7 @@ export const selectedTweensEaseCurvesMatch = createSelector(
       case 'expo':
         return power !== 'multi';
       case 'rough':
-        return false;
+        return roughRef !== 'multi';
       case 'slow':
         return slowLinearRation !== 'multi' && slowPower !== 'multi' && slowYoYo !== 'multi';
       case 'steps':

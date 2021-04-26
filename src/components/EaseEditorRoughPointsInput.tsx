@@ -5,7 +5,7 @@ import { RoughEase } from 'gsap/EasePack';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setLayersRoughTweenPoints } from '../store/actions/layer';
-import { getSelectedRoughTweensPoints } from '../store/selectors/layer';
+import { getSelectedRoughTweensPoints, getSelectedRoughTweenPropsMatch } from '../store/selectors/layer';
 import MathFormGroup from './MathFormGroup';
 
 gsap.registerPlugin(CustomEase, RoughEase);
@@ -18,42 +18,63 @@ const EaseEditorRoughPointsInput = (props: EaseEditorRoughPointsInputProps): Rea
   const formControlRef = useRef(null);
   const { setParamInfo } = props;
   const selectedTweens = useSelector((state: RootState) => state.layer.present.tweens.selected.allIds);
-  // const id = useSelector((state: RootState) => state.easeEditor.tween);
   const points = useSelector((state: RootState) => getSelectedRoughTweensPoints(state));
+  const roughPropsMatch = useSelector((state: RootState) => getSelectedRoughTweenPropsMatch(state));
   const selectedTweensById = useSelector((state: RootState) => selectedTweens.reduce((result, current) => ({
     ...result,
     [current]: state.layer.present.tweens.byId[current]
   }), {}));
-  // const disabled = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].ease !== 'rough' : true);
-  // const roughTween = useSelector((state: RootState) => state.easeEditor.tween ? state.layer.present.tweens.byId[state.easeEditor.tween].rough : null);
   const dispatch = useDispatch();
 
   const handleSubmitSuccess = (newPoints: any): void => {
     if (newPoints < 0) {
       newPoints = 0;
     }
-    dispatch(setLayersRoughTweenPoints({
-      tweens: selectedTweens,
-      points: newPoints,
-      ref: selectedTweens.reduce((result, current) => {
-        const tweenItem = selectedTweensById[current];
-        const roughProps = tweenItem.rough;
-        return {
+    if (roughPropsMatch) {
+      const tweenRef = selectedTweensById[selectedTweens[0]];
+      const sharedRef = CustomEase.getSVGData(`rough({
+        clamp: ${tweenRef.rough.clamp},
+        points: ${newPoints},
+        randomize: ${tweenRef.rough.randomize},
+        strength: ${tweenRef.rough.strength},
+        taper: ${tweenRef.rough.taper},
+        template: ${tweenRef.rough.template}
+      })`, {
+        width: 400,
+        height: 400
+      });
+      dispatch(setLayersRoughTweenPoints({
+        tweens: selectedTweens,
+        points: newPoints,
+        ref: selectedTweens.reduce((result, current) => ({
           ...result,
-          [current]: CustomEase.getSVGData(`rough({
-            clamp: ${roughProps.clamp},
-            points: ${newPoints},
-            randomize: ${roughProps.randomize},
-            strength: ${roughProps.strength},
-            taper: ${roughProps.taper},
-            template: ${roughProps.template}
-          })`, {
-            width: 400,
-            height: 400
-          })
-        };
-      }, {})
-    }));
+          [current]: sharedRef
+        }), {})
+      }));
+    } else {
+      dispatch(setLayersRoughTweenPoints({
+        tweens: selectedTweens,
+        points: newPoints,
+        ref: selectedTweens.reduce((result, current) => {
+          const tweenItem = selectedTweensById[current];
+          const roughProps = tweenItem.rough;
+          return {
+            ...result,
+            [current]: CustomEase.getSVGData(`rough({
+              clamp: ${roughProps.clamp},
+              points: ${newPoints},
+              randomize: ${roughProps.randomize},
+              strength: ${roughProps.strength},
+              taper: ${roughProps.taper},
+              template: ${roughProps.template}
+            })`, {
+              width: 400,
+              height: 400
+            })
+          };
+        }, {})
+      }));
+    }
   }
 
   const handleFocus = (e: any): void => {

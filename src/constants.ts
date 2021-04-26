@@ -24,7 +24,9 @@ export const DEFAULT_TWEEN_POWER_OPTIONS: Btwx.CubicBezierType[] = ['in', 'inOut
 export const DEFAULT_TWEEN_DURATION = 0.5;
 export const DEFAULT_TWEEN_DELAY = 0;
 export const DEFAULT_TWEEN_REPEAT = 0;
+export const DEFAULT_TWEEN_REPEAT_DELAY = 0;
 export const DEFAULT_TWEEN_YOYO = false;
+export const DEFAULT_TWEEN_YOYO_EASE = false;
 export const DEFAULT_TWEEN_EASE = 'power1';
 export const DEFAULT_TWEEN_POWER = 'out';
 // Text Tween
@@ -138,17 +140,8 @@ export const CUSTOM_WIGGLE_TWEEN_STRENGTH_MAP: { [id: string]: number | Btwx.Col
   fontSize: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
   letterSpacing: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
   lineHeight: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
-  // paragraph: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
   fontWeight: 900,
-  // oblique: 14,
-  // justification: 'right',
   text: 'wiggle text',
-  // fromX: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
-  // fromY: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
-  // toX: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
-  // toY: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
-  // pointX: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
-  // pointY: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
   scaleX: 1,
   scaleY: 1,
   blur: 10
@@ -160,7 +153,9 @@ export const getDefaultTweenProps = (customWiggleProp: any = null) => ({
   duration: DEFAULT_TWEEN_DURATION,
   delay: DEFAULT_TWEEN_DELAY,
   repeat: DEFAULT_TWEEN_REPEAT,
+  repeatDelay: DEFAULT_TWEEN_REPEAT_DELAY,
   yoyo: DEFAULT_TWEEN_YOYO,
+  yoyoEase: DEFAULT_TWEEN_YOYO_EASE,
   frozen: false,
   text: {
     delimiter: DEFAULT_TEXT_TWEEN_DELIMITER,

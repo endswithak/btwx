@@ -87,8 +87,12 @@ export const SET_LAYER_TWEEN_DURATION = 'SET_LAYER_TWEEN_DURATION';
 export const SET_LAYERS_TWEEN_DURATION = 'SET_LAYERS_TWEEN_DURATION';
 export const SET_LAYER_TWEEN_REPEAT = 'SET_LAYER_TWEEN_REPEAT';
 export const SET_LAYERS_TWEEN_REPEAT = 'SET_LAYERS_TWEEN_REPEAT';
+export const SET_LAYER_TWEEN_REPEAT_DELAY = 'SET_LAYER_TWEEN_REPEAT_DELAY';
+export const SET_LAYERS_TWEEN_REPEAT_DELAY = 'SET_LAYERS_TWEEN_REPEAT_DELAY';
 export const SET_LAYER_TWEEN_YOYO = 'SET_LAYER_TWEEN_YOYO';
 export const SET_LAYERS_TWEEN_YOYO = 'SET_LAYERS_TWEEN_YOYO';
+export const SET_LAYER_TWEEN_YOYO_EASE = 'SET_LAYER_TWEEN_YOYO_EASE';
+export const SET_LAYERS_TWEEN_YOYO_EASE = 'SET_LAYERS_TWEEN_YOYO_EASE';
 export const SET_LAYER_TWEEN_DELAY = 'SET_LAYER_TWEEN_DELAY';
 export const SET_LAYERS_TWEEN_DELAY = 'SET_LAYERS_TWEEN_DELAY';
 export const SET_LAYER_TWEEN_EASE = 'SET_LAYER_TWEEN_EASE';
@@ -1084,6 +1088,28 @@ export interface SetLayersTweenRepeat {
   payload: SetLayersTweenRepeatPayload;
 }
 
+//
+
+export interface SetLayerTweenRepeatDelayPayload {
+  id: string;
+  repeatDelay: number;
+}
+
+export interface SetLayerTweenRepeatDelay {
+  type: typeof SET_LAYER_TWEEN_REPEAT_DELAY;
+  payload: SetLayerTweenRepeatDelayPayload;
+}
+
+export interface SetLayersTweenRepeatDelayPayload {
+  tweens: string[];
+  repeatDelay: number;
+}
+
+export interface SetLayersTweenRepeatDelay {
+  type: typeof SET_LAYERS_TWEEN_REPEAT_DELAY;
+  payload: SetLayersTweenRepeatDelayPayload;
+}
+
 export interface SetLayerTweenYoyoPayload {
   id: string;
   yoyo: boolean;
@@ -1102,6 +1128,26 @@ export interface SetLayersTweenYoyoPayload {
 export interface SetLayersTweenYoyo {
   type: typeof SET_LAYERS_TWEEN_YOYO;
   payload: SetLayersTweenYoyoPayload;
+}
+
+export interface SetLayerTweenYoyoEasePayload {
+  id: string;
+  yoyoEase: boolean | string;
+}
+
+export interface SetLayerTweenYoyoEase {
+  type: typeof SET_LAYER_TWEEN_YOYO_EASE;
+  payload: SetLayerTweenYoyoEasePayload;
+}
+
+export interface SetLayersTweenYoyoEasePayload {
+  tweens: string[];
+  yoyoEase: boolean | string;
+}
+
+export interface SetLayersTweenYoyoEase {
+  type: typeof SET_LAYERS_TWEEN_YOYO_EASE;
+  payload: SetLayersTweenYoyoEasePayload;
 }
 
 export interface SetLayerTweenTimingPayload {
@@ -4063,8 +4109,12 @@ export type LayerTypes = AddArtboard |
                          SetLayersTweenDuration |
                          SetLayerTweenRepeat |
                          SetLayersTweenRepeat |
+                         SetLayerTweenRepeatDelay |
+                         SetLayersTweenRepeatDelay |
                          SetLayerTweenYoyo |
                          SetLayersTweenYoyo |
+                         SetLayerTweenYoyoEase |
+                         SetLayersTweenYoyoEase |
                          SetLayerTweenTiming |
                          SetLayersTweenTiming |
                          SetLayerTweenDelay |

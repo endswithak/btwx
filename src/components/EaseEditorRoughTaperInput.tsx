@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import capitalize from 'lodash.capitalize'
 import { RootState } from '../store/reducers';
 import { setLayersRoughTweenTaper } from '../store/actions/layer';
-import { getSelectedRoughTweensTaper } from '../store/selectors/layer';
+import { getSelectedRoughTweensTaper, getSelectedRoughTweenPropsMatch } from '../store/selectors/layer';
 import { DEFAULT_ROUGH_TWEEN_TAPER_TYPES } from '../constants';
 import Form from './Form';
 import Icon from './Icon';
@@ -27,6 +27,7 @@ const EaseEditorRoughTaperInput = (props: EaseEditorRoughTaperInputProps): React
     [current]: state.layer.present.tweens.byId[current]
   }), {}));
   const taperValue = useSelector((state: RootState) => getSelectedRoughTweensTaper(state));
+  const roughPropsMatch = useSelector((state: RootState) => getSelectedRoughTweenPropsMatch(state));
   const [taper, setTaper] = useState(taperValue);
   const dispatch = useDispatch();
 
@@ -50,28 +51,51 @@ const EaseEditorRoughTaperInput = (props: EaseEditorRoughTaperInputProps): React
 
   const handleChange = (e: any): void => {
     setTaper(e.target.value);
-    dispatch(setLayersRoughTweenTaper({
-      tweens: selectedTweens,
-      taper: e.target.value,
-      ref: selectedTweens.reduce((result, current) => {
-        const tweenItem = selectedTweensById[current];
-        const roughProps = tweenItem.rough;
-        return {
+    if (roughPropsMatch) {
+      const tweenRef = selectedTweensById[selectedTweens[0]];
+      const sharedRef = CustomEase.getSVGData(`rough({
+        clamp: ${tweenRef.rough.clamp},
+        points: ${tweenRef.rough.points},
+        randomize: ${tweenRef.rough.randomize},
+        strength: ${tweenRef.rough.strength},
+        taper: ${e.target.value},
+        template: ${tweenRef.rough.template}
+      })`, {
+        width: 400,
+        height: 400
+      });
+      dispatch(setLayersRoughTweenTaper({
+        tweens: selectedTweens,
+        taper: e.target.value,
+        ref: selectedTweens.reduce((result, current) => ({
           ...result,
-          [current]: CustomEase.getSVGData(`rough({
-            clamp: ${roughProps.clamp},
-            points: ${roughProps.points},
-            randomize: ${roughProps.randomize},
-            strength: ${roughProps.strength},
-            taper: ${e.target.value},
-            template: ${roughProps.template}
-          })`, {
-            width: 400,
-            height: 400
-          })
-        };
-      }, {})
-    }));
+          [current]: sharedRef
+        }), {})
+      }));
+    } else {
+      dispatch(setLayersRoughTweenTaper({
+        tweens: selectedTweens,
+        taper: e.target.value,
+        ref: selectedTweens.reduce((result, current) => {
+          const tweenItem = selectedTweensById[current];
+          const roughProps = tweenItem.rough;
+          return {
+            ...result,
+            [current]: CustomEase.getSVGData(`rough({
+              clamp: ${roughProps.clamp},
+              points: ${roughProps.points},
+              randomize: ${roughProps.randomize},
+              strength: ${roughProps.strength},
+              taper: ${e.target.value},
+              template: ${roughProps.template}
+            })`, {
+              width: 400,
+              height: 400
+            })
+          };
+        }, {})
+      }));
+    }
   }
 
   const handleFocus = (): void => {

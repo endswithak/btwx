@@ -105,6 +105,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
           //
           gsap.set(guide, {x: this.x});
           gsap.set(leftTooltipElement, {display: 'inline'});
+          // should be innerText
           leftTooltipElement.innerText = `${(this.x / 4) / 100}s`;
           document.body.style.cursor = 'grabbing';
         }
@@ -125,6 +126,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
           gsap.set(guide, {
             x: `+=${this.deltaX}`
           });
+          // should be innerText
           leftTooltipElement.innerText = `${(this.x / 4) / 100}s`;
         }
       }
@@ -172,6 +174,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
           //
           gsap.set(guide, {x: this.x + (theme.unit * 4)});
           gsap.set(rightTooltipElement, {display: 'inline'});
+          // should be innerText
           rightTooltipElement.innerText = `${(tweenHandleElement.clientWidth / 4) / 100}s`;
           document.body.style.cursor = 'grabbing';
         }
@@ -238,6 +241,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
           //
           gsap.set(guide, {x: (gsap.getProperty(rightHandleElement, 'x') as number) + (theme.unit * 4)});
           gsap.set(leftTooltipElement, {display: 'inline'});
+          // should be innerText
           leftTooltipElement.innerText = `${(gsap.getProperty(leftHandleElement, 'x') as number / 4) / 100}s`;
           document.body.style.cursor = 'grabbing';
         }
@@ -256,6 +260,7 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
           gsap.set(guide, {
             x: `+=${this.deltaX}`
           });
+          // should be innerText
           leftTooltipElement.innerText = `${(gsap.getProperty(leftHandleElement, 'x') as number / 4) / 100}s`;
         }
       }

@@ -1,13 +1,6 @@
-import React, { useContext, ReactElement, useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { ThemeContext } from './ThemeProvider';
-
-const Button = styled.button`
-  color: ${props => props.theme.palette.primary};
-  :hover {
-    color: ${props => props.theme.palette.primaryHover};
-  }
-`;
+import { clipboard } from 'electron';
+import React, { ReactElement, useState, useEffect } from 'react';
+import Button from './Button';
 
 interface EaseEditorCopyPathButtonProps {
   pathData: string;
@@ -15,20 +8,21 @@ interface EaseEditorCopyPathButtonProps {
 
 const EaseEditorCopyPathButton = (props: EaseEditorCopyPathButtonProps): ReactElement => {
   const { pathData } = props;
-  const theme = useContext(ThemeContext);
   const [showCopied, setShowCopied] = useState(false);
   const [indicatorInterval, setIndicatorInterval] = useState(null);
 
   const handleClick = () => {
-    // remote.clipboard.writeText(pathData);
-    if (indicatorInterval) {
-      clearInterval(indicatorInterval);
+    if (pathData) {
+      clipboard.writeText(pathData);
+      if (indicatorInterval) {
+        clearInterval(indicatorInterval);
+      }
+      setShowCopied(true);
+      const intervalId = setInterval(() => {
+        setShowCopied(false);
+      }, 1000);
+      setIndicatorInterval(intervalId);
     }
-    setShowCopied(true);
-    const intervalId = setInterval(() => {
-      setShowCopied(false);
-    }, 1000);
-    setIndicatorInterval(intervalId);
   }
 
   useEffect(() => {
@@ -38,25 +32,21 @@ const EaseEditorCopyPathButton = (props: EaseEditorCopyPathButtonProps): ReactEl
   }, []);
 
   return (
-    <>
+    <div className='c-ease-editor__copy-ease'>
       <Button
-        className='c-ease-editor__copy-ease'
-        theme={theme}
+        disabled={!pathData}
+        size='small'
         onClick={handleClick}>
         Copy Path
       </Button>
       {
         showCopied
-        ? <div
-            className='c-ease-editor__copied-indicator'
-            style={{
-              color: theme.text.base
-            }}>
+        ? <div className='c-ease-editor__copied-indicator'>
             Copied
           </div>
         : null
       }
-    </>
+    </div>
   );
 }
 

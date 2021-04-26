@@ -5,7 +5,7 @@ import { CustomEase } from 'gsap/CustomEase';
 import { RoughEase } from 'gsap/EasePack';
 import { RootState } from '../store/reducers';
 import { setLayersRoughTweenTemplate } from '../store/actions/layer';
-import { getSelectedRoughTweensTemplate } from '../store/selectors/layer';
+import { getSelectedRoughTweensTemplate, getSelectedRoughTweenPropsMatch } from '../store/selectors/layer';
 import Form from './Form';
 
 gsap.registerPlugin(CustomEase, RoughEase);
@@ -23,6 +23,7 @@ const EaseEditorRoughTemplateInput = (props: EaseEditorRoughTemplateInputProps):
     [current]: state.layer.present.tweens.byId[current]
   }), {}));
   const template = useSelector((state: RootState) => getSelectedRoughTweensTemplate(state));
+  const roughPropsMatch = useSelector((state: RootState) => getSelectedRoughTweenPropsMatch(state));
   const [currentValue, setCurrentValue] = useState(template === 'none' ? '' : template);
   const [evaluation, setEvaluation] = useState(template);
   const [valid, setValid] = useState(true);
@@ -51,28 +52,51 @@ const EaseEditorRoughTemplateInput = (props: EaseEditorRoughTemplateInputProps):
 
   const handleSubmit = (e: any): void => {
     if (valid && dirty) {
-      dispatch(setLayersRoughTweenTemplate({
-        tweens: selectedTweens,
-        template: currentValue.length === 0 ? 'none' : currentValue,
-        ref: selectedTweens.reduce((result, current) => {
-          const tweenItem = selectedTweensById[current];
-          const roughProps = tweenItem.rough;
-          return {
+      if (roughPropsMatch) {
+        const tweenRef = selectedTweensById[selectedTweens[0]];
+        const sharedRef = CustomEase.getSVGData(`rough({
+          clamp: ${tweenRef.rough.clamp},
+          points: ${tweenRef.rough.points},
+          randomize: ${tweenRef.rough.randomize},
+          strength: ${tweenRef.rough.strength},
+          taper: ${tweenRef.rough.taper},
+          template: ${currentValue}
+        })`, {
+          width: 400,
+          height: 400
+        });
+        dispatch(setLayersRoughTweenTemplate({
+          tweens: selectedTweens,
+          template: currentValue.length === 0 ? 'none' : currentValue,
+          ref: selectedTweens.reduce((result, current) => ({
             ...result,
-            [current]: CustomEase.getSVGData(`rough({
-              clamp: ${roughProps.clamp},
-              points: ${roughProps.points},
-              randomize: ${roughProps.randomize},
-              strength: ${roughProps.strength},
-              taper: ${roughProps.taper},
-              template: ${currentValue}
-            })`, {
-              width: 400,
-              height: 400
-            })
-          };
-        }, {})
-      }));
+            [current]: sharedRef
+          }), {})
+        }));
+      } else {
+        dispatch(setLayersRoughTweenTemplate({
+          tweens: selectedTweens,
+          template: currentValue.length === 0 ? 'none' : currentValue,
+          ref: selectedTweens.reduce((result, current) => {
+            const tweenItem = selectedTweensById[current];
+            const roughProps = tweenItem.rough;
+            return {
+              ...result,
+              [current]: CustomEase.getSVGData(`rough({
+                clamp: ${roughProps.clamp},
+                points: ${roughProps.points},
+                randomize: ${roughProps.randomize},
+                strength: ${roughProps.strength},
+                taper: ${roughProps.taper},
+                template: ${currentValue}
+              })`, {
+                width: 400,
+                height: 400
+              })
+            };
+          }, {})
+        }));
+      }
     } else {
       setCurrentValue(template === 'none' ? '' : template);
       setValid(true);
