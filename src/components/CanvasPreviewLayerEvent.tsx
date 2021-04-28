@@ -45,6 +45,8 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
   const [playing, setPlaying] = useState(false);
   const [eventType, setEventType] = useState(event.event);
   const [eventLayer, setEventLayer] = useState(event.layer);
+  const [eventLayers, setEventLayers] = useState(eventTweenLayers);
+  const [instance, setNewInstance] = useState(0);
   const dispatch = useDispatch();
 
   const buildTimeline = () => gsap.timeline({
@@ -133,6 +135,7 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
     }
   }
 
+  // create initial timeline
   useEffect(() => {
     if (eventTimeline) {
       eventTimeline.kill();
@@ -153,12 +156,31 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
     }
   }, []);
 
+  // reset event timeline when playing stops
   useEffect(() => {
     if (!playing && eventTimeline) {
       eventTimeline.progress(0).pause();
     }
   }, [playing]);
 
+  // rebuild event timeline when tween layers are added/removed
+  useEffect(() => {
+    if (eventTimeline && (eventTweenLayers.some(id => !eventLayers.includes(id)) || eventTweenLayers.length !== eventLayers.length)) {
+      if (playing) {
+        eventTimeline.pause().progress(0);
+        eventTimeline.kill();
+      }
+      const newTimeline = buildTimeline();
+      removePaperLayerEventListener();
+      addPaperLayerEventListener(newTimeline);
+      setEventTimeline(newTimeline);
+      setNewInstance(instance + 1);
+      setEventLayers(eventTweenLayers);
+    }
+  }, [eventTweenLayers]);
+
+  // autoplay feature...
+  // plays timeline whenever any event tween layer tween prop changes
   useEffect(() => {
     if (tweenEdit && prevEdit && autoplay) {
       paperPreview.view.center = originArtboardPosition;
@@ -178,7 +200,7 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
         {
           event.tweens.map((tweenId) => (
             <CanvasPreviewLayerTween
-              key={tweenId}
+              key={`${tweenId}-${instance}`}
               tweenId={tweenId}
               eventTimeline={eventTimeline} />
           ))

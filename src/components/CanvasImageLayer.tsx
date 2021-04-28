@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import tinyColor from 'tinycolor2';
-import { getPaperShadowColor, getPaperShadowOffset, getLayerAbsPosition, getPaperParent, getPaperShadowBlur, getPaperLayerIndex, getPaperStrokeColor, getPaperFillColor } from '../store/utils/paper';
+import { getPaperShadowColor, getPaperShadowOffset, getLayerAbsPosition, getPaperParent, getPaperShadowBlur, getPaperLayerIndex, getPaperStrokeColor, getPaperFillColor, clearLayerTransforms, applyLayerTransforms } from '../store/utils/paper';
 import { paperMain, paperPreview } from '../canvas';
 import CanvasPreviewLayerEvent from './CanvasPreviewLayerEvent';
 
@@ -16,7 +16,6 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
   const layerItem: Btwx.Image = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Image);
   const parentItem: Btwx.Artboard | Btwx.Group = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.parent] as Btwx.Artboard | Btwx.Group : null);
   const artboardItem: Btwx.Artboard = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null);
-  // const tweening = useSelector((state: RootState) => state.preview.tweening === artboardItem.id);
   const layerIndex = parentItem.children.indexOf(layerItem.id);
   const underlyingMaskIndex = layerItem.underlyingMask ? parentItem.children.indexOf(layerItem.underlyingMask) : null;
   const maskedIndex = (layerIndex - underlyingMaskIndex) + 1;
@@ -24,9 +23,7 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
   const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
   const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
   const [rendered, setRendered] = useState<boolean>(false);
-  const [prevRotation, setPrevRotation] = useState(layerItem.transform.rotation);
-  // const [prevTweening, setPrevTweening] = useState(tweening);
-  // const [eventInstance, setEventInstance] = useState(0);
+  // const [prevRotation, setPrevRotation] = useState(layerItem.transform.rotation);
 
   ///////////////////////////////////////////////////////
   // HELPER FUNCTIONS
@@ -133,8 +130,10 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
         raster.bounds.height = layerItem.frame.innerHeight;
         raster.position = imageAbsPosition;
         raster.visible = true;
-        imageContainer.scale(layerItem.transform.horizontalFlip ? -1 : 1, layerItem.transform.verticalFlip ? -1 : 1);
-        imageContainer.rotation = layerItem.transform.rotation;
+        applyLayerTransforms({
+          paperLayer: imageContainer,
+          transform: layerItem.transform
+        });
         resolve(imageContainer);
       }
     })
@@ -154,7 +153,10 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
         isParentArtboard: layerItem.parent === layerItem.artboard,
         masked: layerItem.masked,
         underlyingMask: layerItem.underlyingMask
-      }).insertChild(getPaperLayerIndex(layerItem, parentItem), imageContainer);
+      }).insertChild(
+        getPaperLayerIndex(layerItem, parentItem),
+        imageContainer
+      );
       setRendered(true);
     });
     return (): void => {
@@ -165,23 +167,6 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
       }
     }
   }, []);
-
-  ///////////////////////////////////////////////////////
-  // TWEENING
-  ///////////////////////////////////////////////////////
-
-  // useEffect(() => {
-  //   if (paperScope === 'preview') {
-  //     if (!tweening && prevTweening) {
-  //       const { paperLayer } = getPaperLayer();
-  //       createImage().then((imageContainer) => {
-  //         paperLayer.replaceWith(imageContainer);
-  //       });
-  //       setEventInstance(eventInstance + 1);
-  //     }
-  //     setPrevTweening(tweening);
-  //   }
-  // }, [tweening]);
 
   ///////////////////////////////////////////////////////
   // IMAGE ID
@@ -197,8 +182,10 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
         newRaster.bounds.width = layerItem.frame.innerWidth;
         newRaster.bounds.height = layerItem.frame.innerHeight;
         newRaster.position = imageAbsPosition;
-        newRaster.scale(layerItem.transform.horizontalFlip ? -1 : 1, layerItem.transform.verticalFlip ? -1 : 1);
-        newRaster.rotation = layerItem.transform.rotation;
+        applyLayerTransforms({
+          paperLayer: newRaster,
+          transform: layerItem.transform
+        });
         newRaster.data = {
           id: 'imageRaster',
           type: 'LayerChild',
@@ -273,25 +260,33 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
   useEffect(() => {
     if (rendered) {
       const { paperLayer } = getPaperLayer();
-      paperLayer.rotation = -prevRotation;
-      paperLayer.rotation = layerItem.transform.rotation;
-      setPrevRotation(layerItem.transform.rotation);
+      clearLayerTransforms({
+        layerType: 'Image',
+        paperLayer
+      });
+      applyLayerTransforms({
+        paperLayer: paperLayer,
+        transform: layerItem.transform
+      });
+      // paperLayer.rotation = -prevRotation;
+      // paperLayer.rotation = layerItem.transform.rotation;
+      // setPrevRotation(layerItem.transform.rotation);
     }
-  }, [layerItem.transform.rotation]);
+  }, [layerItem.transform.rotation, layerItem.transform.horizontalFlip, layerItem.transform.verticalFlip]);
 
-  useEffect(() => {
-    if (rendered) {
-      const { paperLayer } = getPaperLayer();
-      paperLayer.scale(-1, 1);
-    }
-  }, [layerItem.transform.horizontalFlip]);
+  // useEffect(() => {
+  //   if (rendered) {
+  //     const { paperLayer } = getPaperLayer();
+  //     paperLayer.scale(-1, 1);
+  //   }
+  // }, [layerItem.transform.horizontalFlip]);
 
-  useEffect(() => {
-    if (rendered) {
-      const { paperLayer } = getPaperLayer();
-      paperLayer.scale(1, -1);
-    }
-  }, [layerItem.transform.verticalFlip]);
+  // useEffect(() => {
+  //   if (rendered) {
+  //     const { paperLayer } = getPaperLayer();
+  //     paperLayer.scale(1, -1);
+  //   }
+  // }, [layerItem.transform.verticalFlip]);
 
   ///////////////////////////////////////////////////////
   // FRAME
@@ -301,9 +296,19 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
     if (rendered) {
       const { paperLayer } = getPaperLayer();
       const absoluteX = layerItem.frame.x + artboardItem.frame.x;
-      paperLayer.rotation = -layerItem.transform.rotation;
+      // paperLayer.rotation = -layerItem.transform.rotation;
+      // paperLayer.bounds.width = layerItem.frame.innerWidth;
+      // paperLayer.rotation = layerItem.transform.rotation;
+      // paperLayer.position.x = absoluteX;
+      clearLayerTransforms({
+        layerType: 'Image',
+        paperLayer
+      });
       paperLayer.bounds.width = layerItem.frame.innerWidth;
-      paperLayer.rotation = layerItem.transform.rotation;
+      applyLayerTransforms({
+        paperLayer: paperLayer,
+        transform: layerItem.transform
+      });
       paperLayer.position.x = absoluteX;
     }
   }, [layerItem.frame.innerWidth]);
@@ -312,9 +317,19 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
     if (rendered) {
       const { paperLayer } = getPaperLayer();
       const absoluteY = layerItem.frame.y + artboardItem.frame.y;
-      paperLayer.rotation = -layerItem.transform.rotation;
+      // paperLayer.rotation = -layerItem.transform.rotation;
+      // paperLayer.bounds.height = layerItem.frame.innerHeight;
+      // paperLayer.rotation = layerItem.transform.rotation;
+      // paperLayer.position.y = absoluteY;
+      clearLayerTransforms({
+        layerType: 'Image',
+        paperLayer
+      });
       paperLayer.bounds.height = layerItem.frame.innerHeight;
-      paperLayer.rotation = layerItem.transform.rotation;
+      applyLayerTransforms({
+        paperLayer: paperLayer,
+        transform: layerItem.transform
+      });
       paperLayer.position.y = absoluteY;
     }
   }, [layerItem.frame.innerHeight]);

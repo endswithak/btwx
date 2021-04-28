@@ -143,7 +143,6 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   const layerItem: Btwx.Text = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Text);
   const parentItem: Btwx.Artboard | Btwx.Group = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.parent] as Btwx.Artboard | Btwx.Group : null);
   const artboardItem: Btwx.Artboard = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null);
-  // const tweening = useSelector((state: RootState) => state.preview.tweening === artboardItem.id);
   const layerIndex = parentItem.children.indexOf(layerItem.id);
   const underlyingMaskIndex = layerItem.underlyingMask ? parentItem.children.indexOf(layerItem.underlyingMask) : null;
   const maskedIndex = (layerIndex - underlyingMaskIndex) + 1;
@@ -151,9 +150,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
   const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
   const [rendered, setRendered] = useState<boolean>(false);
-  const [prevRotation, setPrevRotation] = useState(layerItem.transform.rotation);
-  // const [prevTweening, setPrevTweening] = useState(tweening);
-  // const [eventInstance, setEventInstance] = useState(0);
+  // const [prevRotation, setPrevRotation] = useState(layerItem.transform.rotation);
   const content = useMemo(() =>
     getContent({paragraphs: layerItem.paragraphs}),
     [layerItem.paragraphs]
@@ -279,13 +276,13 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
             layerType: 'Text',
             layerId: id
           },
-          clipMask: true
+          clipMask: layerItem.textStyle.textResize !== 'autoWidth'
         }),
         new paperLayerScope.Path.Rectangle({
           rectangle: getAreaTextRectangle(),
-          // fillColor: tinyColor('#fff').setAlpha(0.01).toRgbString(),
-          // blendMode: 'multiply',
-          fillColor: tinyColor('red').setAlpha(0.25).toRgbString(),
+          fillColor: tinyColor('#fff').setAlpha(0.01).toRgbString(),
+          blendMode: 'multiply',
+          // fillColor: tinyColor('red').setAlpha(0.25).toRgbString(),
           data: {
             id: 'textBackground',
             type: 'LayerChild',
@@ -351,21 +348,6 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   }, []);
 
   ///////////////////////////////////////////////////////
-  // TWEENS
-  ///////////////////////////////////////////////////////
-
-  // useEffect(() => {
-  //   if (paperScope === 'preview') {
-  //     if (!tweening && prevTweening) {
-  //       const { paperLayer, textContent } = getPaperLayer();
-  //       paperLayer.replaceWith(createText());
-  //       setEventInstance(eventInstance + 1);
-  //     }
-  //     setPrevTweening(tweening);
-  //   }
-  // }, [tweening]);
-
-  ///////////////////////////////////////////////////////
   // INDEX & MASK
   ///////////////////////////////////////////////////////
 
@@ -426,35 +408,31 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
 
   useEffect(() => {
     if (rendered) {
-      const { paperLayer } = getPaperLayer();
+      const { paperLayer, textContent } = getPaperLayer();
       clearLayerTransforms({
-        paperLayer,
-        transform: {
-          ...layerItem.transform,
-          rotation: prevRotation
-        }
+        layerType: 'Text',
+        paperLayer
       });
       applyLayerTransforms({
         paperLayer,
         transform: layerItem.transform
       });
-      setPrevRotation(layerItem.transform.rotation);
     }
-  }, [layerItem.transform.rotation]);
+  }, [layerItem.transform.rotation, layerItem.transform.horizontalFlip, layerItem.transform.verticalFlip]);
 
-  useEffect(() => {
-    if (rendered) {
-      const { paperLayer } = getPaperLayer();
-      paperLayer.scale(-1, 1);
-    }
-  }, [layerItem.transform.horizontalFlip]);
+  // useEffect(() => {
+  //   if (rendered) {
+  //     const { paperLayer } = getPaperLayer();
+  //     paperLayer.scale(-1, 1);
+  //   }
+  // }, [layerItem.transform.horizontalFlip]);
 
-  useEffect(() => {
-    if (rendered) {
-      const { paperLayer } = getPaperLayer();
-      paperLayer.scale(1, -1);
-    }
-  }, [layerItem.transform.verticalFlip]);
+  // useEffect(() => {
+  //   if (rendered) {
+  //     const { paperLayer } = getPaperLayer();
+  //     paperLayer.scale(1, -1);
+  //   }
+  // }, [layerItem.transform.verticalFlip]);
 
   ///////////////////////////////////////////////////////
   // FRAME / TEXT / TEXTRESIZE
@@ -464,8 +442,8 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
     if (rendered) {
       const { paperLayer, textContent, textBackground, textMask } = getPaperLayer();
       clearLayerTransforms({
-        paperLayer,
-        transform: layerItem.transform
+        layerType: 'Text',
+        paperLayer
       });
       textContent.content = content;
       applyTextBounds({
@@ -618,8 +596,8 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
     if (rendered) {
       const { paperLayer, textContent, textBackground, textMask } = getPaperLayer();
       clearLayerTransforms({
-        paperLayer,
-        transform: layerItem.transform
+        layerType: 'Text',
+        paperLayer
       });
       textContent.fontFamily = layerItem.textStyle.fontFamily;
       textContent.content = content;
@@ -644,8 +622,8 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
     if (rendered) {
       const { paperLayer, textContent, textBackground, textMask } = getPaperLayer();
       clearLayerTransforms({
-        paperLayer,
-        transform: layerItem.transform
+        layerType: 'Text',
+        paperLayer
       });
       textContent.fontWeight = layerItem.textStyle.fontWeight;
       textContent.content = content;
@@ -670,8 +648,8 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
     if (rendered) {
       const { paperLayer, textContent, textBackground, textMask } = getPaperLayer();
       clearLayerTransforms({
-        paperLayer,
-        transform: layerItem.transform
+        layerType: 'Text',
+        paperLayer
       });
       textContent.fontStyle = layerItem.textStyle.fontStyle;
       textContent.content = content;
@@ -696,8 +674,8 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
     if (rendered) {
       const { paperLayer, textContent, textBackground, textMask } = getPaperLayer();
       clearLayerTransforms({
-        paperLayer,
-        transform: layerItem.transform
+        layerType: 'Text',
+        paperLayer
       });
       textContent.letterSpacing = layerItem.textStyle.letterSpacing;
       textContent.content = content;
@@ -722,8 +700,8 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
     if (rendered) {
       const { paperLayer, textContent, textBackground, textMask } = getPaperLayer();
       clearLayerTransforms({
-        paperLayer,
-        transform: layerItem.transform
+        layerType: 'Text',
+        paperLayer
       });
       textContent.textTransform = layerItem.textStyle.textTransform;
       textContent.content = content;
@@ -748,8 +726,8 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
     if (rendered) {
       const { paperLayer, textContent, textBackground, textMask } = getPaperLayer();
       clearLayerTransforms({
-        paperLayer,
-        transform: layerItem.transform
+        layerType: 'Text',
+        paperLayer
       });
       textContent.fontSize = layerItem.textStyle.fontSize;
       textContent.content = content;
@@ -774,8 +752,8 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
     if (rendered) {
       const { paperLayer, textContent } = getPaperLayer();
       clearLayerTransforms({
-        paperLayer,
-        transform: layerItem.transform
+        layerType: 'Text',
+        paperLayer
       });
       textContent.justification = layerItem.textStyle.justification;
       positionTextContent({
@@ -795,8 +773,8 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
     if (rendered) {
       const { paperLayer } = getPaperLayer();
       clearLayerTransforms({
-        paperLayer,
-        transform: layerItem.transform
+        layerType: 'Text',
+        paperLayer
       });
       positionTextContent({
         paperLayer: paperLayer,
@@ -815,8 +793,8 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
     if (rendered) {
       const { paperLayer, textContent, textBackground, textMask } = getPaperLayer();
       clearLayerTransforms({
-        paperLayer,
-        transform: layerItem.transform
+        layerType: 'Text',
+        paperLayer
       });
       textContent.leading = layerItem.textStyle.leading;
       textContent.content = content;

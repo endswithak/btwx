@@ -4,6 +4,18 @@ import tinyColor from 'tinycolor2';
 import { DEFAULT_ROUNDED_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_RADIUS, DEFAULT_STAR_POINTS, DEFAULT_LINE_FROM, DEFAULT_LINE_TO } from '../../constants';
 import { paperMain, paperPreview } from '../../canvas';
 
+export const getShapeIcon = (pathData): string => {
+  const layerIcon = new paperMain.CompoundPath({
+    pathData: pathData,
+    insert: false
+  });
+  layerIcon.fitBounds(new paperMain.Rectangle({
+    point: new paperMain.Point(0,0),
+    size: new paperMain.Size(24,24)
+  }));
+  return layerIcon.pathData;
+}
+
 interface GetScaleReset {
   scale: number;
 }
@@ -93,30 +105,78 @@ export const positionTextContent = ({paperLayer, justification, verticalAlignmen
 }
 
 interface ClearLayerTransforms {
+  layerType?: Btwx.LayerType;
   paperLayer: paper.Item;
-  transform: Btwx.Transform;
+  transform?: Btwx.Transform;
   variable?: boolean;
   width?: number;
   height?: number;
 }
 
-export const clearLayerTransforms = ({ paperLayer, transform, variable, width, height }: ClearLayerTransforms): paper.Item => {
+export const clearLayerTransforms = ({ layerType, paperLayer, transform, variable, width, height }: ClearLayerTransforms): paper.Item => {
+  let decomposeLayer: paper.Item;
+  switch(layerType) {
+    case 'Shape':
+      decomposeLayer = paperLayer;
+      break;
+    case 'Text':
+      decomposeLayer = paperLayer.getItem({data:{id:'textContent'}});
+      break;
+    case 'Image':
+      decomposeLayer = paperLayer.getItem({data:{id:'imageRaster'}});
+      break;
+    default:
+      decomposeLayer = paperLayer;
+  }
   if (variable) {
-    paperLayer.scale(
-      (transform.horizontalFlip as any) < 0 ? -1 : 1,
-      (transform.verticalFlip as any) < 0 ? -1 : 1
-    );
+    // paperLayer.scale(
+    //   (transform.horizontalFlip as any) < 0 ? -1 : 1,
+    //   (transform.verticalFlip as any) < 0 ? -1 : 1
+    // );
+    // paperLayer.scale(
+    //   width / paperLayer.bounds.width,
+    //   height / paperLayer.bounds.height
+    // );
+    // paperLayer.rotation = -transform.rotation;
+    if (layerType !== 'Shape') {
+      paperLayer.scale(
+        decomposeLayer.matrix.scaling.x < 0 ? -1 : 1,
+        decomposeLayer.matrix.scaling.y < 0 ? -1 : 1
+      );
+    } else {
+      paperLayer.scale(
+        (transform.horizontalFlip as any) < 0 ? -1 : 1,
+        (transform.verticalFlip as any) < 0 ? -1 : 1
+      );
+    }
     paperLayer.scale(
       width / paperLayer.bounds.width,
       height / paperLayer.bounds.height
     );
-    paperLayer.rotation = -transform.rotation;
+    if (layerType !== 'Shape') {
+      paperLayer.rotation = -decomposeLayer.matrix.rotation;
+    } else {
+      paperLayer.rotation = -transform.rotation;
+    }
   } else {
-    paperLayer.scale(
-      transform.horizontalFlip ? -1 : 1,
-      transform.verticalFlip ? -1 : 1
-    );
-    paperLayer.rotation = -transform.rotation;
+    // paperLayer.scale(
+    //   transform.horizontalFlip ? -1 : 1,
+    //   transform.verticalFlip ? -1 : 1
+    // );
+    // paperLayer.rotation = -transform.rotation;
+    if (layerType !== 'Shape') {
+      paperLayer.scale(
+        decomposeLayer.matrix.scaling.x,
+        decomposeLayer.matrix.scaling.y
+      );
+      paperLayer.rotation = -decomposeLayer.matrix.rotation;
+    } else {
+      paperLayer.scale(
+        transform.horizontalFlip ? -1 : 1,
+        transform.verticalFlip ? -1 : 1
+      );
+      paperLayer.rotation = -transform.rotation;
+    }
   }
   return paperLayer;
 }

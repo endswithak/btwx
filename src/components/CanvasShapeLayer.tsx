@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getPaperStyle, getLayerAbsPosition, getPaperParent, getPaperLayerIndex, getPaperFillColor, getPaperStrokeColor } from '../store/utils/paper';
+import { getPaperStyle, getLayerAbsPosition, getPaperParent, getPaperLayerIndex, getPaperFillColor, getPaperStrokeColor, clearLayerTransforms, applyLayerTransforms } from '../store/utils/paper';
 import { paperMain, paperPreview } from '../canvas';
 import CanvasPreviewLayerEvent from './CanvasPreviewLayerEvent';
 
@@ -16,7 +16,6 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
   const layerItem: Btwx.Shape = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Shape);
   const parentItem: Btwx.Artboard | Btwx.Group = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.parent] as Btwx.Artboard | Btwx.Group : null);
   const artboardItem: Btwx.Artboard = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null);
-  // const tweening = useSelector((state: RootState) => state.preview.tweening === artboardItem.id);
   const layerIndex = parentItem.children.indexOf(layerItem.id);
   const underlyingMaskIndex = layerItem.underlyingMask ? parentItem.children.indexOf(layerItem.underlyingMask) : null;
   const maskedIndex = (layerIndex - underlyingMaskIndex) + 1;
@@ -24,8 +23,6 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
   const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
   const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
   const [rendered, setRendered] = useState<boolean>(false);
-  // const [prevTweening, setPrevTweening] = useState(tweening);
-  // const [eventInstance, setEventInstance] = useState(0);
 
   ///////////////////////////////////////////////////////
   // HELPER FUNCTIONS
@@ -159,27 +156,6 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
       }
     }
   }, []);
-
-  ///////////////////////////////////////////////////////
-  // TWEENING
-  ///////////////////////////////////////////////////////
-
-  // useEffect(() => {
-  //   if (paperScope === 'preview') {
-  //     if (!tweening && prevTweening) {
-  //       let oldPaperLayer = paperProject.getItem({ data: { id }});
-  //       const newPaperLayer = createShape();
-  //       if (layerItem.mask) {
-  //         oldPaperLayer = oldPaperLayer.parent;
-  //         const nonMaskChildren = oldPaperLayer.children.slice(2, oldPaperLayer.children.length);
-  //         newPaperLayer.addChildren(nonMaskChildren);
-  //       }
-  //       oldPaperLayer.replaceWith(newPaperLayer);
-  //       setEventInstance(eventInstance + 1);
-  //     }
-  //     setPrevTweening(tweening);
-  //   }
-  // }, [tweening]);
 
   ///////////////////////////////////////////////////////
   // INDEX & MASK & SCOPE
@@ -342,40 +318,6 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
   //     }
   //   }
   // }, [layerItem.frame.y, artboardItem.frame.innerHeight]);
-
-  ///////////////////////////////////////////////////////
-  // LINE FROM & LINE TO
-  ///////////////////////////////////////////////////////
-
-  // if (layerItem.shapeType === 'Line') {
-  //   useEffect(() => {
-  //     if (rendered) {
-  //       const paperLayer = paperProject.getItem({ data: { id } }) as paper.Path;
-  //       paperLayer.firstSegment.point.x = (layerItem as Btwx.Line).from.x + artboardItem.frame.x;
-  //     }
-  //   }, [(layerItem as Btwx.Line).from.x, artboardItem.frame.innerWidth]);
-
-  //   useEffect(() => {
-  //     if (rendered) {
-  //       const paperLayer = paperProject.getItem({ data: { id } }) as paper.Path;
-  //       paperLayer.firstSegment.point.y = (layerItem as Btwx.Line).from.y + artboardItem.frame.y;
-  //     }
-  //   }, [(layerItem as Btwx.Line).from.y, artboardItem.frame.innerHeight]);
-
-  //   useEffect(() => {
-  //     if (rendered) {
-  //       const paperLayer = paperProject.getItem({ data: { id } }) as paper.Path;
-  //       paperLayer.lastSegment.point.x = (layerItem as Btwx.Line).to.x + artboardItem.frame.x;
-  //     }
-  //   }, [(layerItem as Btwx.Line).to.x, artboardItem.frame.innerWidth]);
-
-  //   useEffect(() => {
-  //     if (rendered) {
-  //       const paperLayer = paperProject.getItem({ data: { id } }) as paper.Path;
-  //       paperLayer.lastSegment.point.y = (layerItem as Btwx.Line).to.y + artboardItem.frame.y;
-  //     }
-  //   }, [(layerItem as Btwx.Line).to.y, artboardItem.frame.innerHeight]);
-  // }
 
   ///////////////////////////////////////////////////////
   // CONTEXT STYLE

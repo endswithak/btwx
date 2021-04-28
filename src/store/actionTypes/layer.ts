@@ -419,6 +419,7 @@ export type AddShapePayload = {
   layer: {
     [P in keyof Btwx.Shape]?: Btwx.Shape[P];
   };
+  shapeIcon?: string;
   batch?: boolean;
 }
 
@@ -1944,6 +1945,7 @@ export interface SetLayerWidthPayload {
   id: string;
   width: number;
   pathData?: string;
+  shapeIcon?: string;
   bounds?: Btwx.Frame;
   lines?: Btwx.TextLine[];
   paragraphs?: string[][];
@@ -1961,6 +1963,9 @@ export interface SetLayersWidthPayload {
   layers: string[];
   width: number;
   pathData?: {
+    [id: string]: string;
+  };
+  shapeIcon?: {
     [id: string]: string;
   };
   bounds?: {
@@ -1992,6 +1997,7 @@ export interface SetLayerHeightPayload {
   id: string;
   height: number;
   pathData?: string;
+  shapeIcon?: string;
   bounds?: Btwx.Frame;
   lines?: Btwx.TextLine[];
   paragraphs?: string[][];
@@ -2009,6 +2015,9 @@ export interface SetLayersHeightPayload {
   layers: string[];
   height: number;
   pathData?: {
+    [id: string]: string;
+  };
+  shapeIcon?: {
     [id: string]: string;
   };
   bounds?: {
@@ -2041,6 +2050,7 @@ export interface SetLayerRotationPayload {
   rotation: number;
   bounds?: Btwx.Frame;
   pathData?: string;
+  shapeIcon?: string;
   point?: Btwx.Point;
   from?: Btwx.Point;
   to?: Btwx.Point;
@@ -2058,6 +2068,9 @@ export interface SetLayersRotationPayload {
     [id: string]: Btwx.Frame;
   };
   pathData?: {
+    [id: string]: string;
+  };
+  shapeIcon?: {
     [id: string]: string;
   };
   point?: {
@@ -2158,6 +2171,7 @@ export interface EnableLayerHorizontalFlipPayload {
   to?: Btwx.Point;
   point?: Btwx.Point;
   pathData?: string;
+  shapeIcon?: string;
 }
 
 export interface EnableLayerHorizontalFlip {
@@ -2179,6 +2193,9 @@ export interface EnableLayersHorizontalFlipPayload {
   pathData?: {
     [id: string]: string;
   };
+  shapeIcon?: {
+    [id: string]: string;
+  };
 }
 
 export interface EnableLayersHorizontalFlip {
@@ -2192,6 +2209,7 @@ export interface DisableLayerHorizontalFlipPayload {
   to?: Btwx.Point;
   point?: Btwx.Point;
   pathData?: string;
+  shapeIcon?: string;
 }
 
 export interface DisableLayerHorizontalFlip {
@@ -2213,6 +2231,9 @@ export interface DisableLayersHorizontalFlipPayload {
   pathData?: {
     [id: string]: string;
   };
+  shapeIcon?: {
+    [id: string]: string;
+  };
 }
 
 export interface DisableLayersHorizontalFlip {
@@ -2226,6 +2247,7 @@ export interface EnableLayerVerticalFlipPayload {
   to?: Btwx.Point;
   point?: Btwx.Point;
   pathData?: string;
+  shapeIcon?: string;
 }
 
 export interface EnableLayerVerticalFlip {
@@ -2247,6 +2269,9 @@ export interface EnableLayersVerticalFlipPayload {
   pathData?: {
     [id: string]: string;
   };
+  shapeIcon?: {
+    [id: string]: string;
+  };
 }
 
 export interface EnableLayersVerticalFlip {
@@ -2260,6 +2285,7 @@ export interface DisableLayerVerticalFlipPayload {
   to?: Btwx.Point;
   point?: Btwx.Point;
   pathData?: string;
+  shapeIcon?: string;
 }
 
 export interface DisableLayerVerticalFlip {
@@ -2279,6 +2305,9 @@ export interface DisableLayersVerticalFlipPayload {
     [id: string]: Btwx.Point;
   };
   pathData?: {
+    [id: string]: string;
+  };
+  shapeIcon?: {
     [id: string]: string;
   };
 }
