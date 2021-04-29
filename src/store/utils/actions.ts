@@ -8,11 +8,36 @@ import {
   DEFAULT_SHADOW_STYLE, DEFAULT_BLEND_MODE, DEFAULT_OPACITY, DEFAULT_SHAPE_WIDTH,
   DEFAULT_SHAPE_HEIGHT, DEFAULT_STAR_POINTS, DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS,
   DEFAULT_POLYGON_SIDES, DEFAULT_STROKE_OPTIONS_STYLE, DEFAULT_LINE_FROM, DEFAULT_LINE_TO,
-  DEFAULT_BLUR
+  DEFAULT_BLUR, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_FILL_COLOR
 } from '../../constants';
 
 export const getLayerFillStyle = (payload: any, overrides = {}): Btwx.Fill => {
-  const fill = payload.layer.style && payload.layer.style.fill ? { ...DEFAULT_FILL_STYLE, ...payload.layer.style.fill } : DEFAULT_FILL_STYLE;
+  const fill = payload.layer.style && payload.layer.style.fill
+  ? { ...DEFAULT_FILL_STYLE, ...payload.layer.style.fill }
+  : (() => {
+      switch(payload.layer.type) {
+        case 'Group':
+        case 'Image':
+          return {
+            ...DEFAULT_FILL_STYLE,
+            enabled: false
+          }
+        case 'Text':
+          return {
+            ...DEFAULT_FILL_STYLE,
+            color: DEFAULT_TEXT_FILL_COLOR
+          }
+        case 'Artboard':
+          return {
+            ...DEFAULT_FILL_STYLE,
+            color: DEFAULT_ARTBOARD_BACKGROUND_COLOR
+          }
+        case 'Shape':
+          return DEFAULT_FILL_STYLE;
+        default:
+          return DEFAULT_FILL_STYLE;
+      }
+    })();
   return { ...fill, ...overrides };
 };
 
@@ -22,7 +47,24 @@ export const getLayerStrokeOptionsStyle = (payload: any, overrides = {}): Btwx.S
 };
 
 export const getLayerStrokeStyle = (payload: any, overrides = {}): Btwx.Stroke => {
-  const stroke = payload.layer.style && payload.layer.style.stroke ? { ...DEFAULT_STROKE_STYLE, ...payload.layer.style.stroke } : DEFAULT_STROKE_STYLE;
+  const stroke = payload.layer.style && payload.layer.style.stroke
+  ? { ...DEFAULT_STROKE_STYLE, ...payload.layer.style.stroke }
+  : (() => {
+      switch(payload.layer.type) {
+        case 'Artboard':
+        case 'Group':
+        case 'Text':
+        case 'Image':
+          return {
+            ...DEFAULT_STROKE_STYLE,
+            enabled: false
+          }
+        case 'Shape':
+          return DEFAULT_STROKE_STYLE;
+        default:
+          return DEFAULT_STROKE_STYLE;
+      }
+    })()
   return { ...stroke, ...overrides };
 };
 

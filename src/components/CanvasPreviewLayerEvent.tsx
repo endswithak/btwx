@@ -54,8 +54,12 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
     paused: true,
     data: eventTweenLayers.reduce((result, current) => ({
       ...result,
-      [current]: {}
-    }), {}),
+      [current]: {},
+      callbacks: {
+        ...result.callbacks,
+        [current]: {}
+      }
+    }), { callbacks: {} }),
     onStart: handleEventStart,
     onComplete: handleEventComplete
   })
@@ -160,6 +164,12 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
   useEffect(() => {
     if (!playing && eventTimeline) {
       eventTimeline.progress(0).pause();
+      Object.keys(eventTimeline.data.callbacks).forEach((layerCallbackKey) => {
+        const layerCallbacks = eventTimeline.data.callbacks[layerCallbackKey];
+        Object.keys(layerCallbacks).forEach((propCallbackKey) => {
+          layerCallbacks[propCallbackKey]();
+        });
+      });
     }
   }, [playing]);
 

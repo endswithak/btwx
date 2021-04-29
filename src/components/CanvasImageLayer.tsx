@@ -85,6 +85,8 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
       raster.visible = false;
       const imageContainer = new paperLayerScope.Group({
         name: `image-${layerItem.name}`,
+        fillColor: null,
+        strokeColor: null,
         shadowColor: getPaperShadowColor(layerItem.style.shadow),
         shadowOffset: getPaperShadowOffset(layerItem.style.shadow),
         shadowBlur: getPaperShadowBlur(layerItem.style.shadow),
@@ -268,25 +270,8 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
         paperLayer: paperLayer,
         transform: layerItem.transform
       });
-      // paperLayer.rotation = -prevRotation;
-      // paperLayer.rotation = layerItem.transform.rotation;
-      // setPrevRotation(layerItem.transform.rotation);
     }
   }, [layerItem.transform.rotation, layerItem.transform.horizontalFlip, layerItem.transform.verticalFlip]);
-
-  // useEffect(() => {
-  //   if (rendered) {
-  //     const { paperLayer } = getPaperLayer();
-  //     paperLayer.scale(-1, 1);
-  //   }
-  // }, [layerItem.transform.horizontalFlip]);
-
-  // useEffect(() => {
-  //   if (rendered) {
-  //     const { paperLayer } = getPaperLayer();
-  //     paperLayer.scale(1, -1);
-  //   }
-  // }, [layerItem.transform.verticalFlip]);
 
   ///////////////////////////////////////////////////////
   // FRAME
@@ -296,10 +281,6 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
     if (rendered) {
       const { paperLayer } = getPaperLayer();
       const absoluteX = layerItem.frame.x + artboardItem.frame.x;
-      // paperLayer.rotation = -layerItem.transform.rotation;
-      // paperLayer.bounds.width = layerItem.frame.innerWidth;
-      // paperLayer.rotation = layerItem.transform.rotation;
-      // paperLayer.position.x = absoluteX;
       clearLayerTransforms({
         layerType: 'Image',
         paperLayer
@@ -317,10 +298,6 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
     if (rendered) {
       const { paperLayer } = getPaperLayer();
       const absoluteY = layerItem.frame.y + artboardItem.frame.y;
-      // paperLayer.rotation = -layerItem.transform.rotation;
-      // paperLayer.bounds.height = layerItem.frame.innerHeight;
-      // paperLayer.rotation = layerItem.transform.rotation;
-      // paperLayer.position.y = absoluteY;
       clearLayerTransforms({
         layerType: 'Image',
         paperLayer
@@ -396,11 +373,11 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
   // STROKE & SHADOW STYLE
   ///////////////////////////////////////////////////////
 
-  useEffect(() => {
-    if (rendered) {
-      applyStroke();
-    }
-  }, [layerItem.style.stroke]);
+  // useEffect(() => {
+  //   if (rendered) {
+  //     applyStroke();
+  //   }
+  // }, [layerItem.style.stroke]);
 
   useEffect(() => {
     if (rendered) {
@@ -408,20 +385,20 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
     }
   }, [layerItem.style.shadow]);
 
-  useEffect(() => {
-    if (rendered) {
-      if (layerItem.style.stroke.fillType === 'gradient') {
-        applyStroke();
-      }
-    }
-  }, [layerItem.transform.rotation, layerItem.frame.innerWidth, layerItem.frame.innerHeight]);
+  // useEffect(() => {
+  //   if (rendered) {
+  //     if (layerItem.style.stroke.fillType === 'gradient') {
+  //       applyStroke();
+  //     }
+  //   }
+  // }, [layerItem.transform.rotation, layerItem.frame.innerWidth, layerItem.frame.innerHeight]);
 
-  useEffect(() => {
-    if (rendered) {
-      const { paperLayer } = getPaperLayer();
-      paperLayer.strokeWidth = layerItem.style.stroke.width;
-    }
-  }, [layerItem.style.stroke.width]);
+  // useEffect(() => {
+  //   if (rendered) {
+  //     const { paperLayer } = getPaperLayer();
+  //     paperLayer.strokeWidth = layerItem.style.stroke.width;
+  //   }
+  // }, [layerItem.style.stroke.width]);
 
   ///////////////////////////////////////////////////////
   // STROKE OPTIONS STYLE

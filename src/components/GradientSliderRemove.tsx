@@ -17,7 +17,13 @@ const GradientSliderRemove = (props: GradientSliderProps): ReactElement => {
   const dispatch = useDispatch();
 
   const removeStop = () => {
-    dispatch(removeLayersGradientStop({layers: selected, prop, stopIndex: activeStopIndex}));
+    if (!disabled) {
+      dispatch(removeLayersGradientStop({
+        layers: selected,
+        stopIndex: activeStopIndex,
+        prop
+      }));
+    }
   }
 
   return (

@@ -703,8 +703,15 @@ export const addArtboardThunk = (payload: AddArtboardPayload) => {
     const name = payload.layer.name ? payload.layer.name : 'Artboard';
     const projectIndex = Math.floor((state.layer.present.byId.root.children.length) / ARTBOARDS_PER_PROJECT) + 1;
     const index = state.layer.present.byId.root.children.length;
-    const style = getLayerStyle(payload, {}, { fill: { color: DEFAULT_ARTBOARD_BACKGROUND_COLOR } as Btwx.Fill, stroke: { enabled: false } as Btwx.Stroke, shadow: { enabled: false } as Btwx.Shadow });
-    const frame = getLayerFrame(payload);
+    const payloadWithType = {
+      ...payload,
+      layer: {
+        ...payload.layer,
+        type: 'Artboard'
+      }
+    }
+    const style = getLayerStyle(payloadWithType);
+    const frame = getLayerFrame(payloadWithType);
     const showChildren = payload.layer.showChildren ? payload.layer.showChildren : true;
     // dispatch action
     const newLayer = {
@@ -751,7 +758,14 @@ export const addGroupThunk = (payload: AddGroupPayload) => {
   return (dispatch: any, getState: any): Promise<Btwx.Group> => {
     const state = getState() as RootState;
     const id = payload.layer.id ? payload.layer.id : uuidv4();
-    const style = getLayerStyle(payload, {}, { fill: { enabled: false } as Btwx.Fill, stroke: { enabled: false } as Btwx.Stroke, shadow: { enabled: false } as Btwx.Shadow });
+    const payloadWithType = {
+      ...payload,
+      layer: {
+        ...payload.layer,
+        type: 'Group'
+      }
+    }
+    const style = getLayerStyle(payloadWithType);
     const name = payload.layer.name ? payload.layer.name : 'Group';
     const parent = payload.layer.parent ? payload.layer.parent : state.layer.present.activeArtboard;
     const parentItem = state.layer.present.byId[parent];
@@ -817,11 +831,18 @@ export const addShapeThunk = (payload: AddShapePayload) => {
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
     const name = payload.layer.name ? payload.layer.name : shapeType;
-    const frame = getLayerFrame(payload);
-    const shapeOpts = getLayerShapeOpts(payload);
-    const pathData = getLayerPathData(payload);
-    const style = getLayerStyle(payload);
-    const transform = getLayerTransform(payload);
+    const payloadWithType = {
+      ...payload,
+      layer: {
+        ...payload.layer,
+        type: 'Shape'
+      }
+    }
+    const frame = getLayerFrame(payloadWithType);
+    const shapeOpts = getLayerShapeOpts(payloadWithType);
+    const pathData = getLayerPathData(payloadWithType);
+    const style = getLayerStyle(payloadWithType);
+    const transform = getLayerTransform(payloadWithType);
     const shapeIcon = getShapeIcon(pathData);
     const mask = payload.layer.mask ? payload.layer.mask : false;
     const newLayer = {
@@ -888,10 +909,17 @@ export const addTextThunk = (payload: AddTextPayload) => {
     const parentItem = state.layer.present.byId[parent];
     const scope = [...parentItem.scope, parent];
     const artboard = scope[1];
-    const style = getLayerStyle(payload);
-    const textStyle = getLayerTextStyle(payload);
-    const transform = getLayerTransform(payload);
-    const frame = getLayerFrame(payload);
+    const payloadWithType = {
+      ...payload,
+      layer: {
+        ...payload.layer,
+        type: 'Text'
+      }
+    }
+    const style = getLayerStyle(payloadWithType);
+    const textStyle = getLayerTextStyle(payloadWithType);
+    const transform = getLayerTransform(payloadWithType);
+    const frame = getLayerFrame(payloadWithType);
     const point = payload.layer.point;
     const nextParagraphs = getParagraphs({
       text: text,
@@ -999,9 +1027,16 @@ export const addImageThunk = (payload: AddImagePayload) => {
     const parentItem = state.layer.present.byId[parent];
     const scope = [...parentItem.scope, parent];
     const artboard = scope[1];
-    const style = getLayerStyle(payload);
-    const transform = getLayerTransform(payload);
-    const frame = getLayerFrame(payload);
+    const payloadWithType = {
+      ...payload,
+      layer: {
+        ...payload.layer,
+        type: 'Image'
+      }
+    }
+    const style = getLayerStyle(payloadWithType);
+    const transform = getLayerTransform(payloadWithType);
+    const frame = getLayerFrame(payloadWithType);
     const newLayer = {
       type: 'Image',
       id: id,
@@ -6967,27 +7002,33 @@ export const updateFramesThunk = () => {
     const state = getState() as RootState;
     const artboardItems = getAllArtboardItems(state);
     const activeArtboardBounds = getActiveArtboardBounds(state);
-    const selectedInnerBounds = getSelectedBounds(state);
+    // const selectedInnerBounds = getSelectedBounds(state);
     const selectedBounds = getSelectedBounds(state);
-    const selectedRotation = getSelectedRotation(state);
-    const selectedPaperScopes = getSelectedProjectIndices(state);
+    // const selectedRotation = getSelectedRotation(state);
+    // const selectedPaperScopes = getSelectedProjectIndices(state);
     const singleSelection = state.layer.present.selected.length === 1;
     const isLine = singleSelection && state.layer.present.byId[state.layer.present.selected[0]].type === 'Shape' && (state.layer.present.byId[state.layer.present.selected[0]] as Btwx.Shape).shapeType === 'Line';
     const lineItem = isLine ? state.layer.present.byId[state.layer.present.selected[0]] as Btwx.Line : null;
     const artboardItem = isLine ? state.layer.present.byId[lineItem.artboard] : null;
     // const linePaperLayer = isLine ? getPaperLayer(Object.keys(selectedPaperScopes)[0], selectedPaperScopes[Object.keys(selectedPaperScopes)[0]]) : null;
-    const canvasWrap = document.getElementById('canvas-container');
-    ['ui', ...state.layer.present.byId.root.children].forEach((scope, index) => {
-      paperMain.projects[index].view.viewSize = new paperMain.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
-      paperMain.projects[index].view.matrix.set(state.documentSettings.matrix);
-    });
+    // const canvasWrap = document.getElementById('canvas-container');
+    // ['ui', ...state.layer.present.byId.root.children].forEach((scope, index) => {
+    //   paperMain.projects[index].view.viewSize = new paperMain.Size(canvasWrap.clientWidth, canvasWrap.clientHeight);
+    //   paperMain.projects[index].view.matrix.set(state.documentSettings.matrix);
+    // });
     updateSelectionFrame({
       // bounds: selectedRotation !== 'multi' && selectedRotation !== 0 ? selectedInnerBounds : selectedBounds,
       bounds: selectedBounds,
       handle: 'all',
       lineHandles: isLine ? {
-        from: { x: artboardItem.frame.x + lineItem.from.x, y: artboardItem.frame.y + lineItem.from.y },
-        to: { x: artboardItem.frame.x + lineItem.to.x, y: artboardItem.frame.y + lineItem.to.y }
+        from: {
+          x: artboardItem.frame.x + lineItem.from.x,
+          y: artboardItem.frame.y + lineItem.from.y
+        },
+        to: {
+          x: artboardItem.frame.x + lineItem.to.x,
+          y: artboardItem.frame.y + lineItem.to.y
+        }
       } : null,
       // rotation: selectedRotation !== 'multi' && selectedRotation !== 0 ? selectedRotation : null
     });

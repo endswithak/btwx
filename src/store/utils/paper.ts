@@ -166,8 +166,8 @@ export const clearLayerTransforms = ({ layerType, paperLayer, transform, variabl
     // paperLayer.rotation = -transform.rotation;
     if (layerType !== 'Shape') {
       paperLayer.scale(
-        decomposeLayer.matrix.scaling.x,
-        decomposeLayer.matrix.scaling.y
+        decomposeLayer.matrix.scaling.x < 0 ? -1 : 1,
+        decomposeLayer.matrix.scaling.y < 0 ? -1 : 1
       );
       paperLayer.rotation = -decomposeLayer.matrix.rotation;
     } else {

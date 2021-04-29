@@ -269,7 +269,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
           rectangle: getAreaTextRectangle(),
           // fillColor: tinyColor('#fff').setAlpha(0.01).toRgbString(),
           // blendMode: 'multiply',
-          fillColor: '#000',
+          fillColor: layerItem.textStyle.textResize !== 'autoWidth' ? '#000' : null,
           data: {
             id: 'textMask',
             type: 'LayerChild',
