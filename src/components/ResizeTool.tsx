@@ -44,8 +44,10 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
     if ((handle === 'leftCenter' || handle === 'rightCenter') && layerItem.textStyle.textResize !== 'fixed') {
       textResize = 'autoHeight';
       textMask.clipMask = false;
+      textMask.visible = false;
     } else {
       textMask.clipMask = true;
+      textMask.visible = true;
     }
     const paragraphs = getParagraphs({
       text: layerItem.text,

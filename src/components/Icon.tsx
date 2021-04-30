@@ -932,7 +932,9 @@ const Icon = (props: IconProps): ReactElement => {
               <path d={iconData && iconData.fill ? iconData.fill : path ? path : null} />
               {
                 iconData && iconData.opacity
-                ? <path style={{ opacity: 0.5 }} d={iconData.opacity} />
+                ? <path
+                    className='c-icon__opacity'
+                    d={iconData.opacity} />
                 : null
               }
             </>

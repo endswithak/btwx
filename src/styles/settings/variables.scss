@@ -206,6 +206,16 @@ $theme-light-background-z5: color-tint($theme-light-gray, 40%);
 $theme-light-background-z6: color-tint($theme-light-gray, 30%);
 $theme-light-background-z7: color-tint($theme-light-gray, 20%);
 $theme-light-background-z8: color-tint($theme-light-gray, 10%);
+// theme light foregrounds
+$theme-light-foreground-z0: color-shade($theme-light-gray, 90%);
+$theme-light-foreground-z1: color-shade($theme-light-gray, 80%);
+$theme-light-foreground-z2: color-shade($theme-light-gray, 70%);
+$theme-light-foreground-z3: color-shade($theme-light-gray, 60%);
+$theme-light-foreground-z4: color-shade($theme-light-gray, 50%);
+$theme-light-foreground-z5: color-shade($theme-light-gray, 40%);
+$theme-light-foreground-z6: color-shade($theme-light-gray, 30%);
+$theme-light-foreground-z7: color-shade($theme-light-gray, 20%);
+$theme-light-foreground-z8: color-shade($theme-light-gray, 10%);
 // theme dark palette
 $theme-dark-primary: #0a84ff;
 $theme-dark-primary-active: color-tint(
@@ -357,6 +367,16 @@ $theme-dark-background-z5: color-shade($theme-dark-gray, 40%);
 $theme-dark-background-z6: color-shade($theme-dark-gray, 30%);
 $theme-dark-background-z7: color-shade($theme-dark-gray, 20%);
 $theme-dark-background-z8: color-shade($theme-dark-gray, 10%);
+// theme dark foregrounds
+$theme-dark-foreground-z0: color-tint($theme-dark-gray, 90%);
+$theme-dark-foreground-z1: color-tint($theme-dark-gray, 80%);
+$theme-dark-foreground-z2: color-tint($theme-dark-gray, 70%);
+$theme-dark-foreground-z3: color-tint($theme-dark-gray, 60%);
+$theme-dark-foreground-z4: color-tint($theme-dark-gray, 50%);
+$theme-dark-foreground-z5: color-tint($theme-dark-gray, 40%);
+$theme-dark-foreground-z6: color-tint($theme-dark-gray, 30%);
+$theme-dark-foreground-z7: color-tint($theme-dark-gray, 20%);
+$theme-dark-foreground-z8: color-tint($theme-dark-gray, 10%);
 
 $themes: (
   light: (
@@ -415,6 +435,15 @@ $themes: (
     background-z6: $theme-light-background-z6,
     background-z7: $theme-light-background-z7,
     background-z8: $theme-light-background-z8,
+    foreground-z0: $theme-light-foreground-z0,
+    foreground-z1: $theme-light-foreground-z1,
+    foreground-z2: $theme-light-foreground-z2,
+    foreground-z3: $theme-light-foreground-z3,
+    foreground-z4: $theme-light-foreground-z4,
+    foreground-z5: $theme-light-foreground-z5,
+    foreground-z6: $theme-light-foreground-z6,
+    foreground-z7: $theme-light-foreground-z7,
+    foreground-z8: $theme-light-foreground-z8,
     button-background: $theme-light-background-z0,
     button-border: $theme-light-background-z3,
     button-border-active: $theme-light-background-z4,
@@ -500,6 +529,15 @@ $themes: (
     background-z6: $theme-dark-background-z6,
     background-z7: $theme-dark-background-z7,
     background-z8: $theme-dark-background-z8,
+    foreground-z0: $theme-dark-foreground-z0,
+    foreground-z1: $theme-dark-foreground-z1,
+    foreground-z2: $theme-dark-foreground-z2,
+    foreground-z3: $theme-dark-foreground-z3,
+    foreground-z4: $theme-dark-foreground-z4,
+    foreground-z5: $theme-dark-foreground-z5,
+    foreground-z6: $theme-dark-foreground-z6,
+    foreground-z7: $theme-dark-foreground-z7,
+    foreground-z8: $theme-dark-foreground-z8,
     button-background: $theme-dark-background-z2,
     button-border: $theme-dark-background-z3,
     button-border-active: $theme-dark-background-z4,

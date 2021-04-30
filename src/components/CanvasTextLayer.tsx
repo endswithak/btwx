@@ -269,14 +269,15 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
           rectangle: getAreaTextRectangle(),
           // fillColor: tinyColor('#fff').setAlpha(0.01).toRgbString(),
           // blendMode: 'multiply',
-          fillColor: layerItem.textStyle.textResize !== 'autoWidth' ? '#000' : null,
+          fillColor: '#000',
           data: {
             id: 'textMask',
             type: 'LayerChild',
             layerType: 'Text',
             layerId: id
           },
-          clipMask: layerItem.textStyle.textResize !== 'autoWidth'
+          clipMask: layerItem.textStyle.textResize !== 'autoWidth',
+          visible: layerItem.textStyle.textResize !== 'autoWidth'
         }),
         new paperLayerScope.Path.Rectangle({
           rectangle: getAreaTextRectangle(),
@@ -591,6 +592,23 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   ///////////////////////////////////////////////////////
   // TEXT STYLE
   ///////////////////////////////////////////////////////
+
+  useEffect(() => {
+    if (rendered) {
+      const { paperLayer, textContent, textBackground, textMask } = getPaperLayer();
+      switch(layerItem.textStyle.textResize) {
+        case 'autoHeight':
+        case 'autoWidth':
+          textMask.clipMask = false;
+          textMask.visible = false;
+          break;
+        case 'fixed':
+          textMask.visible = true;
+          textMask.clipMask = true;
+          break;
+      }
+    }
+  }, [layerItem.textStyle.textResize]);
 
   useEffect(() => {
     if (rendered) {

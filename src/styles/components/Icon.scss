@@ -9,6 +9,10 @@
   justify-content: center;
   flex-shrink: 0;
 
+  .c-icon__opacity {
+    opacity: 0.5;
+  }
+
   > svg {
     @include themed() {
       fill: theme-prop(text-lighter);
