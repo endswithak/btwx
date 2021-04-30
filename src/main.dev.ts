@@ -60,6 +60,7 @@ interface BtwxInstance {
   id: string;
   document: BrowserWindow | null;
   preview: BrowserWindow | null;
+  documentPath?: string;
 }
 
 export interface BtwxElectron {
@@ -162,6 +163,36 @@ export const handleInstanceClose = (instanceId: string) => {
   instance.document.destroy();
 };
 
+interface HandleExecute {
+  instance: BtwxInstance;
+  window: Btwx.WindowType;
+  func: string;
+  payloadString?: string;
+  callback?: any;
+}
+
+const handleExecute = ({instance, window, func, payloadString = '', callback = null}: HandleExecute) => {
+  if (instance && instance[window]) {
+    if (!instance[window].webContents.isLoading()) {
+      instance[window].webContents.executeJavaScript(`${func}(${payloadString})`).then(() => {
+        if (callback) {
+          callback();
+        }
+      });
+    } else {
+      instance[window].webContents.on('did-finish-load', () => {
+        instance[window].webContents.executeJavaScript(`${func}(${payloadString})`).then(() => {
+          if (callback) {
+            callback();
+          }
+        });;
+      });
+    }
+  } else {
+    console.error('execute error: invalid instance');
+  }
+}
+
 const getFocusedInstance = (): string => {
   const focusedWindow = BrowserWindow.getFocusedWindow();
   if (focusedWindow && btwxElectron.instance.allIds.length > 0) {
@@ -238,6 +269,7 @@ export const createInstance = async ({
       byId: {
         ...btwxElectron.instance.byId,
         [INSTANCE_ID]: {
+          documentPath: initialState && initialState.documentSettings && initialState.documentSettings.path ? initialState.documentSettings.path : null,
           id: INSTANCE_ID,
           document: new BrowserWindow({
             show: false,
@@ -826,7 +858,16 @@ export const handleSaveAs = ({
                 path: writeDocumentState.documentSettings.path,
                 edit: writeDocumentState.documentSettings.edit
               })})`).then(handleOnSave);
-              // handleOnSave();
+              btwxElectron.instance = {
+                ...btwxElectron.instance,
+                byId: {
+                  ...btwxElectron.instance.byId,
+                  [instance.id]: {
+                    ...btwxElectron.instance.byId[instance.id],
+                    documentPath: writeDocumentState.documentSettings.path
+                  }
+                }
+              }
             }
           });
         });
@@ -856,57 +897,80 @@ export const handleOpenDialog = () => {
 
 export const handleOpen = (fullPath: string) => {
   const ext = path.extname(fullPath);
-  if (ext === `.${APP_NAME}`) {
-    const focusedInstanceDocument = getFocusedInstanceDocument();
-    if (focusedInstanceDocument) {
-      focusedInstanceDocument.focus();
-    }
-    if (focusedInstanceDocument) {
-      const size = focusedInstanceDocument.getSize();
-      focusedInstanceDocument.webContents.executeJavaScript(`getCurrentEdit()`).then((documentJSON: string) => {
-        const editState = JSON.parse(documentJSON) as BtwxInstanceEditState;
-        fs.readFile(fullPath, { encoding: 'utf-8' }, (err, data) => {
+  const alreadyOpen = btwxElectron.instance.allIds.find((instanceId) => {
+    const documentPath = btwxElectron.instance.byId[instanceId].documentPath;
+    const matches = documentPath && (`${documentPath}.${APP_NAME}` === fullPath);
+    return matches;
+  });
+  if (alreadyOpen) {
+    btwxElectron.instance.byId[alreadyOpen].document.focus();
+  } else {
+    if (ext === `.${APP_NAME}`) {
+      const focusedInstanceId = getFocusedInstance();
+      const focusedInstanceDocument = getFocusedInstanceDocument();
+      if (focusedInstanceDocument) {
+        focusedInstanceDocument.focus();
+      }
+      if (focusedInstanceDocument) {
+        const size = focusedInstanceDocument.getSize();
+        focusedInstanceDocument.webContents.executeJavaScript(`getCurrentEdit()`).then((documentJSON: string) => {
+          const editState = JSON.parse(documentJSON) as BtwxInstanceEditState;
+          fs.readFile(fullPath, { encoding: 'utf-8' }, (err, data) => {
+            if(err) {
+              dialog.showMessageBox(focusedInstanceDocument, {
+                type: 'error',
+                message: `Failed to open document "${fullPath}.${APP_NAME}"`
+              });
+            } else {
+              app.addRecentDocument(fullPath);
+              const documentStateWithTree = getDocumentStateWithTree(JSON.parse(data) as BtwxInstanceDocumentState);
+              if (!editState.path && !editState.edit.id) {
+                focusedInstanceDocument.webContents.executeJavaScript(`hydrateDocument(${JSON.stringify(documentStateWithTree)})`);
+                btwxElectron = {
+                  ...btwxElectron,
+                  instance: {
+                    ...btwxElectron.instance,
+                    byId: {
+                      ...btwxElectron.instance.byId,
+                      [focusedInstanceId]: {
+                        ...btwxElectron.instance.byId[focusedInstanceId],
+                        documentPath: documentStateWithTree.documentSettings.path
+                      }
+                    }
+                  }
+                }
+              } else {
+                createInstance({
+                  width: size[0],
+                  height: size[1],
+                  initialState: documentStateWithTree
+                });
+              }
+            }
+          });
+        });
+      } else {
+        fs.readFile(fullPath, {encoding: 'utf-8'}, (err, data) => {
           if(err) {
             dialog.showMessageBox(focusedInstanceDocument, {
               type: 'error',
               message: `Failed to open document "${fullPath}.${APP_NAME}"`
             });
           } else {
-            app.addRecentDocument(`${fullPath}.${APP_NAME}`);
-            const documentStateWithTree = getDocumentStateWithTree(JSON.parse(data) as BtwxInstanceDocumentState);
-            if (!editState.path && !editState.edit.id) {
-              focusedInstanceDocument.webContents.executeJavaScript(`hydrateDocument(${JSON.stringify(documentStateWithTree)})`);
-            } else {
-              createInstance({
-                width: size[0],
-                height: size[1],
-                initialState: documentStateWithTree
-              });
-            }
+            app.addRecentDocument(fullPath);
+            createInstance({
+              initialState: getDocumentStateWithTree(JSON.parse(data) as BtwxInstanceDocumentState)
+            });
           }
         });
-      });
+      }
     } else {
-      fs.readFile(fullPath, {encoding: 'utf-8'}, (err, data) => {
-        if(err) {
-          dialog.showMessageBox(focusedInstanceDocument, {
-            type: 'error',
-            message: `Failed to open document "${fullPath}.${APP_NAME}"`
-          });
-        } else {
-          app.addRecentDocument(`${fullPath}.${APP_NAME}`);
-          createInstance({
-            initialState: getDocumentStateWithTree(JSON.parse(data) as BtwxInstanceDocumentState)
-          });
-        }
+      dialog.showMessageBox({
+        type: 'error',
+        title: 'Invalid Filetype',
+        message: `Cannot open ".${ext}" files.`
       });
     }
-  } else {
-    dialog.showMessageBox({
-      type: 'error',
-      title: 'Invalid Filetype',
-      message: `Cannot open ".${ext}" files.`
-    });
   }
 }
 
@@ -1063,14 +1127,23 @@ ipcMain.on('focusInstanceDocument', (event, args) => {
 ipcMain.on('setDocumentPreviewTweening', (event, args) => {
   const { instanceId, tweening } = JSON.parse(args);
   const instance = btwxElectron.instance.byId[instanceId];
-  instance.document.webContents.executeJavaScript(`setPreviewTweening(${JSON.stringify(tweening)})`);
+  handleExecute({
+    instance,
+    window: 'document',
+    func: 'setPreviewTweening',
+    payloadString: JSON.stringify(tweening)
+  });
 });
 
 ipcMain.handle('setDocumentActiveArtboard', (event, args) => {
   const { instanceId, activeArtboard } = JSON.parse(args);
   const instance = btwxElectron.instance.byId[instanceId];
-  instance.document.webContents.executeJavaScript(`setActiveArtboard(${JSON.stringify(activeArtboard)})`).then(() => {
-    return Promise.resolve();
+  handleExecute({
+    instance,
+    window: 'document',
+    func: 'setActiveArtboard',
+    payloadString: JSON.stringify(activeArtboard),
+    callback: Promise.resolve
   });
 });
 
@@ -1128,7 +1201,11 @@ ipcMain.handle('getPreviewMediaSource', (event, args) => {
 ipcMain.on('setDocumentRecordingStarted', (event, args) => {
   const { instanceId } = JSON.parse(args);
   const instance = btwxElectron.instance.byId[instanceId];
-  instance.document.webContents.executeJavaScript(`startPreviewRecording()`);
+  handleExecute({
+    instance,
+    window: 'document',
+    func: 'startPreviewRecording'
+  });
 });
 
 // ipcMain.on('setDocumentRecordingStopped', (event, args) => {
@@ -1167,14 +1244,24 @@ ipcMain.handle('setDocumentRecordingStopped', (event, args) => {
 ipcMain.on('hydratePreviewLayers', (event, args) => {
   const { instanceId, state } = JSON.parse(args);
   const instance = btwxElectron.instance.byId[instanceId];
-  instance.preview.webContents.executeJavaScript(`hydrateLayers(${JSON.stringify(state)})`);
+  handleExecute({
+    instance,
+    window: 'preview',
+    func: 'hydrateLayers',
+    payloadString: JSON.stringify(state)
+  });
 });
 
 ipcMain.on('hydrateDocumentImages', (event, args) => {
   const { instanceId, images } = JSON.parse(args);
   const instance = btwxElectron.instance.byId[instanceId];
   const payload = {images};
-  instance.preview.webContents.executeJavaScript(`hydrateDocumentImages(${JSON.stringify(payload)})`);
+  handleExecute({
+    instance,
+    window: 'preview',
+    func: 'hydrateDocumentImages',
+    payloadString: JSON.stringify(payload)
+  });
 });
 
 ipcMain.on('openPreview', (event, args) => {
@@ -1193,13 +1280,23 @@ ipcMain.on('openPreview', (event, args) => {
 ipcMain.on('setPreviewEventDrawerEvent', (event, args) => {
   const { instanceId, eventId } = JSON.parse(args);
   const instance = btwxElectron.instance.byId[instanceId];
-  instance.preview.webContents.executeJavaScript(`setEventDrawerEvent(${JSON.stringify(eventId)})`);
+  handleExecute({
+    instance,
+    window: 'preview',
+    func: 'setEventDrawerEvent',
+    payloadString: JSON.stringify(eventId)
+  });
 });
 
 ipcMain.on('setPreviewActiveArtboard', (event, args) => {
   const { instanceId, activeArtboard } = JSON.parse(args);
   const instance = btwxElectron.instance.byId[instanceId];
-  instance.preview.webContents.executeJavaScript(`setActiveArtboard(${JSON.stringify(activeArtboard)})`);
+  handleExecute({
+    instance,
+    window: 'preview',
+    func: 'setActiveArtboard',
+    payloadString: JSON.stringify(activeArtboard)
+  });
 });
 
 ipcMain.on('stickPreview', (event, args) => {
