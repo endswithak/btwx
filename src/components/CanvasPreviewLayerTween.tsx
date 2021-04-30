@@ -1061,6 +1061,60 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     }, tween.delay);
   };
 
+  const addResetTextCallback = () => {
+    eventTimeline.data.callbacks[tween.layer][tween.prop] = () => {
+      const { paperLayer, artboardBackground, textContent, textBackground, textMask, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
+      const originTextItem: Btwx.Text = originLayerItem as Btwx.Text;
+      const artboardPosition = new paperPreview.Point(originArtboardItem.frame.x, originArtboardItem.frame.y);
+      const textPosition = new paperPreview.Point(originLayerItem.frame.x, originLayerItem.frame.y);
+      const absPosition = textPosition.add(artboardPosition);
+      const topLeft = new paperPreview.Point(
+        absPosition.x - (originLayerItem.frame.innerWidth / 2),
+        absPosition.y - (originLayerItem.frame.innerHeight / 2)
+      );
+      const bottomRight = new paperPreview.Point(
+        absPosition.x + (originLayerItem.frame.innerWidth / 2),
+        absPosition.y + (originLayerItem.frame.innerHeight / 2)
+      );
+      const textBounds = new paperPreview.Rectangle({
+        from: topLeft,
+        to: bottomRight
+      });
+      clearLayerTransforms({
+        paperLayer,
+        layerType: originLayerItem.type,
+      });
+      const initialParagraphs = getParagraphs({
+        text: originTextItem.text,
+        fontSize: originTextItem.textStyle.fontSize,
+        fontWeight: originTextItem.textStyle.fontWeight,
+        fontFamily: originTextItem.textStyle.fontFamily,
+        textResize: originTextItem.textStyle.textResize,
+        innerWidth: originTextItem.frame.innerWidth,
+        letterSpacing: originTextItem.textStyle.letterSpacing,
+        textTransform: originTextItem.textStyle.textTransform,
+        fontStyle: originTextItem.textStyle.fontStyle,
+        preview: true
+      });
+      const initialContent = getContent({
+        paragraphs: initialParagraphs
+      });
+      textContent.content = initialContent;
+      textBackground.bounds = textBounds;
+      textMask.bounds = textBounds;
+      positionTextContent({
+        paperLayer: paperLayer as any,
+        verticalAlignment: originTextItem.textStyle.verticalAlignment,
+        justification: originTextItem.textStyle.justification,
+        textResize: originTextItem.textStyle.textResize
+      });
+      applyLayerTransforms({
+        paperLayer,
+        transform: originTextItem.transform
+      });
+    }
+  }
+
   const addWidthTween = (): void => {
     eventTimeline.data[tween.layer][tween.prop] = originLayerItem.frame.innerWidth;
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
@@ -1148,7 +1202,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         }
         paperLayer.rotation = currentProps.rotation;
         eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
-        eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
+        // eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
         paperLayer.rotation = -currentProps.rotation;
         applyLayerTransforms({
           paperLayer,
@@ -1237,6 +1291,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       },
       ease: getEaseString(tween),
     }, tween.delay);
+    addResetTextCallback();
   };
 
   const addHeightTween = (): void => {
@@ -1296,6 +1351,12 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           textMask.bounds.height = eventTimeline.data[tween.layer][tween.prop];
           textMask.pivot = null;
           textBackground.pivot = null;
+          positionTextContent({
+            paperLayer: paperLayer as paper.Group,
+            verticalAlignment: (originLayerItem as Btwx.Text).textStyle.verticalAlignment,
+            justification: (originLayerItem as Btwx.Text).textStyle.justification,
+            textResize: (originLayerItem as Btwx.Text).textStyle.textResize
+          });
         } else {
           paperLayer.bounds.height = eventTimeline.data[tween.layer][tween.prop];
           if (shapeMask) {
@@ -1304,7 +1365,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         }
         paperLayer.rotation = currentProps.rotation;
         eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
-        eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
+        // eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
         paperLayer.rotation = -currentProps.rotation;
         applyLayerTransforms({
           paperLayer,
@@ -1393,6 +1454,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       },
       ease: getEaseString(tween),
     }, tween.delay);
+    addResetTextCallback();
   };
 
   const addRotationTween = (): void => {

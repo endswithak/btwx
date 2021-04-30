@@ -280,9 +280,9 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         }),
         new paperLayerScope.Path.Rectangle({
           rectangle: getAreaTextRectangle(),
-          fillColor: tinyColor('#fff').setAlpha(0.01).toRgbString(),
-          blendMode: 'multiply',
-          // fillColor: tinyColor('red').setAlpha(0.25).toRgbString(),
+          // fillColor: tinyColor('#fff').setAlpha(0.01).toRgbString(),
+          // blendMode: 'multiply',
+          fillColor: tinyColor('red').setAlpha(0.25).toRgbString(),
           data: {
             id: 'textBackground',
             type: 'LayerChild',
