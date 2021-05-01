@@ -156,7 +156,6 @@ const Canvas = (): ReactElement => {
   }
 
   const handleMouseDown = (e: any): void => {
-    console.log(document.activeElement.nodeName);
     if (!focusing) {
       dispatch(setCanvasFocusing({focusing: true}));
     }

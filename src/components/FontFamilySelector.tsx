@@ -64,7 +64,8 @@ const FontFamilySelector = (): ReactElement => {
         search={search}
         setSearch={setSearch}
         searching={searching}
-        setSearching={setSearching} />
+        setSearching={setSearching}
+        itemData={itemData} />
       <FontFamilySelectorItems
         itemData={itemData}
         search={search}

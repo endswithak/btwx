@@ -6,15 +6,25 @@ import Form from './Form';
 interface FontFamilySearchProps {
   search: string;
   searching: boolean;
+  itemData: { value: string; label: string }[];
   setSearch(search: string): void;
   setSearching(searching: boolean): void;
 }
 
 const FontFamilySearch = forwardRef(function FontFamilySearch(props: FontFamilySearchProps, ref) {
-  const { search, searching, setSearch, setSearching } = props;
+  const { search, searching, itemData, setSearch, setSearching } = props;
 
   const handleChangeDebounce = (value: any): void => {
     setSearch(value)
+  }
+
+  const handleKeyDown = (e: any) => {
+    if (e.key === 'Enter' || e.key === 'ArrowDown') {
+      const items = document.getElementById('control-font-family-selector') as HTMLSelectElement;
+      if (itemData.length > 0) {
+        items.focus();
+      }
+    }
   }
 
   const handleBlur = (e: any): void => {
@@ -42,6 +52,7 @@ const FontFamilySearch = forwardRef(function FontFamilySearch(props: FontFamilyS
         onBlur={handleBlur}
         onFocus={handleFocus}
         onClear={handleClear}
+        onKeyDown={handleKeyDown}
         onChangeDebounce={handleChangeDebounce} />
     </Form>
   )
