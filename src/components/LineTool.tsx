@@ -87,8 +87,9 @@ const LineTool = (props: PaperToolProps): ReactElement => {
             break;
           }
         }
-        const nextIsHorizontal = (isBetween(nextVector.angle, 0, 45) || isBetween(nextVector.angle, -45, 0) || isBetween(nextVector.angle, 135, 180) || isBetween(nextVector.angle, -180, -135));
-        const nextIsVertical = (isBetween(nextVector.angle, -90, -45) || isBetween(nextVector.angle, -135, -90) || isBetween(nextVector.angle, 45, 90) || isBetween(nextVector.angle, 90, 135));
+        // const nextIsHorizontal = (isBetween(nextVector.angle, 0, 45) || isBetween(nextVector.angle, -45, 0) || isBetween(nextVector.angle, 135, 180) || isBetween(nextVector.angle, -180, -135));
+        // const nextIsVertical = (isBetween(nextVector.angle, -90, -45) || isBetween(nextVector.angle, -135, -90) || isBetween(nextVector.angle, 45, 90) || isBetween(nextVector.angle, 90, 135));
+        const isHorizontal = isBetween(Math.abs(nextVector.angle), 0, 45) || isBetween(Math.abs(nextVector.angle), 135, 180);
         const nextSnapBounds = new paperMain.Rectangle({
           from: new paperMain.Point(dragEvent.point.x - 0.5, dragEvent.point.y - 0.5),
           to: new paperMain.Point(dragEvent.point.x + 0.5, dragEvent.point.y + 0.5)
@@ -123,8 +124,8 @@ const LineTool = (props: PaperToolProps): ReactElement => {
         }
         setSnapBounds(nextSnapBounds);
         setVector(nextVector);
-        setIsHorizontal(nextIsHorizontal);
-        setIsVertical(nextIsVertical);
+        setIsHorizontal(isHorizontal);
+        setIsVertical(!isHorizontal);
       }
     } catch(err) {
       console.error(`Line Tool Error -- On Mouse Drag -- ${err}`);
@@ -137,11 +138,19 @@ const LineTool = (props: PaperToolProps): ReactElement => {
       if (downEvent && upEvent && isEnabled && resizing) {
         switch(handle) {
           case 'lineFrom': {
-            dispatch(setLineFromThunk({id: selected[0], x: toBounds.center.x, y: toBounds.center.y}));
+            dispatch(setLineFromThunk({
+              id: selected[0],
+              x: toBounds.center.x,
+              y: toBounds.center.y
+            }));
             break;
           }
           case 'lineTo': {
-            dispatch(setLineToThunk({id: selected[0], x: toBounds.center.x, y: toBounds.center.y}));
+            dispatch(setLineToThunk({
+              id: selected[0],
+              x: toBounds.center.x,
+              y: toBounds.center.y
+            }));
             break;
           }
         }
