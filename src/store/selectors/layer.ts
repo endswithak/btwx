@@ -664,7 +664,8 @@ export const getSelectedCustomWiggleTweensType = createSelector(
 );
 
 // TS config is all wonky...
-// this should not be red
+// this should not be red...
+// WHY ARE YOU RED!
 export const selectedTweensEaseCurvesMatch = createSelector(
   [
     getSelectedTweensEase, getSelectedTweensPower, getSelectedCustomBounceTweensStrength,
@@ -702,6 +703,8 @@ export const selectedTweensEaseCurvesMatch = createSelector(
       case 'customWiggle':
         return customWiggleStrength !== 'multi' && customWiggleType !== 'multi' && customWiggleWiggles !== 'multi';
       case 'multi':
+        return false;
+      default:
         return false;
     }
   }
@@ -2652,9 +2655,9 @@ export const getSelectedBlurValue = createSelector(
     return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
       const layerItem = selectedById[current];
       if (!result) {
-        result = layerItem.style.blur.blur;
+        result = layerItem.style.blur.radius;
       }
-      if (result && layerItem.style.blur.blur !== result) {
+      if (result && layerItem.style.blur.radius !== result) {
         result = 'multi';
       }
       return result;
@@ -3634,9 +3637,9 @@ export const hasBlurTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.La
   const validType = layerItem.type !== 'Group' && layerItem.type !== 'Artboard';
   if (validType) {
     const bothEnabled = layerItem.style.blur.enabled && equivalentLayerItem.style.blur.enabled;
-    const oneEnabled = (layerItem.style.blur.enabled && layerItem.style.blur.blur > 0) || (equivalentLayerItem.style.blur.enabled && equivalentLayerItem.style.blur.blur > 0);
-    const blursMatch = layerItem.style.blur.blur === equivalentLayerItem.style.blur.blur;
-    return oneEnabled || (bothEnabled && !blursMatch);
+    const oneEnabled = (layerItem.style.blur.enabled && layerItem.style.blur.radius > 0) || (equivalentLayerItem.style.blur.enabled && equivalentLayerItem.style.blur.radius > 0);
+    const radiusMatch = layerItem.style.blur.radius === equivalentLayerItem.style.blur.radius;
+    return oneEnabled || (bothEnabled && !radiusMatch);
   } else {
     return false;
   }

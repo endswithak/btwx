@@ -41,8 +41,6 @@ type CanvasEventType = 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | '
 const Canvas = (): ReactElement => {
   const ref = useRef<HTMLDivElement>(null);
   const ready = useSelector((state: RootState) => state.canvasSettings.ready);
-  const searching = useSelector((state: RootState) => state.leftSidebar.searching);
-  const editing = useSelector((state: RootState) => state.leftSidebar.editing);
   const focusing = useSelector((state: RootState) => state.canvasSettings.focusing);
   const measuring = useSelector((state: RootState) => state.canvasSettings.measuring);
   const waiting = useSelector((state: RootState) => state.canvasSettings.waiting);
@@ -158,17 +156,15 @@ const Canvas = (): ReactElement => {
   }
 
   const handleMouseDown = (e: any): void => {
+    console.log(document.activeElement.nodeName);
     if (!focusing) {
       dispatch(setCanvasFocusing({focusing: true}));
     }
     if (measuring) {
       dispatch(setCanvasMeasuring({measuring: false}));
     }
-    if (searching) {
-      (document.getElementById(`control-layers-search`) as HTMLInputElement).blur();
-    }
-    if (editing) {
-      (document.getElementById(`control-${editing}-name`) as HTMLInputElement).blur();
+    if (document.activeElement && document.activeElement.nodeName === 'INPUT') {
+      (document.activeElement as HTMLInputElement).blur();
     }
     handleHitResult(e, 'mouseDown');
   }
@@ -189,6 +185,10 @@ const Canvas = (): ReactElement => {
 
   const handleKeyUp = (e: any): void => {
     if (e.key === 'Alt') {
+      if (measuring) {
+        dispatch(setCanvasMeasuring({measuring: false}));
+      }
+    } else {
       if (measuring) {
         dispatch(setCanvasMeasuring({measuring: false}));
       }
@@ -218,11 +218,11 @@ const Canvas = (): ReactElement => {
   }, [allProjectIndices]);
 
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
     return (): void => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
     }
   }, [focusing, measuring]);
 

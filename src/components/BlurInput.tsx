@@ -2,7 +2,7 @@
 import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { setLayersBlur } from '../store/actions/layer';
+import { setLayersBlurRadius } from '../store/actions/layer';
 import { getPaperLayer, getSelectedProjectIndices, getSelectedBlurValue, getSelectedBlurEnabled, getSelectedById } from '../store/selectors/layer';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
@@ -39,12 +39,18 @@ const BlurInput = (): ReactElement => {
 
   const handleSliderSubmit = (e: any): void => {
     if (e.target.value !== blurValue) {
-      dispatch(setLayersBlur({layers: selected, blur: e.target.value}));
+      dispatch(setLayersBlurRadius({
+        layers: selected,
+        radius: e.target.value
+      }));
     }
   }
 
   const handleControlSubmitSuccess = (nextBlur: any): void => {
-    dispatch(setLayersBlur({layers: selected, blur: nextBlur}));
+    dispatch(setLayersBlurRadius({
+      layers: selected,
+      radius: nextBlur
+    }));
   }
 
   return (
@@ -77,7 +83,7 @@ const BlurInput = (): ReactElement => {
           min={minBlur}
           max={maxBlur}
           size='small'
-          label='Blur'
+          label='Radius'
           disabled={!enabled || enabled === 'multi'}
           onSubmitSuccess={handleControlSubmitSuccess}
           submitOnBlur

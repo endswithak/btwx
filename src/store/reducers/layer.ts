@@ -155,8 +155,8 @@ import {
   SET_LAYERS_ROTATION,
   SET_LAYER_OPACITY,
   SET_LAYERS_OPACITY,
-  SET_LAYER_BLUR,
-  SET_LAYERS_BLUR,
+  SET_LAYER_BLUR_RADIUS,
+  SET_LAYERS_BLUR_RADIUS,
   ENABLE_LAYER_HORIZONTAL_FLIP,
   ENABLE_LAYERS_HORIZONTAL_FLIP,
   DISABLE_LAYER_HORIZONTAL_FLIP,
@@ -487,8 +487,8 @@ import {
   disableLayerBlur,
   enableLayersBlur,
   disableLayersBlur,
-  setLayerBlur,
-  setLayersBlur,
+  setLayerBlurRadius,
+  setLayersBlurRadius,
   enableLayerHorizontalFlip,
   enableLayersHorizontalFlip,
   disableLayerHorizontalFlip,
@@ -1067,10 +1067,10 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayerOpacity(state, action);
     case SET_LAYERS_OPACITY:
       return setLayersOpacity(state, action);
-    case SET_LAYER_BLUR:
-      return setLayerBlur(state, action);
-    case SET_LAYERS_BLUR:
-      return setLayersBlur(state, action);
+    case SET_LAYER_BLUR_RADIUS:
+      return setLayerBlurRadius(state, action);
+    case SET_LAYERS_BLUR_RADIUS:
+      return setLayersBlurRadius(state, action);
     case ENABLE_LAYER_HORIZONTAL_FLIP:
       return enableLayerHorizontalFlip(state, action);
     case ENABLE_LAYERS_HORIZONTAL_FLIP:
@@ -1543,8 +1543,8 @@ export default undoable(baseReducer, {
       SET_LAYERS_ROTATION,
       SET_LAYER_OPACITY,
       SET_LAYERS_OPACITY,
-      SET_LAYER_BLUR,
-      SET_LAYERS_BLUR,
+      SET_LAYER_BLUR_RADIUS,
+      SET_LAYERS_BLUR_RADIUS,
       ENABLE_LAYER_HORIZONTAL_FLIP,
       ENABLE_LAYERS_HORIZONTAL_FLIP,
       DISABLE_LAYER_HORIZONTAL_FLIP,

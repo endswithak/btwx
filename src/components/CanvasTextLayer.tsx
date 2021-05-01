@@ -494,7 +494,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
     if (rendered) {
       const paperLayer = paperProject.getItem({ data: { id } });
       if (layerItem.style.blur.enabled) {
-        paperLayer.style.blur = layerItem.style.blur.blur;
+        paperLayer.style.blur = layerItem.style.blur.radius;
       } else {
         paperLayer.style.blur = null;
       }
@@ -505,10 +505,10 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
     if (rendered) {
       if (layerItem.style.blur.enabled) {
         const paperLayer = paperProject.getItem({ data: { id } });
-        paperLayer.style.blur = layerItem.style.blur.blur;
+        paperLayer.style.blur = layerItem.style.blur.radius;
       }
     }
-  }, [layerItem.style.blur.blur]);
+  }, [layerItem.style.blur.radius]);
 
   ///////////////////////////////////////////////////////
   // FILL & STROKE & SHADOW
@@ -596,6 +596,15 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   useEffect(() => {
     if (rendered) {
       const { paperLayer, textContent, textBackground, textMask } = getPaperLayer();
+      clearLayerTransforms({
+        layerType: 'Text',
+        paperLayer
+      });
+      textContent.content = content;
+      applyTextBounds({
+        textBackground,
+        textMask
+      });
       switch(layerItem.textStyle.textResize) {
         case 'autoHeight':
         case 'autoWidth':
@@ -607,6 +616,16 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
           textMask.clipMask = true;
           break;
       }
+      positionTextContent({
+        paperLayer: paperLayer,
+        verticalAlignment: layerItem.textStyle.verticalAlignment,
+        justification: layerItem.textStyle.justification,
+        textResize: layerItem.textStyle.textResize
+      });
+      applyLayerTransforms({
+        paperLayer,
+        transform: layerItem.transform
+      });
     }
   }, [layerItem.textStyle.textResize]);
 

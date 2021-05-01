@@ -196,8 +196,8 @@ import {
   DISABLE_LAYER_BLUR,
   ENABLE_LAYERS_BLUR,
   DISABLE_LAYERS_BLUR,
-  SET_LAYER_BLUR,
-  SET_LAYERS_BLUR,
+  SET_LAYER_BLUR_RADIUS,
+  SET_LAYERS_BLUR_RADIUS,
   ENABLE_LAYER_HORIZONTAL_FLIP,
   ENABLE_LAYERS_HORIZONTAL_FLIP,
   DISABLE_LAYER_HORIZONTAL_FLIP,
@@ -519,8 +519,8 @@ import {
   DisableLayerBlurPayload,
   EnableLayersBlurPayload,
   DisableLayersBlurPayload,
-  SetLayerBlurPayload,
-  SetLayersBlurPayload,
+  SetLayerBlurRadiusPayload,
+  SetLayersBlurRadiusPayload,
   EnableLayerHorizontalFlipPayload,
   EnableLayersHorizontalFlipPayload,
   DisableLayerHorizontalFlipPayload,
@@ -2057,6 +2057,7 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
       if (layerItem.type === 'Shape' || layerItem.type === 'Image') {
         const startPosition = clone.position;
         clearLayerTransforms({
+          layerType: layerItem.type,
           paperLayer: clone,
           transform: layerItem.transform
         });
@@ -2109,6 +2110,7 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
         const textItem: Btwx.Text = layerItem as Btwx.Text;
         const nextTextResize = textItem.textStyle.textResize === 'fixed' ? 'fixed' : 'autoHeight';
         clearLayerTransforms({
+          layerType: layerItem.type,
           paperLayer: clone,
           transform: layerItem.transform
         });
@@ -2230,6 +2232,7 @@ export const setLayersHeightThunk = (payload: SetLayersHeightPayload) => {
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       if (layerItem.type === 'Shape' || layerItem.type === 'Image') {
         clearLayerTransforms({
+          layerType: layerItem.type,
           paperLayer: clone,
           transform: layerItem.transform
         });
@@ -2281,6 +2284,7 @@ export const setLayersHeightThunk = (payload: SetLayersHeightPayload) => {
         const textItem: Btwx.Text = layerItem as Btwx.Text;
         const nextTextResize = 'fixed';
         clearLayerTransforms({
+          layerType: layerItem.type,
           paperLayer: clone,
           transform: layerItem.transform
         });
@@ -2370,6 +2374,7 @@ export const setLayersRotationThunk = (payload: SetLayersRotationPayload) => {
       const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data:{id}});
       const clone = paperLayer.clone({insert: false}) as paper.CompoundPath;
       clearLayerTransforms({
+        layerType: layerItem.type,
         paperLayer: clone,
         transform: layerItem.transform
       });
@@ -2472,13 +2477,13 @@ export const disableLayersBlur = (payload: DisableLayersBlurPayload): LayerTypes
   payload
 });
 
-export const setLayerBlur = (payload: SetLayerBlurPayload): LayerTypes => ({
-  type: SET_LAYER_BLUR,
+export const setLayerBlurRadius = (payload: SetLayerBlurRadiusPayload): LayerTypes => ({
+  type: SET_LAYER_BLUR_RADIUS,
   payload
 });
 
-export const setLayersBlur = (payload: SetLayersBlurPayload): LayerTypes => ({
-  type: SET_LAYERS_BLUR,
+export const setLayersBlurRadius = (payload: SetLayersBlurRadiusPayload): LayerTypes => ({
+  type: SET_LAYERS_BLUR_RADIUS,
   payload
 });
 
@@ -3187,6 +3192,7 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
         const textContent = duplicate.getItem({ data: { id: 'textContent' } }) as paper.PointText;
         const textBackground = duplicate.getItem({ data: { id: 'textBackground' } });
         clearLayerTransforms({
+          layerType: 'Text',
           paperLayer: duplicate,
           transform: {
             ...layerItem.transform,
@@ -3342,6 +3348,7 @@ export const setLayerTextThunk = (payload: SetLayerTextPayload) => {
     const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
     // clear transforms
     clearLayerTransforms({
+      layerType: layerItem.type,
       paperLayer: clone,
       transform: layerItem.transform
     });
@@ -3441,6 +3448,7 @@ export const setLayersTextResizeThunk = (payload: SetLayersTextResizePayload) =>
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       // clear layer transforms
       clearLayerTransforms({
+        layerType: layerItem.type,
         paperLayer: clone,
         transform: layerItem.transform
       });
@@ -3543,6 +3551,7 @@ export const setLayersFontSizeThunk = (payload: SetLayersFontSizePayload) => {
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       // clear layer transforms
       clearLayerTransforms({
+        layerType: layerItem.type,
         paperLayer: clone,
         transform: layerItem.transform
       });
@@ -3647,6 +3656,7 @@ export const setLayersLeadingThunk = (payload: SetLayersLeadingPayload) => {
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       // clear layer transforms
       clearLayerTransforms({
+        layerType: layerItem.type,
         paperLayer: clone,
         transform: layerItem.transform
       });
@@ -3770,6 +3780,7 @@ export const setLayersFontWeightThunk = (payload: SetLayersFontWeightPayload) =>
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       // clear layer transforms
       clearLayerTransforms({
+        layerType: layerItem.type,
         paperLayer: clone,
         transform: layerItem.transform
       });
@@ -3873,6 +3884,7 @@ export const setLayersFontFamilyThunk = (payload: SetLayersFontFamilyPayload) =>
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       // clear layer transforms
       clearLayerTransforms({
+        layerType: layerItem.type,
         paperLayer: clone,
         transform: layerItem.transform
       });
@@ -3976,6 +3988,7 @@ export const setLayersLetterSpacingThunk = (payload: SetLayersLetterSpacingPaylo
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       // clear layer transforms
       clearLayerTransforms({
+        layerType: layerItem.type,
         paperLayer: clone,
         transform: layerItem.transform
       });
@@ -4079,6 +4092,7 @@ export const setLayersTextTransformThunk = (payload: SetLayersTextTransformPaylo
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       // clear layer transforms
       clearLayerTransforms({
+        layerType: layerItem.type,
         paperLayer: clone,
         transform: layerItem.transform
       });
@@ -4183,6 +4197,7 @@ export const setLayersJustificationThunk = (payload: SetLayersJustificationPaylo
       const prevJustification = layerItem.textStyle.justification;
       // clear layer transforms
       clearLayerTransforms({
+        layerType: layerItem.type,
         paperLayer: clone,
         transform: layerItem.transform
       });
@@ -4293,6 +4308,7 @@ export const setLayersVerticalAlignmentThunk = (payload: SetLayersVerticalAlignm
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       // clear layer transforms
       clearLayerTransforms({
+        layerType: layerItem.type,
         paperLayer: clone,
         transform: layerItem.transform
       });
@@ -4375,6 +4391,7 @@ export const setLayersFontStyleThunk = (payload: SetLayersFontStylePayload) => {
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       // clear layer transforms
       clearLayerTransforms({
+        layerType: layerItem.type,
         paperLayer: clone,
         transform: layerItem.transform
       });
@@ -4945,6 +4962,7 @@ export const setRoundedRadiiThunk = (payload: SetRoundedRadiiPayload) => {
       const clone = paperLayer.clone({insert: false}) as paper.CompoundPath;
       const paperLayerPath = clone.children[0] as paper.Path;
       clearLayerTransforms({
+        layerType: layerItem.type,
         paperLayer: clone,
         transform: layerItem.transform
       });
@@ -5000,6 +5018,7 @@ export const setPolygonsSidesThunk = (payload: SetPolygonsSidesPayload) => {
       const paperLayerPath = clone.children[0] as paper.Path;
       const startPosition = paperLayerPath.position;
       clearLayerTransforms({
+        layerType: layerItem.type,
         paperLayer: clone,
         transform: layerItem.transform
       });
@@ -5057,6 +5076,7 @@ export const setStarsPointsThunk = (payload: SetStarsPointsPayload) => {
       const paperLayerPath = clone.children[0] as paper.Path;
       const startPosition = paperLayerPath.position;
       clearLayerTransforms({
+        layerType: layerItem.type,
         paperLayer: clone,
         transform: layerItem.transform
       });
@@ -5116,6 +5136,7 @@ export const setStarsRadiusThunk = (payload: SetStarsRadiusPayload) => {
       const paperLayerPath = clone.children[0] as paper.Path;
       const startPosition = paperLayerPath.position;
       clearLayerTransforms({
+        layerType: layerItem.type,
         paperLayer: clone,
         transform: layerItem.transform
       });
@@ -6813,8 +6834,10 @@ export const updateEventsFrame = (state: RootState): void => {
               }).opacity}`;
           }
         })(),
-        fillColor: elementColor,
-        closed: true,
+        fillColor: eventLayerItem.type === 'Shape' && (!(eventLayerItem as Btwx.Shape).closed || (eventLayerItem as Btwx.Shape).mask) ? null : elementColor,
+        strokeColor: eventLayerItem.type === 'Shape' && (!(eventLayerItem as Btwx.Shape).closed || (eventLayerItem as Btwx.Shape).mask) ? elementColor : null,
+        strokeWidth: 1 / paperMain.view.zoom,
+        closed: eventLayerItem.type === 'Shape' ? (eventLayerItem as Btwx.Shape).closed : true,
         fillRule: 'nonzero',
         insert: false,
         data: {

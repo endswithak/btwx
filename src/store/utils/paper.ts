@@ -394,7 +394,7 @@ export const getPaperStyle = ({ style, textStyle, layerFrame, artboardFrame, isL
     shadowBlur: getPaperShadowBlur(style.shadow),
     blendMode: style.blendMode,
     opacity: style.opacity,
-    blur: style.blur.enabled ? style.blur.blur : null,
+    blur: style.blur.enabled ? style.blur.radius : null,
     dashArray: style.strokeOptions.dashArray,
     dashOffset: style.strokeOptions.dashOffset,
     strokeCap: style.strokeOptions.cap,

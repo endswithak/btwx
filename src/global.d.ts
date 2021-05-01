@@ -271,7 +271,7 @@ declare namespace Btwx {
 
   interface BlurStyle {
     enabled: boolean;
-    blur: number;
+    radius: number;
   }
 
   interface Style {

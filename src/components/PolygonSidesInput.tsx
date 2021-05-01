@@ -44,6 +44,7 @@ const PolygonSidesInput = (): ReactElement => {
       const paperLayer = paperLayerCompound.children[0] as paper.Path;
       const startPosition = paperLayer.position;
       clearLayerTransforms({
+        layerType: 'Shape',
         paperLayer,
         transform: layerItem.transform
       });

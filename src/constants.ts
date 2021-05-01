@@ -395,10 +395,10 @@ export const DEFAULT_SHADOW_STYLE: Btwx.Shadow = {
 export const DEFAULT_OPACITY = 1;
 export const DEFAULT_BLEND_MODE = 'normal';
 
-export const DEFAULT_BLUR = 10;
+export const DEFAULT_BLUR_RADIUS = 10;
 export const DEFAULT_BLUR_STYLE = {
   enabled: false,
-  blur: DEFAULT_BLUR
+  radius: DEFAULT_BLUR_RADIUS
 }
 
 export const DEFAULT_STYLE: Btwx.Style = {

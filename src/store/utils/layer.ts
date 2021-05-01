@@ -61,7 +61,7 @@ import {
   SetLayerRight, SetLayersRight, SetLayerTop, SetLayersTop, SetLayerMiddle, SetLayersMiddle, SetLayerBottom,
   SetLayersBottom, SetLayerLetterSpacing, SetLayersLetterSpacing, SetLayerTextTransform, SetLayersTextTransform,
   SetLayersFillColors, SetLayersStrokeColors, SetLayersShadowColors, AddLayersEvent, SetLayerTree, SetLayerTreeScroll,
-  SetLayerCustomWiggleTweenStrength, SetLayerBlur, SetLayersBlur, EnableLayerBlur, EnableLayersBlur, DisableLayerBlur,
+  SetLayerCustomWiggleTweenStrength, EnableLayerBlur, EnableLayersBlur, DisableLayerBlur,
   DisableLayersBlur, SetLayerTextResize, SetLayersTextResize, SetLayerVerticalAlignment, SetLayersVerticalAlignment,
   SetLayerFontStyle, SetLayersFontStyle, SelectLayerEvent, DeselectLayerEvent, SelectLayerEvents, DeselectLayerEvents,
   SelectLayerEventTween, DeselectLayerEventTween, SelectLayerEventTweens, DeselectLayerEventTweens,
@@ -75,7 +75,8 @@ import {
   SetLayersCustomBounceTweenSquash, SetLayersCustomWiggleTweenStrength, SetLayersCustomWiggleTweenWiggles,
   SetLayersCustomWiggleTweenType, RemoveLayerTweens, RemoveLayersEvent, ShowLayersChildren, HideLayersChildren,
   SetLayerTreeStickyArtboard, SetLayerTweenRepeat, SetLayersTweenRepeat, SetLayerTweenYoyo, SetLayersTweenYoyo,
-  SetLayerTweenRepeatDelay, SetLayersTweenRepeatDelay, SetLayerTweenYoyoEase, SetLayersTweenYoyoEase
+  SetLayerTweenRepeatDelay, SetLayersTweenRepeatDelay, SetLayerTweenYoyoEase, SetLayersTweenYoyoEase,
+  SetLayerBlurRadius, SetLayersBlurRadius
 } from '../actionTypes/layer';
 
 import {
@@ -6013,7 +6014,7 @@ export const disableLayersBlur = (state: LayerState, action: DisableLayersBlur):
   return currentState;
 };
 
-export const setLayerBlur = (state: LayerState, action: SetLayerBlur): LayerState => {
+export const setLayerBlurRadius = (state: LayerState, action: SetLayerBlurRadius): LayerState => {
   let currentState = state;
   currentState = {
     ...currentState,
@@ -6025,7 +6026,7 @@ export const setLayerBlur = (state: LayerState, action: SetLayerBlur): LayerStat
           ...currentState.byId[action.payload.id].style,
           blur: {
             ...currentState.byId[action.payload.id].style.blur,
-            blur: action.payload.blur
+            radius: action.payload.radius
           }
         }
       }
@@ -6035,19 +6036,19 @@ export const setLayerBlur = (state: LayerState, action: SetLayerBlur): LayerStat
   return currentState;
 };
 
-export const setLayersBlur = (state: LayerState, action: SetLayersBlur): LayerState => {
+export const setLayersBlurRadius = (state: LayerState, action: SetLayersBlurRadius): LayerState => {
   let currentState = state;
   currentState = action.payload.layers.reduce((result, current) => {
-    return setLayerBlur(result, layerActions.setLayerBlur({
+    return setLayerBlurRadius(result, layerActions.setLayerBlurRadius({
       id: current,
-      blur: action.payload.blur
-    }) as SetLayerBlur);
+      radius: action.payload.radius
+    }) as SetLayerBlurRadius);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
       payload: action.payload,
-      detail: 'Set Layers Blur',
+      detail: 'Set Layers Blur Radius',
       undoable: true
     }
   }) as SetLayerEdit);

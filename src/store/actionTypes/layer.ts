@@ -382,8 +382,8 @@ export const ENABLE_LAYER_BLUR = 'ENABLE_LAYER_BLUR';
 export const ENABLE_LAYERS_BLUR = 'ENABLE_LAYERS_BLUR';
 export const DISABLE_LAYER_BLUR = 'DISABLE_LAYER_BLUR';
 export const DISABLE_LAYERS_BLUR = 'DISABLE_LAYERS_BLUR';
-export const SET_LAYER_BLUR = 'SET_LAYER_BLUR';
-export const SET_LAYERS_BLUR = 'SET_LAYERS_BLUR';
+export const SET_LAYER_BLUR_RADIUS = 'SET_LAYER_BLUR_RADIUS';
+export const SET_LAYERS_BLUR_RADIUS = 'SET_LAYERS_BLUR_RADIUS';
 
 // Artboard
 
@@ -2145,24 +2145,24 @@ export interface DisableLayersBlur {
   payload: DisableLayersBlurPayload;
 }
 
-export interface SetLayerBlurPayload {
+export interface SetLayerBlurRadiusPayload {
   id: string;
-  blur: number;
+  radius: number;
 }
 
-export interface SetLayerBlur {
-  type: typeof SET_LAYER_BLUR;
-  payload: SetLayerBlurPayload;
+export interface SetLayerBlurRadius {
+  type: typeof SET_LAYER_BLUR_RADIUS;
+  payload: SetLayerBlurRadiusPayload;
 }
 
-export interface SetLayersBlurPayload {
+export interface SetLayersBlurRadiusPayload {
   layers: string[];
-  blur: number;
+  radius: number;
 }
 
-export interface SetLayersBlur {
-  type: typeof SET_LAYERS_BLUR;
-  payload: SetLayersBlurPayload;
+export interface SetLayersBlurRadius {
+  type: typeof SET_LAYERS_BLUR_RADIUS;
+  payload: SetLayersBlurRadiusPayload;
 }
 
 export interface EnableLayerHorizontalFlipPayload {
@@ -4182,8 +4182,8 @@ export type LayerTypes = AddArtboard |
                          DisableLayerBlur |
                          EnableLayersBlur |
                          DisableLayersBlur |
-                         SetLayerBlur |
-                         SetLayersBlur |
+                         SetLayerBlurRadius |
+                         SetLayersBlurRadius |
                          EnableLayerHorizontalFlip |
                          EnableLayersHorizontalFlip |
                          DisableLayerHorizontalFlip |

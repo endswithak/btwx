@@ -8,7 +8,7 @@ import {
   DEFAULT_SHADOW_STYLE, DEFAULT_BLEND_MODE, DEFAULT_OPACITY, DEFAULT_SHAPE_WIDTH,
   DEFAULT_SHAPE_HEIGHT, DEFAULT_STAR_POINTS, DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS,
   DEFAULT_POLYGON_SIDES, DEFAULT_STROKE_OPTIONS_STYLE, DEFAULT_LINE_FROM, DEFAULT_LINE_TO,
-  DEFAULT_BLUR, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_FILL_COLOR
+  DEFAULT_BLUR_STYLE, DEFAULT_ARTBOARD_BACKGROUND_COLOR, DEFAULT_TEXT_FILL_COLOR
 } from '../../constants';
 
 export const getLayerFillStyle = (payload: any, overrides = {}): Btwx.Fill => {
@@ -85,7 +85,7 @@ export const getLayerStyle = (payload: any, styleOverrides = {}, overrides = { f
   const shadow = getLayerShadowStyle(payload, overrides.shadow);
   const opacity = payload.layer.style && payload.layer.style.opacity ? payload.layer.style.opacity : DEFAULT_OPACITY;
   const blendMode = payload.layer.style && payload.layer.style.blendMode ? payload.layer.style.blendMode : DEFAULT_BLEND_MODE;
-  const blur = payload.layer.style && payload.layer.style.blur ? payload.layer.style.blur : DEFAULT_BLUR;
+  const blur = payload.layer.style && payload.layer.style.blur ? payload.layer.style.blur : DEFAULT_BLUR_STYLE;
   return { fill, stroke, strokeOptions, shadow, opacity, blur, blendMode, ...styleOverrides };
 }
 

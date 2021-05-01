@@ -345,7 +345,7 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
     if (rendered) {
       const paperLayer = paperProject.getItem({ data: { id } });
       if (layerItem.style.blur.enabled) {
-        paperLayer.style.blur = layerItem.style.blur.blur;
+        paperLayer.style.blur = layerItem.style.blur.radius;
       } else {
         paperLayer.style.blur = null;
       }
@@ -356,10 +356,10 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
     if (rendered) {
       if (layerItem.style.blur.enabled) {
         const paperLayer = paperProject.getItem({ data: { id } });
-        paperLayer.style.blur = layerItem.style.blur.blur;
+        paperLayer.style.blur = layerItem.style.blur.radius;
       }
     }
-  }, [layerItem.style.blur.blur]);
+  }, [layerItem.style.blur.radius]);
 
   ///////////////////////////////////////////////////////
   // FILL & STROKE & SHADOW
