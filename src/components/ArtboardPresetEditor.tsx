@@ -100,7 +100,11 @@ const ArtboardPresetEditor = (): ReactElement => {
         </p>
       </div>
       <div className='c-artboard-preset-editor__main'>
-        <Form onSubmit={handleSave}>
+        <Form
+          onSubmit={handleSave}
+          style={{
+            height: '100%'
+          }}>
           <Form.Group controlId='control-ape-name'>
             <Form.Control
               ref={nameControlRef}
@@ -146,12 +150,14 @@ const ArtboardPresetEditor = (): ReactElement => {
               </Form.Label>
             </Form.Group>
           </Form.Row>
+          <Form.Row fill />
           <Form.Row>
             <Button
               onClick={() => dispatch(closeArtboardPresetEditor())}
               block>
               Cancel
             </Button>
+            <span>{`\u00A0`}</span>
             <Button
               type='submit'
               variant='primary'

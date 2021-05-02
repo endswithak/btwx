@@ -13,7 +13,7 @@ import 'regenerator-runtime/runtime';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
-import { app, BrowserWindow, ipcMain, session, Menu, nativeTheme, dialog } from 'electron';
+import { app, BrowserWindow, ipcMain, session, Menu, nativeTheme, dialog, globalShortcut } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import Store from 'electron-store';
@@ -104,17 +104,25 @@ let btwxElectron: BtwxElectron = {
 }
 
 const store = new Store({
-  watch: true
+  watch: true,
+  defaults: {
+    session: {
+      platform: process.platform
+    },
+    preferences: initialPreferencesState,
+    keyBindings: process.platform === 'darwin' ? {...initialMacKeyBindingsState, defaults: initialMacKeyBindingsState} : {...initialWindowsKeyBindingsState, defaults: initialWindowsKeyBindingsState},
+    artboardPresets: initialArtboardPresetsState
+  }
 });
 
-store.set({
-  session: {
-    platform: process.platform
-  },
-  preferences: initialPreferencesState,
-  keyBindings: process.platform === 'darwin' ? {...initialMacKeyBindingsState, defaults: initialMacKeyBindingsState} : {...initialWindowsKeyBindingsState, defaults: initialWindowsKeyBindingsState},
-  artboardPresets: initialArtboardPresetsState
-});
+// reset store in development
+if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true') {
+  store.set({
+    preferences: initialPreferencesState,
+    keyBindings: process.platform === 'darwin' ? {...initialMacKeyBindingsState, defaults: initialMacKeyBindingsState} : {...initialWindowsKeyBindingsState, defaults: initialWindowsKeyBindingsState},
+    artboardPresets: initialArtboardPresetsState
+  });
+}
 
 store.onDidChange('preferences', (newValue, oldValue) => {
   if (btwxElectron.instance.allIds.length > 0) {
@@ -328,7 +336,8 @@ export const createInstance = async ({
       session: {
         ...store.get('session') as SessionState,
         instance: INSTANCE_ID,
-        windowType: 'document'
+        windowType: 'document',
+        env: process.env.NODE_ENV
       },
       preferences: store.get('preferences') as PreferencesState,
       keyBindings: store.get('keyBindings') as KeyBindingsState,
@@ -351,7 +360,8 @@ export const createInstance = async ({
       session: {
         ...store.get('session') as SessionState,
         instance: INSTANCE_ID,
-        windowType: 'preview'
+        windowType: 'preview',
+        env: process.env.NODE_ENV
       },
       preferences: store.get('preferences') as PreferencesState,
       keyBindings: store.get('keyBindings') as KeyBindingsState,
@@ -498,7 +508,8 @@ export const createPreferences = async () => {
     btwxElectron.preferences.webContents.executeJavaScript(`renderPreferences(${JSON.stringify({
       session: {
         ...store.get('session') as SessionState,
-        windowType: 'preferences'
+        windowType: 'preferences',
+        env: process.env.NODE_ENV
       },
       preferences: store.get('preferences') as PreferencesState,
       keyBindings: store.get('keyBindings') as KeyBindingsState,
@@ -541,6 +552,10 @@ app.on('window-all-closed', () => {
 });
 
 app.on('ready', () => {
+  // need a better way to handle this
+  globalShortcut.register('CommandOrControl+R', () => {
+    console.log('reloaded');
+  });
   Menu.setApplicationMenu(btwxElectron.menu.noInstances);
   createInstance({});
 });

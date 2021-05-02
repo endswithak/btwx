@@ -24,6 +24,9 @@ export interface AcceleratorFormGroupProps {
   onFocus?(e: any): void;
 }
 
+// need a better way to handle this
+const BLACKLIST = ['Cmd+R', 'Ctrl+R'];
+
 const AcceleratorFormGroup = forwardRef(function AcceleratorFormGroup(props: AcceleratorFormGroupProps, ref: any) {
   const allBindings = useSelector((state: RootState) => state.keyBindings.allBindings);
   const { controlId, disabled, size, inline, submitOnBlur, canvasAutoFocus, right, left, label, value, onSubmitSuccess, onSubmitError, onBlur, onFocus } = props;
@@ -43,7 +46,7 @@ const AcceleratorFormGroup = forwardRef(function AcceleratorFormGroup(props: Acc
       const nextValue = `${ctrl ? 'Ctrl+' : ''}${meta ? 'Cmd+' : ''}${shift ? 'Shift+' : ''}${alt ? 'Alt+' : ''}${key}`;
       const nextValid = evaluateAccelerator(nextValue);
       const isRegistered = allBindings.includes(nextValue);
-      if (nextValid && nextValue !== currentValue) {
+      if (nextValid && nextValue !== currentValue && !BLACKLIST.includes(nextValue)) {
         const pretty = getPrettyAccelerator(nextValue);
         if (isRegistered) {
           ipcRenderer.invoke('overwriteRegisteredBinding', pretty).then((overwrite) => {

@@ -41,6 +41,7 @@ type CanvasEventType = 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | '
 const Canvas = (): ReactElement => {
   const ref = useRef<HTMLDivElement>(null);
   const ready = useSelector((state: RootState) => state.canvasSettings.ready);
+  const isDevelopment = useSelector((state: RootState) => state.session.env === 'development');
   const focusing = useSelector((state: RootState) => state.canvasSettings.focusing);
   const measuring = useSelector((state: RootState) => state.canvasSettings.measuring);
   const waiting = useSelector((state: RootState) => state.canvasSettings.waiting);
@@ -296,7 +297,11 @@ const Canvas = (): ReactElement => {
             {/* misc tools */}
             <GradientTool />
             {/* debug tools */}
-            <CanvasToast />
+            {
+              isDevelopment
+              ? <CanvasToast />
+              : null
+            }
           </>
         : null
       }

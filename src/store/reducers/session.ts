@@ -7,12 +7,14 @@ export interface SessionState {
   instance: number;
   windowType: Btwx.WindowType;
   platform: string;
+  env: 'production' | 'development';
 }
 
 export const initialState: SessionState = {
   instance: null,
   windowType: null,
-  platform: null
+  platform: null,
+  env: 'production'
 };
 
 export default (state = initialState, action: SessionTypes): SessionState => {
