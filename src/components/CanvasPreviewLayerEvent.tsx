@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { ipcRenderer } from 'electron';
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useCallback, useEffect, useState, useMemo } from 'react';
+import { createSelector } from 'reselect';
 import { gsap } from 'gsap';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -25,9 +26,21 @@ export interface EventLayerTimelineData {
   shapeMask?: paper.CompoundPath;
 }
 
+const getEventTweensSelector = () =>
+  createSelector(
+    (state: RootState) => state.layer.present.tweens.byId,
+    (_: any, eventTweens: string[]) => eventTweens,
+    (tweensById, eventTweens) => eventTweens.reduce((result, current) => ({
+      ...result,
+      [current]: tweensById[current]
+    }), {})
+  );
+
 const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElement => {
   const { eventId } = props;
   const event = useSelector((state: RootState) => state.layer.present.events.byId[eventId]);
+  const eventTweensSelector = useMemo(getEventTweensSelector, []);
+  const eventTweensById = useSelector((state: RootState) => eventTweensSelector(state, event.tweens));
   const electronInstanceId = useSelector((state: RootState) => state.session.instance);
   const originArtboardItem = useSelector((state: RootState) => state.layer.present.byId[event.artboard] as Btwx.Artboard);
   const originArtboardPosition = new paperPreview.Point(originArtboardItem.frame.x, originArtboardItem.frame.y);
@@ -40,12 +53,10 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
   const autoplay = useSelector((state: RootState) => state.preview.autoplay);
   const payloadString = useSelector((state: RootState) => JSON.stringify(state.layer.present.edit.payload));
   const tweenEdit = event.tweens.some((id) => payloadString.includes(id));
-  const [prevEdit, setPrevEdit] = useState(null);
   const [eventTimeline, setEventTimeline] = useState<GSAPTimeline>(null);
-  const [playing, setPlaying] = useState(false);
   const [eventType, setEventType] = useState(event.event);
   const [eventLayer, setEventLayer] = useState(event.layer);
-  const [eventLayers, setEventLayers] = useState(eventTweenLayers);
+  // const [eventLayers, setEventLayers] = useState(eventTweenLayers);
   const [instance, setNewInstance] = useState(0);
   const dispatch = useDispatch();
 
@@ -54,41 +65,39 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
     paused: true,
     data: eventTweenLayers.reduce((result, current) => ({
       ...result,
-      [current]: {},
-      callbacks: {
-        ...result.callbacks,
-        [current]: {}
-      }
-    }), { callbacks: {} }),
-    onStart: handleEventStart,
-    onComplete: handleEventComplete
+      [current]: {}
+    }), {}),
+    onStart: function() {
+      dispatch(setPreviewTweening({
+        tweening: event.artboard
+      }));
+      ipcRenderer.send('setDocumentPreviewTweening', JSON.stringify({
+        instanceId: electronInstanceId,
+        tweening: event.artboard
+      }));
+    },
+    onComplete: function() {
+      paperPreview.view.center = destinationArtboardPosition;
+      dispatch(setActiveArtboard({
+        id: event.destinationArtboard
+      }));
+      dispatch(setPreviewTweening({
+        tweening: null
+      }));
+      ipcRenderer.send('setDocumentActiveArtboard', JSON.stringify({
+        instanceId: electronInstanceId,
+        activeArtboard: event.destinationArtboard
+      }));
+      ipcRenderer.send('setDocumentPreviewTweening', JSON.stringify({
+        instanceId: electronInstanceId,
+        tweening: event.artboard
+      }));
+      this.progress(0, false).pause();
+      createTimeline();
+    }
   })
   // add timelines for all event layers
   .add(buildLayerTimelines(), 0);
-
-  const handleEventStart = () => {
-    setPlaying(true);
-    dispatch(setPreviewTweening({tweening: event.artboard}));
-    ipcRenderer.send('setDocumentPreviewTweening', JSON.stringify({
-      instanceId: electronInstanceId,
-      tweening: event.artboard
-    }));
-  }
-
-  const handleEventComplete = () => {
-    paperPreview.view.center = destinationArtboardPosition;
-    dispatch(setActiveArtboard({id: event.destinationArtboard}));
-    dispatch(setPreviewTweening({tweening: null}));
-    ipcRenderer.send('setDocumentActiveArtboard', JSON.stringify({
-      instanceId: electronInstanceId,
-      activeArtboard: event.destinationArtboard
-    }));
-    ipcRenderer.send('setDocumentPreviewTweening', JSON.stringify({
-      instanceId: electronInstanceId,
-      tweening: event.artboard
-    }));
-    setPlaying(false);
-  }
 
   const buildLayerTimelines = () => eventTweenLayers.reduce((result, current) => [...result, gsap.timeline({
     id: `${eventId}-${current}`,
@@ -139,62 +148,43 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
     }
   }
 
-  // create initial timeline
-  useEffect(() => {
+  const killTimeline = () => {
     if (eventTimeline) {
       eventTimeline.kill();
     }
-    const newTimeline = buildTimeline();
     removePaperLayerEventListener();
+  }
+
+  const createTimeline = () => {
+    killTimeline();
+    const newTimeline = buildTimeline();
     addPaperLayerEventListener(newTimeline);
-    setPrevEdit(edit);
     setEventTimeline(newTimeline);
+    setNewInstance(instance + 1);
+  }
+
+  // create initial timeline
+  useEffect(() => {
+    createTimeline();
     return () => {
-      if (eventTimeline) {
-        if (playing) {
-          eventTimeline.pause().progress(0);
-        }
-        eventTimeline.kill();
-      }
-      removePaperLayerEventListener();
+      killTimeline();
     }
   }, []);
 
-  // reset event timeline when playing stops
   useEffect(() => {
-    if (!playing && eventTimeline) {
-      eventTimeline.progress(0).pause();
-      Object.keys(eventTimeline.data.callbacks).forEach((layerCallbackKey) => {
-        const layerCallbacks = eventTimeline.data.callbacks[layerCallbackKey];
-        Object.keys(layerCallbacks).forEach((propCallbackKey) => {
-          layerCallbacks[propCallbackKey]();
-        });
-      });
+    if (eventTimeline) {
+      createTimeline();
     }
-  }, [playing]);
-
-  // rebuild event timeline when tween layers are added/removed
-  useEffect(() => {
-    if (eventTimeline && (eventTweenLayers.some(id => !eventLayers.includes(id)) || eventTweenLayers.length !== eventLayers.length)) {
-      if (playing) {
-        eventTimeline.pause().progress(0);
-        eventTimeline.kill();
-      }
-      const newTimeline = buildTimeline();
-      removePaperLayerEventListener();
-      addPaperLayerEventListener(newTimeline);
-      setEventTimeline(newTimeline);
-      setNewInstance(instance + 1);
-      setEventLayers(eventTweenLayers);
-    }
-  }, [eventTweenLayers]);
+  }, [eventTweensById]);
 
   // autoplay feature...
   // plays timeline whenever any event tween layer tween prop changes
   useEffect(() => {
-    if (tweenEdit && prevEdit && autoplay) {
+    if (tweenEdit && eventTimeline && autoplay) {
       paperPreview.view.center = originArtboardPosition;
-      dispatch(setActiveArtboard({id: event.artboard}));
+      dispatch(setActiveArtboard({
+        id: event.artboard
+      }));
       ipcRenderer.invoke('setDocumentActiveArtboard', JSON.stringify({
         instanceId: electronInstanceId,
         activeArtboard: event.artboard

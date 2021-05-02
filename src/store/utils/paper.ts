@@ -81,6 +81,7 @@ export const positionTextContent = ({paperLayer, justification, verticalAlignmen
   const textBackground = paperLayer.getItem({ data: { id: 'textBackground' }});
   switch(textResize) {
     case 'autoWidth':
+      textContent.position = textBackground.position;
       break;
     case 'autoHeight':
       textContent.bounds.top = textBackground.bounds.top;
@@ -150,8 +151,8 @@ export const clearLayerTransforms = ({ layerType, paperLayer, transform, variabl
       );
     }
     paperLayer.scale(
-      width / paperLayer.bounds.width,
-      height / paperLayer.bounds.height
+      ((transform.horizontalFlip as any) !== -1 && (transform.horizontalFlip as any) !== 1) ? width / paperLayer.bounds.width : 1,
+      ((transform.verticalFlip as any) !== -1 && (transform.verticalFlip as any) !== 1) ? height / paperLayer.bounds.height : 1
     );
     if (layerType !== 'Shape') {
       paperLayer.rotation = -decomposeLayer.matrix.rotation;

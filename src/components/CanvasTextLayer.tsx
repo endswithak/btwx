@@ -189,14 +189,14 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   }
 
   const getAreaTextRectangle = () => {
-    const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
-    const textPosition = new paperMain.Point(layerItem.frame.x, layerItem.frame.y);
+    const artboardPosition = new paperLayerScope.Point(artboardItem.frame.x, artboardItem.frame.y);
+    const textPosition = new paperLayerScope.Point(layerItem.frame.x, layerItem.frame.y);
     const absPosition = textPosition.add(artboardPosition);
-    const topLeft = new paperMain.Point(
+    const topLeft = new paperLayerScope.Point(
       absPosition.x - (layerItem.frame.innerWidth / 2),
       absPosition.y - (layerItem.frame.innerHeight / 2)
     );
-    const bottomRight = new paperMain.Point(
+    const bottomRight = new paperLayerScope.Point(
       absPosition.x + (layerItem.frame.innerWidth / 2),
       absPosition.y + (layerItem.frame.innerHeight / 2)
     );
@@ -213,8 +213,8 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   }
 
   const getAbsPoint = () => {
-    const point = new paperMain.Point(layerItem.point.x, layerItem.point.y);
-    const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
+    const point = new paperLayerScope.Point(layerItem.point.x, layerItem.point.y);
+    const artboardPosition = new paperLayerScope.Point(artboardItem.frame.x, artboardItem.frame.y);
     return point.add(artboardPosition);
   }
 
@@ -248,7 +248,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         alpha: layerItem.style.shadow.color.a
       } as paper.Color;
       textContent.shadowBlur = layerItem.style.shadow.blur;
-      textContent.shadowOffset = new paperMain.Point(layerItem.style.shadow.offset.x, layerItem.style.shadow.offset.y);
+      textContent.shadowOffset = new paperLayerScope.Point(layerItem.style.shadow.offset.x, layerItem.style.shadow.offset.y);
     } else {
       textContent.shadowColor = null;
     }
@@ -281,9 +281,9 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         }),
         new paperLayerScope.Path.Rectangle({
           rectangle: getAreaTextRectangle(),
-          // fillColor: tinyColor('#fff').setAlpha(0.01).toRgbString(),
-          // blendMode: 'multiply',
-          fillColor: tinyColor('red').setAlpha(0.25).toRgbString(),
+          fillColor: tinyColor('#fff').setAlpha(0.01).toRgbString(),
+          blendMode: 'multiply',
+          // fillColor: tinyColor('red').setAlpha(0.25).toRgbString(),
           data: {
             id: 'textBackground',
             type: 'LayerChild',

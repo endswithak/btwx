@@ -222,7 +222,6 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           break;
         }
       }
-      return;
     }
   }
 

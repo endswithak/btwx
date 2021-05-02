@@ -712,7 +712,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
 
   useEffect(() => {
     try {
-      if (dragEvent && isEnabled && handle && fromPivot && fromBounds) {
+      if (dragEvent && isEnabled && handle && fromPivot && fromBounds && selected.length > 0) {
         let nextHandle = handle;
         let nextHorizontalFlip = horizontalFlip;
         let nextVerticalFlip = verticalFlip;
@@ -918,10 +918,12 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
       } else {
         if (fromPivot) {
           clearLayerPivots();
-          updateSelectionFrame({
-            bounds: fromBounds,
-            // rotation: selectedRotation !== 'multi' && selectedRotation !== 0 ? selectedRotation : null
-          });
+          if (selected.length > 0) {
+            updateSelectionFrame({
+              bounds: fromBounds,
+              // rotation: selectedRotation !== 'multi' && selectedRotation !== 0 ? selectedRotation : null
+            });
+          }
           resetState();
         }
       }
@@ -962,7 +964,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
   }, [keyUpEvent]);
 
   useEffect(() => {
-    if (toBounds && isEnabled) {
+    if (toBounds && isEnabled && dragEvent) {
       resizeLayers();
       updateSelectionFrame({
         bounds: toBounds,
