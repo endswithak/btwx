@@ -421,20 +421,6 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
     }
   }, [layerItem.transform.rotation, layerItem.transform.horizontalFlip, layerItem.transform.verticalFlip]);
 
-  // useEffect(() => {
-  //   if (rendered) {
-  //     const { paperLayer } = getPaperLayer();
-  //     paperLayer.scale(-1, 1);
-  //   }
-  // }, [layerItem.transform.horizontalFlip]);
-
-  // useEffect(() => {
-  //   if (rendered) {
-  //     const { paperLayer } = getPaperLayer();
-  //     paperLayer.scale(1, -1);
-  //   }
-  // }, [layerItem.transform.verticalFlip]);
-
   ///////////////////////////////////////////////////////
   // FRAME / TEXT / TEXTRESIZE
   ///////////////////////////////////////////////////////

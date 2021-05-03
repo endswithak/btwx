@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { ipcRenderer } from 'electron';
-import React, { ReactElement, useCallback, useEffect, useState, useMemo } from 'react';
-import { createSelector } from 'reselect';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
