@@ -8,6 +8,7 @@ const EventsFrame = (): ReactElement => {
   const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
   const activeArtboardEvents = useSelector((state: RootState) => (state.layer.present.byId[state.layer.present.activeArtboard] as Btwx.Artboard).originArtboardForEvents);
   const theme = useSelector((state: RootState) => state.preferences.theme);
+  const canvasTheme = useSelector((state: RootState) => state.preferences.canvasTheme);
   const eventDrawerEventSort = useSelector((state: RootState) => state.eventDrawer.eventSort);
   const eventDrawerEventHover = useSelector((state: RootState) => state.eventDrawer.eventHover);
   const eventDrawerEvent = useSelector((state: RootState) => state.eventDrawer.event);
@@ -24,7 +25,7 @@ const EventsFrame = (): ReactElement => {
       eventsFrame.removeChildren();
     }
   }, [
-    activeArtboard, theme, eventDrawerEventSort, eventDrawerEventHover,
+    activeArtboard, theme, canvasTheme, eventDrawerEventSort, eventDrawerEventHover,
     eventDrawerEvent, activeArtboardEvents, zoom, allEventIds, selectedEvents,
     shapeIcons
   ]);

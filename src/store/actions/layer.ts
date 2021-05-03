@@ -6743,7 +6743,14 @@ export const updateEventsFrame = (state: RootState): void => {
   }).eventItems;
   eventsFrame.removeChildren();
   if (events) {
-    const theme = getTheme(state.preferences.theme);
+    const theme = getTheme((() => {
+      switch(state.preferences.canvasTheme) {
+        case 'btwx-default':
+          return state.preferences.theme;
+        default:
+          return state.preferences.canvasTheme as 'light' | 'dark';
+      }
+    })());
     events.forEach((event, index) => {
       const isSelected = selectedEvents.includes(event.id);
       const eventLayerItem = state.layer.present.byId[event.layer];
@@ -6893,8 +6900,8 @@ export const updateEventsFrame = (state: RootState): void => {
       });
       const margin = 8 / paperMain.view.zoom;
       const eventFrameBackground = new paperMain.Path.Rectangle({
-        from: eventFrame.bounds.topLeft.subtract(new paperMain.Point(0, margin)),
-        to: eventFrame.bounds.bottomRight.add(new paperMain.Point(0, margin)),
+        from: eventFrame.bounds.topLeft.subtract(new paperMain.Point(margin, margin)),
+        to: eventFrame.bounds.bottomRight.add(new paperMain.Point(margin, margin)),
         fillColor: isSelected && !editingEvent ? theme.palette.primary : tinyColor(theme.background.z0).setAlpha(0.01).toRgbString(),
         strokeColor: !state.eventDrawer.event && state.eventDrawer.eventHover === event.id ? THEME_PRIMARY_COLOR : null,
         strokeWidth: 1 / paperMain.view.zoom,
