@@ -2286,7 +2286,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       if (gsap.getById(tweenId) && eventLayerTimeline) {
         eventLayerTimeline.remove(gsap.getById(tweenId));
         eventTimeline.data[tween.layer] = Object.keys(eventTimeline.data[tween.layer]).reduce((result, current) => {
-          if (current !== tween.prop || current.startsWith(tween.prop)) {
+          if (current !== tween.prop && !current.startsWith(tween.prop)) {
             result = {
               ...result,
               [current]: eventTimeline.data[tween.layer][current]

@@ -459,17 +459,23 @@ const PreviewDevice = (): ReactElement => {
       if (newImages) {
         setImages(deviceImages[`${device}${deviceColor.charAt(0).toUpperCase()}${deviceColor.slice(1)}`]);
         setSize(newDevice.frame);
-        ipcRenderer.send('resizePreview', JSON.stringify({instanceId: instance, size: newDevice.frame}));
+        ipcRenderer.send('resizePreview', JSON.stringify({
+          instanceId: instance,
+          size: newDevice.frame
+        }));
       }
     } else {
       if (images) {
         setImages(null);
       }
       if (activeArtboardItem) {
-        ipcRenderer.send('resizePreview', JSON.stringify({instanceId: instance, size: {
-          width: activeArtboardItem.frame.width,
-          height: activeArtboardItem.frame.height
-        }}));
+        ipcRenderer.send('resizePreview', JSON.stringify({
+          instanceId: instance,
+          size: {
+            width: activeArtboardItem.frame.width,
+            height: activeArtboardItem.frame.height
+          }
+        }));
       }
     }
   }, [device, deviceColor]);

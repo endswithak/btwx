@@ -553,6 +553,9 @@ app.on('window-all-closed', () => {
 
 app.on('ready', () => {
   // need a better way to handle this
+  // issue:
+  // - accelerator form group will refresh preferences...
+  //   if any shortcut is set to `CommandOrControl+R`...
   globalShortcut.register('CommandOrControl+R', () => {
     console.log('reloaded');
   });

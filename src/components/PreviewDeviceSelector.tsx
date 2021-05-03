@@ -11,6 +11,7 @@ const PreviewDevice = (): ReactElement => {
   const instance = useSelector((state: RootState) => state.session.instance);
   const device = useSelector((state: RootState) => state.preview.device.id);
   const deviceColor = useSelector((state: RootState) => state.preview.device.color);
+  const activeArtboardItem = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.activeArtboard]);
   const dispatch = useDispatch();
 
   const buildContextMenu = () => {
@@ -30,6 +31,23 @@ const PreviewDevice = (): ReactElement => {
         }
       }
     },
+    { type: 'separator' },
+    {
+      label: 'Fit Frame',
+      click: {
+        id: 'resizePreview',
+        params: {
+          instanceId: instance,
+          size: device
+          ? devRef.frame
+          : {
+              width: activeArtboardItem.frame.width,
+              height: activeArtboardItem.frame.height
+            }
+        }
+      }
+    },
+    { type: 'separator' },
     ...device && deviceColor ? [
       { type: 'separator' },
       {

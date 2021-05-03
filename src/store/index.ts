@@ -86,6 +86,9 @@ const configureStore: any = (preloadedState, isDocumentWindow = false): typeof s
       }
     });
   };
+  (window as any).resizePreview = (params: any): void => {
+    ipcRenderer.send('resizePreview', JSON.stringify(params));
+  };
   (window as any).hydrateDocument = (state: HydrateDocumentPayload): void => {
     store.dispatch(hydrateDocumentThunk(state) as any);
   };
