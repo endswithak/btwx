@@ -89,10 +89,10 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     const boundingHeight = hasTweenProp('boundingHeight', originLayerItem.frame.height);
     const scaleX = hasTweenProp('scaleX', originLayerItem.transform.horizontalFlip ? -1 : 1);
     const scaleY = hasTweenProp('scaleY', originLayerItem.transform.verticalFlip ? -1 : 1);
-    const prevScaleX = hasTweenProp('prevScaleX', originLayerItem.transform.horizontalFlip ? -1 : 1);
-    const prevScaleY = hasTweenProp('prevScaleY', originLayerItem.transform.verticalFlip ? -1 : 1);
+    const prevScaleX = hasTweenProp('scaleXPrevious', originLayerItem.transform.horizontalFlip ? -1 : 1);
+    const prevScaleY = hasTweenProp('scaleYPrevious', originLayerItem.transform.verticalFlip ? -1 : 1);
     const rotation = hasTweenProp('rotation', originLayerItem.transform.rotation);
-    const prevRotation = hasTweenProp('prevRotation', 0);
+    const prevRotation = hasTweenProp('rotationPrevious', originLayerItem.transform.rotation);
     const dashArrayWidth = hasTweenProp('dashArrayWidth', originLayerItem.style.strokeOptions.dashArray[0]);
     const dashArrayGap = hasTweenProp('dashArrayGap', originLayerItem.style.strokeOptions.dashArray[1]);
     // Gradient origin/destination
@@ -1423,7 +1423,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           });
         }
         paperLayer.position = startPosition;
-        eventTimeline.data[tween.layer]['prevRotation'] = currentProps.rotation;
+        eventTimeline.data[tween.layer]['rotationPrevious'] = currentProps.rotation;
         updateGradients({ paperLayer, textContent, textBackground, currentProps });
       },
       ease: getEaseString(tween),
@@ -1642,12 +1642,6 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           justification: originTextItem.textStyle.justification,
           textResize: originTextItem.textStyle.textResize
         });
-        // if (originTextItem.textStyle.textResize !== 'fixed') {
-        //   paperLayer.rotation = currentProps.rotation;
-        //   eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
-        //   eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
-        //   paperLayer.rotation = -currentProps.rotation;
-        // }
         paperLayer.rotation = currentProps.rotation;
         eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
         eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
@@ -1736,12 +1730,6 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           justification: originTextItem.textStyle.justification,
           textResize: originTextItem.textStyle.textResize
         });
-        // if (originTextItem.textStyle.textResize !== 'fixed') {
-        //   paperLayer.rotation = currentProps.rotation;
-        //   eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
-        //   eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
-        //   paperLayer.rotation = -currentProps.rotation;
-        // }
         paperLayer.rotation = currentProps.rotation;
         eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
         eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
@@ -1822,12 +1810,6 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           justification: originTextItem.textStyle.justification,
           textResize: originTextItem.textStyle.textResize
         });
-        // if (originTextItem.textStyle.textResize !== 'fixed') {
-        //   paperLayer.rotation = currentProps.rotation;
-        //   eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
-        //   eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
-        //   paperLayer.rotation = -currentProps.rotation;
-        // }
         paperLayer.rotation = currentProps.rotation;
         eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
         eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
@@ -1858,42 +1840,33 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       repeat: tween.repeat,
       yoyo: tween.yoyo,
       ...tween.text.scramble ? {
-          scrambleText: {
-            text: tween.ease === 'customWiggle'
+        scrambleText: {
+          text: tween.ease === 'customWiggle'
             ? tween.customWiggle.strength
             : destinationTextItem.text
               ? getTransformedText(destinationTextItem.text, destinationTextItem.textStyle.textTransform)
               : '',
-            chars: tween.scrambleText.characters === 'custom'
+          chars: tween.scrambleText.characters === 'custom'
             ? tween.scrambleText.customCharacters
             : tween.scrambleText.characters,
-            revealDelay: tween.scrambleText.revealDelay,
-            speed: tween.scrambleText.speed,
-            delimiter: tween.scrambleText.delimiter,
-            rightToLeft: tween.scrambleText.rightToLeft
-          }
+          revealDelay: tween.scrambleText.revealDelay,
+          speed: tween.scrambleText.speed,
+          delimiter: tween.scrambleText.delimiter,
+          rightToLeft: tween.scrambleText.rightToLeft
         }
-      : {
-          text: {
-            value: tween.ease === 'customWiggle'
+      }
+    : {
+        text: {
+          value: tween.ease === 'customWiggle'
             ? tween.customWiggle.strength
             : destinationTextItem.text
               ? getTransformedText(destinationTextItem.text, destinationTextItem.textStyle.textTransform)
               : '',
-            delimiter: tween.text.delimiter,
-            speed: tween.text.speed,
-            type: tween.text.diff ? 'diff' : null
-          }
-        },
-      // onComplete: () => {
-      //   // should be innerText
-      //   textDOM.innerText === (originLayerItem as Btwx.Text).text
-      //   ? getTransformedText(
-      //       (originLayerItem as Btwx.Text).text,
-      //       (originLayerItem as Btwx.Text).textStyle.textTransform
-      //     )
-      //   : ''
-      // },
+          delimiter: tween.text.delimiter,
+          speed: tween.text.speed,
+          type: tween.text.diff ? 'diff' : null
+        }
+      },
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textMask, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
         const currentProps = getCurrentTweenLayerProps();
@@ -1954,12 +1927,6 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           justification: originTextItem.textStyle.justification,
           textResize: originTextItem.textStyle.textResize
         });
-        // if (originTextItem.textStyle.textResize !== 'fixed') {
-        //   paperLayer.rotation = currentProps.rotation;
-        //   eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
-        //   eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
-        //   paperLayer.rotation = -currentProps.rotation;
-        // }
         paperLayer.rotation = currentProps.rotation;
         eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
         eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
@@ -2049,12 +2016,6 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           justification: originTextItem.textStyle.justification,
           textResize: originTextItem.textStyle.textResize
         });
-        // if (originTextItem.textStyle.textResize !== 'fixed') {
-        //   paperLayer.rotation = currentProps.rotation;
-        //   eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
-        //   eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
-        //   paperLayer.rotation = -currentProps.rotation;
-        // }
         paperLayer.rotation = currentProps.rotation;
         eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
         eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
@@ -2134,7 +2095,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           });
         }
         paperLayer.position = startPosition;
-        eventTimeline.data[tween.layer]['prevScaleX'] = currentProps.scaleX;
+        eventTimeline.data[tween.layer]['scaleXPrevious'] = currentProps.scaleX;
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -2199,7 +2160,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           });
         }
         paperLayer.position = startPosition;
-        eventTimeline.data[tween.layer]['prevScaleY'] = currentProps.scaleY;
+        eventTimeline.data[tween.layer]['scaleYPrevious'] = currentProps.scaleY;
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -2325,7 +2286,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       if (gsap.getById(tweenId) && eventLayerTimeline) {
         eventLayerTimeline.remove(gsap.getById(tweenId));
         eventTimeline.data[tween.layer] = Object.keys(eventTimeline.data[tween.layer]).reduce((result, current) => {
-          if (current !== tween.prop) {
+          if (current !== tween.prop || current.startsWith(tween.prop)) {
             result = {
               ...result,
               [current]: eventTimeline.data[tween.layer][current]
