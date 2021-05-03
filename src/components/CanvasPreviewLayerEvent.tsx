@@ -39,8 +39,8 @@ const getEventTweensSelector = () =>
 const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElement => {
   const { eventId } = props;
   const event = useSelector((state: RootState) => state.layer.present.events.byId[eventId]);
-  const eventTweensSelector = useMemo(getEventTweensSelector, []);
-  const eventTweensById = useSelector((state: RootState) => eventTweensSelector(state, event.tweens));
+  // const eventTweensSelector = useMemo(getEventTweensSelector, []);
+  // const eventTweensById = useSelector((state: RootState) => eventTweensSelector(state, event.tweens));
   const electronInstanceId = useSelector((state: RootState) => state.session.instance);
   const originArtboardItem = useSelector((state: RootState) => state.layer.present.byId[event.artboard] as Btwx.Artboard);
   const originArtboardPosition = new paperPreview.Point(originArtboardItem.frame.x, originArtboardItem.frame.y);
@@ -56,7 +56,7 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
   const [eventTimeline, setEventTimeline] = useState<GSAPTimeline>(null);
   const [eventType, setEventType] = useState(event.event);
   const [eventLayer, setEventLayer] = useState(event.layer);
-  // const [eventLayers, setEventLayers] = useState(eventTweenLayers);
+  const [eventLayers, setEventLayers] = useState(eventTweenLayers);
   const [instance, setNewInstance] = useState(0);
   const dispatch = useDispatch();
 
@@ -92,8 +92,7 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
         instanceId: electronInstanceId,
         tweening: event.artboard
       }));
-      this.progress(0, false).pause();
-      createTimeline();
+      this.pause(0, false);
     }
   })
   // add timelines for all event layers
@@ -150,7 +149,11 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
 
   const killTimeline = () => {
     if (eventTimeline) {
-      eventTimeline.kill();
+      if ((eventTimeline as GSAPTimeline).isActive()) {
+        eventTimeline.pause(0, false).kill();
+      } else {
+        eventTimeline.kill();
+      }
     }
     removePaperLayerEventListener();
   }
@@ -172,10 +175,11 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
   }, []);
 
   useEffect(() => {
-    if (eventTimeline) {
+    if (eventTimeline && (eventTweenLayers.length !== eventLayers.length || !eventLayers.every(id => eventTweenLayers.includes(id)))) {
       createTimeline();
+      setEventLayers(eventTweenLayers);
     }
-  }, [eventTweensById]);
+  }, [eventTweenLayers]);
 
   // autoplay feature...
   // plays timeline whenever any event tween layer tween prop changes
@@ -189,7 +193,7 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
         instanceId: electronInstanceId,
         activeArtboard: event.artboard
       }));
-      eventTimeline.play();
+      eventTimeline.play(0, false);
     }
   }, [edit]);
 

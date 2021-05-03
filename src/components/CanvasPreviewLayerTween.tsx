@@ -92,7 +92,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     const prevScaleX = hasTweenProp('prevScaleX', originLayerItem.transform.horizontalFlip ? -1 : 1);
     const prevScaleY = hasTweenProp('prevScaleY', originLayerItem.transform.verticalFlip ? -1 : 1);
     const rotation = hasTweenProp('rotation', originLayerItem.transform.rotation);
-    const prevRotation = hasTweenProp('prevRotation', originLayerItem.transform.rotation);
+    const prevRotation = hasTweenProp('prevRotation', 0);
     const dashArrayWidth = hasTweenProp('dashArrayWidth', originLayerItem.style.strokeOptions.dashArray[0]);
     const dashArrayGap = hasTweenProp('dashArrayGap', originLayerItem.style.strokeOptions.dashArray[1]);
     // Gradient origin/destination
@@ -2322,8 +2322,17 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       addTween();
     }
     return () => {
-      if (gsap.getById(tweenId)) {
+      if (gsap.getById(tweenId) && eventLayerTimeline) {
         eventLayerTimeline.remove(gsap.getById(tweenId));
+        eventTimeline.data[tween.layer] = Object.keys(eventTimeline.data[tween.layer]).reduce((result, current) => {
+          if (current !== tween.prop) {
+            result = {
+              ...result,
+              [current]: eventTimeline.data[tween.layer][current]
+            }
+          }
+          return result;
+        }, {});
       }
     }
   }, [tween, eventLayerTimeline]);
