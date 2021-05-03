@@ -26,21 +26,9 @@ export interface EventLayerTimelineData {
   shapeMask?: paper.CompoundPath;
 }
 
-const getEventTweensSelector = () =>
-  createSelector(
-    (state: RootState) => state.layer.present.tweens.byId,
-    (_: any, eventTweens: string[]) => eventTweens,
-    (tweensById, eventTweens) => eventTweens.reduce((result, current) => ({
-      ...result,
-      [current]: tweensById[current]
-    }), {})
-  );
-
 const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElement => {
   const { eventId } = props;
   const event = useSelector((state: RootState) => state.layer.present.events.byId[eventId]);
-  // const eventTweensSelector = useMemo(getEventTweensSelector, []);
-  // const eventTweensById = useSelector((state: RootState) => eventTweensSelector(state, event.tweens));
   const electronInstanceId = useSelector((state: RootState) => state.session.instance);
   const originArtboardItem = useSelector((state: RootState) => state.layer.present.byId[event.artboard] as Btwx.Artboard);
   const originArtboardPosition = new paperPreview.Point(originArtboardItem.frame.x, originArtboardItem.frame.y);

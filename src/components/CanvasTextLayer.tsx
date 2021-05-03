@@ -511,53 +511,6 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   }, [layerItem.style.blur.radius]);
 
   ///////////////////////////////////////////////////////
-  // FILL & STROKE & SHADOW
-  ///////////////////////////////////////////////////////
-
-  useEffect(() => {
-    if (rendered) {
-      applyFill();
-    }
-  }, [layerItem.style.fill]);
-
-  useEffect(() => {
-    if (rendered) {
-      applyStroke();
-    }
-  }, [layerItem.style.stroke]);
-
-  useEffect(() => {
-    if (rendered) {
-      applyShadow();
-    }
-  }, [layerItem.style.shadow]);
-
-  useEffect(() => {
-    if (rendered) {
-      if (layerItem.style.fill.fillType === 'gradient') {
-        applyFill();
-      }
-      if (layerItem.style.stroke.fillType === 'gradient') {
-        applyStroke();
-      }
-    }
-  }, [
-    layerItem.transform.rotation, layerItem.frame.innerWidth, layerItem.frame.innerHeight,
-    layerItem.text, layerItem.textStyle.fontFamily, layerItem.textStyle.fontWeight,
-    layerItem.textStyle.fontSize, layerItem.textStyle.justification,
-    layerItem.textStyle.leading, layerItem.textStyle.textTransform,
-    layerItem.textStyle.verticalAlignment, layerItem.textStyle.textResize,
-    layerItem.textStyle.letterSpacing
-  ]);
-
-  useEffect(() => {
-    if (rendered) {
-      const { textContent } = getPaperLayer();
-      textContent.strokeWidth = layerItem.style.stroke.width;
-    }
-  }, [layerItem.style.stroke.width]);
-
-  ///////////////////////////////////////////////////////
   // STROKE OPTIONS
   ///////////////////////////////////////////////////////
 
@@ -851,6 +804,53 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
       });
     }
   }, [layerItem.textStyle.leading]);
+
+  ///////////////////////////////////////////////////////
+  // FILL & STROKE & SHADOW
+  ///////////////////////////////////////////////////////
+
+  useEffect(() => {
+    if (rendered) {
+      applyFill();
+    }
+  }, [layerItem.style.fill]);
+
+  useEffect(() => {
+    if (rendered) {
+      applyStroke();
+    }
+  }, [layerItem.style.stroke]);
+
+  useEffect(() => {
+    if (rendered) {
+      applyShadow();
+    }
+  }, [layerItem.style.shadow]);
+
+  useEffect(() => {
+    if (rendered) {
+      if (layerItem.style.fill.fillType === 'gradient') {
+        applyFill();
+      }
+      if (layerItem.style.stroke.fillType === 'gradient') {
+        applyStroke();
+      }
+    }
+  }, [
+    layerItem.transform.rotation, layerItem.frame.innerWidth, layerItem.frame.innerHeight,
+    layerItem.text, layerItem.textStyle.fontFamily, layerItem.textStyle.fontWeight,
+    layerItem.textStyle.fontSize, layerItem.textStyle.justification,
+    layerItem.textStyle.leading, layerItem.textStyle.textTransform,
+    layerItem.textStyle.verticalAlignment, layerItem.textStyle.textResize,
+    layerItem.textStyle.letterSpacing
+  ]);
+
+  useEffect(() => {
+    if (rendered) {
+      const { textContent } = getPaperLayer();
+      textContent.strokeWidth = layerItem.style.stroke.width;
+    }
+  }, [layerItem.style.stroke.width]);
 
   ///////////////////////////////////////////////////////
   // EVENTS

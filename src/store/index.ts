@@ -22,14 +22,14 @@ const configureStore: any = (preloadedState, isDocumentWindow = false): typeof s
   const store = createStore(rootReducer, preloadedState, applyMiddleware(logger, thunk));
   let currentEdit: string = null;
   let currentDocumentImages: string[] = [];
-  // let currentActiveArtboard: string = null;
+  let currentActiveArtboard: string = null;
   const handleChange = () => {
     const currentState = store.getState() as RootState;
     const previousEdit: string = currentEdit;
-    // const previousActiveArtboard: string = currentActiveArtboard;
+    const previousActiveArtboard: string = currentActiveArtboard;
     const instanceId = currentState.session.instance;
     currentEdit = currentState.layer.present.edit.id;
-    // currentActiveArtboard = currentState.layer.present.activeArtboard;
+    currentActiveArtboard = currentState.layer.present.activeArtboard;
     if (previousEdit !== currentEdit) {
       const cdi = currentState.documentSettings.images.allIds;
       if (cdi.length !== currentDocumentImages.length || cdi.every((id) => currentDocumentImages.includes(id))) {
@@ -44,12 +44,12 @@ const configureStore: any = (preloadedState, isDocumentWindow = false): typeof s
         state: currentState.layer.present
       }));
     }
-    // if (isMainWindow && currentActiveArtboard !== previousActiveArtboard) {
-    //   ipcRenderer.send('setPreviewActiveArtboard', JSON.stringify({
-    //     instanceId: instanceId,
-    //     activeArtboard: currentActiveArtboard
-    //   }));
-    // }
+    if (currentActiveArtboard !== previousActiveArtboard) {
+      ipcRenderer.send('setPreviewActiveArtboard', JSON.stringify({
+        instanceId: instanceId,
+        activeArtboard: currentActiveArtboard
+      }));
+    }
   }
   if (isDocumentWindow) {
     store.subscribe(handleChange);

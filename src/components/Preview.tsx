@@ -1,6 +1,7 @@
 import { ipcRenderer } from 'electron';
-import React, { useContext, useEffect, ReactElement, useState } from 'react';
+import React, { useEffect, ReactElement, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { paperPreview } from '../canvas';
 import { RootState } from '../store/reducers';
 import EmptyState from './EmptyState';
 import PreviewCanvas from './PreviewCanvas';
@@ -20,7 +21,11 @@ const Preview = (): ReactElement => {
 
   useEffect(() => {
     if (activeArtboard) {
-      if (!prevActiveArtboard || (activeArtboard.frame.width !== prevActiveArtboard.frame.width || activeArtboard.frame.height !== prevActiveArtboard.frame.height)) {
+      const activeArtboardPosition = new paperPreview.Point(activeArtboard.frame.x, activeArtboard.frame.y);
+      if (
+        !prevActiveArtboard
+        // || (activeArtboard.frame.width !== prevActiveArtboard.frame.width || activeArtboard.frame.height !== prevActiveArtboard.frame.height)
+      ) {
         ipcRenderer.send('resizePreview', JSON.stringify({
           instanceId: instance,
           size: {
@@ -28,6 +33,9 @@ const Preview = (): ReactElement => {
             height: activeArtboard.frame.height
           }
         }));
+      }
+      if (!paperPreview.view.center.equals(activeArtboardPosition)) {
+        paperPreview.view.center = activeArtboardPosition;
       }
     }
     setPrevActiveArtboard(activeArtboard);
