@@ -6755,7 +6755,7 @@ export const updateEventsFrame = (state: RootState): void => {
       const isSelected = selectedEvents.includes(event.id);
       const eventLayerItem = state.layer.present.byId[event.layer];
       // const groupOpacity = state.layer.present.hover ? state.layer.present.hover === event.id ? 1 : 0.25 : 1;
-      const elementColor = isSelected && !editingEvent ? '#fff' : event.artboard === state.layer.present.activeArtboard ? THEME_PRIMARY_COLOR : theme.text.lighter;
+      const elementColor = isSelected && !editingEvent ? '#fff' : event.artboard === state.layer.present.activeArtboard ? theme.palette.primary : theme.eventFrameInactiveColor;
       const artboardTopTop = getArtboardsTopTop(state.layer.present);
       const origin = state.layer.present.byId[event.artboard];
       const destination = state.layer.present.byId[event.destinationArtboard];
@@ -6903,7 +6903,7 @@ export const updateEventsFrame = (state: RootState): void => {
         from: eventFrame.bounds.topLeft.subtract(new paperMain.Point(margin, margin)),
         to: eventFrame.bounds.bottomRight.add(new paperMain.Point(margin, margin)),
         fillColor: isSelected && !editingEvent ? theme.palette.primary : tinyColor(theme.background.z0).setAlpha(0.01).toRgbString(),
-        strokeColor: !state.eventDrawer.event && state.eventDrawer.eventHover === event.id ? THEME_PRIMARY_COLOR : null,
+        strokeColor: !state.eventDrawer.event && state.eventDrawer.eventHover === event.id ? theme.palette.primary : null,
         strokeWidth: 1 / paperMain.view.zoom,
         radius: 2 / paperMain.view.zoom,
         parent: eventFrame,

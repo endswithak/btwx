@@ -662,6 +662,8 @@ declare namespace Btwx {
   }
 
   interface BackgroundScale {
+    z8: string;
+    z7: string;
     z6: string;
     z5: string;
     z4: string;
@@ -719,17 +721,8 @@ declare namespace Btwx {
         warn: string;
       };
     };
-    background: {
-      z0: string;
-      z1: string;
-      z2: string;
-      z3: string;
-      z4: string;
-      z5: string;
-      z6: string;
-      z7: string;
-      z8: string;
-    };
+    background: BackgroundScale;
+    foreground: BackgroundScale;
     buttonBackground: string;
     buttonBorder: string;
     buttonBorderActive: string;
@@ -741,6 +734,7 @@ declare namespace Btwx {
     topbarBackground: string;
     topbarBorder: string;
     listItemRootBackground: string;
+    eventFrameInactiveColor: string;
     unit: number;
   }
 

@@ -79,6 +79,16 @@ const THEME_LIGHT_BACKGROUND_Z5 = colorTint(THEME_LIGHT_GRAY, 40);
 const THEME_LIGHT_BACKGROUND_Z6 = colorTint(THEME_LIGHT_GRAY, 30);
 const THEME_LIGHT_BACKGROUND_Z7 = colorTint(THEME_LIGHT_GRAY, 20);
 const THEME_LIGHT_BACKGROUND_Z8 = colorTint(THEME_LIGHT_GRAY, 10);
+//
+const THEME_LIGHT_FOREGROUND_Z0 = colorShade(THEME_LIGHT_GRAY, 90);
+const THEME_LIGHT_FOREGROUND_Z1 = colorShade(THEME_LIGHT_GRAY, 80);
+const THEME_LIGHT_FOREGROUND_Z2 = colorShade(THEME_LIGHT_GRAY, 70);
+const THEME_LIGHT_FOREGROUND_Z3 = colorShade(THEME_LIGHT_GRAY, 60);
+const THEME_LIGHT_FOREGROUND_Z4 = colorShade(THEME_LIGHT_GRAY, 50);
+const THEME_LIGHT_FOREGROUND_Z5 = colorShade(THEME_LIGHT_GRAY, 40);
+const THEME_LIGHT_FOREGROUND_Z6 = colorShade(THEME_LIGHT_GRAY, 30);
+const THEME_LIGHT_FOREGROUND_Z7 = colorShade(THEME_LIGHT_GRAY, 20);
+const THEME_LIGHT_FOREGROUND_Z8 = colorShade(THEME_LIGHT_GRAY, 10);
 // DARK
 const THEME_DARK_PRIMARY = '#0A84FF';
 const THEME_DARK_PRIMARY_ACTIVE = colorTint(THEME_DARK_PRIMARY, THEME_ACTIVE_COLOR_WEIGHT);
@@ -113,6 +123,16 @@ const THEME_DARK_BACKGROUND_Z5 = colorShade(THEME_DARK_GRAY, 40);
 const THEME_DARK_BACKGROUND_Z6 = colorShade(THEME_DARK_GRAY, 30);
 const THEME_DARK_BACKGROUND_Z7 = colorShade(THEME_DARK_GRAY, 20);
 const THEME_DARK_BACKGROUND_Z8 = colorShade(THEME_DARK_GRAY, 10);
+//
+const THEME_DARK_FOREGROUND_Z0 = colorTint(THEME_DARK_GRAY, 90);
+const THEME_DARK_FOREGROUND_Z1 = colorTint(THEME_DARK_GRAY, 80);
+const THEME_DARK_FOREGROUND_Z2 = colorTint(THEME_DARK_GRAY, 70);
+const THEME_DARK_FOREGROUND_Z3 = colorTint(THEME_DARK_GRAY, 60);
+const THEME_DARK_FOREGROUND_Z4 = colorTint(THEME_DARK_GRAY, 50);
+const THEME_DARK_FOREGROUND_Z5 = colorTint(THEME_DARK_GRAY, 40);
+const THEME_DARK_FOREGROUND_Z6 = colorTint(THEME_DARK_GRAY, 30);
+const THEME_DARK_FOREGROUND_Z7 = colorTint(THEME_DARK_GRAY, 20);
+const THEME_DARK_FOREGROUND_Z8 = colorTint(THEME_DARK_GRAY, 10);
 
 export const THEMES: { light: Btwx.Theme; dark: Btwx.Theme } = {
   light: {
@@ -158,6 +178,17 @@ export const THEMES: { light: Btwx.Theme; dark: Btwx.Theme } = {
       z7: THEME_LIGHT_BACKGROUND_Z7,
       z8: THEME_LIGHT_BACKGROUND_Z8,
     },
+    foreground: {
+      z0: THEME_LIGHT_FOREGROUND_Z0,
+      z1: THEME_LIGHT_FOREGROUND_Z1,
+      z2: THEME_LIGHT_FOREGROUND_Z2,
+      z3: THEME_LIGHT_FOREGROUND_Z3,
+      z4: THEME_LIGHT_FOREGROUND_Z4,
+      z5: THEME_LIGHT_FOREGROUND_Z5,
+      z6: THEME_LIGHT_FOREGROUND_Z6,
+      z7: THEME_LIGHT_FOREGROUND_Z7,
+      z8: THEME_LIGHT_FOREGROUND_Z8,
+    },
     buttonBackground: THEME_LIGHT_BACKGROUND_Z0,
     buttonBorder: THEME_LIGHT_BACKGROUND_Z3,
     buttonBorderActive: THEME_LIGHT_BACKGROUND_Z4,
@@ -169,6 +200,7 @@ export const THEMES: { light: Btwx.Theme; dark: Btwx.Theme } = {
     topbarBackground: THEME_LIGHT_BACKGROUND_Z1,
     topbarBorder: THEME_LIGHT_BACKGROUND_Z3,
     listItemRootBackground: THEME_LIGHT_BACKGROUND_Z0,
+    eventFrameInactiveColor: THEME_LIGHT_FOREGROUND_Z7,
     unit: THEME_UNIT_SIZE
   },
   dark: {
@@ -214,6 +246,17 @@ export const THEMES: { light: Btwx.Theme; dark: Btwx.Theme } = {
       z7: THEME_DARK_BACKGROUND_Z7,
       z8: THEME_DARK_BACKGROUND_Z8,
     },
+    foreground: {
+      z0: THEME_DARK_FOREGROUND_Z0,
+      z1: THEME_DARK_FOREGROUND_Z1,
+      z2: THEME_DARK_FOREGROUND_Z2,
+      z3: THEME_DARK_FOREGROUND_Z3,
+      z4: THEME_DARK_FOREGROUND_Z4,
+      z5: THEME_DARK_FOREGROUND_Z5,
+      z6: THEME_DARK_FOREGROUND_Z6,
+      z7: THEME_DARK_FOREGROUND_Z7,
+      z8: THEME_DARK_FOREGROUND_Z8,
+    },
     buttonBackground: THEME_DARK_BACKGROUND_Z2,
     buttonBorder: THEME_DARK_BACKGROUND_Z3,
     buttonBorderActive: THEME_DARK_BACKGROUND_Z4,
@@ -225,6 +268,7 @@ export const THEMES: { light: Btwx.Theme; dark: Btwx.Theme } = {
     topbarBackground: THEME_DARK_BACKGROUND_Z1,
     topbarBorder: THEME_DARK_BACKGROUND_Z3,
     listItemRootBackground: THEME_DARK_BACKGROUND_Z2,
+    eventFrameInactiveColor: THEME_DARK_BACKGROUND_Z7,
     unit: THEME_UNIT_SIZE
   }
 }
