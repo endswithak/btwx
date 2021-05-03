@@ -54,6 +54,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     fontWeight: number;
     letterSpacing: number;
     lineHeight: number;
+    prevLineHeight: number;
     text: string;
     shape: string;
     strokeGradientOriginX: number;
@@ -118,6 +119,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     const fontWeight = originLayerItem.type === 'Text' ? hasTweenProp('fontWeight', (originLayerItem as Btwx.Text).textStyle.fontWeight) : null;
     const letterSpacing = originLayerItem.type === 'Text' ? hasTweenProp('letterSpacing', (originLayerItem as Btwx.Text).textStyle.letterSpacing) : null;
     const lineHeight = originLayerItem.type === 'Text' ? hasTweenProp('lineHeight', (originLayerItem as Btwx.Text).textStyle.leading) : null;
+    const prevLineHeight = originLayerItem.type === 'Text' ? hasTweenProp('lineHeightPrevious', (originLayerItem as Btwx.Text).textStyle.leading) : null;
     const text = originLayerItem.type === 'Text' ? hasTweenProp('text', (originLayerItem as Btwx.Text).text) : null;
     const shape = originLayerItem.type === 'Shape' ? hasTweenProp('shape', (originLayerItem as Btwx.Shape).pathData) : null;
     return {
@@ -153,6 +155,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       fontWeight,
       letterSpacing,
       lineHeight,
+      prevLineHeight,
       text,
       shape
     }
@@ -1101,6 +1104,19 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             justification: (originLayerItem as Btwx.Text).textStyle.justification,
             textResize: (originLayerItem as Btwx.Text).textStyle.textResize
           });
+          switch((originLayerItem as Btwx.Text).textStyle.textResize) {
+            case 'autoHeight':
+              eventTimeline.data[tween.layer]['height'] = textContent.bounds.height;
+              textMask.bounds.top = textContent.bounds.top;
+              textBackground.bounds.top = textContent.bounds.top;
+              textMask.pivot = textContent.bounds.topCenter;
+              textBackground.pivot = textContent.bounds.topCenter;
+              textMask.bounds.height = textContent.bounds.height;
+              textBackground.bounds.height = textContent.bounds.height;
+              textMask.pivot = null;
+              textBackground.pivot = null;
+              break;
+          }
         } else {
           paperLayer.bounds.width = currentProps.width;
           if (shapeMask) {
@@ -1776,16 +1792,16 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           width: currentProps.boundingWidth,
           height: currentProps.boundingHeight
         });
-        const diff = (currentProps.lineHeight - (textContent.leading as number)) * 0.75;
+        const diff = (currentProps.lineHeight - currentProps.prevLineHeight) * 0.75;
         textContent.leading = currentProps.lineHeight;
         switch(originTextItem.textStyle.textResize) {
           case 'autoWidth':
-            eventTimeline.data[tween.layer]['innerHeight'] = textContent.bounds.height;
+            eventTimeline.data[tween.layer]['height'] = textContent.bounds.height;
             textMask.bounds = textContent.bounds;
             textBackground.bounds = textContent.bounds;
             break;
           case 'autoHeight':
-            eventTimeline.data[tween.layer]['innerHeight'] = textContent.bounds.height;
+            eventTimeline.data[tween.layer]['height'] = textContent.bounds.height;
             textMask.bounds.top = textContent.bounds.top;
             textBackground.bounds.top = textContent.bounds.top;
             textMask.pivot = textContent.bounds.topCenter;
@@ -1825,6 +1841,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         });
         paperLayer.position = startPosition;
         updateGradients({ paperLayer, textContent, textBackground, currentProps });
+        eventTimeline.data[tween.layer]['lineHeightPrevious'] = currentProps.lineHeight;
       },
       ease: getEaseString(tween),
     }, tween.delay);
