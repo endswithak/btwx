@@ -75,6 +75,7 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
         activeTool: action.payload.activeTool,
         dragging: Object.prototype.hasOwnProperty.call(action.payload, 'dragging') ? action.payload.dragging : state.dragging,
         resizing: Object.prototype.hasOwnProperty.call(action.payload, 'resizing') ? action.payload.resizing : state.resizing,
+        focusing: Object.prototype.hasOwnProperty.call(action.payload, 'focusing') ? action.payload.focusing : state.focusing,
         selecting: Object.prototype.hasOwnProperty.call(action.payload, 'selecting') ? action.payload.selecting : state.selecting,
         zooming: Object.prototype.hasOwnProperty.call(action.payload, 'zooming') ? action.payload.zooming : state.zooming,
         translating: Object.prototype.hasOwnProperty.call(action.payload, 'translating') ? action.payload.translating : state.translating,

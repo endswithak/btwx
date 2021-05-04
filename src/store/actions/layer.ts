@@ -241,6 +241,8 @@ import {
   REMOVE_LAYER_GRADIENT_STOP,
   REMOVE_LAYERS_GRADIENT_STOP,
   SET_LAYER_ACTIVE_GRADIENT_STOP,
+  FLIP_LAYER_GRADIENT,
+  FLIP_LAYERS_GRADIENT,
   SET_LAYER_STROKE_WIDTH,
   SET_LAYERS_STROKE_WIDTH,
   SET_LAYER_STROKE_CAP,
@@ -563,6 +565,8 @@ import {
   RemoveLayerGradientStopPayload,
   RemoveLayersGradientStopPayload,
   SetLayerActiveGradientStopPayload,
+  FlipLayerGradientPayload,
+  FlipLayersGradientPayload,
   SetLayerStrokeWidthPayload,
   SetLayersStrokeWidthPayload,
   SetLayerStrokeCapPayload,
@@ -2953,6 +2957,16 @@ export const removeLayersGradientStop = (payload: RemoveLayersGradientStopPayloa
 
 export const setLayerActiveGradientStop = (payload: SetLayerActiveGradientStopPayload): LayerTypes => ({
   type: SET_LAYER_ACTIVE_GRADIENT_STOP,
+  payload
+});
+
+export const flipLayerGradient = (payload: FlipLayerGradientPayload): LayerTypes => ({
+  type: FLIP_LAYER_GRADIENT,
+  payload
+});
+
+export const flipLayersGradient = (payload: FlipLayersGradientPayload): LayerTypes => ({
+  type: FLIP_LAYERS_GRADIENT,
   payload
 });
 
@@ -6243,8 +6257,8 @@ export const updateGradientFrame = (origin: { position: paper.Point; color: Btwx
       data: {
         id: 'gradientFrameLine',
         type: 'UIElementChild',
-        interactive: false,
-        interactiveType: null,
+        interactive: true,
+        interactiveType: 'connector',
         elementId: 'gradientFrame'
       }
     });
@@ -6255,8 +6269,8 @@ export const updateGradientFrame = (origin: { position: paper.Point; color: Btwx
       data: {
         id: 'gradientFrameLine',
         type: 'UIElementChild',
-        interactive: false,
-        interactiveType: null,
+        interactive: true,
+        interactiveType: 'connector',
         elementId: 'gradientFrame'
       }
     });
@@ -6288,8 +6302,8 @@ export const updateGradientFrame = (origin: { position: paper.Point; color: Btwx
       data: {
         id: 'gradientFrameLines',
         type: 'UIElementChild',
-        interactive: false,
-        interactiveType: null,
+        interactive: true,
+        interactiveType: 'connector',
         elementId: 'gradientFrame'
       },
       insert: false,

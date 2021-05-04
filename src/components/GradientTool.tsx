@@ -20,6 +20,7 @@ const GradientTool = (props: PaperToolProps): ReactElement => {
   const selectedById = useSelector((state: RootState) => getSelectedById(state));
   const [originHandlePosition, setOriginHandlePosition] = useState<paper.Point>(null);
   const [destinationHandlePosition, setDestinationHandlePosition] = useState<paper.Point>(null);
+  const [connectorHandlePosition, setConnectorHandlePosition] = useState<paper.Point>(null);
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
   const [handle, setHandle] = useState<Btwx.GradientHandle>(null);
@@ -28,6 +29,7 @@ const GradientTool = (props: PaperToolProps): ReactElement => {
   const resetState = (): void => {
     setOriginHandlePosition(null);
     setDestinationHandlePosition(null);
+    setConnectorHandlePosition(null);
     setToBounds(null);
     setSnapBounds(null);
     setHandle(null);
@@ -43,8 +45,10 @@ const GradientTool = (props: PaperToolProps): ReactElement => {
       if (downEvent && isEnabled) {
         const originHandle = paperMain.project.getItem({data: { id: 'gradientFrameOriginHandle' }});
         const destinationHandle = paperMain.project.getItem({data: { id: 'gradientFrameDestinationHandle' }});
+        const connectorHandle = paperMain.project.getItem({data: { id: 'gradientFrameLines' }});
         setOriginHandlePosition(originHandle.position);
         setDestinationHandlePosition(destinationHandle.position);
+        setConnectorHandlePosition(connectorHandle.position);
         setHandle(gradientHandle);
       }
     } catch(err) {
@@ -55,7 +59,7 @@ const GradientTool = (props: PaperToolProps): ReactElement => {
 
   useEffect(() => {
     try {
-      if (dragEvent && isEnabled) {
+      if (dragEvent && handle && isEnabled) {
         const nextSnapBounds = new paperMain.Rectangle({
           from: new paperMain.Point(dragEvent.point.x - 0.5, dragEvent.point.y - 0.5),
           to: new paperMain.Point(dragEvent.point.x + 0.5, dragEvent.point.y + 0.5)
@@ -107,9 +111,27 @@ const GradientTool = (props: PaperToolProps): ReactElement => {
             }));
             break;
           }
+          case 'connector': {
+            const originHandle = paperMain.project.getItem({data: { id: 'gradientFrameOriginHandle' }});
+            const destinationHandle = paperMain.project.getItem({data: { id: 'gradientFrameDestinationHandle' }});
+            dispatch(setLayersGradientOD({
+              layers: selected,
+              origin: {
+                x: originHandle.position.x,
+                y: originHandle.position.y
+              },
+              destination: {
+                x: destinationHandle.position.x,
+                y: destinationHandle.position.y
+              },
+              prop: gradientProp,
+              handle: 'position' as any
+            }));
+            break;
+          }
         }
-        resetState();
       }
+      resetState();
     } catch(err) {
       console.error(`Gradient Tool Error -- On Mouse Up -- ${err}`);
       resetState();
@@ -119,47 +141,70 @@ const GradientTool = (props: PaperToolProps): ReactElement => {
   const updateGradients = (): void => {
     const originHandle = paperMain.project.getItem({data: { id: 'gradientFrameOriginHandle' }});
     const destinationHandle = paperMain.project.getItem({data: { id: 'gradientFrameDestinationHandle' }});
+    const gradientFrame = paperMain.project.getItem({data: { id: 'gradientFrame' }});
     const lines = paperMain.project.getItems({data: { id: 'gradientFrameLine' }});
     const paperProp = getPaperProp(gradientProp);
-    if (handle === 'origin') {
-      originHandle.position = toBounds.center;
-      lines.forEach((line: paper.Path) => {
-        line.firstSegment.point = toBounds.center;
-      });
-      selected.forEach((id) => {
-        let paperLayer = getPaperLayer(id, selectedProjectIndices[id]);
-        if (selectedById[id].type === 'Artboard') {
-          paperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
-        }
-        if (selectedById[id].type === 'Text') {
-          paperLayer = paperLayer.getItem({data: {id: 'textContent'}});
-        }
-        paperLayer[paperProp] = {
-          gradient: paperLayer[paperProp].gradient,
-          origin: toBounds.center,
-          destination: destinationHandlePosition
-        } as Btwx.PaperGradientFill
-      });
-    }
-    if (handle === 'destination') {
-      destinationHandle.position = toBounds.center;
-      lines.forEach((line: paper.Path) => {
-        line.lastSegment.point = toBounds.center;
-      });
-      selected.forEach((id) => {
-        let paperLayer = getPaperLayer(id, selectedProjectIndices[id]);
-        if (selectedById[id].type === 'Artboard') {
-          paperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
-        }
-        if (selectedById[id].type === 'Text') {
-          paperLayer = paperLayer.getItem({data: {id: 'textContent'}});
-        }
-        paperLayer[paperProp] = {
-          gradient: paperLayer[paperProp].gradient,
-          origin: originHandlePosition,
-          destination: toBounds.center
-        } as Btwx.PaperGradientFill
-      });
+    switch(handle) {
+      case 'origin': {
+        originHandle.position = toBounds.center;
+        lines.forEach((line: paper.Path) => {
+          line.firstSegment.point = toBounds.center;
+        });
+        selected.forEach((id) => {
+          let paperLayer = getPaperLayer(id, selectedProjectIndices[id]);
+          if (selectedById[id].type === 'Artboard') {
+            paperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
+          }
+          if (selectedById[id].type === 'Text') {
+            paperLayer = paperLayer.getItem({data: {id: 'textContent'}});
+          }
+          paperLayer[paperProp] = {
+            gradient: paperLayer[paperProp].gradient,
+            origin: toBounds.center,
+            destination: destinationHandlePosition
+          } as Btwx.PaperGradientFill
+        });
+        break;
+      }
+      case 'destination': {
+        destinationHandle.position = toBounds.center;
+        lines.forEach((line: paper.Path) => {
+          line.lastSegment.point = toBounds.center;
+        });
+        selected.forEach((id) => {
+          let paperLayer = getPaperLayer(id, selectedProjectIndices[id]);
+          if (selectedById[id].type === 'Artboard') {
+            paperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
+          }
+          if (selectedById[id].type === 'Text') {
+            paperLayer = paperLayer.getItem({data: {id: 'textContent'}});
+          }
+          paperLayer[paperProp] = {
+            gradient: paperLayer[paperProp].gradient,
+            origin: originHandlePosition,
+            destination: toBounds.center
+          } as Btwx.PaperGradientFill
+        });
+        break;
+      }
+      case 'connector': {
+        gradientFrame.position = toBounds.center;
+        selected.forEach((id) => {
+          let paperLayer = getPaperLayer(id, selectedProjectIndices[id]);
+          if (selectedById[id].type === 'Artboard') {
+            paperLayer = paperLayer.getItem({data: {id: 'artboardBackground'}});
+          }
+          if (selectedById[id].type === 'Text') {
+            paperLayer = paperLayer.getItem({data: {id: 'textContent'}});
+          }
+          paperLayer[paperProp] = {
+            gradient: paperLayer[paperProp].gradient,
+            origin: originHandle.position,
+            destination: destinationHandle.position
+          } as Btwx.PaperGradientFill
+        });
+        break;
+      }
     }
   }
 

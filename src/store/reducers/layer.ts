@@ -200,6 +200,8 @@ import {
   REMOVE_LAYER_GRADIENT_STOP,
   REMOVE_LAYERS_GRADIENT_STOP,
   SET_LAYER_ACTIVE_GRADIENT_STOP,
+  FLIP_LAYER_GRADIENT,
+  FLIP_LAYERS_GRADIENT,
   SET_LAYER_STROKE_WIDTH,
   SET_LAYERS_STROKE_WIDTH,
   SET_LAYER_STROKE_CAP,
@@ -588,6 +590,8 @@ import {
   removeLayerGradientStop,
   removeLayersGradientStop,
   setLayerActiveGradientStop,
+  flipLayerGradient,
+  flipLayersGradient,
   addLayersMask,
   setLayerUnderlyingMask,
   setLayersUnderlyingMask,
@@ -1277,6 +1281,10 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return removeLayersGradientStop(state, action);
     case SET_LAYER_ACTIVE_GRADIENT_STOP:
       return setLayerActiveGradientStop(state, action);
+    case FLIP_LAYER_GRADIENT:
+      return flipLayerGradient(state, action);
+    case FLIP_LAYERS_GRADIENT:
+      return flipLayersGradient(state, action);
     case ADD_LAYERS_MASK:
       return addLayersMask(state, action);
     case SET_LAYER_UNDERLYING_MASK:
@@ -1589,6 +1597,8 @@ export default undoable(baseReducer, {
       SET_LAYERS_GRADIENT_OD,
       SET_LAYER_GRADIENT_ORIGIN,
       SET_LAYERS_GRADIENT_ORIGIN,
+      FLIP_LAYER_GRADIENT,
+      FLIP_LAYERS_GRADIENT,
       SET_LAYER_STROKE_WIDTH,
       SET_LAYERS_STROKE_WIDTH,
       SET_LAYER_STROKE_CAP,

@@ -76,7 +76,7 @@ import {
   SetLayersCustomWiggleTweenType, RemoveLayerTweens, RemoveLayersEvent, ShowLayersChildren, HideLayersChildren,
   SetLayerTreeStickyArtboard, SetLayerTweenRepeat, SetLayersTweenRepeat, SetLayerTweenYoyo, SetLayersTweenYoyo,
   SetLayerTweenRepeatDelay, SetLayersTweenRepeatDelay, SetLayerTweenYoyoEase, SetLayersTweenYoyoEase,
-  SetLayerBlurRadius, SetLayersBlurRadius
+  SetLayerBlurRadius, SetLayersBlurRadius, FlipLayerGradient, FlipLayersGradient
 } from '../actionTypes/layer';
 
 import {
@@ -7355,6 +7355,55 @@ export const setLayerActiveGradientStop = (state: LayerState, action: SetLayerAc
       }
     }
   }
+  return currentState;
+};
+
+export const flipLayerGradient = (state: LayerState, action: FlipLayerGradient): LayerState => {
+  let currentState = state;
+  const layerItem = currentState.byId[action.payload.id];
+  const gradient = layerItem.style[action.payload.prop].gradient;
+  const newStops = gradient.stops.reverse().map((stop) => ({
+    ...stop,
+    position: 1 - stop.position
+  }));
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          [action.payload.prop]: {
+            ...currentState.byId[action.payload.id].style[action.payload.prop],
+            gradient: {
+              ...currentState.byId[action.payload.id].style[action.payload.prop].gradient,
+              stops: newStops
+            }
+          }
+        }
+      }
+    }
+  }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, [action.payload.prop]);
+  return currentState;
+};
+
+export const flipLayersGradient = (state: LayerState, action: FlipLayersGradient): LayerState => {
+  let currentState = state;
+  currentState = flipLayerGradient(currentState, layerActions.flipLayerGradient({
+    id: action.payload.layers[0],
+    prop: action.payload.prop
+  }) as FlipLayerGradient);
+  currentState = updateGradients(currentState, action.payload.layers, action.payload.prop);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Flip Layers Gradient',
+      undoable: true
+    }
+  }) as SetLayerEdit);
   return currentState;
 };
 

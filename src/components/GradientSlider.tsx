@@ -3,6 +3,7 @@ import React, { ReactElement } from 'react';
 import GradientSliderStop from './GradientSliderStop';
 import GradientSliderGradient from './GradientSliderGradient';
 import GradientSliderRemove from './GradientSliderRemove';
+import GradientSliderFlip from './GradientSliderFlip';
 
 interface GradientSliderProps {
   gradientStops: Btwx.GradientStop[];
@@ -20,6 +21,9 @@ const GradientSlider = ({
   onSliderClick
 }: GradientSliderProps): ReactElement => (
   <div className='c-gradient-slider'>
+    <div className='c-gradient-slider__cap'>
+      <GradientSliderFlip />
+    </div>
     <div
       id='c-gradient-slider__slider'
       className='c-gradient-slider__slider'>
@@ -34,14 +38,15 @@ const GradientSlider = ({
             activeStopIndex={activeStopIndex}
             onStopPress={onStopPress}
             onStopDrag={onStopDrag}
-            key={index}
-            />
+            key={index} />
         ))
       }
     </div>
-    <GradientSliderRemove
-      disabled={gradientStops.length <= 2}
-      activeStopIndex={activeStopIndex} />
+    <div className='c-gradient-slider__cap'>
+      <GradientSliderRemove
+        disabled={gradientStops.length <= 2}
+        activeStopIndex={activeStopIndex} />
+    </div>
   </div>
 );
 

@@ -51,6 +51,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
   const resizing = useSelector((state: RootState) => state.canvasSettings.resizing);
   const dragging = useSelector((state: RootState) => state.canvasSettings.dragging);
   const dragHandle = useSelector((state: RootState) => state.canvasSettings.dragHandle);
+  const gradientHandle = useSelector((state: RootState) => state.canvasSettings.gradientHandle);
   const cursor = useSelector((state: RootState) => state.canvasSettings.cursor);
   const artboardItems = useSelector((state: RootState) => getAllArtboardItems(state));
   // const selecting = useSelector((state: RootState) => state.canvasSettings.selecting);
@@ -107,10 +108,10 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
               if (activeTool !== 'Resize') {
                 dispatch(setCanvasActiveTool({
                   activeTool: 'Resize',
-                  resizeHandle: uiEvent.hitResult.item.data.interactiveType,
+                  resizeHandle: interactiveType,
                   dragHandle: false,
                   lineHandle: null,
-                  cursor: [getSelectionFrameCursor(uiEvent.hitResult.item.data.interactiveType), ...cursor]
+                  cursor: [getSelectionFrameCursor(interactiveType), ...cursor]
                 }));
               }
               break;
@@ -120,10 +121,10 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
               if (activeTool !== 'Line') {
                 dispatch(setCanvasActiveTool({
                   activeTool: 'Line',
-                  lineHandle: uiEvent.hitResult.item.data.interactiveType,
+                  lineHandle: interactiveType,
                   dragHandle: false,
                   resizeHandle: null,
-                  cursor: [getSelectionFrameCursor(uiEvent.hitResult.item.data.interactiveType), ...cursor]
+                  cursor: [getSelectionFrameCursor(interactiveType), ...cursor]
                 }));
               }
               break;
@@ -134,10 +135,10 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           if (hover) {
             dispatch(setLayerHover({id: null}));
           }
-          if (activeTool !== 'Gradient') {
+          if (activeTool !== 'Gradient' || (activeTool === 'Gradient' && interactiveType && gradientHandle !== interactiveType)) {
             dispatch(setCanvasActiveTool({
               activeTool: 'Gradient',
-              gradientHandle: uiEvent.hitResult.item.data.interactiveType,
+              gradientHandle: interactiveType,
               cursor: ['move', ...cursor]
             }));
           }
@@ -195,11 +196,13 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           break;
         }
         case 'gradientFrame': {
-          dispatch(setLayerActiveGradientStop({
-            id: selected[0],
-            prop: gradientEditorProp,
-            stopIndex: uiEvent.hitResult.item.data.stopIndex
-          }));
+          if (interactiveType && uiEvent.hitResult.item.data.stopIndex) {
+            dispatch(setLayerActiveGradientStop({
+              id: selected[0],
+              prop: gradientEditorProp,
+              stopIndex: uiEvent.hitResult.item.data.stopIndex
+            }));
+          }
           break;
         }
         case 'namesFrame': {

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement } from 'react';
-import { ThemeContext } from './ThemeProvider';
+import React, { ReactElement } from 'react';
 import tinyColor from 'tinycolor2';
 
 interface GradientSliderGradientProps {
@@ -9,7 +8,6 @@ interface GradientSliderGradientProps {
 }
 
 const GradientSliderGradient = (props: GradientSliderGradientProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { stops, onSliderClick } = props;
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {

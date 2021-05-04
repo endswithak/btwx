@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { useContext, ReactElement, useRef, useState, useEffect } from 'react';
+import React, { ReactElement, useRef, useState, useEffect } from 'react';
 import tinyColor from 'tinycolor2';
-import { ThemeContext } from './ThemeProvider';
 import gsap from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 
@@ -24,76 +23,139 @@ interface ColorPickerSaturationProps {
 }
 
 const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { hue, saturation, lightness, setHex, setSaturation, setLightness, setRed, setGreen, setBlue, onChange, colorValues } = props;
   const pointerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
 
-  useEffect(() => {
-    if (pointerRef.current) {
-      if (Draggable.get(pointerRef.current)) {
-        Draggable.get(pointerRef.current).kill();
-      }
-      Draggable.create(pointerRef.current, {
-        type: 'x,y',
-        zIndexBoost: false,
-        bounds: containerRef.current,
-        onPress: function() {
-          setDragging(true);
-        },
-        onDrag: function() {
-          const s = this.x / this.maxX;
-          const v = 1 - (this.y / this.maxY);
-          const l = (2 - s) * v / 2;
-          const sat = s < 0 ? 0 : s > 1 ? 1 : s;
-          const lit = l < 0 ? 0 : l > 1 ? 1 : l;
-          let hex: string | 'multi';
-          let red: number | 'multi';
-          let green: number | 'multi';
-          let blue: number | 'multi';
-          const newColors = Object.keys(colorValues).reduce((result, current, index) => {
-            const colorInstance = tinyColor({h: colorValues[current].h, s: sat, l: lit});
-            const newHex = colorInstance.toHex();
-            const rgb = colorInstance.toRgb();
-            if (index === 0) {
-              hex = newHex;
-              red = rgb.r;
-              green = rgb.g;
-              blue = rgb.b;
-            } else {
-              if (hex !== 'multi' && hex !== newHex) {
-                hex = 'multi';
-              }
-              if (red !== 'multi' && red !== rgb.r) {
-                red = 'multi';
-              }
-              if (green !== 'multi' && green !== rgb.g) {
-                green = 'multi';
-              }
-              if (blue !== 'multi' && blue !== rgb.b) {
-                blue = 'multi';
-              }
-            }
-            return {
-              ...result,
-              [current]: { s: sat, l: lit }
-            };
-          }, {});
-          setHex(hex);
-          setSaturation(sat);
-          setLightness(lit);
-          setRed(red);
-          setGreen(green);
-          setBlue(blue);
-          onChange(newColors);
-        },
-        onRelease: function() {
-          setDragging(false);
-        }
-      });
+  const createDraggable = (): globalThis.Draggable[] => {
+    if (Draggable.get(pointerRef.current)) {
+      Draggable.get(pointerRef.current).kill();
     }
-  }, [hue]);
+    const dragger = Draggable.create(pointerRef.current, {
+      type: 'x,y',
+      zIndexBoost: false,
+      bounds: containerRef.current,
+      onPress: function() {
+        setDragging(true);
+      },
+      onDrag: function() {
+        const s = this.x / this.maxX;
+        const v = 1 - (this.y / this.maxY);
+        const l = (2 - s) * v / 2;
+        const sat = s < 0 ? 0 : s > 1 ? 1 : s;
+        const lit = l < 0 ? 0 : l > 1 ? 1 : l;
+        let hex: string | 'multi';
+        let red: number | 'multi';
+        let green: number | 'multi';
+        let blue: number | 'multi';
+        const newColors = Object.keys(colorValues).reduce((result, current, index) => {
+          const colorInstance = tinyColor({h: colorValues[current].h, s: sat, l: lit});
+          const newHex = colorInstance.toHex();
+          const rgb = colorInstance.toRgb();
+          if (index === 0) {
+            hex = newHex;
+            red = rgb.r;
+            green = rgb.g;
+            blue = rgb.b;
+          } else {
+            if (hex !== 'multi' && hex !== newHex) {
+              hex = 'multi';
+            }
+            if (red !== 'multi' && red !== rgb.r) {
+              red = 'multi';
+            }
+            if (green !== 'multi' && green !== rgb.g) {
+              green = 'multi';
+            }
+            if (blue !== 'multi' && blue !== rgb.b) {
+              blue = 'multi';
+            }
+          }
+          return {
+            ...result,
+            [current]: { s: sat, l: lit }
+          };
+        }, {});
+        setHex(hex);
+        setSaturation(sat);
+        setLightness(lit);
+        setRed(red);
+        setGreen(green);
+        setBlue(blue);
+        onChange(newColors);
+      },
+      onRelease: function() {
+        setDragging(false);
+      }
+    });
+    return dragger;
+  }
+
+  // useEffect(() => {
+  //   if (pointerRef.current) {
+  //     if (Draggable.get(pointerRef.current)) {
+  //       Draggable.get(pointerRef.current).kill();
+  //     }
+  //     Draggable.create(pointerRef.current, {
+  //       type: 'x,y',
+  //       zIndexBoost: false,
+  //       bounds: containerRef.current,
+  //       onPress: function() {
+  //         setDragging(true);
+  //       },
+  //       onDrag: function() {
+  //         const s = this.x / this.maxX;
+  //         const v = 1 - (this.y / this.maxY);
+  //         const l = (2 - s) * v / 2;
+  //         const sat = s < 0 ? 0 : s > 1 ? 1 : s;
+  //         const lit = l < 0 ? 0 : l > 1 ? 1 : l;
+  //         let hex: string | 'multi';
+  //         let red: number | 'multi';
+  //         let green: number | 'multi';
+  //         let blue: number | 'multi';
+  //         const newColors = Object.keys(colorValues).reduce((result, current, index) => {
+  //           const colorInstance = tinyColor({h: colorValues[current].h, s: sat, l: lit});
+  //           const newHex = colorInstance.toHex();
+  //           const rgb = colorInstance.toRgb();
+  //           if (index === 0) {
+  //             hex = newHex;
+  //             red = rgb.r;
+  //             green = rgb.g;
+  //             blue = rgb.b;
+  //           } else {
+  //             if (hex !== 'multi' && hex !== newHex) {
+  //               hex = 'multi';
+  //             }
+  //             if (red !== 'multi' && red !== rgb.r) {
+  //               red = 'multi';
+  //             }
+  //             if (green !== 'multi' && green !== rgb.g) {
+  //               green = 'multi';
+  //             }
+  //             if (blue !== 'multi' && blue !== rgb.b) {
+  //               blue = 'multi';
+  //             }
+  //           }
+  //           return {
+  //             ...result,
+  //             [current]: { s: sat, l: lit }
+  //           };
+  //         }, {});
+  //         setHex(hex);
+  //         setSaturation(sat);
+  //         setLightness(lit);
+  //         setRed(red);
+  //         setGreen(green);
+  //         setBlue(blue);
+  //         onChange(newColors);
+  //       },
+  //       onRelease: function() {
+  //         setDragging(false);
+  //       }
+  //     });
+  //   }
+  // }, [hue]);
 
   useEffect(() => {
     if (!dragging && pointerRef.current && Draggable.get(pointerRef.current)) {
@@ -109,7 +171,10 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
   }, [saturation, lightness]);
 
   const handleMouseDown = (event: any) => {
-    if (!dragging && pointerRef.current && Draggable.get(pointerRef.current)) {
+    if (
+      !dragging && pointerRef.current
+      // && Draggable.get(pointerRef.current)
+    ) {
       const boundingBox = containerRef.current.getBoundingClientRect();
       const x = event.clientX - boundingBox.left;
       const y = event.clientY - boundingBox.top;
@@ -159,8 +224,8 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
       setBlue(blue);
       onChange(newColors);
       gsap.set(pointerRef.current, {x, y});
-      Draggable.get(pointerRef.current).update();
-      Draggable.get(pointerRef.current).startDrag(event);
+      const newDragger = createDraggable();
+      newDragger[0].startDrag(event);
     }
   }
 

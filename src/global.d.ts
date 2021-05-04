@@ -66,7 +66,7 @@ declare namespace Btwx {
 
   type SelectionFrameHandle = ResizeHandle | LineHandle | 'move' | 'none' | 'all';
 
-  type GradientHandle = 'origin' | 'destination';
+  type GradientHandle = 'origin' | 'destination' | 'connector';
 
   type GradientProp = 'fill' | 'stroke';
 

@@ -22,17 +22,31 @@ const GradientEditor = (): ReactElement => {
 
   const debounceStopColorChange = useCallback(
     debounce((stopIndex: number, color: Btwx.Color) => {
-      dispatch(setLayersGradientStopColor({layers: selected, prop: gradientEditor.prop as 'fill' | 'stroke', stopIndex, color}));
+      dispatch(setLayersGradientStopColor({
+        layers: selected,
+        prop: gradientEditor.prop as 'fill' | 'stroke',
+        stopIndex,
+        color
+      }));
     }, 150),
     []
   );
 
   const debounceStopPositionChange = useCallback(
     debounce((stopIndex: number, position: number) => {
-      dispatch(setLayersGradientStopPosition({layers: selected, prop: gradientEditor.prop as 'fill' | 'stroke', stopIndex, position}));
+      dispatch(setLayersGradientStopPosition({
+        layers: selected,
+        prop: gradientEditor.prop as 'fill' | 'stroke',
+        stopIndex,
+        position
+      }));
     }, 150),
     []
   );
+
+  const handleActiveStopColorChange = useCallback((colors: { [id: string]: { [P in keyof Btwx.Color]?: Btwx.Color[P] } }): void => {
+    debounceStopColorChange(gradientValue.activeStopIndex, colors[selected[0]]);
+  }, [gradientValue.activeStopIndex]);
 
   useEffect(() => {
     document.addEventListener('mousedown', onMouseDown);
@@ -50,17 +64,13 @@ const GradientEditor = (): ReactElement => {
       if ((event.target.id as string).startsWith('canvas')) {
         const eventPoint = paperMain.view.getEventPoint(event);
         const hitResult = paperMain.project.hitTest(eventPoint);
-        if (!hitResult || !(hitResult.item && hitResult.item.data && hitResult.item.data.interactive && hitResult.item.data.elementId === 'gradientFrame')) {
+        if (!hitResult || !(hitResult.item && hitResult.item.data && hitResult.item.data.elementId === 'gradientFrame')) {
           dispatch(closeGradientEditor());
         }
       } else {
         dispatch(closeGradientEditor());
       }
     }
-  }
-
-  const handleActiveStopColorChange = (colors: { [id: string]: { [P in keyof Btwx.Color]?: Btwx.Color[P] } }): void => {
-    debounceStopColorChange(gradientValue.activeStopIndex, colors[selected[0]]);
   }
 
   const handleStopPress = (stopIndex: number): void => {

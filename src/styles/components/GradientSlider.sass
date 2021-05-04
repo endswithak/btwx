@@ -4,10 +4,19 @@
   display: flex
   align-items: center
   justify-content: center
-  padding: $unit * 2
+  padding: $unit * 2 0
   width: 100%
   max-width: 100%
   height: $unit * 8
+
+.c-gradient-slider__cap
+  width: $unit * 8
+  min-width: $unit * 8
+  max-width: $unit * 8
+  height: $unit * 8
+  display: flex
+  align-items: center
+  justify-content: center
 
 .c-gradient-slider__slider
   width: 100%
@@ -17,7 +26,7 @@
   align-items: center
   border-radius: $unit
   flex-grow: 2
-  margin-right: $unit
+  // margin: 0 $unit
 
 .c-gradient-slider__gradient
   @include absolute-full

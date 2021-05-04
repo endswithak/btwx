@@ -21,6 +21,7 @@ export interface SetCanvasActiveToolPayload {
   resizing?: boolean;
   drawing?: boolean;
   selecting?: boolean;
+  focusing?: boolean;
   zooming?: boolean;
   translating?: boolean;
   zoomType?: Btwx.ZoomType;

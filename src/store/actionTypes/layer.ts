@@ -228,6 +228,8 @@ export const ADD_LAYERS_GRADIENT_STOP = 'ADD_LAYERS_GRADIENT_STOP';
 export const REMOVE_LAYER_GRADIENT_STOP = 'REMOVE_LAYER_GRADIENT_STOP';
 export const REMOVE_LAYERS_GRADIENT_STOP = 'REMOVE_LAYERS_GRADIENT_STOP';
 export const SET_LAYER_ACTIVE_GRADIENT_STOP = 'SET_LAYER_ACTIVE_GRADIENT_STOP';
+export const FLIP_LAYER_GRADIENT = 'FLIP_LAYER_GRADIENT';
+export const FLIP_LAYERS_GRADIENT = 'FLIP_LAYERS_GRADIENT';
 
 export const ENABLE_LAYER_STROKE = 'ENABLE_LAYER_STROKE';
 export const ENABLE_LAYERS_STROKE = 'ENABLE_LAYERS_STROKE';
@@ -2679,6 +2681,26 @@ export interface SetLayerActiveGradientStop {
   payload: SetLayerActiveGradientStopPayload;
 }
 
+export interface FlipLayerGradientPayload {
+  id: string;
+  prop: 'fill' | 'stroke';
+}
+
+export interface FlipLayerGradient {
+  type: typeof FLIP_LAYER_GRADIENT;
+  payload: FlipLayerGradientPayload;
+}
+
+export interface FlipLayersGradientPayload {
+  layers: string[];
+  prop: 'fill' | 'stroke';
+}
+
+export interface FlipLayersGradient {
+  type: typeof FLIP_LAYERS_GRADIENT;
+  payload: FlipLayersGradientPayload;
+}
+
 export interface SetLayerStrokeWidthPayload {
   id: string;
   strokeWidth: number;
@@ -4220,6 +4242,8 @@ export type LayerTypes = AddArtboard |
                          RemoveLayerGradientStop |
                          RemoveLayersGradientStop |
                          SetLayerActiveGradientStop |
+                         FlipLayerGradient |
+                         FlipLayersGradient |
                          EnableLayerStroke |
                          EnableLayersStroke |
                          DisableLayerStroke |
