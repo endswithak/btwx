@@ -7,16 +7,18 @@ import {
   SAVE_DOCUMENT_AS,
   SAVE_DOCUMENT,
   ADD_DOCUMENT_IMAGE,
+  REMOVE_DOCUMENT_IMAGE,
+  REMOVE_DOCUMENT_IMAGES,
   SET_CANVAS_MATRIX,
   SET_CANVAS_COLOR_FORMAT,
   HYDRATE_DOCUMENT,
-  HYDRATE_DOCUMENT_IMAGES,
-  HydrateDocumentImagesPayload,
   HydrateDocumentPayload,
   OpenDocumentPayload,
   SaveDocumentAsPayload,
   SaveDocumentPayload,
   AddDocumentImagePayload,
+  RemoveDocumentImagePayload,
+  RemoveDocumentImagesPayload,
   SetCanvasMatrixPayload,
   SetCanvasColorFormatPayload,
   DocumentSettingsTypes
@@ -58,6 +60,16 @@ export const addDocumentImage = (payload: AddDocumentImagePayload): DocumentSett
   payload
 });
 
+export const removeDocumentImage = (payload: RemoveDocumentImagePayload): DocumentSettingsTypes => ({
+  type: REMOVE_DOCUMENT_IMAGE,
+  payload
+});
+
+export const removeDocumentImages = (payload: RemoveDocumentImagesPayload): DocumentSettingsTypes => ({
+  type: REMOVE_DOCUMENT_IMAGES,
+  payload
+});
+
 export const setCanvasMatrix = (payload: SetCanvasMatrixPayload): DocumentSettingsTypes => ({
   type: SET_CANVAS_MATRIX,
   payload
@@ -65,10 +77,5 @@ export const setCanvasMatrix = (payload: SetCanvasMatrixPayload): DocumentSettin
 
 export const setCanvasColorFormat = (payload: SetCanvasColorFormatPayload): DocumentSettingsTypes => ({
   type: SET_CANVAS_COLOR_FORMAT,
-  payload
-});
-
-export const hydrateDocumentImages = (payload: HydrateDocumentImagesPayload): DocumentSettingsTypes => ({
-  type: HYDRATE_DOCUMENT_IMAGES,
   payload
 });

@@ -337,7 +337,11 @@ export const createInstance = async ({
         ...store.get('session') as SessionState,
         instance: INSTANCE_ID,
         windowType: 'document',
-        env: process.env.NODE_ENV
+        env: process.env.NODE_ENV,
+        images: (initialState && initialState.documentSettings) ? initialState.documentSettings.images : {
+          allIds: [],
+          byId: {}
+        }
       },
       preferences: store.get('preferences') as PreferencesState,
       keyBindings: store.get('keyBindings') as KeyBindingsState,
@@ -361,7 +365,11 @@ export const createInstance = async ({
         ...store.get('session') as SessionState,
         instance: INSTANCE_ID,
         windowType: 'preview',
-        env: process.env.NODE_ENV
+        env: process.env.NODE_ENV,
+        images: (initialState && initialState.documentSettings) ? initialState.documentSettings.images : {
+          allIds: [],
+          byId: {}
+        }
       },
       preferences: store.get('preferences') as PreferencesState,
       keyBindings: store.get('keyBindings') as KeyBindingsState,
@@ -941,9 +949,20 @@ export const handleOpen = (fullPath: string) => {
               });
             } else {
               app.addRecentDocument(fullPath);
-              const documentStateWithTree = getDocumentStateWithTree(JSON.parse(data) as BtwxInstanceDocumentState);
+              const documentState = JSON.parse(data) as BtwxInstanceDocumentState;
+              const documentStateWithTree = getDocumentStateWithTree(documentState);
+              const documentStateWithSessionImages = {
+                ...documentStateWithTree,
+                session: {
+                  ...store.get('session') as SessionState,
+                  instance: focusedInstanceId,
+                  windowType: 'document',
+                  env: process.env.NODE_ENV,
+                  images: documentStateWithTree.documentSettings.images
+                }
+              }
               if (!editState.path && !editState.edit.id) {
-                focusedInstanceDocument.webContents.executeJavaScript(`hydrateDocument(${JSON.stringify(documentStateWithTree)})`);
+                focusedInstanceDocument.webContents.executeJavaScript(`hydrateDocument(${JSON.stringify(documentStateWithSessionImages)})`);
                 btwxElectron = {
                   ...btwxElectron,
                   instance: {
@@ -1270,14 +1289,14 @@ ipcMain.on('hydratePreviewLayers', (event, args) => {
   });
 });
 
-ipcMain.on('hydrateDocumentImages', (event, args) => {
+ipcMain.on('hydratePreviewSessionImages', (event, args) => {
   const { instanceId, images } = JSON.parse(args);
   const instance = btwxElectron.instance.byId[instanceId];
   const payload = {images};
   handleExecute({
     instance,
     window: 'preview',
-    func: 'hydrateDocumentImages',
+    func: 'hydrateSessionImages',
     payloadString: JSON.stringify(payload)
   });
 });

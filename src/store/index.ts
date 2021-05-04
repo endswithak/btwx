@@ -14,14 +14,16 @@ import { setActiveArtboard } from './actions/layer';
 import { KeyBindingsState } from './reducers/keyBindings';
 import { PreferencesState } from './reducers/preferences';
 import { ArtboardPresetsState } from './reducers/artboardPresets';
-import { hydrateDocumentThunk, saveDocumentAs, saveDocument, hydrateDocumentImages } from './actions/documentSettings';
+import { hydrateDocumentThunk, saveDocumentAs, saveDocument } from './actions/documentSettings';
+import { hydrateSessionImages } from './actions/session';
 import { HydrateDocumentPayload, SaveDocumentAsPayload, SaveDocumentPayload } from './actionTypes/documentSettings';
 import { LayerState } from './reducers/layer';
 
 const configureStore: any = (preloadedState, isDocumentWindow = false): typeof store => {
-  const store = createStore(rootReducer, preloadedState, applyMiddleware(logger, thunk));
+  const isDev = preloadedState.session.env === 'development';
+  const store = createStore(rootReducer, preloadedState, (isDev ? applyMiddleware(logger, thunk) : applyMiddleware(thunk)));
   let currentEdit: string = null;
-  let currentDocumentImages: string[] = [];
+  let currentSessionImages: string[] = [];
   let currentActiveArtboard: string = null;
   const handleChange = () => {
     const currentState = store.getState() as RootState;
@@ -31,13 +33,13 @@ const configureStore: any = (preloadedState, isDocumentWindow = false): typeof s
     currentEdit = currentState.layer.present.edit.id;
     currentActiveArtboard = currentState.layer.present.activeArtboard;
     if (previousEdit !== currentEdit) {
-      const cdi = currentState.documentSettings.images.allIds;
-      if (cdi.length !== currentDocumentImages.length || cdi.every((id) => currentDocumentImages.includes(id))) {
-        ipcRenderer.send('hydrateDocumentImages', JSON.stringify({
+      const csi = currentState.session.images.allIds;
+      if (csi.length !== currentSessionImages.length || csi.every((id) => currentSessionImages.includes(id))) {
+        ipcRenderer.send('hydratePreviewSessionImages', JSON.stringify({
           instanceId: instanceId,
-          images: currentState.documentSettings.images
+          images: currentState.session.images
         }));
-        currentDocumentImages = cdi;
+        currentSessionImages = csi;
       }
       ipcRenderer.send('hydratePreviewLayers', JSON.stringify({
         instanceId: instanceId,
@@ -65,12 +67,26 @@ const configureStore: any = (preloadedState, isDocumentWindow = false): typeof s
   };
   (window as any).getDocumentState = (): string => {
     const state = store.getState();
+    const documentImages = state.layer.present.allImageIds.reduce((result, current) => {
+      const layerItem = state.layer.present.byId[current] as Btwx.Image;
+      if (!result.includes(layerItem.imageId)) {
+        result = [...result, layerItem.imageId];
+      }
+      return result;
+    }, []);
     const { documentSettings, layer, viewSettings } = state;
     return JSON.stringify({
       viewSettings,
       documentSettings: {
         ...documentSettings,
-        edit: null
+        edit: null,
+        images: {
+          allIds: documentImages,
+          byId: documentImages.reduce((result, current) => ({
+            ...result,
+            [current]: state.session.images.byId[current]
+          }), {})
+        }
       },
       layer: {
         past: [],
@@ -92,8 +108,8 @@ const configureStore: any = (preloadedState, isDocumentWindow = false): typeof s
   (window as any).hydrateDocument = (state: HydrateDocumentPayload): void => {
     store.dispatch(hydrateDocumentThunk(state) as any);
   };
-  (window as any).hydrateDocumentImages = (params: any): void => {
-    store.dispatch(hydrateDocumentImages(params));
+  (window as any).hydrateSessionImages = (params: any): void => {
+    store.dispatch(hydrateSessionImages(params));
   };
   (window as any).hydratePreferences = (state: PreferencesState): void => {
     store.dispatch(hydratePreferences(state));

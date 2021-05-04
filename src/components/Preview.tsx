@@ -6,7 +6,7 @@ import { RootState } from '../store/reducers';
 import EmptyState from './EmptyState';
 import PreviewCanvas from './PreviewCanvas';
 import PreviewTopbar from './PreviewTopbar';
-import DocumentImages from './DocumentImages';
+import SessionImages from './SessionImages';
 import Titlebar from './Titlebar';
 import PreviewDevice from './PreviewDevice';
 
@@ -76,7 +76,7 @@ const Preview = (): ReactElement => {
             detail='Add an artboard to preview it.'
             style={{paddingRight: 24, paddingLeft: 24}} />
       }
-      <DocumentImages />
+      <SessionImages />
     </div>
   );
 }

@@ -25,7 +25,8 @@ import {
 } from '../utils/actions';
 import { bufferToBase64 } from '../../utils';
 import getTheme from '../../theme';
-import { addDocumentImage } from './documentSettings';
+// import { addDocumentImage, removeDocumentImage, removeDocumentImages } from './documentSettings';
+import { addSessionImage } from './session';
 import { setEventDrawerEventThunk } from './eventDrawer';
 import { openColorEditor, closeColorEditor } from './colorEditor';
 import { openGradientEditor, closeGradientEditor } from './gradientEditor';
@@ -1020,9 +1021,10 @@ export const addImageThunk = (payload: AddImagePayload) => {
   return (dispatch: any, getState: any): Promise<Btwx.Image> => {
     const state = getState() as RootState;
     const buffer = Buffer.from(payload.buffer);
-    const exists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(buffer));
+    // const documentImageExists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(buffer));
+    const sessionImageExists = state.session.images.allIds.length > 0 && state.session.images.allIds.find((id) => Buffer.from(state.session.images.byId[id].buffer).equals(buffer));
     const id = payload.layer.id ? payload.layer.id : uuidv4();
-    const imageId = exists ? exists : payload.layer.imageId ? payload.layer.imageId : uuidv4();
+    const imageId = sessionImageExists ? sessionImageExists : payload.layer.imageId ? payload.layer.imageId : uuidv4();
     const name = payload.layer.name ? payload.layer.name : 'Image';
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
@@ -1068,8 +1070,15 @@ export const addImageThunk = (payload: AddImagePayload) => {
       imageId: imageId,
       originalDimensions: payload.layer.originalDimensions
     } as Btwx.Image;
-    if (!exists) {
-      dispatch(addDocumentImage({
+    // if (!documentImageExists) {
+    //   dispatch(addDocumentImage({
+    //     id: imageId,
+    //     buffer: buffer,
+    //     ext: payload.ext
+    //   }));
+    // }
+    if (!sessionImageExists) {
+      dispatch(addSessionImage({
         id: imageId,
         buffer: buffer,
         ext: payload.ext
@@ -1141,17 +1150,34 @@ export const removeLayersThunk = () => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     if (state.layer.present.selected.length > 0 && state.canvasSettings.focusing) {
+      const selectedAndDescendants = state.layer.present.selected.reduce((result, current) => {
+        return [...result, ...getLayerAndDescendants(state.layer.present, current)];
+      }, []);
       if (state.viewSettings.eventDrawer.isOpen && state.eventDrawer.event) {
         const tweenEvent = state.layer.present.events.byId[state.eventDrawer.event];
-        let layersAndChildren: string[] = [];
-        state.layer.present.selected.forEach((id) => {
-          layersAndChildren = [...layersAndChildren, ...getLayerAndDescendants(state.layer.present, id)];
-        });
-        if (layersAndChildren.includes(tweenEvent.layer) || layersAndChildren.includes(tweenEvent.artboard) || layersAndChildren.includes(tweenEvent.destinationArtboard)) {
+        if (selectedAndDescendants.includes(tweenEvent.layer) || selectedAndDescendants.includes(tweenEvent.artboard) || selectedAndDescendants.includes(tweenEvent.destinationArtboard)) {
           dispatch(setEventDrawerEventThunk({id: null}));
         }
       }
-      dispatch(removeLayers({layers: state.layer.present.selected}));
+      // if (selectedAndDescendants.some(id => state.layer.present.byId[id].type === 'Image')) {
+      //   const removedImages = selectedAndDescendants.filter(id => state.layer.present.byId[id].type === 'Image');
+      //   const removedDocumentImages = removedImages.reduce((result, current) => {
+      //     const imageItem =  state.layer.present.byId[current] as Btwx.Image;
+      //     const lastInstance = !state.layer.present.allImageIds.some(id => id !== current && ((state.layer.present.byId[id] as Btwx.Image).imageId === imageItem.imageId));
+      //     if (lastInstance) {
+      //       result = [...result, imageItem.imageId];
+      //     }
+      //     return result;
+      //   }, []);
+      //   if (removedDocumentImages.length > 0) {
+      //     dispatch(removeDocumentImages({
+      //       images: removedDocumentImages
+      //     }));
+      //   }
+      // }
+      dispatch(removeLayers({
+        layers: state.layer.present.selected
+      }));
     } else {
       return;
     }
@@ -5523,10 +5549,21 @@ export const replaceSelectedImagesThunk = () => {
   return (dispatch: any, getState: any): Promise<Btwx.Image> => {
     return new Promise((resolve, reject) => {
       const state = getState() as RootState;
+      // const sameImageInstance = state.layer.present.selected.every(id => (state.layer.present.byId[id] as Btwx.Image).imageId === (state.layer.present.byId[state.layer.present.selected[0]] as Btwx.Image).imageId);
+      // const allInstancesSelected = sameImageInstance ? state.layer.present.allImageIds.filter(id => (state.layer.present.byId[id] as Btwx.Image).imageId === (state.layer.present.byId[state.layer.present.selected[0]] as Btwx.Image).imageId).length === state.layer.present.selected.length : false;
+      // const removedDocumentImages = state.layer.present.selected.reduce((result, current) => {
+      //   const imageItem =  state.layer.present.byId[current] as Btwx.Image;
+      //   const lastInstance = !state.layer.present.allImageIds.some(id => id !== current && ((state.layer.present.byId[id] as Btwx.Image).imageId === imageItem.imageId));
+      //   if (lastInstance) {
+      //     result = [...result, imageItem.imageId];
+      //   }
+      //   return result;
+      // }, []);
       ipcRenderer.invoke('insertImage').then((data) => {
         const buffer = Buffer.from(data.buffer);
-        const exists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(buffer));
-        const imageId = exists ? exists : uuidv4();
+        // const documentImageExists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(buffer));
+        const sessionImageExists = state.session.images.allIds.length > 0 && state.session.images.allIds.find((id) => Buffer.from(state.session.images.byId[id].buffer).equals(buffer));
+        const imageId = sessionImageExists ? sessionImageExists : uuidv4();
         const base64 = bufferToBase64(buffer);
         const base64Str = `data:image/${data.ext};base64,${base64}`;
         const newImage = new Image();
@@ -5535,8 +5572,15 @@ export const replaceSelectedImagesThunk = () => {
             width: newImage.width,
             height: newImage.height
           }
-          if (!exists) {
-            dispatch(addDocumentImage({
+          // if (!documentImageExists) {
+          //   dispatch(addDocumentImage({
+          //     id: imageId,
+          //     buffer: buffer,
+          //     ext: data.ext
+          //   }));
+          // }
+          if (!sessionImageExists) {
+            dispatch(addSessionImage({
               id: imageId,
               buffer: buffer,
               ext: data.ext
@@ -5547,6 +5591,17 @@ export const replaceSelectedImagesThunk = () => {
             imageId,
             originalDimensions
           }));
+          // if (allInstancesSelected) {
+          //   dispatch(removeDocumentImages({
+          //     images: [(state.layer.present.byId[state.layer.present.selected[0]] as Btwx.Image).imageId]
+          //   }));
+          // } else {
+          //   if (removedDocumentImages.length > 0) {
+          //     dispatch(removeDocumentImages({
+          //       images: removedDocumentImages
+          //     }));
+          //   }
+          // }
           resolve(null);
         }
         newImage.src = base64Str;
@@ -5570,7 +5625,7 @@ export const copySelectedToClipboardThunk = () => {
         const layerItem = state.layer.present.byId[current];
         const imageId = (layerItem as Btwx.Image).imageId;
         if (!Object.keys(result).includes(imageId)) {
-          result[imageId] = state.documentSettings.images.byId[imageId];
+          result[imageId] = state.session.images.byId[imageId];
         }
         return result;
       }, {});
@@ -5794,9 +5849,13 @@ export const pasteLayersThunk = (props?: { overSelection?: boolean; overPoint?: 
             Object.keys(clipboardLayers.images).forEach((imgId) => {
               const documentImage = clipboardLayers.images[imgId];
               const buffer = Buffer.from(documentImage.buffer);
-              const exists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(buffer));
-              if (!exists) {
-                dispatch(addDocumentImage(documentImage));
+              // const documentImageExists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(buffer));
+              const sessionImageExists = state.session.images.allIds.length > 0 && state.session.images.allIds.find((id) => Buffer.from(state.session.images.byId[id].buffer).equals(buffer));
+              if (!sessionImageExists) {
+                // if (!documentImageExists) {
+                //   dispatch(addDocumentImage(documentImage));
+                // }
+                dispatch(addSessionImage(documentImage));
               } else {
                 clipboardLayers = clipboardLayers.allImageIds.filter((id) =>
                   (clipboardLayers.byId[id] as Btwx.Image).imageId === imgId
@@ -5806,7 +5865,7 @@ export const pasteLayersThunk = (props?: { overSelection?: boolean; overPoint?: 
                     ...result.byId,
                     [current]: {
                       ...result.byId[current],
-                      imageId: exists
+                      imageId: sessionImageExists
                     } as Btwx.Image
                   }
                 }), clipboardLayers);

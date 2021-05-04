@@ -7,7 +7,7 @@ import { RootState } from '../store/reducers';
 import Topbar from './Topbar';
 import EaseEditorWrap from './EaseEditorWrap';
 import ArtboardPresetEditorWrap from './ArtboardPresetEditorWrap';
-import DocumentImages from './DocumentImages';
+import SessionImages from './SessionImages';
 import Titlebar from './Titlebar';
 import AutoSaver from './AutoSaver';
 import Main from './Main';
@@ -51,7 +51,7 @@ const App = (): ReactElement => {
         {/* abs elements */}
         <EaseEditorWrap />
         <ArtboardPresetEditorWrap />
-        <DocumentImages />
+        <SessionImages />
         <AutoSaver />
     </div>
   );

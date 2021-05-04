@@ -1,14 +1,19 @@
 import { DEFAULT_COLOR_FORMAT } from '../../constants';
+import { removeItem, addItem } from '../utils/general';
 
 import {
   SAVE_DOCUMENT_AS,
   ADD_DOCUMENT_IMAGE,
+  REMOVE_DOCUMENT_IMAGE,
+  REMOVE_DOCUMENT_IMAGES,
   SAVE_DOCUMENT,
   SET_CANVAS_MATRIX,
   SET_CANVAS_COLOR_FORMAT,
-  HYDRATE_DOCUMENT_IMAGES,
   DocumentSettingsTypes
 } from '../actionTypes/documentSettings';
+
+import { RemoveDocumentImage } from '../actionTypes/documentSettings';
+import { removeDocumentImage as removeDocumentImageAction } from '../actions/documentSettings';
 
 export interface DocumentSettingsState {
   id: string;
@@ -40,6 +45,25 @@ export const initialState: DocumentSettingsState = {
   edit: null
 };
 
+const removeDocumentImage = (state: DocumentSettingsState, action: RemoveDocumentImage): DocumentSettingsState => {
+  return {
+    ...state,
+    images: {
+      ...state.images,
+      allIds: removeItem(state.images.allIds, action.payload.id),
+      byId: Object.keys(state.images.byId).reduce((result, current) => {
+        if (current !== action.payload.id) {
+          result = {
+            ...result,
+            [current]: state.images.byId[current]
+          }
+        }
+        return result;
+      }, {})
+    }
+  };
+}
+
 export default (state = initialState, action: DocumentSettingsTypes): DocumentSettingsState => {
   switch (action.type) {
     case SAVE_DOCUMENT_AS: {
@@ -62,13 +86,23 @@ export default (state = initialState, action: DocumentSettingsTypes): DocumentSe
         ...state,
         images: {
           ...state.images,
-          allIds: [...state.images.allIds, action.payload.id],
+          allIds: addItem(state.images.allIds, action.payload.id),
           byId: {
             ...state.images.byId,
             [action.payload.id]: action.payload
           }
         }
       };
+    }
+    case REMOVE_DOCUMENT_IMAGE: {
+      return removeDocumentImage(state, action);
+    }
+    case REMOVE_DOCUMENT_IMAGES: {
+      return action.payload.images.reduce((result, current) => {
+        return removeDocumentImage(result, removeDocumentImageAction({
+          id: current
+        }) as RemoveDocumentImage);
+      }, state);
     }
     case SET_CANVAS_MATRIX: {
       return {
@@ -81,12 +115,6 @@ export default (state = initialState, action: DocumentSettingsTypes): DocumentSe
       return {
         ...state,
         colorFormat: action.payload.colorFormat
-      };
-    }
-    case HYDRATE_DOCUMENT_IMAGES: {
-      return {
-        ...state,
-        images: action.payload.images
       };
     }
     default:

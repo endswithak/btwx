@@ -32,9 +32,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   const destinationLayerItem = useSelector((state: RootState) => state.layer.present.byId[tween.destinationLayer]);
   const originArtboardItem = useSelector((state: RootState) => state.layer.present.byId[event.artboard] as Btwx.Artboard);
   const destinationArtboardItem = useSelector((state: RootState) => state.layer.present.byId[event.destinationArtboard] as Btwx.Artboard);
-  const documentImages = useSelector((state: RootState) => state.documentSettings.images.byId);
-  const originImage = originLayerItem.type === 'Image' ? documentImages[(originLayerItem as Btwx.Image).imageId] : null;
-  const destinationImage = destinationLayerItem.type === 'Image' ? documentImages[(destinationLayerItem as Btwx.Image).imageId] : null;
+  // const sessionImages = useSelector((state: RootState) => state.session.images.byId);
+  // const originImage = originLayerItem.type === 'Image' ? sessionImages[(originLayerItem as Btwx.Image).imageId] : null;
+  // const destinationImage = destinationLayerItem.type === 'Image' ? sessionImages[(destinationLayerItem as Btwx.Image).imageId] : null;
   const [eventLayerTimeline, setEventLayerTimeline] = useState(null);
 
   interface CurrentTweenProps {

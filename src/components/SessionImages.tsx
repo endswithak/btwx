@@ -3,17 +3,17 @@ import { useSelector } from 'react-redux';
 import { bufferToBase64 } from '../utils';
 import { RootState } from '../store/reducers';
 
-const DocumentImages = (): ReactElement => {
-  const documentImages = useSelector((state: RootState) => state.documentSettings.images);
+const SessionImages = (): ReactElement => {
+  const sessionImages = useSelector((state: RootState) => state.session.images);
 
   return (
     <>
       {
-        documentImages && documentImages.allIds.length > 0
-        ? documentImages.allIds.map((id) => {
-          const documentImage = documentImages.byId[id];
-          const base64 = bufferToBase64(Buffer.from(documentImage.buffer));
-          const ext = documentImage.ext;
+        sessionImages && sessionImages.allIds.length > 0
+        ? sessionImages.allIds.map((id) => {
+          const sessionImage = sessionImages.byId[id];
+          const base64 = bufferToBase64(Buffer.from(sessionImage.buffer));
+          const ext = sessionImage.ext;
           return (
             <img
               key={id}
@@ -31,4 +31,4 @@ const DocumentImages = (): ReactElement => {
   );
 }
 
-export default DocumentImages;
+export default SessionImages;

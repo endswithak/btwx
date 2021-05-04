@@ -13,7 +13,8 @@ export const SET_CANVAS_MATRIX = 'SET_CANVAS_MATRIX';
 export const SET_CANVAS_COLOR_FORMAT = 'SET_CANVAS_COLOR_FORMAT';
 
 export const ADD_DOCUMENT_IMAGE = 'ADD_DOCUMENT_IMAGE';
-export const HYDRATE_DOCUMENT_IMAGES = 'HYDRATE_DOCUMENT_IMAGES';
+export const REMOVE_DOCUMENT_IMAGE = 'REMOVE_DOCUMENT_IMAGE';
+export const REMOVE_DOCUMENT_IMAGES = 'REMOVE_DOCUMENT_IMAGES';
 
 export interface OpenDocumentPayload {
   layer: StateWithHistory<LayerState>;
@@ -87,18 +88,22 @@ export interface AddDocumentImage {
   payload: AddDocumentImagePayload;
 }
 
-export interface HydrateDocumentImagesPayload {
-  images: {
-    allIds: string[];
-    byId: {
-      [id: string]: Btwx.DocumentImage;
-    };
-  };
+export interface RemoveDocumentImagePayload {
+  id: string;
 }
 
-export interface HydrateDocumentImages {
-  type: typeof HYDRATE_DOCUMENT_IMAGES;
-  payload: HydrateDocumentImagesPayload;
+export interface RemoveDocumentImage {
+  type: typeof REMOVE_DOCUMENT_IMAGE;
+  payload: RemoveDocumentImagePayload;
+}
+
+export interface RemoveDocumentImagesPayload {
+  images: string[];
+}
+
+export interface RemoveDocumentImages {
+  type: typeof REMOVE_DOCUMENT_IMAGES;
+  payload: RemoveDocumentImagesPayload;
 }
 
 export type DocumentSettingsTypes = OpenDocument |
@@ -107,5 +112,6 @@ export type DocumentSettingsTypes = OpenDocument |
                                     SetCanvasMatrix |
                                     SetCanvasColorFormat |
                                     AddDocumentImage |
-                                    HydrateDocument |
-                                    HydrateDocumentImages;
+                                    RemoveDocumentImage |
+                                    RemoveDocumentImages |
+                                    HydrateDocument;
