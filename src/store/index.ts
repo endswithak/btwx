@@ -6,8 +6,12 @@ import rootReducer, { RootState } from './reducers';
 import { closePreview, startPreviewRecording, stopPreviewRecording, setPreviewFocusing, openPreview, setPreviewTweening } from './actions/preview';
 import { hydratePreferences } from './actions/preferences';
 import { setEventDrawerEvent, setEventDrawerEventThunk } from './actions/eventDrawer';
-import { hydrateLayers, addLayerTween, removeLayerTweens, removeLayerTween, removeLayersEvent } from './actions/layer';
+import { hydrateLayers, addLayerTween, removeLayerTweens, removeLayerTween, removeLayersEvent, insertImageThunk, groupSelectedThunk, ungroupSelectedThunk, alignSelectedToLeftThunk, alignSelectedToCenterThunk, alignSelectedToRightThunk, alignSelectedToTopThunk, alignSelectedToMiddleThunk, alignSelectedToBottomThunk, distributeSelectedHorizontallyThunk, distributeSelectedVerticallyThunk, sendSelectedBackwardThunk, bringSelectedForwardThunk } from './actions/layer';
 import { openEaseEditor, closeEaseEditor } from './actions/easeEditor';
+import { zoomInThunk, zoomOutThunk } from './actions/zoomTool';
+import { toggleArtboardToolThunk } from './actions/artboardTool';
+import { toggleShapeToolThunk } from './actions/shapeTool';
+import { toggleTextToolThunk } from './actions/textTool';
 import { hydrateKeyBindings } from './actions/keyBindings';
 import { hydrateArtboardPresets } from './actions/artboardPresets';
 import { setActiveArtboard } from './actions/layer';
@@ -173,6 +177,60 @@ const configureStore: any = (preloadedState, isDocumentWindow = false): typeof s
   };
   (window as any).saveDocument = (payload: SaveDocumentPayload): void => {
     store.dispatch(saveDocument(payload));
+  };
+  (window as any).insertImageThunk = (): void => {
+    store.dispatch(insertImageThunk() as any);
+  };
+  (window as any).groupSelectedThunk = (): void => {
+    store.dispatch(groupSelectedThunk() as any);
+  };
+  (window as any).ungroupSelectedThunk = (): void => {
+    store.dispatch(ungroupSelectedThunk() as any);
+  };
+  (window as any).alignSelectedToLeftThunk = (): void => {
+    store.dispatch(alignSelectedToLeftThunk() as any);
+  };
+  (window as any).alignSelectedToCenterThunk = (): void => {
+    store.dispatch(alignSelectedToCenterThunk() as any);
+  };
+  (window as any).alignSelectedToRightThunk = (): void => {
+    store.dispatch(alignSelectedToRightThunk() as any);
+  };
+  (window as any).alignSelectedToTopThunk = (): void => {
+    store.dispatch(alignSelectedToTopThunk() as any);
+  };
+  (window as any).alignSelectedToMiddleThunk = (): void => {
+    store.dispatch(alignSelectedToMiddleThunk() as any);
+  };
+  (window as any).alignSelectedToBottomThunk = (): void => {
+    store.dispatch(alignSelectedToBottomThunk() as any);
+  };
+  (window as any).distributeSelectedHorizontallyThunk = (): void => {
+    store.dispatch(distributeSelectedHorizontallyThunk() as any);
+  };
+  (window as any).distributeSelectedVerticallyThunk = (): void => {
+    store.dispatch(distributeSelectedVerticallyThunk() as any);
+  };
+  (window as any).sendSelectedBackwardThunk = (): void => {
+    store.dispatch(sendSelectedBackwardThunk() as any);
+  };
+  (window as any).bringSelectedForwardThunk = (): void => {
+    store.dispatch(bringSelectedForwardThunk() as any);
+  };
+  (window as any).zoomInThunk = (): void => {
+    store.dispatch(zoomInThunk() as any);
+  };
+  (window as any).zoomOutThunk = (): void => {
+    store.dispatch(zoomOutThunk() as any);
+  };
+  (window as any).toggleArtboardToolThunk = (): void => {
+    store.dispatch(toggleArtboardToolThunk() as any);
+  };
+  (window as any).toggleShapeToolThunk = (shapeType): void => {
+    store.dispatch(toggleShapeToolThunk(shapeType) as any);
+  };
+  (window as any).toggleTextToolThunk = (): void => {
+    store.dispatch(toggleTextToolThunk() as any);
   };
   return store;
 }

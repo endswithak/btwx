@@ -10,6 +10,7 @@ import ArtboardPresetEditorWrap from './ArtboardPresetEditorWrap';
 import SessionImages from './SessionImages';
 import Titlebar from './Titlebar';
 import AutoSaver from './AutoSaver';
+import Touchbar from './Touchbar';
 import Main from './Main';
 
 const App = (): ReactElement => {
@@ -53,6 +54,7 @@ const App = (): ReactElement => {
         <ArtboardPresetEditorWrap />
         <SessionImages />
         <AutoSaver />
+        <Touchbar />
     </div>
   );
 }

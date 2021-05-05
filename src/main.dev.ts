@@ -13,7 +13,7 @@ import 'regenerator-runtime/runtime';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
-import { app, BrowserWindow, ipcMain, session, Menu, nativeTheme, dialog, globalShortcut } from 'electron';
+import { app, BrowserWindow, ipcMain, session, Menu, nativeTheme, dialog, nativeImage, globalShortcut, TouchBar } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import Store from 'electron-store';
@@ -1280,6 +1280,455 @@ ipcMain.on('setDocumentTimelineGuidePosition', (event, args) => {
   instance.document.webContents.send('setDocumentTimelineGuidePosition', JSON.stringify({
     time: time
   }));
+});
+
+////////////////////////////////////////////////////////////
+// INSTANCE => FROM DOCUMENT RENDERER => TOUCHBAR
+////////////////////////////////////////////////////////////
+
+const activeBG = '#777';
+
+interface BuildInsertGroup {
+  instance: BtwxInstance;
+  hasActiveArtboard: boolean;
+  isArtboardToolActive: boolean;
+  isRectangleToolActive: boolean;
+  isEllipseToolActive: boolean;
+  isTextToolActive: boolean;
+  theme: Btwx.ThemeName;
+}
+
+const buildInsertGroup = ({
+  instance,
+  hasActiveArtboard,
+  isArtboardToolActive,
+  isRectangleToolActive,
+  isEllipseToolActive,
+  isTextToolActive,
+  theme
+}: BuildInsertGroup) => {
+  const { TouchBarButton, TouchBarGroup, TouchBarColorPicker, TouchBarSpacer } = TouchBar;
+  const RESOURCES_PATH = app.isPackaged ? path.join(process.resourcesPath, 'assets/touch-bar') : path.join(__dirname, '../assets/touch-bar');
+  // images
+  const artboardImage = nativeImage.createFromPath(`${RESOURCES_PATH}/artboard.png`);
+  const rectangleImage = nativeImage.createFromPath(`${RESOURCES_PATH}/rectangle.png`);
+  const ellipseImage = nativeImage.createFromPath(`${RESOURCES_PATH}/ellipse.png`);
+  const textImage = nativeImage.createFromPath(`${RESOURCES_PATH}/text.png`);
+  const imageImage = nativeImage.createFromPath(`${RESOURCES_PATH}/image-${theme}.png`);
+
+  // artboard
+  const artboardButton = new TouchBarButton({
+    icon: artboardImage,
+    accessibilityLabel: 'Artboard',
+    backgroundColor: isArtboardToolActive ? activeBG : null,
+    click: () => handleExecute({
+      instance,
+      window: 'document',
+      func: 'toggleArtboardToolThunk'
+    })
+  });
+  // rect
+  const rectangleButton = hasActiveArtboard ? [new TouchBarButton({
+    icon: rectangleImage,
+    accessibilityLabel: 'Rectangle',
+    backgroundColor: isRectangleToolActive ? activeBG : null,
+    click: () => handleExecute({
+      instance,
+      window: 'document',
+      func: 'toggleShapeToolThunk',
+      payloadString: JSON.stringify('Rectangle')
+    })
+  })] : [];
+  // ellipse
+  const ellipseButton = hasActiveArtboard ? [new TouchBarButton({
+    icon: ellipseImage,
+    accessibilityLabel: 'Ellipse',
+    backgroundColor: isEllipseToolActive ? activeBG : null,
+    click: () => handleExecute({
+      instance,
+      window: 'document',
+      func: 'toggleShapeToolThunk',
+      payloadString: JSON.stringify('Ellipse')
+    })
+  })] : [];
+  // text
+  const textButton = hasActiveArtboard ? [new TouchBarButton({
+    icon: textImage,
+    accessibilityLabel: 'Text',
+    backgroundColor: isTextToolActive ? activeBG : null,
+    click: () => handleExecute({
+      instance,
+      window: 'document',
+      func: 'toggleTextToolThunk'
+    })
+  })] : [];
+  // image
+  const imageButton = hasActiveArtboard ? [new TouchBarButton({
+    icon: imageImage,
+    accessibilityLabel: 'Image',
+    click: () => handleExecute({
+      instance,
+      window: 'document',
+      func: 'insertImageThunk',
+    })
+  })] : [];
+  // group
+  return [
+    artboardButton,
+    ...rectangleButton,
+    ...ellipseButton,
+    ...textButton,
+    ...imageButton
+  ];
+}
+
+interface BuildDistributeGroup {
+  instance: BtwxInstance;
+  canDistribute: boolean;
+}
+
+const buildDistributeGroup = ({
+  instance,
+  canDistribute
+}: BuildDistributeGroup) => {
+  const { TouchBarButton, TouchBarGroup, TouchBarColorPicker, TouchBarSpacer } = TouchBar;
+  const RESOURCES_PATH = app.isPackaged ? path.join(process.resourcesPath, 'assets/touch-bar') : path.join(__dirname, '../assets/touch-bar');
+  // images
+  const distributeHorizontallyImage = nativeImage.createFromPath(`${RESOURCES_PATH}/distribute-horizontally.png`);
+  const distributeVerticallyImage = nativeImage.createFromPath(`${RESOURCES_PATH}/distribute-vertically.png`);
+  // distribute horizontally
+  const distributeHorizontallyButton = canDistribute ? [new TouchBarButton({
+    icon: distributeHorizontallyImage,
+    accessibilityLabel: 'Distribute Horizontally',
+    click: () => handleExecute({
+      instance,
+      window: 'document',
+      func: 'distributeSelectedHorizontallyThunk'
+    })
+  })] : [];
+  // distribute vertically
+  const distributeVerticallyButton = canDistribute ? [new TouchBarButton({
+    icon: distributeVerticallyImage,
+    accessibilityLabel: 'Distribute Vertically',
+    click: () => handleExecute({
+      instance,
+      window: 'document',
+      func: 'distributeSelectedVerticallyThunk'
+    })
+  })] : [];
+  // group
+  return canDistribute ? [...distributeHorizontallyButton, ...distributeVerticallyButton] : [];
+}
+
+interface BuildMoveGroup {
+  instance: BtwxInstance;
+  canBringForward: boolean;
+  canSendBackward: boolean;
+}
+
+const buildMoveGroup = ({
+  instance,
+  canBringForward,
+  canSendBackward
+}: BuildMoveGroup) => {
+  const { TouchBarButton, TouchBarGroup, TouchBarColorPicker, TouchBarSpacer } = TouchBar;
+  const RESOURCES_PATH = app.isPackaged ? path.join(process.resourcesPath, 'assets/touch-bar') : path.join(__dirname, '../assets/touch-bar');
+  // images
+  const moveForwardImage = nativeImage.createFromPath(`${RESOURCES_PATH}/bring-forward.png`);
+  const moveBackwardImage = nativeImage.createFromPath(`${RESOURCES_PATH}/send-backward.png`);
+  // forward
+  const moveForwardButton = canBringForward ? [new TouchBarButton({
+    icon: moveForwardImage,
+    accessibilityLabel: 'Bring Forward',
+    click: () => handleExecute({
+      instance,
+      window: 'document',
+      func: 'bringSelectedForwardThunk'
+    })
+  })] : [];
+  // backward
+  const moveBackwardButton = canSendBackward ? [new TouchBarButton({
+    icon: moveBackwardImage,
+    accessibilityLabel: 'Send Backward',
+    click: () => handleExecute({
+      instance,
+      window: 'document',
+      func: 'sendSelectedBackwardThunk'
+    })
+  })] : [];
+  // group
+  return canBringForward || canSendBackward ? [...moveForwardButton, ...moveBackwardButton] : [];
+}
+
+interface BuildGroupGroup {
+  instance: BtwxInstance;
+  canGroup: boolean;
+  canUngroup: boolean;
+}
+
+const buildGroupGroup = ({
+  instance,
+  canGroup,
+  canUngroup
+}: BuildGroupGroup) => {
+  const { TouchBarButton, TouchBarGroup, TouchBarColorPicker, TouchBarSpacer } = TouchBar;
+  const RESOURCES_PATH = app.isPackaged ? path.join(process.resourcesPath, 'assets/touch-bar') : path.join(__dirname, '../assets/touch-bar');
+  // images
+  const groupImage = nativeImage.createFromPath(`${RESOURCES_PATH}/group.png`);
+  const ungroupImage = nativeImage.createFromPath(`${RESOURCES_PATH}/ungroup.png`);
+  // group
+  const groupButton = canGroup ? [new TouchBarButton({
+    icon: groupImage,
+    accessibilityLabel: 'Group',
+    click: () => handleExecute({
+      instance,
+      window: 'document',
+      func: 'groupSelectedThunk'
+    })
+  })] : [];
+  // ungroup
+  const ungroupButton = canUngroup ? [new TouchBarButton({
+    icon: ungroupImage,
+    accessibilityLabel: 'Ungroup',
+    click: () => handleExecute({
+      instance,
+      window: 'document',
+      func: 'ungroupSelectedThunk'
+    })
+  })] : [];
+  // group
+  return canGroup || canUngroup ? [...groupButton, ...ungroupButton] : [];
+}
+
+interface BuildAlignGroup {
+  instance: BtwxInstance;
+  canAlignLeft: boolean;
+  canAlignCenter: boolean;
+  canAlignRight: boolean;
+  canAlignTop: boolean;
+  canAlignMiddle: boolean;
+  canAlignBottom: boolean
+}
+
+const buildAlignGroup = ({
+  instance,
+  canAlignLeft,
+  canAlignCenter,
+  canAlignRight,
+  canAlignTop,
+  canAlignMiddle,
+  canAlignBottom
+}: BuildAlignGroup) => {
+  const { TouchBarButton, TouchBarGroup, TouchBarColorPicker, TouchBarSpacer } = TouchBar;
+  const RESOURCES_PATH = app.isPackaged ? path.join(process.resourcesPath, 'assets/touch-bar') : path.join(__dirname, '../assets/touch-bar');
+  // images
+  const alignLeftImage = nativeImage.createFromPath(`${RESOURCES_PATH}/align-left.png`);
+  const alignCenterImage = nativeImage.createFromPath(`${RESOURCES_PATH}/align-center.png`);
+  const alignRightImage = nativeImage.createFromPath(`${RESOURCES_PATH}/align-right.png`);
+  const alignTopImage = nativeImage.createFromPath(`${RESOURCES_PATH}/align-top.png`);
+  const alignMiddleImage = nativeImage.createFromPath(`${RESOURCES_PATH}/align-middle.png`);
+  const alignBottomImage = nativeImage.createFromPath(`${RESOURCES_PATH}/align-bottom.png`);
+  // left
+  const alignLeftButton = canAlignLeft ? [new TouchBarButton({
+    icon: alignLeftImage,
+    accessibilityLabel: 'Align Left',
+    click: () => handleExecute({
+      instance,
+      window: 'document',
+      func: 'alignSelectedToLeftThunk'
+    })
+  })] : [];
+  // center
+  const alignCenterButton = canAlignCenter ? [new TouchBarButton({
+    icon: alignCenterImage,
+    accessibilityLabel: 'Align Center',
+    click: () => handleExecute({
+      instance,
+      window: 'document',
+      func: 'alignSelectedToCenterThunk'
+    })
+  })] : [];
+  // right
+  const alignRightButton = canAlignRight ? [new TouchBarButton({
+    icon: alignRightImage,
+    accessibilityLabel: 'Align Right',
+    click: () => handleExecute({
+      instance,
+      window: 'document',
+      func: 'alignSelectedToRightThunk'
+    })
+  })] : [];
+  // top
+  const alignTopButton = canAlignTop ? [new TouchBarButton({
+    icon: alignTopImage,
+    accessibilityLabel: 'Align Top',
+    click: () => handleExecute({
+      instance,
+      window: 'document',
+      func: 'alignSelectedToTopThunk'
+    })
+  })] : [];
+  // middle
+  const alignMiddleButton = canAlignMiddle ? [new TouchBarButton({
+    icon: alignMiddleImage,
+    accessibilityLabel: 'Align Middle',
+    click: () => handleExecute({
+      instance,
+      window: 'document',
+      func: 'alignSelectedToMiddleThunk'
+    })
+  })] : [];
+  // bottom
+  const alignBottomButton = canAlignBottom ? [new TouchBarButton({
+    icon: alignBottomImage,
+    accessibilityLabel: 'Align Bottom',
+    click: () => handleExecute({
+      instance,
+      window: 'document',
+      func: 'alignSelectedToBottomThunk'
+    })
+  })] : [];
+  // group
+  return canAlignLeft || canAlignCenter || canAlignRight || canAlignTop || canAlignMiddle || canAlignBottom ? [
+    ...alignLeftButton, ...alignCenterButton, ...alignRightButton,
+    ...alignTopButton, ...alignMiddleButton, ...alignBottomButton
+  ]: [];
+}
+
+interface BuildZoomGroup {
+  instance: BtwxInstance;
+  canZoomOut: boolean;
+}
+
+const buildZoomGroup = ({
+  instance,
+  canZoomOut
+}: BuildZoomGroup) => {
+  const { TouchBarButton, TouchBarGroup, TouchBarColorPicker, TouchBarSpacer } = TouchBar;
+  const RESOURCES_PATH = app.isPackaged ? path.join(process.resourcesPath, 'assets/touch-bar') : path.join(__dirname, '../assets/touch-bar');
+  // images
+  const zoomOutImage = nativeImage.createFromPath(`${RESOURCES_PATH}/zoom-out.png`);
+  const zoomInImage = nativeImage.createFromPath(`${RESOURCES_PATH}/zoom-in.png`);
+  // zoom out
+  const zoomOutButton = canZoomOut ? [new TouchBarButton({
+    icon: zoomOutImage,
+    accessibilityLabel: 'Zoom Out',
+    click: () => handleExecute({
+      instance,
+      window: 'document',
+      func: 'zoomOutThunk'
+    })
+  })] : [];
+  // zoom in
+  const zoomInButton = new TouchBarButton({
+    icon: zoomInImage,
+    accessibilityLabel: 'Zoom In',
+    click: () => handleExecute({
+      instance,
+      window: 'document',
+      func: 'zoomInThunk'
+    })
+  });
+  // group
+  return [...zoomOutButton, zoomInButton];
+}
+
+const buildEmptySelectionTouchBar = (props: BuildInsertGroup & BuildZoomGroup) => {
+  const { TouchBarButton, TouchBarGroup, TouchBarColorPicker, TouchBarSpacer } = TouchBar;
+  const {
+    instance,
+    hasActiveArtboard,
+    isArtboardToolActive,
+    isRectangleToolActive,
+    isEllipseToolActive,
+    isTextToolActive,
+    theme,
+    canZoomOut
+  } = props;
+  instance.document.setTouchBar(new TouchBar({
+    items: [
+      ...buildInsertGroup({
+        instance,
+        hasActiveArtboard,
+        isArtboardToolActive,
+        isRectangleToolActive,
+        isEllipseToolActive,
+        isTextToolActive,
+        theme
+      }),
+      new TouchBarSpacer({size: 'large'}),
+      ...buildZoomGroup({
+        instance,
+        canZoomOut
+      })
+    ]
+  }));
+}
+
+const buildSelectionTouchBar = (props: BuildAlignGroup & BuildDistributeGroup & BuildGroupGroup & BuildMoveGroup) => {
+  const {
+    instance,
+    canAlignLeft,
+    canAlignCenter,
+    canAlignRight,
+    canAlignTop,
+    canAlignMiddle,
+    canAlignBottom,
+    canDistribute,
+    canGroup,
+    canUngroup,
+    canBringForward,
+    canSendBackward
+  } = props;
+  const alignTouchBar = buildAlignGroup({
+    instance,
+    canAlignLeft,
+    canAlignCenter,
+    canAlignRight,
+    canAlignTop,
+    canAlignMiddle,
+    canAlignBottom
+  });
+  const distributeTouchBar = buildDistributeGroup({
+    instance,
+    canDistribute
+  });
+  const groupTouchBar = buildGroupGroup({
+    instance,
+    canGroup,
+    canUngroup
+  });
+  const moveTouchBar = buildMoveGroup({
+    instance,
+    canBringForward,
+    canSendBackward
+  });
+  instance.document.setTouchBar(new TouchBar({
+    items: [
+      ...distributeTouchBar,
+      ...alignTouchBar,
+      ...groupTouchBar,
+      ...moveTouchBar
+    ]
+  }));
+}
+
+ipcMain.on('buildEmptySelectionTouchBar', (event, args) => {
+  const { instanceId, ...rest } = JSON.parse(args);
+  const instance = btwxElectron.instance.byId[instanceId];
+  buildEmptySelectionTouchBar({
+    instance,
+    ...rest
+  });
+});
+
+ipcMain.on('buildSelectionTouchBar', (event, args) => {
+  const { instanceId, ...rest } = JSON.parse(args);
+  const instance = btwxElectron.instance.byId[instanceId];
+  buildSelectionTouchBar({
+    instance,
+    ...rest
+  });
 });
 
 ////////////////////////////////////////////////////////////
