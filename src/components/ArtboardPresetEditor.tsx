@@ -34,12 +34,6 @@ const ArtboardPresetEditor = (): ReactElement => {
     setHeight(e.target.value);
   };
 
-  const handleKeyDown = (e: any): void => {
-    if (e.key === 'Escape') {
-      dispatch(closeArtboardPresetEditor());
-    }
-  };
-
   const handleMouseDown = (e: any): void => {
     if (!editorRef.current.contains(e.target)) {
       dispatch(closeArtboardPresetEditor());
@@ -70,7 +64,6 @@ const ArtboardPresetEditor = (): ReactElement => {
 
   useEffect(() => {
     dispatch(setCanvasFocusing({focusing: false}));
-    document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('mousedown', handleMouseDown);
     if (nameControlRef.current) {
       nameControlRef.current.focus();
@@ -78,7 +71,6 @@ const ArtboardPresetEditor = (): ReactElement => {
     }
     return () => {
       dispatch(setCanvasFocusing({focusing: true}));
-      document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('mousedown', handleMouseDown);
     }
   }, []);

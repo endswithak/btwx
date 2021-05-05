@@ -12,6 +12,7 @@ import Titlebar from './Titlebar';
 import AutoSaver from './AutoSaver';
 import Touchbar from './Touchbar';
 import Main from './Main';
+import KeyBindings from './KeyBindings';
 
 const App = (): ReactElement => {
   const theme = useSelector((state: RootState) => state.preferences.theme);
@@ -55,6 +56,7 @@ const App = (): ReactElement => {
         <SessionImages />
         <AutoSaver />
         <Touchbar />
+        <KeyBindings />
     </div>
   );
 }
