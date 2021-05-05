@@ -6,7 +6,12 @@ import { getPrettyAccelerator, base64ToBuffer } from '../utils';
 import { addImageThunk } from '../store/actions/layer';
 import ListItem from './ListItem';
 
-const InsertImageListItem = (): ReactElement => {
+interface InsertImageListItemProps {
+  closeDropdown(): void;
+}
+
+const InsertImageListItem = (props: InsertImageListItemProps): ReactElement => {
+  const { closeDropdown } = props;
   const imageAccelerator = useSelector((state: RootState) => getPrettyAccelerator(state.keyBindings.insert.image));
   const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
   const dispatch = useDispatch();
@@ -40,6 +45,7 @@ const InsertImageListItem = (): ReactElement => {
           buffer: buffer as any,
           ext: ext
         }));
+        closeDropdown();
       }
       image.src = this.result as string;
     }, false);

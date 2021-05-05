@@ -36,6 +36,12 @@ const InsertButton = (): ReactElement => {
     }
   }
 
+  const onKeyDown = (e: any): void => {
+    if (e.key === 'Escape') {
+      closeDropdown();
+    }
+  }
+
   const handleClick = (event: React.SyntheticEvent): void => {
     showDropdown ? closeDropdown() : openDropdown();
     // if (onClick) {
@@ -43,14 +49,46 @@ const InsertButton = (): ReactElement => {
     // }
   }
 
+  const handleItemClick = (type) => {
+    switch(type) {
+      case 'Artboard':
+        dispatch(toggleArtboardToolThunk());
+        break;
+      case 'Rectangle':
+        dispatch(toggleShapeToolThunk('Rectangle'));
+        break;
+      case 'Rounded':
+        dispatch(toggleShapeToolThunk('Rounded'));
+        break;
+      case 'Ellipse':
+        dispatch(toggleShapeToolThunk('Ellipse'));
+        break;
+      case 'Star':
+        dispatch(toggleShapeToolThunk('Star'));
+        break;
+      case 'Polygon':
+        dispatch(toggleShapeToolThunk('Polygon'));
+        break;
+      case 'Line':
+        dispatch(toggleShapeToolThunk('Line'));
+        break;
+      case 'Text':
+        dispatch(toggleTextToolThunk());
+        break;
+    }
+    closeDropdown();
+  }
+
   const closeDropdown = (): void => {
     setShowDropdown(false);
     document.removeEventListener('mousedown', onMouseDown);
+    document.removeEventListener('keydown', onKeyDown);
   }
 
   const openDropdown = (): void => {
     setShowDropdown(true);
     document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('keydown', onKeyDown);
   }
 
   const getInsertButtonIcon = () => {
@@ -99,7 +137,7 @@ const InsertButton = (): ReactElement => {
             <ListGroup as='div'>
               <ListItem
                 as='button'
-                onClick={() => dispatch(toggleArtboardToolThunk())}
+                onClick={(e) => handleItemClick('Artboard')}
                 isActive={activeTool === 'Artboard'}
                 interactive>
                 <ListItem.Icon name='artboard' />
@@ -122,7 +160,7 @@ const InsertButton = (): ReactElement => {
               </ListItem>
               <ListItem
                 as='button'
-                onClick={() => dispatch(toggleShapeToolThunk('Rectangle'))}
+                onClick={(e) => handleItemClick('Rectangle')}
                 isActive={activeTool === 'Shape' && shapeToolShapeType === 'Rectangle'}
                 disabled={activeArtboard === null}
                 interactive>
@@ -146,7 +184,7 @@ const InsertButton = (): ReactElement => {
               </ListItem>
               <ListItem
                 as='button'
-                onClick={() => dispatch(toggleShapeToolThunk('Rounded'))}
+                onClick={(e) => handleItemClick('Rounded')}
                 isActive={activeTool === 'Shape' && shapeToolShapeType === 'Rounded'}
                 disabled={activeArtboard === null}
                 interactive>
@@ -170,7 +208,7 @@ const InsertButton = (): ReactElement => {
               </ListItem>
               <ListItem
                 as='button'
-                onClick={() => dispatch(toggleShapeToolThunk('Ellipse'))}
+                onClick={(e) => handleItemClick('Ellipse')}
                 isActive={activeTool === 'Shape' && shapeToolShapeType === 'Ellipse'}
                 disabled={activeArtboard === null}
                 interactive>
@@ -194,7 +232,7 @@ const InsertButton = (): ReactElement => {
               </ListItem>
               <ListItem
                 as='button'
-                onClick={() => dispatch(toggleShapeToolThunk('Star'))}
+                onClick={(e) => handleItemClick('Star')}
                 isActive={activeTool === 'Shape' && shapeToolShapeType === 'Star'}
                 disabled={activeArtboard === null}
                 interactive>
@@ -218,7 +256,7 @@ const InsertButton = (): ReactElement => {
               </ListItem>
               <ListItem
                 as='button'
-                onClick={() => dispatch(toggleShapeToolThunk('Polygon'))}
+                onClick={(e) => handleItemClick('Polygon')}
                 isActive={activeTool === 'Shape' && shapeToolShapeType === 'Polygon'}
                 disabled={activeArtboard === null}
                 interactive>
@@ -242,7 +280,7 @@ const InsertButton = (): ReactElement => {
               </ListItem>
               <ListItem
                 as='button'
-                onClick={() => dispatch(toggleShapeToolThunk('Line'))}
+                onClick={(e) => handleItemClick('Line')}
                 isActive={activeTool === 'Shape' && shapeToolShapeType === 'Line'}
                 disabled={activeArtboard === null}
                 interactive>
@@ -266,7 +304,7 @@ const InsertButton = (): ReactElement => {
               </ListItem>
               <ListItem
                 as='button'
-                onClick={() => dispatch(toggleTextToolThunk())}
+                onClick={(e) => handleItemClick('Text')}
                 isActive={activeTool === 'Text'}
                 disabled={activeArtboard === null}
                 interactive>
@@ -288,7 +326,8 @@ const InsertButton = (): ReactElement => {
                   </ListItem.Text>
                 </ListItem.Right>
               </ListItem>
-              <InsertImageListItem />
+              <InsertImageListItem
+                closeDropdown={closeDropdown} />
               {/* <ListItem
                 onClick={() => dispatch(insertImageThunk())}
                 disabled={activeArtboard === null}

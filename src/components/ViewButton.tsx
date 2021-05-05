@@ -22,10 +22,14 @@ const InsertButton = (): ReactElement => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dispatch = useDispatch();
 
-  // const isMac = remote.process.platform === 'darwin';
-
   const onMouseDown = (event: any): void => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      closeDropdown();
+    }
+  }
+
+  const onKeyDown = (e: any): void => {
+    if (e.key === 'Escape') {
       closeDropdown();
     }
   }
@@ -40,11 +44,13 @@ const InsertButton = (): ReactElement => {
   const closeDropdown = (): void => {
     setShowDropdown(false);
     document.removeEventListener('mousedown', onMouseDown);
+    document.removeEventListener('keydown', onKeyDown);
   }
 
   const openDropdown = (): void => {
     setShowDropdown(true);
     document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('keydown', onKeyDown);
   }
 
   const handleLeftSidebarChange = (e: any): void => {

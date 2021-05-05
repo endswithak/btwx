@@ -74,15 +74,21 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
         }));
       }
       if (eventDrawerHover !== null) {
-        dispatch(setEventDrawerEventHoverThunk({id: null}));
-        dispatch(setCanvasCursor({cursor: cursor.filter(c => c !== 'pointer')}));
+        dispatch(setEventDrawerEventHoverThunk({
+          id: null
+        }));
+        dispatch(setCanvasCursor({
+          cursor: cursor.filter(c => c !== 'pointer')
+        }));
       }
     } else {
       const interactiveType = uiEvent.hitResult.item.data.interactiveType;
       switch(uiEvent.hitResult.item.data.elementId) {
         case 'selectionFrame': {
           if (hover) {
-            dispatch(setLayerHover({id: null}));
+            dispatch(setLayerHover({
+              id: null
+            }));
           }
           switch(interactiveType) {
             case 'move':
@@ -133,7 +139,9 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
         }
         case 'gradientFrame': {
           if (hover) {
-            dispatch(setLayerHover({id: null}));
+            dispatch(setLayerHover({
+              id: null
+            }));
           }
           if (activeTool !== 'Gradient' || (activeTool === 'Gradient' && interactiveType && gradientHandle !== interactiveType)) {
             dispatch(setCanvasActiveTool({
@@ -146,16 +154,22 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
         }
         case 'eventsFrame': {
           if (interactiveType && eventDrawerHover !== interactiveType) {
-            dispatch(setEventDrawerEventHoverThunk({id: interactiveType}));
+            dispatch(setEventDrawerEventHoverThunk({
+              id: interactiveType
+            }));
             if (cursor[0] !== 'pointer' && !eventDrawerEvent) {
-              dispatch(setCanvasCursor({cursor: ['pointer', ...cursor]}));
+              dispatch(setCanvasCursor({
+                cursor: ['pointer', ...cursor]
+              }));
             }
           }
           break;
         }
         case 'namesFrame': {
           if (interactiveType && hover !== interactiveType) {
-            dispatch(setLayerHover({id: interactiveType}));
+            dispatch(setLayerHover({
+              id: interactiveType
+            }));
           }
           if (activeTool !== 'Drag') {
             dispatch(setCanvasActiveTool({
@@ -175,7 +189,9 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
   const handleMouseDown = (): void => {
     if (uiEvent.empty) {
       if (selectedEvents.length > 0 && !uiEvent.event.shiftKey) {
-        dispatch(deselectLayerEvents({events: selectedEvents}));
+        dispatch(deselectLayerEvents({
+          events: selectedEvents
+        }));
       }
     } else {
       const interactiveType = uiEvent.hitResult.item.data.interactiveType;
@@ -184,19 +200,26 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           const isSelected = selectedEvents.includes(interactiveType);
           if (uiEvent.event.shiftKey) {
             if (isSelected) {
-              dispatch(deselectLayerEvents({events: [interactiveType]}));
+              dispatch(deselectLayerEvents({
+                events: [interactiveType]
+              }));
             } else {
-              dispatch(selectLayerEvents({events: [interactiveType]}));
+              dispatch(selectLayerEvents({
+                events: [interactiveType]
+              }));
             }
           } else {
             if (!isSelected) {
-              dispatch(selectLayerEvents({events: [interactiveType], newSelection: true}));
+              dispatch(selectLayerEvents({
+                events: [interactiveType],
+                newSelection: true
+              }));
             }
           }
           break;
         }
         case 'gradientFrame': {
-          if (interactiveType && uiEvent.hitResult.item.data.stopIndex) {
+          if (interactiveType && interactiveType !== 'connector') {
             dispatch(setLayerActiveGradientStop({
               id: selected[0],
               prop: gradientEditorProp,
@@ -210,15 +233,26 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
             const artboardItem = artboardItems[interactiveType];
             if (uiEvent.event.shiftKey) {
               if (artboardItem.selected) {
-                dispatch(deselectLayers({layers: [interactiveType]}));
+                dispatch(deselectLayers({
+                  layers: [interactiveType]
+                }));
               } else {
-                dispatch(setLayerTreeScroll({scroll: interactiveType}));
-                dispatch(selectLayers({layers: [interactiveType]}));
+                dispatch(setLayerTreeScroll({
+                  scroll: interactiveType
+                }));
+                dispatch(selectLayers({
+                  layers: [interactiveType]
+                }));
               }
             } else {
               if (!selected.includes(interactiveType)) {
-                dispatch(setLayerTreeScroll({scroll: interactiveType}));
-                dispatch(selectLayers({layers: [interactiveType], newSelection: true}));
+                dispatch(setLayerTreeScroll({
+                  scroll: interactiveType
+                }));
+                dispatch(selectLayers({
+                  layers: [interactiveType],
+                  newSelection: true
+                }));
               }
             }
           }
@@ -236,8 +270,12 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
       switch(uiEvent.hitResult.item.data.elementId) {
         case 'eventsFrame': {
           if (interactiveType && eventDrawerEvent !== interactiveType) {
-            dispatch(setEventDrawerEventThunk({id: interactiveType}));
-            dispatch(setCanvasCursor({cursor: ['auto']}));
+            dispatch(setEventDrawerEventThunk({
+              id: interactiveType
+            }));
+            dispatch(setCanvasCursor({
+              cursor: ['auto']
+            }));
           }
           break;
         }

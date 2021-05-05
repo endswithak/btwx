@@ -23,18 +23,50 @@ const ZoomButton = (): ReactElement => {
     }
   }
 
+  const onKeyDown = (e: any): void => {
+    if (e.key === 'Escape') {
+      closeDropdown();
+    }
+  }
+
   const handleClick = (event: React.SyntheticEvent): void => {
     showDropdown ? closeDropdown() : openDropdown();
+  }
+
+  const handleItemClick = (type: string | number): void => {
+    switch(type) {
+      case 50:
+        dispatch(zoomPercentThunk(0.5));
+        break;
+      case 100:
+        dispatch(zoomPercentThunk(1));
+        break;
+      case 200:
+        dispatch(zoomPercentThunk(2));
+        break;
+      case 'fitCanvas':
+        dispatch(zoomFitCanvasThunk());
+        break;
+      case 'fitSelected':
+        dispatch(zoomFitSelectedThunk());
+        break;
+      case 'fitActiveArtboard':
+        dispatch(zoomFitActiveArtboardThunk());
+        break;
+    }
+    closeDropdown();
   }
 
   const closeDropdown = (): void => {
     setShowDropdown(false);
     document.removeEventListener('mousedown', onMouseDown);
+    document.removeEventListener('keydown', onKeyDown);
   }
 
   const openDropdown = (): void => {
     setShowDropdown(true);
     document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('keydown', onKeyDown);
   }
 
   return (
@@ -57,7 +89,7 @@ const ZoomButton = (): ReactElement => {
             <ListGroup>
               <ListItem
                 interactive
-                onClick={() => dispatch(zoomPercentThunk(0.5))}>
+                onClick={() => handleItemClick(50)}>
                 <ListItem.Body>
                   <ListItem.Text size='small'>
                     50%
@@ -66,7 +98,7 @@ const ZoomButton = (): ReactElement => {
               </ListItem>
               <ListItem
                 interactive
-                onClick={() => dispatch(zoomPercentThunk(1))}>
+                onClick={() => handleItemClick(100)}>
                 <ListItem.Body>
                   <ListItem.Text size='small'>
                     100%
@@ -75,7 +107,7 @@ const ZoomButton = (): ReactElement => {
               </ListItem>
               <ListItem
                 interactive
-                onClick={() => dispatch(zoomPercentThunk(2))}>
+                onClick={() => handleItemClick(200)}>
                 <ListItem.Body>
                   <ListItem.Text size='small'>
                     200%
@@ -84,7 +116,7 @@ const ZoomButton = (): ReactElement => {
               </ListItem>
               <ListItem
                 interactive
-                onClick={() => dispatch(zoomFitCanvasThunk())}
+                onClick={() => handleItemClick('fitCanvas')}
                 disabled={!canCanvasZoom}>
                 <ListItem.Body>
                   <ListItem.Text size='small'>
@@ -94,7 +126,7 @@ const ZoomButton = (): ReactElement => {
               </ListItem>
               <ListItem
                 interactive
-                onClick={() => dispatch(zoomFitSelectedThunk())}
+                onClick={() => handleItemClick('fitSelected')}
                 disabled={!canSelectedZoom}>
                 <ListItem.Body>
                   <ListItem.Text size='small'>
@@ -104,7 +136,7 @@ const ZoomButton = (): ReactElement => {
               </ListItem>
               <ListItem
                 interactive
-                onClick={() => dispatch(zoomFitActiveArtboardThunk())}
+                onClick={() => handleItemClick('fitActiveArtboard')}
                 disabled={!canArtboardZoom}>
                 <ListItem.Body>
                   <ListItem.Text size='small'>

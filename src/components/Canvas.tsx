@@ -4,6 +4,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
 import { setCanvasReady, setCanvasFocusing, setCanvasMeasuring } from '../store/actions/canvasSettings';
+import { toggleShapeToolThunk } from '../store/actions/shapeTool';
+import { toggleTextToolThunk } from '../store/actions/textTool';
+import { toggleArtboardToolThunk } from '../store/actions/artboardTool';
+import { closeArtboardPresetEditor } from '../store/actions/artboardPresetEditor';
+import { closeGradientEditor } from '../store/actions/gradientEditor';
+import { closeColorEditor } from '../store/actions/colorEditor';
+import { closeEaseEditor } from '../store/actions/easeEditor';
+import { closeFontFamilySelector } from '../store/actions/fontFamilySelector';
 import { getAllProjectIndices } from '../store/selectors/layer';
 import CanvasLayerEvents from './CanvasLayerEvents';
 import CanvasUIEvents from './CanvasUIEvents';
@@ -44,6 +52,15 @@ const Canvas = (): ReactElement => {
   const isDevelopment = useSelector((state: RootState) => state.session.env === 'development');
   const focusing = useSelector((state: RootState) => state.canvasSettings.focusing);
   const measuring = useSelector((state: RootState) => state.canvasSettings.measuring);
+  const gradientEditorOpen = useSelector((state: RootState) => state.gradientEditor.isOpen);
+  const colorEditorOpen = useSelector((state: RootState) => state.colorEditor.isOpen);
+  const easeEditorOpen = useSelector((state: RootState) => state.easeEditor.isOpen);
+  const artboardPresetEditorOpen = useSelector((state: RootState) => state.artboardPresetEditor.isOpen);
+  const fontFamilySelectorOpen = useSelector((state: RootState) => state.fontFamilySelector.isOpen);
+  const shapeToolActive = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Shape');
+  const shapeToolShapeType = useSelector((state: RootState) => state.shapeTool.shapeType);
+  const textToolActive = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Text');
+  const artboardToolActive = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Artboard');
   const waiting = useSelector((state: RootState) => state.canvasSettings.waiting);
   const activeTool = useSelector((state: RootState) => state.canvasSettings.activeTool);
   const shapeToolType = useSelector((state: RootState) => state.shapeTool.shapeType);
@@ -158,10 +175,14 @@ const Canvas = (): ReactElement => {
 
   const handleMouseDown = (e: any): void => {
     if (!focusing) {
-      dispatch(setCanvasFocusing({focusing: true}));
+      dispatch(setCanvasFocusing({
+        focusing: true
+      }));
     }
     if (measuring) {
-      dispatch(setCanvasMeasuring({measuring: false}));
+      dispatch(setCanvasMeasuring({
+        measuring: false
+      }));
     }
     if (document.activeElement && document.activeElement.nodeName === 'INPUT') {
       (document.activeElement as HTMLInputElement).blur();
@@ -179,18 +200,53 @@ const Canvas = (): ReactElement => {
 
   const handleKeyDown = (e: any): void => {
     if (e.key === 'Alt') {
-      dispatch(setCanvasMeasuring({measuring: true}));
+      dispatch(setCanvasMeasuring({
+        measuring: true
+      }));
+    }
+    if (e.key === 'Escape') {
+      if (gradientEditorOpen) {
+        dispatch(closeGradientEditor());
+      }
+      if (colorEditorOpen) {
+        dispatch(closeColorEditor());
+      }
+      if (easeEditorOpen) {
+        dispatch(closeEaseEditor());
+      }
+      if (shapeToolActive) {
+        dispatch(toggleShapeToolThunk(shapeToolShapeType));
+      }
+      if (artboardToolActive) {
+        dispatch(toggleArtboardToolThunk());
+      }
+      if (textToolActive) {
+        dispatch(toggleTextToolThunk());
+      }
+      if (artboardPresetEditorOpen) {
+        dispatch(closeArtboardPresetEditor());
+      }
+      if (fontFamilySelectorOpen) {
+        dispatch(closeFontFamilySelector());
+      }
+      if (document.activeElement && document.activeElement.nodeName === 'INPUT') {
+        (document.activeElement as HTMLInputElement).blur();
+      }
     }
   }
 
   const handleKeyUp = (e: any): void => {
     if (e.key === 'Alt') {
       if (measuring) {
-        dispatch(setCanvasMeasuring({measuring: false}));
+        dispatch(setCanvasMeasuring({
+          measuring: false
+        }));
       }
     } else {
       if (measuring) {
-        dispatch(setCanvasMeasuring({measuring: false}));
+        dispatch(setCanvasMeasuring({
+          measuring: false
+        }));
       }
     }
   }
@@ -224,7 +280,11 @@ const Canvas = (): ReactElement => {
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('keyup', handleKeyUp);
     }
-  }, [focusing, measuring]);
+  }, [
+    focusing, measuring, gradientEditorOpen, colorEditorOpen, easeEditorOpen,
+    shapeToolActive, shapeToolShapeType, artboardToolActive, textToolActive,
+    artboardPresetEditorOpen, fontFamilySelectorOpen
+  ]);
 
   useEffect(() => {
     dispatch(setCanvasReady());

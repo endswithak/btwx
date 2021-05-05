@@ -128,14 +128,16 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
         raster.bounds.width = layerItem.frame.innerWidth;
         raster.bounds.height = layerItem.frame.innerHeight;
         raster.position = imageAbsPosition;
-        raster.shadowColor = {
-          hue: layerItem.style.shadow.color.h,
-          saturation: layerItem.style.shadow.color.s,
-          lightness: layerItem.style.shadow.color.l,
-          alpha: layerItem.style.shadow.color.a
-        } as paper.Color;
-        raster.shadowBlur = layerItem.style.shadow.blur;
-        raster.shadowOffset = new paperMain.Point(layerItem.style.shadow.offset.x, layerItem.style.shadow.offset.y);
+        if (layerItem.style.shadow.enabled) {
+          raster.shadowColor = {
+            hue: layerItem.style.shadow.color.h,
+            saturation: layerItem.style.shadow.color.s,
+            lightness: layerItem.style.shadow.color.l,
+            alpha: layerItem.style.shadow.color.a
+          } as paper.Color;
+          raster.shadowBlur = layerItem.style.shadow.blur;
+          raster.shadowOffset = new paperMain.Point(layerItem.style.shadow.offset.x, layerItem.style.shadow.offset.y);
+        }
         raster.visible = true;
         applyLayerTransforms({
           paperLayer: imageContainer,
@@ -189,14 +191,16 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
         newRaster.bounds.width = layerItem.frame.innerWidth;
         newRaster.bounds.height = layerItem.frame.innerHeight;
         newRaster.position = imageAbsPosition;
-        raster.shadowColor = {
-          hue: layerItem.style.shadow.color.h,
-          saturation: layerItem.style.shadow.color.s,
-          lightness: layerItem.style.shadow.color.l,
-          alpha: layerItem.style.shadow.color.a
-        } as paper.Color;
-        raster.shadowBlur = layerItem.style.shadow.blur;
-        raster.shadowOffset = new paperMain.Point(layerItem.style.shadow.offset.x, layerItem.style.shadow.offset.y);
+        if (layerItem.style.shadow.enabled) {
+          raster.shadowColor = {
+            hue: layerItem.style.shadow.color.h,
+            saturation: layerItem.style.shadow.color.s,
+            lightness: layerItem.style.shadow.color.l,
+            alpha: layerItem.style.shadow.color.a
+          } as paper.Color;
+          raster.shadowBlur = layerItem.style.shadow.blur;
+          raster.shadowOffset = new paperMain.Point(layerItem.style.shadow.offset.x, layerItem.style.shadow.offset.y);
+        }
         applyLayerTransforms({
           paperLayer: newRaster,
           transform: layerItem.transform

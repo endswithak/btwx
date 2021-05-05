@@ -6237,7 +6237,7 @@ export const updateGradientFrame = (origin: { position: paper.Point; color: Btwx
       radius: 8 / paperMain.view.zoom,
       fillColor: '#fff',
       shadowColor: new paperMain.Color(0, 0, 0, 0.5),
-      shadowBlur: 2,
+      shadowBlur: 2 / paperMain.view.zoom,
       insert: false,
       strokeWidth: 1 / paperMain.view.zoom
     }
@@ -6245,6 +6245,15 @@ export const updateGradientFrame = (origin: { position: paper.Point; color: Btwx
       radius: 6 / paperMain.view.zoom,
       fillColor: '#fff',
       insert: false
+    }
+    const gradientFrameHandleActiveBorderProps = {
+      radius: 10 / paperMain.view.zoom,
+      fillColor: null,
+      insert: false,
+      strokeWidth: 2 / paperMain.view.zoom,
+      shadowColor: new paperMain.Color(0, 0, 0, 0.5),
+      shadowBlur: 2 / paperMain.view.zoom,
+      strokeColor: THEME_PRIMARY_COLOR
     }
     const gradientFrameLineProps = {
       from: origin.position,
@@ -6260,8 +6269,7 @@ export const updateGradientFrame = (origin: { position: paper.Point; color: Btwx
         interactiveType: 'origin',
         elementId: 'gradientFrame',
         stopIndex: origin.index
-      },
-      strokeColor: origin.selected ? THEME_PRIMARY_COLOR : null
+      }
     });
     const gradientFrameOriginHandleSwatch  = new paperMain.Shape.Circle({
       ...gradientFrameHandleSwatchProps,
@@ -6280,6 +6288,18 @@ export const updateGradientFrame = (origin: { position: paper.Point; color: Btwx
         stopIndex: origin.index
       }
     });
+    const gradientFrameOriginHandleActiveBorder  = new paperMain.Shape.Circle({
+      ...gradientFrameHandleActiveBorderProps,
+      center: origin.position,
+      visible: origin.selected,
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'origin',
+        elementId: 'gradientFrame',
+        stopIndex: origin.index
+      }
+    });
     const gradientFrameDestinationHandleBg = new paperMain.Shape.Circle({
       ...gradientFrameHandleBgProps,
       center: destination.position,
@@ -6289,8 +6309,7 @@ export const updateGradientFrame = (origin: { position: paper.Point; color: Btwx
         interactiveType: 'destination',
         elementId: 'gradientFrame',
         stopIndex: destination.index
-      },
-      strokeColor: destination.selected ? THEME_PRIMARY_COLOR : null
+      }
     });
     const gradientFrameDestinationHandleSwatch = new paperMain.Shape.Circle({
       ...gradientFrameHandleSwatchProps,
@@ -6301,6 +6320,18 @@ export const updateGradientFrame = (origin: { position: paper.Point; color: Btwx
         alpha: destination.color.a
       },
       center: destination.position,
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'destination',
+        elementId: 'gradientFrame',
+        stopIndex: destination.index
+      }
+    });
+    const gradientFrameDestinationHandleActiveBorder  = new paperMain.Shape.Circle({
+      ...gradientFrameHandleActiveBorderProps,
+      center: destination.position,
+      visible: destination.selected,
       data: {
         type: 'UIElementChild',
         interactive: true,
@@ -6343,7 +6374,7 @@ export const updateGradientFrame = (origin: { position: paper.Point; color: Btwx
         stopIndex: origin.index
       },
       insert: false,
-      children: [gradientFrameOriginHandleBg, gradientFrameOriginHandleSwatch]
+      children: [gradientFrameOriginHandleActiveBorder, gradientFrameOriginHandleBg, gradientFrameOriginHandleSwatch]
     });
     const gradientFrameDestinationHandle = new paperMain.Group({
       data: {
@@ -6355,7 +6386,7 @@ export const updateGradientFrame = (origin: { position: paper.Point; color: Btwx
         stopIndex: destination.index
       },
       insert: false,
-      children: [gradientFrameDestinationHandleBg, gradientFrameDestinationHandleSwatch]
+      children: [gradientFrameDestinationHandleActiveBorder, gradientFrameDestinationHandleBg, gradientFrameDestinationHandleSwatch]
     });
     const gradientFrameLines = new paperMain.Group({
       data: {
