@@ -63,6 +63,12 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
         tweening: event.artboard
       }));
     },
+    onUpdate: function() {
+      ipcRenderer.send('setDocumentTimelineGuidePosition', JSON.stringify({
+        instanceId: electronInstanceId,
+        time: this.time()
+      }));
+    },
     onComplete: function() {
       paperPreview.view.center = destinationArtboardPosition;
       dispatch(setActiveArtboard({
@@ -77,7 +83,7 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
       }));
       ipcRenderer.send('setDocumentPreviewTweening', JSON.stringify({
         instanceId: electronInstanceId,
-        tweening: event.artboard
+        tweening: null
       }));
       this.pause(0, false);
     }

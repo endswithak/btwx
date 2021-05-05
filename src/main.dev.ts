@@ -1274,6 +1274,14 @@ ipcMain.handle('setDocumentRecordingStopped', (event, args) => {
   });
 });
 
+ipcMain.on('setDocumentTimelineGuidePosition', (event, args) => {
+  const { instanceId, time } = JSON.parse(args);
+  const instance = btwxElectron.instance.byId[instanceId];
+  instance.document.webContents.send('setDocumentTimelineGuidePosition', JSON.stringify({
+    time: time
+  }));
+});
+
 ////////////////////////////////////////////////////////////
 // INSTANCE => FROM DOCUMENT RENDERER
 ////////////////////////////////////////////////////////////
