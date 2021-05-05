@@ -178,12 +178,11 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     }
   }
 
-  const updateGradients = (paperLayers: { paperLayer: paper.Item; textContent: paper.PointText; textBackground: paper.Path.Rectangle, currentProps: CurrentTweenProps }): void => {
-    const { paperLayer, textContent, textBackground, currentProps } = paperLayers;
-    const isText = originLayerItem.type === 'Text';
+  const updateGradients = (paperLayers: { paperLayer: paper.Item, fillRef: paper.Item, currentProps: CurrentTweenProps }): void => {
+    const { paperLayer, fillRef, currentProps } = paperLayers;
     const isOriginLayerLine = originLayerItem.type === 'Shape' && (originLayerItem as Btwx.Shape).shapeType === 'Line';
     ['fill', 'stroke'].forEach((style: 'fill' | 'stroke') => {
-      if (paperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] && paperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient || isText && textContent[`${style}Color` as 'fillColor' | 'strokeColor'] && textContent[`${style}Color` as 'fillColor' | 'strokeColor'].gradient) {
+      if (fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] && fillRef[`${style}Color` as 'fillColor' | 'strokeColor'].gradient) {
         const innerWidth = isOriginLayerLine ? currentProps.boundingWidth : currentProps.width; // ? currentProps.innerWidth : (isOriginLayerLine ? originLayerItem.frame.width : originLayerItem.frame.innerWidth);
         const innerHeight = isOriginLayerLine ? currentProps.boundingHeight : currentProps.height; // ? currentProps.innerHeight : (isOriginLayerLine ? originLayerItem.frame.height : originLayerItem.frame.innerHeight);
         const originX = currentProps[`${style}GradientOriginX`]; // ? currentProps[`${style}GradientOriginX`] : originLayerItem.style[style].gradient.origin.x;
@@ -200,13 +199,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         const nextDestinationY = destinationYEase && destinationYEase === 'customWiggle' ? destinationY : (destinationY * innerHeight) + paperLayer.position.y;
         const nextOrigin = new paperPreview.Point(nextOriginX, nextOriginY);
         const nextDestination = new paperPreview.Point(nextDestinationX, nextDestinationY);
-        if (isText) {
-          (textContent[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).origin = nextOrigin;
-          (textContent[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).destination = nextDestination;
-        } else {
-          (paperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).origin = nextOrigin;
-          (paperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).destination = nextDestination;
-        }
+        (fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).origin = nextOrigin;
+        (fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).destination = nextDestination;
       }
     });
   };
@@ -358,7 +352,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: morphData[1],
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, artboardBackground, textContent, textBackground, fillRef, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
         const currentProps = getCurrentTweenLayerProps();
         const startPosition = paperLayer.position;
         clearLayerTransforms({
@@ -394,7 +388,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         });
         paperLayer.position = startPosition;
         // update fill gradient origin/destination if needed
-        updateGradients({ paperLayer, textContent, textBackground, currentProps });
+        updateGradients({ paperLayer, fillRef, currentProps });
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -411,18 +405,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? tinyColor(tween.customWiggle.strength).toRgbString() : tinyColor(dfc).toRgbString(),
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         const nextFS = eventTimeline.data[tween.layer][tween.prop];
-        switch(originLayerItem.type) {
-          case 'Artboard':
-            artboardBackground[`${style}Color` as 'fillColor' | 'strokeColor'] = nextFS;
-            break;
-          case 'Text':
-            textContent[`${style}Color` as 'fillColor' | 'strokeColor'] = nextFS;
-            break;
-          default:
-            paperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] = nextFS;
-        }
+        fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] = nextFS;
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -438,18 +423,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: tinyColor(dfc).toRgbString(),
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         const nextFS = eventTimeline.data[tween.layer][tween.prop];
-        switch(originLayerItem.type) {
-          case 'Artboard':
-            artboardBackground[`${style}Color` as 'fillColor' | 'strokeColor'] = nextFS;
-            break;
-          case 'Text':
-            textContent[`${style}Color` as 'fillColor' | 'strokeColor'] = nextFS;
-            break;
-          default:
-            paperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] = nextFS;
-        }
+        fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] = nextFS;
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -465,18 +441,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: 0,
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         const nextFS = eventTimeline.data[tween.layer][tween.prop];
-        switch(originLayerItem.type) {
-          case 'Artboard':
-            artboardBackground[`${style}Color` as 'fillColor' | 'strokeColor'].alpha = nextFS;
-            break;
-          case 'Text':
-            textContent[`${style}Color` as 'fillColor' | 'strokeColor'].alpha = nextFS;
-            break;
-          default:
-            paperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].alpha = nextFS;
-        }
+        fillRef[`${style}Color` as 'fillColor' | 'strokeColor'].alpha = nextFS;
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -500,7 +467,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         eventTimeline.data[tween.layer][`${tween.prop}-ease`] = tween.ease;
       },
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         const currentProps = getCurrentTweenLayerProps();
         const widthRef = isLine ? currentProps.boundingWidth : currentProps.width;
         const heightRef = isLine ? currentProps.boundingHeight : currentProps.height;
@@ -510,16 +477,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         const nextOriginX = tween.ease === 'customWiggle' ? originX : (originX * widthRef) + paperLayer.position.x;
         const nextOriginY = originYEase === 'customWiggle' ? originY : (originY * heightRef) + paperLayer.position.y;
         const nextOrigin = new paperPreview.Point(nextOriginX, nextOriginY);
-        switch(originLayerItem.type) {
-          case 'Artboard':
-            (artboardBackground[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).origin = nextOrigin;
-            break;
-          case 'Text':
-            (textContent[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).origin = nextOrigin;
-            break;
-          default:
-            (paperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).origin = nextOrigin;
-        }
+        (fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).origin = nextOrigin;
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -538,7 +496,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         eventTimeline.data[tween.layer][`${tween.prop}-ease`] = tween.ease;
       },
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         const currentProps = getCurrentTweenLayerProps();
         const widthRef = isLine ? currentProps.boundingWidth : currentProps.width;
         const heightRef = isLine ? currentProps.boundingHeight : currentProps.height;
@@ -548,16 +506,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         const nextOriginX = originXEase === 'customWiggle' ? originX : (originX * widthRef) + paperLayer.position.x;
         const nextOriginY = tween.ease === 'customWiggle' ? originY : (originY * heightRef) + paperLayer.position.y;
         const nextOrigin = new paperPreview.Point(nextOriginX, nextOriginY);
-        switch(originLayerItem.type) {
-          case 'Artboard':
-            (artboardBackground[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).origin = nextOrigin;
-            break;
-          case 'Text':
-            (textContent[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).origin = nextOrigin;
-            break;
-          default:
-            (paperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).origin = nextOrigin;
-        }
+        (fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).origin = nextOrigin;
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -576,7 +525,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         eventTimeline.data[tween.layer][`${tween.prop}-ease`] = tween.ease;
       },
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         const currentProps = getCurrentTweenLayerProps();
         const widthRef = isLine ? currentProps.boundingWidth : currentProps.width;
         const heightRef = isLine ? currentProps.boundingHeight : currentProps.height;
@@ -586,16 +535,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         const nextDestinationX = tween.ease === 'customWiggle' ? destinationX : (destinationX * widthRef) + paperLayer.position.x;
         const nextDestinationY = destinationYEase === 'customWiggle' ? destinationY : (destinationY * heightRef) + paperLayer.position.y;
         const nextDestination = new paperPreview.Point(nextDestinationX, nextDestinationY);
-        switch(originLayerItem.type) {
-          case 'Artboard':
-            (artboardBackground[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).destination = nextDestination;
-            break;
-          case 'Text':
-            (textContent[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).destination = nextDestination;
-            break;
-          default:
-            (paperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).destination = nextDestination;
-        }
+        (fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).destination = nextDestination;
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -614,7 +554,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         eventTimeline.data[tween.layer][`${tween.prop}-ease`] = tween.ease;
       },
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         const currentProps = getCurrentTweenLayerProps();
         const widthRef = isLine ? currentProps.boundingWidth : currentProps.width;
         const heightRef = isLine ? currentProps.boundingHeight : currentProps.height;
@@ -624,54 +564,70 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         const nextDestinationX = destinationXEase === 'customWiggle' ? destinationX : (destinationX * widthRef) + paperLayer.position.x;
         const nextDestinationY = tween.ease === 'customWiggle' ? destinationY : (destinationY * heightRef) + paperLayer.position.y;
         const nextDestination = new paperPreview.Point(nextDestinationX, nextDestinationY);
-        switch(originLayerItem.type) {
-          case 'Artboard':
-            (artboardBackground[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).destination = nextDestination;
-            break;
-          case 'Text':
-            (textContent[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).destination = nextDestination;
-            break;
-          default:
-            (paperLayer[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).destination = nextDestination;
-        }
+        (fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).destination = nextDestination;
       },
       ease: getEaseString(tween),
     }, tween.delay);
   };
 
   const addGradientToGradientFSTween = (style: 'fill' | 'stroke'): void => {
-    const isArtboard = originLayerItem.type === 'Artboard';
-    const isText = originLayerItem.type === 'Text';
+    const isLine = originLayerItem.type === 'Shape' && (originLayerItem as Btwx.Shape).shapeType === 'Line';
     const og = originLayerItem.style[style].gradient;
     const dg = destinationLayerItem.style[style].gradient;
     const originStopCount = og.stops.length;
     const destinationStopCount = dg.stops.length;
     const stopDiff = destinationStopCount - originStopCount;
-    const stops = og.stops;
+    let stops = og.stops;
     if (destinationStopCount > originStopCount) {
       for (let i = 0; i < stopDiff; i++) {
-        const stopClone = {...stops[0]};
-        stops.push(stopClone);
+        const stopClone = {...stops[stops.length - 1]};
+        stops = [...stops, stopClone];
       }
     }
     const stopsTimeline = gsap.timeline({
       id: tweenId,
       onStart: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { fillRef, paperLayer } = eventLayerTimeline.data as EventLayerTimelineData;
         if (destinationStopCount > originStopCount) {
           const stopDiff = destinationStopCount - originStopCount;
-          const paperLayerRef = isText ? textContent : isArtboard ? artboardBackground : paperLayer;
-          const gradientRef = isText ? paperLayerRef.children[0] : isArtboard ? artboardBackground : paperLayer;
-          paperLayerRef[`${style}Color` as 'fillColor' | 'strokeColor'] = {
+          // set to current gradient
+          // needed for when event resets
+          fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] = {
+            gradient: {
+              stops: og.stops.reduce((result, current) => {
+                result = [
+                  ...result,
+                  new paperPreview.GradientStop({
+                    hue: current.color.h,
+                    saturation: current.color.s,
+                    lightness: current.color.l,
+                    alpha: current.color.a
+                  } as paper.Color, current.position)
+                ];
+                return result;
+              }, []) as paper.GradientStop[],
+              radial: og.gradientType === 'radial'
+            },
+            origin: new paperPreview.Point(
+              (og.origin.x * (isLine ? originLayerItem.frame.width : originLayerItem.frame.innerWidth)) + paperLayer.position.x,
+              (og.origin.y * (isLine ? originLayerItem.frame.height : originLayerItem.frame.innerHeight)) + paperLayer.position.y
+            ),
+            destination: new paperPreview.Point(
+              (og.destination.x * (isLine ? originLayerItem.frame.width : originLayerItem.frame.innerWidth)) + paperLayer.position.x,
+              (og.destination.y * (isLine ? originLayerItem.frame.height : originLayerItem.frame.innerHeight)) + paperLayer.position.y
+            )
+          } as Btwx.PaperGradientFill;
+          // add missing stops
+          fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] = {
             gradient: {
               stops: [...Array(stopDiff).keys()].reduce((result, current) => [
                 ...result,
-                gradientRef[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[0].clone()
-              ], gradientRef[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops),
+                fillRef[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[fillRef[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops.length - 1].clone()
+              ], fillRef[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops),
               radial: dg.gradientType === 'radial'
             },
-            origin: (gradientRef[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).origin,
-            destination: (gradientRef[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).destination
+            origin: (fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).origin,
+            destination: (fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).destination
           } as Btwx.PaperGradientFill;
         }
       }
@@ -697,22 +653,11 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           : tinyColor(dc).toRgbString(),
         [`${tween.prop}-stop-${index}-offset`]: dp,
         onUpdate: () => {
-          const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+          const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
           const nextStopColor = eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`];
           const nextStopOffset = eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-offset`];
-          switch(originLayerItem.type) {
-            case 'Artboard':
-              artboardBackground[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color = nextStopColor;
-              artboardBackground[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].offset = nextStopOffset;
-              break;
-            case 'Text':
-              textContent[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color = nextStopColor;
-              textContent[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].offset = nextStopOffset;
-              break;
-            default:
-              paperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color = nextStopColor;
-              paperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].offset = nextStopOffset;
-          }
+          fillRef[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color = nextStopColor;
+          fillRef[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].offset = nextStopOffset;
         },
         ease: getEaseString(tween),
       }, tween.delay);
@@ -733,18 +678,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         yoyo: tween.yoyo,
         [`${tween.prop}-stop-${index}-color`]: tinyColor(dc).toRgbString(),
         onUpdate: () => {
-          const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+          const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
           const nextFS = eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`];
-          switch(originLayerItem.type) {
-            case 'Artboard':
-              artboardBackground[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color = nextFS;
-              break;
-            case 'Text':
-              textContent[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color = nextFS;
-              break;
-            default:
-              paperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color = nextFS;
-          }
+          fillRef[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color = nextFS;
         },
         ease: getEaseString(tween),
       }, tween.delay);
@@ -753,22 +689,19 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   };
 
   const addColorToGradientFSTween = (style: 'fill' | 'stroke'): void => {
-    const isText = originLayerItem.type === 'Text';
-    const isArtboard = originLayerItem.type === 'Artboard';
     const oc = originLayerItem.style[style].color;
     const dg = destinationLayerItem.style[style].gradient;
     const stopsTimeline = gsap.timeline({
       id: tweenId,
       onStart: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
-        const paperLayerRef = isText ? textContent : isArtboard ? artboardBackground : paperLayer;
+        const { paperLayer, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         eventTimeline.data[tween.layer][`${style}GradientOriginX`] = dg.origin.x;
         eventTimeline.data[tween.layer][`${style}GradientOriginY`] = dg.origin.y;
         eventTimeline.data[tween.layer][`${style}GradientDestinationX`] = dg.destination.x;
         eventTimeline.data[tween.layer][`${style}GradientDestinationY`] = dg.destination.y;
         // set origin layer styleColor to destination layer gradient...
         // with all the stop colors as origin color
-        paperLayerRef[`${style}Color` as 'fillColor' | 'strokeColor'] = {
+        fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] = {
           gradient: {
             stops: destinationLayerItem.style[style].gradient.stops.map((stop) => {
               return new paperPreview.GradientStop(
@@ -798,18 +731,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         yoyo: tween.yoyo,
         [`${tween.prop}-stop-${index}-color`]: tinyColor(sc).toRgbString(),
         onUpdate: () => {
-          const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+          const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
           const nextFS = eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`];
-          switch(originLayerItem.type) {
-            case 'Artboard':
-              artboardBackground[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color = nextFS;
-              break;
-            case 'Text':
-              textContent[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color = nextFS;
-              break;
-            default:
-              paperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color = nextFS;
-          }
+          fillRef[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color = nextFS;
         },
         ease: getEaseString(tween),
       }, tween.delay);
@@ -829,18 +753,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         yoyo: tween.yoyo,
         [`${tween.prop}-stop-${index}-color`]: 0,
         onUpdate: () => {
-          const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+          const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
           const nextFS = eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`];
-          switch(originLayerItem.type) {
-            case 'Artboard':
-              artboardBackground[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha = nextFS;
-              break;
-            case 'Text':
-              textContent[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha = nextFS;
-              break;
-            default:
-              paperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha = nextFS;
-          }
+          fillRef[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha = nextFS;
         },
         ease: getEaseString(tween),
       }, tween.delay);
@@ -849,20 +764,17 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   };
 
   const addNullToGradientFSTween = (style: 'fill' | 'stroke'): void => {
-    const isText = originLayerItem.type === 'Text';
-    const isArtboard = originLayerItem.type === 'Artboard';
     const dg = destinationLayerItem.style[style].gradient;
     const stopsTimeline = gsap.timeline({
       id: tweenId,
       onStart: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, artboardBackground, textContent, textBackground, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         eventTimeline.data[tween.layer][`${style}GradientOriginX`] = dg.origin.x;
         eventTimeline.data[tween.layer][`${style}GradientOriginY`] = dg.origin.y;
         eventTimeline.data[tween.layer][`${style}GradientDestinationX`] = dg.destination.x;
         eventTimeline.data[tween.layer][`${style}GradientDestinationY`] = dg.destination.y;
         // set origin layer styleColor to destination layer gradient with opaque stops
-        const paperLayerRef = isText ? textContent : isArtboard ? artboardBackground : paperLayer;
-        paperLayerRef[`${style}Color` as 'fillColor' | 'strokeColor'] = {
+        fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] = {
           gradient: {
             stops: dg.stops.map((stop) => {
               const sc = stop.color;
@@ -896,18 +808,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         yoyo: tween.yoyo,
         [`${tween.prop}-stop-${index}-color`]: sc.a,
         onUpdate: () => {
-          const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+          const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
           const nextFS = eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`];
-          switch(originLayerItem.type) {
-            case 'Artboard':
-              artboardBackground[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha = nextFS;
-              break;
-            case 'Text':
-              textContent[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha = nextFS;
-              break;
-            default:
-              paperLayer[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha = nextFS;
-          }
+          fillRef[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha = nextFS;
         },
         ease: getEaseString(tween),
       }, tween.delay);
@@ -916,7 +819,6 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   };
 
   const addDashOffsetTween = (): void => {
-    const isText = originLayerItem.type === 'Text';
     eventTimeline.data[tween.layer][tween.prop] = originLayerItem.style.strokeOptions.dashOffset;
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
@@ -925,16 +827,14 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style.strokeOptions.dashOffset,
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
-        const paperLayerRef = isText ? textContent : paperLayer;
-        paperLayerRef.dashOffset = eventTimeline.data[tween.layer][tween.prop];
+        const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
+        fillRef.dashOffset = eventTimeline.data[tween.layer][tween.prop];
       },
       ease: getEaseString(tween),
     }, tween.delay);
   };
 
   const addDashArrayWidthTween = (): void => {
-    const isText = originLayerItem.type === 'Text';
     eventTimeline.data[tween.layer][tween.prop] = originLayerItem.style.strokeOptions.dashArray[0];
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
@@ -943,16 +843,14 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style.strokeOptions.dashArray[0],
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
-        const paperLayerRef = isText ? textContent : paperLayer;
-        paperLayerRef.dashArray = [eventTimeline.data[tween.layer][tween.prop] < 1 ? 0 : eventTimeline.data[tween.layer][tween.prop], paperLayerRef.dashArray[1] < 1 ? 0 : paperLayerRef.dashArray[1]];
+        const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
+        fillRef.dashArray = [eventTimeline.data[tween.layer][tween.prop] < 1 ? 0 : eventTimeline.data[tween.layer][tween.prop], fillRef.dashArray[1] < 1 ? 0 : fillRef.dashArray[1]];
       },
       ease: getEaseString(tween),
     }, tween.delay);
   };
 
   const addDashArrayGapTween = (): void => {
-    const isText = originLayerItem.type === 'Text';
     eventTimeline.data[tween.layer][tween.prop] = originLayerItem.style.strokeOptions.dashArray[1];
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
@@ -961,16 +859,14 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style.strokeOptions.dashArray[1],
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
-        const paperLayerRef = isText ? textContent : paperLayer;
-        paperLayerRef.dashArray = [paperLayerRef.dashArray[0] < 1 ? 0 : paperLayerRef.dashArray[0], eventTimeline.data[tween.layer][tween.prop] < 1 ? 0 : eventTimeline.data[tween.layer][tween.prop]];
+        const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
+        fillRef.dashArray = [fillRef.dashArray[0] < 1 ? 0 : fillRef.dashArray[0], eventTimeline.data[tween.layer][tween.prop] < 1 ? 0 : eventTimeline.data[tween.layer][tween.prop]];
       },
       ease: getEaseString(tween),
     }, tween.delay);
   };
 
   const addStrokeWidthTween = (): void => {
-    const isText = originLayerItem.type === 'Text';
     eventTimeline.data[tween.layer][tween.prop] = originLayerItem.style.stroke.width;
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
@@ -979,9 +875,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style.stroke.width,
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
-        const paperLayerRef = isText ? textContent : paperLayer;
-        paperLayerRef.strokeWidth = eventTimeline.data[tween.layer][tween.prop];
+        const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
+        fillRef.strokeWidth = eventTimeline.data[tween.layer][tween.prop];
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -996,7 +891,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: `+=${tween.ease === 'customWiggle' ? tween.customWiggle.strength : destinationLayerItem.frame.x - originLayerItem.frame.x}`,
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
         paperLayer.position.x = eventTimeline.data[tween.layer][tween.prop];
         if (shapeMask) {
           shapeMask.position.x = eventTimeline.data[tween.layer][tween.prop];
@@ -1015,7 +910,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: `+=${tween.ease === 'customWiggle' ? tween.customWiggle.strength : destinationLayerItem.frame.y - originLayerItem.frame.y}`,
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
         paperLayer.position.y = eventTimeline.data[tween.layer][tween.prop];
         if (shapeMask) {
           shapeMask.position.y = eventTimeline.data[tween.layer][tween.prop];
@@ -1034,7 +929,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.frame.innerWidth,
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground, textMask, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, textContent, textBackground, textMask, shapeMask, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         const currentProps = getCurrentTweenLayerProps();
         const startPosition = paperLayer.position;
         clearLayerTransforms({
@@ -1209,7 +1104,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             });
           }
         }
-        updateGradients({ paperLayer, textContent, textBackground, currentProps });
+        updateGradients({ paperLayer, fillRef, currentProps });
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -1224,7 +1119,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.frame.innerHeight,
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textMask, shapeMask, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, artboardBackground, textContent, textMask, shapeMask, textBackground, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         const currentProps = getCurrentTweenLayerProps();
         const startPosition = paperLayer.position;
         clearLayerTransforms({
@@ -1370,7 +1265,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             });
           }
         }
-        updateGradients({ paperLayer, textContent, textBackground, currentProps });
+        updateGradients({ paperLayer, fillRef, currentProps });
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -1385,7 +1280,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.transform.rotation,
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, fillRef, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
         const currentProps = getCurrentTweenLayerProps();
         const startPosition = paperLayer.position;
         clearLayerTransforms({
@@ -1440,14 +1335,13 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         }
         paperLayer.position = startPosition;
         eventTimeline.data[tween.layer]['rotationPrevious'] = currentProps.rotation;
-        updateGradients({ paperLayer, textContent, textBackground, currentProps });
+        updateGradients({ paperLayer, fillRef, currentProps });
       },
       ease: getEaseString(tween),
     }, tween.delay);
   };
 
   const addShadowColorTween = (): void => {
-    const isText = originLayerItem.type === 'Text';
     const originShadow = originLayerItem.style.shadow;
     const destinationShadow = destinationLayerItem.style.shadow;
     let osc = originLayerItem.style.shadow.color;
@@ -1464,16 +1358,14 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       duration: tween.duration,
       [tween.prop]: tween.ease === 'customWiggle' ? tinyColor(tween.customWiggle.strength).toRgbString() : tinyColor({h: dsc.h, s: dsc.s, l: dsc.l, a: dsc.a}).toRgbString(),
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
-        const paperLayerRef = isText ? textContent : paperLayer;
-        paperLayerRef.shadowColor = eventTimeline.data[tween.layer][tween.prop];
+        const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
+        fillRef.shadowColor = eventTimeline.data[tween.layer][tween.prop];
       },
       ease: getEaseString(tween),
     }, tween.delay);
   };
 
   const addShadowXOffsetTween = (): void => {
-    const isText = originLayerItem.type === 'Text';
     const originShadow = originLayerItem.style.shadow;
     const destinationShadow = destinationLayerItem.style.shadow;
     let osx = originLayerItem.style.shadow.offset.x;
@@ -1492,17 +1384,15 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : dsx,
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
-        const paperLayerRef = isText ? textContent : paperLayer;
-        const y = paperLayerRef.shadowOffset ? paperLayerRef.shadowOffset.y : originShadow.offset.y;
-        paperLayerRef.shadowOffset = new paperPreview.Point(eventTimeline.data[tween.layer][tween.prop], y);
+        const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
+        const y = fillRef.shadowOffset ? fillRef.shadowOffset.y : originShadow.offset.y;
+        fillRef.shadowOffset = new paperPreview.Point(eventTimeline.data[tween.layer][tween.prop], y);
       },
       ease: getEaseString(tween),
     }, tween.delay);
   };
 
   const addShadowYOffsetTween = (): void => {
-    const isText = originLayerItem.type === 'Text';
     const originShadow = originLayerItem.style.shadow;
     const destinationShadow = destinationLayerItem.style.shadow;
     let osy = originLayerItem.style.shadow.offset.y;
@@ -1521,17 +1411,15 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : dsy,
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
-        const paperLayerRef = isText ? textContent : paperLayer;
-        const x = paperLayerRef.shadowOffset ? paperLayerRef.shadowOffset.x : originShadow.offset.x;
-        paperLayerRef.shadowOffset = new paperPreview.Point(x, eventTimeline.data[tween.layer][tween.prop]);
+        const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
+        const x = fillRef.shadowOffset ? fillRef.shadowOffset.x : originShadow.offset.x;
+        fillRef.shadowOffset = new paperPreview.Point(x, eventTimeline.data[tween.layer][tween.prop]);
       },
       ease: getEaseString(tween),
     }, tween.delay);
   };
 
   const addShadowBlurTween = (): void => {
-    const isText = originLayerItem.type === 'Text';
     const originShadow = originLayerItem.style.shadow;
     const destinationShadow = destinationLayerItem.style.shadow;
     let osb = originLayerItem.style.shadow.blur;
@@ -1550,9 +1438,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : dsb,
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
-        const paperLayerRef = isText ? textContent : paperLayer;
-        paperLayerRef.shadowBlur = eventTimeline.data[tween.layer][tween.prop];
+        const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
+        fillRef.shadowBlur = eventTimeline.data[tween.layer][tween.prop];
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -1601,7 +1488,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationTextItem.textStyle.fontSize,
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textMask, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, textContent, textMask, textBackground, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         const currentProps = getCurrentTweenLayerProps();
         const startPosition = paperLayer.position;
         clearLayerTransforms({
@@ -1672,7 +1559,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           variable: true
         });
         paperLayer.position = startPosition;
-        updateGradients({ paperLayer, textContent, textBackground, currentProps });
+        updateGradients({ paperLayer, fillRef, currentProps });
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -1689,7 +1576,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: destinationTextItem.textStyle.fontWeight,
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textMask, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, textContent, textMask, textBackground, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         const currentProps = getCurrentTweenLayerProps();
         const startPosition = paperLayer.position;
         clearLayerTransforms({
@@ -1760,7 +1647,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           variable: true
         });
         paperLayer.position = startPosition;
-        updateGradients({ paperLayer, textContent, textBackground, currentProps });
+        updateGradients({ paperLayer, fillRef, currentProps });
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -1777,7 +1664,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationTextItem.textStyle.leading,
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textMask, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, textContent, textMask, textBackground, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         const currentProps = getCurrentTweenLayerProps();
         const startPosition = paperLayer.position;
         clearLayerTransforms({
@@ -1840,7 +1727,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           variable: true
         });
         paperLayer.position = startPosition;
-        updateGradients({ paperLayer, textContent, textBackground, currentProps });
+        updateGradients({ paperLayer, fillRef, currentProps });
         eventTimeline.data[tween.layer]['lineHeightPrevious'] = currentProps.lineHeight;
       },
       ease: getEaseString(tween),
@@ -1885,7 +1772,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         }
       },
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textMask, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, textContent, textMask, textBackground, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         const currentProps = getCurrentTweenLayerProps();
         const startPosition = paperLayer.position;
         clearLayerTransforms({
@@ -1959,7 +1846,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         });
         paperLayer.position = startPosition;
         eventTimeline.data[tween.layer]['text'] = textDOM.innerText;
-        updateGradients({ paperLayer, textContent, textBackground, currentProps });
+        updateGradients({ paperLayer, fillRef, currentProps });
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -1976,7 +1863,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationTextItem.textStyle.letterSpacing,
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textMask, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, textContent, textMask, textBackground, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         const currentProps = getCurrentTweenLayerProps();
         const startPosition = paperLayer.position;
         clearLayerTransforms({
@@ -2047,7 +1934,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           variable: true
         });
         paperLayer.position = startPosition;
-        updateGradients({ paperLayer, textContent, textBackground, currentProps });
+        updateGradients({ paperLayer, fillRef, currentProps });
       },
       ease: getEaseString(tween),
     }, tween.delay);

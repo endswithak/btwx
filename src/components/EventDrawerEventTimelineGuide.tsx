@@ -4,6 +4,7 @@ import { ipcRenderer } from 'electron';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 
+// comes from CanvasPreviewLayerEvent when event playhead updates
 ipcRenderer.on('setDocumentTimelineGuidePosition', (event, args) => {
   const guide = document.getElementById(`event-drawer-guide`);
   const { time } = JSON.parse(args);
@@ -12,8 +13,10 @@ ipcRenderer.on('setDocumentTimelineGuidePosition', (event, args) => {
 });
 
 const EventDrawerEventTimelineGuide = (): ReactElement => {
+  // only show guide when dragging event drawer handles...
+  // or when event drawer event is playing
   const scrubbing = useSelector((state: RootState) => state.eventDrawer.tweenEditing && !state.easeEditor.isOpen);
-  const tweening = useSelector((state: RootState) => state.preview.tweening);
+  const tweening = useSelector((state: RootState) => state.eventDrawer.event && state.preview.tweening && (state.preview.tweening === state.layer.present.events.byId[state.eventDrawer.event].artboard));
 
   return (
     <div

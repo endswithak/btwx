@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { desktopCapturer, ipcRenderer } from 'electron';
 import { gsap } from 'gsap';
-// import { writeFile } from 'fs';
 import React, { ReactElement, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -17,6 +16,7 @@ let previewVideoChunks: any[] = [];
 let windowSize: { width: number; height: number } = { width: null, height: null };
 const topbarHeight = PREVIEW_TOPBAR_HEIGHT;
 
+// comes from PreviewButton
 ipcRenderer.on('setPreviewRecordingStopped', (event, args) => {
   previewMediaRecorder.stop();
   const { instanceId, platform } = JSON.parse(args);

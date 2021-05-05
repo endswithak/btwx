@@ -19,10 +19,12 @@ export interface EventLayerTimelineData {
   paperLayer: paper.Item;
   artboardBackground: paper.Path.Rectangle;
   // textLinesGroup: paper.Group;
+  imageRaster: paper.Raster;
   textContent: paper.PointText;
   textBackground: paper.Path.Rectangle;
   textMask: paper.Path.Rectangle;
   shapeMask?: paper.CompoundPath;
+  fillRef: paper.Item;
 }
 
 const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElement => {
@@ -101,6 +103,9 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
         artboardBackground: paperLayer.data.layerType === 'Artboard'
           ? paperLayer.getItem({ data: { id: 'artboardBackground' } }) as paper.Path.Rectangle
           : null,
+        imageRaster: paperLayer.data.layerType === 'Image'
+          ? paperLayer.getItem({ data: { id: 'imageRaster' } }) as paper.Raster
+          : null,
         textContent: paperLayer.data.layerType === 'Text'
           ? paperLayer.getItem({ data: { id: 'textContent' } }) as paper.PointText
           : null,
@@ -112,7 +117,19 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
           : null,
         shapeMask: paperLayer.data.layerType === 'Shape' && paperLayer.parent.data && paperLayer.parent.data.id === 'maskGroup'
           ? paperLayer.parent.getItem({ data: { id: 'mask' } }) as paper.CompoundPath
-          : null
+          : null,
+        fillRef: (() => {
+          switch(paperLayer.data.layerType) {
+            case 'Artboard':
+              return paperLayer.getItem({ data: { id: 'artboardBackground' } });
+            case 'Text':
+              return paperLayer.getItem({ data: { id: 'textContent' } }) as paper.PointText;
+            case 'Image':
+              return paperLayer.getItem({ data: { id: 'imageRaster' } }) as paper.Raster;
+            default:
+              return paperLayer;
+          }
+        })()
       };
     }
   })], []);
