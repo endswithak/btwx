@@ -73,11 +73,13 @@ export const SELECT_LAYER_EVENT = 'SELECT_LAYER_EVENT';
 export const DESELECT_LAYER_EVENT = 'DESELECT_LAYER_EVENT';
 export const SELECT_LAYER_EVENTS = 'SELECT_LAYER_EVENTS';
 export const DESELECT_LAYER_EVENTS = 'DESELECT_LAYER_EVENTS';
+export const DESELECT_ALL_LAYER_EVENTS = 'DESELECT_ALL_LAYER_EVENTS';
 
 export const SELECT_LAYER_EVENT_TWEEN = 'SELECT_LAYER_EVENT_TWEEN';
 export const DESELECT_LAYER_EVENT_TWEEN = 'DESELECT_LAYER_EVENT_TWEEN';
 export const SELECT_LAYER_EVENT_TWEENS = 'SELECT_LAYER_EVENT_TWEENS';
 export const DESELECT_LAYER_EVENT_TWEENS = 'DESELECT_LAYER_EVENT_TWEENS';
+export const DESELECT_ALL_LAYER_EVENT_TWEENS = 'DESELECT_ALL_LAYER_EVENT_TWEENS';
 
 export const ADD_LAYER_TWEEN = 'ADD_LAYER_TWEEN';
 export const REMOVE_LAYER_TWEEN = 'REMOVE_LAYER_TWEEN';
@@ -980,6 +982,10 @@ export interface DeselectLayerEvents {
   payload: DeselectLayerEventsPayload;
 }
 
+export interface DeselectAllLayerEvents {
+  type: typeof DESELECT_ALL_LAYER_EVENTS;
+}
+
 // Tween
 
 export type AddLayerTweenPayload = {
@@ -1049,6 +1055,10 @@ export interface DeselectLayerEventTweensPayload {
 export interface DeselectLayerEventTweens {
   type: typeof DESELECT_LAYER_EVENT_TWEENS;
   payload: DeselectLayerEventTweensPayload;
+}
+
+export interface DeselectAllLayerEventTweens {
+  type: typeof DESELECT_ALL_LAYER_EVENT_TWEENS;
 }
 
 export interface SetLayerTweenDurationPayload {
@@ -4149,6 +4159,7 @@ export type LayerTypes = AddArtboard |
                          DeselectLayerEvent |
                          SelectLayerEvents |
                          DeselectLayerEvents |
+                         DeselectAllLayerEvents |
                          AddLayerTween |
                          RemoveLayerTween |
                          RemoveLayerTweens |
@@ -4156,6 +4167,7 @@ export type LayerTypes = AddArtboard |
                          DeselectLayerEventTween |
                          SelectLayerEventTweens |
                          DeselectLayerEventTweens |
+                         DeselectAllLayerEventTweens |
                          SetLayerTweenDuration |
                          SetLayersTweenDuration |
                          SetLayerTweenRepeat |

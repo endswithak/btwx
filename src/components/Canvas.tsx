@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
 import { setCanvasReady, setCanvasFocusing, setCanvasMeasuring } from '../store/actions/canvasSettings';
+import { deselectAllLayers, deselectAllLayerEvents, deselectAllLayerEventTweens } from '../store/actions/layer';
 import { toggleShapeToolThunk } from '../store/actions/shapeTool';
 import { toggleTextToolThunk } from '../store/actions/textTool';
 import { toggleArtboardToolThunk } from '../store/actions/artboardTool';
@@ -51,6 +52,7 @@ const Canvas = (): ReactElement => {
   const ready = useSelector((state: RootState) => state.canvasSettings.ready);
   const isDevelopment = useSelector((state: RootState) => state.session.env === 'development');
   const focusing = useSelector((state: RootState) => state.canvasSettings.focusing);
+  const escapeDisabled = useSelector((state: RootState) => state.canvasSettings.selecting || state.canvasSettings.dragging || state.canvasSettings.resizing || state.canvasSettings.drawing);
   const measuring = useSelector((state: RootState) => state.canvasSettings.measuring);
   const gradientEditorOpen = useSelector((state: RootState) => state.gradientEditor.isOpen);
   const colorEditorOpen = useSelector((state: RootState) => state.colorEditor.isOpen);
@@ -204,7 +206,7 @@ const Canvas = (): ReactElement => {
         measuring: true
       }));
     }
-    if (e.key === 'Escape') {
+    if (e.key === 'Escape' && !escapeDisabled) {
       if (gradientEditorOpen) {
         dispatch(closeGradientEditor());
       }
@@ -232,6 +234,9 @@ const Canvas = (): ReactElement => {
       if (document.activeElement && document.activeElement.nodeName === 'INPUT') {
         (document.activeElement as HTMLInputElement).blur();
       }
+      dispatch(deselectAllLayers());
+      dispatch(deselectAllLayerEvents());
+      dispatch(deselectAllLayerEventTweens());
     }
   }
 
@@ -283,7 +288,7 @@ const Canvas = (): ReactElement => {
   }, [
     focusing, measuring, gradientEditorOpen, colorEditorOpen, easeEditorOpen,
     shapeToolActive, shapeToolShapeType, artboardToolActive, textToolActive,
-    artboardPresetEditorOpen, fontFamilySelectorOpen
+    artboardPresetEditorOpen, fontFamilySelectorOpen, escapeDisabled
   ]);
 
   useEffect(() => {

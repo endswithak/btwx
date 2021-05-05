@@ -92,6 +92,7 @@ import {
   DESELECT_LAYER_EVENT,
   SELECT_LAYER_EVENTS,
   DESELECT_LAYER_EVENTS,
+  DESELECT_ALL_LAYER_EVENTS,
   ADD_LAYER_TWEEN,
   REMOVE_LAYER_TWEEN,
   REMOVE_LAYER_TWEENS,
@@ -99,6 +100,7 @@ import {
   DESELECT_LAYER_EVENT_TWEEN,
   SELECT_LAYER_EVENT_TWEENS,
   DESELECT_LAYER_EVENT_TWEENS,
+  DESELECT_ALL_LAYER_EVENT_TWEENS,
   SET_LAYER_TWEEN_DURATION,
   SET_LAYER_TWEEN_REPEAT,
   SET_LAYER_TWEEN_REPEAT_DELAY,
@@ -1585,6 +1587,10 @@ export const deselectLayerEvents = (payload: DeselectLayerEventsPayload): LayerT
   payload
 });
 
+export const deselectAllLayerEvents = (): LayerTypes => ({
+  type: DESELECT_ALL_LAYER_EVENTS
+});
+
 // Tween
 
 export const addLayerTween = (payload: AddLayerTweenPayload): LayerTypes => ({
@@ -1623,6 +1629,10 @@ export const selectLayerEventTweens = (payload: SelectLayerEventTweensPayload): 
 export const deselectLayerEventTweens = (payload: DeselectLayerEventTweensPayload): LayerTypes => ({
   type: DESELECT_LAYER_EVENT_TWEENS,
   payload
+});
+
+export const deselectAllLayerEventTweens = (): LayerTypes => ({
+  type: DESELECT_ALL_LAYER_EVENT_TWEENS
 });
 
 export const setLayerTweenDuration = (payload: SetLayerTweenDurationPayload): LayerTypes => ({

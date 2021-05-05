@@ -54,6 +54,7 @@ import {
   DESELECT_LAYER_EVENT,
   SELECT_LAYER_EVENTS,
   DESELECT_LAYER_EVENTS,
+  DESELECT_ALL_LAYER_EVENTS,
   REMOVE_LAYER_EVENT,
   REMOVE_LAYERS_EVENT,
   ADD_LAYER_TWEEN,
@@ -63,6 +64,7 @@ import {
   DESELECT_LAYER_EVENT_TWEEN,
   SELECT_LAYER_EVENT_TWEENS,
   DESELECT_LAYER_EVENT_TWEENS,
+  DESELECT_ALL_LAYER_EVENT_TWEENS,
   SET_LAYER_TWEEN_DURATION,
   SET_LAYER_TWEEN_REPEAT,
   SET_LAYER_TWEEN_REPEAT_DELAY,
@@ -383,6 +385,7 @@ import {
   deselectLayerEvent,
   selectLayerEvents,
   deselectLayerEvents,
+  deselectAllLayerEvents,
   removeLayerEvent,
   removeLayersEvent,
   addLayerTween,
@@ -392,6 +395,7 @@ import {
   deselectLayerEventTween,
   selectLayerEventTweens,
   deselectLayerEventTweens,
+  deselectAllLayerEventTweens,
   setLayerName,
   setLayerTweenDuration,
   setLayerTweenRepeat,
@@ -873,6 +877,8 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return selectLayerEvents(state, action);
     case DESELECT_LAYER_EVENTS:
       return deselectLayerEvents(state, action);
+    case DESELECT_ALL_LAYER_EVENTS:
+      return deselectAllLayerEvents(state, action);
     case ADD_LAYER_TWEEN:
       return addLayerTween(state, action);
     case REMOVE_LAYER_TWEEN:
@@ -887,6 +893,8 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return selectLayerEventTweens(state, action);
     case DESELECT_LAYER_EVENT_TWEENS:
       return deselectLayerEventTweens(state, action);
+    case DESELECT_ALL_LAYER_EVENT_TWEENS:
+      return deselectAllLayerEventTweens(state, action);
     case SET_LAYER_TWEEN_DURATION:
       return setLayerTweenDuration(state, action);
     case SET_LAYER_TWEEN_REPEAT:

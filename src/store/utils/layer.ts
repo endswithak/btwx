@@ -76,7 +76,7 @@ import {
   SetLayersCustomWiggleTweenType, RemoveLayerTweens, RemoveLayersEvent, ShowLayersChildren, HideLayersChildren,
   SetLayerTreeStickyArtboard, SetLayerTweenRepeat, SetLayersTweenRepeat, SetLayerTweenYoyo, SetLayersTweenYoyo,
   SetLayerTweenRepeatDelay, SetLayersTweenRepeatDelay, SetLayerTweenYoyoEase, SetLayersTweenYoyoEase,
-  SetLayerBlurRadius, SetLayersBlurRadius, FlipLayerGradient, FlipLayersGradient
+  SetLayerBlurRadius, SetLayersBlurRadius, FlipLayerGradient, FlipLayersGradient, DeselectAllLayerEventTweens, DeselectAllLayerEvents
 } from '../actionTypes/layer';
 
 import {
@@ -2221,6 +2221,16 @@ export const deselectLayerEvents = (state: LayerState, action: DeselectLayerEven
   return currentState;
 };
 
+export const deselectAllLayerEvents = (state: LayerState, action: DeselectAllLayerEvents): LayerState => {
+  let currentState = state;
+  currentState = currentState.events.selected.reduce((result, current) => {
+    return deselectLayerEvent(result, layerActions.deselectLayerEvent({
+      id: current
+    }) as DeselectLayerEvent);
+  }, state);
+  return currentState;
+};
+
 export const addTweenEventLayerTweens = (state: LayerState, eventId: string, layerId: string): LayerState => {
   let currentState = state;
   const tweenEvent = currentState.events.byId[eventId];
@@ -2471,6 +2481,16 @@ export const selectLayerEventTweens = (state: LayerState, action: SelectLayerEve
 export const deselectLayerEventTweens = (state: LayerState, action: DeselectLayerEventTweens): LayerState => {
   let currentState = state;
   currentState = action.payload.tweens.reduce((result, current) => {
+    return deselectLayerEventTween(result, layerActions.deselectLayerEventTween({
+      id: current
+    }) as DeselectLayerEventTween);
+  }, state);
+  return currentState;
+};
+
+export const deselectAllLayerEventTweens = (state: LayerState, action: DeselectAllLayerEventTweens): LayerState => {
+  let currentState = state;
+  currentState = currentState.tweens.selected.allIds.reduce((result, current) => {
     return deselectLayerEventTween(result, layerActions.deselectLayerEventTween({
       id: current
     }) as DeselectLayerEventTween);
