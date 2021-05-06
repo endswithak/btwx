@@ -307,7 +307,7 @@ export const DEFAULT_LINE_TO = { x: DEFAULT_LINE_TO_X, y: DEFAULT_LINE_TO_Y };
 
 export const PREVIEW_TOPBAR_HEIGHT = 44;
 
-export const MAC_TITLEBAR_HEIGHT = 22;
+export const MAC_TITLEBAR_HEIGHT = 30;
 export const WINDOWS_TITLEBAR_HEIGHT = 30;
 
 export const DEFAULT_GRADIENT_TYPE = 'linear';

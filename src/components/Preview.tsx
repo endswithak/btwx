@@ -41,6 +41,18 @@ const Preview = (): ReactElement => {
     setPrevActiveArtboard(activeArtboard);
   }, [activeArtboard]);
 
+  useEffect(() => {
+    if (recording) {
+      ipcRenderer.send('buildPreviewRecordingTouchBar', JSON.stringify({
+        instanceId: instance
+      }));
+    } else {
+      ipcRenderer.send('buildPreviewTouchBar', JSON.stringify({
+        instanceId: instance
+      }));
+    }
+  }, [recording]);
+
   return (
     <div className={`
       c-preview

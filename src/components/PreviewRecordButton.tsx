@@ -105,6 +105,9 @@ const PreviewRecordButton = (): ReactElement => {
                 instanceId: instance
               }));
               previewMediaRecorder.start();
+              ipcRenderer.send('buildRecordingTouchBar', JSON.stringify({
+                instanceId: instance
+              }));
             }, 0.15);
           }
         });
@@ -145,6 +148,9 @@ const PreviewRecordButton = (): ReactElement => {
   };
 
   useEffect(() => {
+    (window as any)['startPreviewRecording'] = () => {
+      handleRecord();
+    }
     return () => {
       if (recording) {
         ipcRenderer.send('setPreviewRecordingStopped', JSON.stringify({

@@ -8,6 +8,7 @@ import { getSelectedLeft, getSelectedCenter, getSelectedRight, getSelectedTop, g
 const Touchbar = (): ReactElement => {
   const ready = useSelector((state: RootState) => state.canvasSettings.ready);
   const focusing = useSelector((state: RootState) => state.canvasSettings.focusing);
+  const recording = useSelector((state: RootState) => state.preview.recording);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   // zoom
   const canZoomOut = useSelector((state: RootState) => state.documentSettings.zoom !== 0.01);
@@ -38,7 +39,7 @@ const Touchbar = (): ReactElement => {
   const instanceId = useSelector((state: RootState) => state.session.instance);
 
   useEffect(() => {
-    if (ready && isMac && focusing && selected.length === 0) {
+    if (ready && isMac && focusing && selected.length === 0 && !recording) {
       ipcRenderer.send('buildEmptySelectionTouchBar', JSON.stringify({
         instanceId,
         isArtboardToolActive,
@@ -57,7 +58,7 @@ const Touchbar = (): ReactElement => {
   ]);
 
   useEffect(() => {
-    if (ready && isMac && focusing && selected.length >= 1) {
+    if (ready && isMac && focusing && selected.length >= 1 && !recording) {
       ipcRenderer.send('buildSelectionTouchBar', JSON.stringify({
         instanceId,
         canAlignLeft,
@@ -80,13 +81,57 @@ const Touchbar = (): ReactElement => {
   ]);
 
   useEffect(() => {
-    if (ready && isMac && !focusing) {
+    if (ready && isMac && !focusing && !recording) {
       ipcRenderer.send('clearTouchBar', JSON.stringify({
         instanceId
       }));
     }
   }, [
     ready, focusing
+  ]);
+
+  useEffect(() => {
+    if (recording) {
+      ipcRenderer.send('buildDocumentRecordingTouchBar', JSON.stringify({
+        instanceId
+      }));
+    } else {
+      if (!focusing) {
+        ipcRenderer.send('clearTouchBar', JSON.stringify({
+          instanceId
+        }));
+      } else {
+        if (selected.length >= 1) {
+          ipcRenderer.send('buildSelectionTouchBar', JSON.stringify({
+            instanceId,
+            canAlignLeft,
+            canAlignCenter,
+            canAlignRight,
+            canAlignTop,
+            canAlignMiddle,
+            canAlignBottom,
+            canDistribute,
+            canGroup,
+            canUngroup,
+            canBringForward,
+            canSendBackward
+          }));
+        } else {
+          ipcRenderer.send('buildEmptySelectionTouchBar', JSON.stringify({
+            instanceId,
+            isArtboardToolActive,
+            theme,
+            hasActiveArtboard,
+            isRectangleToolActive,
+            isEllipseToolActive,
+            isTextToolActive,
+            canZoomOut
+          }));
+        }
+      }
+    }
+  }, [
+    recording
   ]);
 
   return null;

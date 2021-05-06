@@ -29,6 +29,7 @@ export interface EventLayerTimelineData {
 
 const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElement => {
   const { eventId } = props;
+  const isPreviewOpen = useSelector((state: RootState) => state.preview.isOpen);
   const event = useSelector((state: RootState) => state.layer.present.events.byId[eventId]);
   const electronInstanceId = useSelector((state: RootState) => state.session.instance);
   const originArtboardItem = useSelector((state: RootState) => state.layer.present.byId[event.artboard] as Btwx.Artboard);
@@ -194,7 +195,7 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
   // autoplay feature...
   // plays timeline whenever any event tween layer tween prop changes
   useEffect(() => {
-    if (tweenEdit && eventTimeline && autoplay) {
+    if (tweenEdit && eventTimeline && autoplay && isPreviewOpen) {
       paperPreview.view.center = originArtboardPosition;
       dispatch(setActiveArtboard({
         id: event.artboard

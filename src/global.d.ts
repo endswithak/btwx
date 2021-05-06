@@ -681,6 +681,7 @@ declare namespace Btwx {
     onPrimary: string;
     onAccent: string;
     onError: string;
+    onRecording: string;
     onWarn: string;
     onSuccess: string;
   }
@@ -703,7 +704,9 @@ declare namespace Btwx {
       info: string;
       infoActive: string;
       error: string;
-      errroActive: string;
+      errorActive: string;
+      recording: string;
+      recordingActive: string;
       warn: string;
       warnActive: string;
     };
@@ -718,6 +721,7 @@ declare namespace Btwx {
         success: string;
         info: string;
         error: string;
+        recording: string;
         warn: string;
       };
     };

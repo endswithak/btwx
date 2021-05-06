@@ -26,6 +26,7 @@ import { LayerState } from './store/reducers/layer';
 import { DocumentSettingsState } from './store/reducers/documentSettings';
 import { ViewSettingsState } from './store/reducers/viewSettings';
 import { APP_NAME, MIN_DOCUMENT_WIDTH, MIN_DOCUMENT_HEIGHT, DEFAULT_MAC_DEVICE, MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT, PREVIEW_TOPBAR_HEIGHT, TWEEN_PROPS_MAP } from './constants';
+import { THEME_DARK_RECORDING } from './theme';
 import { addItem, removeItem } from './store/utils/general';
 import noInstancesMenu from './menu';
 import { buildContentMenuTemplate } from './utils';
@@ -1734,6 +1735,99 @@ ipcMain.on('buildSelectionTouchBar', (event, args) => {
     instance,
     ...rest
   });
+});
+
+const buildPreviewLoadingTouchBar = (instanceId) => {
+  const { TouchBarButton, TouchBarSpacer } = TouchBar;
+  const RESOURCES_PATH = app.isPackaged ? path.join(process.resourcesPath, 'assets/touch-bar') : path.join(__dirname, '../assets/touch-bar');
+  const recordingImage = nativeImage.createFromPath(`${RESOURCES_PATH}/start-recording.png`);
+  const instance = btwxElectron.instance.byId[instanceId];
+  instance.preview.setTouchBar(new TouchBar({
+    items: [
+      new TouchBarSpacer({size: 'flexible'}),
+      new TouchBarButton({
+        icon: recordingImage,
+        accessibilityLabel: 'Starting Recording',
+        enabled: false,
+        click: () => {}
+      }),
+      new TouchBarSpacer({size: 'flexible'})
+    ]
+  }));
+}
+
+ipcMain.on('buildPreviewTouchBar', (event, args) => {
+  const { instanceId } = JSON.parse(args);
+  const { TouchBarButton, TouchBarSpacer } = TouchBar;
+  const RESOURCES_PATH = app.isPackaged ? path.join(process.resourcesPath, 'assets/touch-bar') : path.join(__dirname, '../assets/touch-bar');
+  const recordingImage = nativeImage.createFromPath(`${RESOURCES_PATH}/start-recording.png`);
+  const instance = btwxElectron.instance.byId[instanceId];
+  instance.preview.setTouchBar(new TouchBar({
+    items: [
+      new TouchBarSpacer({size: 'flexible'}),
+      new TouchBarButton({
+        icon: recordingImage,
+        accessibilityLabel: 'Start Recording',
+        click: () => {
+          buildPreviewLoadingTouchBar(instanceId);
+          handleExecute({
+            instance,
+            window: 'preview',
+            func: 'startPreviewRecording'
+          })
+        }
+      }),
+      new TouchBarSpacer({size: 'flexible'})
+    ]
+  }));
+});
+
+ipcMain.on('buildPreviewRecordingTouchBar', (event, args) => {
+  const { instanceId } = JSON.parse(args);
+  const { TouchBarButton, TouchBarSpacer } = TouchBar;
+  const RESOURCES_PATH = app.isPackaged ? path.join(process.resourcesPath, 'assets/touch-bar') : path.join(__dirname, '../assets/touch-bar');
+  const recordingImage = nativeImage.createFromPath(`${RESOURCES_PATH}/stop-recording.png`);
+  const instance = btwxElectron.instance.byId[instanceId];
+  instance.preview.setTouchBar(new TouchBar({
+    items: [
+      new TouchBarSpacer({size: 'flexible'}),
+      new TouchBarButton({
+        icon: recordingImage,
+        accessibilityLabel: 'Stop Recording',
+        backgroundColor: THEME_DARK_RECORDING,
+        click: () => {
+          instance.preview.webContents.send('setPreviewRecordingStopped', JSON.stringify({
+            instanceId: instanceId
+          }));
+        }
+      }),
+      new TouchBarSpacer({size: 'flexible'})
+    ]
+  }));
+});
+
+ipcMain.on('buildDocumentRecordingTouchBar', (event, args) => {
+  const { instanceId } = JSON.parse(args);
+  const { TouchBarButton, TouchBarSpacer } = TouchBar;
+  const RESOURCES_PATH = app.isPackaged ? path.join(process.resourcesPath, 'assets/touch-bar') : path.join(__dirname, '../assets/touch-bar');
+  const recordingImage = nativeImage.createFromPath(`${RESOURCES_PATH}/stop-recording.png`);
+  const instance = btwxElectron.instance.byId[instanceId];
+  instance.document.setTouchBar(new TouchBar({
+    items: [
+      new TouchBarSpacer({size: 'flexible'}),
+      new TouchBarButton({
+        icon: recordingImage,
+        accessibilityLabel: 'Stop Recording',
+        backgroundColor: THEME_DARK_RECORDING,
+        click: () => {
+          instance.preview.webContents.send('setPreviewRecordingStopped', JSON.stringify({
+            instanceId: instanceId
+          }));
+        }
+      }),
+      new TouchBarSpacer({size: 'flexible'})
+    ]
+  }));
 });
 
 ipcMain.on('clearTouchBar', (event, args) => {
