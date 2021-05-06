@@ -1258,7 +1258,7 @@ ipcMain.handle('setDocumentRecordingStopped', (event, args) => {
   const videoBuffer = Buffer.from(buffer);
   instance.document.webContents.executeJavaScript(`stopPreviewRecording()`).then(() => {
     return new Promise((resolve, reject) => {
-      dialog.showSaveDialog(instance.document, {
+      dialog.showSaveDialog(instance.preview, {
         buttonLabel: 'Save video',
         defaultPath: `vid-${Date.now()}.webm`
       }).then((res) => {

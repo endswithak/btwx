@@ -42,16 +42,18 @@ const Preview = (): ReactElement => {
   }, [activeArtboard]);
 
   useEffect(() => {
-    if (recording) {
-      ipcRenderer.send('buildPreviewRecordingTouchBar', JSON.stringify({
-        instanceId: instance
-      }));
-    } else {
-      ipcRenderer.send('buildPreviewTouchBar', JSON.stringify({
-        instanceId: instance
-      }));
+    if (activeArtboard) {
+      if (recording) {
+        ipcRenderer.send('buildPreviewRecordingTouchBar', JSON.stringify({
+          instanceId: instance
+        }));
+      } else {
+        ipcRenderer.send('buildPreviewTouchBar', JSON.stringify({
+          instanceId: instance
+        }));
+      }
     }
-  }, [recording]);
+  }, [recording, activeArtboard]);
 
   return (
     <div className={`
