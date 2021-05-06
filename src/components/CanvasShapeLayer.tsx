@@ -90,8 +90,19 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
     }
   }
 
+  const getPaperLayer = (): { paperLayer: paper.CompoundPath; maskGroup: paper.Group; mask: paper.CompoundPath } => {
+    const paperLayer = paperProject.getItem({ data: { id } }) as paper.CompoundPath;
+    const maskGroup = paperLayer && paperLayer.parent.data.id === 'maskGroup' ? paperLayer.parent as paper.Group : null;
+    const mask = paperLayer && paperLayer.parent.data.id === 'maskGroup' ? paperLayer.previousSibling as paper.CompoundPath : null;
+    return {
+      paperLayer,
+      maskGroup,
+      mask
+    }
+  }
+
   const applyFill = (): void => {
-    const paperLayer = paperProject.getItem({ data: { id } });
+    const { paperLayer } = getPaperLayer();
     paperLayer.fillColor = getPaperFillColor({
       fill: layerItem.style.fill,
       isLine: layerItem.shapeType === 'Line',
@@ -101,7 +112,7 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
   }
 
   const applyStroke = (): void => {
-    const paperLayer = paperProject.getItem({ data: { id } });
+    const { paperLayer } = getPaperLayer();
     paperLayer.strokeColor = getPaperStrokeColor({
       stroke: layerItem.style.stroke,
       isLine: layerItem.shapeType === 'Line',
@@ -111,7 +122,7 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
   }
 
   const applyShadow = (): void => {
-    const paperLayer = paperProject.getItem({ data: { id } });
+    const { paperLayer } = getPaperLayer();
     if (layerItem.style.shadow.enabled) {
       paperLayer.shadowColor = {
         hue: layerItem.style.shadow.color.h,
@@ -144,12 +155,14 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
     );
     setRendered(true);
     return (): void => {
-      const paperLayer = paperProject.getItem({data: {id}});
+      const { paperLayer, maskGroup, mask } = getPaperLayer();
       if (paperLayer) {
         if (layerItem.mask) {
-          const maskGroup = paperLayer.parent;
-          maskGroup.children[0].remove();
+          // remove mask
+          mask.remove();
+          // move masked layers out of mask group
           maskGroup.parent.insertChildren(maskGroup.index, maskGroup.children);
+          // remove mask group
           maskGroup.remove();
         }
         paperLayer.remove();
@@ -163,7 +176,7 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
 
   useEffect(() => {
     if (rendered) {
-      const paperLayer = paperProject.getItem({ data: { id: layerItem.id } });
+      const { paperLayer } = getPaperLayer();
       paperLayer.data.scope = layerItem.scope;
     }
   }, [layerItem.scope]);
@@ -188,7 +201,7 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
 
   useEffect(() => {
     if (rendered) {
-      const paperLayer = paperProject.getItem({ data: { id: layerItem.id } }) as paper.Path;
+      const { paperLayer, maskGroup, mask } = getPaperLayer();
       if (layerItem.mask) {
         paperLayer.replaceWith(
           new paperLayerScope.Group({
@@ -217,9 +230,11 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
           })
         );
       } else {
-        const maskGroup = paperLayer.parent;
-        maskGroup.children[0].remove();
+        // remove mask
+        mask.remove();
+        // move masked layers out of mask group
         maskGroup.parent.insertChildren(maskGroup.index, maskGroup.children);
+        // remove mask group
         maskGroup.remove();
       }
     }
@@ -269,8 +284,8 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
 
   useEffect(() => {
     if (rendered) {
+      const { paperLayer, mask } = getPaperLayer();
       const absPosition = getLayerAbsPosition(layerItem.frame, artboardItem.frame);
-      const paperLayer = paperProject.getItem({ data: { id } }) as paper.CompoundPath;
       paperLayer.pathData = layerItem.pathData;
       paperLayer.children.forEach((item) => {
         item.data = {
@@ -282,9 +297,8 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
       });
       paperLayer.position = absPosition;
       if (layerItem.mask) {
-        const maskGroup = paperProject.getItem({ data: { id } }).parent;
-        (maskGroup.children[0] as paper.CompoundPath).pathData = paperLayer.pathData;
-        maskGroup.children[0].position = absPosition;
+        mask.pathData = paperLayer.pathData;
+        mask.position = absPosition;
       }
     }
   }, [layerItem.pathData]);
@@ -295,12 +309,10 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
 
   useEffect(() => {
     if (rendered) {
+      const { paperLayer, mask } = getPaperLayer();
       const absPosition = getLayerAbsPosition(layerItem.frame, artboardItem.frame);
-      const paperLayer = paperProject.getItem({ data: { id } });
       paperLayer.position = absPosition;
       if (layerItem.mask) {
-        const maskGroup = paperLayer.parent;
-        const mask = maskGroup.children[0];
         mask.position = paperLayer.position;
       }
     }
@@ -325,14 +337,14 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
 
   useEffect(() => {
     if (rendered) {
-      const paperLayer = paperProject.getItem({ data: { id } });
+      const { paperLayer } = getPaperLayer();
       paperLayer.opacity = layerItem.style.opacity;
     }
   }, [layerItem.style.opacity]);
 
   useEffect(() => {
     if (rendered) {
-      const paperLayer = paperProject.getItem({ data: { id } });
+      const { paperLayer } = getPaperLayer();
       paperLayer.blendMode = layerItem.style.blendMode;
     }
   }, [layerItem.style.blendMode]);
@@ -343,7 +355,7 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
 
   useEffect(() => {
     if (rendered) {
-      const paperLayer = paperProject.getItem({ data: { id } });
+      const { paperLayer } = getPaperLayer();
       if (layerItem.style.blur.enabled) {
         paperLayer.style.blur = layerItem.style.blur.radius;
       } else {
@@ -355,7 +367,7 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
   useEffect(() => {
     if (rendered) {
       if (layerItem.style.blur.enabled) {
-        const paperLayer = paperProject.getItem({ data: { id } });
+        const { paperLayer } = getPaperLayer();
         paperLayer.style.blur = layerItem.style.blur.radius;
       }
     }
@@ -396,7 +408,7 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
 
   useEffect(() => {
     if (rendered) {
-      const paperLayer = paperProject.getItem({ data: { id } });
+      const { paperLayer } = getPaperLayer();
       paperLayer.strokeWidth = layerItem.style.stroke.width;
     }
   }, [layerItem.style.stroke.width]);
@@ -407,28 +419,31 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
 
   useEffect(() => {
     if (rendered) {
-      const paperLayer = paperProject.getItem({ data: { id } });
+      const { paperLayer } = getPaperLayer();
       paperLayer.strokeCap = layerItem.style.strokeOptions.cap;
     }
   }, [layerItem.style.strokeOptions.cap]);
 
   useEffect(() => {
     if (rendered) {
-      const paperLayer = paperProject.getItem({ data: { id } });
+      const { paperLayer } = getPaperLayer();
       paperLayer.strokeJoin = layerItem.style.strokeOptions.join;
     }
   }, [layerItem.style.strokeOptions.join]);
 
   useEffect(() => {
     if (rendered) {
-      const paperLayer = paperProject.getItem({ data: { id } });
-      paperLayer.dashArray = [layerItem.style.strokeOptions.dashArray[0], layerItem.style.strokeOptions.dashArray[1]];
+      const { paperLayer } = getPaperLayer();
+      paperLayer.dashArray = [
+        layerItem.style.strokeOptions.dashArray[0],
+        layerItem.style.strokeOptions.dashArray[1]
+      ];
     }
   }, [layerItem.style.strokeOptions.dashArray]);
 
   useEffect(() => {
     if (rendered) {
-      const paperLayer = paperProject.getItem({ data: { id } });
+      const { paperLayer } = getPaperLayer();
       paperLayer.dashOffset = layerItem.style.strokeOptions.dashOffset;
     }
   }, [layerItem.style.strokeOptions.dashOffset]);
