@@ -1712,7 +1712,8 @@ const buildSelectionTouchBar = (props: BuildAlignGroup & BuildDistributeGroup & 
       new TouchBarSpacer({size: 'flexible'}),
       ...groupTouchBar,
       new TouchBarSpacer({size: 'flexible'}),
-      ...moveTouchBar
+      ...moveTouchBar,
+      new TouchBarSpacer({size: 'flexible'})
     ]
   }));
 }
