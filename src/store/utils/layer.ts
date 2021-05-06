@@ -6070,6 +6070,10 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
   const pathData = action.payload.pathData;
   const shapeIcon = action.payload.shapeIcon;
   const bounds = action.payload.bounds;
+  const fillGradientOrigin = action.payload.fillGradientOrigin;
+  const fillGradientDestination = action.payload.fillGradientDestination;
+  const strokeGradientOrigin = action.payload.strokeGradientOrigin;
+  const strokeGradientDestination = action.payload.strokeGradientDestination;
   currentState = {
     ...currentState,
     byId: {
@@ -6086,6 +6090,34 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
         }
       }
     }
+  }
+  if (fillGradientOrigin) {
+    currentState = setLayerGradientOrigin(currentState, layerActions.setLayerGradientOrigin({
+      id: action.payload.id,
+      prop: 'fill',
+      origin: fillGradientOrigin
+    }) as SetLayerGradientOrigin);
+  }
+  if (fillGradientDestination) {
+    currentState = setLayerGradientDestination(currentState, layerActions.setLayerGradientDestination({
+      id: action.payload.id,
+      prop: 'fill',
+      destination: fillGradientDestination
+    }) as SetLayerGradientDestination);
+  }
+  if (strokeGradientOrigin) {
+    currentState = setLayerGradientOrigin(currentState, layerActions.setLayerGradientOrigin({
+      id: action.payload.id,
+      prop: 'stroke',
+      origin: strokeGradientOrigin
+    }) as SetLayerGradientOrigin);
+  }
+  if (strokeGradientDestination) {
+    currentState = setLayerGradientDestination(currentState, layerActions.setLayerGradientDestination({
+      id: action.payload.id,
+      prop: 'stroke',
+      destination: strokeGradientDestination
+    }) as SetLayerGradientDestination);
   }
   if (pathData) {
     currentState = {
@@ -6191,10 +6223,18 @@ export const setLayersRotation = (state: LayerState, action: SetLayersRotation):
     const point = action.payload.point ? action.payload.point[current] : null;
     const from = action.payload.point ? action.payload.from[current] : null;
     const to = action.payload.point ? action.payload.to[current] : null;
+    const fillGradientOrigin = action.payload.fillGradientOrigin ? action.payload.fillGradientOrigin[current] : null;
+    const fillGradientDestination = action.payload.fillGradientDestination ? action.payload.fillGradientDestination[current] : null;
+    const strokeGradientOrigin = action.payload.strokeGradientOrigin ? action.payload.strokeGradientOrigin[current] : null;
+    const strokeGradientDestination = action.payload.strokeGradientDestination ? action.payload.strokeGradientDestination[current] : null;
     return setLayerRotation(result, layerActions.setLayerRotation({
       id: current,
       rotation: action.payload.rotation,
       pathData,
+      fillGradientOrigin,
+      fillGradientDestination,
+      strokeGradientOrigin,
+      strokeGradientDestination,
       shapeIcon,
       bounds,
       point,

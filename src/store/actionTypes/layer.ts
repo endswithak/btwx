@@ -2066,6 +2066,10 @@ export interface SetLayerRotationPayload {
   point?: Btwx.Point;
   from?: Btwx.Point;
   to?: Btwx.Point;
+  fillGradientOrigin?: Btwx.Point;
+  fillGradientDestination?: Btwx.Point;
+  strokeGradientOrigin?: Btwx.Point;
+  strokeGradientDestination?: Btwx.Point;
 }
 
 export interface SetLayerRotation {
@@ -2092,6 +2096,18 @@ export interface SetLayersRotationPayload {
     [id: string]: Btwx.Point;
   };
   to?: {
+    [id: string]: Btwx.Point;
+  };
+  fillGradientOrigin?: {
+    [id: string]: Btwx.Point;
+  };
+  fillGradientDestination?: {
+    [id: string]: Btwx.Point;
+  };
+  strokeGradientOrigin?: {
+    [id: string]: Btwx.Point;
+  };
+  strokeGradientDestination?: {
     [id: string]: Btwx.Point;
   };
 }

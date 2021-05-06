@@ -2407,6 +2407,10 @@ export const setLayersRotationThunk = (payload: SetLayersRotationPayload) => {
     let point: { [id: string]: Btwx.Point; } = {};
     let to: { [id: string]: Btwx.Point; } = {};
     let from: { [id: string]: Btwx.Point; } = {};
+    let fillGradientOrigin: { [id: string]: Btwx.Point; } = {};
+    let fillGradientDestination: { [id: string]: Btwx.Point; } = {};
+    let strokeGradientOrigin: { [id: string]: Btwx.Point; } = {};
+    let strokeGradientDestination: { [id: string]: Btwx.Point; } = {};
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
@@ -2425,6 +2429,35 @@ export const setLayersRotationThunk = (payload: SetLayersRotationPayload) => {
           rotation: payload.rotation
         }
       });
+      let fillRef = null;
+      switch(layerItem.type) {
+        case 'Shape':
+          fillRef = clone;
+          break;
+        case 'Text':
+          fillRef = clone.getItem({data:{id:'textContent'}});
+          break;
+      }
+      if (layerItem.style.fill.fillType === 'gradient') {
+        fillGradientOrigin = {
+          ...fillGradientOrigin,
+          [id]: fillRef.fillColor.origin
+        }
+        fillGradientDestination = {
+          ...fillGradientDestination,
+          [id]: fillRef.fillColor.destination
+        }
+      }
+      if (layerItem.style.stroke.fillType === 'gradient') {
+        strokeGradientOrigin = {
+          ...strokeGradientOrigin,
+          [id]: fillRef.strokeColor.origin
+        }
+        strokeGradientDestination = {
+          ...strokeGradientDestination,
+          [id]: fillRef.strokeColor.destination
+        }
+      }
       if (layerItem.type === 'Shape') {
         pathData = {
           ...pathData,
@@ -2479,6 +2512,10 @@ export const setLayersRotationThunk = (payload: SetLayersRotationPayload) => {
         bounds,
         pathData,
         shapeIcon,
+        fillGradientOrigin,
+        fillGradientDestination,
+        strokeGradientOrigin,
+        strokeGradientDestination,
         point,
         from,
         to
