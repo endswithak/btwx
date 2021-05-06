@@ -6224,6 +6224,7 @@ export const setLayersRotation = (state: LayerState, action: SetLayersRotation):
 export const enableLayerHorizontalFlip = (state: LayerState, action: EnableLayerHorizontalFlip): LayerState => {
   let currentState = state;
   const pathData = action.payload.pathData;
+  const shapeIcon = action.payload.shapeIcon;
   const from = action.payload.from;
   const to = action.payload.to;
   const point = action.payload.point;
@@ -6236,6 +6237,37 @@ export const enableLayerHorizontalFlip = (state: LayerState, action: EnableLayer
         transform: {
           ...currentState.byId[action.payload.id].transform,
           horizontalFlip: true
+        },
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          fill: {
+            ...currentState.byId[action.payload.id].style.fill,
+            gradient: {
+              ...currentState.byId[action.payload.id].style.fill.gradient,
+              origin: {
+                ...currentState.byId[action.payload.id].style.fill.gradient.origin,
+                x: currentState.byId[action.payload.id].style.fill.gradient.origin.x * -1
+              },
+              destination: {
+                ...currentState.byId[action.payload.id].style.fill.gradient.destination,
+                x: currentState.byId[action.payload.id].style.fill.gradient.destination.x * -1
+              }
+            }
+          },
+          stroke: {
+            ...currentState.byId[action.payload.id].style.stroke,
+            gradient: {
+              ...currentState.byId[action.payload.id].style.stroke.gradient,
+              origin: {
+                ...currentState.byId[action.payload.id].style.stroke.gradient.origin,
+                x: currentState.byId[action.payload.id].style.stroke.gradient.origin.x * -1
+              },
+              destination: {
+                ...currentState.byId[action.payload.id].style.stroke.gradient.destination,
+                x: currentState.byId[action.payload.id].style.stroke.gradient.destination.x * -1
+              }
+            }
+          }
         }
       }
     }
@@ -6251,8 +6283,16 @@ export const enableLayerHorizontalFlip = (state: LayerState, action: EnableLayer
         } as Btwx.Shape
       }
     }
-    currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
     currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shape']);
+  }
+  if (shapeIcon) {
+    currentState = {
+      ...currentState,
+      shapeIcons: {
+        ...currentState.shapeIcons,
+        [action.payload.id]: shapeIcon
+      }
+    }
   }
   if (from) {
     currentState = {
@@ -6284,7 +6324,7 @@ export const enableLayerHorizontalFlip = (state: LayerState, action: EnableLayer
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleX']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleX', 'fillGradientOriginX', 'fillGradientDestinationX', 'strokeGradientOriginX', 'strokeGradientDestinationX']);
   if (point) {
     currentState = {
       ...currentState,
@@ -6308,6 +6348,7 @@ export const enableLayersHorizontalFlip = (state: LayerState, action: EnableLaye
   let currentState = state;
   currentState = action.payload.layers.reduce((result, current) => {
     const pathData = action.payload.pathData ? action.payload.pathData[current] : null;
+    const shapeIcon = action.payload.shapeIcon ? action.payload.shapeIcon[current] : null;
     const point = action.payload.point ? action.payload.point[current] : null;
     const from = action.payload.from ? action.payload.from[current] : null;
     const to = action.payload.to ? action.payload.to[current] : null;
@@ -6315,6 +6356,7 @@ export const enableLayersHorizontalFlip = (state: LayerState, action: EnableLaye
       id: current,
       point,
       pathData,
+      shapeIcon,
       from,
       to
     }) as EnableLayerHorizontalFlip);
@@ -6336,6 +6378,7 @@ export const disableLayerHorizontalFlip = (state: LayerState, action: DisableLay
   const from = action.payload.from;
   const to = action.payload.to;
   const point = action.payload.point;
+  const shapeIcon = action.payload.shapeIcon;
   currentState = {
     ...currentState,
     byId: {
@@ -6345,6 +6388,37 @@ export const disableLayerHorizontalFlip = (state: LayerState, action: DisableLay
         transform: {
           ...currentState.byId[action.payload.id].transform,
           horizontalFlip: false
+        },
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          fill: {
+            ...currentState.byId[action.payload.id].style.fill,
+            gradient: {
+              ...currentState.byId[action.payload.id].style.fill.gradient,
+              origin: {
+                ...currentState.byId[action.payload.id].style.fill.gradient.origin,
+                x: currentState.byId[action.payload.id].style.fill.gradient.origin.x * -1
+              },
+              destination: {
+                ...currentState.byId[action.payload.id].style.fill.gradient.destination,
+                x: currentState.byId[action.payload.id].style.fill.gradient.destination.x * -1
+              }
+            }
+          },
+          stroke: {
+            ...currentState.byId[action.payload.id].style.stroke,
+            gradient: {
+              ...currentState.byId[action.payload.id].style.stroke.gradient,
+              origin: {
+                ...currentState.byId[action.payload.id].style.stroke.gradient.origin,
+                x: currentState.byId[action.payload.id].style.stroke.gradient.origin.x * -1
+              },
+              destination: {
+                ...currentState.byId[action.payload.id].style.stroke.gradient.destination,
+                x: currentState.byId[action.payload.id].style.stroke.gradient.destination.x * -1
+              }
+            }
+          }
         }
       }
     }
@@ -6360,8 +6434,16 @@ export const disableLayerHorizontalFlip = (state: LayerState, action: DisableLay
         } as Btwx.Shape
       }
     }
-    currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
     currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shape']);
+  }
+  if (shapeIcon) {
+    currentState = {
+      ...currentState,
+      shapeIcons: {
+        ...currentState.shapeIcons,
+        [action.payload.id]: shapeIcon
+      }
+    }
   }
   if (from) {
     currentState = {
@@ -6393,7 +6475,7 @@ export const disableLayerHorizontalFlip = (state: LayerState, action: DisableLay
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleX']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleX', 'fillGradientOriginX', 'fillGradientDestinationX', 'strokeGradientOriginX', 'strokeGradientDestinationX']);
   if (point) {
     currentState = {
       ...currentState,
@@ -6416,6 +6498,7 @@ export const disableLayersHorizontalFlip = (state: LayerState, action: DisableLa
   let currentState = state;
   currentState = action.payload.layers.reduce((result, current) => {
     const pathData = action.payload.pathData ? action.payload.pathData[current] : null;
+    const shapeIcon = action.payload.shapeIcon ? action.payload.shapeIcon[current] : null;
     const point = action.payload.point ? action.payload.point[current] : null;
     const from = action.payload.from ? action.payload.from[current] : null;
     const to = action.payload.to ? action.payload.to[current] : null;
@@ -6423,6 +6506,7 @@ export const disableLayersHorizontalFlip = (state: LayerState, action: DisableLa
       id: current,
       point,
       pathData,
+      shapeIcon,
       from,
       to
     }) as DisableLayerHorizontalFlip);
@@ -6441,6 +6525,7 @@ export const disableLayersHorizontalFlip = (state: LayerState, action: DisableLa
 export const enableLayerVerticalFlip = (state: LayerState, action: EnableLayerVerticalFlip): LayerState => {
   let currentState = state;
   const pathData = action.payload.pathData;
+  const shapeIcon = action.payload.shapeIcon;
   const from = action.payload.from;
   const to = action.payload.to;
   const point = action.payload.point;
@@ -6453,6 +6538,37 @@ export const enableLayerVerticalFlip = (state: LayerState, action: EnableLayerVe
         transform: {
           ...currentState.byId[action.payload.id].transform,
           verticalFlip: true
+        },
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          fill: {
+            ...currentState.byId[action.payload.id].style.fill,
+            gradient: {
+              ...currentState.byId[action.payload.id].style.fill.gradient,
+              origin: {
+                ...currentState.byId[action.payload.id].style.fill.gradient.origin,
+                y: currentState.byId[action.payload.id].style.fill.gradient.origin.y * -1
+              },
+              destination: {
+                ...currentState.byId[action.payload.id].style.fill.gradient.destination,
+                y: currentState.byId[action.payload.id].style.fill.gradient.destination.y * -1
+              }
+            }
+          },
+          stroke: {
+            ...currentState.byId[action.payload.id].style.stroke,
+            gradient: {
+              ...currentState.byId[action.payload.id].style.stroke.gradient,
+              origin: {
+                ...currentState.byId[action.payload.id].style.stroke.gradient.origin,
+                y: currentState.byId[action.payload.id].style.stroke.gradient.origin.y * -1
+              },
+              destination: {
+                ...currentState.byId[action.payload.id].style.stroke.gradient.destination,
+                y: currentState.byId[action.payload.id].style.stroke.gradient.destination.y * -1
+              }
+            }
+          }
         }
       }
     }
@@ -6468,8 +6584,16 @@ export const enableLayerVerticalFlip = (state: LayerState, action: EnableLayerVe
         } as Btwx.Shape
       }
     }
-    currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
     currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shape']);
+  }
+  if (shapeIcon) {
+    currentState = {
+      ...currentState,
+      shapeIcons: {
+        ...currentState.shapeIcons,
+        [action.payload.id]: shapeIcon
+      }
+    }
   }
   if (from) {
     currentState = {
@@ -6501,7 +6625,7 @@ export const enableLayerVerticalFlip = (state: LayerState, action: EnableLayerVe
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleY']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleY', 'fillGradientOriginY', 'fillGradientDestinationY', 'strokeGradientOriginY', 'strokeGradientDestinationY']);
   if (point) {
     currentState = {
       ...currentState,
@@ -6525,6 +6649,7 @@ export const enableLayersVerticalFlip = (state: LayerState, action: EnableLayers
   let currentState = state;
   currentState = action.payload.layers.reduce((result, current) => {
     const pathData = action.payload.pathData ? action.payload.pathData[current] : null;
+    const shapeIcon = action.payload.shapeIcon ? action.payload.shapeIcon[current] : null;
     const point = action.payload.point ? action.payload.point[current] : null;
     const from = action.payload.from ? action.payload.from[current] : null;
     const to = action.payload.to ? action.payload.to[current] : null;
@@ -6532,6 +6657,7 @@ export const enableLayersVerticalFlip = (state: LayerState, action: EnableLayers
       id: current,
       point,
       pathData,
+      shapeIcon,
       from,
       to
     }) as EnableLayerVerticalFlip);
@@ -6550,6 +6676,7 @@ export const enableLayersVerticalFlip = (state: LayerState, action: EnableLayers
 export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayerVerticalFlip): LayerState => {
   let currentState = state;
   const pathData = action.payload.pathData;
+  const shapeIcon = action.payload.shapeIcon;
   const from = action.payload.from;
   const to = action.payload.to;
   const point = action.payload.point;
@@ -6562,6 +6689,37 @@ export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayer
         transform: {
           ...currentState.byId[action.payload.id].transform,
           verticalFlip: false
+        },
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          fill: {
+            ...currentState.byId[action.payload.id].style.fill,
+            gradient: {
+              ...currentState.byId[action.payload.id].style.fill.gradient,
+              origin: {
+                ...currentState.byId[action.payload.id].style.fill.gradient.origin,
+                y: currentState.byId[action.payload.id].style.fill.gradient.origin.y * -1
+              },
+              destination: {
+                ...currentState.byId[action.payload.id].style.fill.gradient.destination,
+                y: currentState.byId[action.payload.id].style.fill.gradient.destination.y * -1
+              }
+            }
+          },
+          stroke: {
+            ...currentState.byId[action.payload.id].style.stroke,
+            gradient: {
+              ...currentState.byId[action.payload.id].style.stroke.gradient,
+              origin: {
+                ...currentState.byId[action.payload.id].style.stroke.gradient.origin,
+                y: currentState.byId[action.payload.id].style.stroke.gradient.origin.y * -1
+              },
+              destination: {
+                ...currentState.byId[action.payload.id].style.stroke.gradient.destination,
+                y: currentState.byId[action.payload.id].style.stroke.gradient.destination.y * -1
+              }
+            }
+          }
         }
       }
     }
@@ -6577,8 +6735,16 @@ export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayer
         } as Btwx.Shape
       }
     }
-    currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
     currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shape']);
+  }
+  if (shapeIcon) {
+    currentState = {
+      ...currentState,
+      shapeIcons: {
+        ...currentState.shapeIcons,
+        [action.payload.id]: shapeIcon
+      }
+    }
   }
   if (from) {
     currentState = {
@@ -6610,7 +6776,7 @@ export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayer
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleY']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleY', 'fillGradientOriginY', 'fillGradientDestinationY', 'strokeGradientOriginY', 'strokeGradientDestinationY']);
   if (point) {
     currentState = {
       ...currentState,
@@ -6634,6 +6800,7 @@ export const disableLayersVerticalFlip = (state: LayerState, action: DisableLaye
   let currentState = state;
   currentState = action.payload.layers.reduce((result, current) => {
     const pathData = action.payload.pathData ? action.payload.pathData[current] : null;
+    const shapeIcon = action.payload.shapeIcon ? action.payload.shapeIcon[current] : null;
     const point = action.payload.point ? action.payload.point[current] : null;
     const from = action.payload.from ? action.payload.from[current] : null;
     const to = action.payload.to ? action.payload.to[current] : null;
@@ -6641,6 +6808,7 @@ export const disableLayersVerticalFlip = (state: LayerState, action: DisableLaye
       id: current,
       point,
       pathData,
+      shapeIcon,
       from,
       to
     }) as DisableLayerVerticalFlip);

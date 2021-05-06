@@ -2571,6 +2571,10 @@ export const setLayersHorizontalFlipThunk = (payload: (EnableLayersHorizontalFli
             ...pathData,
             [id]: (duplicate as paper.CompoundPath).pathData
           }
+          shapeIcon = {
+            ...shapeIcon,
+            [id]: getShapeIcon((duplicate as paper.CompoundPath).pathData)
+          }
           if ((layerItem as Btwx.Shape).shapeType === 'Line') {
             const fromPoint = (duplicate as paper.Path).firstSegment.point.subtract(artboardPosition);
             const toPoint = (duplicate as paper.Path).lastSegment.point.subtract(artboardPosition);
@@ -2610,6 +2614,7 @@ export const setLayersHorizontalFlipThunk = (payload: (EnableLayersHorizontalFli
       dispatch(enableLayersHorizontalFlip({
         layers: compiledLayers,
         pathData,
+        shapeIcon,
         from,
         to,
         point
@@ -2618,6 +2623,7 @@ export const setLayersHorizontalFlipThunk = (payload: (EnableLayersHorizontalFli
       dispatch(disableLayersHorizontalFlip({
         layers: compiledLayers,
         pathData,
+        shapeIcon,
         from,
         to,
         point
@@ -2681,6 +2687,7 @@ export const setLayersVerticalFlipThunk = (payload: (EnableLayersVerticalFlipPay
     let to = {} as { [id: string]: Btwx.Point };
     let point = {} as { [id: string]: Btwx.Point };
     let pathData = {} as { [id: string]: string };
+    let shapeIcon = {} as { [id: string]: string };
     const handleLayers = (layers: string[]) => {
       layers.forEach((id) => {
         compiledLayers.push(id);
@@ -2695,6 +2702,10 @@ export const setLayersVerticalFlipThunk = (payload: (EnableLayersVerticalFlipPay
           pathData = {
             ...pathData,
             [id]: (duplicate as paper.CompoundPath).pathData
+          }
+          shapeIcon = {
+            ...shapeIcon,
+            [id]: getShapeIcon((duplicate as paper.CompoundPath).pathData)
           }
           if ((layerItem as Btwx.Shape).shapeType === 'Line') {
             const fromPoint = (duplicate as paper.Path).firstSegment.point.subtract(artboardPosition);
@@ -2735,6 +2746,7 @@ export const setLayersVerticalFlipThunk = (payload: (EnableLayersVerticalFlipPay
       dispatch(enableLayersVerticalFlip({
         layers: compiledLayers,
         pathData,
+        shapeIcon,
         from,
         to,
         point
@@ -2743,6 +2755,7 @@ export const setLayersVerticalFlipThunk = (payload: (EnableLayersVerticalFlipPay
       dispatch(disableLayersVerticalFlip({
         layers: compiledLayers,
         pathData,
+        shapeIcon,
         from,
         to,
         point
