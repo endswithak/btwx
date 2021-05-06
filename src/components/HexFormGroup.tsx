@@ -2,7 +2,7 @@
 import React, { useEffect, useState, forwardRef, useCallback } from 'react';
 import debounce from 'lodash.debounce';
 import tinyColor from 'tinycolor2';
-import { evaluateHex, clearTouchbar } from '../utils';
+import { evaluateHex } from '../utils';
 import Form from './Form';
 
 interface HexFormGroup {

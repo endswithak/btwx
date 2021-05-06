@@ -86,12 +86,12 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
   }
 
   const clearLayerScale = (paperLayer: paper.Item): void => {
-    const originalLayer = originalSelection[paperLayer.data.id];
-    paperLayer.replaceWith(originalLayer.clone());
     if (originalSelection[`${paperLayer.data.id}-mask`]) {
       const maskClone = originalSelection[`${paperLayer.data.id}-mask`];
       paperLayer.previousSibling.replaceWith(maskClone.clone());
     }
+    const originalLayer = originalSelection[paperLayer.data.id];
+    paperLayer.replaceWith(originalLayer.clone());
   }
 
   const clearLayerPivots = (): void => {
@@ -669,19 +669,20 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
             const projectIndex = artboardItem.projectIndex;
             const layerItem = layersById[id];
             if (layerItem.type !== 'Group') {
-              const clone = getPaperLayer(id, projectIndex).clone({insert: false});
+              const paperLayer = getPaperLayer(id, projectIndex);
+              const clone = paperLayer.clone({insert: false});
               nextOriginalSelection = {
                 ...nextOriginalSelection,
                 [id]: clone
               }
-              setLayerPivot(id, nextFromPivot);
-              compiledSelected.push(id);
               if (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask) {
                 nextOriginalSelection = {
                   ...nextOriginalSelection,
-                  [`${id}-mask`]: clone.previousSibling
+                  [`${id}-mask`]: paperLayer.previousSibling.clone({insert: false})
                 }
               }
+              compiledSelected.push(id);
+              setLayerPivot(id, nextFromPivot);
             } else {
               const descendents = getLayerDescendants({byId: layersById} as any, id, false);
               handleLayers(descendents);

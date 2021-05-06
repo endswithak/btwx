@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { ReactElement, useState, useEffect, useRef, useCallback } from 'react';
 import debounce from 'lodash.debounce';
-import { clearTouchbar } from '../utils';
+// import { clearTouchbar } from '../utils';
 import Form from './Form';
 
 interface ColorPickerAlphaProps {

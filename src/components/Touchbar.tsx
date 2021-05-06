@@ -50,7 +50,11 @@ const Touchbar = (): ReactElement => {
         canZoomOut
       }));
     }
-  }, [ready, selected, canZoomOut, focusing, isArtboardToolActive, theme, hasActiveArtboard, isRectangleToolActive, isEllipseToolActive, isTextToolActive]);
+  }, [
+    ready, selected, canZoomOut, focusing, isArtboardToolActive,
+    hasActiveArtboard, isRectangleToolActive, isEllipseToolActive,
+    isTextToolActive, theme, isShapeToolActive
+  ]);
 
   useEffect(() => {
     if (ready && isMac && focusing && selected.length >= 1) {
@@ -69,7 +73,21 @@ const Touchbar = (): ReactElement => {
         canSendBackward
       }));
     }
-  }, [ready, selected, canAlignLeft, canAlignCenter, canAlignRight, canAlignTop, canAlignMiddle, canAlignBottom, canDistribute, canGroup, canUngroup, canBringForward, canSendBackward]);
+  }, [
+    ready, selected, canAlignLeft, canAlignCenter, canAlignRight,
+    canAlignTop, canAlignMiddle, canAlignBottom, canDistribute,
+    canGroup, canUngroup, canBringForward, canSendBackward
+  ]);
+
+  useEffect(() => {
+    if (ready && isMac && !focusing) {
+      ipcRenderer.send('clearTouchBar', JSON.stringify({
+        instanceId
+      }));
+    }
+  }, [
+    ready, focusing
+  ]);
 
   return null;
 }
