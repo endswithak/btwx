@@ -16,7 +16,6 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
   const layerItem: Btwx.Group = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Group);
   const parentItem: Btwx.Artboard | Btwx.Group = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.parent] as Btwx.Artboard | Btwx.Group : null);
   const artboardItem: Btwx.Artboard = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null);
-  // const tweening = useSelector((state: RootState) => state.preview.tweening === artboardItem.id);
   const layerIndex = parentItem.children.indexOf(layerItem.id);
   const underlyingMaskIndex = layerItem.underlyingMask ? parentItem.children.indexOf(layerItem.underlyingMask) : null;
   const maskedIndex = (layerIndex - underlyingMaskIndex) + 1;
@@ -24,8 +23,6 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
   const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
   const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
   const [rendered, setRendered] = useState<boolean>(false);
-  // const [prevTweening, setPrevTweening] = useState(tweening);
-  // const [eventInstance, setEventInstance] = useState(0);
 
   ///////////////////////////////////////////////////////
   // HELPER FUNCTIONS
@@ -74,23 +71,6 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
       }
     }
   }, []);
-
-  ///////////////////////////////////////////////////////
-  // TWEENS
-  ///////////////////////////////////////////////////////
-
-  // useEffect(() => {
-  //   if (paperScope === 'preview') {
-  //     if (!tweening && prevTweening) {
-  //       const paperLayer = paperProject.getItem({ data: { id } });
-  //       const newGroup = createGroup();
-  //       newGroup.addChildren(paperLayer.children);
-  //       paperLayer.replaceWith(newGroup);
-  //       setEventInstance(eventInstance + 1);
-  //     }
-  //     setPrevTweening(tweening);
-  //   }
-  // }, [tweening]);
 
   ///////////////////////////////////////////////////////
   // INDEX & MASK
@@ -151,47 +131,20 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
   // CHILDREN & EVENTS
   ///////////////////////////////////////////////////////
 
-  if (paperScope === 'preview') {
-    return (
-      rendered && layerItem
-      ? <>
-          {
-            layerItem.children.length > 0
-            ? layerItem.children.map((childId) => (
-                <CanvasLayer
-                  key={childId}
-                  id={childId}
-                  paperScope={paperScope} />
-              ))
-            : null
-          }
-          {/* {
-            layerItem.events.map((eventId) => (
-              <CanvasPreviewLayerEvent
-                key={eventId}
-                eventId={eventId}
-                instanceId={`${eventInstance}-${eventId}`} />
-            ))
-          } */}
-        </>
-      : null
-    )
-  } else {
-    return (
-      rendered && layerItem && layerItem.children.length > 0
-      ? <>
-          {
-            layerItem.children.map((childId) => (
-              <CanvasLayer
-                key={childId}
-                id={childId}
-                paperScope={paperScope} />
-            ))
-          }
-        </>
-      : null
-    );
-  }
+  return (
+    rendered && layerItem && layerItem.children.length > 0
+    ? <>
+        {
+          layerItem.children.map((childId) => (
+            <CanvasLayer
+              key={childId}
+              id={childId}
+              paperScope={paperScope} />
+          ))
+        }
+      </>
+    : null
+  );
 }
 
 export default CanvasGroupLayer;
