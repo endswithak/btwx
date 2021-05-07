@@ -3,7 +3,6 @@ import { createSelector } from 'reselect';
 // import replaceAll from 'string.prototype.replaceall';
 import tinyColor from 'tinycolor2';
 import paper from 'paper';
-import isSVG from 'is-svg';
 import { clipboard } from 'electron';
 import { LayerState } from '../reducers/layer';
 import { paperMain } from '../../canvas';
@@ -4145,11 +4144,10 @@ export const canResizeSelection = (store: LayerState): boolean => {
   return store.selected.length >= 1 && !store.selected.some((id) => store.byId[id].type === 'Artboard') && selectedWithChildren.allIds.some((id) => store.byId[id].type === 'Text' || store.byId[id].type === 'Group');
 };
 
-export const canPasteSVG = (): boolean => {
-  try {
-    const clipboardText = clipboard.readText();
-    return isSVG(clipboardText);
-  } catch(error) {
-    return false;
-  }
-};
+// export const canPasteSVG = (): boolean => {
+//   try {
+//     const clipboardText = clipboard.readText();
+//   } catch(error) {
+//     return false;
+//   }
+// };

@@ -42,7 +42,7 @@ const Preview = (): ReactElement => {
   }, [activeArtboard]);
 
   useEffect(() => {
-    if (activeArtboard) {
+    if (activeArtboard && platform === 'darwin') {
       if (recording) {
         ipcRenderer.send('buildPreviewRecordingTouchBar', JSON.stringify({
           instanceId: instance

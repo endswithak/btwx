@@ -711,32 +711,6 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
     }
   }, [layerItem.textStyle.textTransform]);
 
-  // useEffect(() => {
-  //   if (rendered) {
-  //     const { paperLayer, textContent, textBackground, textMask } = getPaperLayer();
-  //     clearLayerTransforms({
-  //       layerType: 'Text',
-  //       paperLayer
-  //     });
-  //     textContent.fontSize = layerItem.textStyle.fontSize;
-  //     textContent.content = content;
-  //     applyTextBounds({
-  //       textBackground,
-  //       textMask
-  //     });
-  //     positionTextContent({
-  //       paperLayer: paperLayer,
-  //       verticalAlignment: layerItem.textStyle.verticalAlignment,
-  //       justification: layerItem.textStyle.justification,
-  //       textResize: layerItem.textStyle.textResize
-  //     });
-  //     applyLayerTransforms({
-  //       paperLayer,
-  //       transform: layerItem.transform
-  //     });
-  //   }
-  // }, [layerItem.textStyle.fontSize]);
-
   useEffect(() => {
     if (rendered) {
       const { paperLayer, textContent } = getPaperLayer();

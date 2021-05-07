@@ -15,9 +15,10 @@ import {
   resizeTextBoundingBox, getPaperStyle, getShapeIcon
 } from '../utils/paper';
 import {
-  getLayerAndDescendants, getLayersBounds, getNearestScopeAncestor, getArtboardEventItems, canPasteSVG,
-  getArtboardsTopTop, getSelectedBounds, getPaperLayer, getItemLayers, getSelectedProjectIndices, getAbsolutePosition,
-  getActiveArtboardBounds, getAllArtboardItems, getSelectedAndDescendentsFull, getLayerDescendants, getSelectedRotation
+  getLayerAndDescendants, getLayersBounds, getNearestScopeAncestor, getArtboardEventItems,
+  getArtboardsTopTop, getSelectedBounds, getPaperLayer, getItemLayers, getSelectedProjectIndices,
+  getAbsolutePosition, getActiveArtboardBounds, getAllArtboardItems, getSelectedAndDescendentsFull,
+  getLayerDescendants, getSelectedRotation
 } from '../selectors/layer';
 import {
   getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle,
@@ -5905,7 +5906,7 @@ export const pasteStyleThunk = () => {
 export const pasteSVGThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
-    if (state.canvasSettings.focusing && canPasteSVG()) {
+    if (state.canvasSettings.focusing) {
       const clipboardText = clipboard.readText();
       const svg = paperMain.project.importSVG(clipboardText, {insert: false});
       console.log(svg);
