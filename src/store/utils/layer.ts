@@ -8783,7 +8783,7 @@ export const setLayerFontSize = (state: LayerState, action: SetLayerFontSize): L
     }
   }
   currentState = updateGroupParentBounds(currentState, groupParents);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fontSize', 'x', 'width']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['fontSize', 'x', 'width', 'lineHeight']);
   return currentState;
 };
 

@@ -15,7 +15,7 @@ import { paperPreview } from '../canvas';
 import { getTransformedText } from '../utils';
 import { positionTextContent, clearLayerTransforms, applyLayerTransforms, getPaperFillColor, getPaperStrokeColor } from '../store/utils/paper';
 import { EventLayerTimelineData } from './CanvasPreviewLayerEvent';
-import { getParagraphs, getContent } from './CanvasTextLayer';
+import { getParagraphs, getContent, getLeading } from './CanvasTextLayer';
 
 gsap.registerPlugin(MorphSVGPlugin, RoughEase, SlowMo, CustomBounce, CustomEase, CustomWiggle, ScrambleTextPlugin, TextPlugin);
 
@@ -1656,13 +1656,19 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   const addLineHeightTween = (): void => {
     const originTextItem = originLayerItem as Btwx.Text;
     const destinationTextItem = destinationLayerItem as Btwx.Text;
-    eventTimeline.data[tween.layer][tween.prop] = originTextItem.textStyle.leading;
+    eventTimeline.data[tween.layer][tween.prop] = getLeading({
+      leading: originTextItem.textStyle.leading,
+      fontSize: originTextItem.textStyle.fontSize
+    });
     eventLayerTimeline.to(eventTimeline.data[tween.layer], {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
       yoyo: tween.yoyo,
-      [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationTextItem.textStyle.leading,
+      [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : getLeading({
+        leading: destinationTextItem.textStyle.leading,
+        fontSize: destinationTextItem.textStyle.fontSize
+      }),
       onUpdate: () => {
         const { paperLayer, textContent, textMask, textBackground, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         const currentProps = getCurrentTweenLayerProps();

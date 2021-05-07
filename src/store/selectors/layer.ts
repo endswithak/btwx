@@ -11,6 +11,7 @@ import { removeItem } from '../utils/general';
 import { colorsMatch, gradientsMatch } from '../../utils';
 import { RootState } from '../reducers';
 import { ARTBOARDS_PER_PROJECT, DEFAULT_TWEEN_EVENTS_TYPES, TWEEN_PROPS_MAP } from '../../constants';
+import { getLeading } from '../../components/CanvasTextLayer';
 
 export const getRoot = (state: RootState): Btwx.Layer => state.layer.present.byId.root;
 export const getArtboardEventDestinationIds = (state: RootState, id: string): string[] => (state.layer.present.byId[id] as Btwx.Artboard).destinationArtboardForEvents;
@@ -3665,7 +3666,7 @@ export const hasLetterSpacingTween = (layerItem: Btwx.Layer, equivalentLayerItem
 
 export const hasLineHeightTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const validType = layerItem.type === 'Text';
-  const leadingMatch = validType && (layerItem as Btwx.Text).textStyle.leading === (equivalentLayerItem as Btwx.Text).textStyle.leading;
+  const leadingMatch = validType && getLeading({leading: (layerItem as Btwx.Text).textStyle.leading, fontSize: (layerItem as Btwx.Text).textStyle.fontSize}) === getLeading({leading: (equivalentLayerItem as Btwx.Text).textStyle.leading, fontSize: (equivalentLayerItem as Btwx.Text).textStyle.fontSize});
   return validType && !leadingMatch;
 };
 

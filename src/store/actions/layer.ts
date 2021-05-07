@@ -31,7 +31,7 @@ import { setEventDrawerEventThunk } from './eventDrawer';
 import { openColorEditor, closeColorEditor } from './colorEditor';
 import { openGradientEditor, closeGradientEditor } from './gradientEditor';
 import { RootState } from '../reducers';
-import { getContent, getParagraphs } from '../../components/CanvasTextLayer';
+import { getContent, getParagraphs, getLeading } from '../../components/CanvasTextLayer';
 import { getIconData } from '../../components/Icon';
 
 import {
@@ -2190,7 +2190,10 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
         });
         const textLines = getTextLines({
           paperLayer: textContent,
-          leading: (layerItem as Btwx.Text).textStyle.leading,
+          leading: getLeading({
+            leading: (layerItem as Btwx.Text).textStyle.leading,
+            fontSize: (layerItem as Btwx.Text).textStyle.fontSize
+          }),
           artboardPosition: artboardPosition,
           paragraphs: nextParagraphs
         });
@@ -2340,7 +2343,10 @@ export const setLayersHeightThunk = (payload: SetLayersHeightPayload) => {
         });
         const textLines = getTextLines({
           paperLayer: textContent,
-          leading: textItem.textStyle.leading,
+          leading: getLeading({
+            leading: (layerItem as Btwx.Text).textStyle.leading,
+            fontSize: (layerItem as Btwx.Text).textStyle.fontSize
+          }),
           artboardPosition: artboardPosition,
           paragraphs: textItem.paragraphs
         });
@@ -3348,7 +3354,10 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
         });
         const nextTextLines = getTextLines({
           paperLayer: textContent,
-          leading: (layerItem as Btwx.Text).textStyle.leading,
+          leading: getLeading({
+            leading: (layerItem as Btwx.Text).textStyle.leading,
+            fontSize: (layerItem as Btwx.Text).textStyle.fontSize
+          }),
           artboardPosition: artboardPosition,
           paragraphs: nextParagraphs
         });
@@ -3492,7 +3501,10 @@ export const setLayerTextThunk = (payload: SetLayerTextPayload) => {
     });
     const nextTextLines = getTextLines({
       paperLayer: textContent,
-      leading: (layerItem as Btwx.Text).textStyle.leading,
+      leading: getLeading({
+        leading: (layerItem as Btwx.Text).textStyle.leading,
+        fontSize: (layerItem as Btwx.Text).textStyle.fontSize
+      }),
       artboardPosition: artboardPosition,
       paragraphs: nextParagraphs
     });
@@ -3592,7 +3604,10 @@ export const setLayersTextResizeThunk = (payload: SetLayersTextResizePayload) =>
       });
       const textLines = getTextLines({
         paperLayer: textContent,
-        leading: (layerItem as Btwx.Text).textStyle.leading,
+        leading: getLeading({
+          leading: (layerItem as Btwx.Text).textStyle.leading,
+          fontSize: (layerItem as Btwx.Text).textStyle.fontSize
+        }),
         artboardPosition: artboardPosition,
         paragraphs: nextParagraphs
       });
@@ -3654,6 +3669,8 @@ export const setLayersFontSizeThunk = (payload: SetLayersFontSizePayload) => {
       const paperLayer = paperMain.projects[projectIndex].getItem({data:{id}});
       const clone = paperLayer.clone({insert: false}) as paper.Group;
       const textContent = clone.getItem({data: {id: 'textContent'}}) as paper.AreaText;
+      const textBackground = clone.getItem({data:{id:'textBackground'}}) as paper.Path.Rectangle;
+      const textMask = clone.getItem({data:{id:'textMask'}}) as paper.Path.Rectangle;
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       // clear layer transforms
       clearLayerTransforms({
@@ -3677,9 +3694,54 @@ export const setLayersFontSizeThunk = (payload: SetLayersFontSizePayload) => {
       const nextContent = getContent({
         paragraphs: nextParagraphs
       });
+      //
+      const nextLeading = getLeading({
+        leading: (layerItem as Btwx.Text).textStyle.leading,
+        fontSize: payload.fontSize
+      });
       // apply new props
       textContent.fontSize = payload.fontSize;
+      textContent.leading = nextLeading;
       textContent.content = nextContent;
+      // Recalculate bounds height and y
+      let nextInnerHeight;
+      let nextY;
+      const prevLeading = getLeading({
+        leading: (layerItem as Btwx.Text).textStyle.leading,
+        fontSize: (layerItem as Btwx.Text).textStyle.fontSize
+      })
+      const diff = (nextLeading - prevLeading) * 0.75;
+      switch(layerItem.textStyle.textResize) {
+        case 'autoWidth':
+          nextInnerHeight = textContent.bounds.height;
+          nextY = textContent.position.y - artboardPosition.y;
+          textBackground.bounds = textContent.bounds;
+          textMask.bounds = textContent.bounds;
+          break;
+        case 'autoHeight':
+          nextInnerHeight = textContent.bounds.height;
+          nextY = textContent.position.y - artboardPosition.y;
+          textBackground.bounds.height = textContent.bounds.height;
+          textMask.bounds.height = textContent.bounds.height;
+          textBackground.position.y = textContent.position.y;
+          textMask.position.y = textMask.position.y;
+          break;
+        case 'fixed':
+          switch(layerItem.textStyle.verticalAlignment) {
+            case 'top':
+              nextY = layerItem.frame.y - diff;
+              nextInnerHeight = layerItem.frame.innerHeight;
+              textBackground.position.y -= diff;
+              textMask.position.y -= diff;
+              break;
+            case 'middle':
+            case 'bottom':
+              nextY = layerItem.frame.y;
+              nextInnerHeight = layerItem.frame.innerHeight;
+              break;
+          }
+          break;
+      }
       // reposition text content
       positionTextContent({
         paperLayer: clone,
@@ -3688,17 +3750,37 @@ export const setLayersFontSizeThunk = (payload: SetLayersFontSizePayload) => {
         textResize: (layerItem as Btwx.Text).textStyle.textResize
       });
       // get next point, inner bounds, and lines
+      // const nextInnerBounds = getTextInnerBounds({
+      //   paperLayer: clone,
+      //   frame: (layerItem as Btwx.Text).frame,
+      //   textResize: (layerItem as Btwx.Text).textStyle.textResize,
+      //   artboardPosition
+      // });
+      // const textLines = getTextLines({
+      //   paperLayer: textContent,
+      //   leading: getLeading({
+      //     leading: (layerItem as Btwx.Text).textStyle.leading,
+      //     fontSize: payload.fontSize
+      //   }),
+      //   artboardPosition: artboardPosition,
+      //   paragraphs: nextParagraphs
+      // });
+      // get next point, inner bounds, and lines
       const nextInnerBounds = getTextInnerBounds({
         paperLayer: clone,
-        frame: (layerItem as Btwx.Text).frame,
-        textResize: (layerItem as Btwx.Text).textStyle.textResize,
+        frame: {
+          ...layerItem.frame,
+          innerHeight: nextInnerHeight,
+          y: nextY
+        },
+        textResize: layerItem.textStyle.textResize,
         artboardPosition
       });
       const textLines = getTextLines({
         paperLayer: textContent,
-        leading: (layerItem as Btwx.Text).textStyle.leading,
+        leading: nextLeading,
         artboardPosition: artboardPosition,
-        paragraphs: nextParagraphs
+        paragraphs: layerItem.paragraphs
       });
       // resize text bounding box
       resizeTextBoundingBox({
@@ -3767,11 +3849,22 @@ export const setLayersLeadingThunk = (payload: SetLayersLeadingPayload) => {
         transform: layerItem.transform
       });
       // apply new props
-      textContent.leading = payload.leading;
+      textContent.leading = getLeading({
+        leading: payload.leading,
+        fontSize: (layerItem as Btwx.Text).textStyle.fontSize
+      });
       // Recalculate bounds height and y
       let nextInnerHeight;
       let nextY;
-      const diff = (payload.leading - layerItem.textStyle.leading) * 0.75;
+      const nextLeading = getLeading({
+        leading: payload.leading,
+        fontSize: (layerItem as Btwx.Text).textStyle.fontSize
+      });
+      const prevLeading = getLeading({
+        leading: layerItem.textStyle.leading,
+        fontSize: (layerItem as Btwx.Text).textStyle.fontSize
+      })
+      const diff = (nextLeading - prevLeading) * 0.75;
       switch(layerItem.textStyle.textResize) {
         case 'autoWidth':
           nextInnerHeight = textContent.bounds.height;
@@ -3823,7 +3916,10 @@ export const setLayersLeadingThunk = (payload: SetLayersLeadingPayload) => {
       });
       const textLines = getTextLines({
         paperLayer: textContent,
-        leading: payload.leading,
+        leading: getLeading({
+          leading: payload.leading,
+          fontSize: (layerItem as Btwx.Text).textStyle.fontSize
+        }),
         artboardPosition: artboardPosition,
         paragraphs: layerItem.paragraphs
       });
@@ -3925,7 +4021,10 @@ export const setLayersFontWeightThunk = (payload: SetLayersFontWeightPayload) =>
       });
       const textLines = getTextLines({
         paperLayer: textContent,
-        leading: (layerItem as Btwx.Text).textStyle.leading,
+        leading: getLeading({
+          leading: (layerItem as Btwx.Text).textStyle.leading,
+          fontSize: (layerItem as Btwx.Text).textStyle.fontSize
+        }),
         artboardPosition: artboardPosition,
         paragraphs: nextParagraphs
       });
@@ -4029,7 +4128,10 @@ export const setLayersFontFamilyThunk = (payload: SetLayersFontFamilyPayload) =>
       });
       const textLines = getTextLines({
         paperLayer: textContent,
-        leading: (layerItem as Btwx.Text).textStyle.leading,
+        leading: getLeading({
+          leading: (layerItem as Btwx.Text).textStyle.leading,
+          fontSize: (layerItem as Btwx.Text).textStyle.fontSize
+        }),
         artboardPosition: artboardPosition,
         paragraphs: nextParagraphs
       });
@@ -4133,7 +4235,10 @@ export const setLayersLetterSpacingThunk = (payload: SetLayersLetterSpacingPaylo
       });
       const textLines = getTextLines({
         paperLayer: textContent,
-        leading: (layerItem as Btwx.Text).textStyle.leading,
+        leading: getLeading({
+          leading: (layerItem as Btwx.Text).textStyle.leading,
+          fontSize: (layerItem as Btwx.Text).textStyle.fontSize
+        }),
         artboardPosition: artboardPosition,
         paragraphs: nextParagraphs
       });
@@ -4237,7 +4342,10 @@ export const setLayersTextTransformThunk = (payload: SetLayersTextTransformPaylo
       });
       const textLines = getTextLines({
         paperLayer: textContent,
-        leading: (layerItem as Btwx.Text).textStyle.leading,
+        leading: getLeading({
+          leading: (layerItem as Btwx.Text).textStyle.leading,
+          fontSize: (layerItem as Btwx.Text).textStyle.fontSize
+        }),
         artboardPosition: artboardPosition,
         paragraphs: nextParagraphs
       });
@@ -4361,7 +4469,10 @@ export const setLayersJustificationThunk = (payload: SetLayersJustificationPaylo
       // get next point, inner bounds, and lines
       const textLines = getTextLines({
         paperLayer: textContent,
-        leading: (layerItem as Btwx.Text).textStyle.leading,
+        leading: getLeading({
+          leading: (layerItem as Btwx.Text).textStyle.leading,
+          fontSize: (layerItem as Btwx.Text).textStyle.fontSize
+        }),
         artboardPosition: artboardPosition,
         paragraphs: layerItem.paragraphs
       });
@@ -4434,7 +4545,10 @@ export const setLayersVerticalAlignmentThunk = (payload: SetLayersVerticalAlignm
       });
       const textLines = getTextLines({
         paperLayer: textContent,
-        leading: (layerItem as Btwx.Text).textStyle.leading,
+        leading: getLeading({
+          leading: (layerItem as Btwx.Text).textStyle.leading,
+          fontSize: (layerItem as Btwx.Text).textStyle.fontSize
+        }),
         artboardPosition: artboardPosition,
         paragraphs: layerItem.paragraphs
       });
@@ -4536,7 +4650,10 @@ export const setLayersFontStyleThunk = (payload: SetLayersFontStylePayload) => {
       });
       const textLines = getTextLines({
         paperLayer: textContent,
-        leading: (layerItem as Btwx.Text).textStyle.leading,
+        leading: getLeading({
+          leading: (layerItem as Btwx.Text).textStyle.leading,
+          fontSize: (layerItem as Btwx.Text).textStyle.fontSize
+        }),
         artboardPosition: artboardPosition,
         paragraphs: nextParagraphs
       });

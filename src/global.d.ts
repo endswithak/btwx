@@ -292,7 +292,7 @@ declare namespace Btwx {
 
   interface TextStyle {
     fontSize: number;
-    leading: number;
+    leading: number | 'auto';
     fontWeight: FontWeight;
     fontFamily: string;
     fontStyle: FontStyle;

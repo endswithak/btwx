@@ -40,15 +40,15 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
   const resizeTextContent = useCallback(throttle((bounds: paper.Rectangle, layerItem: Btwx.Text, paperLayer: paper.Group, handle: Btwx.ResizeHandle) => {
     const textContent = paperLayer.getItem({data: { id: 'textContent' }}) as paper.PointText;
     const textMask = paperLayer.getItem({data: { id: 'textMask' }});
-    let textResize: Btwx.TextResize = 'fixed';
+    const textBackground = paperLayer.getItem({data: { id: 'textBackground' }});
+    let textResize: Btwx.TextResize;
     if ((handle === 'leftCenter' || handle === 'rightCenter') && layerItem.textStyle.textResize !== 'fixed') {
       textResize = 'autoHeight';
-      textMask.clipMask = false;
-      textMask.visible = false;
     } else {
-      textMask.clipMask = true;
-      textMask.visible = true;
+      textResize = 'fixed';
     }
+    textMask.clipMask = true;
+    textMask.visible = true;
     const paragraphs = getParagraphs({
       text: layerItem.text,
       fontSize: layerItem.textStyle.fontSize,
@@ -68,6 +68,10 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
       verticalAlignment: layerItem.textStyle.verticalAlignment,
       textResize: textResize,
     });
+    if (textResize === 'autoHeight' && layerItem.transform.rotation === 0) {
+      textMask.bounds.height = textContent.bounds.height;
+      textBackground.bounds.height = textContent.bounds.height;
+    }
   }, 0.25), []);
 
   const resetState = (): void => {

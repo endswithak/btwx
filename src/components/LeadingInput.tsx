@@ -13,8 +13,16 @@ const LeadingInput = (): ReactElement => {
   const dispatch = useDispatch();
 
   const handleSubmitSuccess = (newLeading: any): void => {
-    dispatch(setLayersLeadingThunk({layers: selected, leading: newLeading}));
-    dispatch(setTextSettingsLeading({leading: newLeading}));
+    if (newLeading === 0) {
+      newLeading = 'auto';
+    }
+    dispatch(setLayersLeadingThunk({
+      layers: selected,
+      leading: newLeading
+    }));
+    dispatch(setTextSettingsLeading({
+      leading: newLeading
+    }));
   }
 
   return (
@@ -22,9 +30,10 @@ const LeadingInput = (): ReactElement => {
       ref={formControlRef}
       controlId='control-leading'
       value={leading}
+      placeholder='auto'
       size='small'
       label='Leading'
-      min={1}
+      min={0}
       onSubmitSuccess={handleSubmitSuccess}
       canvasAutoFocus
       submitOnBlur />

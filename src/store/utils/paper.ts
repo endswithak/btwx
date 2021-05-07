@@ -3,6 +3,7 @@ import paper from 'paper';
 import tinyColor from 'tinycolor2';
 import { DEFAULT_ROUNDED_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_RADIUS, DEFAULT_STAR_POINTS, DEFAULT_LINE_FROM, DEFAULT_LINE_TO } from '../../constants';
 import { paperMain, paperPreview } from '../../canvas';
+import { getLeading } from '../../components/CanvasTextLayer';
 
 export const getShapeIcon = (pathData): string => {
   const layerIcon = new paperMain.CompoundPath({
@@ -404,7 +405,10 @@ export const getPaperStyle = ({ style, textStyle, layerFrame, artboardFrame, isL
       if (textStyle) {
         return {
           fontSize: textStyle.fontSize,
-          leading: textStyle.leading,
+          leading: getLeading({
+            leading: textStyle.leading,
+            fontSize: textStyle.fontSize
+          }),
           fontWeight: textStyle.fontWeight,
           fontFamily: textStyle.fontFamily,
           justification: textStyle.justification,

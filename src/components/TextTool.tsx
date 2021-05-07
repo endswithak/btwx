@@ -14,6 +14,7 @@ import { DEFAULT_TEXT_VALUE, DEFAULT_TRANSFORM, DEFAULT_STYLE } from '../constan
 import { getLayerProjectIndices } from '../store/selectors/layer';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
+import { getLeading } from './CanvasTextLayer';
 
 interface TextToolStateProps {
   isEnabled?: boolean;
@@ -72,6 +73,10 @@ const TextTool = (props: TextToolProps): ReactElement => {
           point: toBounds ? toBounds.center : downEvent.point,
           content: DEFAULT_TEXT_VALUE,
           ...textSettings,
+          leading: getLeading({
+            leading: textSettings.leading,
+            fontSize: textSettings.fontSize
+          }),
           insert: false
         });
         const artboardPosition = new paperMain.Point(activeArtboardItem.frame.x, activeArtboardItem.frame.y);

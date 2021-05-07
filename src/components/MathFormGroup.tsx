@@ -10,6 +10,7 @@ export interface MathFormGroupProps {
   disabled?: boolean;
   right?: ReactElement;
   left?: ReactElement;
+  placeholder?: string;
   rightReadOnly?: boolean;
   leftReadOnly?: boolean;
   label?: string;
@@ -27,7 +28,7 @@ export interface MathFormGroupProps {
 const getFixedValue = (v) => !isNaN(v) ? Number(Number(v).toFixed(2)) : v;
 
 const MathFormGroup = forwardRef(function MathFormGroup(props: MathFormGroupProps, ref: any) {
-  const { controlId, disabled, size, inline, min, max, submitOnBlur, canvasAutoFocus, right, rightReadOnly = true, left, leftReadOnly = true, label, value, onSubmitSuccess, onSubmitError, onBlur, onFocus } = props;
+  const { controlId, disabled, size, inline, min, max, submitOnBlur, canvasAutoFocus, placeholder, right, rightReadOnly = true, left, leftReadOnly = true, label, value, onSubmitSuccess, onSubmitError, onBlur, onFocus } = props;
   const initialEval = evaluateExp(value);
   const validInitialEval = initialEval !== null;
   const aboveRange = max !== undefined && validInitialEval && initialEval > max;
@@ -87,6 +88,7 @@ const MathFormGroup = forwardRef(function MathFormGroup(props: MathFormGroupProp
           ref={ref}
           as='input'
           value={currentValue}
+          placeholder={placeholder}
           size={size}
           type='text'
           // isInvalid={!valid && dirty}

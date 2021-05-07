@@ -15,6 +15,19 @@ interface CanvasTextLayerProps {
   paperScope: Btwx.PaperScope;
 }
 
+interface GetAutoLineHeight {
+  fontSize: number;
+  leading: number | 'auto';
+}
+
+export const getLeading = ({ fontSize, leading }: GetAutoLineHeight): number => {
+  if (leading === 'auto') {
+    return Math.round(fontSize * 1.25);
+  } else {
+    return leading;
+  }
+};
+
 interface GetFontStyle {
   fontSize: number;
   fontWeight: number;
@@ -545,12 +558,12 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         textMask
       });
       switch(layerItem.textStyle.textResize) {
-        case 'autoHeight':
         case 'autoWidth':
           textMask.clipMask = false;
           textMask.visible = false;
           break;
         case 'fixed':
+        case 'autoHeight':
           textMask.visible = true;
           textMask.clipMask = true;
           break;
@@ -698,31 +711,31 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
     }
   }, [layerItem.textStyle.textTransform]);
 
-  useEffect(() => {
-    if (rendered) {
-      const { paperLayer, textContent, textBackground, textMask } = getPaperLayer();
-      clearLayerTransforms({
-        layerType: 'Text',
-        paperLayer
-      });
-      textContent.fontSize = layerItem.textStyle.fontSize;
-      textContent.content = content;
-      applyTextBounds({
-        textBackground,
-        textMask
-      });
-      positionTextContent({
-        paperLayer: paperLayer,
-        verticalAlignment: layerItem.textStyle.verticalAlignment,
-        justification: layerItem.textStyle.justification,
-        textResize: layerItem.textStyle.textResize
-      });
-      applyLayerTransforms({
-        paperLayer,
-        transform: layerItem.transform
-      });
-    }
-  }, [layerItem.textStyle.fontSize]);
+  // useEffect(() => {
+  //   if (rendered) {
+  //     const { paperLayer, textContent, textBackground, textMask } = getPaperLayer();
+  //     clearLayerTransforms({
+  //       layerType: 'Text',
+  //       paperLayer
+  //     });
+  //     textContent.fontSize = layerItem.textStyle.fontSize;
+  //     textContent.content = content;
+  //     applyTextBounds({
+  //       textBackground,
+  //       textMask
+  //     });
+  //     positionTextContent({
+  //       paperLayer: paperLayer,
+  //       verticalAlignment: layerItem.textStyle.verticalAlignment,
+  //       justification: layerItem.textStyle.justification,
+  //       textResize: layerItem.textStyle.textResize
+  //     });
+  //     applyLayerTransforms({
+  //       paperLayer,
+  //       transform: layerItem.transform
+  //     });
+  //   }
+  // }, [layerItem.textStyle.fontSize]);
 
   useEffect(() => {
     if (rendered) {
@@ -772,7 +785,11 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         layerType: 'Text',
         paperLayer
       });
-      textContent.leading = layerItem.textStyle.leading;
+      textContent.leading = getLeading({
+        leading: layerItem.textStyle.leading,
+        fontSize: layerItem.textStyle.fontSize
+      });
+      textContent.fontSize = layerItem.textStyle.fontSize;
       textContent.content = content;
       applyTextBounds({
         textBackground,
@@ -789,7 +806,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         transform: layerItem.transform
       });
     }
-  }, [layerItem.textStyle.leading]);
+  }, [layerItem.textStyle.leading, layerItem.textStyle.fontSize]);
 
   ///////////////////////////////////////////////////////
   // FILL & STROKE & SHADOW

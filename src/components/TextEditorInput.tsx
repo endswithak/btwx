@@ -9,6 +9,7 @@ import { setCanvasFocusing } from '../store/actions/canvasSettings';
 import { setLayerTextThunk } from '../store/actions/layer';
 import { getPaperLayer } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
+import { getLeading } from './CanvasTextLayer';
 
 const TextEditorInput = (): ReactElement => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -19,7 +20,10 @@ const TextEditorInput = (): ReactElement => {
   const textValue = useSelector((state: RootState) => (state.layer.present.byId[state.textEditor.layer] as Btwx.Text).text);
   const [text, setText] = useState(textValue);
   const debounceText = useCallback(
-    debounce((dText: string) => dispatch(setLayerTextThunk({id: textEditor.layer, text: dText })), 150),
+    debounce((dText: string) => dispatch(setLayerTextThunk({
+      id: textEditor.layer,
+      text: dText
+    })), 150),
     []
   );
   const [pos, setPos] = useState({x: textEditor.x, y: textEditor.y});
@@ -30,7 +34,9 @@ const TextEditorInput = (): ReactElement => {
       const paperLayer = getPaperLayer(textEditor.layer, textEditor.projectIndex) as paper.PointText;
       paperLayer.visible = true;
       debounceText(textAreaRef.current.value);
-      dispatch(setCanvasFocusing({focusing: true}));
+      dispatch(setCanvasFocusing({
+        focusing: true
+      }));
       dispatch(closeTextEditor());
     }
   }
@@ -114,7 +120,10 @@ const TextEditorInput = (): ReactElement => {
           fontSize: layerItem.textStyle.fontSize,
           minHeight: layerItem.textStyle.leading,
           fontWeight: layerItem.textStyle.fontWeight,
-          lineHeight: `${layerItem.textStyle.leading}px`,
+          lineHeight: `${getLeading({
+            leading: layerItem.textStyle.leading,
+            fontSize: layerItem.textStyle.fontSize
+          })}px`,
           letterSpacing: layerItem.textStyle.letterSpacing,
           fontStyle: layerItem.textStyle.fontStyle,
           textAlign: layerItem.textStyle.justification,
@@ -153,7 +162,10 @@ const TextEditorInput = (): ReactElement => {
           fontFamily: layerItem.textStyle.fontFamily,
           fontSize: layerItem.textStyle.fontSize,
           fontWeight: layerItem.textStyle.fontWeight,
-          lineHeight: `${layerItem.textStyle.leading}px`,
+          lineHeight: `${getLeading({
+            leading: layerItem.textStyle.leading,
+            fontSize: layerItem.textStyle.fontSize
+          })}px`,
           textAlign: layerItem.textStyle.justification,
           letterSpacing: layerItem.textStyle.letterSpacing,
           textTransform: layerItem.textStyle.textTransform,
