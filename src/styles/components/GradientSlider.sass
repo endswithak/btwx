@@ -44,6 +44,10 @@
 
 .c-gradient-slider__pointer
   position: absolute
+  cursor: grab
+
+  &.c-gradient-slider__pointer--dragging
+    cursor: grabbing
 
 .c-gradient-slider__circle
   width: $unit * 2

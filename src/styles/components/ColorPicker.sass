@@ -5,6 +5,7 @@
 
 .c-color-picker__saturation
   padding: $unit * 2
+  cursor: pointer
 
 .c-color-picker-saturation
   @include aspect(4,3)
@@ -25,6 +26,10 @@
 
 .c-color-picker-saturation__pointer
   position: absolute
+  cursor: grab
+
+  &.c-color-picker-saturation__pointer--dragging
+    cursor: grabbing
 
 .c-color-picker-saturation__circle
   width: $unit * 2

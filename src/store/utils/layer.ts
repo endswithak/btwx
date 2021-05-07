@@ -7569,7 +7569,8 @@ export const flipLayerGradient = (state: LayerState, action: FlipLayerGradient):
             ...currentState.byId[action.payload.id].style[action.payload.prop],
             gradient: {
               ...currentState.byId[action.payload.id].style[action.payload.prop].gradient,
-              stops: newStops
+              stops: newStops,
+              activeStopIndex: (gradient.stops.length - 1) - currentState.byId[action.payload.id].style[action.payload.prop].gradient.activeStopIndex
             }
           }
         }

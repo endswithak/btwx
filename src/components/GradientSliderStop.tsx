@@ -17,6 +17,7 @@ const GradientSliderStop = (props: GradientSliderProps): ReactElement => {
   const ref = useRef<HTMLDivElement>(null);
   const { stop, index, activeStopIndex, onStopPress, onStopDrag } = props;
   const [prevPos, setPrevPos] = useState(stop.position);
+  const [dragging, setDragging] = useState(false);
 
   const initDraggable = () => {
     if (ref.current) {
@@ -30,6 +31,10 @@ const GradientSliderStop = (props: GradientSliderProps): ReactElement => {
         bounds: '#c-gradient-slider__slider',
         onPress: function() {
           onStopPress(index);
+          setDragging(true);
+        },
+        onDragStart: function() {
+          document.body.style.cursor = 'grabbing';
         },
         onDrag: function() {
           let newPosition = this.x / this.maxX;
@@ -40,6 +45,10 @@ const GradientSliderStop = (props: GradientSliderProps): ReactElement => {
           }
           onStopDrag(index, newPosition);
           setPrevPos(newPosition);
+        },
+        onRelease: function() {
+          document.body.style.cursor = 'auto';
+          setDragging(false);
         }
       });
     }
@@ -59,7 +68,11 @@ const GradientSliderStop = (props: GradientSliderProps): ReactElement => {
   return (
     <div
       ref={ref}
-      className='c-gradient-slider__pointer'>
+      className={`c-gradient-slider__pointer${
+        dragging
+        ? `${' '}c-gradient-slider__pointer--dragging`
+        : ''
+      }`}>
       <div
         className={`c-gradient-slider__circle${
           index === activeStopIndex

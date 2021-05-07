@@ -39,6 +39,9 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
       onPress: function() {
         setDragging(true);
       },
+      onDragStart: function() {
+        document.body.style.cursor = 'grabbing';
+      },
       onDrag: function() {
         const s = this.x / this.maxX;
         const v = 1 - (this.y / this.maxY);
@@ -87,6 +90,7 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
       },
       onRelease: function() {
         setDragging(false);
+        document.body.style.cursor = 'auto';
       }
     });
     return dragger;
@@ -243,7 +247,11 @@ const ColorPickerSaturation = (props: ColorPickerSaturationProps): ReactElement 
       <div className='c-color-picker-saturation__black' />
       <div
         ref={pointerRef}
-        className='c-color-picker-saturation__pointer'>
+        className={`c-color-picker-saturation__pointer${
+          dragging
+          ? `${' '}c-color-picker-saturation__pointer--dragging`
+          : ''
+        }`}>
         <div className='c-color-picker-saturation__circle' />
       </div>
     </div>

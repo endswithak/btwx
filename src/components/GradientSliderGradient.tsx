@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { ReactElement } from 'react';
 import tinyColor from 'tinycolor2';
+import insertGradientStopCursor from '../../assets/cursor/insert-gradient-stop.svg';
 
 interface GradientSliderGradientProps {
   stops: Btwx.GradientStop[];
@@ -60,7 +61,7 @@ const GradientSliderGradient = (props: GradientSliderGradientProps): ReactElemen
             return result;
           }, 'linear-gradient(to right,');
         })(),
-        cursor: 'cell'
+        cursor: `url(${insertGradientStopCursor}) 9 17, auto`
       }} />
   );
 }
