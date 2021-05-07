@@ -864,26 +864,6 @@ export const setLayerHover = (state: LayerState, action: SetLayerHover): LayerSt
   return currentState;
 };
 
-export const setShapeIcon = (state: LayerState, id: string, pathData: string): LayerState => {
-  let currentState = state;
-  const layerIcon = new paperMain.CompoundPath({
-    pathData: pathData,
-    insert: false
-  });
-  layerIcon.fitBounds(new paperMain.Rectangle({
-    point: new paperMain.Point(0,0),
-    size: new paperMain.Size(24,24)
-  }));
-  currentState = {
-    ...currentState,
-    shapeIcons: {
-      ...currentState.shapeIcons,
-      [id]: layerIcon.pathData
-    }
-  };
-  return currentState;
-};
-
 export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
@@ -8385,6 +8365,7 @@ export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState =>
   let currentState = state;
   const layerItem = state.byId[action.payload.id];
   const pathData = action.payload.pathData;
+  const shapeIcon = action.payload.shapeIcon;
   const rotation = action.payload.rotation;
   const bounds = action.payload.bounds;
   const from = action.payload.from;
@@ -8395,21 +8376,99 @@ export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState =>
   const paragraphs = action.payload.paragraphs;
   const isArtboard = layerItem.type === 'Artboard';
   const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
-  currentState = {
-    ...currentState,
-    byId: {
-      ...currentState.byId,
-      [action.payload.id]: {
-        ...currentState.byId[action.payload.id],
-        transform: {
-          ...currentState.byId[action.payload.id].transform,
-          horizontalFlip: action.payload.horizontalFlip ? !currentState.byId[action.payload.id].transform.horizontalFlip : currentState.byId[action.payload.id].transform.horizontalFlip,
-          verticalFlip: action.payload.verticalFlip ? !currentState.byId[action.payload.id].transform.verticalFlip : currentState.byId[action.payload.id].transform.verticalFlip
+  if (action.payload.horizontalFlip) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          transform: {
+            ...currentState.byId[action.payload.id].transform,
+            horizontalFlip: !currentState.byId[action.payload.id].transform.horizontalFlip
+          },
+          style: {
+            ...currentState.byId[action.payload.id].style,
+            fill: {
+              ...currentState.byId[action.payload.id].style.fill,
+              gradient: {
+                ...currentState.byId[action.payload.id].style.fill.gradient,
+                origin: {
+                  ...currentState.byId[action.payload.id].style.fill.gradient.origin,
+                  x: currentState.byId[action.payload.id].style.fill.gradient.origin.x * -1
+                },
+                destination: {
+                  ...currentState.byId[action.payload.id].style.fill.gradient.destination,
+                  x: currentState.byId[action.payload.id].style.fill.gradient.destination.x * -1
+                }
+              }
+            },
+            stroke: {
+              ...currentState.byId[action.payload.id].style.stroke,
+              gradient: {
+                ...currentState.byId[action.payload.id].style.stroke.gradient,
+                origin: {
+                  ...currentState.byId[action.payload.id].style.stroke.gradient.origin,
+                  x: currentState.byId[action.payload.id].style.stroke.gradient.origin.x * -1
+                },
+                destination: {
+                  ...currentState.byId[action.payload.id].style.stroke.gradient.destination,
+                  x: currentState.byId[action.payload.id].style.stroke.gradient.destination.x * -1
+                }
+              }
+            }
+          }
         }
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleX', 'scaleY']);
+  if (action.payload.verticalFlip) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          transform: {
+            ...currentState.byId[action.payload.id].transform,
+            verticalFlip: !currentState.byId[action.payload.id].transform.verticalFlip
+          },
+          style: {
+            ...currentState.byId[action.payload.id].style,
+            fill: {
+              ...currentState.byId[action.payload.id].style.fill,
+              gradient: {
+                ...currentState.byId[action.payload.id].style.fill.gradient,
+                origin: {
+                  ...currentState.byId[action.payload.id].style.fill.gradient.origin,
+                  y: currentState.byId[action.payload.id].style.fill.gradient.origin.y * -1
+                },
+                destination: {
+                  ...currentState.byId[action.payload.id].style.fill.gradient.destination,
+                  y: currentState.byId[action.payload.id].style.fill.gradient.destination.y * -1
+                }
+              }
+            },
+            stroke: {
+              ...currentState.byId[action.payload.id].style.stroke,
+              gradient: {
+                ...currentState.byId[action.payload.id].style.stroke.gradient,
+                origin: {
+                  ...currentState.byId[action.payload.id].style.stroke.gradient.origin,
+                  y: currentState.byId[action.payload.id].style.stroke.gradient.origin.y * -1
+                },
+                destination: {
+                  ...currentState.byId[action.payload.id].style.stroke.gradient.destination,
+                  y: currentState.byId[action.payload.id].style.stroke.gradient.destination.y * -1
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleX', 'scaleY', 'fillGradientOriginX', 'fillGradientDestinationX', 'strokeGradientOriginX', 'strokeGradientDestinationX', 'fillGradientOriginY', 'fillGradientDestinationY', 'strokeGradientOriginY', 'strokeGradientDestinationY']);
   if (pathData) {
     currentState = {
       ...currentState,
@@ -8421,8 +8480,16 @@ export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState =>
         } as Btwx.Shape
       }
     }
-    currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
     currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shape']);
+  }
+  if (shapeIcon) {
+    currentState = {
+      ...currentState,
+      shapeIcons: {
+        ...currentState.shapeIcons,
+        [action.payload.id]: action.payload.shapeIcon
+      }
+    }
   }
   if (rotation) {
     currentState = {
@@ -8539,6 +8606,7 @@ export const scaleLayers = (state: LayerState, action: ScaleLayers): LayerState 
   let currentState = state;
   currentState = action.payload.layers.reduce((result, current) => {
     const pathData = action.payload.pathData ? action.payload.pathData[current] : null;
+    const shapeIcon = action.payload.shapeIcon ? action.payload.shapeIcon[current] : null;
     const rotation = action.payload.rotation ? action.payload.rotation[current] : null;
     const bounds = action.payload.bounds ? action.payload.bounds[current] : null;
     const point = action.payload.point ? action.payload.point[current] : null;
@@ -8558,6 +8626,7 @@ export const scaleLayers = (state: LayerState, action: ScaleLayers): LayerState 
       verticalFlip,
       horizontalFlip,
       pathData,
+      shapeIcon,
       rotation,
       resize,
       bounds,
@@ -10414,7 +10483,15 @@ export const setRoundedRadius = (state: LayerState, action: SetRoundedRadius): L
         } as Btwx.Shape
       }
     }
-    currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
+  }
+  if (action.payload.shapeIcon && layerItem.type === 'Shape') {
+    currentState = {
+      ...currentState,
+      shapeIcons: {
+        ...currentState.shapeIcons,
+        [action.payload.id]: action.payload.shapeIcon
+      }
+    }
   }
   currentState = updateGroupParentBounds(currentState, groupParents);
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['width', 'height', 'rotation', 'shape']);
@@ -10426,11 +10503,13 @@ export const setRoundedRadii = (state: LayerState, action: SetRoundedRadii): Lay
   currentState = action.payload.layers.reduce((result, current, index) => {
     const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
     const pathData = action.payload.pathData ? action.payload.pathData[index] : null;
+    const shapeIcon = action.payload.shapeIcon ? action.payload.shapeIcon[index] : null;
     return setRoundedRadius(result, layerActions.setRoundedRadius({
       id: current,
       radius: action.payload.radius,
       bounds,
-      pathData
+      pathData,
+      shapeIcon
     }) as SetRoundedRadius);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
@@ -10475,7 +10554,15 @@ export const setPolygonSides = (state: LayerState, action: SetPolygonSides): Lay
         } as Btwx.Shape
       }
     }
-    currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
+  }
+  if (action.payload.shapeIcon && layerItem.type === 'Shape') {
+    currentState = {
+      ...currentState,
+      shapeIcons: {
+        ...currentState.shapeIcons,
+        [action.payload.id]: action.payload.shapeIcon
+      }
+    }
   }
   currentState = updateGroupParentBounds(currentState, groupParents);
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['width', 'height', 'rotation', 'shape']);
@@ -10487,11 +10574,13 @@ export const setPolygonsSides = (state: LayerState, action: SetPolygonsSides): L
   currentState = action.payload.layers.reduce((result, current, index) => {
     const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
     const pathData = action.payload.pathData ? action.payload.pathData[index] : null;
+    const shapeIcon = action.payload.shapeIcon ? action.payload.shapeIcon[index] : null;
     return setPolygonSides(result, layerActions.setPolygonSides({
       id: current,
       sides: action.payload.sides,
       bounds,
-      pathData
+      pathData,
+      shapeIcon
     }) as SetPolygonSides);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
@@ -10536,7 +10625,15 @@ export const setStarPoints = (state: LayerState, action: SetStarPoints): LayerSt
         } as Btwx.Shape
       }
     }
-    currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
+  }
+  if (action.payload.shapeIcon && layerItem.type === 'Shape') {
+    currentState = {
+      ...currentState,
+      shapeIcons: {
+        ...currentState.shapeIcons,
+        [action.payload.id]: action.payload.shapeIcon
+      }
+    }
   }
   currentState = updateGroupParentBounds(currentState, groupParents);
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['width', 'height', 'rotation', 'shape']);
@@ -10548,11 +10645,13 @@ export const setStarsPoints = (state: LayerState, action: SetStarsPoints): Layer
   currentState = action.payload.layers.reduce((result, current, index) => {
     const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
     const pathData = action.payload.pathData ? action.payload.pathData[index] : null;
+    const shapeIcon = action.payload.shapeIcon ? action.payload.shapeIcon[index] : null;
     return setStarPoints(result, layerActions.setStarPoints({
       id: current,
       points: action.payload.points,
       bounds,
-      pathData
+      pathData,
+      shapeIcon
     }) as SetStarPoints);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
@@ -10597,7 +10696,15 @@ export const setStarRadius = (state: LayerState, action: SetStarRadius): LayerSt
         } as Btwx.Shape
       }
     }
-    currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
+  }
+  if (action.payload.shapeIcon && layerItem.type === 'Shape') {
+    currentState = {
+      ...currentState,
+      shapeIcons: {
+        ...currentState.shapeIcons,
+        [action.payload.id]: action.payload.shapeIcon
+      }
+    }
   }
   currentState = updateGroupParentBounds(currentState, groupParents);
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['width', 'height', 'rotation', 'shape']);
@@ -10609,11 +10716,13 @@ export const setStarsRadius = (state: LayerState, action: SetStarsRadius): Layer
   currentState = action.payload.layers.reduce((result, current, index) => {
     const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
     const pathData = action.payload.pathData ? action.payload.pathData[index] : null;
+    const shapeIcon = action.payload.shapeIcon ? action.payload.shapeIcon[index] : null;
     return setStarRadius(result, layerActions.setStarRadius({
       id: current,
       radius: action.payload.radius,
       bounds,
-      pathData
+      pathData,
+      shapeIcon
     }) as SetStarRadius);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
@@ -10667,7 +10776,15 @@ export const setLineFromX = (state: LayerState, action: SetLineFromX): LayerStat
         } as Btwx.Shape
       }
     }
-    currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
+  }
+  if (action.payload.shapeIcon && layerItem.type === 'Shape') {
+    currentState = {
+      ...currentState,
+      shapeIcons: {
+        ...currentState.shapeIcons,
+        [action.payload.id]: action.payload.shapeIcon
+      }
+    }
   }
   currentState = updateGroupParentBounds(currentState, groupParents);
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y', 'width', 'rotation']);
@@ -10689,6 +10806,7 @@ export const setLinesFromX = (state: LayerState, action: SetLinesFromX): LayerSt
   currentState = action.payload.layers.reduce((result, current, index) => {
     const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
     const pathData = action.payload.pathData ? action.payload.pathData[index] : null;
+    const shapeIcon = action.payload.shapeIcon ? action.payload.shapeIcon[index] : null;
     const rotation = action.payload.rotation ? action.payload.rotation[index] : null;
     return setLineFromX(result, layerActions.setLineFromX({
       id: current,
@@ -10696,6 +10814,7 @@ export const setLinesFromX = (state: LayerState, action: SetLinesFromX): LayerSt
       setEdit: false,
       bounds,
       pathData,
+      shapeIcon,
       rotation
     }) as SetLineFromX);
   }, currentState);
@@ -10750,7 +10869,15 @@ export const setLineFromY = (state: LayerState, action: SetLineFromY): LayerStat
         } as Btwx.Shape
       }
     }
-    currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
+  }
+  if (action.payload.shapeIcon && layerItem.type === 'Shape') {
+    currentState = {
+      ...currentState,
+      shapeIcons: {
+        ...currentState.shapeIcons,
+        [action.payload.id]: action.payload.shapeIcon
+      }
+    }
   }
   currentState = updateGroupParentBounds(currentState, groupParents);
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y', 'width', 'rotation']);
@@ -10772,6 +10899,7 @@ export const setLinesFromY = (state: LayerState, action: SetLinesFromY): LayerSt
   currentState = action.payload.layers.reduce((result, current, index) => {
     const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
     const pathData = action.payload.pathData ? action.payload.pathData[index] : null;
+    const shapeIcon = action.payload.shapeIcon ? action.payload.shapeIcon[index] : null;
     const rotation = action.payload.rotation ? action.payload.rotation[index] : null;
     return setLineFromY(result, layerActions.setLineFromY({
       id: current,
@@ -10779,6 +10907,7 @@ export const setLinesFromY = (state: LayerState, action: SetLinesFromY): LayerSt
       setEdit: false,
       bounds,
       pathData,
+      shapeIcon,
       rotation
     }) as SetLineFromY);
   }, currentState);
@@ -10796,12 +10925,14 @@ export const setLinesFromY = (state: LayerState, action: SetLinesFromY): LayerSt
 export const setLineFrom = (state: LayerState, action: SetLineFrom): LayerState => {
   let currentState = state;
   const pathData = action.payload.pathData ? action.payload.pathData : null;
+  const shapeIcon = action.payload.pathData ? action.payload.shapeIcon : null;
   const bounds = action.payload.bounds ? action.payload.bounds : null;
   const rotation = action.payload.rotation ? action.payload.rotation : null;
   currentState = setLineFromX(currentState, layerActions.setLineFromX({
     id: action.payload.id,
     x: action.payload.x,
     pathData,
+    shapeIcon,
     bounds,
     rotation
   }) as SetLineFromX);
@@ -10809,6 +10940,7 @@ export const setLineFrom = (state: LayerState, action: SetLineFrom): LayerState 
     id: action.payload.id,
     y: action.payload.y,
     pathData,
+    shapeIcon,
     bounds,
     rotation
   }) as SetLineFromY);
@@ -10863,7 +10995,15 @@ export const setLineToX = (state: LayerState, action: SetLineToX): LayerState =>
         } as Btwx.Shape
       }
     }
-    currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
+  }
+  if (action.payload.shapeIcon && layerItem.type === 'Shape') {
+    currentState = {
+      ...currentState,
+      shapeIcons: {
+        ...currentState.shapeIcons,
+        [action.payload.id]: action.payload.shapeIcon
+      }
+    }
   }
   currentState = updateGroupParentBounds(currentState, groupParents);
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y', 'width', 'rotation']);
@@ -10885,6 +11025,7 @@ export const setLinesToX = (state: LayerState, action: SetLinesToX): LayerState 
   currentState = action.payload.layers.reduce((result, current, index) => {
     const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
     const pathData = action.payload.pathData ? action.payload.pathData[index] : null;
+    const shapeIcon = action.payload.shapeIcon ? action.payload.shapeIcon[index] : null;
     const rotation = action.payload.rotation ? action.payload.rotation[index] : null;
     return setLineToX(result, layerActions.setLineToX({
       id: current,
@@ -10892,6 +11033,7 @@ export const setLinesToX = (state: LayerState, action: SetLinesToX): LayerState 
       setEdit: false,
       bounds,
       pathData,
+      shapeIcon,
       rotation
     }) as SetLineToX);
   }, currentState);
@@ -10946,7 +11088,15 @@ export const setLineToY = (state: LayerState, action: SetLineToY): LayerState =>
         } as Btwx.Shape
       }
     }
-    currentState = setShapeIcon(currentState, action.payload.id, action.payload.pathData);
+  }
+  if (action.payload.shapeIcon && layerItem.type === 'Shape') {
+    currentState = {
+      ...currentState,
+      shapeIcons: {
+        ...currentState.shapeIcons,
+        [action.payload.id]: action.payload.shapeIcon
+      }
+    }
   }
   currentState = updateGroupParentBounds(currentState, groupParents);
   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x', 'y', 'width', 'rotation']);
@@ -10968,6 +11118,7 @@ export const setLinesToY = (state: LayerState, action: SetLinesToY): LayerState 
   currentState = action.payload.layers.reduce((result, current, index) => {
     const bounds = action.payload.bounds ? action.payload.bounds[index] : null;
     const pathData = action.payload.pathData ? action.payload.pathData[index] : null;
+    const shapeIcon = action.payload.shapeIcon ? action.payload.shapeIcon[index] : null;
     const rotation = action.payload.rotation ? action.payload.rotation[index] : null;
     return setLineToY(result, layerActions.setLineToY({
       id: current,
@@ -10975,6 +11126,7 @@ export const setLinesToY = (state: LayerState, action: SetLinesToY): LayerState 
       setEdit: false,
       bounds,
       pathData,
+      shapeIcon,
       rotation
     }) as SetLineToY);
   }, currentState);
@@ -10992,12 +11144,14 @@ export const setLinesToY = (state: LayerState, action: SetLinesToY): LayerState 
 export const setLineTo = (state: LayerState, action: SetLineTo): LayerState => {
   let currentState = state;
   const pathData = action.payload.pathData ? action.payload.pathData : null;
+  const shapeIcon = action.payload.shapeIcon ? action.payload.shapeIcon : null;
   const bounds = action.payload.bounds ? action.payload.bounds : null;
   const rotation = action.payload.rotation ? action.payload.rotation : null;
   currentState = setLineToX(currentState, layerActions.setLineToX({
     id: action.payload.id,
     x: action.payload.x,
     pathData,
+    shapeIcon,
     bounds,
     rotation
   }) as SetLineToX);
@@ -11005,6 +11159,7 @@ export const setLineTo = (state: LayerState, action: SetLineTo): LayerState => {
     id: action.payload.id,
     y: action.payload.y,
     pathData,
+    shapeIcon,
     bounds,
     rotation
   }) as SetLineToY);

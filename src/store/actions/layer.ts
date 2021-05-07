@@ -3234,6 +3234,7 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     let pathData = {} as { [id: string]: string };
+    let shapeIcon = {} as { [id: string]: string };
     let rotation = {} as { [id: string]: number };
     let bounds = {} as { [id: string]: Btwx.Frame };
     let from = {} as { [id: string]: Btwx.Point };
@@ -3260,6 +3261,10 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
         pathData = {
           ...pathData,
           [id]: (paperLayer as paper.CompoundPath).pathData
+        }
+        shapeIcon = {
+          ...shapeIcon,
+          [id]: getShapeIcon((paperLayer as paper.CompoundPath).pathData)
         }
         if (isLine) {
           const fromPoint = (paperLayer as paper.Path).firstSegment.point.subtract(artboardPosition);
@@ -3419,6 +3424,7 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
         ...payload,
         point,
         pathData,
+        shapeIcon,
         bounds,
         from,
         to,
@@ -5054,6 +5060,7 @@ export const setRoundedRadiiThunk = (payload: SetRoundedRadiiPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     const pathData: string[] = [];
+    const shapeIcon: string[] = [];
     const bounds: Btwx.Frame[] = [];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
@@ -5079,6 +5086,7 @@ export const setRoundedRadiiThunk = (payload: SetRoundedRadiiPayload) => {
       });
       paperLayerPath.pathData = newShape.pathData;
       pathData.push(clone.pathData);
+      shapeIcon.push(getShapeIcon(clone.pathData));
       bounds.push({
         ...layerItem.frame,
         width: clone.bounds.width,
@@ -5089,6 +5097,7 @@ export const setRoundedRadiiThunk = (payload: SetRoundedRadiiPayload) => {
       setRoundedRadii({
         ...payload,
         pathData,
+        shapeIcon,
         bounds
       })
     )
@@ -5109,6 +5118,7 @@ export const setPolygonsSidesThunk = (payload: SetPolygonsSidesPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     const pathData: string[] = [];
+    const shapeIcon: string[] = [];
     const bounds: Btwx.Frame[] = [];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
@@ -5137,6 +5147,7 @@ export const setPolygonsSidesThunk = (payload: SetPolygonsSidesPayload) => {
       newShape.position = startPosition;
       paperLayerPath.pathData = newShape.pathData;
       pathData.push(clone.pathData);
+      shapeIcon.push(getShapeIcon(clone.pathData));
       bounds.push({
         ...layerItem.frame,
         width: clone.bounds.width,
@@ -5147,6 +5158,7 @@ export const setPolygonsSidesThunk = (payload: SetPolygonsSidesPayload) => {
       setPolygonsSides({
         ...payload,
         pathData,
+        shapeIcon,
         bounds
       })
     )
@@ -5167,6 +5179,7 @@ export const setStarsPointsThunk = (payload: SetStarsPointsPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     const pathData: string[] = [];
+    const shapeIcon: string[] = [];
     const bounds: Btwx.Frame[] = [];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
@@ -5197,6 +5210,7 @@ export const setStarsPointsThunk = (payload: SetStarsPointsPayload) => {
       newShape.position = startPosition;
       paperLayerPath.pathData = newShape.pathData;
       pathData.push(clone.pathData);
+      shapeIcon.push(getShapeIcon(clone.pathData));
       bounds.push({
         ...layerItem.frame,
         width: clone.bounds.width,
@@ -5207,6 +5221,7 @@ export const setStarsPointsThunk = (payload: SetStarsPointsPayload) => {
       setStarsPoints({
         ...payload,
         pathData,
+        shapeIcon,
         bounds
       })
     )
@@ -5227,6 +5242,7 @@ export const setStarsRadiusThunk = (payload: SetStarsRadiusPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     const pathData: string[] = [];
+    const shapeIcon: string[] = [];
     const bounds: Btwx.Frame[] = [];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
@@ -5257,6 +5273,7 @@ export const setStarsRadiusThunk = (payload: SetStarsRadiusPayload) => {
       newShape.position = startPosition;
       paperLayerPath.pathData = newShape.pathData;
       pathData.push(clone.pathData);
+      shapeIcon.push(getShapeIcon(clone.pathData));
       bounds.push({
         ...layerItem.frame,
         width: clone.bounds.width,
@@ -5267,6 +5284,7 @@ export const setStarsRadiusThunk = (payload: SetStarsRadiusPayload) => {
       setStarsRadius({
         ...payload,
         pathData,
+        shapeIcon,
         bounds
       })
     )
@@ -5287,6 +5305,7 @@ export const setLinesFromXThunk = (payload: SetLinesFromXPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     const pathData: string[] = [];
+    const shapeIcon: string[] = [];
     const bounds: Btwx.Frame[] = [];
     const rotation: number[] = [];
     payload.layers.forEach((id) => {
@@ -5302,6 +5321,7 @@ export const setLinesFromXThunk = (payload: SetLinesFromXPayload) => {
       const positionInArtboard = clone.position.subtract(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y)).round();
       rotation.push(vector.angle);
       pathData.push(clone.pathData);
+      shapeIcon.push(getShapeIcon(clone.pathData));
       bounds.push({
         ...layerItem.frame,
         x: positionInArtboard.x,
@@ -5316,6 +5336,7 @@ export const setLinesFromXThunk = (payload: SetLinesFromXPayload) => {
       setLinesFromX({
         ...payload,
         pathData,
+        shapeIcon,
         bounds,
         rotation
       })
@@ -5337,6 +5358,7 @@ export const setLinesFromYThunk = (payload: SetLinesFromYPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     const pathData: string[] = [];
+    const shapeIcon: string[] = [];
     const bounds: Btwx.Frame[] = [];
     const rotation: number[] = [];
     payload.layers.forEach((id) => {
@@ -5352,6 +5374,7 @@ export const setLinesFromYThunk = (payload: SetLinesFromYPayload) => {
       const positionInArtboard = clone.position.subtract(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y)).round();
       rotation.push(vector.angle);
       pathData.push(clone.pathData);
+      shapeIcon.push(getShapeIcon(clone.pathData));
       bounds.push({
         ...layerItem.frame,
         x: positionInArtboard.x,
@@ -5366,6 +5389,7 @@ export const setLinesFromYThunk = (payload: SetLinesFromYPayload) => {
       setLinesFromY({
         ...payload,
         pathData,
+        shapeIcon,
         bounds,
         rotation
       })
@@ -5393,6 +5417,7 @@ export const setLineFromThunk = (payload: SetLineFromPayload) => {
     const positionInArtboard = paperLayer.position.subtract(artboardPosition).round();
     const rotation = vector.angle;
     const pathData = paperLayer.pathData;
+    const shapeIcon = getShapeIcon(paperLayer.pathData);
     const bounds = {
       ...layerItem.frame,
       x: positionInArtboard.x,
@@ -5408,6 +5433,7 @@ export const setLineFromThunk = (payload: SetLineFromPayload) => {
         x: relFrom.x,
         y: relFrom.y,
         pathData,
+        shapeIcon,
         bounds,
         rotation
       })
@@ -5429,6 +5455,7 @@ export const setLinesToXThunk = (payload: SetLinesToXPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     const pathData: string[] = [];
+    const shapeIcon: string[] = [];
     const bounds: Btwx.Frame[] = [];
     const rotation: number[] = [];
     payload.layers.forEach((id) => {
@@ -5444,6 +5471,7 @@ export const setLinesToXThunk = (payload: SetLinesToXPayload) => {
       const positionInArtboard = clone.position.subtract(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y)).round();
       rotation.push(vector.angle);
       pathData.push(clone.pathData);
+      shapeIcon.push(getShapeIcon(clone.pathData));
       bounds.push({
         ...layerItem.frame,
         x: positionInArtboard.x,
@@ -5458,6 +5486,7 @@ export const setLinesToXThunk = (payload: SetLinesToXPayload) => {
       setLinesToX({
         ...payload,
         pathData,
+        shapeIcon,
         bounds,
         rotation
       })
@@ -5479,6 +5508,7 @@ export const setLinesToYThunk = (payload: SetLinesToYPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     const pathData: string[] = [];
+    const shapeIcon: string[] = [];
     const bounds: Btwx.Frame[] = [];
     const rotation: number[] = [];
     payload.layers.forEach((id) => {
@@ -5494,6 +5524,7 @@ export const setLinesToYThunk = (payload: SetLinesToYPayload) => {
       const positionInArtboard = clone.position.subtract(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y)).round();
       rotation.push(vector.angle);
       pathData.push(clone.pathData);
+      shapeIcon.push(getShapeIcon(clone.pathData));
       bounds.push({
         ...layerItem.frame,
         x: positionInArtboard.x,
@@ -5508,6 +5539,7 @@ export const setLinesToYThunk = (payload: SetLinesToYPayload) => {
       setLinesToY({
         ...payload,
         pathData,
+        shapeIcon,
         bounds,
         rotation
       })
@@ -5535,6 +5567,7 @@ export const setLineToThunk = (payload: SetLineToPayload) => {
     const positionInArtboard = paperLayer.position.subtract(artboardPosition).round();
     const rotation = vector.angle;
     const pathData = paperLayer.pathData;
+    const shapeIcon = getShapeIcon(paperLayer.pathData);
     const bounds = {
       ...layerItem.frame,
       x: positionInArtboard.x,
@@ -5550,6 +5583,7 @@ export const setLineToThunk = (payload: SetLineToPayload) => {
         x: relTo.x,
         y: relTo.y,
         pathData,
+        shapeIcon,
         bounds,
         rotation
       })
