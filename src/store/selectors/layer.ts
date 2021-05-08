@@ -29,6 +29,7 @@ export const getLayerChildren = (state: RootState, id: string): string[] => stat
 export const getHover = (state: RootState): string => state.layer.present.hover;
 export const getHoverItem = (state: RootState): Btwx.Layer => state.layer.present.byId[state.layer.present.hover];
 export const getEventDrawerEvent = (state: RootState): string => state.eventDrawer.event;
+export const getEventDrawerEventItem = (state: RootState): Btwx.Event => state.layer.present.events.byId[state.eventDrawer.event];
 export const getEventDrawerSort = (state: RootState): string => state.eventDrawer.eventSort;
 export const getEventDrawerHover = (state: RootState): string => state.eventDrawer.eventHover;
 export const getActiveArtboard = (state: RootState): string => state.layer.present.activeArtboard;
@@ -1924,6 +1925,47 @@ export const getEventLayersSelector = createSelector(
       allIds: [],
       byId: {}
     });
+  }
+);
+
+export const getEventDrawerLayers = createSelector(
+  [ getLayersById, getEventDrawerEventItem, getTweensById ],
+  (layersById, eventDrawerEventItem, tweensById) => {
+    return eventDrawerEventItem.tweens.reduce((result, current) => {
+      const tween = tweensById[current];
+      if (!result.allIds.includes(tween.layer)) {
+        result = {
+          allIds: [...result.allIds, tween.layer],
+          byId: {
+            ...result.byId,
+            [tween.layer]: layersById[tween.layer]
+          }
+        }
+      }
+      return result;
+    }, {
+      allIds: [],
+      byId: {}
+    });
+  }
+);
+
+export const getEventDrawerScrollPositions = createSelector(
+  [getEventDrawerLayers, getEventDrawerEventItem],
+  (eventLayers, eventDrawerEventItem) => {
+    return eventLayers.allIds.reduce((result: number[], current, index) => {
+      const prevY = result[index - 1] ? result[index - 1] : 0;
+      let y = 32 + prevY;
+      const eventLayer = eventLayers.byId[current];
+      const layerTweens = eventLayer.tweens.asOrigin;
+      layerTweens.forEach((id) => {
+        if (eventDrawerEventItem.tweens.includes(id)) {
+          y += 32;
+        }
+      });
+      result = [...result, y];
+      return result;
+    }, [])
   }
 );
 

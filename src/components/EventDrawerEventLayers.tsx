@@ -2,7 +2,7 @@ import React, { ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { ScrollSyncPane } from 'react-scroll-sync';
 import { RootState } from '../store/reducers';
-import { getEventLayersSelector, getWiggleLayersSelector } from '../store/selectors/layer';
+import { getEventDrawerLayers, getWiggleLayersSelector } from '../store/selectors/layer';
 import { setEventDrawerEventThunk } from '../store/actions/eventDrawer';
 import { setLayerHover } from '../store/actions/layer';
 import EventDrawerEventLayer from './EventDrawerEventLayer';
@@ -19,7 +19,7 @@ interface EventDrawerEventLayersProps {
 
 const EventDrawerEventLayers = (props: EventDrawerEventLayersProps): ReactElement => {
   const { scrollLayer } = props;
-  const eventLayers = useSelector((state: RootState) => getEventLayersSelector(state, state.eventDrawer.event));
+  const eventLayers = useSelector((state: RootState) => getEventDrawerLayers(state));
   const wiggleLayers = useSelector((state: RootState) => getWiggleLayersSelector(state, state.eventDrawer.event));
   const eventItem = useSelector((state: RootState) => state.layer.present.events.byId[state.eventDrawer.event]);
   const artboardItem = useSelector((state: RootState) => state.layer.present.byId[eventItem.artboard]);
