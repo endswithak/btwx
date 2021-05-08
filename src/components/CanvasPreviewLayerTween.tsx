@@ -178,29 +178,42 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     }
   }
 
-  const updateGradients = (paperLayers: { paperLayer: paper.Item, fillRef: paper.Item, currentProps: CurrentTweenProps }): void => {
-    const { paperLayer, fillRef, currentProps } = paperLayers;
+  const getFSOrigin = (props: { paperLayer: paper.Item, style: 'fill' | 'stroke' }): paper.Point => {
+    const currentProps = getCurrentTweenLayerProps();
+    const { paperLayer, style } = props;
     const isOriginLayerLine = originLayerItem.type === 'Shape' && (originLayerItem as Btwx.Shape).shapeType === 'Line';
+    const widthRef = isOriginLayerLine ? currentProps.boundingWidth : currentProps.width;
+    const heightRef = isOriginLayerLine ? currentProps.boundingHeight : currentProps.height;
+    const originX = currentProps[`${style}GradientOriginX`];
+    const originXEase = currentProps[`${style}GradientOriginX-ease`];
+    const nextOriginX = originXEase && originXEase === 'customWiggle' ? originX : (originX * widthRef) + paperLayer.position.x;
+    const originY = currentProps[`${style}GradientOriginY`];
+    const originYEase = currentProps[`${style}GradientOriginY-ease`];
+    const nextOriginY = originYEase && originYEase === 'customWiggle' ? originY : (originY * heightRef) + paperLayer.position.y;
+    return new paperPreview.Point(nextOriginX, nextOriginY);
+  };
+
+  const getFSDestination = (props: { paperLayer: paper.Item, style: 'fill' | 'stroke' }): paper.Point => {
+    const currentProps = getCurrentTweenLayerProps();
+    const { paperLayer, style } = props;
+    const isOriginLayerLine = originLayerItem.type === 'Shape' && (originLayerItem as Btwx.Shape).shapeType === 'Line';
+    const widthRef = isOriginLayerLine ? currentProps.boundingWidth : currentProps.width;
+    const heightRef = isOriginLayerLine ? currentProps.boundingHeight : currentProps.height;
+    const destinationX = currentProps[`${style}GradientDestinationX`];
+    const destinationXEase = currentProps[`${style}GradientDestinationX-ease`];
+    const nextDestinationX = destinationXEase && destinationXEase === 'customWiggle' ? destinationX : (destinationX * widthRef) + paperLayer.position.x;
+    const destinationY = currentProps[`${style}GradientDestinationY`];
+    const destinationYEase = currentProps[`${style}GradientDestinationY-ease`];
+    const nextDestinationY = destinationYEase && destinationYEase === 'customWiggle' ? destinationY : (destinationY * heightRef) + paperLayer.position.y;
+    return new paperPreview.Point(nextDestinationX, nextDestinationY);
+  };
+
+  const updateGradientsOD = (paperLayers: { paperLayer: paper.Item, fillRef: paper.Item }): void => {
+    const { paperLayer, fillRef } = paperLayers;
     ['fill', 'stroke'].forEach((style: 'fill' | 'stroke') => {
       if (fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] && fillRef[`${style}Color` as 'fillColor' | 'strokeColor'].gradient) {
-        const innerWidth = isOriginLayerLine ? currentProps.boundingWidth : currentProps.width; // ? currentProps.innerWidth : (isOriginLayerLine ? originLayerItem.frame.width : originLayerItem.frame.innerWidth);
-        const innerHeight = isOriginLayerLine ? currentProps.boundingHeight : currentProps.height; // ? currentProps.innerHeight : (isOriginLayerLine ? originLayerItem.frame.height : originLayerItem.frame.innerHeight);
-        const originX = currentProps[`${style}GradientOriginX`]; // ? currentProps[`${style}GradientOriginX`] : originLayerItem.style[style].gradient.origin.x;
-        const originXEase = currentProps[`${style}GradientOriginX-ease`]; // ? currentProps[`${style}GradientOriginX-ease`] : null;
-        const nextOriginX = originXEase && originXEase === 'customWiggle' ? originX : (originX * innerWidth) + paperLayer.position.x;
-        const originY = currentProps[`${style}GradientOriginY`]; // ? currentProps[`${style}GradientOriginY`] : originLayerItem.style[style].gradient.origin.y;
-        const originYEase = currentProps[`${style}GradientOriginY-ease`]; // ? currentProps[`${style}GradientOriginY-ease`] : null;
-        const nextOriginY = originYEase && originYEase === 'customWiggle' ? originY : (originY * innerHeight) + paperLayer.position.y;
-        const destinationX = currentProps[`${style}GradientDestinationX`]; // ? currentProps[`${style}GradientDestinationX`] : originLayerItem.style[style].gradient.destination.x;
-        const destinationXEase = currentProps[`${style}GradientDestinationX-ease`]; // ? currentProps[`${style}GradientDestinationX-ease`] : null;
-        const nextDestinationX = destinationXEase && destinationXEase === 'customWiggle' ? destinationX : (destinationX * innerWidth) + paperLayer.position.x;
-        const destinationY = currentProps[`${style}GradientDestinationY`]; // ? currentProps[`${style}GradientDestinationY`] : originLayerItem.style[style].gradient.destination.y;
-        const destinationYEase = currentProps[`${style}GradientDestinationY-ease`]; // ? currentProps[`${style}GradientDestinationY-ease`] : null;
-        const nextDestinationY = destinationYEase && destinationYEase === 'customWiggle' ? destinationY : (destinationY * innerHeight) + paperLayer.position.y;
-        const nextOrigin = new paperPreview.Point(nextOriginX, nextOriginY);
-        const nextDestination = new paperPreview.Point(nextDestinationX, nextDestinationY);
-        (fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).origin = nextOrigin;
-        (fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).destination = nextDestination;
+        (fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).origin = getFSOrigin({paperLayer, style});
+        (fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).destination = getFSDestination({paperLayer, style});
       }
     });
   };
@@ -388,7 +401,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         });
         paperLayer.position = startPosition;
         // update fill gradient origin/destination if needed
-        updateGradients({ paperLayer, fillRef, currentProps });
+        updateGradientsOD({ paperLayer, fillRef });
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -571,7 +584,6 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   };
 
   const addGradientToGradientFSTween = (style: 'fill' | 'stroke'): void => {
-    const isLine = originLayerItem.type === 'Shape' && (originLayerItem as Btwx.Shape).shapeType === 'Line';
     const og = originLayerItem.style[style].gradient;
     const dg = destinationLayerItem.style[style].gradient;
     const originStopCount = og.stops.length;
@@ -587,7 +599,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     const stopsTimeline = gsap.timeline({
       id: tweenId,
       onStart: () => {
-        const { fillRef, paperLayer } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { paperLayer, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         if (destinationStopCount > originStopCount) {
           const stopDiff = destinationStopCount - originStopCount;
           // set to current gradient
@@ -608,14 +620,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
               }, []) as paper.GradientStop[],
               radial: og.gradientType === 'radial'
             },
-            origin: new paperPreview.Point(
-              (og.origin.x * (isLine ? originLayerItem.frame.width : originLayerItem.frame.innerWidth)) + paperLayer.position.x,
-              (og.origin.y * (isLine ? originLayerItem.frame.height : originLayerItem.frame.innerHeight)) + paperLayer.position.y
-            ),
-            destination: new paperPreview.Point(
-              (og.destination.x * (isLine ? originLayerItem.frame.width : originLayerItem.frame.innerWidth)) + paperLayer.position.x,
-              (og.destination.y * (isLine ? originLayerItem.frame.height : originLayerItem.frame.innerHeight)) + paperLayer.position.y
-            )
+            origin: getFSOrigin({ paperLayer, style }),
+            destination: getFSDestination({ paperLayer, style })
           } as Btwx.PaperGradientFill;
           // add missing stops
           fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] = {
@@ -626,8 +632,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
               ], fillRef[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops),
               radial: dg.gradientType === 'radial'
             },
-            origin: (fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).origin,
-            destination: (fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] as Btwx.PaperGradientFill).destination
+            origin: getFSOrigin({ paperLayer, style }),
+            destination: getFSDestination({ paperLayer, style })
           } as Btwx.PaperGradientFill;
         }
       }
@@ -711,14 +717,16 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             }),
             radial: dg.gradientType === 'radial'
           },
-          origin: new paperPreview.Point(
-            (destinationLayerItem.style[style].gradient.origin.x * paperLayer.bounds.width) + paperLayer.position.x,
-            (destinationLayerItem.style[style].gradient.origin.y * paperLayer.bounds.height) + paperLayer.position.y
-          ),
-          destination: new paperPreview.Point(
-            (destinationLayerItem.style[style].gradient.destination.x * paperLayer.bounds.width) + paperLayer.position.x,
-            (destinationLayerItem.style[style].gradient.destination.y * paperLayer.bounds.height) + paperLayer.position.y
-          )
+          origin: getFSOrigin({ paperLayer, style }),
+          destination: getFSDestination({ paperLayer, style })
+          // origin: new paperPreview.Point(
+          //   (destinationLayerItem.style[style].gradient.origin.x * paperLayer.bounds.width) + paperLayer.position.x,
+          //   (destinationLayerItem.style[style].gradient.origin.y * paperLayer.bounds.height) + paperLayer.position.y
+          // ),
+          // destination: new paperPreview.Point(
+          //   (destinationLayerItem.style[style].gradient.destination.x * paperLayer.bounds.width) + paperLayer.position.x,
+          //   (destinationLayerItem.style[style].gradient.destination.y * paperLayer.bounds.height) + paperLayer.position.y
+          // )
         } as Btwx.PaperGradientFill;
       }
     });
@@ -788,14 +796,16 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             }),
             radial: dg.gradientType === 'radial'
           },
-          origin: new paperPreview.Point(
-            (dg.origin.x * paperLayer.bounds.width) + paperLayer.position.x,
-            (dg.origin.y * paperLayer.bounds.height) + paperLayer.position.y
-          ),
-          destination: new paperPreview.Point(
-            (dg.destination.x * paperLayer.bounds.width) + paperLayer.position.x,
-            (dg.destination.y * paperLayer.bounds.height) + paperLayer.position.y
-          )
+          origin: getFSOrigin({ paperLayer, style }),
+          destination: getFSDestination({ paperLayer, style })
+          // origin: new paperPreview.Point(
+          //   (dg.origin.x * paperLayer.bounds.width) + paperLayer.position.x,
+          //   (dg.origin.y * paperLayer.bounds.height) + paperLayer.position.y
+          // ),
+          // destination: new paperPreview.Point(
+          //   (dg.destination.x * paperLayer.bounds.width) + paperLayer.position.x,
+          //   (dg.destination.y * paperLayer.bounds.height) + paperLayer.position.y
+          // )
         } as Btwx.PaperGradientFill;
       }
     });
@@ -1104,7 +1114,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             });
           }
         }
-        updateGradients({ paperLayer, fillRef, currentProps });
+        updateGradientsOD({ paperLayer, fillRef });
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -1265,7 +1275,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             });
           }
         }
-        updateGradients({ paperLayer, fillRef, currentProps });
+        updateGradientsOD({ paperLayer, fillRef });
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -1335,7 +1345,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         }
         paperLayer.position = startPosition;
         eventTimeline.data[tween.layer]['rotationPrevious'] = currentProps.rotation;
-        updateGradients({ paperLayer, fillRef, currentProps });
+        updateGradientsOD({ paperLayer, fillRef });
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -1559,7 +1569,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           variable: true
         });
         paperLayer.position = startPosition;
-        updateGradients({ paperLayer, fillRef, currentProps });
+        updateGradientsOD({ paperLayer, fillRef });
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -1647,7 +1657,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           variable: true
         });
         paperLayer.position = startPosition;
-        updateGradients({ paperLayer, fillRef, currentProps });
+        updateGradientsOD({ paperLayer, fillRef });
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -1733,7 +1743,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           variable: true
         });
         paperLayer.position = startPosition;
-        updateGradients({ paperLayer, fillRef, currentProps });
+        updateGradientsOD({ paperLayer, fillRef });
         eventTimeline.data[tween.layer]['lineHeightPrevious'] = currentProps.lineHeight;
       },
       ease: getEaseString(tween),
@@ -1852,7 +1862,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         });
         paperLayer.position = startPosition;
         eventTimeline.data[tween.layer]['text'] = textDOM.innerText;
-        updateGradients({ paperLayer, fillRef, currentProps });
+        updateGradientsOD({ paperLayer, fillRef });
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -1940,7 +1950,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           variable: true
         });
         paperLayer.position = startPosition;
-        updateGradients({ paperLayer, fillRef, currentProps });
+        updateGradientsOD({ paperLayer, fillRef });
       },
       ease: getEaseString(tween),
     }, tween.delay);

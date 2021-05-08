@@ -410,6 +410,9 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
     if (rendered) {
       const { paperLayer } = getPaperLayer();
       paperLayer.strokeWidth = layerItem.style.stroke.width;
+      if (layerItem.style.stroke.fillType === 'gradient') {
+        applyStroke();
+      }
     }
   }, [layerItem.style.stroke.width]);
 
