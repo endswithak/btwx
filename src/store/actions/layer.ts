@@ -5743,7 +5743,43 @@ export const resetImagesDimensions = (payload: ResetImagesDimensionsPayload): La
 export const resetSelectedImageDimensionsThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
-    dispatch(resetImagesDimensions({layers: state.layer.present.selected}));
+    let bounds = {};
+    state.layer.present.selected.forEach((id) => {
+      const layerItem = state.layer.present.byId[id] as Btwx.Image;
+      const od = layerItem.originalDimensions;
+      const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
+      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
+      const clone = paperLayer.clone({insert: false}) as paper.Item;
+      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
+      const startPosition = clone.position;
+      clearLayerTransforms({
+        layerType: layerItem.type,
+        paperLayer: clone,
+        transform: layerItem.transform
+      });
+      clone.bounds.width = od.width;
+      clone.bounds.height = od.height;
+      applyLayerTransforms({
+        paperLayer: clone,
+        transform: layerItem.transform
+      });
+      bounds = {
+        ...bounds,
+        [id]: {
+          ...layerItem.frame,
+          innerWidth: od.width,
+          innerHeight: od.height,
+          width: clone.bounds.width,
+          height: clone.bounds.height
+        }
+      }
+    });
+    dispatch(
+      resetImagesDimensions({
+        layers: state.layer.present.selected,
+        bounds
+      })
+    )
   }
 };
 

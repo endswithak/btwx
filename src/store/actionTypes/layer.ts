@@ -4055,6 +4055,7 @@ export interface SetLayersStyle {
 
 export interface ResetImageDimensionsPayload {
   id: string;
+  bounds?: Btwx.Frame;
 }
 
 export interface ResetImageDimensions {
@@ -4064,6 +4065,9 @@ export interface ResetImageDimensions {
 
 export interface ResetImagesDimensionsPayload {
   layers: string[];
+  bounds?: {
+    [id: string]: Btwx.Frame;
+  };
 }
 
 export interface ResetImagesDimensions {

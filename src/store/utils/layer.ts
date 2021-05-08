@@ -11300,11 +11300,13 @@ export const resetImageDimensions = (state: LayerState, action: ResetImageDimens
   const layerItem = currentState.byId[action.payload.id] as Btwx.Image;
   currentState = setLayerWidth(currentState, layerActions.setLayerWidth({
     id: action.payload.id,
-    width: layerItem.originalDimensions.width
+    width: layerItem.originalDimensions.width,
+    bounds: action.payload.bounds
   }) as SetLayerWidth);
   currentState = setLayerHeight(currentState, layerActions.setLayerHeight({
     id: action.payload.id,
-    height: layerItem.originalDimensions.height
+    height: layerItem.originalDimensions.height,
+    bounds: action.payload.bounds
   }) as SetLayerHeight);
   return currentState;
 };
@@ -11312,8 +11314,10 @@ export const resetImageDimensions = (state: LayerState, action: ResetImageDimens
 export const resetImagesDimensions = (state: LayerState, action: ResetImagesDimensions): LayerState => {
   let currentState = state;
   currentState = action.payload.layers.reduce((result, current) => {
+    const bounds = action.payload.bounds[current];
     return resetImageDimensions(result, layerActions.resetImageDimensions({
-      id: current
+      id: current,
+      bounds
     }) as ResetImageDimensions);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
