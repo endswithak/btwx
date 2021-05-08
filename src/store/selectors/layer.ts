@@ -2175,7 +2175,7 @@ export const getArtboardEventItems = createSelector(
         [id: string]: Btwx.Layer;
       };
     };
-    if (eventDrawerEvent) {
+    if (eventDrawerEvent && eventById[eventDrawerEvent]) {
       const eventItem = eventById[eventDrawerEvent];
       const eventLayer = eventItem.layer;
       const eventLayerItem = layerById[eventLayer];
