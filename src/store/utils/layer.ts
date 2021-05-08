@@ -174,9 +174,9 @@ export const addArtboard = (state: LayerState, action: AddArtboard): LayerState 
     currentState = setLayerTreeScroll(currentState, layerActions.setLayerTreeScroll({
       scroll: action.payload.layer.id
     }) as SetLayerTreeScroll);
-    currentState = setLayerTreeStickyArtboard(currentState, layerActions.setLayerTreeStickyArtboard({
-      stickyArtboard: action.payload.layer.id
-    }) as SetLayerTreeStickyArtboard);
+    // currentState = setLayerTreeStickyArtboard(currentState, layerActions.setLayerTreeStickyArtboard({
+    //   stickyArtboard: action.payload.layer.id
+    // }) as SetLayerTreeStickyArtboard);
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
       edit: {
         actionType: action.type,
@@ -230,9 +230,9 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
     currentState = setLayerTreeScroll(currentState, layerActions.setLayerTreeScroll({
       scroll: action.payload.layer.id
     }) as SetLayerTreeScroll);
-    currentState = setLayerTreeStickyArtboard(currentState, layerActions.setLayerTreeStickyArtboard({
-      stickyArtboard: action.payload.layer.artboard
-    }) as SetLayerTreeStickyArtboard);
+    // currentState = setLayerTreeStickyArtboard(currentState, layerActions.setLayerTreeStickyArtboard({
+    //   stickyArtboard: action.payload.layer.artboard
+    // }) as SetLayerTreeStickyArtboard);
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
       edit: {
         actionType: action.type,
@@ -280,9 +280,9 @@ export const addGroup = (state: LayerState, action: AddGroup): LayerState => {
     currentState = setLayerTreeScroll(currentState, layerActions.setLayerTreeScroll({
       scroll: action.payload.layer.id
     }) as SetLayerTreeScroll);
-    currentState = setLayerTreeStickyArtboard(currentState, layerActions.setLayerTreeStickyArtboard({
-      stickyArtboard: action.payload.layer.artboard
-    }) as SetLayerTreeStickyArtboard);
+    // currentState = setLayerTreeStickyArtboard(currentState, layerActions.setLayerTreeStickyArtboard({
+    //   stickyArtboard: action.payload.layer.artboard
+    // }) as SetLayerTreeStickyArtboard);
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
       edit: {
         actionType: action.type,
@@ -332,9 +332,9 @@ export const addText = (state: LayerState, action: AddText): LayerState => {
     currentState = setLayerTreeScroll(currentState, layerActions.setLayerTreeScroll({
       scroll: action.payload.layer.id
     }) as SetLayerTreeScroll);
-    currentState = setLayerTreeStickyArtboard(currentState, layerActions.setLayerTreeStickyArtboard({
-      stickyArtboard: action.payload.layer.artboard
-    }) as SetLayerTreeStickyArtboard);
+    // currentState = setLayerTreeStickyArtboard(currentState, layerActions.setLayerTreeStickyArtboard({
+    //   stickyArtboard: action.payload.layer.artboard
+    // }) as SetLayerTreeStickyArtboard);
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
       edit: {
         actionType: action.type,
@@ -383,9 +383,9 @@ export const addImage = (state: LayerState, action: AddImage): LayerState => {
     currentState = setLayerTreeScroll(currentState, layerActions.setLayerTreeScroll({
       scroll: action.payload.layer.id
     }) as SetLayerTreeScroll);
-    currentState = setLayerTreeStickyArtboard(currentState, layerActions.setLayerTreeStickyArtboard({
-      stickyArtboard: action.payload.layer.artboard
-    }) as SetLayerTreeStickyArtboard);
+    // currentState = setLayerTreeStickyArtboard(currentState, layerActions.setLayerTreeStickyArtboard({
+    //   stickyArtboard: action.payload.layer.artboard
+    // }) as SetLayerTreeStickyArtboard);
     currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
       edit: {
         actionType: action.type,
@@ -1559,9 +1559,9 @@ export const groupLayers = (state: LayerState, action: GroupLayers): LayerState 
   currentState = setLayerTreeScroll(currentState, layerActions.setLayerTreeScroll({
     scroll: action.payload.group.id
   }) as SetLayerTreeScroll);
-  currentState = setLayerTreeStickyArtboard(currentState, layerActions.setLayerTreeStickyArtboard({
-    stickyArtboard: action.payload.group.artboard
-  }) as SetLayerTreeStickyArtboard);
+  // currentState = setLayerTreeStickyArtboard(currentState, layerActions.setLayerTreeStickyArtboard({
+  //   stickyArtboard: action.payload.group.artboard
+  // }) as SetLayerTreeStickyArtboard);
   // set layer edit
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
@@ -10075,9 +10075,9 @@ export const duplicateLayers = (state: LayerState, action: DuplicateLayers): Lay
   currentState = setLayerTreeScroll(currentState, layerActions.setLayerTreeScroll({
     scroll: newSelection[0]
   }) as SetLayerTreeScroll);
-  currentState = setLayerTreeStickyArtboard(currentState, layerActions.setLayerTreeStickyArtboard({
-    stickyArtboard: currentState.byId[newSelection[0]].artboard
-  }) as SetLayerTreeStickyArtboard);
+  // currentState = setLayerTreeStickyArtboard(currentState, layerActions.setLayerTreeStickyArtboard({
+  //   stickyArtboard: currentState.byId[newSelection[0]].artboard
+  // }) as SetLayerTreeStickyArtboard);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,

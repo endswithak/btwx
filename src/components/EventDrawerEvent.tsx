@@ -1,4 +1,4 @@
-import React, { ReactElement, useState, useEffect, useCallback } from 'react';
+import React, { ReactElement, useState, useEffect } from 'react';
 import throttle from 'lodash.throttle';
 import { useSelector } from 'react-redux';
 import { ScrollSync } from 'react-scroll-sync';

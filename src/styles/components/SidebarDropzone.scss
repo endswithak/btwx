@@ -6,12 +6,18 @@
     }
     &.c-sidebar-dropzone--center {
       box-shadow: 0 0 0 1px theme-prop(primary) inset;
+      border-radius: $border-radius;
+
+      &.c-sidebar-dropzone--artboard {
+        border-radius: 0;
+      }
     }
     &.c-sidebar-dropzone--bottom {
       box-shadow: 0 $unit / 2 0 0 theme-prop(primary);
     }
     &.c-sidebar-dropzone--parent {
       box-shadow: 0 0 0 1px theme-prop(sidebar-border) inset;
+      border-radius: $border-radius;
     }
   }
   z-index: 999999999;

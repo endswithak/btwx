@@ -139,7 +139,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
         : 'c-list-item--sticky'
         : ''
       }
-      flush
+      flush={isArtboard && !isDragGhost}
       interactive
       hovering={isHover && !isDragGhost}
       root={isArtboard && !isDragGhost}

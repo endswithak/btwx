@@ -22,6 +22,11 @@ const EventDrawerEventEditEase = ({ tweenId }: EventDrawerEventEditEaseProps): R
       iconName='more'
       toggle
       isActive={editingEase}
+      variant={
+        editingEase
+        ? 'base-on-primary'
+        : null
+      }
       label='edit' />
   );
 }

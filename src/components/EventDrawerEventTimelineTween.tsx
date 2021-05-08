@@ -417,14 +417,14 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
     <div
       id={`${tweenId}-timeline`}
       className='c-event-drawer-event-layer__tween-timeline'
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
       style={{
         // used to position drag z index element above others
         zIndex: editing ? 3 : 2
       }}>
       <EventDrawerEventClearSelection />
       <div
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         id={`${tweenId}-handle-delay`}
         className={`c-timeline-tween-handle${
           selectedHandle && selectedHandle === 'delay'
@@ -437,6 +437,8 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
         }`}
         onMouseDown={(e) => handleHandleMouseDown('delay', e)} />
       <div
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         id={`${tweenId}-handle-both`}
         className={`c-timeline-handle c-timeline-handle--both${
           selectedHandle && selectedHandle === 'both'
@@ -450,6 +452,8 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
           className='c-timeline-handle__tooltip' />
       </div>
       <div
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         id={`${tweenId}-handle-duration`}
         className={`c-timeline-handle c-timeline-handle--duration${
           selectedHandle && selectedHandle === 'duration'
@@ -465,6 +469,8 @@ const EventDrawerEventTimelineTween = (props: EventDrawerEventTimelineTweenProps
       {
         tween.repeat !== 0
         ? <div
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
             id={`${tweenId}-handle-repeat`}
             className={`c-timeline-tween-handle c-timeline-tween-handle--ghost${
               selectedHandle && selectedHandle === 'delay'

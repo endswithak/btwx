@@ -8,6 +8,7 @@ import { setEventDrawerTweenHoverThunk } from '../store/actions/eventDrawer';
 import EventDrawerEventEditEase from './EventDrawerEventEditEase';
 import Icon from './Icon';
 import ListItem from './ListItem';
+import IconButton from './IconButton';
 
 interface EventDrawerEventLayerTweenPropProps {
   tweenId: string;
@@ -91,26 +92,34 @@ const EventDrawerEventLayerTweenProp = (props: EventDrawerEventLayerTweenPropPro
       onMouseLeave={handleMouseLeave}
       onContextMenu={handleContextMenu}
       onMouseDown={handleMouseDown}
-      flush
+      isActive={isSelected}
+      interactive
+      hovering={tweenId === tweenHover}
       style={{
         cursor: 'pointer'
       }}>
       {
         tweenId === tweenHover
-        ? <EventDrawerEventEditEase tweenId={tweenId} />
+        ? <EventDrawerEventEditEase
+            tweenId={tweenId} />
         : <Icon />
       }
       <ListItem.Body>
         <ListItem.Text
-          size='small'
-          variant={
-            tweenId === tweenHover
-            ? isSelected ? 'primary' : 'base'
-            : isSelected ? 'primary' : 'lighter'
-          }>
-          { `${tweenProp}${isWiggle ? ' (Wiggle)' : ''}` }
+          size='small'>
+          { tweenProp }
         </ListItem.Text>
       </ListItem.Body>
+      {
+        isWiggle
+        ? <ListItem.Right>
+            <IconButton
+              iconName='ease-customWiggle-out'
+              onClick={handleContextMenu}
+              size='small' />
+          </ListItem.Right>
+        : null
+      }
     </ListItem>
   );
 }

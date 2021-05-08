@@ -8,6 +8,7 @@ import { titleCase } from '../utils';
 import { getDefaultTweenProps } from '../constants';
 import ListItem from './ListItem';
 import SidebarLayerIcon from './SidebarLayerIcon';
+import IconButton from './IconButton';
 
 interface EventDrawerStickyHeaderProps {
   scrollLayer: string;
@@ -97,6 +98,12 @@ const EventDrawerStickyHeader = (props: EventDrawerStickyHeaderProps): ReactElem
               { layerItem.name }
             </ListItem.Text>
           </ListItem.Body>
+          <ListItem.Right>
+            <IconButton
+              iconName='ease-customWiggle-out'
+              onClick={handleContextMenu}
+              size='small' />
+          </ListItem.Right>
         </ListItem>
       </div>
     : null

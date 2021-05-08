@@ -123,6 +123,10 @@ const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement =>
         isParent
         ? `${' '}c-sidebar-dropzone--parent`
         : ''
+      }${
+        layerItem.type === 'Artboard'
+        ? `${' '}c-sidebar-dropzone--artboard`
+        : ''
       }`}
       onDragOver={handleDragOver}
       onDrop={handleDrop}

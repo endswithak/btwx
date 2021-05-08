@@ -8,6 +8,7 @@ import { titleCase } from '../utils';
 import { getDefaultTweenProps } from '../constants';
 import EventDrawerEventTweenProps from './EventDrawerEventLayerTweenProps';
 import SidebarLayerIcon from './SidebarLayerIcon';
+import IconButton from './IconButton';
 import ListItem from './ListItem';
 
 interface EventDrawerEventLayerProps {
@@ -95,6 +96,12 @@ const EventDrawerEventLayer = ({ id, equivalentId, equivalentTweenProps, eventId
             { layerItem.name }
           </ListItem.Text>
         </ListItem.Body>
+        <ListItem.Right>
+          <IconButton
+            iconName='ease-customWiggle-out'
+            onClick={handleContextMenu}
+            size='small' />
+        </ListItem.Right>
       </ListItem>
       <EventDrawerEventTweenProps
         layerId={id} />
