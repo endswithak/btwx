@@ -1,4 +1,3 @@
-import paper from 'paper';
 import { paperMain } from '../canvas';
 import { THEME_GUIDE_COLOR } from '../constants';
 
