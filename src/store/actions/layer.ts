@@ -6321,7 +6321,11 @@ export const undoThunk = () => {
               if (state.gradientEditor.isOpen) {
                 dispatch(closeGradientEditor());
                 if (state.gradientEditor.prop === 'fill') {
-                  dispatch(openColorEditor({x: state.gradientEditor.x, y: state.gradientEditor.y, prop: state.gradientEditor.prop}));
+                  dispatch(openColorEditor({
+                    x: state.gradientEditor.x,
+                    y: state.gradientEditor.y,
+                    prop: state.gradientEditor.prop
+                  }));
                 }
               }
               break;
@@ -6330,7 +6334,11 @@ export const undoThunk = () => {
               if (state.colorEditor.isOpen) {
                 dispatch(closeColorEditor());
                 if (state.colorEditor.prop === 'fill') {
-                  dispatch(openGradientEditor({x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
+                  dispatch(openGradientEditor({
+                    x: state.colorEditor.x,
+                    y: state.colorEditor.y,
+                    prop: state.colorEditor.prop
+                  }));
                 }
               }
               break;
@@ -6343,7 +6351,11 @@ export const undoThunk = () => {
               if (state.gradientEditor.isOpen) {
                 dispatch(closeGradientEditor());
                 if (state.gradientEditor.prop === 'stroke') {
-                  dispatch(openColorEditor({x: state.gradientEditor.x, y: state.gradientEditor.y, prop: state.gradientEditor.prop}));
+                  dispatch(openColorEditor({
+                    x: state.gradientEditor.x,
+                    y: state.gradientEditor.y,
+                    prop: state.gradientEditor.prop
+                  }));
                 }
               }
               break;
@@ -6352,7 +6364,11 @@ export const undoThunk = () => {
               if (state.colorEditor.isOpen) {
                 dispatch(closeColorEditor());
                 if (state.colorEditor.prop === 'stroke') {
-                  dispatch(openGradientEditor({x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
+                  dispatch(openGradientEditor({
+                    x: state.colorEditor.x,
+                    y: state.colorEditor.y,
+                    prop: state.colorEditor.prop
+                  }));
                 }
               }
               break;
@@ -6425,7 +6441,11 @@ export const redoThunk = () => {
               if (state.colorEditor.isOpen) {
                 dispatch(closeColorEditor());
                 if (state.colorEditor.prop === 'fill') {
-                  dispatch(openGradientEditor({x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
+                  dispatch(openGradientEditor({
+                    x: state.colorEditor.x,
+                    y: state.colorEditor.y,
+                    prop: state.colorEditor.prop
+                  }));
                 }
               }
               break;
@@ -6434,7 +6454,11 @@ export const redoThunk = () => {
               if (state.gradientEditor.isOpen) {
                 dispatch(closeGradientEditor());
                 if (state.gradientEditor.prop === 'fill') {
-                  dispatch(openColorEditor({x: state.gradientEditor.x, y: state.gradientEditor.y, prop: state.gradientEditor.prop}));
+                  dispatch(openColorEditor({
+                    x: state.gradientEditor.x,
+                    y: state.gradientEditor.y,
+                    prop: state.gradientEditor.prop
+                  }));
                 }
               }
               break;
@@ -6447,7 +6471,11 @@ export const redoThunk = () => {
               if (state.colorEditor.isOpen) {
                 dispatch(closeColorEditor());
                 if (state.colorEditor.prop === 'stroke') {
-                  dispatch(openGradientEditor({x: state.colorEditor.x, y: state.colorEditor.y, prop: state.colorEditor.prop}));
+                  dispatch(openGradientEditor({
+                    x: state.colorEditor.x,
+                    y: state.colorEditor.y,
+                    prop: state.colorEditor.prop
+                  }));
                 }
               }
               break;
@@ -6456,7 +6484,11 @@ export const redoThunk = () => {
               if (state.gradientEditor.isOpen) {
                 dispatch(closeGradientEditor());
                 if (state.colorEditor.prop === 'stroke') {
-                  dispatch(openColorEditor({x: state.gradientEditor.x, y: state.gradientEditor.y, prop: state.gradientEditor.prop}));
+                  dispatch(openColorEditor({
+                    x: state.gradientEditor.x,
+                    y: state.gradientEditor.y,
+                    prop: state.gradientEditor.prop
+                  }));
                 }
               }
               break;

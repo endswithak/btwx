@@ -8,7 +8,7 @@ import Menu from './components/Menu';
 import ContextMenu from './components/ContextMenu';
 import configureStore from './store';
 import ThemeProvider from './components/ThemeProvider';
-import './app.global.sass';
+import './App.global.scss';
 
 (window as any).renderDocument = (preloadedState?: Btwx.Document): void => {
   const store = configureStore(preloadedState, true);

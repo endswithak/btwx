@@ -38,7 +38,7 @@
 
     &:disabled,
     &.c-form-control--disabled {
-      opacity: 50%;
+      opacity: 0.5;
       color: theme-prop(text-lighter);
       fill: theme-prop(text-lighter);
       box-shadow: 0 0 0 1px theme-prop(control-border) inset;
@@ -52,7 +52,7 @@
       }
 
       & ~ span .c-form-text {
-        opacity: 50%;
+        opacity: 0.5;
       }
     }
 

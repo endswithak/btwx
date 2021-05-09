@@ -194,7 +194,7 @@
     &:disabled,
     &:disabled &:hover,
     &.c-button--disabled {
-      opacity: 50%;
+      opacity: 0.5;
       color: theme-prop(text-lighter);
       background: none;
       box-shadow: none;
@@ -324,7 +324,7 @@
     &.c-button--disabled {
       box-shadow: none;
       background: none;
-      opacity: 50%;
+      opacity: 0.5;
       .c-stacked-button__top {
         background: none;
       }
@@ -390,7 +390,7 @@
       &:disabled &:hover,
       &.c-button--disabled {
         cursor: not-allowed;
-        opacity: 50%;
+        opacity: 0.5;
         color: theme-prop(text-lighter-on-primary);
         background: theme-prop(primary);
         box-shadow: 0 0 0 1px theme-prop(primary) inset;
@@ -409,7 +409,7 @@
     &:disabled &:hover,
     &.c-button--disabled {
       cursor: not-allowed;
-      opacity: 50%;
+      opacity: 0.5;
       color: theme-prop(text-lighter);
       box-shadow: 0 0 0 1px theme-prop(button-border) inset;
 
@@ -482,7 +482,7 @@
       &:disabled &:hover,
       &.c-button--disabled {
         cursor: not-allowed;
-        opacity: 50%;
+        opacity: 0.5;
         color: theme-prop(text-lighter-on-recording);
         background: theme-prop(recording);
         box-shadow: 0 0 0 1px theme-prop(recording) inset;
@@ -501,7 +501,7 @@
     &:disabled &:hover,
     &.c-button--disabled {
       cursor: not-allowed;
-      opacity: 50%;
+      opacity: 0.5;
       color: theme-prop(text-lighter);
       box-shadow: 0 0 0 1px theme-prop(button-border) inset;
 
@@ -549,7 +549,7 @@
     &:disabled &:hover,
     &.c-button--disabled {
       cursor: not-allowed;
-      opacity: 50%;
+      opacity: 0.5;
       color: theme-prop(text-lighter-on-#{$theme-color});
       background: theme-prop($theme-color);
       box-shadow: 0 0 0 1px theme-prop($theme-color) inset;
