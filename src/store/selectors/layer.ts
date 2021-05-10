@@ -3840,66 +3840,190 @@ export const getEquivalentTweenProps = (layerItem: Btwx.Layer, equivalentLayerIt
   scaleY: hasScaleYTween(layerItem, equivalentLayerItem)
 });
 
-export const getPossibleProps = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): Btwx.TweenProp[] => {
-  const contextProps = ['opacity', 'blur'];
-  const transformProps = ['rotation'];
-  const strokeOptionsProps = ['strokeWidth', 'dashOffset', 'dashArrayWidth', 'dashArrayGap'];
-  const fillProps = ['fill', ...(layerItem.style.fill.fillType === 'gradient' ? ['fillGradientOriginX', 'fillGradientOriginY', 'fillGradientDestinationX', 'fillGradientDestinationY'] : [])];
-  const strokeProps = ['stroke', ...(layerItem.style.fill.fillType === 'gradient' ? ['strokeGradientOriginX', 'strokeGradientOriginY', 'strokeGradientDestinationX', 'strokeGradientDestinationY'] : [])];
-  const shadowProps = ['shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur'];
-  const textProps = ['fontSize', 'fontWeight', 'letterSpacing', 'lineHeight', 'text'];
-  const positionProps = (() => {
-    switch(layerItem.type) {
-      case 'Text':
-      case 'Image': {
-        return ['x', 'y'];
-      }
-      case 'Group':
-      default: {
-        return [];
-      }
-    }
-  })();
-  const sizeProps = (() => {
-    switch(layerItem.type) {
-      case 'Shape': {
-        if ((layerItem as Btwx.Shape).shapeType !== (equivalentLayerItem as Btwx.Shape).shapeType) {
-          return ['shape'];
-        } else {
-          return ['width', 'height'];
-        }
-      }
-      case 'Image': {
-        return ['width', 'height'];
-      }
-      case 'Artboard':
-      case 'Group':
-      case 'Text': {
-        return [];
-      }
-    }
-  })();
+const getFillWiggles = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): Btwx.TweenProp[] => {
+  const fillProps = [
+    'fill', ...(layerItem.style.fill.fillType === 'gradient'
+      ? ['fillGradientOriginX', 'fillGradientOriginY', 'fillGradientDestinationX', 'fillGradientDestinationY']
+      : []
+    )
+  ] as Btwx.TweenProp[];
   switch(layerItem.type) {
+    case 'Text':
     case 'Artboard':
-      return [
-        ...fillProps
-      ] as Btwx.TweenProp[];
+      return fillProps;
+    case 'Shape':
+      switch((layerItem as Btwx.Shape).shapeType) {
+        case 'Line':
+          return [];
+        case 'Rectangle':
+        case 'Rounded':
+        case 'Polygon':
+        case 'Star':
+        case 'Ellipse':
+        case 'Custom':
+          return fillProps;
+      }
+    case 'Image':
+    case 'Group':
+    default:
+      return [];
+  }
+}
+
+const getStrokeWiggles = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): Btwx.TweenProp[] => {
+  switch(layerItem.type) {
+    case 'Text':
+    case 'Artboard':
     case 'Shape':
       return [
-        ...sizeProps, ...contextProps, ...transformProps, ...strokeOptionsProps,
-        ...fillProps, ...strokeProps, ...shadowProps, ...positionProps
-      ] as Btwx.TweenProp[];
-    case 'Text':
-      return [
-        ...contextProps, ...transformProps, ...strokeOptionsProps, ...fillProps,
-        ...strokeProps, ...shadowProps, ...positionProps, ...textProps
+        'stroke', ...(layerItem.style.stroke.fillType === 'gradient'
+          ? ['strokeGradientOriginX', 'strokeGradientOriginY', 'strokeGradientDestinationX', 'strokeGradientDestinationY']
+          : []
+        )
       ] as Btwx.TweenProp[];
     case 'Image':
-      return [
-        ...sizeProps, ...contextProps, ...transformProps, ...strokeOptionsProps,
-        ...strokeProps, ...shadowProps, ...positionProps
-      ] as Btwx.TweenProp[];
+    case 'Group':
+    default:
+      return [];
   }
+}
+
+const getStrokeOptionsWiggles = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): Btwx.TweenProp[] => {
+  switch(layerItem.type) {
+    case 'Text':
+    case 'Artboard':
+    case 'Shape':
+      return ['strokeWidth', 'dashOffset', 'dashArrayWidth', 'dashArrayGap'];
+    case 'Image':
+    case 'Group':
+    default:
+      return [];
+  }
+}
+
+const getPositionWiggles = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): Btwx.TweenProp[] => {
+  switch(layerItem.type) {
+    case 'Shape':
+    case 'Text':
+    case 'Image':
+      return ['x', 'y'];
+    case 'Artboard':
+    case 'Group':
+    default:
+      return [];
+  }
+}
+
+const getSizeWiggles = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): Btwx.TweenProp[] => {
+  switch(layerItem.type) {
+    case 'Shape': {
+      switch((layerItem as Btwx.Shape).shapeType) {
+        case 'Line':
+          if ((equivalentLayerItem as Btwx.Shape).shapeType !== 'Line') {
+            return [];
+          } else {
+            return ['width'];
+          }
+        case 'Rectangle':
+        case 'Rounded':
+        case 'Polygon':
+        case 'Star':
+        case 'Ellipse':
+        case 'Custom':
+        default:
+          if ((layerItem as Btwx.Shape).shapeType !== (equivalentLayerItem as Btwx.Shape).shapeType) {
+            return ['shape'];
+          } else {
+            return ['width', 'height'];
+          }
+      }
+    }
+    case 'Image':
+      return ['width', 'height'];
+    case 'Text':
+      switch((layerItem as Btwx.Text).textStyle.textResize) {
+        case 'autoHeight':
+          return ['width'];
+        case 'fixed':
+          return ['width', 'height'];
+        case 'autoWidth':
+          return [];
+      }
+    case 'Artboard':
+    case 'Group':
+      return [];
+  }
+}
+
+const getShadowWiggles = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): Btwx.TweenProp[] => {
+  switch(layerItem.type) {
+    case 'Shape':
+    case 'Image':
+    case 'Text':
+      return ['shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur'];
+    case 'Group':
+    case 'Artboard':
+      return [];
+  }
+}
+
+const getTextWiggles = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): Btwx.TweenProp[] => {
+  switch(layerItem.type) {
+    case 'Text':
+      return ['fontSize', 'fontWeight', 'letterSpacing', 'lineHeight', 'text'];
+    case 'Shape':
+    case 'Image':
+    case 'Group':
+    case 'Artboard':
+      return [];
+  }
+}
+
+const getTransformWiggles = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): Btwx.TweenProp[] => {
+  switch(layerItem.type) {
+    case 'Text':
+    case 'Shape':
+    case 'Image':
+      return ['rotation', 'scaleX', 'scaleY'];
+    case 'Group':
+    case 'Artboard':
+      return [];
+  }
+}
+
+const getContextWiggles = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): Btwx.TweenProp[] => {
+  switch(layerItem.type) {
+    case 'Text':
+    case 'Shape':
+    case 'Image':
+      return ['opacity', 'blur'];
+    case 'Group':
+    case 'Artboard':
+      return [];
+  }
+}
+
+export const getPossibleProps = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): Btwx.TweenProp[] => {
+  const contextProps = getContextWiggles(layerItem, equivalentLayerItem);
+  const transformProps = getTransformWiggles(layerItem, equivalentLayerItem);
+  const strokeOptionsProps = getStrokeOptionsWiggles(layerItem, equivalentLayerItem);
+  const fillProps = getFillWiggles(layerItem, equivalentLayerItem);
+  const strokeProps = getStrokeWiggles(layerItem, equivalentLayerItem);
+  const shadowProps = getShadowWiggles(layerItem, equivalentLayerItem);
+  const textProps = getTextWiggles(layerItem, equivalentLayerItem);
+  const positionProps = getPositionWiggles(layerItem, equivalentLayerItem);
+  const sizeProps = getSizeWiggles(layerItem, equivalentLayerItem);
+  return [
+    ...contextProps,
+    ...transformProps,
+    ...strokeOptionsProps,
+    ...fillProps,
+    ...strokeProps,
+    ...shadowProps,
+    ...textProps,
+    ...positionProps,
+    ...sizeProps
+  ];
 }
 
 export const getLongestEventTween = (tweensById: {[id: string]: Btwx.Tween}): Btwx.Tween => {
