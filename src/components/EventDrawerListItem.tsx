@@ -2,11 +2,10 @@ import React, { ReactElement, useRef } from 'react';
 import { ipcRenderer } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
+import { getSelectedEventsEventListener, getChangeEventListenerDisabled, getSelectedEventsAvailableEventListeners } from '../store/selectors/layer';
 import { setEventDrawerEventThunk, setEventDrawerEventHoverThunk } from '../store/actions/eventDrawer';
-import { setLayerHover, setActiveArtboard, selectLayerEvents, deselectLayerEvents } from '../store/actions/layer';
-import { DEFAULT_TWEEN_EVENTS } from '../constants';
-import EventDrawerListItemEdit from './EventDrawerListItemEdit';
-import EventDrawerListItemRemove from './EventDrawerListItemRemove';
+import { setLayerHover, selectLayerEvents, deselectLayerEvents } from '../store/actions/layer';
+import { DEFAULT_TWEEN_EVENTS, DEFAULT_TWEEN_EVENTS_TYPES } from '../constants';
 import SidebarLayerIcon from './SidebarLayerIcon';
 import ListItem from './ListItem';
 import ListGroup from './ListGroup';
@@ -19,6 +18,9 @@ const EventDrawerListItem = (props: EventDrawerListItemProps): ReactElement => {
   const actionsContainerRef = useRef(null);
   const { id } = props;
   // const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
+  const selectedEventsEventListener = useSelector((state: RootState) => getSelectedEventsEventListener(state));
+  const changeEventListenerDisabled = useSelector((state: RootState) => getChangeEventListenerDisabled(state));
+  const selectedAvailableListeners = useSelector((state: RootState) => getSelectedEventsAvailableEventListeners(state));
   const instanceId = useSelector((state: RootState) => state.session.instance);
   const selectedEvents = useSelector((state: RootState) => state.layer.present.events.selected);
   const event = useSelector((state: RootState) => state.layer.present.events.byId[id]);
@@ -67,11 +69,58 @@ const EventDrawerListItem = (props: EventDrawerListItemProps): ReactElement => {
     dispatch(setLayerHover({id: null}));
   }
 
+  const getPrettyEventListener = (eventListener: Btwx.EventType): string => {
+    switch(eventListener) {
+      case 'mousedown':
+        return 'Mouse Down';
+      case 'mouseup':
+        return 'Mouse Up';
+      case 'mousedrag':
+        return 'Mouse Drag';
+      // case 'mousemove':
+      //   return 'Mouse Move';
+      case 'mouseenter':
+        return 'Mouse Enter';
+      case 'mouseleave':
+        return 'Mouse Leave';
+      case 'click':
+        return 'Click';
+      case 'rightclick':
+        return 'Right Click';
+      case 'doubleclick':
+        return 'Double Click';
+    }
+  }
+
   const handleContextMenu = (e: any): void => {
     ipcRenderer.send('openEventContextMenu', JSON.stringify({
       instanceId,
       template: [
-        ...selectedEvents.length === 1
+        ...(!changeEventListenerDisabled
+        ? [{
+          label: 'Event Listener...',
+          submenu: DEFAULT_TWEEN_EVENTS_TYPES.reduce((result, current) => {
+            result = [
+              ...result,
+              {
+                label: getPrettyEventListener(current),
+                type: 'checkbox',
+                enabled: selectedAvailableListeners.includes(current),
+                checked: ((selectedEventsEventListener !== 'multi') && (selectedEventsEventListener === current)),
+                click: {
+                  id: 'setLayersEventEventListener',
+                  params: {
+                    events: selectedEvents,
+                    eventListener: current
+                  }
+                }
+              }
+            ]
+            return result;
+          }, [])
+        }]
+        : []),
+        ...(selectedEvents.length === 1
         ? [{
             label: 'Edit Event...',
             click: {
@@ -79,8 +128,8 @@ const EventDrawerListItem = (props: EventDrawerListItemProps): ReactElement => {
               params: { id }
             }
           }]
-        : [],
-        ...selectedEvents.length > 0
+        : []),
+        ...(selectedEvents.length > 0
         ? [{
             label: `Remove ${selectedEvents.length === 1 ? 'Event' : `${selectedEvents.length} Events`}`,
             click: {
@@ -90,7 +139,7 @@ const EventDrawerListItem = (props: EventDrawerListItemProps): ReactElement => {
               }
             }
           }]
-        : []
+        : [])
       ]
     }));
   }

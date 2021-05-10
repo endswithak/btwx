@@ -76,7 +76,7 @@ import {
   SetLayersCustomWiggleTweenType, RemoveLayerTweens, RemoveLayersEvent, ShowLayersChildren, HideLayersChildren,
   SetLayerTreeStickyArtboard, SetLayerTweenRepeat, SetLayersTweenRepeat, SetLayerTweenYoyo, SetLayersTweenYoyo,
   SetLayerTweenRepeatDelay, SetLayersTweenRepeatDelay, SetLayerTweenYoyoEase, SetLayersTweenYoyoEase,
-  SetLayerBlurRadius, SetLayersBlurRadius, FlipLayerGradient, FlipLayersGradient, DeselectAllLayerEventTweens, DeselectAllLayerEvents
+  SetLayerBlurRadius, SetLayersBlurRadius, FlipLayerGradient, FlipLayersGradient, DeselectAllLayerEventTweens, DeselectAllLayerEvents, SetLayerEventEventListener, SetLayersEventEventListener
 } from '../actionTypes/layer';
 
 import {
@@ -2125,6 +2125,51 @@ export const removeLayersEvent = (state: LayerState, action: RemoveLayersEvent):
       actionType: action.type,
       payload: action.payload,
       detail: 'Remove Event Listeners',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerEventEventListener = (state: LayerState, action: SetLayerEventEventListener): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    events: {
+      ...currentState.events,
+      byId: {
+        ...currentState.events.byId,
+        [action.payload.id]: {
+          ...currentState.events.byId[action.payload.id],
+          event: action.payload.eventListener
+        }
+      }
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Event Event Listener',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayersEventEventListener = (state: LayerState, action: SetLayersEventEventListener): LayerState => {
+  let currentState = state;
+  currentState = action.payload.events.reduce((result, current, index) => {
+    return setLayerEventEventListener(result, layerActions.setLayerEventEventListener({
+      id: current,
+      eventListener: action.payload.eventListener
+    }) as SetLayerEventEventListener);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Events Event Listener',
       undoable: true
     }
   }) as SetLayerEdit);

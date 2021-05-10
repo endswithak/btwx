@@ -6,7 +6,7 @@ import rootReducer, { RootState } from './reducers';
 import { closePreview, startPreviewRecording, stopPreviewRecording, setPreviewFocusing, openPreview, setPreviewTweening } from './actions/preview';
 import { hydratePreferences } from './actions/preferences';
 import { setEventDrawerEvent, setEventDrawerEventThunk } from './actions/eventDrawer';
-import { hydrateLayers, addLayerTween, removeLayerTweens, removeLayerTween, removeLayersEvent, insertImageThunk, groupSelectedThunk, ungroupSelectedThunk, alignSelectedToLeftThunk, alignSelectedToCenterThunk, alignSelectedToRightThunk, alignSelectedToTopThunk, alignSelectedToMiddleThunk, alignSelectedToBottomThunk, distributeSelectedHorizontallyThunk, distributeSelectedVerticallyThunk, sendSelectedBackwardThunk, bringSelectedForwardThunk, removeLayersGradientStop } from './actions/layer';
+import { hydrateLayers, addLayerTween, removeLayerTweens, removeLayerTween, removeLayersEvent, insertImageThunk, groupSelectedThunk, ungroupSelectedThunk, alignSelectedToLeftThunk, alignSelectedToCenterThunk, alignSelectedToRightThunk, alignSelectedToTopThunk, alignSelectedToMiddleThunk, alignSelectedToBottomThunk, distributeSelectedHorizontallyThunk, distributeSelectedVerticallyThunk, sendSelectedBackwardThunk, bringSelectedForwardThunk, removeLayersGradientStop, setLayersEventEventListener } from './actions/layer';
 import { openEaseEditor, closeEaseEditor } from './actions/easeEditor';
 import { zoomInThunk, zoomOutThunk } from './actions/zoomTool';
 import { toggleArtboardToolThunk } from './actions/artboardTool';
@@ -234,6 +234,9 @@ const configureStore: any = (preloadedState, isDocumentWindow = false): typeof s
   };
   (window as any).removeLayersGradientStop = (params): void => {
     store.dispatch(removeLayersGradientStop(params) as any);
+  };
+  (window as any).setLayersEventEventListener = (params): void => {
+    store.dispatch(setLayersEventEventListener(params) as any);
   };
   return store;
 }

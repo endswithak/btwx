@@ -39,6 +39,7 @@ export const getLayerSearching = (state: RootState): boolean => state.leftSideba
 export const getTree = (state: RootState): any => state.layer.present.tree.byId;
 export const getShapeIcons = (state: RootState): any => state.layer.present.shapeIcons;
 export const getSelectedTweens = (state: RootState): any => state.layer.present.tweens.selected;
+export const getSelectedEvents = (state: RootState): any => state.layer.present.events.selected;
 
 export const allTextTweensSelected = createSelector(
   [ getSelectedTweens, getTweensById ],
@@ -896,7 +897,7 @@ export const getSelectedById = createSelector(
   }
 );
 
-export const getSelectedEvents = createSelector(
+export const getSelectedLayersEvents = createSelector(
   [ getSelectedById, getEventsById ],
   (selectedById, eventsById) => {
     return Object.keys(selectedById).reduce((result: { allIds: string[]; byId: { [id: string]: Btwx.Event } }, current) => {
@@ -916,11 +917,55 @@ export const getSelectedEvents = createSelector(
   }
 );
 
+export const getSelectedEventsEventListener = createSelector(
+  [ getSelectedEvents, getEventsById ],
+  (selectedEvents, eventsById) => {
+    return selectedEvents.reduce((result: Btwx.EventType | 'multi', current: string) => {
+      const eventItem = eventsById[current];
+      if (!result) {
+        result = eventItem.event;
+      }
+      if (result && eventItem.event !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null);
+  }
+);
+
+export const getSelectedEventsAvailableEventListeners = createSelector(
+  [ getSelectedEvents, getEventsById, getLayersById ],
+  (selectedEvents, eventsById, layersById) => {
+    return selectedEvents.reduce((result: Btwx.EventType[], current: string) => {
+      const eventItem = eventsById[current];
+      const eventLayerItem = layersById[eventItem.layer];
+      const layerItemEvents = eventLayerItem.events;
+      layerItemEvents.forEach((id) => {
+        const layerEventItem = eventsById[id];
+        if (result.includes(layerEventItem.event)) {
+          result = removeItem(result, layerEventItem.event);
+        }
+      });
+      return result;
+    }, DEFAULT_TWEEN_EVENTS_TYPES) as Btwx.EventType[];
+  }
+);
+
+export const getChangeEventListenerDisabled = createSelector(
+  [ getSelectedEvents, getEventsById ],
+  (selectedEvents, eventsById) => {
+    return selectedEvents.some((id) => {
+      const event = eventsById[id];
+      return (eventsById[selectedEvents[0]].layer === event.layer) && (selectedEvents[0] !== id);
+    }) as boolean;
+  }
+);
+
 export const getSelectedAvailableEventListeners = createSelector(
-  [ getSelectedEvents ],
-  (selectedEvents) => {
-    return selectedEvents.allIds.reduce((result, current) => {
-      const event = selectedEvents.byId[current];
+  [ getSelectedLayersEvents ],
+  (selectedLayersEvents) => {
+    return selectedLayersEvents.allIds.reduce((result, current) => {
+      const event = selectedLayersEvents.byId[current];
       if (result.includes(event.event)) {
         result = removeItem(result, event.event);
       }
@@ -959,14 +1004,17 @@ export const getSelectedScopedArtboards = createSelector(
 );
 
 export const getSelectedAvailableEventDestinations = createSelector(
-  [ getSelectedScopedArtboards, getSelectedEvents, getAllArtboardIds ],
-  (selectedScopedArtboards, selectedEvents, allArtboardIds) => {
+  [ getSelectedScopedArtboards, getSelectedLayersEvents, getAllArtboardIds ],
+  (selectedScopedArtboards, selectedLayersEvents, allArtboardIds) => {
     let artboards = allArtboardIds;
-    if (selectedEvents.allIds.length > 0) {
-      artboards = selectedEvents.allIds.reduce((result, current) => {
-        const event = selectedEvents.byId[current];
+    if (selectedLayersEvents.allIds.length > 0) {
+      artboards = selectedLayersEvents.allIds.reduce((result, current) => {
+        const event = selectedLayersEvents.byId[current];
         if (result.includes(event.artboard)) {
           result = removeItem(result, event.artboard);
+        }
+        if (result.includes(event.destinationArtboard)) {
+          result = removeItem(result, event.destinationArtboard);
         }
         return result;
       }, artboards);

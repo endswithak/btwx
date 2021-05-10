@@ -57,6 +57,8 @@ import {
   DESELECT_ALL_LAYER_EVENTS,
   REMOVE_LAYER_EVENT,
   REMOVE_LAYERS_EVENT,
+  SET_LAYER_EVENT_EVENT_LISTENER,
+  SET_LAYERS_EVENT_EVENT_LISTENER,
   ADD_LAYER_TWEEN,
   REMOVE_LAYER_TWEEN,
   REMOVE_LAYER_TWEENS,
@@ -388,6 +390,8 @@ import {
   deselectAllLayerEvents,
   removeLayerEvent,
   removeLayersEvent,
+  setLayerEventEventListener,
+  setLayersEventEventListener,
   addLayerTween,
   removeLayerTween,
   removeLayerTweens,
@@ -869,6 +873,10 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return removeLayerEvent(state, action);
     case REMOVE_LAYERS_EVENT:
       return removeLayersEvent(state, action);
+    case SET_LAYER_EVENT_EVENT_LISTENER:
+      return setLayerEventEventListener(state, action);
+    case SET_LAYERS_EVENT_EVENT_LISTENER:
+      return setLayersEventEventListener(state, action);
     case SELECT_LAYER_EVENT:
       return selectLayerEvent(state, action);
     case DESELECT_LAYER_EVENT:
@@ -1464,6 +1472,8 @@ export default undoable(baseReducer, {
       ADD_LAYERS_EVENT,
       REMOVE_LAYER_EVENT,
       REMOVE_LAYERS_EVENT,
+      SET_LAYER_EVENT_EVENT_LISTENER,
+      SET_LAYERS_EVENT_EVENT_LISTENER,
       ADD_LAYER_TWEEN,
       REMOVE_LAYER_TWEEN,
       REMOVE_LAYER_TWEENS,

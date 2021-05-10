@@ -18,7 +18,7 @@ const MenuArtboardPresetDelete = (props: MenuArtboardPresetDeleteProps): ReactEl
 
   useEffect(() => {
     setMenuItemTemplate({
-      label: 'Delete',
+      label: 'Delete Preset',
       id: MENU_ITEM_ID,
       click: {
         id: MENU_ITEM_ID

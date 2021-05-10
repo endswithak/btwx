@@ -89,6 +89,8 @@ import {
   ADD_LAYERS_EVENT,
   REMOVE_LAYER_EVENT,
   REMOVE_LAYERS_EVENT,
+  SET_LAYER_EVENT_EVENT_LISTENER,
+  SET_LAYERS_EVENT_EVENT_LISTENER,
   SELECT_LAYER_EVENT,
   DESELECT_LAYER_EVENT,
   SELECT_LAYER_EVENTS,
@@ -416,6 +418,8 @@ import {
   AddLayersEventPayload,
   RemoveLayerEventPayload,
   RemoveLayersEventPayload,
+  SetLayerEventEventListenerPayload,
+  SetLayersEventEventListenerPayload,
   SelectLayerEventPayload,
   DeselectLayerEventPayload,
   SelectLayerEventsPayload,
@@ -1565,6 +1569,16 @@ export const removeLayerEvent = (payload: RemoveLayerEventPayload): LayerTypes =
 
 export const removeLayersEvent = (payload: RemoveLayersEventPayload): LayerTypes => ({
   type: REMOVE_LAYERS_EVENT,
+  payload
+});
+
+export const setLayerEventEventListener = (payload: SetLayerEventEventListenerPayload): LayerTypes => ({
+  type: SET_LAYER_EVENT_EVENT_LISTENER,
+  payload
+});
+
+export const setLayersEventEventListener = (payload: SetLayersEventEventListenerPayload): LayerTypes => ({
+  type: SET_LAYERS_EVENT_EVENT_LISTENER,
   payload
 });
 

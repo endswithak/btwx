@@ -192,6 +192,13 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
     }
   }, [eventTweenLayers]);
 
+  useEffect(() => {
+    if (eventType && eventType !== event.event) {
+      createTimeline();
+      setEventType(event.event);
+    }
+  }, [event.event]);
+
   // autoplay feature...
   // plays timeline whenever any event tween layer tween prop changes
   useEffect(() => {

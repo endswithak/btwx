@@ -18,7 +18,7 @@ const MenuArtboardPresetEdit = (props: MenuArtboardPresetEditProps): ReactElemen
 
   useEffect(() => {
     setMenuItemTemplate({
-      label: 'Edit',
+      label: 'Edit Preset...',
       id: MENU_ITEM_ID,
       click: {
         id: MENU_ITEM_ID

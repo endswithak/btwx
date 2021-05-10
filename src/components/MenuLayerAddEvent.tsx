@@ -25,7 +25,7 @@ const MenuLayerAddEvent = (props: MenuLayerAddEventProps): ReactElement => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (mouseDown && mouseUp && mouseDrag && click && rightClick && doubleClick && mouseMove && mouseEnter && mouseLeave) {
+    if (mouseDown && mouseUp && mouseDrag && click && rightClick && doubleClick && mouseEnter && mouseLeave) {
       setAddEvent({
         label: 'Add Event Listener...',
         visible,
@@ -33,16 +33,15 @@ const MenuLayerAddEvent = (props: MenuLayerAddEventProps): ReactElement => {
           mouseDown,
           mouseUp,
           mouseDrag,
+          mouseEnter,
+          mouseLeave,
           click,
           rightClick,
-          doubleClick,
-          mouseMove,
-          mouseEnter,
-          mouseLeave
+          doubleClick
         ]
       });
     }
-  }, [visible, mouseDown, mouseUp, mouseDrag, click, rightClick, doubleClick, mouseMove, mouseEnter, mouseLeave]);
+  }, [visible, mouseDown, mouseUp, mouseDrag, click, rightClick, doubleClick, mouseEnter, mouseLeave]);
 
   useEffect(() => {
     (window as any)[MENU_ITEM_ID] = (params: { event: Btwx.EventType; destinationArtboard: string }) => {
@@ -54,41 +53,41 @@ const MenuLayerAddEvent = (props: MenuLayerAddEventProps): ReactElement => {
   return (
     <>
       <MenuLayerEvent
-        event={'mousedown'}
+        eventListener={'mousedown'}
         label={'Mouse Down'}
         setEvent={setMouseDown} />
       <MenuLayerEvent
-        event={'mouseup'}
+        eventListener={'mouseup'}
         label={'Mouse Up'}
         setEvent={setMouseUp} />
       <MenuLayerEvent
-        event={'mousedrag'}
+        eventListener={'mousedrag'}
         label={'Mouse Drag'}
         setEvent={setMouseDrag} />
-      <MenuLayerEvent
-        event={'click'}
-        label={'Click'}
-        setEvent={setClick} />
-      <MenuLayerEvent
-        event={'rightclick'}
-        label={'Right Click'}
-        setEvent={setRightClick} />
-      <MenuLayerEvent
-        event={'doubleclick'}
-        label={'Double Click'}
-        setEvent={setDoubleClick} />
-      <MenuLayerEvent
+      {/* <MenuLayerEvent
         event={'mousemove'}
         label={'Mouse Move'}
-        setEvent={setMouseMove} />
+        setEvent={setMouseMove} /> */}
       <MenuLayerEvent
-        event={'mouseenter'}
+        eventListener={'mouseenter'}
         label={'Mouse Enter'}
         setEvent={setMouseEnter} />
       <MenuLayerEvent
-        event={'mouseleave'}
+        eventListener={'mouseleave'}
         label={'Mouse Leave'}
         setEvent={setMouseLeave} />
+      <MenuLayerEvent
+        eventListener={'click'}
+        label={'Click'}
+        setEvent={setClick} />
+      <MenuLayerEvent
+        eventListener={'rightclick'}
+        label={'Right Click'}
+        setEvent={setRightClick} />
+      <MenuLayerEvent
+        eventListener={'doubleclick'}
+        label={'Double Click'}
+        setEvent={setDoubleClick} />
     </>
   );
 };

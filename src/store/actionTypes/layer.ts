@@ -68,6 +68,8 @@ export const ADD_LAYER_EVENT = 'ADD_LAYER_EVENT';
 export const ADD_LAYERS_EVENT = 'ADD_LAYERS_EVENT';
 export const REMOVE_LAYER_EVENT = 'REMOVE_LAYER_EVENT';
 export const REMOVE_LAYERS_EVENT = 'REMOVE_LAYERS_EVENT';
+export const SET_LAYER_EVENT_EVENT_LISTENER = 'SET_LAYER_EVENT_EVENT_LISTENER';
+export const SET_LAYERS_EVENT_EVENT_LISTENER = 'SET_LAYERS_EVENT_EVENT_LISTENER';
 
 export const SELECT_LAYER_EVENT = 'SELECT_LAYER_EVENT';
 export const DESELECT_LAYER_EVENT = 'DESELECT_LAYER_EVENT';
@@ -942,6 +944,26 @@ export interface RemoveLayersEventPayload {
 export interface RemoveLayersEvent {
   type: typeof REMOVE_LAYERS_EVENT;
   payload: RemoveLayersEventPayload;
+}
+
+export interface SetLayerEventEventListenerPayload {
+  id: string;
+  eventListener: Btwx.EventType;
+}
+
+export interface SetLayerEventEventListener {
+  type: typeof SET_LAYER_EVENT_EVENT_LISTENER;
+  payload: SetLayerEventEventListenerPayload;
+}
+
+export interface SetLayersEventEventListenerPayload {
+  events: string[];
+  eventListener: Btwx.EventType;
+}
+
+export interface SetLayersEventEventListener {
+  type: typeof SET_LAYERS_EVENT_EVENT_LISTENER;
+  payload: SetLayersEventEventListenerPayload;
 }
 
 export interface SelectLayerEventPayload {
@@ -4197,6 +4219,8 @@ export type LayerTypes = AddArtboard |
                          AddLayersEvent |
                          RemoveLayerEvent |
                          RemoveLayersEvent |
+                         SetLayerEventEventListener |
+                         SetLayersEventEventListener |
                          SelectLayerEvent |
                          DeselectLayerEvent |
                          SelectLayerEvents |

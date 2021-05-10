@@ -200,7 +200,7 @@ export const getDefaultTweenProps = (customWiggleProp: any = null) => ({
   }
 })
 
-export const DEFAULT_TWEEN_EVENTS_TYPES: Btwx.EventType[] = ['mousedown', 'mouseup', 'mousedrag', 'click', 'rightclick', 'doubleclick', 'mousemove', 'mouseenter', 'mouseleave'];
+export const DEFAULT_TWEEN_EVENTS_TYPES: Btwx.EventType[] = ['mousedown', 'mouseup', 'mousedrag', 'mouseenter', 'mouseleave', 'click', 'rightclick', 'doubleclick'];
 
 export const DEFAULT_TWEEN_EVENTS: { event: Btwx.EventType; titleCase: string }[] = [
   { event: 'mousedown', titleCase: 'Mouse Down' },
