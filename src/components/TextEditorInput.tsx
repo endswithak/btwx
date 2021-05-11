@@ -29,16 +29,14 @@ const TextEditorInput = (): ReactElement => {
   const [pos, setPos] = useState({x: textEditor.x, y: textEditor.y});
   const dispatch = useDispatch();
 
-  const onMouseDown = (event: any): void => {
-    if (event.target !== textAreaRef.current) {
-      const paperLayer = getPaperLayer(textEditor.layer, textEditor.projectIndex) as paper.PointText;
-      paperLayer.visible = true;
-      debounceText(textAreaRef.current.value);
-      dispatch(setCanvasFocusing({
-        focusing: true
-      }));
-      dispatch(closeTextEditor());
-    }
+  const handleBlur = (event: any): void => {
+    const paperLayer = getPaperLayer(textEditor.layer, textEditor.projectIndex) as paper.PointText;
+    paperLayer.visible = true;
+    debounceText(textAreaRef.current.value);
+    dispatch(setCanvasFocusing({
+      focusing: true
+    }));
+    dispatch(closeTextEditor());
   }
 
   const handleTextChange = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
@@ -58,8 +56,6 @@ const TextEditorInput = (): ReactElement => {
   }
 
   useEffect(() => {
-    document.addEventListener('mousedown', onMouseDown, true);
-    dispatch(setCanvasFocusing({focusing: false}));
     if (textAreaRef.current) {
       const paperLayer = getPaperLayer(textEditor.layer, textEditor.projectIndex) as paper.PointText;
       paperLayer.visible = false;
@@ -92,9 +88,7 @@ const TextEditorInput = (): ReactElement => {
       });
       updateTextAreaSize();
     }
-    return () => {
-      document.removeEventListener('mousedown', onMouseDown, true);
-    }
+    dispatch(setCanvasFocusing({focusing: false}));
   }, []);
 
   useEffect(() => {
@@ -109,6 +103,7 @@ const TextEditorInput = (): ReactElement => {
         className='c-text-editor__textarea'
         spellCheck={false}
         ref={textAreaRef}
+        onBlur={handleBlur}
         value={text}
         onChange={handleTextChange}
         rows={1}

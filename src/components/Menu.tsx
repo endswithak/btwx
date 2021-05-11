@@ -66,11 +66,9 @@ const Menu = (): ReactElement => {
       ipcRenderer.invoke('buildDefaultApplicationMenu', JSON.stringify({
         template: defaultMenu
       })).then(() => {
-        if (focusing) {
-          ipcRenderer.invoke('setApplicationMenu', JSON.stringify({
-            type: 'default'
-          }));
-        }
+        ipcRenderer.invoke('setApplicationMenu', JSON.stringify({
+          type: focusing ? 'default' : 'input'
+        }));
       });
     }
   }, [defaultMenu]);

@@ -1,4 +1,4 @@
-import React, { ReactElement, useRef } from 'react';
+import React, { ReactElement } from 'react';
 import { ipcRenderer } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -15,7 +15,6 @@ interface EventDrawerListItemProps {
 }
 
 const EventDrawerListItem = (props: EventDrawerListItemProps): ReactElement => {
-  const actionsContainerRef = useRef(null);
   const { id } = props;
   // const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
   const selectedEventsEventListener = useSelector((state: RootState) => getSelectedEventsEventListener(state));

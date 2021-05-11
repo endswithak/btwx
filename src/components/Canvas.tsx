@@ -167,7 +167,7 @@ const Canvas = (): ReactElement => {
         measuring: false
       }));
     }
-    if ((document.activeElement && document.activeElement.nodeName === 'INPUT')) {
+    if ((document.activeElement && (document.activeElement.nodeName === 'INPUT' || document.activeElement.nodeName === 'TEXTAREA'))) {
       (document.activeElement as HTMLInputElement).blur();
     }
     handleHitResult(e, 'mouseDown');
