@@ -29,3 +29,10 @@
   max-width: 100%
   overflow: hidden
   flex-direction: column
+
+.c-app__drop-frame
+  pointer-events: none
+  z-index: 9999
+  @include absolute-full
+  @include themed()
+    box-shadow: 0 0 0 2px theme-prop(primary) inset

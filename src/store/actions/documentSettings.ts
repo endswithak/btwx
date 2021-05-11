@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCreators } from 'redux-undo';
 import { updateFramesThunk } from './layer';
+import { addSessionImages }  from './session';
 
 import {
   OPEN_DOCUMENT,
@@ -36,6 +37,7 @@ export const hydrateDocument = (payload: HydrateDocumentPayload): DocumentSettin
 
 export const hydrateDocumentThunk = (payload: HydrateDocumentPayload) => {
   return (dispatch: any, getState: any): void => {
+    dispatch(addSessionImages({images: payload.documentSettings.images}));
     dispatch(hydrateDocument(payload));
     dispatch(ActionCreators.clearHistory());
     dispatch(updateFramesThunk());

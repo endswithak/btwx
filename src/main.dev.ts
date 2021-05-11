@@ -955,18 +955,8 @@ export const handleOpen = (fullPath: string) => {
               app.addRecentDocument(fullPath);
               const documentState = JSON.parse(data) as BtwxInstanceDocumentState;
               const documentStateWithTree = getDocumentStateWithTree(documentState);
-              const documentStateWithSessionImages = {
-                ...documentStateWithTree,
-                session: {
-                  ...store.get('session') as SessionState,
-                  instance: focusedInstanceId,
-                  windowType: 'document',
-                  env: process.env.NODE_ENV,
-                  images: documentStateWithTree.documentSettings.images
-                }
-              }
               if (!editState.path && !editState.edit.id) {
-                focusedInstanceDocument.webContents.executeJavaScript(`hydrateDocument(${JSON.stringify(documentStateWithSessionImages)})`);
+                focusedInstanceDocument.webContents.executeJavaScript(`hydrateDocument(${JSON.stringify(documentStateWithTree)})`);
                 btwxElectron = {
                   ...btwxElectron,
                   instance: {
@@ -1060,6 +1050,11 @@ ipcMain.on('newInstance', (event, args) => {
 
 ipcMain.on('openInstance', (event, args) => {
   handleOpenDialog();
+});
+
+ipcMain.on('openDroppedDocument', (event, args) => {
+  const { path } = JSON.parse(args);
+  handleOpen(path);
 });
 
 ipcMain.on('saveInstance', (event, args) => {

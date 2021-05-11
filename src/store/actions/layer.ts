@@ -6293,7 +6293,6 @@ export const pasteLayersThunk = (props?: { overSelection?: boolean; overPoint?: 
         resolve(null);
       } catch(error) {
         const formats = clipboard.availableFormats();
-        console.log(formats);
         // if (formats.some(format => format.startsWith('text'))) {
         //   if (state.layer.present.activeArtboard) {
         //     const text = clipboard.readText();
@@ -6403,15 +6402,25 @@ export const pasteLayersThunk = (props?: { overSelection?: boolean; overPoint?: 
         // handle image paste
         if (formats.some(format => format.startsWith('image'))) {
           if (state.layer.present.activeArtboard) {
+            const activeArtboardItem = state.layer.present.byId[state.layer.present.activeArtboard];
+            const artboardPosition = new paperMain.Point(activeArtboardItem.frame.x, activeArtboardItem.frame.y);
             const image = clipboard.readImage();
             const buffer = image.toPNG();
             const originalDimensions = image.getSize();
+            let x = 0;
+            let y = 0;
+            if (overSelection && state.layer.present.selected.length > 0) {
+              const selectedBounds = getSelectedBounds(state);
+              const pos = selectedBounds.center.subtract(artboardPosition);
+              x = pos.x;
+              y = pos.y;
+            }
             dispatch(addImageThunk({
               layer: {
                 name: 'image',
                 frame: {
-                  x: 0,
-                  y: 0,
+                  x: x,
+                  y: y,
                   width: originalDimensions.width,
                   height: originalDimensions.height,
                   innerWidth: originalDimensions.width,
@@ -6425,6 +6434,12 @@ export const pasteLayersThunk = (props?: { overSelection?: boolean; overPoint?: 
               buffer: buffer as any,
               ext: 'png'
             }));
+          } else {
+            ipcRenderer.invoke('initPasteWithoutArtboardAlert', JSON.stringify({
+              instanceId: state.session.instance
+            })).then(() => {
+              resolve(null);
+            });
           }
         }
         resolve(null);
