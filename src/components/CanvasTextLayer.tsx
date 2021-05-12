@@ -352,6 +352,13 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
       getPaperLayerIndex(layerItem, parentItem),
       createText()
     );
+    // hack fix for morning brain
+    if (layerItem.style.fill.fillType === 'gradient') {
+      applyFill();
+    }
+    if (layerItem.style.stroke.fillType === 'gradient') {
+      applyStroke();
+    }
     setRendered(true);
     return (): void => {
       const { paperLayer } = getPaperLayer();
