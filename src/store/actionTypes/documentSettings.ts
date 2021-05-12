@@ -41,7 +41,7 @@ export interface HydrateDocument {
 export interface SaveDocumentAsPayload {
   id?: string;
   name: string;
-  path: string;
+  // path: string;
   edit: string;
 }
 

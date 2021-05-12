@@ -18,7 +18,6 @@ import { removeDocumentImage as removeDocumentImageAction } from '../actions/doc
 export interface DocumentSettingsState {
   id: string;
   name: string;
-  path: string;
   zoom: number;
   matrix: number[];
   images: {
@@ -34,7 +33,6 @@ export interface DocumentSettingsState {
 export const initialState: DocumentSettingsState = {
   id: null,
   name: 'Untitled',
-  path: null,
   zoom: 1,
   matrix: [1, 0, 0, 1, 0, 0],
   images: {
@@ -71,7 +69,6 @@ export default (state = initialState, action: DocumentSettingsTypes): DocumentSe
         ...state,
         id: action.payload.id,
         name: action.payload.name,
-        path: action.payload.path,
         edit: action.payload.edit
       };
     }

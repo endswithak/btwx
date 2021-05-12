@@ -65,7 +65,6 @@ const configureStore: any = (preloadedState, isDocumentWindow = false): typeof s
     return JSON.stringify({
       edit: state.layer.present.edit,
       dirty: state.documentSettings.edit !== state.layer.present.edit.id,
-      path: state.documentSettings.path,
       name: state.documentSettings.name
     });
   };

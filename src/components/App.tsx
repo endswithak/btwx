@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setTextSettingsSystemFonts, setTextSettingsReady } from '../store/actions/textSettings';
 import { addImageThunk } from '../store/actions/layer';
 import { hydrateDocumentThunk } from '../store/actions/documentSettings';
-import { WEB_SAFE_FONTS, APP_NAME } from '../constants';
+import { WEB_SAFE_FONTS } from '../constants';
 import { base64ToBuffer } from '../utils';
 import { RootState } from '../store/reducers';
 import Topbar from './Topbar';
@@ -19,9 +19,10 @@ import Main from './Main';
 import KeyBindings from './KeyBindings';
 
 const App = (): ReactElement => {
+  const instanceId = useSelector((state: RootState) => state.session.instance);
   const theme = useSelector((state: RootState) => state.preferences.theme);
   const platform = useSelector((state: RootState) => state.session.platform);
-  const isClean = useSelector((state: RootState) => !state.documentSettings.path && !state.layer.present.edit.id);
+  const isClean = useSelector((state: RootState) => !state.documentSettings.id && !state.layer.present.edit.id);
   const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
   const dispatch = useDispatch();
   const [dragOver, setDragOver] = useState(false);
@@ -76,8 +77,7 @@ const App = (): ReactElement => {
     file.text().then((text) => {
       try {
         const documentState = JSON.parse(text) as Btwx.Document;
-        const path = `${documentState.documentSettings.path}.${APP_NAME}`;
-        if (path && !dirty) {
+        if (!dirty) {
           dispatch(hydrateDocumentThunk({
             ...documentState,
             layer: {
@@ -91,9 +91,13 @@ const App = (): ReactElement => {
               }
             }
           }));
+          ipcRenderer.send('setDocumentRepresentedFilename', JSON.stringify({
+            instanceId,
+            documentPath: file.path
+          }));
         } else {
           ipcRenderer.send('openDroppedDocument', JSON.stringify({
-            path
+            path: file.path
           }));
         }
       } catch {

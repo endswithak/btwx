@@ -8,7 +8,7 @@ const Titlebar = (): ReactElement => {
   const windowType = useSelector((state: RootState) => state.session.windowType);
   const unsavedEdits = useSelector((state: RootState) => state.layer.present.edit.id !== state.documentSettings.edit);
   const documentName = useSelector((state: RootState) => state.documentSettings.name);
-  const documentPath = useSelector((state: RootState) => state.documentSettings.path);
+  // const documentPath = useSelector((state: RootState) => state.documentSettings.path);
   const recording = useSelector((state: RootState) => state.preview.recording);
 
   const handleDoubleClick = () => {
@@ -35,16 +35,16 @@ const Titlebar = (): ReactElement => {
     }
   }, [unsavedEdits]);
 
-  useEffect(() => {
-    if (windowType === 'document') {
-      if (documentPath) {
-        ipcRenderer.invoke('setDocumentRepresentedFilename', JSON.stringify({
-          instanceId: instanceId,
-          filename: documentPath
-        }));
-      }
-    }
-  }, [documentPath]);
+  // useEffect(() => {
+  //   if (windowType === 'document') {
+  //     if (documentPath) {
+  //       ipcRenderer.invoke('setDocumentRepresentedFilename', JSON.stringify({
+  //         instanceId: instanceId,
+  //         filename: documentPath
+  //       }));
+  //     }
+  //   }
+  // }, [documentPath]);
 
   return (
     <div

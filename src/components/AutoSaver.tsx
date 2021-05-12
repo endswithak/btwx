@@ -7,17 +7,17 @@ import { RootState } from '../store/reducers';
 const AutoSaver = (): ReactElement => {
   const autoSave = useSelector((state: RootState) => state.preferences.autoSave);
   const edit = useSelector((state: RootState) => state.layer.present.edit);
-  const documentPath = useSelector((state: RootState) => state.documentSettings.path);
+  const documentId = useSelector((state: RootState) => state.documentSettings.id);
 
   const debounceSave = useCallback(debounce(() => {
     ipcRenderer.send('saveInstance');
   }, 500), []);
 
   useEffect(() => {
-    if (edit.undoable && autoSave && documentPath) {
+    if (edit.undoable && autoSave && documentId) {
       debounceSave();
     }
-  }, [edit, autoSave, documentPath]);
+  }, [edit, autoSave, documentId]);
 
   return null;
 }

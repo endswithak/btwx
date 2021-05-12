@@ -248,7 +248,7 @@ const getWriteDocumentState = (documentState: BtwxInstanceDocumentState, documen
   documentSettings: {
     ...documentState.documentSettings,
     name: path.basename(documentPath),
-    path: documentPath,
+    // path: documentPath,
     edit: documentState.layer.present.edit.id
   }
 });
@@ -256,10 +256,12 @@ const getWriteDocumentState = (documentState: BtwxInstanceDocumentState, documen
 export const createInstance = async ({
   width = MIN_DOCUMENT_WIDTH,
   height = MIN_DOCUMENT_HEIGHT,
+  documentPath = null,
   initialState = {}
 }: {
   width?: number;
   height?: number;
+  documentPath?: string;
   initialState?: BtwxInstanceDocumentState
 }) => {
 
@@ -278,7 +280,7 @@ export const createInstance = async ({
       byId: {
         ...btwxElectron.instance.byId,
         [INSTANCE_ID]: {
-          documentPath: initialState && initialState.documentSettings && initialState.documentSettings.path ? initialState.documentSettings.path : null,
+          documentPath: documentPath,
           id: INSTANCE_ID,
           document: new BrowserWindow({
             show: false,
@@ -333,6 +335,9 @@ export const createInstance = async ({
     } else {
       instance.document.show();
       instance.document.focus();
+    }
+    if (documentPath && process.platform === 'darwin') {
+      instance.document.setRepresentedFilename(documentPath);
     }
     instance.document.webContents.executeJavaScript(`renderDocument(${JSON.stringify({
       ...initialState,
@@ -806,14 +811,14 @@ export const handleSave = ({
         resolve(null);
       }
     }
-    if (instanceSaveState.editState.path) {
+    if (instance.documentPath) {
       focusedInstanceDocument.webContents.executeJavaScript(`getDocumentState()`).then((documentStateJSON) => {
-        const writeDocumentState = getWriteDocumentState(JSON.parse(documentStateJSON), editState.path);
-        fs.writeFile(`${editState.path}.${APP_NAME}`, JSON.stringify(writeDocumentState), (err) => {
+        const writeDocumentState = getWriteDocumentState(JSON.parse(documentStateJSON), instance.documentPath);
+        fs.writeFile(instance.documentPath, JSON.stringify(writeDocumentState), (err) => {
           if (err) {
             dialog.showMessageBox(focusedInstanceDocument, {
               type: 'error',
-              message: `Failed to save document at "${editState.path}.${APP_NAME}"`
+              message: `Failed to save document at "${instance.documentPath}"`
             }).then(handleOnSave);
           } else {
             focusedInstanceDocument.webContents.executeJavaScript(`saveDocument(${JSON.stringify({
@@ -885,7 +890,6 @@ export const handleSaveAs = ({
               app.addRecentDocument(`${fullPath}.${APP_NAME}`);
               focusedInstanceDocument.webContents.executeJavaScript(`saveDocumentAs(${JSON.stringify({
                 name: writeDocumentState.documentSettings.name,
-                path: writeDocumentState.documentSettings.path,
                 edit: writeDocumentState.documentSettings.edit
               })})`).then(handleOnSave);
               btwxElectron.instance = {
@@ -894,10 +898,11 @@ export const handleSaveAs = ({
                   ...btwxElectron.instance.byId,
                   [instance.id]: {
                     ...btwxElectron.instance.byId[instance.id],
-                    documentPath: writeDocumentState.documentSettings.path
+                    documentPath: `${fullPath}.${APP_NAME}`
                   }
                 }
               }
+              focusedInstanceDocument.setRepresentedFilename(`${fullPath}.${APP_NAME}`);
             }
           });
         });
@@ -929,7 +934,7 @@ export const handleOpen = (fullPath: string) => {
   const ext = path.extname(fullPath);
   const alreadyOpen = btwxElectron.instance.allIds.find((instanceId) => {
     const documentPath = btwxElectron.instance.byId[instanceId].documentPath;
-    const matches = documentPath && (`${documentPath}.${APP_NAME}` === fullPath);
+    const matches = documentPath && (documentPath === fullPath);
     return matches;
   });
   if (alreadyOpen) {
@@ -944,18 +949,19 @@ export const handleOpen = (fullPath: string) => {
       if (focusedInstanceDocument) {
         const size = focusedInstanceDocument.getSize();
         focusedInstanceDocument.webContents.executeJavaScript(`getCurrentEdit()`).then((documentJSON: string) => {
+          const focusedInstanceDocumentPath = btwxElectron.instance.byId[focusedInstanceId].documentPath;
           const editState = JSON.parse(documentJSON) as BtwxInstanceEditState;
           fs.readFile(fullPath, { encoding: 'utf-8' }, (err, data) => {
             if(err) {
               dialog.showMessageBox(focusedInstanceDocument, {
                 type: 'error',
-                message: `Failed to open document "${fullPath}.${APP_NAME}"`
+                message: `Failed to open document "${fullPath}"`
               });
             } else {
               app.addRecentDocument(fullPath);
               const documentState = JSON.parse(data) as BtwxInstanceDocumentState;
               const documentStateWithTree = getDocumentStateWithTree(documentState);
-              if (!editState.path && !editState.edit.id) {
+              if (!focusedInstanceDocumentPath && !editState.edit.id) {
                 focusedInstanceDocument.webContents.executeJavaScript(`hydrateDocument(${JSON.stringify(documentStateWithTree)})`);
                 btwxElectron = {
                   ...btwxElectron,
@@ -965,16 +971,18 @@ export const handleOpen = (fullPath: string) => {
                       ...btwxElectron.instance.byId,
                       [focusedInstanceId]: {
                         ...btwxElectron.instance.byId[focusedInstanceId],
-                        documentPath: documentStateWithTree.documentSettings.path
+                        documentPath: fullPath
                       }
                     }
                   }
                 }
+                focusedInstanceDocument.setRepresentedFilename(fullPath);
               } else {
                 createInstance({
                   width: size[0],
                   height: size[1],
-                  initialState: documentStateWithTree
+                  initialState: documentStateWithTree,
+                  documentPath: fullPath
                 });
               }
             }
@@ -985,12 +993,13 @@ export const handleOpen = (fullPath: string) => {
           if(err) {
             dialog.showMessageBox(focusedInstanceDocument, {
               type: 'error',
-              message: `Failed to open document "${fullPath}.${APP_NAME}"`
+              message: `Failed to open document "${fullPath}"`
             });
           } else {
             app.addRecentDocument(fullPath);
             createInstance({
-              initialState: getDocumentStateWithTree(JSON.parse(data) as BtwxInstanceDocumentState)
+              initialState: getDocumentStateWithTree(JSON.parse(data) as BtwxInstanceDocumentState),
+              documentPath: fullPath
             });
           }
         });
@@ -1962,9 +1971,24 @@ ipcMain.handle('maximizeDocument', (event, args) => {
 });
 
 ipcMain.handle('setDocumentRepresentedFilename', (event, args) => {
-  const { instanceId, filename } = JSON.parse(args);
+  const { instanceId, documentPath } = JSON.parse(args);
   const instance = btwxElectron.instance.byId[instanceId];
-  instance.document.setRepresentedFilename(filename);
+  if (process.platform === 'darwin') {
+    instance.document.setRepresentedFilename(documentPath);
+  }
+  btwxElectron = {
+    ...btwxElectron,
+    instance: {
+      ...btwxElectron.instance,
+      byId: {
+        ...btwxElectron.instance.byId,
+        [instanceId]: {
+          ...btwxElectron.instance.byId[instanceId],
+          documentPath: documentPath
+        }
+      }
+    }
+  }
 });
 
 ////////////////////////////////////////////////////////////
