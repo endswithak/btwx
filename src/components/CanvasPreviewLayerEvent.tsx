@@ -12,13 +12,11 @@ import CanvasPreviewLayerTween from './CanvasPreviewLayerTween';
 
 interface CanvasPreviewLayerEventProps {
   eventId: string;
-  // instanceId: string;
 }
 
 export interface EventLayerTimelineData {
   paperLayer: paper.Item;
   artboardBackground: paper.Path.Rectangle;
-  // textLinesGroup: paper.Group;
   imageRaster: paper.Raster;
   textContent: paper.PointText;
   textBackground: paper.Path.Rectangle;
