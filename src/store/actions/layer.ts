@@ -7342,11 +7342,14 @@ export const updateEventsFrame = (state: RootState): void => {
       const artboardTopTop = getArtboardsTopTop(state.layer.present);
       const origin = state.layer.present.byId[event.artboard];
       const destination = state.layer.present.byId[event.destinationArtboard];
-      const tweenEventDestinationIndicator = new paperMain.Path.Ellipse({
+      const leftToRight = origin.frame.x < destination.frame.x;
+      const tweenEventDestinationIndicator = new paperMain.Path.RegularPolygon({
         center: new paperMain.Point(destination.frame.x, artboardTopTop - (48 / paperMain.view.zoom)),
-        radius: 4 / paperMain.view.zoom,
+        sides: 3,
+        radius: 5 / paperMain.view.zoom,
         fillColor: elementColor,
         insert: false,
+        rotation: leftToRight ? 90 : -90,
         data: {
           type: 'UIElementChild',
           interactive: true,
@@ -7356,7 +7359,7 @@ export const updateEventsFrame = (state: RootState): void => {
       });
       const tweenEventDestinationIndicatorBackground = new paperMain.Path.Ellipse({
         center: tweenEventDestinationIndicator.bounds.center,
-        radius: 16 / paperMain.view.zoom,
+        radius: 14 / paperMain.view.zoom,
         fillColor: isSelected && !editingEvent ? theme.palette.primary : theme.background.z0,
         opacity: 0,
         insert: false,
@@ -7369,7 +7372,7 @@ export const updateEventsFrame = (state: RootState): void => {
       });
       const tweenEventOriginIndicator = new paperMain.Path.Ellipse({
         center: new paperMain.Point(origin.frame.x, artboardTopTop - (48 / paperMain.view.zoom)),
-        radius: 10 / paperMain.view.zoom,
+        radius: 8 / paperMain.view.zoom,
         insert: false,
         data: {
           type: 'UIElementChild',
@@ -7380,7 +7383,7 @@ export const updateEventsFrame = (state: RootState): void => {
       });
       const tweenEventIconBackground = new paperMain.Path.Ellipse({
         center: tweenEventOriginIndicator.bounds.center,
-        radius: 16 / paperMain.view.zoom,
+        radius: 14 / paperMain.view.zoom,
         fillColor: isSelected && !editingEvent ? theme.palette.primary : theme.background.z0,
         insert: false,
         data: {
@@ -7455,10 +7458,11 @@ export const updateEventsFrame = (state: RootState): void => {
         content: DEFAULT_TWEEN_EVENTS.find((tweenEvent) => event.event === tweenEvent.event).titleCase,
         point: new paperMain.Point(
           tweenEventConnector.bounds.center.x,
-          tweenEventDestinationIndicator.bounds.top - ((1 / paperMain.view.zoom) * 10)
+          tweenEventDestinationIndicator.bounds.top - ((1 / paperMain.view.zoom) * 8)
         ),
         justification: 'center',
         fontSize: 10 / paperMain.view.zoom,
+        visible: paperMain.view.zoom > 0.3,
         fillColor: elementColor,
         insert: false,
         fontFamily: 'Space Mono',
@@ -7481,7 +7485,7 @@ export const updateEventsFrame = (state: RootState): void => {
         parent: eventsFrame,
         // opacity: groupOpacity
       });
-      const margin = 8 / paperMain.view.zoom;
+      const margin = 4 / paperMain.view.zoom;
       const eventFrameBackground = new paperMain.Path.Rectangle({
         from: eventFrame.bounds.topLeft.subtract(new paperMain.Point(margin, margin)),
         to: eventFrame.bounds.bottomRight.add(new paperMain.Point(margin, margin)),
