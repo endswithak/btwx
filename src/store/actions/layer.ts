@@ -7485,7 +7485,7 @@ export const updateEventsFrame = (state: RootState): void => {
         parent: eventsFrame,
         // opacity: groupOpacity
       });
-      const margin = 4 / paperMain.view.zoom;
+      const margin = 8 / paperMain.view.zoom;
       const eventFrameBackground = new paperMain.Path.Rectangle({
         from: eventFrame.bounds.topLeft.subtract(new paperMain.Point(margin, margin)),
         to: eventFrame.bounds.bottomRight.add(new paperMain.Point(margin, margin)),

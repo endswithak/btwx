@@ -34,6 +34,20 @@ const EventDrawerListHeader = (): ReactElement => {
     }
   }
 
+  const getSortLabel = (sort: string): string => {
+    switch(sort) {
+      case 'layer':
+      case 'artboard':
+        return sort;
+      case 'event':
+        return 'listener';
+      case 'destinationArtboard':
+        return 'destination';
+      default:
+        return sort;
+    }
+  }
+
   const items = (['layer', 'event', 'artboard', 'destinationArtboard'] as Btwx.EventSortBy[]).map((sort, index) => (
     <ListItem
       key={sort}
@@ -60,11 +74,7 @@ const EventDrawerListHeader = (): ReactElement => {
             ? 'primary'
             : 'lighter'
           }>
-          {
-            sort === 'destinationArtboard'
-            ? 'destination'
-            : sort
-          }
+          { getSortLabel(sort) }
         </ListItem.Text>
       </ListItem.Body>
     </ListItem>

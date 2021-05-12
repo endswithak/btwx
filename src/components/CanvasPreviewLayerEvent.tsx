@@ -44,7 +44,7 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
   const payloadString = useSelector((state: RootState) => JSON.stringify(state.layer.present.edit.payload));
   const tweenEdit = event.tweens.some((id) => payloadString.includes(id));
   const [eventTimeline, setEventTimeline] = useState<GSAPTimeline>(null);
-  const [eventType, setEventType] = useState(event.event);
+  const [eventListener, setEventListener] = useState(event.event);
   const [eventLayer, setEventLayer] = useState(event.layer);
   const [eventLayers, setEventLayers] = useState(eventTweenLayers);
   const [instance, setNewInstance] = useState(0);
@@ -147,14 +147,14 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
           timeline.play();
         }
       };
-      paperLayer.on(eventType === 'rightclick' ? 'click' : eventType, callback);
+      paperLayer.on(event.event === 'rightclick' ? 'click' : event.event, callback);
     }
   }
 
   const removePaperLayerEventListener = () => {
     const paperLayer = paperPreview.project.getItem({ data: { id: eventLayer } });
     if (paperLayer) {
-      paperLayer.off((eventType === 'rightclick' ? 'click' : eventType) as any);
+      paperLayer.off((eventListener === 'rightclick' ? 'click' : eventListener) as any);
     }
   }
 
@@ -180,10 +180,11 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
   // create initial timeline
   useEffect(() => {
     createTimeline();
+    setEventListener(event.event);
     return () => {
       killTimeline();
     }
-  }, []);
+  }, [event.event]);
 
   useEffect(() => {
     if (eventTimeline && (eventTweenLayers.length !== eventLayers.length || !eventLayers.every(id => eventTweenLayers.includes(id)))) {
@@ -191,13 +192,6 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
       setEventLayers(eventTweenLayers);
     }
   }, [eventTweenLayers]);
-
-  useEffect(() => {
-    if (eventType && eventType !== event.event) {
-      createTimeline();
-      setEventType(event.event);
-    }
-  }, [event.event]);
 
   // autoplay feature...
   // plays timeline whenever any event tween layer tween prop changes

@@ -95,6 +95,18 @@ const EventDrawerListItem = (props: EventDrawerListItemProps): ReactElement => {
     ipcRenderer.send('openEventContextMenu', JSON.stringify({
       instanceId,
       template: [
+        ...(selectedEvents.length === 1
+        ? [{
+            label: 'Edit Event...',
+            click: {
+              id: 'setEventDrawerEventThunk',
+              params: { id }
+            }
+          },
+          {
+            type: 'separator'
+          }]
+        : []),
         ...(!changeEventListenerDisabled
         ? [{
           label: 'Event Listener...',
@@ -118,15 +130,6 @@ const EventDrawerListItem = (props: EventDrawerListItemProps): ReactElement => {
             return result;
           }, [])
         }]
-        : []),
-        ...(selectedEvents.length === 1
-        ? [{
-            label: 'Edit Event...',
-            click: {
-              id: 'setEventDrawerEventThunk',
-              params: { id }
-            }
-          }]
         : []),
         ...(selectedEvents.length > 0
         ? [{
