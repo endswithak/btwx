@@ -11,6 +11,8 @@ interface CanvasImageLayerProps {
   paperScope: Btwx.PaperScope;
 }
 
+const debug = false;
+
 const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
   const { id, paperScope } = props;
   const layerItem: Btwx.Image = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Image);
@@ -111,9 +113,8 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
               layerType: 'Image',
               layerId: id
             },
-            // fillColor: tinyColor('blue').setAlpha(0.20).toRgbString(),
-            fillColor: tinyColor('#fff').setAlpha(0.01).toRgbString(),
-            blendMode: 'multiply'
+            fillColor: debug ? tinyColor('blue').setAlpha(0.20).toRgbString() : tinyColor('#fff').setAlpha(0.01).toRgbString(),
+            blendMode: debug ? 'normal' : 'multiply'
           })
         ],
         insert: false

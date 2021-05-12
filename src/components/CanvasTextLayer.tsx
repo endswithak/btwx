@@ -151,6 +151,8 @@ export const getTextWidth = ({font, text, letterSpacing, textTransform, preview}
   return width;
 };
 
+const debug = false;
+
 const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   const { id, paperScope } = props;
   const layerItem: Btwx.Text = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Text);
@@ -280,8 +282,6 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
       children: [
         new paperLayerScope.Path.Rectangle({
           rectangle: getAreaTextRectangle(),
-          // fillColor: tinyColor('#fff').setAlpha(0.01).toRgbString(),
-          // blendMode: 'multiply',
           fillColor: '#000',
           data: {
             id: 'textMask',
@@ -294,9 +294,8 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         }),
         new paperLayerScope.Path.Rectangle({
           rectangle: getAreaTextRectangle(),
-          fillColor: tinyColor('#fff').setAlpha(0.01).toRgbString(),
-          blendMode: 'multiply',
-          // fillColor: tinyColor('red').setAlpha(0.25).toRgbString(),
+          fillColor: debug ? tinyColor('red').setAlpha(0.25).toRgbString() : tinyColor('#fff').setAlpha(0.01).toRgbString(),
+          blendMode: debug ? 'normal' : 'multiply',
           data: {
             id: 'textBackground',
             type: 'LayerChild',
