@@ -6332,6 +6332,13 @@ export const enableLayerHorizontalFlip = (state: LayerState, action: EnableLayer
                 x: currentState.byId[action.payload.id].style.stroke.gradient.destination.x * -1
               }
             }
+          },
+          shadow: {
+            ...currentState.byId[action.payload.id].style.shadow,
+            offset: {
+              ...currentState.byId[action.payload.id].style.shadow.offset,
+              x: currentState.byId[action.payload.id].style.shadow.offset.x * -1
+            }
           }
         }
       }
@@ -6389,7 +6396,7 @@ export const enableLayerHorizontalFlip = (state: LayerState, action: EnableLayer
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleX', 'fillGradientOriginX', 'fillGradientDestinationX', 'strokeGradientOriginX', 'strokeGradientDestinationX']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleX', 'fillGradientOriginX', 'fillGradientDestinationX', 'strokeGradientOriginX', 'strokeGradientDestinationX', 'shadowOffsetX']);
   if (point) {
     currentState = {
       ...currentState,
@@ -6483,6 +6490,13 @@ export const disableLayerHorizontalFlip = (state: LayerState, action: DisableLay
                 x: currentState.byId[action.payload.id].style.stroke.gradient.destination.x * -1
               }
             }
+          },
+          shadow: {
+            ...currentState.byId[action.payload.id].style.shadow,
+            offset: {
+              ...currentState.byId[action.payload.id].style.shadow.offset,
+              x: currentState.byId[action.payload.id].style.shadow.offset.x * -1
+            }
           }
         }
       }
@@ -6540,7 +6554,7 @@ export const disableLayerHorizontalFlip = (state: LayerState, action: DisableLay
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleX', 'fillGradientOriginX', 'fillGradientDestinationX', 'strokeGradientOriginX', 'strokeGradientDestinationX']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleX', 'fillGradientOriginX', 'fillGradientDestinationX', 'strokeGradientOriginX', 'strokeGradientDestinationX', 'shadowOffsetX']);
   if (point) {
     currentState = {
       ...currentState,
@@ -6633,6 +6647,13 @@ export const enableLayerVerticalFlip = (state: LayerState, action: EnableLayerVe
                 y: currentState.byId[action.payload.id].style.stroke.gradient.destination.y * -1
               }
             }
+          },
+          shadow: {
+            ...currentState.byId[action.payload.id].style.shadow,
+            offset: {
+              ...currentState.byId[action.payload.id].style.shadow.offset,
+              y: currentState.byId[action.payload.id].style.shadow.offset.y * -1
+            }
           }
         }
       }
@@ -6690,7 +6711,7 @@ export const enableLayerVerticalFlip = (state: LayerState, action: EnableLayerVe
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleY', 'fillGradientOriginY', 'fillGradientDestinationY', 'strokeGradientOriginY', 'strokeGradientDestinationY']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleY', 'fillGradientOriginY', 'fillGradientDestinationY', 'strokeGradientOriginY', 'strokeGradientDestinationY', 'shadowOffsetY']);
   if (point) {
     currentState = {
       ...currentState,
@@ -6784,6 +6805,13 @@ export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayer
                 y: currentState.byId[action.payload.id].style.stroke.gradient.destination.y * -1
               }
             }
+          },
+          shadow: {
+            ...currentState.byId[action.payload.id].style.shadow,
+            offset: {
+              ...currentState.byId[action.payload.id].style.shadow.offset,
+              y: currentState.byId[action.payload.id].style.shadow.offset.y * -1
+            }
           }
         }
       }
@@ -6841,7 +6869,7 @@ export const disableLayerVerticalFlip = (state: LayerState, action: DisableLayer
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleY', 'fillGradientOriginY', 'fillGradientDestinationY', 'strokeGradientOriginY', 'strokeGradientDestinationY']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleY', 'fillGradientOriginY', 'fillGradientDestinationY', 'strokeGradientOriginY', 'strokeGradientDestinationY', 'shadowOffsetY']);
   if (point) {
     currentState = {
       ...currentState,
@@ -8462,6 +8490,13 @@ export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState =>
                   x: currentState.byId[action.payload.id].style.stroke.gradient.destination.x * -1
                 }
               }
+            },
+            shadow: {
+              ...currentState.byId[action.payload.id].style.shadow,
+              offset: {
+                ...currentState.byId[action.payload.id].style.shadow.offset,
+                x: currentState.byId[action.payload.id].style.shadow.offset.x * -1
+              }
             }
           }
         }
@@ -8508,13 +8543,20 @@ export const scaleLayer = (state: LayerState, action: ScaleLayer): LayerState =>
                   y: currentState.byId[action.payload.id].style.stroke.gradient.destination.y * -1
                 }
               }
+            },
+            shadow: {
+              ...currentState.byId[action.payload.id].style.shadow,
+              offset: {
+                ...currentState.byId[action.payload.id].style.shadow.offset,
+                y: currentState.byId[action.payload.id].style.shadow.offset.y * -1
+              }
             }
           }
         }
       }
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleX', 'scaleY', 'fillGradientOriginX', 'fillGradientDestinationX', 'strokeGradientOriginX', 'strokeGradientDestinationX', 'fillGradientOriginY', 'fillGradientDestinationY', 'strokeGradientOriginY', 'strokeGradientDestinationY']);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['scaleX', 'scaleY', 'fillGradientOriginX', 'fillGradientDestinationX', 'strokeGradientOriginX', 'strokeGradientDestinationX', 'fillGradientOriginY', 'fillGradientDestinationY', 'strokeGradientOriginY', 'strokeGradientDestinationY', 'shadowOffsetX', 'shadowOffsetY']);
   if (pathData) {
     currentState = {
       ...currentState,
