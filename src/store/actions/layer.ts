@@ -7346,7 +7346,7 @@ export const updateEventsFrame = (state: RootState): void => {
       const tweenEventDestinationIndicator = new paperMain.Path.RegularPolygon({
         center: new paperMain.Point(destination.frame.x, artboardTopTop - (48 / paperMain.view.zoom)),
         sides: 3,
-        radius: 5 / paperMain.view.zoom,
+        radius: 4 / paperMain.view.zoom,
         fillColor: elementColor,
         insert: false,
         rotation: leftToRight ? 90 : -90,
@@ -7441,6 +7441,7 @@ export const updateEventsFrame = (state: RootState): void => {
         }
       });
       tweenEventIcon.fitBounds(tweenEventOriginIndicator.bounds);
+      tweenEventDestinationIndicator.bounds.center.y = tweenEventOriginIndicator.bounds.center.y;
       const tweenEventConnector = new paperMain.Path.Line({
         from: tweenEventOriginIndicator.bounds.center,
         to: tweenEventDestinationIndicator.bounds.center,
@@ -7492,7 +7493,7 @@ export const updateEventsFrame = (state: RootState): void => {
         fillColor: isSelected && !editingEvent ? theme.palette.primary : tinyColor(theme.background.z0).setAlpha(0.01).toRgbString(),
         strokeColor: !state.eventDrawer.event && state.eventDrawer.eventHover === event.id ? theme.palette.primary : null,
         strokeWidth: 1 / paperMain.view.zoom,
-        radius: 2 / paperMain.view.zoom,
+        radius: 4 / paperMain.view.zoom,
         parent: eventFrame,
         data: {
           type: 'UIElementChild',
