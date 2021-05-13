@@ -2,7 +2,7 @@
   "name": "btwx",
   "productName": "btwx",
   "version": "1.0.0",
-  "description": "Product Designer prototyping tool",
+  "description": "Product Designer animation and prototyping tool",
   "main": "./main.prod.js",
   "author": {
     "name": "Erik Myers",
