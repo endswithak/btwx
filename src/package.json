@@ -1,7 +1,7 @@
 {
   "name": "btwx",
   "productName": "btwx",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Product Designer animation and prototyping tool",
   "main": "./main.prod.js",
   "author": {
