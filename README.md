@@ -27,7 +27,7 @@ Product Designer animation and prototyping tool.
 
 ## Getting Started
 
-- [Download btwx](../../releases/v1.0.1-beta/download/btwx-v1.0.1-beta.zip)
+- [Download btwx](../../releases/v1.0.1-beta)
 - Open btwx
 - Add two or more artboards with child layers of the same name and type
 - Add event listeners to child layers
