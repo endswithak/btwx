@@ -22,7 +22,7 @@ Product Designer animation and prototyping tool.
 - Screen recording
 - Auto save
 - Light and dark themes
-- Sketch plugin support
+- Sketch support - [Plugin](https://github.com/endswithak/btwx-sketch-plugin)
 - Custom key bindings
 
 ## Getting Started
