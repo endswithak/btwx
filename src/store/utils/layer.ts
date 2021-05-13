@@ -11431,7 +11431,7 @@ export const replaceImage = (state: LayerState, action: ReplaceImage): LayerStat
       } as Btwx.Image
     }
   }
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['image']);
+  // currentState = updateLayerTweensByProps(currentState, action.payload.id, ['image']);
   return currentState;
 };
 

@@ -110,7 +110,7 @@ export const CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER = 20;
 export const CUSTOM_WIGGLE_TWEEN_STRENGTH_COLOR = { h: 0, s: 0, l: 0, a: 1 };
 
 export const CUSTOM_WIGGLE_TWEEN_STRENGTH_MAP: { [id: string]: number | Btwx.Color | string } = {
-  image: null,
+  // image: null,
   shape: null,
   fill: CUSTOM_WIGGLE_TWEEN_STRENGTH_COLOR,
   fillGradientOriginX: 5,

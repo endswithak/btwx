@@ -278,58 +278,58 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     }
   };
 
-  const addImageTween = (): void => {
-    eventTimeline.data[tween.layer][`${tween.prop}-before`] = 1;
-    eventTimeline.data[tween.layer][`${tween.prop}-after`] = 0;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
-      id: tweenId,
-      duration: tween.duration,
-      repeat: tween.repeat,
-      yoyo: tween.yoyo,
-      [`${tween.prop}-before`]: 0,
-      [`${tween.prop}-after`]: 1,
-      onStart: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
-        const currentProps = getCurrentTweenLayerProps();
-        const startPosition = paperLayer.position;
-        clearLayerTransforms({
-          paperLayer,
-          layerType: originLayerItem.type,
-          transform: {
-            rotation: currentProps.rotation,
-            horizontalFlip: currentProps.scaleX,
-            verticalFlip: currentProps.scaleY
-          } as any,
-          variable: true,
-          width: currentProps.boundingWidth,
-          height: currentProps.boundingHeight
-        });
-        const beforeRaster = paperLayer.getItem({data: {id: 'imageRaster'}}) as paper.Raster;
-        const afterRaster = beforeRaster.clone() as paper.Raster;
-        afterRaster.source = (paperPreview.project.getItem({data:{id: tween.destinationLayer}}).children[0] as paper.Raster).source;
-        afterRaster.bounds = beforeRaster.bounds;
-        afterRaster.opacity = 0;
-        applyLayerTransforms({
-          paperLayer,
-          transform: {
-            rotation: currentProps.rotation,
-            horizontalFlip: currentProps.scaleX,
-            verticalFlip: currentProps.scaleY
-          } as any,
-          variable: true
-        });
-        paperLayer.position = startPosition;
-      },
-      onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
-        const beforeRaster = paperLayer.children[0];
-        const afterRaster = paperLayer.children[1];
-        beforeRaster.opacity = eventTimeline.data[tween.layer][`${tween.prop}-before`];
-        afterRaster.opacity = eventTimeline.data[tween.layer][`${tween.prop}-after`];
-      },
-      ease: getEaseString(tween),
-    }, tween.delay);
-  };
+  // const addImageTween = (): void => {
+  //   eventTimeline.data[tween.layer][`${tween.prop}-before`] = 1;
+  //   eventTimeline.data[tween.layer][`${tween.prop}-after`] = 0;
+  //   eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+  //     id: tweenId,
+  //     duration: tween.duration,
+  //     repeat: tween.repeat,
+  //     yoyo: tween.yoyo,
+  //     [`${tween.prop}-before`]: 0,
+  //     [`${tween.prop}-after`]: 1,
+  //     onStart: () => {
+  //       const { paperLayer, fillRef, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+  //       const currentProps = getCurrentTweenLayerProps();
+  //       const startPosition = paperLayer.position;
+  //       clearLayerTransforms({
+  //         paperLayer,
+  //         layerType: originLayerItem.type,
+  //         transform: {
+  //           rotation: currentProps.rotation,
+  //           horizontalFlip: currentProps.scaleX,
+  //           verticalFlip: currentProps.scaleY
+  //         } as any,
+  //         variable: true,
+  //         width: currentProps.boundingWidth,
+  //         height: currentProps.boundingHeight
+  //       });
+  //       const originRaster = fillRef;
+  //       const destinationRaster = originRaster.clone() as paper.Raster;
+  //       destinationRaster.source = (paperPreview.project.getItem({data: {id: tween.destinationLayer}}).children[0] as paper.Raster).source;
+  //       destinationRaster.bounds = originRaster.bounds;
+  //       destinationRaster.opacity = 0;
+  //       applyLayerTransforms({
+  //         paperLayer,
+  //         transform: {
+  //           rotation: currentProps.rotation,
+  //           horizontalFlip: currentProps.scaleX,
+  //           verticalFlip: currentProps.scaleY
+  //         } as any,
+  //         variable: true
+  //       });
+  //       paperLayer.position = startPosition;
+  //     },
+  //     onUpdate: () => {
+  //       const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
+  //       const beforeRaster = paperLayer.children[0];
+  //       const afterRaster = paperLayer.children[1];
+  //       beforeRaster.opacity = eventTimeline.data[tween.layer][`${tween.prop}-before`];
+  //       afterRaster.opacity = eventTimeline.data[tween.layer][`${tween.prop}-after`];
+  //     },
+  //     ease: getEaseString(tween),
+  //   }, tween.delay);
+  // };
 
   const addShapeTween = (): void => {
     const originWithoutRotation = new paperPreview.Path({

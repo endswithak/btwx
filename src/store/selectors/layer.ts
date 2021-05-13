@@ -3509,9 +3509,9 @@ export const getPositionInArtboard = (layer: Btwx.Layer, artboard: Btwx.Artboard
   return new paper.Point(parseInt(xDiff.toFixed(2)), parseInt(yDiff.toFixed(2)));
 };
 
-export const hasImageTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  return layerItem.type === 'Image' && (layerItem as Btwx.Image).imageId !== (equivalentLayerItem as Btwx.Image).imageId;
-};
+// export const hasImageTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+//   return layerItem.type === 'Image' && (layerItem as Btwx.Image).imageId !== (equivalentLayerItem as Btwx.Image).imageId;
+// };
 
 export const hasShapeTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const validType = layerItem.type === 'Shape';
@@ -3779,8 +3779,8 @@ export const hasScaleYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.
 
 export const getEquivalentTweenProp = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer, prop: Btwx.TweenProp): boolean => {
   switch(prop) {
-    case 'image':
-      return hasImageTween(layerItem, equivalentLayerItem);
+    // case 'image':
+    //   return hasImageTween(layerItem, equivalentLayerItem);
     case 'shape':
       return hasShapeTween(layerItem, equivalentLayerItem);
     case 'fill':
@@ -3851,7 +3851,7 @@ export const getEquivalentTweenProp = (layerItem: Btwx.Layer, equivalentLayerIte
 };
 
 export const getEquivalentTweenProps = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): Btwx.TweenPropMap => ({
-  image: hasImageTween(layerItem, equivalentLayerItem),
+  // image: hasImageTween(layerItem, equivalentLayerItem),
   shape: hasShapeTween(layerItem, equivalentLayerItem),
   fill: hasFillTween(layerItem, equivalentLayerItem),
   fillGradientOriginX: hasFillGradientOriginXTween(layerItem, equivalentLayerItem),

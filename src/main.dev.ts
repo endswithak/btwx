@@ -1970,7 +1970,7 @@ ipcMain.handle('maximizeDocument', (event, args) => {
   instance.document.maximize();
 });
 
-ipcMain.handle('setDocumentRepresentedFilename', (event, args) => {
+ipcMain.on('setDocumentRepresentedFilename', (event, args) => {
   const { instanceId, documentPath } = JSON.parse(args);
   const instance = btwxElectron.instance.byId[instanceId];
   if (process.platform === 'darwin') {
