@@ -380,12 +380,30 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           width: currentProps.boundingWidth,
           height: currentProps.boundingHeight
         });
+        if (shapeMask) {
+          clearLayerTransforms({
+            paperLayer: shapeMask,
+            layerType: originLayerItem.type,
+            transform: {
+              rotation: currentProps.rotation,
+              horizontalFlip: currentProps.scaleX,
+              verticalFlip: currentProps.scaleY
+            } as any,
+            variable: true,
+            width: currentProps.boundingWidth,
+            height: currentProps.boundingHeight
+          });
+        }
         (paperLayer as paper.Path).pathData = currentProps.shape;
         if (shapeMask) {
           (shapeMask as paper.Path).pathData = currentProps.shape;
         }
         paperLayer.bounds.width = currentProps.width;
         paperLayer.bounds.height = currentProps.height;
+        if (shapeMask) {
+          (shapeMask as paper.Path).bounds.width = currentProps.width;
+          (shapeMask as paper.Path).bounds.height = currentProps.height;
+        }
         paperLayer.rotation = currentProps.rotation;
         eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
         eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
@@ -399,7 +417,21 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           } as any,
           variable: true
         });
+        if (shapeMask) {
+          applyLayerTransforms({
+            paperLayer: shapeMask,
+            transform: {
+              rotation: currentProps.rotation,
+              horizontalFlip: currentProps.scaleX,
+              verticalFlip: currentProps.scaleY
+            } as any,
+            variable: true
+          });
+        }
         paperLayer.position = startPosition;
+        if (shapeMask) {
+          shapeMask.position = startPosition;
+        }
         // update fill gradient origin/destination if needed
         updateGradientsOD({ paperLayer, fillRef });
       },
@@ -2088,9 +2120,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
 
   const addTween = () => {
     switch(tween.prop) {
-      case 'image':
-        addImageTween();
-        break;
+      // case 'image':
+      //   addImageTween();
+      //   break;
       case 'shape':
         addShapeTween();
         break;

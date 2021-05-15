@@ -3518,6 +3518,7 @@ export const hasShapeTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.L
   const bothLines = validType && (layerItem as Btwx.Shape).shapeType === 'Line' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
   const bothPolygons = validType && (layerItem as Btwx.Shape).shapeType === 'Polygon' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Polygon';
   const bothStars = validType && (layerItem as Btwx.Shape).shapeType === 'Star' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Star';
+  const bothCustom = validType && (layerItem as Btwx.Shape).shapeType === 'Custom' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Custom';
   if (bothLines) {
     return false;
   } else if (validType && (layerItem as Btwx.Shape).shapeType !== (equivalentLayerItem as Btwx.Shape).shapeType) {
@@ -3525,6 +3526,8 @@ export const hasShapeTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.L
   } else if (bothStars && (((layerItem as Btwx.Star).points !== (equivalentLayerItem as Btwx.Star).points) || ((layerItem as Btwx.Star).radius !== (equivalentLayerItem as Btwx.Star).radius))) {
     return true;
   } else if (bothPolygons && (layerItem as Btwx.Polygon).sides !== (equivalentLayerItem as Btwx.Polygon).sides) {
+    return true;
+  } else if (bothCustom) {
     return true;
   } else {
     return false;
