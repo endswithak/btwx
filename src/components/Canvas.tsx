@@ -219,34 +219,31 @@ const Canvas = (): ReactElement => {
       onContextMenu={ready ? handleContextMenu : null}
       onWheel={ready ? handleWheel : null}
       style={{
-        cursor: waiting
-        ? 'wait'
-        // : cursor[0]
-        : cursor[0] === 'crosshair'
-          ? (() => {
-              switch(activeTool) {
-                case 'Shape':
-                  switch(shapeToolType) {
-                    case 'Rectangle':
-                      return `url(${insertRectangleCursor}) 17 17, auto`;
-                    case 'Ellipse':
-                      return `url(${insertEllipseCursor}) 17 17, auto`;
-                    case 'Polygon':
-                      return `url(${insertPolygonCursor}) 17 17, auto`;
-                    case 'Rounded':
-                      return `url(${insertRoundedCursor}) 17 17, auto`;
-                    case 'Star':
-                      return `url(${insertStarCursor}) 17 17, auto`;
-                    case 'Line':
-                      return `url(${insertLineCursor}) 17 17, auto`;
-                    default:
-                      return `url(${insertCursor}) 17 17, auto`;
-                  }
-                default:
-                  return `url(${insertCursor}) 17 17, auto`;
-              }
-            })()
-          : cursor[0]
+        cursor: cursor[0] === 'crosshair'
+        ? (() => {
+            switch(activeTool) {
+              case 'Shape':
+                switch(shapeToolType) {
+                  case 'Rectangle':
+                    return `url(${insertRectangleCursor}) 17 17, auto`;
+                  case 'Ellipse':
+                    return `url(${insertEllipseCursor}) 17 17, auto`;
+                  case 'Polygon':
+                    return `url(${insertPolygonCursor}) 17 17, auto`;
+                  case 'Rounded':
+                    return `url(${insertRoundedCursor}) 17 17, auto`;
+                  case 'Star':
+                    return `url(${insertStarCursor}) 17 17, auto`;
+                  case 'Line':
+                    return `url(${insertLineCursor}) 17 17, auto`;
+                  default:
+                    return `url(${insertCursor}) 17 17, auto`;
+                }
+              default:
+                return `url(${insertCursor}) 17 17, auto`;
+            }
+          })()
+        : cursor[0]
       }}>
       <CanvasUI />
       <CanvasProjects />

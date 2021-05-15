@@ -2024,7 +2024,7 @@ export const getWiggleLayersSelector = createSelector(
     const destinationChildren = getLayerDescendants({byId: layersById} as any, event.destinationArtboard);
     return originChildren.reduce((result, current) => {
       const destinationEquivalent = getDestinationEquivalent({byId: layersById} as any, current, destinationChildren);
-      if (destinationEquivalent) {
+      if (destinationEquivalent && destinationEquivalent.type !== 'Group') {
         const currentLayerItem = layersById[current];
         const equivalentLayerItem = layersById[destinationEquivalent.id];
         const equivalentTweenProps = getEquivalentTweenProps(currentLayerItem, equivalentLayerItem);

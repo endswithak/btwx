@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setLayerHover, deselectLayerEventTweens } from '../store/actions/layer';
 import EventDrawerEventTimelineTweens from './EventDrawerEventTimelineTweens';
+import EventDrawerEventTimelineClickZone from './EventDrawerEventTimelineClickZone';
 
 interface EventDrawerEventTimelineProps {
   id: string;
@@ -26,27 +27,10 @@ const EventDrawerEventTimeline = (props: EventDrawerEventTimelineProps): ReactEl
       // onMouseEnter={handleMouseEnter}
       // onMouseLeave={handleMouseLeave}
       >
-      <SpacerTimeline />
+      <EventDrawerEventTimelineClickZone />
       <EventDrawerEventTimelineTweens
         layerId={id} />
     </div>
-  );
-}
-
-const SpacerTimeline = (): ReactElement => {
-  const selected = useSelector((state: RootState) => state.layer.present.tweens.selected.allIds);
-  const dispatch = useDispatch();
-
-  const handleMouseDown = (e) => {
-    if (selected.length > 0 && !e.metaKey) {
-      dispatch(deselectLayerEventTweens({tweens: selected}));
-    }
-  }
-
-  return (
-    <div
-      className='c-event-drawer-event-layer__tween-timeline'
-      onMouseDown={handleMouseDown} />
   );
 }
 
