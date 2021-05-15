@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+import { ipcRenderer } from 'electron';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { pasteLayersThunk } from '../store/actions/layer';
-// import { setCanvasWaiting } from '../store/actions/canvasSettings';
+import { setCanvasWaiting } from '../store/actions/canvasSettings';
 
 export const MENU_ITEM_ID = 'editPaste';
 
@@ -14,6 +15,7 @@ interface MenuEditPasteLayersProps {
 const MenuEditPasteLayers = (props: MenuEditPasteLayersProps): ReactElement => {
   const { setPasteLayers } = props;
   const [menuItemTemplate, setMenuItemTemplate] = useState<any>(null);
+  const instanceId = useSelector((state: RootState) => state.session.instance);
   const accelerator = useSelector((state: RootState) => state.keyBindings.edit.paste.paste);
   const isEnabled = useSelector((state: RootState) =>
     !state.canvasSettings.dragging &&
@@ -33,8 +35,11 @@ const MenuEditPasteLayers = (props: MenuEditPasteLayersProps): ReactElement => {
       }
     });
     (window as any)[MENU_ITEM_ID] = () => {
-      // dispatch(setCanvasWaiting({waiting: true}));
-      dispatch(pasteLayersThunk({}));
+      ipcRenderer.invoke('initPastingLayers', JSON.stringify({instanceId})).then(() => {
+        return dispatch(pasteLayersThunk({}));
+      }).then(() => {
+        dispatch(setCanvasWaiting({waiting: false}));
+      });
     }
   }, []);
 

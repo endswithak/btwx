@@ -19,6 +19,7 @@ import { KeyBindingsState } from './reducers/keyBindings';
 import { PreferencesState } from './reducers/preferences';
 import { ArtboardPresetsState } from './reducers/artboardPresets';
 import { hydrateDocumentThunk, saveDocumentAs, saveDocument } from './actions/documentSettings';
+import { setCanvasWaiting } from './actions/canvasSettings';
 import { hydrateSessionImages } from './actions/session';
 import { HydrateDocumentPayload, SaveDocumentAsPayload, SaveDocumentPayload } from './actionTypes/documentSettings';
 import { LayerState } from './reducers/layer';
@@ -236,6 +237,12 @@ const configureStore: any = (preloadedState, isDocumentWindow = false): typeof s
   };
   (window as any).setLayersEventEventListener = (params): void => {
     store.dispatch(setLayersEventEventListener(params) as any);
+  };
+  (window as any).enableCanvasWaiting = (): void => {
+    store.dispatch(setCanvasWaiting({waiting: true}) as any);
+  };
+  (window as any).disableCanvasWaiting = (): void => {
+    store.dispatch(setCanvasWaiting({waiting: false}) as any);
   };
   return store;
 }

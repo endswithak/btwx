@@ -20,6 +20,7 @@ import TextTool from './TextTool';
 import GradientTool from './GradientTool';
 import CanvasUI from './CanvasUI';
 import CanvasProjects from './CanvasProjects';
+import LoadingIndicator from './LoadingIndicator';
 import insertCursor from '../../assets/cursor/insert.svg';
 import insertRectangleCursor from '../../assets/cursor/insert-rectangle.svg';
 import insertRoundedCursor from '../../assets/cursor/insert-rounded.svg';
@@ -280,6 +281,13 @@ const Canvas = (): ReactElement => {
               : null
             }
           </>
+        : null
+      }
+      {
+        waiting
+        ? <div className='c-canvas__loading-indicaor'>
+            <LoadingIndicator />
+          </div>
         : null
       }
     </div>

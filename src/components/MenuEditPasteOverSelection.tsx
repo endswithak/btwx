@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+import { ipcRenderer } from 'electron';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { pasteLayersThunk } from '../store/actions/layer';
+import { setCanvasWaiting } from '../store/actions/canvasSettings';
 
 export const MENU_ITEM_ID = 'editPasteOverSelection';
 
@@ -13,6 +15,7 @@ interface MenuEditPasteOverSelectionProps {
 const MenuEditPasteOverSelection = (props: MenuEditPasteOverSelectionProps): ReactElement => {
   const { setPasteOverSelection } = props;
   const [menuItemTemplate, setMenuItemTemplate] = useState<any>(null);
+  const instanceId = useSelector((state: RootState) => state.session.instance);
   const accelerator = useSelector((state: RootState) => state.keyBindings.edit.paste.overSelection);
   const isEnabled = useSelector((state: RootState) =>
     state.layer.present.selected.length > 0 &&
@@ -33,7 +36,11 @@ const MenuEditPasteOverSelection = (props: MenuEditPasteOverSelectionProps): Rea
       }
     });
     (window as any)[MENU_ITEM_ID] = () => {
-      dispatch(pasteLayersThunk({overSelection: true}));
+      ipcRenderer.invoke('initPastingLayers', JSON.stringify({instanceId})).then(() => {
+        return dispatch(pasteLayersThunk({overSelection: true}));
+      }).then(() => {
+        dispatch(setCanvasWaiting({waiting: false}));
+      });
     }
   }, []);
 

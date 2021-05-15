@@ -1919,6 +1919,21 @@ ipcMain.on('unStickPreview', (event, args) => {
   preview.setParentWindow(null);
 });
 
+ipcMain.handle('initPastingLayers', (event, args) => {
+  return new Promise((resolve, reject) => {
+    const { instanceId } = JSON.parse(args);
+    const instance = btwxElectron.instance.byId[instanceId];
+    const appMenu = Menu.getApplicationMenu();
+    if (appMenu.getMenuItemById('editPaste')) {
+      appMenu.getMenuItemById('editPaste').enabled = false;
+      appMenu.getMenuItemById('editPasteOverSelection').enabled = false;
+    }
+    instance.document.webContents.executeJavaScript(`enableCanvasWaiting()`).then(() => {
+      resolve(null);
+    });
+  });
+});
+
 ipcMain.handle('initPasteWithoutArtboardAlert', (event, args) => {
   return new Promise((resolve, reject) => {
     const { instanceId } = JSON.parse(args);

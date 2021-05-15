@@ -42,3 +42,15 @@
     outline: none;
   }
 }
+
+.c-canvas__loading-indicaor {
+  @include themed() {
+    background: theme-prop(glass-background);
+    box-shadow: 0 0 0 1px theme-prop(modal-border), $glass-shadow;
+  }
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  z-index: 99999999999;
+  border-radius: $border-radius;
+}

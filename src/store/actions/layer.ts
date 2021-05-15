@@ -6236,23 +6236,33 @@ export const pasteLayersThunk = (props?: { overSelection?: boolean; overPoint?: 
                       })
                     ]
                   });
+                  const initialLineAnchor = textItem.lines[0].anchor;
+                  const absAnchor = new paperMain.Point(initialLineAnchor.x, initialLineAnchor.y).add(artboardPosition);
+                  const textContent = textContainer.getItem({data:{id:'textContent'}}) as paper.PointText;
                   positionTextContent({
                     paperLayer: textContainer,
                     verticalAlignment: textItem.textStyle.verticalAlignment,
                     justification: textItem.textStyle.justification,
                     textResize: textItem.textStyle.textResize
                   });
+                  const pointYDiff = textContent.point.y - absAnchor.y;
+                  textContainer.position.y -= pointYDiff;
                   applyLayerTransforms({
                     paperLayer: textContainer,
                     transform: textItem.transform
                   });
-                  const pointWithTransforms = (textContainer.getItem({data:{id:'textContent'}}) as paper.PointText).point.subtract(artboardPosition);
+                  const pointWithTransforms = textContent.point.subtract(artboardPosition);
+                  const positionWithTransforms = textContainer.position.subtract(artboardPosition);
                   return {
                     ...result,
                     byId: {
                       ...result.byId,
                       [current]: {
                         ...result.byId[current],
+                        frame: {
+                          ...result.byId[current].frame,
+                          y: positionWithTransforms.y
+                        },
                         point: {
                           x: pointWithTransforms.x,
                           y: pointWithTransforms.y
@@ -6263,19 +6273,12 @@ export const pasteLayersThunk = (props?: { overSelection?: boolean; overPoint?: 
                 }, clipboardLayers);
                 // same goes for shape icons
                 clipboardLayers = clipboardLayers.allShapeIds.reduce((result, current) => {
-                  const icon = new paperMain.CompoundPath({
-                    pathData: (clipboardLayers.byId[current] as Btwx.Shape).pathData,
-                    insert: false
-                  })
-                  icon.fitBounds(new paperMain.Rectangle({
-                    point: new paperMain.Point(0,0),
-                    size: new paperMain.Size(24,24)
-                  }));
+                  const iconData = getShapeIcon((clipboardLayers.byId[current] as Btwx.Shape).pathData);
                   return {
                     ...result,
                     shapeIcons: {
                       ...result.shapeIcons,
-                      [current]: icon.pathData
+                      [current]: iconData
                     }
                   }
                 }, clipboardLayers);
