@@ -1512,8 +1512,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : (destinationLayerItem.style.blur.enabled ? destinationLayerItem.style.blur.radius : 0),
       onUpdate: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
-        paperLayer.style.blur = eventTimeline.data[tween.layer][tween.prop];
+        const { paperLayer, artboardBackground, textContent, textBackground, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
+        fillRef.style.blur = eventTimeline.data[tween.layer][tween.prop];
       },
       ease: getEaseString(tween),
     }, tween.delay);

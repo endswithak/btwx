@@ -139,6 +139,9 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
           raster.shadowBlur = layerItem.style.shadow.blur;
           raster.shadowOffset = new paperMain.Point(layerItem.style.shadow.offset.x, layerItem.style.shadow.offset.y);
         }
+        if (layerItem.style.blur.enabled) {
+          raster.style.blur = layerItem.style.blur.radius;
+        }
         raster.visible = true;
         applyLayerTransforms({
           paperLayer: imageContainer,
@@ -193,14 +196,17 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
         newRaster.bounds.height = layerItem.frame.innerHeight;
         newRaster.position = imageAbsPosition;
         if (layerItem.style.shadow.enabled) {
-          raster.shadowColor = {
+          newRaster.shadowColor = {
             hue: layerItem.style.shadow.color.h,
             saturation: layerItem.style.shadow.color.s,
             lightness: layerItem.style.shadow.color.l,
             alpha: layerItem.style.shadow.color.a
           } as paper.Color;
-          raster.shadowBlur = layerItem.style.shadow.blur;
-          raster.shadowOffset = new paperMain.Point(layerItem.style.shadow.offset.x, layerItem.style.shadow.offset.y);
+          newRaster.shadowBlur = layerItem.style.shadow.blur;
+          newRaster.shadowOffset = new paperMain.Point(layerItem.style.shadow.offset.x, layerItem.style.shadow.offset.y);
+        }
+        if (layerItem.style.blur.enabled) {
+          newRaster.style.blur = layerItem.style.blur.radius;
         }
         applyLayerTransforms({
           paperLayer: newRaster,
@@ -369,20 +375,20 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
 
   useEffect(() => {
     if (rendered) {
-      const paperLayer = paperProject.getItem({ data: { id } });
+      const { raster } = getPaperLayer();
       if (layerItem.style.blur.enabled) {
-        paperLayer.style.blur = layerItem.style.blur.radius;
+        raster.style.blur = layerItem.style.blur.radius;
       } else {
-        paperLayer.style.blur = null;
+        raster.style.blur = null;
       }
     }
   }, [layerItem.style.blur.enabled]);
 
   useEffect(() => {
     if (rendered) {
+      const { raster } = getPaperLayer();
       if (layerItem.style.blur.enabled) {
-        const paperLayer = paperProject.getItem({ data: { id } });
-        paperLayer.style.blur = layerItem.style.blur.radius;
+        raster.style.blur = layerItem.style.blur.radius;
       }
     }
   }, [layerItem.style.blur.radius]);
