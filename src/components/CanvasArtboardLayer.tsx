@@ -1,19 +1,31 @@
-import React, { ReactElement, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { ipcRenderer } from 'electron';
+import { gsap } from 'gsap';
+import React, { ReactElement, useEffect, useState, useMemo } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
+import { setPreviewTweening } from '../store/actions/preview';
+import { setActiveArtboard } from '../store/actions/layer';
+import { getEventsByOriginArtboard } from '../store/selectors/layer';
 import { getPaperFillColor } from '../store/utils/paper';
+import { applyLayerTimelines } from '../utils';
 import { paperMain, paperPreview } from '../canvas';
 import CanvasLayer from './CanvasLayer';
-import CanvasPreviewLayerEvent from './CanvasPreviewLayerEvent';
+import CanvasPreviewEventLayerTimeline from './CanvasPreviewEventLayerTimeline';
 
 interface CanvasArtboardLayerProps {
   id: string;
   paperScope: Btwx.PaperScope;
 }
 
+const getOriginEventsSelector = () => getEventsByOriginArtboard;
+
 const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
   const { id, paperScope } = props;
+  const originEventsSelector = useMemo(getOriginEventsSelector, []);
+  const electronInstanceId = useSelector((state: RootState) => state.session.instance);
   const layerItem: Btwx.Artboard = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Artboard);
+  const originEvents = useSelector((state: RootState) => originEventsSelector(state, id));
+  const eventsById = useSelector((state: RootState) => state.layer.present.events.byId);
   const projectIndex: number = useSelector((state: RootState) => state.layer.present.byId[id] ? (state.layer.present.byId[id] as Btwx.Artboard).projectIndex : null);
   const project = paperScope === 'main' ? projectIndex ? paperMain.projects[projectIndex] : null : paperPreview.project;
   const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
@@ -21,6 +33,9 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
   const [rendered, setRendered] = useState<boolean>(false);
   // const [prevTweening, setPrevTweening] = useState(tweening);
   // const [eventInstance, setEventInstance] = useState(0);
+  const [eventTimelines, setEventTimelines] = useState(null);
+  const [layerTimelines, setLayerTimelines] = useState(null);
+  const dispatch = useDispatch();
 
   ///////////////////////////////////////////////////////
   // HELPER FUNCTIONS
@@ -161,46 +176,6 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
   }, []);
 
   ///////////////////////////////////////////////////////
-  // TWEENING
-  ///////////////////////////////////////////////////////
-
-  // useEffect(() => {
-  //   if (paperScope === 'preview') {
-  //     if (!tweening && prevTweening) {
-  //       const { paperLayer, background } = getPaperLayer();
-  //       paperLayer.data = {
-  //         id,
-  //         type: 'Layer',
-  //         layerType: 'Artboard',
-  //         scope: ['root'],
-  //         layerId: id
-  //       };
-  //       background.replaceWith(new paperLayerScope.Path.Rectangle({
-  //         name: 'Artboard Background',
-  //         rectangle: background.bounds,
-  //         data: {
-  //           id: 'artboardBackground',
-  //           type: 'LayerChild',
-  //           layerType: 'Artboard',
-  //           layerId: id
-  //         },
-  //         fillColor: getPaperFillColor({
-  //           fill: layerItem.style.fill,
-  //           isLine: false,
-  //           layerFrame: layerItem.frame,
-  //           artboardFrame: null
-  //         }),
-  //         shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.20 },
-  //         shadowOffset: new paperLayerScope.Point(0, 2),
-  //         shadowBlur: 10
-  //       }));
-  //       setEventInstance(eventInstance + 1);
-  //     }
-  //     setPrevTweening(tweening);
-  //   }
-  // }, [tweening]);
-
-  ///////////////////////////////////////////////////////
   // FRAME
   ///////////////////////////////////////////////////////
 
@@ -255,6 +230,80 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
   }, [layerItem.style.fill]);
 
   ///////////////////////////////////////////////////////
+  // EVENT TIMELINES
+  ///////////////////////////////////////////////////////
+
+  const buildTimeline = (eventId) => {
+    const eventItem = eventsById.byId[eventId];
+    return gsap.timeline({
+      id: eventId,
+      paused: true,
+      // onStart: function() {
+      //   dispatch(setPreviewTweening({
+      //     tweening: eventItem.artboard
+      //   }));
+      //   ipcRenderer.send('setDocumentPreviewTweening', JSON.stringify({
+      //     instanceId: electronInstanceId,
+      //     tweening: eventItem.artboard
+      //   }));
+      // },
+      // onUpdate: function() {
+      //   ipcRenderer.send('setDocumentTimelineGuidePosition', JSON.stringify({
+      //     instanceId: electronInstanceId,
+      //     time: this.time()
+      //   }));
+      // },
+      onComplete: function() {
+        dispatch(setActiveArtboard({
+          id: eventItem.destinationArtboard
+        }));
+        dispatch(setPreviewTweening({
+          tweening: null
+        }));
+        ipcRenderer.send('setDocumentActiveArtboard', JSON.stringify({
+          instanceId: electronInstanceId,
+          activeArtboard: eventItem.destinationArtboard
+        }));
+        ipcRenderer.send('setDocumentPreviewTweening', JSON.stringify({
+          instanceId: electronInstanceId,
+          tweening: null
+        }));
+        this.pause(0, false);
+      }
+    });
+  }
+
+  useEffect(() => {
+    if (rendered && paperScope === 'preview') {
+      if (layerItem.originArtboardForEvents.length > 0) {
+        setEventTimelines(layerItem.originArtboardForEvents.reduce((result, current) => ({
+          ...result,
+          [current]: buildTimeline(current)
+        }), {} as { [id: string]: GSAPTimeline }));
+      } else {
+        setEventTimelines(null);
+      }
+    }
+  }, [layerItem.originArtboardForEvents]);
+
+  ///////////////////////////////////////////////////////
+  // EVENTS
+  ///////////////////////////////////////////////////////
+
+  useEffect(() => {
+    if (rendered && eventTimelines) {
+      const { paperLayer } = getPaperLayer();
+      const newLayerTimelines = applyLayerTimelines({
+        paperLayer,
+        eventTimelines,
+        eventsById,
+        layerItem
+      });
+      setLayerTimelines(newLayerTimelines);
+    }
+  }, [eventTimelines]);
+
+  ///////////////////////////////////////////////////////
   // CHILDREN & EVENTS
   ///////////////////////////////////////////////////////
 
@@ -268,16 +317,21 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
                 <CanvasLayer
                   key={childId}
                   id={childId}
-                  paperScope={paperScope} />
+                  paperScope={paperScope}
+                  eventTimelines={eventTimelines} />
               ))
             : null
           }
           {
-            layerItem.events.map((eventId) => (
-              <CanvasPreviewLayerEvent
-                key={eventId}
-                eventId={eventId} />
-            ))
+            layerTimelines
+            ? Object.keys(layerTimelines).map((eventId) => (
+                <CanvasPreviewEventLayerTimeline
+                  key={eventId}
+                  id={id}
+                  eventId={eventId}
+                  layerTimeline={layerTimelines[eventId]} />
+              ))
+            : null
           }
         </>
       : null

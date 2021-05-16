@@ -9,10 +9,13 @@ import CanvasLayer from './CanvasLayer';
 interface CanvasGroupLayerProps {
   id: string;
   paperScope: Btwx.PaperScope;
+  eventTimelines?: {
+    [id: string]: GSAPTimeline;
+  }
 }
 
 const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
-  const { id, paperScope } = props;
+  const { id, paperScope, eventTimelines } = props;
   const layerItem: Btwx.Group = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Group);
   const parentItem: Btwx.Artboard | Btwx.Group = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.parent] as Btwx.Artboard | Btwx.Group : null);
   const artboardItem: Btwx.Artboard = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null);
@@ -139,7 +142,8 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
             <CanvasLayer
               key={childId}
               id={childId}
-              paperScope={paperScope} />
+              paperScope={paperScope}
+              eventTimelines={eventTimelines} />
           ))
         }
       </>

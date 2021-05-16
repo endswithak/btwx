@@ -2622,7 +2622,8 @@ export const setLayerTweenDuration = (state: LayerState, action: SetLayerTweenDu
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Tween Duration',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -2641,7 +2642,8 @@ export const setLayersTweenDuration = (state: LayerState, action: SetLayersTween
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Tween Duration',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -2667,7 +2669,8 @@ export const setLayerTweenRepeat = (state: LayerState, action: SetLayerTweenRepe
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Tween Repeat',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -2686,7 +2689,8 @@ export const setLayersTweenRepeat = (state: LayerState, action: SetLayersTweenRe
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Tween Repeat',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -2712,7 +2716,8 @@ export const setLayerTweenRepeatDelay = (state: LayerState, action: SetLayerTwee
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Tween Repeat Delay',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -2731,7 +2736,8 @@ export const setLayersTweenRepeatDelay = (state: LayerState, action: SetLayersTw
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Tween Repeat Delay',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -2757,7 +2763,8 @@ export const setLayerTweenYoyo = (state: LayerState, action: SetLayerTweenYoyo):
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Tween YoYo',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -2776,7 +2783,8 @@ export const setLayersTweenYoyo = (state: LayerState, action: SetLayersTweenYoyo
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Tween YoYo',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -2802,7 +2810,8 @@ export const setLayerTweenYoyoEase = (state: LayerState, action: SetLayerTweenYo
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Tween YoYo Ease',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -2821,7 +2830,8 @@ export const setLayersTweenYoyoEase = (state: LayerState, action: SetLayersTween
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Tween YoYo Ease',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -2847,7 +2857,8 @@ export const setLayerTweenDelay = (state: LayerState, action: SetLayerTweenDelay
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Tween Delay',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -2866,7 +2877,8 @@ export const setLayersTweenDelay = (state: LayerState, action: SetLayersTweenDel
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Tween Delay',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -2903,7 +2915,8 @@ export const setLayersTweenTiming = (state: LayerState, action: SetLayersTweenTi
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Tween Timing',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -2929,7 +2942,8 @@ export const setLayerTweenEase = (state: LayerState, action: SetLayerTweenEase):
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Tween Ease',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -2948,7 +2962,8 @@ export const setLayersTweenEase = (state: LayerState, action: SetLayersTweenEase
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Tween Ease',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -2974,7 +2989,8 @@ export const setLayerTweenPower = (state: LayerState, action: SetLayerTweenPower
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Tween Power',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -2993,7 +3009,8 @@ export const setLayersTweenPower = (state: LayerState, action: SetLayersTweenPow
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Tween Power',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3022,7 +3039,8 @@ export const setLayerStepsTweenSteps = (state: LayerState, action: SetLayerSteps
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Step Tween Steps',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3041,7 +3059,8 @@ export const setLayersStepsTweenSteps = (state: LayerState, action: SetLayersSte
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Tween Steps',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3071,7 +3090,8 @@ export const setLayerRoughTweenClamp = (state: LayerState, action: SetLayerRough
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Rough Tween Clamp',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3091,7 +3111,8 @@ export const setLayersRoughTweenClamp = (state: LayerState, action: SetLayersRou
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Rough Tween Clamp',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3121,7 +3142,8 @@ export const setLayerRoughTweenPoints = (state: LayerState, action: SetLayerRoug
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Rough Tween Points',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3141,7 +3163,8 @@ export const setLayersRoughTweenPoints = (state: LayerState, action: SetLayersRo
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Rough Tween Points',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3171,7 +3194,8 @@ export const setLayerRoughTweenRandomize = (state: LayerState, action: SetLayerR
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Rough Tween Randomize',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3191,7 +3215,8 @@ export const setLayersRoughTweenRandomize = (state: LayerState, action: SetLayer
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Rough Tween Randomize',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3221,7 +3246,8 @@ export const setLayerRoughTweenStrength = (state: LayerState, action: SetLayerRo
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Rough Tween Strength',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3241,7 +3267,8 @@ export const setLayersRoughTweenStrength = (state: LayerState, action: SetLayers
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Rough Tween Strength',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3271,7 +3298,8 @@ export const setLayerRoughTweenTaper = (state: LayerState, action: SetLayerRough
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Rough Tween Taper',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3291,7 +3319,8 @@ export const setLayersRoughTweenTaper = (state: LayerState, action: SetLayersRou
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Rough Tween Taper',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3321,7 +3350,8 @@ export const setLayerRoughTweenTemplate = (state: LayerState, action: SetLayerRo
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Rough Tween Template',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3341,7 +3371,8 @@ export const setLayersRoughTweenTemplate = (state: LayerState, action: SetLayers
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Rough Tween Template',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3370,7 +3401,8 @@ export const setLayerSlowTweenLinearRatio = (state: LayerState, action: SetLayer
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Slow Tween Linear Ratio',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3389,7 +3421,8 @@ export const setLayersSlowTweenLinearRatio = (state: LayerState, action: SetLaye
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Slow Tween Linear Ratio',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3418,7 +3451,8 @@ export const setLayerSlowTweenPower = (state: LayerState, action: SetLayerSlowTw
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Slow Tween Power',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3437,7 +3471,8 @@ export const setLayersSlowTweenPower = (state: LayerState, action: SetLayersSlow
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Slow Tween Power',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3466,7 +3501,8 @@ export const setLayerSlowTweenYoYoMode = (state: LayerState, action: SetLayerSlo
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Slow Tween YoYo Mode',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3485,7 +3521,8 @@ export const setLayersSlowTweenYoYoMode = (state: LayerState, action: SetLayersS
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Slow Tween YoYo Mode',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3514,7 +3551,8 @@ export const setLayerTextTweenDelimiter = (state: LayerState, action: SetLayerTe
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Text Tween Delimiter',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3533,7 +3571,8 @@ export const setLayersTextTweenDelimiter = (state: LayerState, action: SetLayers
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Text Tween Delimiter',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3562,7 +3601,8 @@ export const setLayerTextTweenSpeed = (state: LayerState, action: SetLayerTextTw
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Text Tween Speed',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3581,7 +3621,8 @@ export const setLayersTextTweenSpeed = (state: LayerState, action: SetLayersText
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Text Tween Speed',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3610,7 +3651,8 @@ export const setLayerTextTweenDiff = (state: LayerState, action: SetLayerTextTwe
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Text Tween Diff',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3629,7 +3671,8 @@ export const setLayersTextTweenDiff = (state: LayerState, action: SetLayersTextT
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Text Tween Diff',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3658,7 +3701,8 @@ export const setLayerTextTweenScramble = (state: LayerState, action: SetLayerTex
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Text Tween Scramble',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3677,7 +3721,8 @@ export const setLayersTextTweenScramble = (state: LayerState, action: SetLayersT
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Text Tween Scramble',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3707,7 +3752,8 @@ export const setLayerScrambleTextTweenCharacters = (state: LayerState, action: S
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Scramble Text Tween Characters',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3727,7 +3773,8 @@ export const setLayersScrambleTextTweenCharacters = (state: LayerState, action: 
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Scramble Text Tween Characters',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3756,7 +3803,8 @@ export const setLayerScrambleTextTweenRevealDelay = (state: LayerState, action: 
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Scramble Text Tween Reveal Delay',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3775,7 +3823,8 @@ export const setLayersScrambleTextTweenRevealDelay = (state: LayerState, action:
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Scramble Text Tween Reveal Delay',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3804,7 +3853,8 @@ export const setLayerScrambleTextTweenSpeed = (state: LayerState, action: SetLay
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Scramble Text Tween Speed',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3823,7 +3873,8 @@ export const setLayersScrambleTextTweenSpeed = (state: LayerState, action: SetLa
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Scramble Text Tween Speed',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3852,7 +3903,8 @@ export const setLayerScrambleTextTweenDelimiter = (state: LayerState, action: Se
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Scramble Text Tween Delimiter',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3871,7 +3923,8 @@ export const setLayersScrambleTextTweenDelimiter = (state: LayerState, action: S
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Scramble Text Tween Delimiter',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3900,7 +3953,8 @@ export const setLayerScrambleTextTweenRightToLeft = (state: LayerState, action: 
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Scramble Text Tween Right To Left',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3919,7 +3973,8 @@ export const setLayersScrambleTextTweenRightToLeft = (state: LayerState, action:
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Scramble Text Tween Right To Left',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3948,7 +4003,8 @@ export const setLayerCustomBounceTweenStrength = (state: LayerState, action: Set
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Custom Bounce Tween Strength',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3967,7 +4023,8 @@ export const setLayersCustomBounceTweenStrength = (state: LayerState, action: Se
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Custom Bounce Tween Strength',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -3996,7 +4053,8 @@ export const setLayerCustomBounceTweenEndAtStart = (state: LayerState, action: S
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Custom Bounce Tween End At Start',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -4015,7 +4073,8 @@ export const setLayersCustomBounceTweenEndAtStart = (state: LayerState, action: 
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Custom Bounce Tween End At Start',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -4044,7 +4103,8 @@ export const setLayerCustomBounceTweenSquash = (state: LayerState, action: SetLa
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Custom Bounce Tween Squash',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -4063,7 +4123,8 @@ export const setLayersCustomBounceTweenSquash = (state: LayerState, action: SetL
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Custom Bounce Tween Squash',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -4092,7 +4153,8 @@ export const setLayerCustomWiggleTweenStrength = (state: LayerState, action: Set
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Custom Wiggle Tween Strength',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -4111,7 +4173,8 @@ export const setLayersCustomWiggleTweenStrength = (state: LayerState, action: Se
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Custom Wiggle Tween Strength',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -4140,7 +4203,8 @@ export const setLayerCustomWiggleTweenWiggles = (state: LayerState, action: SetL
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Custom Wiggle Tween Wiggles',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -4159,7 +4223,8 @@ export const setLayersCustomWiggleTweenWiggles = (state: LayerState, action: Set
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Custom Wiggle Tween Wiggles',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -4188,7 +4253,8 @@ export const setLayerCustomWiggleTweenType = (state: LayerState, action: SetLaye
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Custom Wiggle Tween Type',
-      undoable: true
+      undoable: true,
+      tweenEdit: [action.payload.id]
     }
   }) as SetLayerEdit);
   return currentState;
@@ -4207,7 +4273,8 @@ export const setLayersCustomWiggleTweenType = (state: LayerState, action: SetLay
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Custom Wiggle Tween Type',
-      undoable: true
+      undoable: true,
+      tweenEdit: action.payload.tweens
     }
   }) as SetLayerEdit);
   return currentState;
@@ -11277,7 +11344,8 @@ export const setLayerEdit = (state: LayerState, action: SetLayerEdit): LayerStat
       ...currentState,
       edit: {
         ...currentState.edit,
-        ...action.payload.edit
+        ...action.payload.edit,
+        tweenEdit: action.payload.edit.tweenEdit ? action.payload.edit.tweenEdit : null
       }
     }
   }

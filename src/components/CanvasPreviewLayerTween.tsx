@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+import { ipcRenderer } from 'electron';
 import React, { ReactElement, useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { gsap } from 'gsap';
 import tinyColor from 'tinycolor2';
 import { CustomEase } from 'gsap/CustomEase';
@@ -13,6 +14,7 @@ import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import { RootState } from '../store/reducers';
 import { paperPreview } from '../canvas';
 import { getTransformedText } from '../utils';
+import { setActiveArtboard } from '../store/actions/layer';
 import { positionTextContent, clearLayerTransforms, applyLayerTransforms, getPaperFillColor, getPaperStrokeColor } from '../store/utils/paper';
 import { EventLayerTimelineData } from './CanvasPreviewLayerEvent';
 import { getParagraphs, getContent, getLeading } from './CanvasTextLayer';
@@ -21,13 +23,18 @@ gsap.registerPlugin(MorphSVGPlugin, RoughEase, SlowMo, CustomBounce, CustomEase,
 
 interface CanvasPreviewLayerTweenProps {
   tweenId: string;
-  eventTimeline: gsap.core.Timeline;
+  layerTimeline: GSAPTimeline;
 }
 
 const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElement => {
-  const { eventTimeline, tweenId } = props;
+  const { layerTimeline, tweenId } = props;
+  const electronInstanceId = useSelector((state: RootState) => state.session.instance);
+  const isPreviewOpen = useSelector((state: RootState) => state.preview.isOpen);
+  const edit = useSelector((state: RootState) => state.layer.present.edit);
+  const autoplay = useSelector((state: RootState) => state.preview.autoplay);
   const tween = useSelector((state: RootState) => state.layer.present.tweens.byId[tweenId]);
   const event = useSelector((state: RootState) => state.layer.present.events.byId[tween.event]);
+  const eventDrawerEvent = useSelector((state: RootState) => state.eventDrawer.event);
   const originLayerItem = useSelector((state: RootState) => state.layer.present.byId[tween.layer]);
   const destinationLayerItem = useSelector((state: RootState) => state.layer.present.byId[tween.destinationLayer]);
   const originArtboardItem = useSelector((state: RootState) => state.layer.present.byId[event.artboard] as Btwx.Artboard);
@@ -36,6 +43,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   // const originImage = originLayerItem.type === 'Image' ? sessionImages[(originLayerItem as Btwx.Image).imageId] : null;
   // const destinationImage = destinationLayerItem.type === 'Image' ? sessionImages[(destinationLayerItem as Btwx.Image).imageId] : null;
   const [eventLayerTimeline, setEventLayerTimeline] = useState(null);
+  const dispatch = useDispatch();
 
   interface CurrentTweenProps {
     width: number;
@@ -76,8 +84,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   }
 
   const hasTweenProp = (prop, value) => {
-    if (Object.prototype.hasOwnProperty.call(eventTimeline.data[tween.layer], prop)) {
-      return eventTimeline.data[tween.layer][prop];
+    if (Object.prototype.hasOwnProperty.call(eventLayerTimeline.data.props, prop)) {
+      return eventLayerTimeline.data.props[prop];
     } else {
       return value;
     }
@@ -279,9 +287,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   };
 
   // const addImageTween = (): void => {
-  //   eventTimeline.data[tween.layer][`${tween.prop}-before`] = 1;
-  //   eventTimeline.data[tween.layer][`${tween.prop}-after`] = 0;
-  //   eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+  //   eventLayerTimeline.data.props[`${tween.prop}-before`] = 1;
+  //   eventLayerTimeline.data.props[`${tween.prop}-after`] = 0;
+  //   eventLayerTimeline.to(eventLayerTimeline.data.props, {
   //     id: tweenId,
   //     duration: tween.duration,
   //     repeat: tween.repeat,
@@ -324,8 +332,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   //       const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
   //       const beforeRaster = paperLayer.children[0];
   //       const afterRaster = paperLayer.children[1];
-  //       beforeRaster.opacity = eventTimeline.data[tween.layer][`${tween.prop}-before`];
-  //       afterRaster.opacity = eventTimeline.data[tween.layer][`${tween.prop}-after`];
+  //       beforeRaster.opacity = eventLayerTimeline.data.props[`${tween.prop}-before`];
+  //       afterRaster.opacity = eventLayerTimeline.data.props[`${tween.prop}-after`];
   //     },
   //     ease: getEaseString(tween),
   //   }, tween.delay);
@@ -356,9 +364,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       destinationWithoutRotation.pathData
     ];
     MorphSVGPlugin.pathFilter(morphData);
-    eventTimeline.data[tween.layer][tween.prop] = morphData[0];
+    eventLayerTimeline.data.props[tween.prop] = morphData[0];
     // set tween
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -405,8 +413,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           (shapeMask as paper.Path).bounds.height = currentProps.height;
         }
         paperLayer.rotation = currentProps.rotation;
-        eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
-        eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
+        eventLayerTimeline.data.props['boundingWidth'] = paperLayer.bounds.width;
+        eventLayerTimeline.data.props['boundingHeight'] = paperLayer.bounds.height;
         paperLayer.rotation = -currentProps.rotation;
         applyLayerTransforms({
           paperLayer,
@@ -442,8 +450,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   const addColorToColorFSTween = (style: 'fill' | 'stroke'): void => {
     const ofc = originLayerItem.style[style].color;
     const dfc = destinationLayerItem.style[style].color;
-    eventTimeline.data[tween.layer][tween.prop] = tinyColor(ofc).toRgbString();
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = tinyColor(ofc).toRgbString();
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -451,7 +459,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       [tween.prop]: tween.ease === 'customWiggle' ? tinyColor(tween.customWiggle.strength).toRgbString() : tinyColor(dfc).toRgbString(),
       onUpdate: () => {
         const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-        const nextFS = eventTimeline.data[tween.layer][tween.prop];
+        const nextFS = eventLayerTimeline.data.props[tween.prop];
         fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] = nextFS;
       },
       ease: getEaseString(tween),
@@ -460,8 +468,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
 
   const addNullToColorFSTween = (style: 'fill' | 'stroke'): void => {
     const dfc = destinationLayerItem.style[style].color;
-    eventTimeline.data[tween.layer][tween.prop] = tinyColor({...dfc, a: 0}).toRgbString();
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = tinyColor({...dfc, a: 0}).toRgbString();
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -469,7 +477,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       [tween.prop]: tinyColor(dfc).toRgbString(),
       onUpdate: () => {
         const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-        const nextFS = eventTimeline.data[tween.layer][tween.prop];
+        const nextFS = eventLayerTimeline.data.props[tween.prop];
         fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] = nextFS;
       },
       ease: getEaseString(tween),
@@ -478,8 +486,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
 
   const addColorToNullFSTween = (style: 'fill' | 'stroke'): void => {
     const ofc = originLayerItem.style[style].color;
-    eventTimeline.data[tween.layer][tween.prop] = ofc.a;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = ofc.a;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -487,7 +495,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       [tween.prop]: 0,
       onUpdate: () => {
         const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-        const nextFS = eventTimeline.data[tween.layer][tween.prop];
+        const nextFS = eventLayerTimeline.data.props[tween.prop];
         fillRef[`${style}Color` as 'fillColor' | 'strokeColor'].alpha = nextFS;
       },
       ease: getEaseString(tween),
@@ -501,15 +509,15 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     const absOriginX = relOriginX + artboardX;
     const initialOrigin = tween.ease === 'customWiggle' ? absOriginX : originX;
     const isLine = originLayerItem.type === 'Shape' && (originLayerItem as Btwx.Shape).shapeType === 'Line';
-    eventTimeline.data[tween.layer][tween.prop] = initialOrigin;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = initialOrigin;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style[style].gradient.origin.x,
       onStart: () => {
-        eventTimeline.data[tween.layer][`${tween.prop}-ease`] = tween.ease;
+        eventLayerTimeline.data.props[`${tween.prop}-ease`] = tween.ease;
       },
       onUpdate: () => {
         const { paperLayer, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -530,15 +538,15 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
 
   const addGradientOriginYFSTween = (style: 'fill' | 'stroke'): void => {
     const isLine = originLayerItem.type === 'Shape' && (originLayerItem as Btwx.Shape).shapeType === 'Line';
-    eventTimeline.data[tween.layer][tween.prop] = tween.ease === 'customWiggle' ? (originLayerItem.style[style].gradient.origin.y * originLayerItem.frame.innerHeight) + originLayerItem.frame.y + (originLayerItem.type !== 'Artboard' ? originArtboardItem.frame.y : 0) : originLayerItem.style[style].gradient.origin.y;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = tween.ease === 'customWiggle' ? (originLayerItem.style[style].gradient.origin.y * originLayerItem.frame.innerHeight) + originLayerItem.frame.y + (originLayerItem.type !== 'Artboard' ? originArtboardItem.frame.y : 0) : originLayerItem.style[style].gradient.origin.y;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style[style].gradient.origin.y,
       onStart: () => {
-        eventTimeline.data[tween.layer][`${tween.prop}-ease`] = tween.ease;
+        eventLayerTimeline.data.props[`${tween.prop}-ease`] = tween.ease;
       },
       onUpdate: () => {
         const { paperLayer, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -559,15 +567,15 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
 
   const addGradientDestinationXFSTween = (style: 'fill' | 'stroke'): void => {
     const isLine = originLayerItem.type === 'Shape' && (originLayerItem as Btwx.Shape).shapeType === 'Line';
-    eventTimeline.data[tween.layer][tween.prop] = tween.ease === 'customWiggle' ? (originLayerItem.style[style].gradient.destination.x * originLayerItem.frame.innerWidth) + originLayerItem.frame.x + (originLayerItem.type !== 'Artboard' ? originArtboardItem.frame.x : 0) : originLayerItem.style[style].gradient.destination.x;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = tween.ease === 'customWiggle' ? (originLayerItem.style[style].gradient.destination.x * originLayerItem.frame.innerWidth) + originLayerItem.frame.x + (originLayerItem.type !== 'Artboard' ? originArtboardItem.frame.x : 0) : originLayerItem.style[style].gradient.destination.x;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style[style].gradient.destination.x,
       onStart: () => {
-        eventTimeline.data[tween.layer][`${tween.prop}-ease`] = tween.ease;
+        eventLayerTimeline.data.props[`${tween.prop}-ease`] = tween.ease;
       },
       onUpdate: () => {
         const { paperLayer, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -588,15 +596,15 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
 
   const addGradientDestinationYFSTween = (style: 'fill' | 'stroke'): void => {
     const isLine = originLayerItem.type === 'Shape' && (originLayerItem as Btwx.Shape).shapeType === 'Line';
-    eventTimeline.data[tween.layer][tween.prop] = tween.ease === 'customWiggle' ? (originLayerItem.style[style].gradient.destination.y * originLayerItem.frame.innerHeight) + originLayerItem.frame.y + (originLayerItem.type !== 'Artboard' ? originArtboardItem.frame.y : 0) : originLayerItem.style[style].gradient.destination.y;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = tween.ease === 'customWiggle' ? (originLayerItem.style[style].gradient.destination.y * originLayerItem.frame.innerHeight) + originLayerItem.frame.y + (originLayerItem.type !== 'Artboard' ? originArtboardItem.frame.y : 0) : originLayerItem.style[style].gradient.destination.y;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style[style].gradient.destination.y,
       onStart: () => {
-        eventTimeline.data[tween.layer][`${tween.prop}-ease`] = tween.ease;
+        eventLayerTimeline.data.props[`${tween.prop}-ease`] = tween.ease;
       },
       onUpdate: () => {
         const { paperLayer, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -680,9 +688,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       });
       const dc = dg.stops[index] ? dg.stops[index].color : cds.color;
       const dp = dg.stops[index] ? dg.stops[index].position : cds.position;
-      eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`] = tinyColor(sc).toRgbString();
-      eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-offset`] = sp;
-      stopsTimeline.to(eventTimeline.data[tween.layer], {
+      eventLayerTimeline.data.props[`${tween.prop}-stop-${index}-color`] = tinyColor(sc).toRgbString();
+      eventLayerTimeline.data.props[`${tween.prop}-stop-${index}-offset`] = sp;
+      stopsTimeline.to(eventLayerTimeline.data.props, {
         duration: tween.duration,
         repeat: tween.repeat,
         yoyo: tween.yoyo,
@@ -692,8 +700,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         [`${tween.prop}-stop-${index}-offset`]: dp,
         onUpdate: () => {
           const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-          const nextStopColor = eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`];
-          const nextStopOffset = eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-offset`];
+          const nextStopColor = eventLayerTimeline.data.props[`${tween.prop}-stop-${index}-color`];
+          const nextStopOffset = eventLayerTimeline.data.props[`${tween.prop}-stop-${index}-offset`];
           fillRef[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color = nextStopColor;
           fillRef[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].offset = nextStopOffset;
         },
@@ -709,15 +717,15 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     const dc = destinationLayerItem.style[style].color;
     og.stops.forEach((stop, index) => {
       const sc = stop.color;
-      eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`] = tinyColor(sc).toRgbString();
-      stopsTimeline.to(eventTimeline.data[tween.layer], {
+      eventLayerTimeline.data.props[`${tween.prop}-stop-${index}-color`] = tinyColor(sc).toRgbString();
+      stopsTimeline.to(eventLayerTimeline.data.props, {
         duration: tween.duration,
         repeat: tween.repeat,
         yoyo: tween.yoyo,
         [`${tween.prop}-stop-${index}-color`]: tinyColor(dc).toRgbString(),
         onUpdate: () => {
           const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-          const nextFS = eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`];
+          const nextFS = eventLayerTimeline.data.props[`${tween.prop}-stop-${index}-color`];
           fillRef[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color = nextFS;
         },
         ease: getEaseString(tween),
@@ -733,10 +741,10 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       id: tweenId,
       onStart: () => {
         const { paperLayer, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-        eventTimeline.data[tween.layer][`${style}GradientOriginX`] = dg.origin.x;
-        eventTimeline.data[tween.layer][`${style}GradientOriginY`] = dg.origin.y;
-        eventTimeline.data[tween.layer][`${style}GradientDestinationX`] = dg.destination.x;
-        eventTimeline.data[tween.layer][`${style}GradientDestinationY`] = dg.destination.y;
+        eventLayerTimeline.data.props[`${style}GradientOriginX`] = dg.origin.x;
+        eventLayerTimeline.data.props[`${style}GradientOriginY`] = dg.origin.y;
+        eventLayerTimeline.data.props[`${style}GradientDestinationX`] = dg.destination.x;
+        eventLayerTimeline.data.props[`${style}GradientDestinationY`] = dg.destination.y;
         // set origin layer styleColor to destination layer gradient...
         // with all the stop colors as origin color
         fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] = {
@@ -764,15 +772,15 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     });
     dg.stops.forEach((stop, index) => {
       const sc = stop.color;
-      eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`] = tinyColor(oc).toRgbString();
-      stopsTimeline.to(eventTimeline.data[tween.layer], {
+      eventLayerTimeline.data.props[`${tween.prop}-stop-${index}-color`] = tinyColor(oc).toRgbString();
+      stopsTimeline.to(eventLayerTimeline.data.props, {
         duration: tween.duration,
         repeat: tween.repeat,
         yoyo: tween.yoyo,
         [`${tween.prop}-stop-${index}-color`]: tinyColor(sc).toRgbString(),
         onUpdate: () => {
           const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-          const nextFS = eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`];
+          const nextFS = eventLayerTimeline.data.props[`${tween.prop}-stop-${index}-color`];
           fillRef[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color = nextFS;
         },
         ease: getEaseString(tween),
@@ -786,15 +794,15 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     const og = originLayerItem.style[style].gradient;
     og.stops.forEach((stop, index) => {
       const sc = stop.color;
-      eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`] = sc.a;
-      stopsTimeline.to(eventTimeline.data[tween.layer], {
+      eventLayerTimeline.data.props[`${tween.prop}-stop-${index}-color`] = sc.a;
+      stopsTimeline.to(eventLayerTimeline.data.props, {
         duration: tween.duration,
         repeat: tween.repeat,
         yoyo: tween.yoyo,
         [`${tween.prop}-stop-${index}-color`]: 0,
         onUpdate: () => {
           const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-          const nextFS = eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`];
+          const nextFS = eventLayerTimeline.data.props[`${tween.prop}-stop-${index}-color`];
           fillRef[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha = nextFS;
         },
         ease: getEaseString(tween),
@@ -809,10 +817,10 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       id: tweenId,
       onStart: () => {
         const { paperLayer, artboardBackground, textContent, textBackground, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-        eventTimeline.data[tween.layer][`${style}GradientOriginX`] = dg.origin.x;
-        eventTimeline.data[tween.layer][`${style}GradientOriginY`] = dg.origin.y;
-        eventTimeline.data[tween.layer][`${style}GradientDestinationX`] = dg.destination.x;
-        eventTimeline.data[tween.layer][`${style}GradientDestinationY`] = dg.destination.y;
+        eventLayerTimeline.data.props[`${style}GradientOriginX`] = dg.origin.x;
+        eventLayerTimeline.data.props[`${style}GradientOriginY`] = dg.origin.y;
+        eventLayerTimeline.data.props[`${style}GradientDestinationX`] = dg.destination.x;
+        eventLayerTimeline.data.props[`${style}GradientDestinationY`] = dg.destination.y;
         // set origin layer styleColor to destination layer gradient with opaque stops
         fillRef[`${style}Color` as 'fillColor' | 'strokeColor'] = {
           gradient: {
@@ -843,15 +851,15 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     });
     dg.stops.forEach((stop, index) => {
       const sc = stop.color;
-      eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`] = 0;
-      stopsTimeline.to(eventTimeline.data[tween.layer], {
+      eventLayerTimeline.data.props[`${tween.prop}-stop-${index}-color`] = 0;
+      stopsTimeline.to(eventLayerTimeline.data.props, {
         duration: tween.duration,
         repeat: tween.repeat,
         yoyo: tween.yoyo,
         [`${tween.prop}-stop-${index}-color`]: sc.a,
         onUpdate: () => {
           const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-          const nextFS = eventTimeline.data[tween.layer][`${tween.prop}-stop-${index}-color`];
+          const nextFS = eventLayerTimeline.data.props[`${tween.prop}-stop-${index}-color`];
           fillRef[`${style}Color` as 'fillColor' | 'strokeColor'].gradient.stops[index].color.alpha = nextFS;
         },
         ease: getEaseString(tween),
@@ -861,8 +869,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   };
 
   const addDashOffsetTween = (): void => {
-    eventTimeline.data[tween.layer][tween.prop] = originLayerItem.style.strokeOptions.dashOffset;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = originLayerItem.style.strokeOptions.dashOffset;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -870,15 +878,15 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style.strokeOptions.dashOffset,
       onUpdate: () => {
         const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-        fillRef.dashOffset = eventTimeline.data[tween.layer][tween.prop];
+        fillRef.dashOffset = eventLayerTimeline.data.props[tween.prop];
       },
       ease: getEaseString(tween),
     }, tween.delay);
   };
 
   const addDashArrayWidthTween = (): void => {
-    eventTimeline.data[tween.layer][tween.prop] = originLayerItem.style.strokeOptions.dashArray[0];
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = originLayerItem.style.strokeOptions.dashArray[0];
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -886,15 +894,15 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style.strokeOptions.dashArray[0],
       onUpdate: () => {
         const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-        fillRef.dashArray = [eventTimeline.data[tween.layer][tween.prop] < 1 ? 0 : eventTimeline.data[tween.layer][tween.prop], fillRef.dashArray[1] < 1 ? 0 : fillRef.dashArray[1]];
+        fillRef.dashArray = [eventLayerTimeline.data.props[tween.prop] < 1 ? 0 : eventLayerTimeline.data.props[tween.prop], fillRef.dashArray[1] < 1 ? 0 : fillRef.dashArray[1]];
       },
       ease: getEaseString(tween),
     }, tween.delay);
   };
 
   const addDashArrayGapTween = (): void => {
-    eventTimeline.data[tween.layer][tween.prop] = originLayerItem.style.strokeOptions.dashArray[1];
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = originLayerItem.style.strokeOptions.dashArray[1];
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -902,15 +910,15 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style.strokeOptions.dashArray[1],
       onUpdate: () => {
         const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-        fillRef.dashArray = [fillRef.dashArray[0] < 1 ? 0 : fillRef.dashArray[0], eventTimeline.data[tween.layer][tween.prop] < 1 ? 0 : eventTimeline.data[tween.layer][tween.prop]];
+        fillRef.dashArray = [fillRef.dashArray[0] < 1 ? 0 : fillRef.dashArray[0], eventLayerTimeline.data.props[tween.prop] < 1 ? 0 : eventLayerTimeline.data.props[tween.prop]];
       },
       ease: getEaseString(tween),
     }, tween.delay);
   };
 
   const addStrokeWidthTween = (): void => {
-    eventTimeline.data[tween.layer][tween.prop] = originLayerItem.style.stroke.width;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = originLayerItem.style.stroke.width;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -918,15 +926,15 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style.stroke.width,
       onUpdate: () => {
         const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-        fillRef.strokeWidth = eventTimeline.data[tween.layer][tween.prop];
+        fillRef.strokeWidth = eventLayerTimeline.data.props[tween.prop];
       },
       ease: getEaseString(tween),
     }, tween.delay);
   };
 
   const addXTween = (): void => {
-    eventTimeline.data[tween.layer][tween.prop] = originLayerItem.frame.x + originArtboardItem.frame.x;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = originLayerItem.frame.x + originArtboardItem.frame.x;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -934,9 +942,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       [tween.prop]: `+=${tween.ease === 'customWiggle' ? tween.customWiggle.strength : destinationLayerItem.frame.x - originLayerItem.frame.x}`,
       onUpdate: () => {
         const { paperLayer, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
-        paperLayer.position.x = eventTimeline.data[tween.layer][tween.prop];
+        paperLayer.position.x = eventLayerTimeline.data.props[tween.prop];
         if (shapeMask) {
-          shapeMask.position.x = eventTimeline.data[tween.layer][tween.prop];
+          shapeMask.position.x = eventLayerTimeline.data.props[tween.prop];
         }
       },
       ease: getEaseString(tween),
@@ -944,8 +952,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   };
 
   const addYTween = (): void => {
-    eventTimeline.data[tween.layer][tween.prop] = originLayerItem.frame.y + originArtboardItem.frame.y;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = originLayerItem.frame.y + originArtboardItem.frame.y;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -953,9 +961,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       [tween.prop]: `+=${tween.ease === 'customWiggle' ? tween.customWiggle.strength : destinationLayerItem.frame.y - originLayerItem.frame.y}`,
       onUpdate: () => {
         const { paperLayer, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
-        paperLayer.position.y = eventTimeline.data[tween.layer][tween.prop];
+        paperLayer.position.y = eventLayerTimeline.data.props[tween.prop];
         if (shapeMask) {
-          shapeMask.position.y = eventTimeline.data[tween.layer][tween.prop];
+          shapeMask.position.y = eventLayerTimeline.data.props[tween.prop];
         }
       },
       ease: getEaseString(tween),
@@ -963,8 +971,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   };
 
   const addWidthTween = (): void => {
-    eventTimeline.data[tween.layer][tween.prop] = originLayerItem.frame.innerWidth;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = originLayerItem.frame.innerWidth;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -1043,7 +1051,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           });
           switch((originLayerItem as Btwx.Text).textStyle.textResize) {
             case 'autoHeight':
-              eventTimeline.data[tween.layer]['height'] = textContent.bounds.height;
+              eventLayerTimeline.data.props['height'] = textContent.bounds.height;
               textMask.bounds.top = textContent.bounds.top;
               textBackground.bounds.top = textContent.bounds.top;
               textMask.pivot = textContent.bounds.topCenter;
@@ -1061,8 +1069,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           }
         }
         paperLayer.rotation = currentProps.rotation;
-        eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
-        eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
+        eventLayerTimeline.data.props['boundingWidth'] = paperLayer.bounds.width;
+        eventLayerTimeline.data.props['boundingHeight'] = paperLayer.bounds.height;
         paperLayer.rotation = -currentProps.rotation;
         applyLayerTransforms({
           paperLayer,
@@ -1098,7 +1106,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
               verticalFlip: currentProps.scaleY
             } as any,
             variable: true,
-            width: eventTimeline.data[tween.layer]['boundingWidth'],
+            width: eventLayerTimeline.data.props['boundingWidth'],
             height: currentProps.boundingHeight
           });
           if (shapeMask) {
@@ -1111,7 +1119,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
                 verticalFlip: currentProps.scaleY
               } as any,
               variable: true,
-              width: eventTimeline.data[tween.layer]['boundingWidth'],
+              width: eventLayerTimeline.data.props['boundingWidth'],
               height: currentProps.boundingHeight
             });
           }
@@ -1153,8 +1161,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   };
 
   const addHeightTween = (): void => {
-    eventTimeline.data[tween.layer][tween.prop] = originLayerItem.frame.innerHeight;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = originLayerItem.frame.innerHeight;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -1222,8 +1230,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           }
         }
         paperLayer.rotation = currentProps.rotation;
-        eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
-        eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
+        eventLayerTimeline.data.props['boundingWidth'] = paperLayer.bounds.width;
+        eventLayerTimeline.data.props['boundingHeight'] = paperLayer.bounds.height;
         paperLayer.rotation = -currentProps.rotation;
         applyLayerTransforms({
           paperLayer,
@@ -1260,7 +1268,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
             } as any,
             variable: true,
             width: currentProps.boundingWidth,
-            height: eventTimeline.data[tween.layer]['boundingHeight']
+            height: eventLayerTimeline.data.props['boundingHeight']
           });
           if (shapeMask) {
             clearLayerTransforms({
@@ -1273,7 +1281,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
               } as any,
               variable: true,
               width: currentProps.boundingWidth,
-              height: eventTimeline.data[tween.layer]['boundingHeight']
+              height: eventLayerTimeline.data.props['boundingHeight']
             });
           }
           const newShape = new paperPreview.Path.Rectangle({
@@ -1314,8 +1322,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   };
 
   const addRotationTween = (): void => {
-    eventTimeline.data[tween.layer][tween.prop] = originLayerItem.transform.rotation;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = originLayerItem.transform.rotation;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -1352,8 +1360,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           });
         }
         paperLayer.rotation = currentProps.rotation;
-        eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
-        eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
+        eventLayerTimeline.data.props['boundingWidth'] = paperLayer.bounds.width;
+        eventLayerTimeline.data.props['boundingHeight'] = paperLayer.bounds.height;
         paperLayer.rotation = -currentProps.rotation;
         applyLayerTransforms({
           paperLayer,
@@ -1376,7 +1384,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           });
         }
         paperLayer.position = startPosition;
-        eventTimeline.data[tween.layer]['rotationPrevious'] = currentProps.rotation;
+        eventLayerTimeline.data.props['rotationPrevious'] = currentProps.rotation;
         updateGradientsOD({ paperLayer, fillRef });
       },
       ease: getEaseString(tween),
@@ -1394,14 +1402,14 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     if (!originShadow.enabled && destinationShadow.enabled) {
       osc = {...osc, a: 0} as Btwx.Color;
     }
-    eventTimeline.data[tween.layer][tween.prop] = tinyColor(osc).toRgbString();
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = tinyColor(osc).toRgbString();
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       [tween.prop]: tween.ease === 'customWiggle' ? tinyColor(tween.customWiggle.strength).toRgbString() : tinyColor({h: dsc.h, s: dsc.s, l: dsc.l, a: dsc.a}).toRgbString(),
       onUpdate: () => {
         const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-        fillRef.shadowColor = eventTimeline.data[tween.layer][tween.prop];
+        fillRef.shadowColor = eventLayerTimeline.data.props[tween.prop];
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -1418,8 +1426,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     if (!originShadow.enabled && destinationShadow.enabled) {
       osx = 0;
     }
-    eventTimeline.data[tween.layer][tween.prop] = osx;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = osx;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -1428,7 +1436,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       onUpdate: () => {
         const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         const y = fillRef.shadowOffset ? fillRef.shadowOffset.y : originShadow.offset.y;
-        fillRef.shadowOffset = new paperPreview.Point(eventTimeline.data[tween.layer][tween.prop], y);
+        fillRef.shadowOffset = new paperPreview.Point(eventLayerTimeline.data.props[tween.prop], y);
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -1445,8 +1453,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     if (!originShadow.enabled && destinationShadow.enabled) {
       osy = 0;
     }
-    eventTimeline.data[tween.layer][tween.prop] = osy;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = osy;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -1455,7 +1463,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       onUpdate: () => {
         const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         const x = fillRef.shadowOffset ? fillRef.shadowOffset.x : originShadow.offset.x;
-        fillRef.shadowOffset = new paperPreview.Point(x, eventTimeline.data[tween.layer][tween.prop]);
+        fillRef.shadowOffset = new paperPreview.Point(x, eventLayerTimeline.data.props[tween.prop]);
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -1472,8 +1480,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     if (!originShadow.enabled && destinationShadow.enabled) {
       osb = 0;
     }
-    eventTimeline.data[tween.layer][tween.prop] = osb;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = osb;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -1481,15 +1489,15 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : dsb,
       onUpdate: () => {
         const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-        fillRef.shadowBlur = eventTimeline.data[tween.layer][tween.prop];
+        fillRef.shadowBlur = eventLayerTimeline.data.props[tween.prop];
       },
       ease: getEaseString(tween),
     }, tween.delay);
   };
 
   const addOpacityTween = (): void => {
-    eventTimeline.data[tween.layer][tween.prop] = originLayerItem.style.opacity;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = originLayerItem.style.opacity;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -1497,15 +1505,15 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : destinationLayerItem.style.opacity,
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground } = eventLayerTimeline.data as EventLayerTimelineData;
-        paperLayer.opacity = eventTimeline.data[tween.layer][tween.prop];
+        paperLayer.opacity = eventLayerTimeline.data.props[tween.prop];
       },
       ease: getEaseString(tween),
     }, tween.delay);
   };
 
   const addBlurTween = (): void => {
-    eventTimeline.data[tween.layer][tween.prop] = originLayerItem.style.blur.enabled ? originLayerItem.style.blur.radius : 0;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = originLayerItem.style.blur.enabled ? originLayerItem.style.blur.radius : 0;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -1513,7 +1521,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       [tween.prop]: tween.ease === 'customWiggle' ? `+=${tween.customWiggle.strength}` : (destinationLayerItem.style.blur.enabled ? destinationLayerItem.style.blur.radius : 0),
       onUpdate: () => {
         const { paperLayer, artboardBackground, textContent, textBackground, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-        fillRef.style.blur = eventTimeline.data[tween.layer][tween.prop];
+        fillRef.style.blur = eventLayerTimeline.data.props[tween.prop];
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -1522,8 +1530,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   const addFontSizeTween = (): void => {
     const originTextItem = originLayerItem as Btwx.Text;
     const destinationTextItem = destinationLayerItem as Btwx.Text;
-    eventTimeline.data[tween.layer][tween.prop] = originTextItem.textStyle.fontSize;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = originTextItem.textStyle.fontSize;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -1564,13 +1572,13 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         textContent.content = nextContent;
         switch(originTextItem.textStyle.textResize) {
           case 'autoWidth':
-            eventTimeline.data[tween.layer]['width'] = textContent.bounds.width;
-            eventTimeline.data[tween.layer]['height'] = textContent.bounds.height;
+            eventLayerTimeline.data.props['width'] = textContent.bounds.width;
+            eventLayerTimeline.data.props['height'] = textContent.bounds.height;
             textMask.bounds = textContent.bounds;
             textBackground.bounds = textContent.bounds;
             break;
           case 'autoHeight':
-            eventTimeline.data[tween.layer]['height'] = textContent.bounds.height;
+            eventLayerTimeline.data.props['height'] = textContent.bounds.height;
             textMask.bounds.top = textContent.bounds.top;
             textBackground.bounds.top = textContent.bounds.top;
             textMask.pivot = textContent.bounds.topCenter;
@@ -1588,8 +1596,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           textResize: originTextItem.textStyle.textResize
         });
         paperLayer.rotation = currentProps.rotation;
-        eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
-        eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
+        eventLayerTimeline.data.props['boundingWidth'] = paperLayer.bounds.width;
+        eventLayerTimeline.data.props['boundingHeight'] = paperLayer.bounds.height;
         paperLayer.rotation = -currentProps.rotation;
         applyLayerTransforms({
           paperLayer,
@@ -1610,8 +1618,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   const addFontWeightTween = (): void => {
     const originTextItem = originLayerItem as Btwx.Text;
     const destinationTextItem = destinationLayerItem as Btwx.Text;
-    eventTimeline.data[tween.layer][tween.prop] = originTextItem.textStyle.fontWeight;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = originTextItem.textStyle.fontWeight;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -1652,13 +1660,13 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         textContent.content = nextContent;
         switch(originTextItem.textStyle.textResize) {
           case 'autoWidth':
-            eventTimeline.data[tween.layer]['width'] = textContent.bounds.width;
-            eventTimeline.data[tween.layer]['height'] = textContent.bounds.height;
+            eventLayerTimeline.data.props['width'] = textContent.bounds.width;
+            eventLayerTimeline.data.props['height'] = textContent.bounds.height;
             textMask.bounds = textContent.bounds;
             textBackground.bounds = textContent.bounds;
             break;
           case 'autoHeight':
-            eventTimeline.data[tween.layer]['height'] = textContent.bounds.height;
+            eventLayerTimeline.data.props['height'] = textContent.bounds.height;
             textMask.bounds.top = textContent.bounds.top;
             textBackground.bounds.top = textContent.bounds.top;
             textMask.pivot = textContent.bounds.topCenter;
@@ -1676,8 +1684,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           textResize: originTextItem.textStyle.textResize
         });
         paperLayer.rotation = currentProps.rotation;
-        eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
-        eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
+        eventLayerTimeline.data.props['boundingWidth'] = paperLayer.bounds.width;
+        eventLayerTimeline.data.props['boundingHeight'] = paperLayer.bounds.height;
         paperLayer.rotation = -currentProps.rotation;
         applyLayerTransforms({
           paperLayer,
@@ -1698,11 +1706,11 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   const addLineHeightTween = (): void => {
     const originTextItem = originLayerItem as Btwx.Text;
     const destinationTextItem = destinationLayerItem as Btwx.Text;
-    eventTimeline.data[tween.layer][tween.prop] = getLeading({
+    eventLayerTimeline.data.props[tween.prop] = getLeading({
       leading: originTextItem.textStyle.leading,
       fontSize: originTextItem.textStyle.fontSize
     });
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -1731,12 +1739,12 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         textContent.leading = currentProps.lineHeight;
         switch(originTextItem.textStyle.textResize) {
           case 'autoWidth':
-            eventTimeline.data[tween.layer]['height'] = textContent.bounds.height;
+            eventLayerTimeline.data.props['height'] = textContent.bounds.height;
             textMask.bounds = textContent.bounds;
             textBackground.bounds = textContent.bounds;
             break;
           case 'autoHeight':
-            eventTimeline.data[tween.layer]['height'] = textContent.bounds.height;
+            eventLayerTimeline.data.props['height'] = textContent.bounds.height;
             textMask.bounds.top = textContent.bounds.top;
             textBackground.bounds.top = textContent.bounds.top;
             textMask.pivot = textContent.bounds.topCenter;
@@ -1762,8 +1770,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           textResize: originTextItem.textStyle.textResize
         });
         paperLayer.rotation = currentProps.rotation;
-        eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
-        eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
+        eventLayerTimeline.data.props['boundingWidth'] = paperLayer.bounds.width;
+        eventLayerTimeline.data.props['boundingHeight'] = paperLayer.bounds.height;
         paperLayer.rotation = -currentProps.rotation;
         applyLayerTransforms({
           paperLayer,
@@ -1776,7 +1784,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         });
         paperLayer.position = startPosition;
         updateGradientsOD({ paperLayer, fillRef });
-        eventTimeline.data[tween.layer]['lineHeightPrevious'] = currentProps.lineHeight;
+        eventLayerTimeline.data.props['lineHeightPrevious'] = currentProps.lineHeight;
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -1856,13 +1864,13 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         textContent.content = nextContent;
         switch(destinationTextItem.textStyle.textResize) {
           case 'autoWidth':
-            eventTimeline.data[tween.layer]['width'] = textContent.bounds.width;
-            eventTimeline.data[tween.layer]['height'] = textContent.bounds.height;
+            eventLayerTimeline.data.props['width'] = textContent.bounds.width;
+            eventLayerTimeline.data.props['height'] = textContent.bounds.height;
             textMask.bounds = textContent.bounds;
             textBackground.bounds = textContent.bounds;
             break;
           case 'autoHeight':
-            eventTimeline.data[tween.layer]['height'] = textContent.bounds.height;
+            eventLayerTimeline.data.props['height'] = textContent.bounds.height;
             textMask.bounds.top = textContent.bounds.top;
             textBackground.bounds.top = textContent.bounds.top;
             textMask.pivot = textContent.bounds.topCenter;
@@ -1880,8 +1888,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           textResize: originTextItem.textStyle.textResize
         });
         paperLayer.rotation = currentProps.rotation;
-        eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
-        eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
+        eventLayerTimeline.data.props['boundingWidth'] = paperLayer.bounds.width;
+        eventLayerTimeline.data.props['boundingHeight'] = paperLayer.bounds.height;
         paperLayer.rotation = -currentProps.rotation;
         applyLayerTransforms({
           paperLayer,
@@ -1893,7 +1901,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           variable: true
         });
         paperLayer.position = startPosition;
-        eventTimeline.data[tween.layer]['text'] = textDOM.innerText;
+        eventLayerTimeline.data.props['text'] = textDOM.innerText;
         updateGradientsOD({ paperLayer, fillRef });
       },
       ease: getEaseString(tween),
@@ -1903,8 +1911,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   const addLetterSpacingTween = (): void => {
     const originTextItem = originLayerItem as Btwx.Text;
     const destinationTextItem = destinationLayerItem as Btwx.Text;
-    eventTimeline.data[tween.layer][tween.prop] = originTextItem.textStyle.letterSpacing;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = originTextItem.textStyle.letterSpacing;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -1945,13 +1953,13 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         textContent.content = nextContent;
         switch(destinationTextItem.textStyle.textResize) {
           case 'autoWidth':
-            eventTimeline.data[tween.layer]['width'] = textContent.bounds.width;
-            eventTimeline.data[tween.layer]['height'] = textContent.bounds.height;
+            eventLayerTimeline.data.props['width'] = textContent.bounds.width;
+            eventLayerTimeline.data.props['height'] = textContent.bounds.height;
             textMask.bounds = textContent.bounds;
             textBackground.bounds = textContent.bounds;
             break;
           case 'autoHeight':
-            eventTimeline.data[tween.layer]['height'] = textContent.bounds.height;
+            eventLayerTimeline.data.props['height'] = textContent.bounds.height;
             textMask.bounds.top = textContent.bounds.top;
             textBackground.bounds.top = textContent.bounds.top;
             textMask.pivot = textContent.bounds.topCenter;
@@ -1969,8 +1977,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           textResize: originTextItem.textStyle.textResize
         });
         paperLayer.rotation = currentProps.rotation;
-        eventTimeline.data[tween.layer]['boundingWidth'] = paperLayer.bounds.width;
-        eventTimeline.data[tween.layer]['boundingHeight'] = paperLayer.bounds.height;
+        eventLayerTimeline.data.props['boundingWidth'] = paperLayer.bounds.width;
+        eventLayerTimeline.data.props['boundingHeight'] = paperLayer.bounds.height;
         paperLayer.rotation = -currentProps.rotation;
         applyLayerTransforms({
           paperLayer,
@@ -1989,8 +1997,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   };
 
   const addScaleXTween = (): void => {
-    eventTimeline.data[tween.layer][tween.prop] = originLayerItem.transform.horizontalFlip ? -1 : 1;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = originLayerItem.transform.horizontalFlip ? -1 : 1;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -2047,15 +2055,15 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           });
         }
         paperLayer.position = startPosition;
-        eventTimeline.data[tween.layer]['scaleXPrevious'] = currentProps.scaleX;
+        eventLayerTimeline.data.props['scaleXPrevious'] = currentProps.scaleX;
       },
       ease: getEaseString(tween),
     }, tween.delay);
   };
 
   const addScaleYTween = (): void => {
-    eventTimeline.data[tween.layer][tween.prop] = originLayerItem.transform.verticalFlip ? -1 : 1;
-    eventLayerTimeline.to(eventTimeline.data[tween.layer], {
+    eventLayerTimeline.data.props[tween.prop] = originLayerItem.transform.verticalFlip ? -1 : 1;
+    eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       repeat: tween.repeat,
@@ -2112,7 +2120,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           });
         }
         paperLayer.position = startPosition;
-        eventTimeline.data[tween.layer]['scaleYPrevious'] = currentProps.scaleY;
+        eventLayerTimeline.data.props['scaleYPrevious'] = currentProps.scaleY;
       },
       ease: getEaseString(tween),
     }, tween.delay);
@@ -2237,11 +2245,11 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     return () => {
       if (gsap.getById(tweenId) && eventLayerTimeline) {
         eventLayerTimeline.remove(gsap.getById(tweenId));
-        eventTimeline.data[tween.layer] = Object.keys(eventTimeline.data[tween.layer]).reduce((result, current) => {
+        eventLayerTimeline.data.props = Object.keys(eventLayerTimeline.data.props).reduce((result, current) => {
           if (current !== tween.prop && !current.startsWith(tween.prop)) {
             result = {
               ...result,
-              [current]: eventTimeline.data[tween.layer][current]
+              [current]: eventLayerTimeline.data.props[current]
             }
           }
           return result;
@@ -2251,8 +2259,22 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   }, [tween, eventLayerTimeline]);
 
   useEffect(() => {
-    setEventLayerTimeline((eventTimeline as any).getById(`${tween.event}-${tween.layer}`) as GSAPTimeline);
-  }, [eventTimeline]);
+    setEventLayerTimeline(layerTimeline);
+  }, [layerTimeline]);
+
+  // useEffect(() => {
+  //   if (edit.tweenEdit && layerTimeline && autoplay && isPreviewOpen && edit.tweenEdit[0] === tweenId) {
+  //     paperPreview.view.center = new paperPreview.Point(originArtboardItem.frame.x, originArtboardItem.frame.y);
+  //     dispatch(setActiveArtboard({
+  //       id: event.artboard
+  //     }));
+  //     ipcRenderer.invoke('setDocumentActiveArtboard', JSON.stringify({
+  //       instanceId: electronInstanceId,
+  //       activeArtboard: event.artboard
+  //     }));
+  //     layerTimeline.parent.play(0, false);
+  //   }
+  // }, [edit.id]);
 
   return (
     originLayerItem.type === 'Text'

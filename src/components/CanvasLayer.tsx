@@ -11,12 +11,15 @@ import CanvasGroupLayer from './CanvasGroupLayer';
 interface CanvasLayerProps {
   id: string;
   paperScope: Btwx.PaperScope;
+  eventTimelines?: {
+    [id: string]: GSAPTimeline;
+  }
 }
 
-const makeGetLayerById = () => getLayerById;
+const getLayerByIdSelector = () => getLayerById;
 
 const CanvasLayer = (props: CanvasLayerProps): ReactElement => {
-  const layerItemSelector: any = useMemo(makeGetLayerById, []);
+  const layerItemSelector: any = useMemo(getLayerByIdSelector, []);
   const layerItem = useSelector((state: RootState) => layerItemSelector(state, props.id), shallowEqual);
 
   if (layerItem) {

@@ -3,19 +3,23 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getPaperStyle, getLayerAbsPosition, getPaperParent, getPaperLayerIndex, getPaperFillColor, getPaperStrokeColor, clearLayerTransforms, applyLayerTransforms } from '../store/utils/paper';
 import { paperMain, paperPreview } from '../canvas';
-import CanvasPreviewLayerEvent from './CanvasPreviewLayerEvent';
+import { applyLayerTimelines } from '../utils';
+import CanvasPreviewEventLayerTimeline from './CanvasPreviewEventLayerTimeline';
 
 interface CanvasShapeLayerProps {
   id: string;
   paperScope: Btwx.PaperScope;
+  eventTimelines?: {
+    [id: string]: GSAPTimeline;
+  }
 }
 
-
 const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
-  const { id, paperScope } = props;
+  const { id, paperScope, eventTimelines } = props;
   const layerItem: Btwx.Shape = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Shape);
   const parentItem: Btwx.Artboard | Btwx.Group = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.parent] as Btwx.Artboard | Btwx.Group : null);
   const artboardItem: Btwx.Artboard = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null);
+  const eventsById = useSelector((state: RootState) => state.layer.present.events.byId);
   const layerIndex = parentItem.children.indexOf(layerItem.id);
   const underlyingMaskIndex = layerItem.underlyingMask ? parentItem.children.indexOf(layerItem.underlyingMask) : null;
   const maskedIndex = (layerIndex - underlyingMaskIndex) + 1;
@@ -23,6 +27,7 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
   const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
   const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
   const [rendered, setRendered] = useState<boolean>(false);
+  const [layerTimelines, setLayerTimelines] = useState(null);
 
   ///////////////////////////////////////////////////////
   // HELPER FUNCTIONS
@@ -455,15 +460,34 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
   // EVENTS
   ///////////////////////////////////////////////////////
 
+  useEffect(() => {
+    if (rendered && eventTimelines) {
+      const { paperLayer } = getPaperLayer();
+      const newLayerTimelines = applyLayerTimelines({
+        paperLayer,
+        eventTimelines,
+        eventsById,
+        layerItem
+      });
+      setLayerTimelines(newLayerTimelines);
+    }
+  }, [eventTimelines]);
+
+  ///////////////////////////////////////////////////////
+  // EVENT TWEENS
+  ///////////////////////////////////////////////////////
+
   if (paperScope === 'preview') {
     return (
-      rendered
+      rendered && layerTimelines
       ? <>
           {
-            layerItem.events.map((eventId, index) => (
-              <CanvasPreviewLayerEvent
+            Object.keys(layerTimelines).map((eventId) => (
+              <CanvasPreviewEventLayerTimeline
                 key={eventId}
-                eventId={eventId} />
+                id={id}
+                eventId={eventId}
+                layerTimeline={layerTimelines[eventId]} />
             ))
           }
         </>

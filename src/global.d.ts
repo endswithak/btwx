@@ -776,6 +776,7 @@ declare namespace Btwx {
     payload: any;
     detail: string;
     treeEdit?: boolean;
+    tweenEdit?: string[];
     undoable: boolean;
   }
 }

@@ -55,21 +55,21 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
       ...result,
       [current]: {}
     }), {}),
-    onStart: function() {
-      dispatch(setPreviewTweening({
-        tweening: event.artboard
-      }));
-      ipcRenderer.send('setDocumentPreviewTweening', JSON.stringify({
-        instanceId: electronInstanceId,
-        tweening: event.artboard
-      }));
-    },
-    onUpdate: function() {
-      ipcRenderer.send('setDocumentTimelineGuidePosition', JSON.stringify({
-        instanceId: electronInstanceId,
-        time: this.time()
-      }));
-    },
+    // onStart: function() {
+    //   dispatch(setPreviewTweening({
+    //     tweening: event.artboard
+    //   }));
+    //   ipcRenderer.send('setDocumentPreviewTweening', JSON.stringify({
+    //     instanceId: electronInstanceId,
+    //     tweening: event.artboard
+    //   }));
+    // },
+    // onUpdate: function() {
+    //   ipcRenderer.send('setDocumentTimelineGuidePosition', JSON.stringify({
+    //     instanceId: electronInstanceId,
+    //     time: this.time()
+    //   }));
+    // },
     onComplete: function() {
       paperPreview.view.center = destinationArtboardPosition;
       dispatch(setActiveArtboard({
@@ -95,42 +95,42 @@ const CanvasPreviewLayerEvent = (props: CanvasPreviewLayerEventProps): ReactElem
   const buildLayerTimelines = () => eventTweenLayers.reduce((result, current) => [...result, gsap.timeline({
     id: `${eventId}-${current}`,
     // on start supply layer timeline with relevant paper layers
-    onStart: function() {
-      const paperLayer = paperPreview.project.getItem({ data: { id: current } });
-      this.data = {
-        paperLayer: paperLayer,
-        artboardBackground: paperLayer.data.layerType === 'Artboard'
-          ? paperLayer.getItem({ data: { id: 'artboardBackground' } }) as paper.Path.Rectangle
-          : null,
-        imageRaster: paperLayer.data.layerType === 'Image'
-          ? paperLayer.getItem({ data: { id: 'imageRaster' } }) as paper.Raster
-          : null,
-        textContent: paperLayer.data.layerType === 'Text'
-          ? paperLayer.getItem({ data: { id: 'textContent' } }) as paper.PointText
-          : null,
-        textMask: paperLayer.data.layerType === 'Text'
-          ? paperLayer.getItem({ data: { id: 'textMask' } }) as paper.Path.Rectangle
-          : null,
-        textBackground: paperLayer.data.layerType === 'Text'
-          ? paperLayer.getItem({ data: { id: 'textBackground' } }) as paper.Path.Rectangle
-          : null,
-        shapeMask: paperLayer.data.layerType === 'Shape' && paperLayer.parent.data && paperLayer.parent.data.id === 'maskGroup'
-          ? paperLayer.parent.getItem({ data: { id: 'mask' } }) as paper.CompoundPath
-          : null,
-        fillRef: (() => {
-          switch(paperLayer.data.layerType) {
-            case 'Artboard':
-              return paperLayer.getItem({ data: { id: 'artboardBackground' } });
-            case 'Text':
-              return paperLayer.getItem({ data: { id: 'textContent' } }) as paper.PointText;
-            case 'Image':
-              return paperLayer.getItem({ data: { id: 'imageRaster' } }) as paper.Raster;
-            default:
-              return paperLayer;
-          }
-        })()
-      };
-    }
+    // onStart: function() {
+    //   const paperLayer = paperPreview.project.getItem({ data: { id: current } });
+    //   this.data = {
+    //     paperLayer: paperLayer,
+    //     artboardBackground: paperLayer.data.layerType === 'Artboard'
+    //       ? paperLayer.getItem({ data: { id: 'artboardBackground' } }) as paper.Path.Rectangle
+    //       : null,
+    //     imageRaster: paperLayer.data.layerType === 'Image'
+    //       ? paperLayer.getItem({ data: { id: 'imageRaster' } }) as paper.Raster
+    //       : null,
+    //     textContent: paperLayer.data.layerType === 'Text'
+    //       ? paperLayer.getItem({ data: { id: 'textContent' } }) as paper.PointText
+    //       : null,
+    //     textMask: paperLayer.data.layerType === 'Text'
+    //       ? paperLayer.getItem({ data: { id: 'textMask' } }) as paper.Path.Rectangle
+    //       : null,
+    //     textBackground: paperLayer.data.layerType === 'Text'
+    //       ? paperLayer.getItem({ data: { id: 'textBackground' } }) as paper.Path.Rectangle
+    //       : null,
+    //     shapeMask: paperLayer.data.layerType === 'Shape' && paperLayer.parent.data && paperLayer.parent.data.id === 'maskGroup'
+    //       ? paperLayer.parent.getItem({ data: { id: 'mask' } }) as paper.CompoundPath
+    //       : null,
+    //     fillRef: (() => {
+    //       switch(paperLayer.data.layerType) {
+    //         case 'Artboard':
+    //           return paperLayer.getItem({ data: { id: 'artboardBackground' } });
+    //         case 'Text':
+    //           return paperLayer.getItem({ data: { id: 'textContent' } }) as paper.PointText;
+    //         case 'Image':
+    //           return paperLayer.getItem({ data: { id: 'imageRaster' } }) as paper.Raster;
+    //         default:
+    //           return paperLayer;
+    //       }
+    //     })()
+    //   };
+    // }
   })], []);
 
   const addPaperLayerEventListener = (timeline: any = eventTimeline): any => {

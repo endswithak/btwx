@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import tinyColor from 'tinycolor2';
 import mexp from 'math-expression-evaluator';
+import { DEFAULT_TWEEN_EVENTS_TYPES } from './constants';
+import { gsap } from 'gsap';
 
 export type Omit<T, U> = Pick<T, Exclude<keyof T, keyof U>>;
 
@@ -27,6 +29,121 @@ export const evaluateExp = (expression: any): any => {
       return null;
     }
   }
+}
+
+export const removePaperLayerEventListeners = (paperLayer) => {
+  DEFAULT_TWEEN_EVENTS_TYPES.forEach((eventListener) => {
+    paperLayer.off((eventListener === 'rightclick' ? 'click' : eventListener) as any);
+  });
+}
+
+interface AddPaperLayerEventListener {
+  eventTimeline: GSAPTimeline;
+  eventListener: Btwx.EventType;
+  paperLayer: paper.Item;
+}
+
+export const addPaperLayerEventListener = ({eventTimeline, eventListener, paperLayer}: AddPaperLayerEventListener): any => {
+  const callback = (e: paper.MouseEvent | paper.KeyEvent): void => {
+    if (eventListener === 'rightclick') {
+      if ((e as any).event.which === 3) {
+        eventTimeline.play();
+      }
+    } else {
+      eventTimeline.play();
+    }
+  };
+  paperLayer.on(eventListener === 'rightclick' ? 'click' : eventListener, callback);
+}
+
+interface GetEventTimelineLayerPaperLayers {
+  paperLayer: paper.Item;
+  layerItem: Btwx.Layer;
+}
+
+export const getEventTimelinePaperLayers = ({ paperLayer, layerItem }: GetEventTimelineLayerPaperLayers) => {
+  return {
+    paperLayer: paperLayer,
+    artboardBackground: layerItem.type === 'Artboard'
+      ? paperLayer.getItem({ data: { id: 'artboardBackground' } }) as paper.Path.Rectangle
+      : null,
+    imageRaster: layerItem.type === 'Image'
+      ? paperLayer.getItem({ data: { id: 'imageRaster' } }) as paper.Raster
+      : null,
+    textContent: layerItem.type === 'Text'
+      ? paperLayer.getItem({ data: { id: 'textContent' } }) as paper.PointText
+      : null,
+    textMask: layerItem.type === 'Text'
+      ? paperLayer.getItem({ data: { id: 'textMask' } }) as paper.Path.Rectangle
+      : null,
+    textBackground: layerItem.type === 'Text'
+      ? paperLayer.getItem({ data: { id: 'textBackground' } }) as paper.Path.Rectangle
+      : null,
+    shapeMask: layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask
+      ? paperLayer.parent.getItem({ data: { id: 'mask' } }) as paper.CompoundPath
+      : null,
+    fillRef: (() => {
+      switch(layerItem.type) {
+        case 'Artboard':
+          return paperLayer.getItem({ data: { id: 'artboardBackground' } });
+        case 'Text':
+          return paperLayer.getItem({ data: { id: 'textContent' } }) as paper.PointText;
+        case 'Image':
+          return paperLayer.getItem({ data: { id: 'imageRaster' } }) as paper.Raster;
+        default:
+          return paperLayer;
+      }
+    })()
+  };
+}
+
+interface ApplyLayerTimelinesProps {
+  paperLayer: paper.Item;
+  layerItem: Btwx.Layer;
+  eventTimelines: {
+    [id: string]: GSAPTimeline;
+  };
+  eventsById: {
+    [id: string]: Btwx.Event;
+  };
+}
+
+export const applyLayerTimelines = ({layerItem, paperLayer, eventTimelines, eventsById}: ApplyLayerTimelinesProps): {
+  [id: string]: GSAPTimeline;
+} => {
+  const eventTimelinePaperLayers = getEventTimelinePaperLayers({
+    paperLayer,
+    layerItem
+  });
+  removePaperLayerEventListeners(paperLayer);
+  return Object.keys(eventTimelines).reduce((result, current) => {
+    const eventItem = eventsById[current];
+    const eventTimeline = eventTimelines[current];
+    // create layer timeline for event
+    const timeline = gsap.timeline({
+      id: `${current}-${layerItem.id}`,
+      data: {
+        props: {},
+        ...eventTimelinePaperLayers
+      }
+    });
+    // add layer timeline
+    eventTimeline.add(timeline);
+    // update layer timelines
+    result = {
+      ...result,
+      [current]: timeline
+    }
+    // add event listener if event layer
+    if (layerItem.events.includes(current)) {
+      addPaperLayerEventListener({
+        eventTimeline,
+        paperLayer,
+        eventListener: eventItem.event
+      });
+    }
+    return result;
+  }, {});
 }
 
 export const getPrettyAccelerator = (str: string) => {

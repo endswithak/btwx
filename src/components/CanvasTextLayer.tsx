@@ -7,12 +7,17 @@ import {
   getPaperStrokeColor, getPaperFillColor, positionTextContent,
   clearLayerTransforms, applyLayerTransforms
 } from '../store/utils/paper';
+import { applyLayerTimelines } from '../utils';
 import { paperMain, paperPreview } from '../canvas';
-import CanvasPreviewLayerEvent from './CanvasPreviewLayerEvent';
+// import CanvasPreviewLayerEvent from './CanvasPreviewLayerEvent';
+import CanvasPreviewEventLayerTimeline from './CanvasPreviewEventLayerTimeline';
 
 interface CanvasTextLayerProps {
   id: string;
   paperScope: Btwx.PaperScope;
+  eventTimelines?: {
+    [id: string]: GSAPTimeline;
+  }
 }
 
 interface GetAutoLineHeight {
@@ -154,10 +159,11 @@ export const getTextWidth = ({font, text, letterSpacing, textTransform, preview}
 const debug = false;
 
 const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
-  const { id, paperScope } = props;
+  const { id, paperScope, eventTimelines } = props;
   const layerItem: Btwx.Text = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Text);
   const parentItem: Btwx.Artboard | Btwx.Group = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.parent] as Btwx.Artboard | Btwx.Group : null);
   const artboardItem: Btwx.Artboard = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null);
+  const eventsById = useSelector((state: RootState) => state.layer.present.events.byId);
   const layerIndex = parentItem.children.indexOf(layerItem.id);
   const underlyingMaskIndex = layerItem.underlyingMask ? parentItem.children.indexOf(layerItem.underlyingMask) : null;
   const maskedIndex = (layerIndex - underlyingMaskIndex) + 1;
@@ -165,6 +171,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
   const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
   const [rendered, setRendered] = useState<boolean>(false);
+  const [layerTimelines, setLayerTimelines] = useState(null);
   // const [prevRotation, setPrevRotation] = useState(layerItem.transform.rotation);
   const content = useMemo(() =>
     getContent({paragraphs: layerItem.paragraphs}),
@@ -839,20 +846,39 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   // EVENTS
   ///////////////////////////////////////////////////////
 
+  useEffect(() => {
+    if (rendered && eventTimelines) {
+      const { paperLayer } = getPaperLayer();
+      const newLayerTimelines = applyLayerTimelines({
+        paperLayer,
+        eventTimelines,
+        eventsById,
+        layerItem
+      });
+      setLayerTimelines(newLayerTimelines);
+    }
+  }, [eventTimelines]);
+
+  ///////////////////////////////////////////////////////
+  // EVENT TWEENS
+  ///////////////////////////////////////////////////////
+
   if (paperScope === 'preview') {
     return (
-      rendered
+      rendered && layerTimelines
       ? <>
           {
-            layerItem.events.map((eventId) => (
-              <CanvasPreviewLayerEvent
+            Object.keys(layerTimelines).map((eventId) => (
+              <CanvasPreviewEventLayerTimeline
                 key={eventId}
-                eventId={eventId} />
+                id={id}
+                eventId={eventId}
+                layerTimeline={layerTimelines[eventId]} />
             ))
           }
         </>
       : null
-    );
+    )
   } else {
     return null;
   }
