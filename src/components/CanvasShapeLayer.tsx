@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getPaperStyle, getLayerAbsPosition, getPaperParent, getPaperLayerIndex, getPaperFillColor, getPaperStrokeColor, clearLayerTransforms, applyLayerTransforms } from '../store/utils/paper';
+import { getPaperStyle, getLayerAbsPosition, getPaperParent, getPaperLayerIndex, getPaperFillColor, getPaperStrokeColor } from '../store/utils/paper';
 import { paperMain, paperPreview } from '../canvas';
 import { applyLayerTimelines } from '../utils';
 import CanvasPreviewEventLayerTimeline from './CanvasPreviewEventLayerTimeline';

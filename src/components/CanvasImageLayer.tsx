@@ -5,7 +5,6 @@ import tinyColor from 'tinycolor2';
 import { getPaperShadowColor, getPaperShadowOffset, getLayerAbsPosition, getPaperParent, getPaperShadowBlur, getPaperLayerIndex, getPaperStrokeColor, getPaperFillColor, clearLayerTransforms, applyLayerTransforms } from '../store/utils/paper';
 import { applyLayerTimelines } from '../utils';
 import { paperMain, paperPreview } from '../canvas';
-// import CanvasPreviewLayerEvent from './CanvasPreviewLayerEvent';
 import CanvasPreviewEventLayerTimeline from './CanvasPreviewEventLayerTimeline';
 
 interface CanvasImageLayerProps {

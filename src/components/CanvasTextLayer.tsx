@@ -9,7 +9,6 @@ import {
 } from '../store/utils/paper';
 import { applyLayerTimelines } from '../utils';
 import { paperMain, paperPreview } from '../canvas';
-// import CanvasPreviewLayerEvent from './CanvasPreviewLayerEvent';
 import CanvasPreviewEventLayerTimeline from './CanvasPreviewEventLayerTimeline';
 
 interface CanvasTextLayerProps {

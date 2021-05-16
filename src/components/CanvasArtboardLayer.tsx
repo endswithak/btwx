@@ -1,14 +1,14 @@
 import { ipcRenderer } from 'electron';
 import { gsap } from 'gsap';
-import React, { ReactElement, useEffect, useState, useMemo } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setPreviewTweening } from '../store/actions/preview';
 import { setActiveArtboard } from '../store/actions/layer';
-import { getEventsByOriginArtboard } from '../store/selectors/layer';
 import { getPaperFillColor } from '../store/utils/paper';
 import { applyLayerTimelines } from '../utils';
 import { paperMain, paperPreview } from '../canvas';
+import { getAllArtboardItems } from '../store/selectors/layer';
 import CanvasLayer from './CanvasLayer';
 import CanvasPreviewEventLayerTimeline from './CanvasPreviewEventLayerTimeline';
 
@@ -17,22 +17,16 @@ interface CanvasArtboardLayerProps {
   paperScope: Btwx.PaperScope;
 }
 
-const getOriginEventsSelector = () => getEventsByOriginArtboard;
-
 const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
   const { id, paperScope } = props;
-  const originEventsSelector = useMemo(getOriginEventsSelector, []);
+  const artboardItems = useSelector((state: RootState) => getAllArtboardItems(state));
   const electronInstanceId = useSelector((state: RootState) => state.session.instance);
   const layerItem: Btwx.Artboard = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Artboard);
-  const originEvents = useSelector((state: RootState) => originEventsSelector(state, id));
   const eventsById = useSelector((state: RootState) => state.layer.present.events.byId);
   const projectIndex: number = useSelector((state: RootState) => state.layer.present.byId[id] ? (state.layer.present.byId[id] as Btwx.Artboard).projectIndex : null);
   const project = paperScope === 'main' ? projectIndex ? paperMain.projects[projectIndex] : null : paperPreview.project;
   const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
-  // const tweening = useSelector((state: RootState) => state.preview.tweening === id);
   const [rendered, setRendered] = useState<boolean>(false);
-  // const [prevTweening, setPrevTweening] = useState(tweening);
-  // const [eventInstance, setEventInstance] = useState(0);
   const [eventTimelines, setEventTimelines] = useState(null);
   const [layerTimelines, setLayerTimelines] = useState(null);
   const dispatch = useDispatch();
@@ -235,25 +229,31 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
 
   const buildTimeline = (eventId) => {
     const eventItem = eventsById.byId[eventId];
+    const destinationArtboardItem = artboardItems[eventItem.destinationArtboard];
+    const destinationArtboardPosition = new paperPreview.Point(
+      destinationArtboardItem.frame.x,
+      destinationArtboardItem.frame.y
+    );
     return gsap.timeline({
       id: eventId,
       paused: true,
-      // onStart: function() {
-      //   dispatch(setPreviewTweening({
-      //     tweening: eventItem.artboard
-      //   }));
-      //   ipcRenderer.send('setDocumentPreviewTweening', JSON.stringify({
-      //     instanceId: electronInstanceId,
-      //     tweening: eventItem.artboard
-      //   }));
-      // },
-      // onUpdate: function() {
-      //   ipcRenderer.send('setDocumentTimelineGuidePosition', JSON.stringify({
-      //     instanceId: electronInstanceId,
-      //     time: this.time()
-      //   }));
-      // },
+      onStart: function() {
+        dispatch(setPreviewTweening({
+          tweening: eventItem.artboard
+        }));
+        ipcRenderer.send('setDocumentPreviewTweening', JSON.stringify({
+          instanceId: electronInstanceId,
+          tweening: eventItem.artboard
+        }));
+      },
+      onUpdate: function() {
+        ipcRenderer.send('setDocumentTimelineGuidePosition', JSON.stringify({
+          instanceId: electronInstanceId,
+          time: this.time()
+        }));
+      },
       onComplete: function() {
+        paperPreview.view.center = destinationArtboardPosition;
         dispatch(setActiveArtboard({
           id: eventItem.destinationArtboard
         }));

@@ -9,7 +9,6 @@ interface CanvasPreviewEventLayerTimelineProps {
   layerTimeline: GSAPTimeline;
 }
 
-
 const CanvasPreviewEventLayerTimeline = (props: CanvasPreviewEventLayerTimelineProps): ReactElement => {
   const { id, eventId, layerTimeline } = props;
   const layerItem: Btwx.Shape = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Shape);
@@ -26,7 +25,7 @@ const CanvasPreviewEventLayerTimeline = (props: CanvasPreviewEventLayerTimelineP
     eventLayerTweens && eventLayerTweens.length > 0
     ? <>
         {
-          eventLayerTweens.map((tweenId, index) => (
+          eventLayerTweens.map((tweenId) => (
             <CanvasPreviewLayerTween
               key={tweenId}
               tweenId={tweenId}

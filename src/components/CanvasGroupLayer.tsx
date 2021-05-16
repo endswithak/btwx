@@ -4,7 +4,6 @@ import { RootState } from '../store/reducers';
 import { getLayerAbsPosition, getPaperParent } from '../store/utils/paper';
 import { paperMain, paperPreview } from '../canvas';
 import CanvasLayer from './CanvasLayer';
-// import CanvasPreviewLayerEvent from './CanvasPreviewLayerEvent';
 
 interface CanvasGroupLayerProps {
   id: string;

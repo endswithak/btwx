@@ -2262,19 +2262,21 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     setEventLayerTimeline(layerTimeline);
   }, [layerTimeline]);
 
-  // useEffect(() => {
-  //   if (edit.tweenEdit && layerTimeline && autoplay && isPreviewOpen && edit.tweenEdit[0] === tweenId) {
-  //     paperPreview.view.center = new paperPreview.Point(originArtboardItem.frame.x, originArtboardItem.frame.y);
-  //     dispatch(setActiveArtboard({
-  //       id: event.artboard
-  //     }));
-  //     ipcRenderer.invoke('setDocumentActiveArtboard', JSON.stringify({
-  //       instanceId: electronInstanceId,
-  //       activeArtboard: event.artboard
-  //     }));
-  //     layerTimeline.parent.play(0, false);
-  //   }
-  // }, [edit.id]);
+  useEffect(() => {
+    if (edit.tweenEdit && layerTimeline && autoplay && isPreviewOpen && edit.tweenEdit[0] === tweenId) {
+      paperPreview.view.center = new paperPreview.Point(originArtboardItem.frame.x, originArtboardItem.frame.y);
+      dispatch(setActiveArtboard({
+        id: event.artboard
+      }));
+      ipcRenderer.invoke('setDocumentActiveArtboard', JSON.stringify({
+        instanceId: electronInstanceId,
+        activeArtboard: event.artboard
+      }));
+      if (gsap.getById(event.id)) {
+        gsap.getById(event.id).play(0, false);
+      }
+    }
+  }, [edit.id]);
 
   return (
     originLayerItem.type === 'Text'
