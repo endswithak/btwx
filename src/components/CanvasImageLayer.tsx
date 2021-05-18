@@ -466,18 +466,23 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
   // EVENTS
   ///////////////////////////////////////////////////////
 
-  useEffect(() => {
-    if (rendered && eventTimelines) {
-      const { paperLayer } = getPaperLayer();
-      const newLayerTimelines = applyLayerTimelines({
-        paperLayer,
-        eventTimelines,
-        eventsById,
-        layerItem
-      });
-      setLayerTimelines(newLayerTimelines);
-    }
-  }, [eventTimelines]);
+  if (paperScope === 'preview') {
+    useEffect(() => {
+      if (rendered && eventTimelines) {
+        const { paperLayer } = getPaperLayer();
+        setLayerTimelines(applyLayerTimelines({
+          paperLayer,
+          eventTimelines,
+          eventsById,
+          layerItem
+        }));
+      } else {
+        if (layerTimelines) {
+          setLayerTimelines(null);
+        }
+      }
+    }, [eventTimelines, rendered, layerItem.imageId]);
+  }
 
   ///////////////////////////////////////////////////////
   // EVENT TWEENS
@@ -493,7 +498,8 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
                 key={eventId}
                 id={id}
                 eventId={eventId}
-                layerTimeline={layerTimelines[eventId]} />
+                layerTimeline={layerTimelines[eventId]}
+                eventTimeline={eventTimelines[eventId]} />
             ))
           }
         </>

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { ipcRenderer } from 'electron';
 import React, { ReactElement, useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { gsap } from 'gsap';
@@ -14,7 +13,6 @@ import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import { RootState } from '../store/reducers';
 import { paperPreview } from '../canvas';
 import { getTransformedText } from '../utils';
-import { setActiveArtboard } from '../store/actions/layer';
 import { positionTextContent, clearLayerTransforms, applyLayerTransforms, getPaperFillColor, getPaperStrokeColor } from '../store/utils/paper';
 import { EventLayerTimelineData } from './CanvasPreviewLayerEvent';
 import { getParagraphs, getContent, getLeading } from './CanvasTextLayer';
@@ -24,10 +22,11 @@ gsap.registerPlugin(MorphSVGPlugin, RoughEase, SlowMo, CustomBounce, CustomEase,
 interface CanvasPreviewLayerTweenProps {
   tweenId: string;
   layerTimeline: GSAPTimeline;
+  eventTimeline: GSAPTimeline;
 }
 
 const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElement => {
-  const { layerTimeline, tweenId } = props;
+  const { layerTimeline, tweenId, eventTimeline } = props;
   const electronInstanceId = useSelector((state: RootState) => state.session.instance);
   const isPreviewOpen = useSelector((state: RootState) => state.preview.isOpen);
   const edit = useSelector((state: RootState) => state.layer.present.edit);
@@ -43,6 +42,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   // const originImage = originLayerItem.type === 'Image' ? sessionImages[(originLayerItem as Btwx.Image).imageId] : null;
   // const destinationImage = destinationLayerItem.type === 'Image' ? sessionImages[(destinationLayerItem as Btwx.Image).imageId] : null;
   const [eventLayerTimeline, setEventLayerTimeline] = useState(null);
+  const [autoplayInstance, setAutoplayInstance] = useState(null);
   const dispatch = useDispatch();
 
   interface CurrentTweenProps {
@@ -2262,21 +2262,18 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     setEventLayerTimeline(layerTimeline);
   }, [layerTimeline]);
 
+  // add flag for autoplay
   useEffect(() => {
-    if (edit.tweenEdit && layerTimeline && autoplay && isPreviewOpen && edit.tweenEdit[0] === tweenId) {
-      paperPreview.view.center = new paperPreview.Point(originArtboardItem.frame.x, originArtboardItem.frame.y);
-      dispatch(setActiveArtboard({
-        id: event.artboard
-      }));
-      ipcRenderer.invoke('setDocumentActiveArtboard', JSON.stringify({
-        instanceId: electronInstanceId,
-        activeArtboard: event.artboard
-      }));
-      if (gsap.getById(event.id)) {
-        gsap.getById(event.id).play(0, false);
-      }
+    if (edit.id && edit.tweenEdit && eventLayerTimeline && autoplay && isPreviewOpen && tweenId === edit.tweenEdit[0] && eventDrawerEvent && eventDrawerEvent === event.id) {
+      setAutoplayInstance(autoplayInstance ? autoplayInstance + 1 : 1);
     }
   }, [edit.id]);
+
+  useEffect(() => {
+    if (autoplayInstance) {
+      eventTimeline.play(0, false);
+    }
+  }, [autoplayInstance]);
 
   return (
     originLayerItem.type === 'Text'

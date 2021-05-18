@@ -61,41 +61,57 @@ interface GetEventTimelineLayerPaperLayers {
   layerItem: Btwx.Layer;
 }
 
-export const getEventTimelinePaperLayers = ({ paperLayer, layerItem }: GetEventTimelineLayerPaperLayers) => {
-  return {
-    paperLayer: paperLayer,
-    artboardBackground: layerItem.type === 'Artboard'
-      ? paperLayer.getItem({ data: { id: 'artboardBackground' } }) as paper.Path.Rectangle
-      : null,
-    imageRaster: layerItem.type === 'Image'
-      ? paperLayer.getItem({ data: { id: 'imageRaster' } }) as paper.Raster
-      : null,
-    textContent: layerItem.type === 'Text'
-      ? paperLayer.getItem({ data: { id: 'textContent' } }) as paper.PointText
-      : null,
-    textMask: layerItem.type === 'Text'
-      ? paperLayer.getItem({ data: { id: 'textMask' } }) as paper.Path.Rectangle
-      : null,
-    textBackground: layerItem.type === 'Text'
-      ? paperLayer.getItem({ data: { id: 'textBackground' } }) as paper.Path.Rectangle
-      : null,
-    shapeMask: layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask
-      ? paperLayer.parent.getItem({ data: { id: 'mask' } }) as paper.CompoundPath
-      : null,
-    fillRef: (() => {
-      switch(layerItem.type) {
-        case 'Artboard':
-          return paperLayer.getItem({ data: { id: 'artboardBackground' } });
-        case 'Text':
-          return paperLayer.getItem({ data: { id: 'textContent' } }) as paper.PointText;
-        case 'Image':
-          return paperLayer.getItem({ data: { id: 'imageRaster' } }) as paper.Raster;
-        default:
-          return paperLayer;
-      }
-    })()
-  };
+export const getEventTimelinePaperLayers = ({ paperLayer, layerItem }: GetEventTimelineLayerPaperLayers) => ({
+  paperLayer: paperLayer,
+  artboardBackground: layerItem.type === 'Artboard'
+    ? paperLayer.getItem({ data: { id: 'artboardBackground' } }) as paper.Path.Rectangle
+    : null,
+  imageRaster: layerItem.type === 'Image'
+    ? paperLayer.getItem({ data: { id: 'imageRaster' } }) as paper.Raster
+    : null,
+  textContent: layerItem.type === 'Text'
+    ? paperLayer.getItem({ data: { id: 'textContent' } }) as paper.PointText
+    : null,
+  textMask: layerItem.type === 'Text'
+    ? paperLayer.getItem({ data: { id: 'textMask' } }) as paper.Path.Rectangle
+    : null,
+  textBackground: layerItem.type === 'Text'
+    ? paperLayer.getItem({ data: { id: 'textBackground' } }) as paper.Path.Rectangle
+    : null,
+  shapeMask: layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask
+    ? paperLayer.parent.getItem({ data: { id: 'mask' } }) as paper.CompoundPath
+    : null,
+  fillRef: (() => {
+    switch(layerItem.type) {
+      case 'Artboard':
+        return paperLayer.getItem({ data: { id: 'artboardBackground' } });
+      case 'Text':
+        return paperLayer.getItem({ data: { id: 'textContent' } }) as paper.PointText;
+      case 'Image':
+        return paperLayer.getItem({ data: { id: 'imageRaster' } }) as paper.Raster;
+      default:
+        return paperLayer;
+    }
+  })()
+});
+
+const killTimeline = (eventId) => {
+  if (gsap.getById(eventId)) {
+    if (gsap.getById(eventId).isActive()) {
+      gsap.getById(eventId).pause(0, false).kill();
+    } else {
+      gsap.getById(eventId).kill();
+    }
+  }
 }
+
+interface HasEventTweensProps {
+  layerItem: Btwx.Layer;
+  eventItem: Btwx.Event;
+}
+
+const hasEventTweens = ({layerItem, eventItem}: HasEventTweensProps): boolean =>
+  eventItem.tweens.some(id => layerItem.tweens.allIds.includes(id));
 
 interface ApplyLayerTimelinesProps {
   paperLayer: paper.Item;
@@ -117,25 +133,28 @@ export const applyLayerTimelines = ({layerItem, paperLayer, eventTimelines, even
   });
   removePaperLayerEventListeners(paperLayer);
   return Object.keys(eventTimelines).reduce((result, current) => {
+    killTimeline(current);
     const eventItem = eventsById[current];
     const eventTimeline = eventTimelines[current];
-    // create layer timeline for event
-    const timeline = gsap.timeline({
-      id: `${current}-${layerItem.id}`,
-      data: {
-        props: {},
-        ...eventTimelinePaperLayers
+    if (hasEventTweens({layerItem, eventItem})) {
+      // create layer timeline for event
+      const timeline = gsap.timeline({
+        id: `${current}-${layerItem.id}`,
+        data: {
+          ...eventTimelinePaperLayers,
+          props: {}
+        }
+      });
+      // add layer timeline
+      eventTimeline.add(timeline, 0);
+      // update layer timelines
+      result = {
+        ...result,
+        [current]: timeline
       }
-    });
-    // add layer timeline
-    eventTimeline.add(timeline);
-    // update layer timelines
-    result = {
-      ...result,
-      [current]: timeline
     }
     // add event listener if event layer
-    if (layerItem.events.includes(current)) {
+    if (eventItem.layer === layerItem.id) {
       addPaperLayerEventListener({
         eventTimeline,
         paperLayer,

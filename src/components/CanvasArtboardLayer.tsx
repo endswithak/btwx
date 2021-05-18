@@ -228,22 +228,35 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
   ///////////////////////////////////////////////////////
 
   const buildTimeline = (eventId) => {
-    const eventItem = eventsById.byId[eventId];
+    const eventItem = eventsById[eventId];
+    const originArtboardItem = artboardItems[eventItem.artboard];
     const destinationArtboardItem = artboardItems[eventItem.destinationArtboard];
     const destinationArtboardPosition = new paperPreview.Point(
       destinationArtboardItem.frame.x,
       destinationArtboardItem.frame.y
     );
+    const originArtboardPosition = new paperPreview.Point(
+      originArtboardItem.frame.x,
+      originArtboardItem.frame.y
+    );
     return gsap.timeline({
       id: eventId,
       paused: true,
       onStart: function() {
+        paperPreview.view.center = originArtboardPosition;
         dispatch(setPreviewTweening({
           tweening: eventItem.artboard
+        }));
+        dispatch(setActiveArtboard({
+          id: eventItem.artboard
         }));
         ipcRenderer.send('setDocumentPreviewTweening', JSON.stringify({
           instanceId: electronInstanceId,
           tweening: eventItem.artboard
+        }));
+        ipcRenderer.send('setDocumentActiveArtboard', JSON.stringify({
+          instanceId: electronInstanceId,
+          activeArtboard: eventItem.artboard
         }));
       },
       onUpdate: function() {
@@ -254,27 +267,27 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
       },
       onComplete: function() {
         paperPreview.view.center = destinationArtboardPosition;
+        dispatch(setPreviewTweening({
+          tweening: null
+        }));
         dispatch(setActiveArtboard({
           id: eventItem.destinationArtboard
         }));
-        dispatch(setPreviewTweening({
+        ipcRenderer.send('setDocumentPreviewTweening', JSON.stringify({
+          instanceId: electronInstanceId,
           tweening: null
         }));
         ipcRenderer.send('setDocumentActiveArtboard', JSON.stringify({
           instanceId: electronInstanceId,
           activeArtboard: eventItem.destinationArtboard
         }));
-        ipcRenderer.send('setDocumentPreviewTweening', JSON.stringify({
-          instanceId: electronInstanceId,
-          tweening: null
-        }));
         this.pause(0, false);
       }
     });
   }
 
-  useEffect(() => {
-    if (rendered && paperScope === 'preview') {
+  if (paperScope === 'preview') {
+    useEffect(() => {
       if (layerItem.originArtboardForEvents.length > 0) {
         setEventTimelines(layerItem.originArtboardForEvents.reduce((result, current) => ({
           ...result,
@@ -283,25 +296,30 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
       } else {
         setEventTimelines(null);
       }
-    }
-  }, [layerItem.originArtboardForEvents]);
+    }, [layerItem.originArtboardForEvents]);
+  }
 
   ///////////////////////////////////////////////////////
   // EVENTS
   ///////////////////////////////////////////////////////
 
-  useEffect(() => {
-    if (rendered && eventTimelines) {
-      const { paperLayer } = getPaperLayer();
-      const newLayerTimelines = applyLayerTimelines({
-        paperLayer,
-        eventTimelines,
-        eventsById,
-        layerItem
-      });
-      setLayerTimelines(newLayerTimelines);
-    }
-  }, [eventTimelines]);
+  if (paperScope === 'preview') {
+    useEffect(() => {
+      if (rendered && eventTimelines) {
+        const { paperLayer } = getPaperLayer();
+        setLayerTimelines(applyLayerTimelines({
+          paperLayer,
+          eventTimelines,
+          eventsById,
+          layerItem
+        }));
+      } else {
+        if (layerTimelines) {
+          setLayerTimelines(null);
+        }
+      }
+    }, [eventTimelines, rendered]);
+  }
 
   ///////////////////////////////////////////////////////
   // CHILDREN & EVENTS
@@ -329,7 +347,8 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
                   key={eventId}
                   id={id}
                   eventId={eventId}
-                  layerTimeline={layerTimelines[eventId]} />
+                  layerTimeline={layerTimelines[eventId]}
+                  eventTimeline={eventTimelines[eventId]} />
               ))
             : null
           }

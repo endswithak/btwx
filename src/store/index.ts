@@ -50,12 +50,13 @@ const configureStore: any = (preloadedState, isDocumentWindow = false): typeof s
         instanceId: instanceId,
         state: currentState.layer.present
       }));
-    }
-    if (currentActiveArtboard !== previousActiveArtboard) {
-      ipcRenderer.send('setPreviewActiveArtboard', JSON.stringify({
-        instanceId: instanceId,
-        activeArtboard: currentActiveArtboard
-      }));
+    } else {
+      if (currentActiveArtboard !== previousActiveArtboard) {
+        ipcRenderer.send('setPreviewActiveArtboard', JSON.stringify({
+          instanceId: instanceId,
+          activeArtboard: currentActiveArtboard
+        }));
+      }
     }
   }
   if (isDocumentWindow) {

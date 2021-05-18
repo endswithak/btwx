@@ -1,25 +1,49 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useMemo, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { createSelector } from 'reselect';
 import { RootState } from '../store/reducers';
 import CanvasPreviewLayerTween from './CanvasPreviewLayerTween';
+import { addPaperLayerEventListener, removePaperLayerEventListeners } from '../utils';
 
 interface CanvasPreviewEventLayerTimelineProps {
   id: string;
   eventId: string;
   layerTimeline: GSAPTimeline;
+  eventTimeline: GSAPTimeline;
 }
 
-const CanvasPreviewEventLayerTimeline = (props: CanvasPreviewEventLayerTimelineProps): ReactElement => {
-  const { id, eventId, layerTimeline } = props;
-  const layerItem: Btwx.Shape = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Shape);
-  const eventItem = useSelector((state: RootState) => state.layer.present.events.byId[eventId]);
-  const eventLayerTweens = useSelector((state: RootState) => {
-    if (state.layer.present.events.byId[eventId]) {
-      return eventItem.tweens.filter(id => layerItem.tweens.allIds.includes(id));
-    } else {
-      return null;
+const getEventLayerTweensSelector = () =>
+  createSelector(
+    (state: RootState) => state.layer.present.events.byId,
+    (state: RootState) => state.layer.present.tweens.byId,
+    (_: any, props: { eventId: string; layerId: string; }) => props,
+    (eventsById, tweensById, props) => {
+      if (eventsById[props.eventId]) {
+        return eventsById[props.eventId].tweens.filter(tweenId => tweensById[tweenId].layer === props.layerId);
+      } else {
+        return null;
+      }
     }
-  });
+  );
+
+const CanvasPreviewEventLayerTimeline = (props: CanvasPreviewEventLayerTimelineProps): ReactElement => {
+  const { id, eventId, layerTimeline, eventTimeline } = props;
+  const eventItem = useSelector((state: RootState) => state.layer.present.events.byId[eventId]);
+  const eventLayerTweensSelector = useMemo(getEventLayerTweensSelector, []);
+  const eventLayerTweens = useSelector((state: RootState) => eventLayerTweensSelector(state, { eventId, layerId: id }));
+  const [prevListener, setPrevListener] = useState(eventItem.event);
+
+  useEffect(() => {
+    if (prevListener !== eventItem.event && id === eventItem.layer) {
+      removePaperLayerEventListeners(layerTimeline.data.paperLayer);
+      addPaperLayerEventListener({
+        eventTimeline,
+        eventListener: eventItem.event,
+        paperLayer: layerTimeline.data.paperLayer
+      });
+      setPrevListener(eventItem.event);
+    }
+  }, [eventItem.event]);
 
   return (
     eventLayerTweens && eventLayerTweens.length > 0
@@ -29,7 +53,8 @@ const CanvasPreviewEventLayerTimeline = (props: CanvasPreviewEventLayerTimelineP
             <CanvasPreviewLayerTween
               key={tweenId}
               tweenId={tweenId}
-              layerTimeline={layerTimeline} />
+              layerTimeline={layerTimeline}
+              eventTimeline={eventTimeline} />
           ))
         }
       </>

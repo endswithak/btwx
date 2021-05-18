@@ -1187,8 +1187,7 @@ ipcMain.handle('setDocumentActiveArtboard', (event, args) => {
     instance,
     window: 'document',
     func: 'setActiveArtboard',
-    payloadString: JSON.stringify(activeArtboard),
-    callback: Promise.resolve
+    payloadString: JSON.stringify(activeArtboard)
   });
 });
 
