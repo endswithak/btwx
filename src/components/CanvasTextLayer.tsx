@@ -869,7 +869,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
 
   if (paperScope === 'preview') {
     return (
-      rendered && layerTimelines
+      rendered && layerTimelines && eventTimelines
       ? <>
           {
             Object.keys(layerTimelines).map((eventId) => (

@@ -434,33 +434,33 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
   // STROKE OPTIONS STYLE
   ///////////////////////////////////////////////////////
 
-  useEffect(() => {
-    if (rendered) {
-      const { paperLayer } = getPaperLayer();
-      paperLayer.strokeCap = layerItem.style.strokeOptions.cap;
-    }
-  }, [layerItem.style.strokeOptions.cap]);
+  // useEffect(() => {
+  //   if (rendered) {
+  //     const { paperLayer } = getPaperLayer();
+  //     paperLayer.strokeCap = layerItem.style.strokeOptions.cap;
+  //   }
+  // }, [layerItem.style.strokeOptions.cap]);
 
-  useEffect(() => {
-    if (rendered) {
-      const { paperLayer } = getPaperLayer();
-      paperLayer.strokeJoin = layerItem.style.strokeOptions.join;
-    }
-  }, [layerItem.style.strokeOptions.join]);
+  // useEffect(() => {
+  //   if (rendered) {
+  //     const { paperLayer } = getPaperLayer();
+  //     paperLayer.strokeJoin = layerItem.style.strokeOptions.join;
+  //   }
+  // }, [layerItem.style.strokeOptions.join]);
 
-  useEffect(() => {
-    if (rendered) {
-      const { paperLayer } = getPaperLayer();
-      paperLayer.dashArray = [layerItem.style.strokeOptions.dashArray[0], layerItem.style.strokeOptions.dashArray[1]];
-    }
-  }, [layerItem.style.strokeOptions.dashArray]);
+  // useEffect(() => {
+  //   if (rendered) {
+  //     const { paperLayer } = getPaperLayer();
+  //     paperLayer.dashArray = [layerItem.style.strokeOptions.dashArray[0], layerItem.style.strokeOptions.dashArray[1]];
+  //   }
+  // }, [layerItem.style.strokeOptions.dashArray]);
 
-  useEffect(() => {
-    if (rendered) {
-      const { paperLayer } = getPaperLayer();
-      paperLayer.dashOffset = layerItem.style.strokeOptions.dashOffset;
-    }
-  }, [layerItem.style.strokeOptions.dashOffset]);
+  // useEffect(() => {
+  //   if (rendered) {
+  //     const { paperLayer } = getPaperLayer();
+  //     paperLayer.dashOffset = layerItem.style.strokeOptions.dashOffset;
+  //   }
+  // }, [layerItem.style.strokeOptions.dashOffset]);
 
   ///////////////////////////////////////////////////////
   // EVENTS
@@ -490,7 +490,7 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
 
   if (paperScope === 'preview') {
     return (
-      rendered && layerTimelines
+      rendered && layerTimelines && eventTimelines
       ? <>
           {
             Object.keys(layerTimelines).map((eventId) => (

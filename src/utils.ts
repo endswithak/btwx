@@ -95,13 +95,9 @@ export const getEventTimelinePaperLayers = ({ paperLayer, layerItem }: GetEventT
   })()
 });
 
-const killTimeline = (eventId) => {
+export const killTimeline = (eventId) => {
   if (gsap.getById(eventId)) {
-    if (gsap.getById(eventId).isActive()) {
-      gsap.getById(eventId).pause(0, false).kill();
-    } else {
-      gsap.getById(eventId).kill();
-    }
+    gsap.getById(eventId).pause(0, false).kill();
   }
 }
 
@@ -111,7 +107,7 @@ interface HasEventTweensProps {
 }
 
 const hasEventTweens = ({layerItem, eventItem}: HasEventTweensProps): boolean =>
-  eventItem.tweens.some(id => layerItem.tweens.allIds.includes(id));
+  eventItem.tweens.some(id => layerItem.tweens.asOrigin.includes(id));
 
 interface ApplyLayerTimelinesProps {
   paperLayer: paper.Item;
@@ -133,7 +129,6 @@ export const applyLayerTimelines = ({layerItem, paperLayer, eventTimelines, even
   });
   removePaperLayerEventListeners(paperLayer);
   return Object.keys(eventTimelines).reduce((result, current) => {
-    killTimeline(current);
     const eventItem = eventsById[current];
     const eventTimeline = eventTimelines[current];
     if (hasEventTweens({layerItem, eventItem})) {

@@ -2264,11 +2264,12 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
 
   // add flag for autoplay
   useEffect(() => {
-    if (edit.id && edit.tweenEdit && eventLayerTimeline && autoplay && isPreviewOpen && tweenId === edit.tweenEdit[0] && eventDrawerEvent && eventDrawerEvent === event.id) {
+    if (edit.id && edit.tweenEdit && eventLayerTimeline && autoplay && isPreviewOpen && event.tweens.some(id => edit.tweenEdit.includes(id)) && eventDrawerEvent && eventDrawerEvent === event.id) {
       setAutoplayInstance(autoplayInstance ? autoplayInstance + 1 : 1);
     }
   }, [edit.id]);
 
+  // autoplay on next render
   useEffect(() => {
     if (autoplayInstance) {
       eventTimeline.play(0, false);
