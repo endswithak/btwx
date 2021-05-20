@@ -1,8 +1,8 @@
 import React, { ReactElement, useRef } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { ScrollSyncPane } from 'react-scroll-sync';
 import { RootState } from '../store/reducers';
-import { getEventLayers, getWiggleLayersSelector } from '../store/selectors/layer';
+import { getWiggleLayersSelector } from '../store/selectors/layer';
 import EventDrawerEventTimeline from './EventDrawerEventTimeline';
 import EventDrawerEventTimelinesEmptyState from './EventDrawerEventTimelinesEmptyState';
 import EventDrawerEventTimelinesHeaders from './EventDrawerEventTimelinesHeaders';
@@ -13,9 +13,9 @@ import EventDrawerEventTimelineClickZone from './EventDrawerEventTimelineClickZo
 const EventDrawerEventTimelines = (): ReactElement => {
   const timelineRef = useRef<HTMLDivElement>(null);
   // const selected = useSelector((state: RootState) => state.layer.present.tweens.selected.allIds);
-  const eventLayers = useSelector((state: RootState) => getEventLayers(state.layer.present, state.eventDrawer.event));
+  const eventLayers = useSelector((state: RootState) => state.layer.present.events.byId[state.eventDrawer.event] ? state.layer.present.events.byId[state.eventDrawer.event].layers : []);
   const wiggleLayers = useSelector((state: RootState) => getWiggleLayersSelector(state, state.eventDrawer.event));
-  const isEmpty = eventLayers.allIds.length === 0;
+  const isEmpty = eventLayers.length === 0;
   // const dispatch = useDispatch();
 
   // const handleMouseDown = () => {
@@ -39,7 +39,7 @@ const EventDrawerEventTimelines = (): ReactElement => {
                 className='c-event-drawer-event-layers-timeline__layers'>
                 <EventDrawerEventClearSelection />
                 {
-                  eventLayers.allIds.map((layer, index) => (
+                  eventLayers.map((layer, index) => (
                     <EventDrawerEventTimeline
                       key={index}
                       id={layer} />
@@ -47,7 +47,7 @@ const EventDrawerEventTimelines = (): ReactElement => {
                 }
                 {/* make space for wiggle layers */}
                 {
-                  wiggleLayers.allIds.filter((id) => !eventLayers.allIds.includes(id)).map((layer) => (
+                  wiggleLayers.allIds.filter((id) => !eventLayers.includes(id)).map((layer) => (
                     <div
                       className='c-event-drawer-event__layer-timeline'>
                       <EventDrawerEventTimelineClickZone />

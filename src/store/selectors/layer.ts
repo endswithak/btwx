@@ -13,8 +13,8 @@ import { ARTBOARDS_PER_PROJECT, DEFAULT_TWEEN_EVENTS_TYPES, TWEEN_PROPS_MAP } fr
 import { getLeading } from '../../components/CanvasTextLayer';
 
 export const getRoot = (state: RootState): Btwx.Layer => state.layer.present.byId.root;
-export const getArtboardEventDestinationIds = (state: RootState, id: string): string[] => (state.layer.present.byId[id] as Btwx.Artboard).destinationArtboardForEvents;
-export const getArtboardEventOriginIds = (state: RootState, id: string): string[] => (state.layer.present.byId[id] as Btwx.Artboard).originArtboardForEvents;
+export const getArtboardEventDestinationIds = (state: RootState, id: string): string[] => (state.layer.present.byId[id] as Btwx.Artboard).destinationForEvents;
+export const getArtboardEventOriginIds = (state: RootState, id: string): string[] => (state.layer.present.byId[id] as Btwx.Artboard).originForEvents;
 export const getRootChildren = (state: RootState): string[] => state.layer.present.byId.root.children;
 export const getSelected = (state: RootState): string[] => state.layer.present.selected;
 export const getAllArtboardIds = (state: RootState): string[] => state.layer.present.allArtboardIds;
@@ -923,9 +923,9 @@ export const getSelectedEventsEventListener = createSelector(
     return selectedEvents.reduce((result: Btwx.EventType | 'multi', current: string) => {
       const eventItem = eventsById[current];
       if (!result) {
-        result = eventItem.event;
+        result = eventItem.listener;
       }
-      if (result && eventItem.event !== result) {
+      if (result && eventItem.listener !== result) {
         result = 'multi';
       }
       return result;
@@ -942,8 +942,8 @@ export const getSelectedEventsAvailableEventListeners = createSelector(
       const layerItemEvents = eventLayerItem.events;
       layerItemEvents.forEach((id) => {
         const layerEventItem = eventsById[id];
-        if (result.includes(layerEventItem.event)) {
-          result = removeItem(result, layerEventItem.event);
+        if (result.includes(layerEventItem.listener)) {
+          result = removeItem(result, layerEventItem.listener);
         }
       });
       return result;
@@ -966,8 +966,8 @@ export const getSelectedAvailableEventListeners = createSelector(
   (selectedLayersEvents) => {
     return selectedLayersEvents.allIds.reduce((result, current) => {
       const event = selectedLayersEvents.byId[current];
-      if (result.includes(event.event)) {
-        result = removeItem(result, event.event);
+      if (result.includes(event.listener)) {
+        result = removeItem(result, event.listener);
       }
       return result;
     }, DEFAULT_TWEEN_EVENTS_TYPES) as Btwx.EventType[];
@@ -1010,11 +1010,11 @@ export const getSelectedAvailableEventDestinations = createSelector(
     if (selectedLayersEvents.allIds.length > 0) {
       artboards = selectedLayersEvents.allIds.reduce((result, current) => {
         const event = selectedLayersEvents.byId[current];
-        if (result.includes(event.artboard)) {
-          result = removeItem(result, event.artboard);
+        if (result.includes(event.origin)) {
+          result = removeItem(result, event.origin);
         }
-        if (result.includes(event.destinationArtboard)) {
-          result = removeItem(result, event.destinationArtboard);
+        if (result.includes(event.destination)) {
+          result = removeItem(result, event.destination);
         }
         return result;
       }, artboards);
@@ -1401,10 +1401,10 @@ export const getSelectedAndDescendentsFull = createSelector(
   (selected, layersById, allShapeIcons, tweensById, eventsById) => {
     const sharedEvents = selected.filter((id) => layersById[id].type === 'Artboard').reduce((result, current) => {
       const layerItem = layersById[current];
-      const originArtboardEvents = (layerItem as Btwx.Artboard).originArtboardForEvents.reduce((ar, ac) => {
+      const originArtboardEvents = (layerItem as Btwx.Artboard).originForEvents.reduce((ar, ac) => {
         const event = eventsById[ac];
-        if (selected.includes(event.destinationArtboard) && !result.events.allIds.includes(ac)) {
-          const eventTweensById = event.tweens.reduce((tr, tc) => ({
+        if (selected.includes(event.destination) && !result.events.allIds.includes(ac)) {
+          const eventTweensById = event.tweens.allIds.reduce((tr, tc) => ({
             ...tr,
             [tc]: tweensById[tc]
           }), {});
@@ -1418,7 +1418,7 @@ export const getSelectedAndDescendentsFull = createSelector(
               }
             },
             tweens: {
-              allIds: [...ar.tweens.allIds, ...event.tweens],
+              allIds: [...ar.tweens.allIds, ...event.tweens.allIds],
               byId: {
                 ...ar.tweens.byId,
                 ...eventTweensById
@@ -1439,10 +1439,10 @@ export const getSelectedAndDescendentsFull = createSelector(
           byId: { ...result.tweens.byId, ...originArtboardEvents.tweens.byId }
         }
       };
-      const destinationArtboardEvents = (layerItem as Btwx.Artboard).destinationArtboardForEvents.reduce((ar, ac) => {
+      const destinationArtboardEvents = (layerItem as Btwx.Artboard).destinationForEvents.reduce((ar, ac) => {
         const event = eventsById[ac];
-        if (selected.includes(event.artboard) && !result.events.allIds.includes(ac)) {
-          const eventTweensById = event.tweens.reduce((tr, tc) => ({
+        if (selected.includes(event.origin) && !result.events.allIds.includes(ac)) {
+          const eventTweensById = event.tweens.allIds.reduce((tr, tc) => ({
             ...tr,
             [tc]: tweensById[tc]
           }), {});
@@ -1456,7 +1456,7 @@ export const getSelectedAndDescendentsFull = createSelector(
               }
             },
             tweens: {
-              allIds: [...ar.tweens.allIds, ...event.tweens],
+              allIds: [...ar.tweens.allIds, ...event.tweens.allIds],
               byId: {
                 ...ar.tweens.byId,
                 ...eventTweensById
@@ -1529,8 +1529,8 @@ export const getSelectedAndDescendentsFull = createSelector(
           ...(() => {
             if (currentLayerItem.type === 'Artboard') {
               return {
-                originArtboardForEvents: (currentLayerItem as Btwx.Artboard).originArtboardForEvents.filter((id) => sharedEvents.events.allIds.includes(id)),
-                destinationArtboardForEvents: (currentLayerItem as Btwx.Artboard).destinationArtboardForEvents.filter((id) => sharedEvents.events.allIds.includes(id))
+                originForEvents: (currentLayerItem as Btwx.Artboard).originForEvents.filter((id) => sharedEvents.events.allIds.includes(id)),
+                destinationForEvents: (currentLayerItem as Btwx.Artboard).destinationForEvents.filter((id) => sharedEvents.events.allIds.includes(id))
               }
             } else {
               return {}
@@ -1941,87 +1941,80 @@ export const canUngroupSelected = createSelector(
   }
 );
 
-export const getEventTweenLayers = createSelector(
-  [ getEventById, getTweensById ],
-  (event, tweensById) => {
-    return event.tweens.reduce((result, current) => {
-      const tween = tweensById[current];
-      if (!result.includes(tween.layer)) {
-        result = [...result, tween.layer];
-      }
+export const getAllEventOriginTweenLayers = createSelector(
+  [ getLayerById, getEventsById ],
+  (layerById, eventsById) => {
+    return (layerById as Btwx.Artboard).originForEvents.reduce((result, current) => {
+      const event = eventsById[current];
+      event.layers.forEach((id) => {
+        if (!result.includes(id)) {
+          result = [...result, id];
+        }
+      });
       return result;
     }, []) as string[];
   }
 );
 
-export const getEventLayersSelector = createSelector(
-  [ getLayersById, getEventById, getTweensById ],
-  (layersById, event, tweensById) => {
-    return event.tweens.reduce((result, current) => {
-      const tween = tweensById[current];
-      if (!result.allIds.includes(tween.layer)) {
-        result = {
-          allIds: [...result.allIds, tween.layer],
-          byId: {
-            ...result.byId,
-            [tween.layer]: layersById[tween.layer]
-          }
-        }
-      }
-      return result;
-    }, {
-      allIds: [],
-      byId: {}
-    });
-  }
-);
+// export const getEventTweenLayers = createSelector(
+//   [ getEventById, getTweensById ],
+//   (event, tweensById) => {
+//     return event.tweens.reduce((result, current) => {
+//       const tween = tweensById[current];
+//       if (!result.includes(tween.layer)) {
+//         result = [...result, tween.layer];
+//       }
+//       return result;
+//     }, []) as string[];
+//   }
+// );
 
-export const getEventDrawerLayers = createSelector(
-  [ getLayersById, getEventDrawerEventItem, getTweensById ],
-  (layersById, eventDrawerEventItem, tweensById) => {
-    return eventDrawerEventItem.tweens.reduce((result, current) => {
-      const tween = tweensById[current];
-      if (!result.allIds.includes(tween.layer)) {
-        result = {
-          allIds: [...result.allIds, tween.layer],
-          byId: {
-            ...result.byId,
-            [tween.layer]: layersById[tween.layer]
-          }
-        }
-      }
-      return result;
-    }, {
-      allIds: [],
-      byId: {}
-    });
-  }
-);
+// export const getEventDrawerLayers = createSelector(
+//   [ getLayersById, getEventDrawerEventItem, getTweensById ],
+//   (layersById, eventDrawerEventItem, tweensById) => {
+//     return eventDrawerEventItem.tweens.reduce((result, current) => {
+//       const tween = tweensById[current];
+//       if (!result.allIds.includes(tween.layer)) {
+//         result = {
+//           allIds: [...result.allIds, tween.layer],
+//           byId: {
+//             ...result.byId,
+//             [tween.layer]: layersById[tween.layer]
+//           }
+//         }
+//       }
+//       return result;
+//     }, {
+//       allIds: [],
+//       byId: {}
+//     });
+//   }
+// );
 
-export const getEventDrawerScrollPositions = createSelector(
-  [getEventDrawerLayers, getEventDrawerEventItem],
-  (eventLayers, eventDrawerEventItem) => {
-    return eventLayers.allIds.reduce((result: number[], current, index) => {
-      const prevY = result[index - 1] ? result[index - 1] : 0;
-      let y = 32 + prevY;
-      const eventLayer = eventLayers.byId[current];
-      const layerTweens = eventLayer.tweens.asOrigin;
-      layerTweens.forEach((id) => {
-        if (eventDrawerEventItem.tweens.includes(id)) {
-          y += 32;
-        }
-      });
-      result = [...result, y];
-      return result;
-    }, [])
-  }
-);
+// export const getEventDrawerScrollPositions = createSelector(
+//   [getEventDrawerLayers, getEventDrawerEventItem],
+//   (eventLayers, eventDrawerEventItem) => {
+//     return eventLayers.allIds.reduce((result: number[], current, index) => {
+//       const prevY = result[index - 1] ? result[index - 1] : 0;
+//       let y = 32 + prevY;
+//       const eventLayer = eventLayers.byId[current];
+//       const layerTweens = eventLayer.tweens.asOrigin;
+//       layerTweens.forEach((id) => {
+//         if (eventDrawerEventItem.tweens.includes(id)) {
+//           y += 32;
+//         }
+//       });
+//       result = [...result, y];
+//       return result;
+//     }, [])
+//   }
+// );
 
 export const getWiggleLayersSelector = createSelector(
   [ getLayersById, getEventById ],
   (layersById, event) => {
-    const originChildren = getLayerDescendants({byId: layersById} as any, event.artboard);
-    const destinationChildren = getLayerDescendants({byId: layersById} as any, event.destinationArtboard);
+    const originChildren = getLayerDescendants({byId: layersById} as any, event.origin);
+    const destinationChildren = getLayerDescendants({byId: layersById} as any, event.destination);
     return originChildren.reduce((result, current) => {
       const destinationEquivalent = getDestinationEquivalent({byId: layersById} as any, current, destinationChildren);
       if (destinationEquivalent && destinationEquivalent.type !== 'Group') {
@@ -2115,13 +2108,13 @@ export const getAllArtboardEventsConnectedArtboards = createSelector(
   (originEvents, layersById) => {
     return originEvents.allIds.reduce((result: { allIds: string[]; byId: { [id: string]: Btwx.Artboard } }, current) => {
       const event = originEvents.byId[current];
-      if (!result.allIds.includes(event.destinationArtboard)) {
-        result.byId[event.destinationArtboard] = layersById[event.destinationArtboard] as Btwx.Artboard;
-        result.allIds = [...result.allIds, event.destinationArtboard];
+      if (!result.allIds.includes(event.destination)) {
+        result.byId[event.destination] = layersById[event.destination] as Btwx.Artboard;
+        result.allIds = [...result.allIds, event.destination];
       }
-      if (!result.allIds.includes(event.artboard)) {
-        result.byId[event.artboard] = layersById[event.artboard] as Btwx.Artboard;
-        result.allIds = [...result.allIds, event.artboard];
+      if (!result.allIds.includes(event.origin)) {
+        result.byId[event.origin] = layersById[event.origin] as Btwx.Artboard;
+        result.allIds = [...result.allIds, event.origin];
       }
       return result;
     }, { allIds: [], byId: {} })
@@ -2147,7 +2140,7 @@ export const getAllArtboardTweens = createSelector(
   (originEvents, tweensById) => {
     return originEvents.allIds.reduce((result: { allIds: string[]; byId: { [id: string]: Btwx.Tween } }, current) => {
       const event = originEvents.byId[current];
-      event.tweens.forEach((tween) => {
+      event.tweens.allIds.forEach((tween) => {
         result.byId[tween] = tweensById[tween];
         result.allIds = [...result.allIds, tween]
       });
@@ -2244,8 +2237,8 @@ export const getSortedEvents = createSelector(
 export const getActiveArtboardSortedEvents = createSelector(
   [ getSortedEvents, getActiveArtboard, getEventsById  ],
   (sortedEvents, activeArtboard, eventById) => {
-    const activeArtboardEvents = activeArtboard ? sortedEvents.filter((id) => eventById[id].artboard === activeArtboard).reverse() : [];
-    const otherEventIds = activeArtboard ? sortedEvents.filter((id) => eventById[id].artboard !== activeArtboard).reverse() : sortedEvents.reverse();
+    const activeArtboardEvents = activeArtboard ? sortedEvents.filter((id) => eventById[id].origin === activeArtboard).reverse() : [];
+    const otherEventIds = activeArtboard ? sortedEvents.filter((id) => eventById[id].origin !== activeArtboard).reverse() : sortedEvents.reverse();
     const eventIds = [...activeArtboardEvents, ...otherEventIds];
     return {
       allIds: eventIds,
@@ -2277,8 +2270,8 @@ export const getArtboardEventItems = createSelector(
         }
       }
     } else {
-      const activeArtboardEvents = activeArtboard ? sortedEvents.filter((id) => eventById[id].artboard === activeArtboard) : [];
-      const otherEventIds = activeArtboard ? sortedEvents.filter((id) => eventById[id].artboard !== activeArtboard) : sortedEvents;
+      const activeArtboardEvents = activeArtboard ? sortedEvents.filter((id) => eventById[id].origin === activeArtboard) : [];
+      const otherEventIds = activeArtboard ? sortedEvents.filter((id) => eventById[id].origin !== activeArtboard) : sortedEvents;
       const eventIds = [...activeArtboardEvents, ...otherEventIds];
       eventItems = eventIds.reduce((result, current) => {
         return [...result, eventById[current]];
@@ -3864,7 +3857,7 @@ export const getEquivalentTweenProps = (layerItem: Btwx.Layer, equivalentLayerIt
   x: hasXTween(layerItem, equivalentLayerItem),
   y: hasYTween(layerItem, equivalentLayerItem),
   rotation: hasRotationTween(layerItem, equivalentLayerItem),
-  radius: false,
+  // radius: false,
   width: hasWidthTween(layerItem, equivalentLayerItem),
   height: hasHeightTween(layerItem, equivalentLayerItem),
   stroke: hasStrokeTween(layerItem, equivalentLayerItem),
@@ -4087,28 +4080,6 @@ export const getLongestEventTween = (tweensById: {[id: string]: Btwx.Tween}): Bt
   }, tweensById[Object.keys(tweensById)[0]]);
 };
 
-export const getEventLayers = (store: LayerState, eventId: string): {
-  allIds: string[];
-  byId: {
-    [id: string]: Btwx.Layer;
-  };
-} => {
-  const tweenEvent = store.events.byId[eventId];
-  const allIds: string[] = [];
-  const byId = tweenEvent.tweens.reduce((result: { [id: string]: Btwx.Layer }, current) => {
-    const tween = store.tweens.byId[current];
-    if (!allIds.includes(tween.layer)) {
-      result[tween.layer] = store.byId[tween.layer];
-      allIds.push(tween.layer);
-    }
-    return result;
-  }, {});
-  return {
-    allIds,
-    byId
-  };
-};
-
 export const getWiggleLayers = (store: LayerState, eventId: string, exclude: string[] = []): {
   allIds: string[];
   byId: {
@@ -4116,8 +4087,8 @@ export const getWiggleLayers = (store: LayerState, eventId: string, exclude: str
   };
 } => {
   const event = store.events.byId[eventId];
-  const originChildren = getLayerDescendants(store, event.artboard);
-  const destinationChildren = getLayerDescendants(store, event.destinationArtboard);
+  const originChildren = getLayerDescendants(store, event.origin);
+  const destinationChildren = getLayerDescendants(store, event.destination);
   return originChildren.reduce((result, current) => {
     const destinationEquivalent = getDestinationEquivalent(store, current, destinationChildren);
     if (destinationEquivalent && !exclude.includes(current)) {
@@ -4138,28 +4109,6 @@ export const getWiggleLayers = (store: LayerState, eventId: string, exclude: str
     allIds: [],
     byId: {}
   });
-};
-
-export const getEventLayerTweens = (store: LayerState, eventId: string, layerId: string): {
-  allIds: string[];
-  byId: {
-    [id: string]: Btwx.Tween;
-  };
-} => {
-  const event = store.events.byId[eventId];
-  const allIds: string[] = [];
-  const byId = event.tweens.reduce((result: { [id: string]: Btwx.Tween }, current) => {
-    const tween = store.tweens.byId[current];
-    if (tween.layer === layerId) {
-      result[current] = tween;
-      allIds.push(current);
-    }
-    return result;
-  }, {});
-  return {
-    allIds,
-    byId
-  };
 };
 
 export const getAbsolutePosition = (store: LayerState, id: string): paper.Point => {

@@ -701,6 +701,7 @@ import {
   LayerTypes
 } from '../actionTypes/layer';
 import { LayerState } from '../reducers/layer';
+import { setPreviewTweening } from './preview';
 
 // Artboard
 
@@ -741,8 +742,8 @@ export const addArtboardThunk = (payload: AddArtboardPayload) => {
       selected: false,
       hover: false,
       events: [],
-      originArtboardForEvents: [],
-      destinationArtboardForEvents: [],
+      originForEvents: [],
+      destinationForEvents: [],
       tweens: {
         allIds: [],
         asOrigin: [],
@@ -1190,9 +1191,22 @@ export const removeLayersThunk = () => {
       const selectedAndDescendants = state.layer.present.selected.reduce((result, current) => {
         return [...result, ...getLayerAndDescendants(state.layer.present, current)];
       }, []);
+      // if preview is tweening, and layers to remove...
+      // includes a tweening layer, reset the tweening event
+      if (state.preview.tweening && selectedAndDescendants.some(id => state.layer.present.events.byId[state.preview.tweening].layers.includes(id))) {
+        ipcRenderer.send('resetPreviewTweeningEvent', JSON.stringify({
+          instanceId: state.session.instance,
+          eventId: state.preview.tweening
+        }));
+        ipcRenderer.send('setPreviewTweening', JSON.stringify({
+          instanceId: state.session.instance,
+          tweening: null
+        }));
+        dispatch(setPreviewTweening({tweening: null}));
+      }
       if (state.viewSettings.eventDrawer.isOpen && state.eventDrawer.event) {
         const tweenEvent = state.layer.present.events.byId[state.eventDrawer.event];
-        if (selectedAndDescendants.includes(tweenEvent.layer) || selectedAndDescendants.includes(tweenEvent.artboard) || selectedAndDescendants.includes(tweenEvent.destinationArtboard)) {
+        if (selectedAndDescendants.includes(tweenEvent.layer) || selectedAndDescendants.includes(tweenEvent.origin) || selectedAndDescendants.includes(tweenEvent.destination)) {
           dispatch(setEventDrawerEventThunk({id: null}));
         }
       }
@@ -1573,19 +1587,23 @@ export const addLayersEvent = (payload: AddLayersEventPayload): LayerTypes => ({
   }
 });
 
-export const addSelectedEventThunk = (event: Btwx.EventType, destinationArtboard: string) => {
+export const addSelectedEventThunk = (listener: Btwx.EventType, destination: string) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     const events: any[] = [];
     state.layer.present.selected.forEach((id, index) => {
       const layerItem = state.layer.present.byId[id];
       events.push({
-        event,
-        destinationArtboard,
+        listener,
+        destination,
         name: 'Event',
-        artboard: layerItem.type === 'Artboard' ? layerItem.id : layerItem.scope[1],
+        origin: layerItem.type === 'Artboard' ? layerItem.id : layerItem.scope[1],
         layer: id,
-        tweens: []
+        layers: [],
+        tweens: {
+          allIds: [],
+          byLayer: {}
+        }
       });
     });
     dispatch(addLayersEvent({events}));
@@ -7341,10 +7359,10 @@ export const updateEventsFrame = (state: RootState): void => {
       const isSelected = selectedEvents.includes(event.id);
       const eventLayerItem = state.layer.present.byId[event.layer];
       // const groupOpacity = state.layer.present.hover ? state.layer.present.hover === event.id ? 1 : 0.25 : 1;
-      const elementColor = isSelected && !editingEvent ? '#fff' : event.artboard === state.layer.present.activeArtboard ? theme.palette.primary : theme.eventFrameInactiveColor;
+      const elementColor = isSelected && !editingEvent ? '#fff' : event.origin === state.layer.present.activeArtboard ? theme.palette.primary : theme.eventFrameInactiveColor;
       const artboardTopTop = getArtboardsTopTop(state.layer.present);
-      const origin = state.layer.present.byId[event.artboard];
-      const destination = state.layer.present.byId[event.destinationArtboard];
+      const origin = state.layer.present.byId[event.origin];
+      const destination = state.layer.present.byId[event.destination];
       const leftToRight = origin.frame.x < destination.frame.x;
       const tweenEventDestinationIndicator = new paperMain.Path.RegularPolygon({
         center: new paperMain.Point(destination.frame.x, artboardTopTop - (48 / paperMain.view.zoom)),
@@ -7459,7 +7477,7 @@ export const updateEventsFrame = (state: RootState): void => {
         }
       });
       const tweenEventText = new paperMain.PointText({
-        content: DEFAULT_TWEEN_EVENTS.find((tweenEvent) => event.event === tweenEvent.event).titleCase,
+        content: DEFAULT_TWEEN_EVENTS.find((tweenEvent) => event.listener === tweenEvent.listener).titleCase,
         point: new paperMain.Point(
           tweenEventConnector.bounds.center.x,
           tweenEventDestinationIndicator.bounds.top - ((1 / paperMain.view.zoom) * 8)

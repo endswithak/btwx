@@ -1,7 +1,5 @@
-import React, { ReactElement, useMemo, useState, useEffect } from 'react';
-import { gsap } from 'gsap';
+import React, { ReactElement, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { createSelector } from 'reselect';
 import { RootState } from '../store/reducers';
 import CanvasPreviewLayerTween from './CanvasPreviewLayerTween';
 import { addPaperLayerEventListener, removePaperLayerEventListeners } from '../utils';
@@ -13,48 +11,33 @@ interface CanvasPreviewEventLayerTimelineProps {
   eventTimeline: GSAPTimeline;
 }
 
-const getEventLayerTweensSelector = () =>
-  createSelector(
-    (state: RootState) => state.layer.present.events.byId,
-    (state: RootState) => state.layer.present.tweens.byId,
-    (_: any, props: { eventId: string; layerId: string; }) => props,
-    (eventsById, tweensById, props) => {
-      if (eventsById[props.eventId]) {
-        return eventsById[props.eventId].tweens.filter(tweenId => tweensById[tweenId].layer === props.layerId);
-      } else {
-        return null;
-      }
-    }
-  );
-
 const CanvasPreviewEventLayerTimeline = (props: CanvasPreviewEventLayerTimelineProps): ReactElement => {
   const { id, eventId, layerTimeline, eventTimeline } = props;
   const eventItem = useSelector((state: RootState) => state.layer.present.events.byId[eventId]);
-  const eventListener = eventItem ? eventItem.event : null;
-  const eventLayer = eventItem ? eventItem.layer : null;
-  const eventLayerTweensSelector = useMemo(getEventLayerTweensSelector, []);
-  const eventLayerTweens = useSelector((state: RootState) => eventLayerTweensSelector(state, { eventId, layerId: id }));
-  const [prevListener, setPrevListener] = useState(eventListener);
+  const currentEventListener = useSelector((state: RootState) => eventItem ? eventItem.listener : null);
+  const currentEventLayer = useSelector((state: RootState) => eventItem ? eventItem.layer : null);
+  const currentEventLayerTweens = useSelector((state: RootState) => eventItem ? eventItem.tweens.byLayer[id] : []);
+  const [eventLayerTweens, setEventLayerTweens] = useState(currentEventLayerTweens);
+  const [eventLayer, setEventLayer] = useState(currentEventLayer);
+  const [prevEventListener, setPrevEventListener] = useState(currentEventListener);
 
   useEffect(() => {
-    return () => {
-      if (gsap.getById(eventId).isActive()) {
-        gsap.getById(eventId).pause(0, false);
-      }
+    if (currentEventLayerTweens && (currentEventLayerTweens.length !== eventLayerTweens.length || !currentEventLayerTweens.every(id => eventLayerTweens.includes(id)))) {
+      setEventLayerTweens(currentEventLayerTweens);
     }
-  }, []);
+  }, [currentEventLayerTweens]);
 
   useEffect(() => {
-    if (eventListener && (prevListener !== eventListener && id === eventLayer)) {
+    if (currentEventListener && (prevEventListener !== currentEventListener && id === eventLayer)) {
       removePaperLayerEventListeners(layerTimeline.data.paperLayer);
       addPaperLayerEventListener({
         eventTimeline,
-        eventListener: eventListener,
+        eventListener: currentEventListener,
         paperLayer: layerTimeline.data.paperLayer
       });
-      setPrevListener(eventListener);
+      setPrevEventListener(currentEventListener);
     }
-  }, [eventListener]);
+  }, [currentEventListener]);
 
   return (
     eventLayerTweens && eventLayerTweens.length > 0

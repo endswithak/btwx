@@ -30,8 +30,8 @@ const MenuLayerEvent = (props: MenuLayerEventProps): ReactElement => {
           click: {
             id: MENU_ITEM_ID,
             params: {
-              destinationArtboard: current,
-              event: eventListener,
+              destination: current,
+              listener: eventListener,
             }
           }
         }

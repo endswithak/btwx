@@ -1,7 +1,6 @@
 import React, { ReactElement } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getEventLayerTweens } from '../store/selectors/layer';
 import EventDrawerEventLayerTweenProp from './EventDrawerEventLayerTweenProp';
 import ListGroup from './ListGroup';
 
@@ -11,17 +10,17 @@ interface EventDrawerEventLayerTweenPropsProps {
 
 const EventDrawerEventLayerTweenProps = (props: EventDrawerEventLayerTweenPropsProps): ReactElement => {
   const { layerId } = props;
-  const eventLayerTweens = useSelector((state: RootState) => getEventLayerTweens(state.layer.present, state.eventDrawer.event, layerId));
-  const sortedProps: string[] = eventLayerTweens.allIds.reduce((result, current) => {
-    const tween = eventLayerTweens.byId[current];
+  const eventLayerTweens = useSelector((state: RootState) => state.layer.present.events.byId[state.eventDrawer.event] ? state.layer.present.events.byId[state.eventDrawer.event].tweens.byLayer[layerId] : []);
+  const sortedProps: string[] = useSelector((state: RootState) => eventLayerTweens.reduce((result, current) => {
+    const tween = state.layer.present.tweens.byId[current];
     result = [...result, tween.prop];
     return result;
-  }, []).sort();
-  const orderedLayerTweensByProp: string[] = sortedProps.reduce((result, current: Btwx.TweenProp) => {
-    const tween = eventLayerTweens.allIds.find((id: string) => eventLayerTweens.byId[id].prop === current);
+  }, []).sort());
+  const orderedLayerTweensByProp: string[] = useSelector((state: RootState) => sortedProps.reduce((result, current: Btwx.TweenProp) => {
+    const tween = eventLayerTweens.find((id: string) => state.layer.present.tweens.byId[id].prop === current);
     result = [...result, tween];
     return result;
-  }, []);
+  }, []));
 
   return (
     <ListGroup>

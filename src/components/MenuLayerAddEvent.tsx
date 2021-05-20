@@ -44,9 +44,9 @@ const MenuLayerAddEvent = (props: MenuLayerAddEventProps): ReactElement => {
   }, [visible, mouseDown, mouseUp, mouseDrag, click, rightClick, doubleClick, mouseEnter, mouseLeave]);
 
   useEffect(() => {
-    (window as any)[MENU_ITEM_ID] = (params: { event: Btwx.EventType; destinationArtboard: string }) => {
-      const { event, destinationArtboard } = params;
-      dispatch(addSelectedEventThunk(event, destinationArtboard));
+    (window as any)[MENU_ITEM_ID] = (params: { listener: Btwx.EventType; destination: string }) => {
+      const { listener, destination } = params;
+      dispatch(addSelectedEventThunk(listener, destination));
     }
   }, []);
 

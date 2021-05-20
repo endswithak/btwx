@@ -78,7 +78,6 @@ export const TWEEN_PROPS_MAP: { [id: string]: string[] } = {
   fillGradientDestinationY: [],
   x: [],
   y: [],
-  radius: [],
   rotation: [],
   width: [],
   height: [],
@@ -119,7 +118,6 @@ export const CUSTOM_WIGGLE_TWEEN_STRENGTH_MAP: { [id: string]: number | Btwx.Col
   fillGradientDestinationY: 5,
   x: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
   y: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
-  radius: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
   rotation: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
   width: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
   height: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
@@ -202,16 +200,16 @@ export const getDefaultTweenProps = (customWiggleProp: any = null) => ({
 
 export const DEFAULT_TWEEN_EVENTS_TYPES: Btwx.EventType[] = ['mousedown', 'mouseup', 'mousedrag', 'mouseenter', 'mouseleave', 'click', 'rightclick', 'doubleclick'];
 
-export const DEFAULT_TWEEN_EVENTS: { event: Btwx.EventType; titleCase: string }[] = [
-  { event: 'mousedown', titleCase: 'Mouse Down' },
-  { event: 'mouseup', titleCase: 'Mouse Up' },
-  { event: 'mousedrag', titleCase: 'Mouse Drag' },
-  { event: 'click', titleCase: 'Click' },
-  { event: 'rightclick', titleCase: 'Right Click' },
-  { event: 'doubleclick', titleCase: 'Double Click' },
-  { event: 'mousemove', titleCase: 'Mouse Move' },
-  { event: 'mouseenter', titleCase: 'Mouse Enter' },
-  { event: 'mouseleave', titleCase: 'Mouse Leave' }
+export const DEFAULT_TWEEN_EVENTS: { listener: Btwx.EventType; titleCase: string }[] = [
+  { listener: 'mousedown', titleCase: 'Mouse Down' },
+  { listener: 'mouseup', titleCase: 'Mouse Up' },
+  { listener: 'mousedrag', titleCase: 'Mouse Drag' },
+  { listener: 'click', titleCase: 'Click' },
+  { listener: 'rightclick', titleCase: 'Right Click' },
+  { listener: 'doubleclick', titleCase: 'Double Click' },
+  { listener: 'mousemove', titleCase: 'Mouse Move' },
+  { listener: 'mouseenter', titleCase: 'Mouse Enter' },
+  { listener: 'mouseleave', titleCase: 'Mouse Leave' }
 ];
 
 export const DEFAULT_EASE_CURVES = {

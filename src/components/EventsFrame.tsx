@@ -6,7 +6,7 @@ import { paperMain } from '../canvas';
 
 const EventsFrame = (): ReactElement => {
   const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
-  const activeArtboardEvents = useSelector((state: RootState) => (state.layer.present.byId[state.layer.present.activeArtboard] as Btwx.Artboard).originArtboardForEvents);
+  const activeArtboardEvents = useSelector((state: RootState) => (state.layer.present.byId[state.layer.present.activeArtboard] as Btwx.Artboard).originForEvents);
   const theme = useSelector((state: RootState) => state.preferences.theme);
   const canvasTheme = useSelector((state: RootState) => state.preferences.canvasTheme);
   const eventDrawerEventSort = useSelector((state: RootState) => state.eventDrawer.eventSort);

@@ -386,8 +386,8 @@ declare namespace Btwx {
 
   interface Artboard extends Layer {
     type: 'Artboard';
-    originArtboardForEvents: string[];
-    destinationArtboardForEvents: string[];
+    originForEvents: string[];
+    destinationForEvents: string[];
     projectIndex: number;
   }
 
@@ -523,10 +523,18 @@ declare namespace Btwx {
     id: string;
     name: string;
     layer: string;
-    event: EventType;
-    artboard: string;
-    destinationArtboard: string;
-    tweens: string[];
+    // event: EventType;
+    listener: EventType;
+    origin: string;
+    destination: string;
+    // tweens: string[];
+    layers: string[];
+    tweens: {
+      allIds: string[];
+      byLayer: {
+        [id: string]: string[];
+      };
+    };
   }
 
   interface Tween {

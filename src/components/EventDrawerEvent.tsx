@@ -2,16 +2,26 @@ import React, { ReactElement, useState, useEffect } from 'react';
 import throttle from 'lodash.throttle';
 import { useSelector } from 'react-redux';
 import { ScrollSync } from 'react-scroll-sync';
-import { getEventDrawerLayers, getEventDrawerScrollPositions } from '../store/selectors/layer';
 import { RootState } from '../store/reducers';
 import EventDrawerEventLayers from './EventDrawerEventLayers';
 import EventDrawerEventLayersDragHandle from './EventDrawerEventLayersDragHandle';
 import EventDrawerEventTimelines from './EventDrawerEventTimelines';
 
 const EventDrawerEvent = (): ReactElement => {
-  const eventLayers = useSelector((state: RootState) => getEventDrawerLayers(state));
-  const scrollPositions = useSelector((state: RootState) => getEventDrawerScrollPositions(state));
-  const [scrollLayer, setScrollLayer] = useState(eventLayers.allIds[0]);
+  const eventLayers = useSelector((state: RootState) => state.layer.present.events.byId[state.eventDrawer.event] ? state.layer.present.events.byId[state.eventDrawer.event].layers : []);
+  const scrollPositions = useSelector((state: RootState) => eventLayers.reduce((result: number[], current, index) => {
+    const prevY = result[index - 1] ? result[index - 1] : 0;
+    let y = 32 + prevY;
+    const layerTweens = state.layer.present.events.byId[state.eventDrawer.event].tweens.byLayer[current];
+    layerTweens.forEach((id) => {
+      if (state.layer.present.events.byId[state.eventDrawer.event].tweens.allIds.includes(id)) {
+        y += 32;
+      }
+    });
+    result = [...result, y];
+    return result;
+  }, []));
+  const [scrollLayer, setScrollLayer] = useState(eventLayers.length > 0 ? eventLayers[0] : null);
 
   const getScrollLayer = () => {
     const tweenLayers = document.getElementById('event-drawer-event-layers');
@@ -21,7 +31,7 @@ const EventDrawerEvent = (): ReactElement => {
       while(scrollTop >= (scrollPositions[index] - 16)) {
         index++;
       }
-      return eventLayers.allIds[index];
+      return eventLayers[index];
     }
   }
 

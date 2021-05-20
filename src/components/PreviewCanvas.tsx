@@ -14,7 +14,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
   const { touchCursor } = props;
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const tweening = useSelector((state: RootState) => state.preview.tweening !== null);
+  const isTweening = useSelector((state: RootState) => state.preview.tweening !== null);
   const artboards = useSelector((state: RootState) => state.layer.present.byId.root.children);
   const activeArtboardItem = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.activeArtboard]);
   const [ready, setReady] = useState(false);
@@ -51,7 +51,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
           id='canvas-preview'
           ref={canvasRef}
           style={{
-            pointerEvents: tweening ? 'none' : 'auto'
+            pointerEvents: isTweening ? 'none' : 'auto'
           }} />
         {
           ready

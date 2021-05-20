@@ -107,7 +107,7 @@ interface HasEventTweensProps {
 }
 
 const hasEventTweens = ({layerItem, eventItem}: HasEventTweensProps): boolean =>
-  eventItem.tweens.some(id => layerItem.tweens.asOrigin.includes(id));
+  eventItem.tweens.allIds.some(id => layerItem.tweens.asOrigin.includes(id));
 
 interface ApplyLayerTimelinesProps {
   paperLayer: paper.Item;
@@ -153,7 +153,7 @@ export const applyLayerTimelines = ({layerItem, paperLayer, eventTimelines, even
       addPaperLayerEventListener({
         eventTimeline,
         paperLayer,
-        eventListener: eventItem.event
+        eventListener: eventItem.listener
       });
     }
     return result;

@@ -544,8 +544,8 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
       }, cs);
     }
     // if artboard, remove any tween events with artboard as origin or destination
-    if (li.type === 'Artboard' && ((li as Btwx.Artboard).originArtboardForEvents.length > 0 || (li as Btwx.Artboard).destinationArtboardForEvents.length > 0)) {
-      const eventsWithArtboard = [...(li as Btwx.Artboard).originArtboardForEvents, ...(li as Btwx.Artboard).destinationArtboardForEvents];
+    if (li.type === 'Artboard' && ((li as Btwx.Artboard).originForEvents.length > 0 || (li as Btwx.Artboard).destinationForEvents.length > 0)) {
+      const eventsWithArtboard = [...(li as Btwx.Artboard).originForEvents, ...(li as Btwx.Artboard).destinationForEvents];
       cs = eventsWithArtboard.reduce((tweenResult, tweenCurrent) => {
         return removeLayerEvent(tweenResult, layerActions.removeLayerEvent({
           id: tweenCurrent
@@ -1957,15 +1957,15 @@ export const setActiveArtboard = (state: LayerState, action: SetActiveArtboard):
 };
 
 export const addLayerEvent = (state: LayerState, action: AddLayerEvent): LayerState => {
-  const artboardChildren = getLayerDescendants(state, action.payload.artboard);
+  const artboardChildren = getLayerDescendants(state, action.payload.origin);
   let currentState = state;
   // if an event doesnt already exist with the same layer, event, and destination
   // add tween event
   if (!currentState.events.allIds.some((id: string) => {
     return (
       currentState.events.byId[id].layer === action.payload.layer &&
-      currentState.events.byId[id].event === action.payload.event &&
-      currentState.events.byId[id].destinationArtboard === action.payload.destinationArtboard
+      currentState.events.byId[id].listener === action.payload.listener &&
+      currentState.events.byId[id].destination === action.payload.destination
     )
   })) {
     // add animation event
@@ -1991,24 +1991,24 @@ export const addLayerEvent = (state: LayerState, action: AddLayerEvent): LayerSt
       ...currentState,
       byId: {
         ...currentState.byId,
-        [action.payload.artboard]: {
-          ...currentState.byId[action.payload.artboard],
-          originArtboardForEvents: addItem((currentState.byId[action.payload.artboard] as Btwx.Artboard).originArtboardForEvents, action.payload.id)
+        [action.payload.origin]: {
+          ...currentState.byId[action.payload.origin],
+          originForEvents: addItem((currentState.byId[action.payload.origin] as Btwx.Artboard).originForEvents, action.payload.id)
         } as Btwx.Artboard,
-        [action.payload.destinationArtboard]: {
-          ...currentState.byId[action.payload.destinationArtboard],
-          destinationArtboardForEvents: addItem((currentState.byId[action.payload.destinationArtboard] as Btwx.Artboard).destinationArtboardForEvents, action.payload.id)
+        [action.payload.destination]: {
+          ...currentState.byId[action.payload.destination],
+          destinationForEvents: addItem((currentState.byId[action.payload.destination] as Btwx.Artboard).destinationForEvents, action.payload.id)
         } as Btwx.Artboard
       }
     }
     // add background tween
-    if (hasFillTween(currentState.byId[action.payload.artboard], currentState.byId[action.payload.destinationArtboard])) {
-      const equivalentTweenProps = getEquivalentTweenProps(currentState.byId[action.payload.artboard], currentState.byId[action.payload.destinationArtboard]);
+    if (hasFillTween(currentState.byId[action.payload.origin], currentState.byId[action.payload.destination])) {
+      const equivalentTweenProps = getEquivalentTweenProps(currentState.byId[action.payload.origin], currentState.byId[action.payload.destination]);
       currentState = Object.keys(equivalentTweenProps).reduce((result, key: Btwx.TweenProp) => {
         if (equivalentTweenProps[key]) {
           result = addLayerTween(result, layerActions.addLayerTween({
-            layer: action.payload.artboard,
-            destinationLayer: action.payload.destinationArtboard,
+            layer: action.payload.origin,
+            destinationLayer: action.payload.destination,
             prop: key,
             event: action.payload.id,
             ease: DEFAULT_TWEEN_EASE,
@@ -2064,7 +2064,7 @@ export const removeLayerEvent = (state: LayerState, action: RemoveLayerEvent): L
     }) as DeselectLayerEvent);
   }
   // remove animation event tweens
-  currentState = animEvent.tweens.reduce((result, current) => {
+  currentState = animEvent.tweens.allIds.reduce((result, current) => {
     return removeLayerTween(result, layerActions.removeLayerTween({id: current}) as RemoveLayerTween);
   }, currentState);
   // remove animation event
@@ -2092,13 +2092,13 @@ export const removeLayerEvent = (state: LayerState, action: RemoveLayerEvent): L
     ...currentState,
     byId: {
       ...currentState.byId,
-      [animEvent.artboard]: {
-        ...currentState.byId[animEvent.artboard],
-        originArtboardForEvents: removeItem((currentState.byId[animEvent.artboard] as Btwx.Artboard).originArtboardForEvents, action.payload.id)
+      [animEvent.origin]: {
+        ...currentState.byId[animEvent.origin],
+        originForEvents: removeItem((currentState.byId[animEvent.origin] as Btwx.Artboard).originForEvents, action.payload.id)
       } as Btwx.Artboard,
-      [animEvent.destinationArtboard]: {
-        ...currentState.byId[animEvent.destinationArtboard],
-        destinationArtboardForEvents: removeItem((currentState.byId[animEvent.destinationArtboard] as Btwx.Artboard).destinationArtboardForEvents, action.payload.id)
+      [animEvent.destination]: {
+        ...currentState.byId[animEvent.destination],
+        destinationForEvents: removeItem((currentState.byId[animEvent.destination] as Btwx.Artboard).destinationForEvents, action.payload.id)
       } as Btwx.Artboard
     }
   }
@@ -2141,7 +2141,7 @@ export const setLayerEventEventListener = (state: LayerState, action: SetLayerEv
         ...currentState.events.byId,
         [action.payload.id]: {
           ...currentState.events.byId[action.payload.id],
-          event: action.payload.eventListener
+          listener: action.payload.eventListener
         }
       }
     }
@@ -2242,7 +2242,7 @@ export const deselectAllLayerEvents = (state: LayerState, action: DeselectAllLay
 export const addTweenEventLayerTweens = (state: LayerState, eventId: string, layerId: string): LayerState => {
   let currentState = state;
   const tweenEvent = currentState.events.byId[eventId];
-  const destinationArtboardChildren = getLayerDescendants(currentState, tweenEvent.destinationArtboard);
+  const destinationArtboardChildren = getLayerDescendants(currentState, tweenEvent.destination);
   const destinationEquivalent = getDestinationEquivalent(currentState, layerId, destinationArtboardChildren);
   if (destinationEquivalent) {
     const currentLayerItem = state.byId[layerId];
@@ -2266,6 +2266,62 @@ export const addTweenEventLayerTweens = (state: LayerState, eventId: string, lay
 
 export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerState => {
   let currentState = state;
+  if (!currentState.events.byId[action.payload.event].layers.includes(action.payload.layer)) {
+    currentState = {
+      ...currentState,
+      events: {
+        ...currentState.events,
+        byId: {
+          ...currentState.events.byId,
+          [action.payload.event]: {
+            ...currentState.events.byId[action.payload.event],
+            layers: addItem(currentState.events.byId[action.payload.event].layers, action.payload.layer)
+          }
+        }
+      }
+    }
+  }
+  if (!currentState.events.byId[action.payload.event].tweens.byLayer[action.payload.layer]) {
+    currentState = {
+      ...currentState,
+      events: {
+        ...currentState.events,
+        byId: {
+          ...currentState.events.byId,
+          [action.payload.event]: {
+            ...currentState.events.byId[action.payload.event],
+            tweens: {
+              ...currentState.events.byId[action.payload.event].tweens,
+              byLayer: {
+                ...currentState.events.byId[action.payload.event].tweens.byLayer,
+                [action.payload.layer]: [action.payload.id]
+              }
+            }
+          }
+        }
+      }
+    }
+  } else {
+    currentState = {
+      ...currentState,
+      events: {
+        ...currentState.events,
+        byId: {
+          ...currentState.events.byId,
+          [action.payload.event]: {
+            ...currentState.events.byId[action.payload.event],
+            tweens: {
+              ...currentState.events.byId[action.payload.event].tweens,
+              byLayer: {
+                ...currentState.events.byId[action.payload.event].tweens.byLayer,
+                [action.payload.layer]: addItem(currentState.events.byId[action.payload.event].tweens.byLayer[action.payload.layer], action.payload.id)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
   currentState = {
     ...currentState,
     events: {
@@ -2274,7 +2330,10 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
         ...currentState.events.byId,
         [action.payload.event]: {
           ...currentState.events.byId[action.payload.event],
-          tweens: addItem(currentState.events.byId[action.payload.event].tweens, action.payload.id)
+          tweens: {
+            ...currentState.events.byId[action.payload.event].tweens,
+            allIds: addItem(currentState.events.byId[action.payload.event].tweens.allIds, action.payload.id)
+          }
         }
       }
     },
@@ -2333,6 +2392,21 @@ export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): L
       id: action.payload.id
     }) as DeselectLayerEventTween);
   }
+  if (currentState.events.byId[tween.event].layers.includes(tween.layer)) {
+    currentState = {
+      ...currentState,
+      events: {
+        ...currentState.events,
+        byId: {
+          ...currentState.events.byId,
+          [tween.event]: {
+            ...currentState.events.byId[tween.event],
+            layers: removeItem(currentState.events.byId[tween.event].layers, tween.layer)
+          }
+        }
+      }
+    }
+  }
   currentState = {
     ...currentState,
     events: {
@@ -2341,7 +2415,31 @@ export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): L
         ...currentState.events.byId,
         [tween.event]: {
           ...currentState.events.byId[tween.event],
-          tweens: removeItem(currentState.events.byId[tween.event].tweens, action.payload.id)
+          tweens: {
+            ...currentState.events.byId[tween.event].tweens,
+            allIds: removeItem(currentState.events.byId[tween.event].tweens.allIds, action.payload.id),
+            byLayer: Object.keys(currentState.events.byId[tween.event].tweens.byLayer).reduce((result, current) => {
+              if (tween.layer === current) {
+                if (currentState.events.byId[tween.event].tweens.byLayer[current].length === 1) {
+                  result = Object.keys(result).reduce((cr, ct) => {
+                    if (ct !== current) {
+                      cr = {
+                        ...cr,
+                        [ct]: cr[ct]
+                      }
+                    }
+                    return cr;
+                  }, result);
+                } else {
+                  result = {
+                    ...result,
+                    [current]: removeItem(currentState.events.byId[tween.event].tweens.byLayer[current], action.payload.id)
+                  }
+                }
+              }
+              return result;
+            }, {})
+          }
         }
       }
     },
@@ -2512,8 +2610,8 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
   if (layerItem.type === 'Artboard' || (layerItem.scope.length > 1 && state.byId[layerItem.scope[1]].type === 'Artboard')) {
     const artboard = layerItem.type === 'Artboard' ? layerId : layerItem.scope[1];
     const artboardItem = state.byId[artboard] as Btwx.Artboard;
-    const eventsWithArtboardAsOrigin = artboardItem.originArtboardForEvents;
-    const eventsWithArtboardAsDestination = artboardItem.destinationArtboardForEvents;
+    const eventsWithArtboardAsOrigin = artboardItem.originForEvents;
+    const eventsWithArtboardAsDestination = artboardItem.destinationForEvents;
     const tweensByProp = layerItem.tweens.byProp[prop];
     // filter tweens by prop
     // if new layer prop matches destination prop, remove tween
@@ -2534,13 +2632,13 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
     // if it doesnt already exist
     currentState = eventsWithArtboardAsOrigin.reduce((result: LayerState, current: string) => {
       const tweenEvent = result.events.byId[current];
-      const destinationArtboardChildren = layerItem.type === 'Artboard' ? null : getLayerDescendants(result, tweenEvent.destinationArtboard);
-      const destinationEquivalent = layerItem.type === 'Artboard' ? result.byId[tweenEvent.destinationArtboard] : getDestinationEquivalent(result, layerId, destinationArtboardChildren);
+      const destinationArtboardChildren = layerItem.type === 'Artboard' ? null : getLayerDescendants(result, tweenEvent.destination);
+      const destinationEquivalent = layerItem.type === 'Artboard' ? result.byId[tweenEvent.destination] : getDestinationEquivalent(result, layerId, destinationArtboardChildren);
       if (destinationEquivalent) {
         const layerItem = result.byId[layerId] as Btwx.Layer;
         const equivalentLayerItem = result.byId[destinationEquivalent.id] as Btwx.Layer;
         const hasTween = getEquivalentTweenProp(layerItem, equivalentLayerItem, prop);
-        const tweenExists = tweenEvent.tweens.some((id: string) => {
+        const tweenExists = tweenEvent.tweens.allIds.some((id: string) => {
           const tween = result.tweens.byId[id];
           return tween.layer === layerId && tween.prop === prop;
         });
@@ -2560,13 +2658,13 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
     // if it doesnt already exist
     currentState = eventsWithArtboardAsDestination.reduce((result: LayerState, current: string) => {
       const tweenEvent = result.events.byId[current];
-      const originArtboardChildren = layerItem.type === 'Artboard' ? null : getLayerDescendants(result, tweenEvent.artboard);
-      const originEquivalent = layerItem.type === 'Artboard' ? result.byId[tweenEvent.artboard] : getDestinationEquivalent(result, layerId, originArtboardChildren);
+      const originArtboardChildren = layerItem.type === 'Artboard' ? null : getLayerDescendants(result, tweenEvent.origin);
+      const originEquivalent = layerItem.type === 'Artboard' ? result.byId[tweenEvent.origin] : getDestinationEquivalent(result, layerId, originArtboardChildren);
       if (originEquivalent) {
         const layerItem = result.byId[layerId] as Btwx.Layer;
         const equivalentLayerItem = result.byId[originEquivalent.id] as Btwx.Layer;
         const hasTween = getEquivalentTweenProp(layerItem, equivalentLayerItem, prop);
-        const tweenExists = tweenEvent.tweens.some((id: string) => {
+        const tweenExists = tweenEvent.tweens.allIds.some((id: string) => {
           const tween = result.tweens.byId[id];
           return tween.layer === originEquivalent.id && tween.prop === prop;
         });

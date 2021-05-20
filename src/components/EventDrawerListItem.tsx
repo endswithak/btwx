@@ -23,19 +23,19 @@ const EventDrawerListItem = (props: EventDrawerListItemProps): ReactElement => {
   const instanceId = useSelector((state: RootState) => state.session.instance);
   const selectedEvents = useSelector((state: RootState) => state.layer.present.events.selected);
   const event = useSelector((state: RootState) => state.layer.present.events.byId[id]);
-  const artboard = useSelector((state: RootState) => state.layer.present.byId[event.artboard]);
+  const artboard = useSelector((state: RootState) => state.layer.present.byId[event.origin]);
   const artboardName = artboard.name;
   const layerItem = useSelector((state: RootState) => state.layer.present.byId[event.layer]);
-  const destination = useSelector((state: RootState) => state.layer.present.byId[event.destinationArtboard]);
+  const destination = useSelector((state: RootState) => state.layer.present.byId[event.destination]);
   const destinationName = destination.name;
-  const eventDisplayName = DEFAULT_TWEEN_EVENTS.find((defaultEvent) => defaultEvent.event === event.event).titleCase;
+  const eventDisplayName = DEFAULT_TWEEN_EVENTS.find((e) => e.listener === event.listener).titleCase;
   const hovering = useSelector((state: RootState) => state.eventDrawer.eventHover === id);
   const isSelected = useSelector((state: RootState) => state.layer.present.events.selected.includes(id));
   const dispatch = useDispatch();
 
   const handleMouseEnter = (): void => {
-    // if (activeArtboard !== tweenEvent.artboard) {
-    //   setActiveArtboard({id: tweenEvent.artboard});
+    // if (activeArtboard !== tweenEvent.origin) {
+    //   setActiveArtboard({id: tweenEvent.origin});
     // }
     dispatch(setEventDrawerEventHoverThunk({id}));
   }

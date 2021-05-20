@@ -1,15 +1,14 @@
 import { ipcRenderer } from 'electron';
 import { gsap } from 'gsap';
-import React, { ReactElement, useEffect, useState, useMemo } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { createSelector } from 'reselect';
 import { RootState } from '../store/reducers';
 import { setPreviewTweening } from '../store/actions/preview';
 import { setActiveArtboard } from '../store/actions/layer';
 import { getPaperFillColor } from '../store/utils/paper';
 import { applyLayerTimelines, killTimeline } from '../utils';
 import { paperMain, paperPreview } from '../canvas';
-import { getAllArtboardItems } from '../store/selectors/layer';
+import { getAllArtboardItems, getAllEventOriginTweenLayers } from '../store/selectors/layer';
 import CanvasLayer from './CanvasLayer';
 import CanvasPreviewEventLayerTimeline from './CanvasPreviewEventLayerTimeline';
 
@@ -18,30 +17,17 @@ interface CanvasArtboardLayerProps {
   paperScope: Btwx.PaperScope;
 }
 
-const getAllEventTweenLayersSelector = () =>
-  createSelector(
-    (state: RootState) => state.layer.present.byId,
-    (state: RootState) => state.layer.present.events.byId,
-    (state: RootState) => state.layer.present.tweens.byId,
-    (_: any, layerId) => layerId,
-    (layersById, eventsById, tweensById, layerId) => (layersById[layerId] as Btwx.Artboard).originArtboardForEvents.reduce((result, current) => {
-      const eventItem = eventsById[current];
-      const tweens = eventItem.tweens;
-      return tweens.reduce((tr, tc) => {
-        const tweenItem = tweensById[tc];
-        const tweenLayer = tweenItem.layer;
-        if (!tr.includes(tweenLayer)) {
-          tr = [...tr, tweenLayer];
-        }
-        return tr;
-      }, result);
-    }, [])
-  );
+// comes from removeLayersThunk
+ipcRenderer.on('resetTweeningEvent', (event, args) => {
+  const { eventId } = JSON.parse(args);
+  if (gsap.getById(eventId)) {
+    gsap.getById(eventId).pause(0, false);
+  }
+});
 
 const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
   const { id, paperScope } = props;
-  const allEventTweenLayersSelector = useMemo(getAllEventTweenLayersSelector, []);
-  const allEventTweenLayers = useSelector((state: RootState) => paperScope === 'preview' ? allEventTweenLayersSelector(state, id) : null);
+  const allEventTweenLayers = useSelector((state: RootState) => paperScope === 'preview' ? getAllEventOriginTweenLayers(state, id) : null);
   const artboardItems = useSelector((state: RootState) => getAllArtboardItems(state));
   const electronInstanceId = useSelector((state: RootState) => state.session.instance);
   const layerItem: Btwx.Artboard = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Artboard);
@@ -53,8 +39,7 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
   const [eventTimelines, setEventTimelines] = useState(null);
   const [layerTimelines, setLayerTimelines] = useState(null);
   const [eventLayers, setEventLayers] = useState(allEventTweenLayers);
-  const [originEvents, setOriginEvents] = useState(layerItem.originArtboardForEvents);
-  const [prevEventTimelines, setPrevEventTimelines] = useState(eventTimelines ? Object.keys(eventTimelines) : []);
+  const [originEvents, setOriginEvents] = useState(layerItem.originForEvents);
   const dispatch = useDispatch();
 
   ///////////////////////////////////////////////////////
@@ -256,8 +241,8 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
   const buildTimeline = (eventId) => {
     killTimeline(eventId);
     const eventItem = eventsById[eventId];
-    const originArtboardItem = artboardItems[eventItem.artboard];
-    const destinationArtboardItem = artboardItems[eventItem.destinationArtboard];
+    const originArtboardItem = artboardItems[eventItem.origin];
+    const destinationArtboardItem = artboardItems[eventItem.destination];
     const destinationArtboardPosition = new paperPreview.Point(
       destinationArtboardItem.frame.x,
       destinationArtboardItem.frame.y
@@ -272,18 +257,18 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
       onStart: function() {
         paperPreview.view.center = originArtboardPosition;
         dispatch(setPreviewTweening({
-          tweening: eventItem.artboard
+          tweening: eventId
         }));
         dispatch(setActiveArtboard({
-          id: eventItem.artboard
+          id: eventItem.origin
         }));
         ipcRenderer.send('setDocumentPreviewTweening', JSON.stringify({
           instanceId: electronInstanceId,
-          tweening: eventItem.artboard
+          tweening: eventId
         }));
         ipcRenderer.send('setDocumentActiveArtboard', JSON.stringify({
           instanceId: electronInstanceId,
-          activeArtboard: eventItem.artboard
+          activeArtboard: eventItem.origin
         }));
       },
       onUpdate: function() {
@@ -298,7 +283,7 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
           tweening: null
         }));
         dispatch(setActiveArtboard({
-          id: eventItem.destinationArtboard
+          id: eventItem.destination
         }));
         ipcRenderer.send('setDocumentPreviewTweening', JSON.stringify({
           instanceId: electronInstanceId,
@@ -306,7 +291,7 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
         }));
         ipcRenderer.send('setDocumentActiveArtboard', JSON.stringify({
           instanceId: electronInstanceId,
-          activeArtboard: eventItem.destinationArtboard
+          activeArtboard: eventItem.destination
         }));
         this.pause(0, false);
       }
@@ -314,8 +299,8 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
   }
 
   const buildTimelines = () => {
-    if (layerItem.originArtboardForEvents.length > 0) {
-      setEventTimelines(layerItem.originArtboardForEvents.reduce((result, current) => ({
+    if (layerItem.originForEvents.length > 0) {
+      setEventTimelines(layerItem.originForEvents.reduce((result, current) => ({
         ...result,
         [current]: buildTimeline(current)
       }), {} as { [id: string]: GSAPTimeline }));
@@ -341,11 +326,11 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
     // extra prop check since we're hydrating layers on every edit...
     // causing array/objects to flag as changed
     useEffect(() => {
-      if (((originEvents.length !== layerItem.originArtboardForEvents.length) || !layerItem.originArtboardForEvents.every(id => originEvents.includes(id)))) {
-        setOriginEvents(layerItem.originArtboardForEvents);
+      if (((originEvents.length !== layerItem.originForEvents.length) || !layerItem.originForEvents.every(id => originEvents.includes(id)))) {
+        setOriginEvents(layerItem.originForEvents);
         buildTimelines();
       }
-    }, [layerItem.originArtboardForEvents]);
+    }, [layerItem.originForEvents]);
   }
 
   ///////////////////////////////////////////////////////

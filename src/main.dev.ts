@@ -1846,6 +1846,14 @@ ipcMain.on('clearTouchBar', (event, args) => {
 // INSTANCE => FROM DOCUMENT RENDERER
 ////////////////////////////////////////////////////////////
 
+ipcMain.on('resetPreviewTweeningEvent', (event, args) => {
+  const { instanceId, eventId } = JSON.parse(args);
+  const instance = btwxElectron.instance.byId[instanceId];
+  instance.preview.webContents.send('resetTweeningEvent', JSON.stringify({
+    eventId: eventId
+  }));
+});
+
 ipcMain.on('hydratePreviewLayers', (event, args) => {
   const { instanceId, state } = JSON.parse(args);
   const instance = btwxElectron.instance.byId[instanceId];
@@ -1901,6 +1909,17 @@ ipcMain.on('setPreviewActiveArtboard', (event, args) => {
     window: 'preview',
     func: 'setActiveArtboard',
     payloadString: JSON.stringify(activeArtboard)
+  });
+});
+
+ipcMain.on('setPreviewTweening', (event, args) => {
+  const { instanceId, tweening } = JSON.parse(args);
+  const instance = btwxElectron.instance.byId[instanceId];
+  handleExecute({
+    instance,
+    window: 'preview',
+    func: 'setPreviewTweening',
+    payloadString: JSON.stringify(tweening)
   });
 });
 

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { ReactElement, useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { gsap } from 'gsap';
 import tinyColor from 'tinycolor2';
 import { CustomEase } from 'gsap/CustomEase';
@@ -13,7 +13,7 @@ import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import { RootState } from '../store/reducers';
 import { paperPreview } from '../canvas';
 import { getTransformedText } from '../utils';
-import { positionTextContent, clearLayerTransforms, applyLayerTransforms, getPaperFillColor, getPaperStrokeColor } from '../store/utils/paper';
+import { positionTextContent, clearLayerTransforms, applyLayerTransforms } from '../store/utils/paper';
 import { EventLayerTimelineData } from './CanvasPreviewLayerEvent';
 import { getParagraphs, getContent, getLeading } from './CanvasTextLayer';
 
@@ -25,25 +25,34 @@ interface CanvasPreviewLayerTweenProps {
   eventTimeline: GSAPTimeline;
 }
 
+// something to do with stale props
+// layer, events, tweens
+
+// tween selectors are updating before component re-renders
+
+
+// when timeline playing
+// 1. delete layer
+// 2. timeline tries
+
 const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElement => {
   const { layerTimeline, tweenId, eventTimeline } = props;
-  const electronInstanceId = useSelector((state: RootState) => state.session.instance);
+  // const electronInstanceId = useSelector((state: RootState) => state.session.instance);
   const isPreviewOpen = useSelector((state: RootState) => state.preview.isOpen);
   const edit = useSelector((state: RootState) => state.layer.present.edit);
   const autoplay = useSelector((state: RootState) => state.preview.autoplay);
   const tween = useSelector((state: RootState) => state.layer.present.tweens.byId[tweenId]);
-  const event = useSelector((state: RootState) => state.layer.present.events.byId[tween.event]);
-  const eventDrawerEvent = useSelector((state: RootState) => state.eventDrawer.event);
-  const originLayerItem = useSelector((state: RootState) => state.layer.present.byId[tween.layer]);
-  const destinationLayerItem = useSelector((state: RootState) => state.layer.present.byId[tween.destinationLayer]);
-  const originArtboardItem = useSelector((state: RootState) => state.layer.present.byId[event.artboard] as Btwx.Artboard);
-  const destinationArtboardItem = useSelector((state: RootState) => state.layer.present.byId[event.destinationArtboard] as Btwx.Artboard);
+  const event = useSelector((state: RootState) => tween ? state.layer.present.events.byId[tween.event] : null);
+  // const eventDrawerEvent = useSelector((state: RootState) => state.eventDrawer.event);
+  const originLayerItem = useSelector((state: RootState) => tween ? state.layer.present.byId[tween.layer] : null);
+  const destinationLayerItem = useSelector((state: RootState) => tween ? state.layer.present.byId[tween.destinationLayer] : null);
+  const originArtboardItem = useSelector((state: RootState) => event ? state.layer.present.byId[event.origin] as Btwx.Artboard : null);
+  const destinationArtboardItem = useSelector((state: RootState) => event ? state.layer.present.byId[event.destination] as Btwx.Artboard : null);
   // const sessionImages = useSelector((state: RootState) => state.session.images.byId);
   // const originImage = originLayerItem.type === 'Image' ? sessionImages[(originLayerItem as Btwx.Image).imageId] : null;
   // const destinationImage = destinationLayerItem.type === 'Image' ? sessionImages[(destinationLayerItem as Btwx.Image).imageId] : null;
   const [eventLayerTimeline, setEventLayerTimeline] = useState(null);
   const [autoplayInstance, setAutoplayInstance] = useState(null);
-  const dispatch = useDispatch();
 
   interface CurrentTweenProps {
     width: number;
@@ -92,44 +101,44 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   }
 
   const getCurrentTweenLayerProps = (): CurrentTweenProps => {
-    const width = hasTweenProp('width', originLayerItem.frame.innerWidth);
-    const height = hasTweenProp('height', originLayerItem.frame.innerHeight);
-    const boundingWidth = hasTweenProp('boundingWidth', originLayerItem.frame.width);
-    const boundingHeight = hasTweenProp('boundingHeight', originLayerItem.frame.height);
-    const scaleX = hasTweenProp('scaleX', originLayerItem.transform.horizontalFlip ? -1 : 1);
-    const scaleY = hasTweenProp('scaleY', originLayerItem.transform.verticalFlip ? -1 : 1);
-    const prevScaleX = hasTweenProp('scaleXPrevious', originLayerItem.transform.horizontalFlip ? -1 : 1);
-    const prevScaleY = hasTweenProp('scaleYPrevious', originLayerItem.transform.verticalFlip ? -1 : 1);
-    const rotation = hasTweenProp('rotation', originLayerItem.transform.rotation);
-    const prevRotation = hasTweenProp('rotationPrevious', originLayerItem.transform.rotation);
-    const dashArrayWidth = hasTweenProp('dashArrayWidth', originLayerItem.style.strokeOptions.dashArray[0]);
-    const dashArrayGap = hasTweenProp('dashArrayGap', originLayerItem.style.strokeOptions.dashArray[1]);
+    const width = originLayerItem && hasTweenProp('width', originLayerItem.frame.innerWidth);
+    const height = originLayerItem && hasTweenProp('height', originLayerItem.frame.innerHeight);
+    const boundingWidth = originLayerItem && hasTweenProp('boundingWidth', originLayerItem.frame.width);
+    const boundingHeight = originLayerItem && hasTweenProp('boundingHeight', originLayerItem.frame.height);
+    const scaleX = originLayerItem && hasTweenProp('scaleX', originLayerItem.transform.horizontalFlip ? -1 : 1);
+    const scaleY = originLayerItem && hasTweenProp('scaleY', originLayerItem.transform.verticalFlip ? -1 : 1);
+    const prevScaleX = originLayerItem && hasTweenProp('scaleXPrevious', originLayerItem.transform.horizontalFlip ? -1 : 1);
+    const prevScaleY = originLayerItem && hasTweenProp('scaleYPrevious', originLayerItem.transform.verticalFlip ? -1 : 1);
+    const rotation = originLayerItem && hasTweenProp('rotation', originLayerItem.transform.rotation);
+    const prevRotation = originLayerItem && hasTweenProp('rotationPrevious', originLayerItem.transform.rotation);
+    const dashArrayWidth = originLayerItem && hasTweenProp('dashArrayWidth', originLayerItem.style.strokeOptions.dashArray[0]);
+    const dashArrayGap = originLayerItem && hasTweenProp('dashArrayGap', originLayerItem.style.strokeOptions.dashArray[1]);
     // Gradient origin/destination
-    const strokeGradientOriginX = hasTweenProp('strokeGradientOriginX', originLayerItem.style.stroke.gradient.origin.x);
-    const strokeGradientOriginY = hasTweenProp('strokeGradientOriginY', originLayerItem.style.stroke.gradient.origin.y);
-    const strokeGradientDestinationX = hasTweenProp('strokeGradientDestinationX', originLayerItem.style.stroke.gradient.destination.x);
-    const strokeGradientDestinationY = hasTweenProp('strokeGradientDestinationY', originLayerItem.style.stroke.gradient.destination.y);
-    const fillGradientOriginX = hasTweenProp('fillGradientOriginX', originLayerItem.style.fill.gradient.origin.x);
-    const fillGradientOriginY = hasTweenProp('fillGradientOriginY', originLayerItem.style.fill.gradient.origin.y);
-    const fillGradientDestinationX = hasTweenProp('fillGradientDestinationX', originLayerItem.style.fill.gradient.destination.x);
-    const fillGradientDestinationY = hasTweenProp('fillGradientDestinationY', originLayerItem.style.fill.gradient.destination.y);
+    const strokeGradientOriginX = originLayerItem && hasTweenProp('strokeGradientOriginX', originLayerItem.style.stroke.gradient.origin.x);
+    const strokeGradientOriginY = originLayerItem && hasTweenProp('strokeGradientOriginY', originLayerItem.style.stroke.gradient.origin.y);
+    const strokeGradientDestinationX = originLayerItem && hasTweenProp('strokeGradientDestinationX', originLayerItem.style.stroke.gradient.destination.x);
+    const strokeGradientDestinationY = originLayerItem && hasTweenProp('strokeGradientDestinationY', originLayerItem.style.stroke.gradient.destination.y);
+    const fillGradientOriginX = originLayerItem && hasTweenProp('fillGradientOriginX', originLayerItem.style.fill.gradient.origin.x);
+    const fillGradientOriginY = originLayerItem && hasTweenProp('fillGradientOriginY', originLayerItem.style.fill.gradient.origin.y);
+    const fillGradientDestinationX = originLayerItem && hasTweenProp('fillGradientDestinationX', originLayerItem.style.fill.gradient.destination.x);
+    const fillGradientDestinationY = originLayerItem && hasTweenProp('fillGradientDestinationY', originLayerItem.style.fill.gradient.destination.y);
     // Gradient origin/destination ease
-    const strokeGradientOriginXEase = hasTweenProp('strokeGradientOriginX-ease', null);
-    const strokeGradientOriginYEase = hasTweenProp('strokeGradientOriginY-ease', null);
-    const strokeGradientDestinationXEase = hasTweenProp('strokeGradientDestinationX-ease', null);
-    const strokeGradientDestinationYEase = hasTweenProp('strokeGradientDestinationY-ease', null);
-    const fillGradientOriginXEase = hasTweenProp('fillGradientOriginX-ease', null);
-    const fillGradientOriginYEase = hasTweenProp('fillGradientOriginY-ease', null);
-    const fillGradientDestinationXEase = hasTweenProp('fillGradientDestinationX-ease', null);
-    const fillGradientDestinationYEase = hasTweenProp('fillGradientDestinationY-ease', null);
+    const strokeGradientOriginXEase = originLayerItem && hasTweenProp('strokeGradientOriginX-ease', null);
+    const strokeGradientOriginYEase = originLayerItem && hasTweenProp('strokeGradientOriginY-ease', null);
+    const strokeGradientDestinationXEase = originLayerItem && hasTweenProp('strokeGradientDestinationX-ease', null);
+    const strokeGradientDestinationYEase = originLayerItem && hasTweenProp('strokeGradientDestinationY-ease', null);
+    const fillGradientOriginXEase = originLayerItem && hasTweenProp('fillGradientOriginX-ease', null);
+    const fillGradientOriginYEase = originLayerItem && hasTweenProp('fillGradientOriginY-ease', null);
+    const fillGradientDestinationXEase = originLayerItem && hasTweenProp('fillGradientDestinationX-ease', null);
+    const fillGradientDestinationYEase = originLayerItem && hasTweenProp('fillGradientDestinationY-ease', null);
     //
-    const fontSize = originLayerItem.type === 'Text' ? hasTweenProp('fontSize', (originLayerItem as Btwx.Text).textStyle.fontSize) : null;
-    const fontWeight = originLayerItem.type === 'Text' ? hasTweenProp('fontWeight', (originLayerItem as Btwx.Text).textStyle.fontWeight) : null;
-    const letterSpacing = originLayerItem.type === 'Text' ? hasTweenProp('letterSpacing', (originLayerItem as Btwx.Text).textStyle.letterSpacing) : null;
-    const lineHeight = originLayerItem.type === 'Text' ? hasTweenProp('lineHeight', (originLayerItem as Btwx.Text).textStyle.leading) : null;
-    const prevLineHeight = originLayerItem.type === 'Text' ? hasTweenProp('lineHeightPrevious', (originLayerItem as Btwx.Text).textStyle.leading) : null;
-    const text = originLayerItem.type === 'Text' ? hasTweenProp('text', (originLayerItem as Btwx.Text).text) : null;
-    const shape = originLayerItem.type === 'Shape' ? hasTweenProp('shape', (originLayerItem as Btwx.Shape).pathData) : null;
+    const fontSize = originLayerItem && originLayerItem.type === 'Text' ? hasTweenProp('fontSize', (originLayerItem as Btwx.Text).textStyle.fontSize) : null;
+    const fontWeight = originLayerItem && originLayerItem.type === 'Text' ? hasTweenProp('fontWeight', (originLayerItem as Btwx.Text).textStyle.fontWeight) : null;
+    const letterSpacing = originLayerItem && originLayerItem.type === 'Text' ? hasTweenProp('letterSpacing', (originLayerItem as Btwx.Text).textStyle.letterSpacing) : null;
+    const lineHeight = originLayerItem && originLayerItem.type === 'Text' ? hasTweenProp('lineHeight', (originLayerItem as Btwx.Text).textStyle.leading) : null;
+    const prevLineHeight = originLayerItem && originLayerItem.type === 'Text' ? hasTweenProp('lineHeightPrevious', (originLayerItem as Btwx.Text).textStyle.leading) : null;
+    const text = originLayerItem && originLayerItem.type === 'Text' ? hasTweenProp('text', (originLayerItem as Btwx.Text).text) : null;
+    const shape = originLayerItem && originLayerItem.type === 'Shape' ? hasTweenProp('shape', (originLayerItem as Btwx.Shape).pathData) : null;
     return {
       width,
       height,
@@ -2236,7 +2245,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   }
 
   useEffect(() => {
-    if (eventLayerTimeline) {
+    if (eventLayerTimeline && tween) {
       if (gsap.getById(tweenId)) {
         eventLayerTimeline.remove(gsap.getById(tweenId));
       }
@@ -2264,7 +2273,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
 
   // add flag for autoplay
   useEffect(() => {
-    if (edit.id && edit.tweenEdit && eventLayerTimeline && autoplay && isPreviewOpen && event.tweens.some(id => edit.tweenEdit.includes(id)) && eventDrawerEvent && eventDrawerEvent === event.id) {
+    if (tween && edit.id && edit.tweenEdit && eventLayerTimeline && autoplay && isPreviewOpen && edit.tweenEdit[0] === tweenId) {
       setAutoplayInstance(autoplayInstance ? autoplayInstance + 1 : 1);
     }
   }, [edit.id]);
@@ -2277,7 +2286,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   }, [autoplayInstance]);
 
   return (
-    originLayerItem.type === 'Text'
+    originLayerItem && originLayerItem.type === 'Text'
     ? <div
         id={`${originLayerItem.id}-text-tween`}
         style={{
