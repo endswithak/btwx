@@ -93,12 +93,12 @@ const EventDrawerEventLayers = (props: EventDrawerEventLayersProps): ReactElemen
                     ))
                   }
                   {
-                    wiggleLayers.allIds.filter((id) => !eventLayers.includes(id)).map((layer) => (
+                    wiggleLayers.allIds.filter((id) => !eventLayers.includes(id)).map((layerId) => (
                       <EventDrawerEventLayer
-                        key={layer}
-                        id={layer}
-                        equivalentId={wiggleLayers.map[layer]}
-                        equivalentTweenProps={wiggleLayers.propsMap[layer]}
+                        key={layerId}
+                        id={layerId}
+                        equivalentId={wiggleLayers.map[layerId]}
+                        equivalentTweenProps={wiggleLayers.propsMap[layerId]}
                         eventId={eventItem.id} />
                     ))
                   }

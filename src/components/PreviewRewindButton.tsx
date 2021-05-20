@@ -8,7 +8,7 @@ import IconButton from './IconButton';
 
 const PreviewRewindButton = (): ReactElement => {
   const instance = useSelector((state: RootState) => state.session.instance);
-  const rewindOrigin = useSelector((state: RootState) => state.eventDrawer.event && state.layer.present.events.byId[state.eventDrawer.event] ? state.layer.present.events.byId[state.eventDrawer.event].artboard : null);
+  const rewindOrigin = useSelector((state: RootState) => state.eventDrawer.event && state.layer.present.events.byId[state.eventDrawer.event] ? state.layer.present.events.byId[state.eventDrawer.event].origin : null);
   const rewindOriginItem = useSelector((state: RootState) => rewindOrigin &&  state.layer.present.byId[rewindOrigin] ? state.layer.present.byId[rewindOrigin] : null);
   const canRewind = useSelector((state: RootState) => state.eventDrawer.event !== null && rewindOrigin && rewindOrigin !== state.layer.present.activeArtboard);
   const dispatch = useDispatch();

@@ -9,7 +9,7 @@ interface EventDrawerEventTimelineTweensProps {
 
 const EventDrawerEventTimelineTweens = (props: EventDrawerEventTimelineTweensProps): ReactElement => {
   const { layerId } = props;
-  const eventLayerTweens = useSelector((state: RootState) => state.layer.present.events.byId[state.eventDrawer.event] ? state.layer.present.events.byId[state.eventDrawer.event].tweens.byLayer[layerId] : []);
+  const eventLayerTweens = useSelector((state: RootState) => state.layer.present.events.byId[state.eventDrawer.event] && state.layer.present.events.byId[state.eventDrawer.event].tweens.byLayer[layerId] ? state.layer.present.events.byId[state.eventDrawer.event].tweens.byLayer[layerId] : []);
   const sortedProps: string[] = useSelector((state: RootState) => eventLayerTweens.reduce((result, current) => {
     const tween = state.layer.present.tweens.byId[current];
     result = [...result, tween.prop];

@@ -31,7 +31,7 @@ const EventDrawerEventLayer = ({ id, equivalentId, equivalentTweenProps, eventId
       const possibleProps = getPossibleProps(layerItem, equivalentLayerItem);
       return (Object.keys(equivalentTweenProps) as Btwx.TweenProp[]).reduce((result, current) => {
         const tweensByProp = layerItem.tweens.byProp[current];
-        if (eventItem.tweens.every((id) => !tweensByProp.includes(id)) && possibleProps.includes(current)) {
+        if (eventItem.tweens.allIds.every((id) => !tweensByProp.includes(id)) && possibleProps.includes(current)) {
           result = [...result, {
             label: titleCase(current),
             click: {

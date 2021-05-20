@@ -47,8 +47,9 @@ const EventDrawerEventTimelines = (): ReactElement => {
                 }
                 {/* make space for wiggle layers */}
                 {
-                  wiggleLayers.allIds.filter((id) => !eventLayers.includes(id)).map((layer) => (
+                  wiggleLayers.allIds.filter((id) => !eventLayers.includes(id)).map((layerId) => (
                     <div
+                      key={layerId}
                       className='c-event-drawer-event__layer-timeline'>
                       <EventDrawerEventTimelineClickZone />
                     </div>
