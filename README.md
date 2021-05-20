@@ -117,3 +117,4 @@ Each event you create has an event listener, origin, and destination. When the e
 
 - [ERB](https://github.com/electron-react-boilerplate/electron-react-boilerplate)
 - [GSAP](https://greensock.com/)
+- [paper.js](https://github.com/paperjs/paper.js)
