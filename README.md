@@ -4,6 +4,8 @@
 
 Product Designer animation and prototyping tool.
 
+![demo screen](demo-screen.png)
+
 ## Features
 
 - Basic vector editing with boolean and mask support
