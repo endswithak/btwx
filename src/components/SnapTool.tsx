@@ -27,6 +27,7 @@ interface SnapToolProps {
   whiteListLayers?: string[];
   blackListLayers?: string[];
   measure?: boolean;
+  noSnapZoneScale?: boolean;
   onUpdate?(snapBounds: paper.Rectangle, xSnapPoint: any, ySnapPoint: any): any;
 }
 
@@ -45,9 +46,10 @@ const snapToolDebug = false;
 // @param {blackListLayers} blacklist snap to layers
 // @param {measure} add measurments to guides
 // @param {onUpdate} callback with snapBounds and snap points
+// @param {noSnapZoneScale} stops snap zone from scaling with canvas zoom (see KeyBindings)
 
 const SnapTool = (props: SnapToolProps): ReactElement => {
-  const { toolEvent, bounds, onUpdate, hitTestZones, snapRule, whiteListLayers, blackListLayers, preserveAspectRatio, aspectRatio, resizeHandle, measure } = props;
+  const { toolEvent, bounds, onUpdate, hitTestZones, snapRule, whiteListLayers, blackListLayers, preserveAspectRatio, aspectRatio, resizeHandle, measure, noSnapZoneScale } = props;
   const scope = useSelector((state: RootState) => state.layer.present.scope);
   const layerProjectIndices = useSelector((state: RootState) => getLayerProjectIndices(state));
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
@@ -67,7 +69,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
   const getSnapZones = (currentToBounds: paper.Rectangle, scaleOverride?: number): Btwx.SnapZones => {
     const zoneMin = 0.5;
     const zoneMax = 20;
-    const zoneScale = scaleOverride ? scaleOverride : 0.5 * (8 / paperMain.view.zoom);
+    const zoneScale = scaleOverride ? scaleOverride : noSnapZoneScale ? zoneMin : zoneMin * (8 / paperMain.view.zoom);
     const scale = zoneScale < zoneMin ? zoneMin : zoneScale > zoneMax ? zoneMax : zoneScale;
     const top = hitTestZones.all || hitTestZones.top ? new paperMain.Rectangle({
       from: new paperMain.Point(paperMain.view.bounds.left, currentToBounds.top - scale),
