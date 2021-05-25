@@ -11,9 +11,10 @@ const FontFamilySelector = (): ReactElement => {
   const listRef = useRef<HTMLDivElement>(null);
   const systemFonts = useSelector((state: RootState) => state.textSettings.systemFonts);
   const y = useSelector((state: RootState) => state.fontFamilySelector.y);
-  const [itemData, setItemData] = useState([]);
+  const [itemData, setItemData] = useState(null);
   const [search, setSearch] = useState('');
   const [searching, setSearching] = useState(false);
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
 
   const onMouseDown = (event: any): void => {
@@ -43,13 +44,28 @@ const FontFamilySelector = (): ReactElement => {
       searchTextFieldRef.current.select();
     }
     document.addEventListener('mousedown', onMouseDown, true);
+    setLoading(true);
     return (): void => {
       document.removeEventListener('mousedown', onMouseDown, true);
     }
   }, []);
 
   useEffect(() => {
-    setItemData(getItemData(search));
+    if (loading) {
+      setItemData(getItemData(search));
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    if (itemData && loading) {
+      setLoading(false);
+    }
+  }, [itemData]);
+
+  useEffect(() => {
+    if (itemData) {
+      setItemData(getItemData(search));
+    }
   }, [search]);
 
   return (
@@ -69,7 +85,8 @@ const FontFamilySelector = (): ReactElement => {
       <FontFamilySelectorItems
         itemData={itemData}
         search={search}
-        searching={searching} />
+        searching={searching}
+        loading={loading} />
     </div>
   );
 }
