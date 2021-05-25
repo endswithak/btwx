@@ -9,7 +9,9 @@ ipcRenderer.on('setDocumentTimelineGuidePosition', (event, args) => {
   const guide = document.getElementById(`event-drawer-guide`);
   const { time } = JSON.parse(args);
   const position = (time * 100) * 4;
-  gsap.set(guide, { x: position });
+  if (guide) {
+    gsap.set(guide, { x: position });
+  }
 });
 
 const EventDrawerEventTimelineGuide = (): ReactElement => {

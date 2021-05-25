@@ -40,31 +40,29 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
   }, []);
 
   return (
-    <>
-      <div
-        className='c-canvas'
-        ref={canvasContainerRef}
+    <div
+      className='c-canvas'
+      ref={canvasContainerRef}
+      style={{
+        cursor: touchCursor ? `url(${touchCursorSvg}) 13 13, auto` : 'default'
+      }}>
+      <canvas
+        id='canvas-preview'
+        ref={canvasRef}
         style={{
-          cursor: touchCursor ? `url(${touchCursorSvg}) 13 13, auto` : 'default'
-        }}>
-        <canvas
-          id='canvas-preview'
-          ref={canvasRef}
-          style={{
-            pointerEvents: isTweening ? 'none' : 'auto'
-          }} />
-        {
-          ready
-          ? artboards.map((id) => (
-              <CanvasArtboardLayer
-                key={id}
-                id={id}
-                paperScope='preview' />
-            ))
-          : null
-        }
-      </div>
-    </>
+          pointerEvents: isTweening ? 'none' : 'auto'
+        }} />
+      {
+        ready
+        ? artboards.map((id) => (
+            <CanvasArtboardLayer
+              key={id}
+              id={id}
+              paperScope='preview' />
+          ))
+        : null
+      }
+    </div>
   );
 }
 

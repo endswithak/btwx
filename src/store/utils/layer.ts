@@ -10197,6 +10197,8 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
           [duplicateId]: {
             ...cs.byId[duplicateId],
             projectIndex: Math.floor(cs.byId.root.children.length / ARTBOARDS_PER_PROJECT) + 1,
+            destinationForEvents: [],
+            originForEvents: []
           } as Btwx.Artboard
         }
       }
