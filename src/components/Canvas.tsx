@@ -156,7 +156,6 @@ const Canvas = (): ReactElement => {
     if (e.buttons === 0) {
       const canvasEventPoint = paperMain.view.getEventPoint(e);
       handleHitResult(e, 'mouseMove');
-      // debounceMousePosition(e);
       dispatch(setCanvasMousePosition({
         mouse: {
           x: e.clientX,
