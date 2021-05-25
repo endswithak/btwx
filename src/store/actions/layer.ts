@@ -1404,16 +1404,22 @@ export const escapeLayerScopeThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
     const nextScope = state.layer.present.scope.filter((id, index) => index !== state.layer.present.scope.length - 1);
-    // if (state.layer.present.scope.length > 0) {
-    //   scrollToLayer(state.layer.present.scope[state.layer.present.scope.length - 1]);
-    // }
-    if (state.canvasSettings.mouse) {
+    if (state.canvasSettings.mouse && state.canvasSettings.mouse.paperX && state.canvasSettings.mouse.paperY) {
       const point = new paperMain.Point(state.canvasSettings.mouse.paperX, state.canvasSettings.mouse.paperY)
       const hitResult = paperMain.project.hitTest(point);
-      const validHitResult = hitResult && hitResult.item && hitResult.item.data && hitResult.item.data.type && (hitResult.item.data.type === 'Layer' || hitResult.item.data.type === 'LayerChild');
+      const validHitResult = hitResult && hitResult.item && hitResult.item.data && hitResult.item.data.type && (hitResult.item.data.type === 'Layer' || hitResult.item.data.type === 'LayerChild' || hitResult.item.data.type === 'LayerContainer');
       if (validHitResult) {
-        const layerItem = state.layer.present.byId[hitResult.item.data.type === 'Layer' ? hitResult.item.data.id : hitResult.item.parent.data.id];
-        const nearestScopeAncestor = getNearestScopeAncestor({...state.layer.present, scope: nextScope}, layerItem.id);
+        let layerId;
+        switch(hitResult.item.data.type) {
+          case 'LayerContainer':
+          case 'LayerChild':
+            layerId = hitResult.item.data.layerId;
+            break;
+          case 'Layer':
+            layerId = hitResult.item.data.id;
+            break;
+        }
+        const nearestScopeAncestor = getNearestScopeAncestor({...state.layer.present, scope: nextScope}, layerId);
         if (state.layer.present.hover !== nearestScopeAncestor.id) {
           dispatch(setLayerHover({id: nearestScopeAncestor.id}));
         }

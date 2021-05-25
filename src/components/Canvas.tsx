@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { ReactElement, useEffect, useState, useRef } from 'react';
+import React, { ReactElement, useEffect, useState, useRef, useCallback } from 'react';
+import debounce from 'lodash.debounce';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
-import { setCanvasReady, setCanvasFocusing, setCanvasMeasuring } from '../store/actions/canvasSettings';
+import { setCanvasReady, setCanvasFocusing, setCanvasMeasuring, setCanvasMousePosition } from '../store/actions/canvasSettings';
 import { getAllProjectIndices } from '../store/selectors/layer';
 import CanvasLayerEvents from './CanvasLayerEvents';
 import CanvasUIEvents from './CanvasUIEvents';
@@ -153,7 +154,17 @@ const Canvas = (): ReactElement => {
 
   const handleMouseMove = (e: any): void => {
     if (e.buttons === 0) {
+      const canvasEventPoint = paperMain.view.getEventPoint(e);
       handleHitResult(e, 'mouseMove');
+      // debounceMousePosition(e);
+      dispatch(setCanvasMousePosition({
+        mouse: {
+          x: e.clientX,
+          y: e.clientY,
+          paperX: canvasEventPoint.x,
+          paperY: canvasEventPoint.y
+        }
+      }));
     }
   }
 
