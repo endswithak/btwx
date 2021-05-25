@@ -24,12 +24,13 @@ const App = (): ReactElement => {
   const platform = useSelector((state: RootState) => state.session.platform);
   const isClean = useSelector((state: RootState) => !state.documentSettings.id && !state.layer.present.edit.id);
   const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
+  const draggingLayers = useSelector((state: RootState) => state.leftSidebar.dragging);
   const dispatch = useDispatch();
   const [dragOver, setDragOver] = useState(false);
 
   const handleDragOver = (e) => {
     e.preventDefault();
-    if (!dragOver) {
+    if (!dragOver && !draggingLayers) {
       setDragOver(true);
     }
   }
