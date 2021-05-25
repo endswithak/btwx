@@ -1542,37 +1542,6 @@ export const moveLayersBy = (payload: MoveLayersByPayload): LayerTypes => ({
   payload
 });
 
-export const nudgeSelectedThunk = (direction: 'up' | 'down' | 'left' | 'right') => {
-  return (dispatch: any, getState: any) => {
-    const state = getState() as RootState;
-    let x;
-    let y;
-    switch(direction) {
-      case 'up':
-        x = 0;
-        y = -1;
-        break;
-      case 'down':
-        x = 0;
-        y = 1;
-        break;
-      case 'left':
-        x = -1;
-        y = 0;
-        break;
-      case 'right':
-        x = 1;
-        y = 0;
-        break;
-    }
-    dispatch(moveLayersBy({
-      layers: state.layer.present.selected,
-      x,
-      y
-    }));
-  }
-};
-
 // Drag
 
 export const enableLayerDrag = (): LayerTypes => ({

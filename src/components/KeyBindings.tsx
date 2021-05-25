@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getSelectedBounds } from '../store/selectors/layer';
 import { setCanvasMeasuring } from '../store/actions/canvasSettings';
-import { deselectAllLayers, deselectAllLayerEvents, deselectAllLayerEventTweens, nudgeSelectedThunk } from '../store/actions/layer';
+import { deselectAllLayers, deselectAllLayerEvents, deselectAllLayerEventTweens, moveLayersBy } from '../store/actions/layer';
 import { toggleShapeToolThunk } from '../store/actions/shapeTool';
 import { toggleTextToolThunk } from '../store/actions/textTool';
 import { toggleArtboardToolThunk } from '../store/actions/artboardTool';
@@ -63,7 +63,11 @@ const KeyBindings = (): ReactElement => {
           deltaY = 0;
           break;
       }
-      dispatch(nudgeSelectedThunk(direction));
+      dispatch(moveLayersBy({
+        layers: selectedLayers,
+        x: deltaX,
+        y: deltaY
+      }));
       if (!nudging) {
         setNudging(true);
       }
