@@ -1437,6 +1437,9 @@ export const escapeLayerScope = (state: LayerState, action: EscapeLayerScope): L
   let currentState = state;
   if (state.scope.length > 1) {
     currentState = selectLayers(state, layerActions.selectLayers({layers: [state.scope[state.scope.length - 1]], newSelection: true}) as SelectLayers);
+    currentState = setLayerTreeScroll(currentState, layerActions.setLayerTreeScroll({
+      scroll: state.scope[state.scope.length - 1]
+    }) as SetLayerTreeScroll);
   } else {
     currentState = deselectAllLayers(state, layerActions.deselectAllLayers() as DeselectAllLayers);
   }

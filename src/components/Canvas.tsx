@@ -1,9 +1,13 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+import { ipcRenderer } from 'electron';
 import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
+import { base64ToBuffer } from '../utils';
+import { addImageThunk } from '../store/actions/layer';
 import { setCanvasReady, setCanvasFocusing, setCanvasMeasuring, setCanvasMousePosition } from '../store/actions/canvasSettings';
+import { hydrateDocumentThunk } from '../store/actions/documentSettings';
 import { getAllProjectIndices } from '../store/selectors/layer';
 import CanvasLayerEvents from './CanvasLayerEvents';
 import CanvasUIEvents from './CanvasUIEvents';
@@ -28,6 +32,7 @@ import insertEllipseCursor from '../../assets/cursor/insert-ellipse.svg';
 import insertPolygonCursor from '../../assets/cursor/insert-polygon.svg';
 import insertStarCursor from '../../assets/cursor/insert-star.svg';
 import insertLineCursor from '../../assets/cursor/insert-line.svg';
+import insertFileCursor from '../../assets/cursor/insert-file.svg';
 
 interface CanvasHitResult {
   layerHitResult: {
@@ -51,10 +56,15 @@ const Canvas = (): ReactElement => {
   const allProjectIndices = useSelector((state: RootState) => getAllProjectIndices(state));
   const cursor = useSelector((state: RootState) => state.canvasSettings.cursor);
   const canvasTheme = useSelector((state: RootState) => state.preferences.canvasTheme);
+  const draggingLayers = useSelector((state: RootState) => state.leftSidebar.dragging);
+  const instanceId = useSelector((state: RootState) => state.session.instance);
+  const isClean = useSelector((state: RootState) => !state.documentSettings.id && !state.layer.present.edit.id);
+  const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
   const [layerEvent, setLayerEvent] = useState(null);
   const [uiEvent, setUIEvent] = useState(null);
   const [translateEvent, setTranslateEvent] = useState(null);
   const [zoomEvent, setZoomEvent] = useState(null);
+  const [dragOver, setDragOver] = useState(false);
   const dispatch = useDispatch();
 
   const validLayerHitResult = (hitResult: paper.HitResult): boolean => {
@@ -206,6 +216,121 @@ const Canvas = (): ReactElement => {
     });
   }
 
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    if (!dragOver && !draggingLayers) {
+      setDragOver(true);
+    }
+  }
+
+  const handleDragEnd = (e: any): void => {
+    setDragOver(false);
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    let isDirty = !isClean;
+    if (e.dataTransfer.items) {
+      for(let i = 0; i < e.dataTransfer.items.length; i++) {
+        if (e.dataTransfer.items[i].kind === 'file') {
+          let file = e.dataTransfer.items[i].getAsFile();
+          const isImage = file.type.startsWith('image');
+          const isDocument = file.name.endsWith('.btwx');
+          if (isImage && activeArtboard) {
+            handleImageDrop(file);
+          }
+          if (isDocument) {
+            handleDocumentDrop(file, isDirty);
+            isDirty = true;
+          }
+        }
+      }
+    } else {
+      for(let i = 0; i < e.dataTransfer.files.length; i++) {
+        let file = e.dataTransfer.files[i];
+        const isImage = file.type.startsWith('image');
+        const isDocument = file.name.endsWith('.btwx');
+        if (isImage && activeArtboard) {
+          handleImageDrop(file);
+        }
+        if (isDocument) {
+          handleDocumentDrop(file, isDirty);
+          isDirty = true;
+        }
+      }
+    }
+    setDragOver(false);
+  }
+
+  const handleDocumentDrop = (file: File, dirty) => {
+    file.text().then((text) => {
+      try {
+        const documentState = JSON.parse(text) as Btwx.Document;
+        if (!dirty) {
+          dispatch(hydrateDocumentThunk({
+            ...documentState,
+            layer: {
+              ...documentState.layer,
+              present: {
+                ...documentState.layer.present,
+                tree: {
+                  ...documentState.layer.present.tree,
+                  byId: documentState.layer.present.byId
+                }
+              }
+            }
+          }));
+          ipcRenderer.send('setDocumentRepresentedFilename', JSON.stringify({
+            instanceId,
+            documentPath: file.path
+          }));
+        } else {
+          ipcRenderer.send('openDroppedDocument', JSON.stringify({
+            path: file.path
+          }));
+        }
+      } catch {
+        console.log('error reading dropped document');
+      }
+    });
+  }
+
+  const handleImageDrop = (file: File) => {
+    const ext = file.type.replace('image/', '');
+    const fileReader = new FileReader();
+    fileReader.addEventListener('load', function() {
+      let image = new Image();
+      image.onload = () => {
+        const buffer = base64ToBuffer((this.result as string).replace(`data:image/${ext};base64,`, ''));
+        const width = image.width;
+        const height = image.height;
+        dispatch(addImageThunk({
+          layer: {
+            name: file.name,
+            frame: {
+              x: 0,
+              y: 0,
+              width,
+              height,
+              innerWidth: width,
+              innerHeight: height
+            },
+            originalDimensions: {
+              width,
+              height
+            }
+          },
+          buffer: buffer as any,
+          ext: ext
+        }));
+      }
+      image.src = this.result as string;
+    }, false);
+    if (file) {
+      fileReader.readAsDataURL(file);
+    }
+  }
+
   useEffect(() => {
     window.addEventListener('resize', handleResize);
     return (): void => {
@@ -221,38 +346,48 @@ const Canvas = (): ReactElement => {
     <div
       ref={ref}
       id='canvas-container'
-      className={`c-canvas c-canvas--${canvasTheme}`}
+      className={`c-canvas c-canvas--${canvasTheme}${
+        dragOver
+        ? `${' '}c-canvas--dragover`
+        : ''
+      }`}
       onMouseMove={ready ? handleMouseMove : null}
       onMouseDown={ready ? handleMouseDown : null}
       onDoubleClick={ready ? handleDoubleClick : null}
       onContextMenu={ready ? handleContextMenu : null}
       onWheel={ready ? handleWheel : null}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
+      onDragLeave={handleDragEnd}
+      onDrop={handleDrop}
       style={{
-        cursor: cursor[0] === 'crosshair'
-        ? (() => {
-            switch(activeTool) {
-              case 'Shape':
-                switch(shapeToolType) {
-                  case 'Rectangle':
-                    return `url(${insertRectangleCursor}) 17 17, auto`;
-                  case 'Ellipse':
-                    return `url(${insertEllipseCursor}) 17 17, auto`;
-                  case 'Polygon':
-                    return `url(${insertPolygonCursor}) 17 17, auto`;
-                  case 'Rounded':
-                    return `url(${insertRoundedCursor}) 17 17, auto`;
-                  case 'Star':
-                    return `url(${insertStarCursor}) 17 17, auto`;
-                  case 'Line':
-                    return `url(${insertLineCursor}) 17 17, auto`;
-                  default:
-                    return `url(${insertCursor}) 17 17, auto`;
-                }
-              default:
-                return `url(${insertCursor}) 17 17, auto`;
-            }
-          })()
-        : cursor[0]
+        cursor: dragOver
+        ? `url(${insertFileCursor}) 14 14, auto`
+        : cursor[0] === 'crosshair'
+          ? (() => {
+              switch(activeTool) {
+                case 'Shape':
+                  switch(shapeToolType) {
+                    case 'Rectangle':
+                      return `url(${insertRectangleCursor}) 17 17, auto`;
+                    case 'Ellipse':
+                      return `url(${insertEllipseCursor}) 17 17, auto`;
+                    case 'Polygon':
+                      return `url(${insertPolygonCursor}) 17 17, auto`;
+                    case 'Rounded':
+                      return `url(${insertRoundedCursor}) 17 17, auto`;
+                    case 'Star':
+                      return `url(${insertStarCursor}) 17 17, auto`;
+                    case 'Line':
+                      return `url(${insertLineCursor}) 17 17, auto`;
+                    default:
+                      return `url(${insertCursor}) 17 17, auto`;
+                  }
+                default:
+                  return `url(${insertCursor}) 17 17, auto`;
+              }
+            })()
+          : cursor[0]
       }}>
       <CanvasUI />
       <CanvasProjects />
