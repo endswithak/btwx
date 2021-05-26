@@ -20,9 +20,9 @@ const ZoomTool = (props: ZoomToolProps): ReactElement => {
   const dispatch = useDispatch();
 
   const debounceZoomEnd = useCallback(
-    debounce((currentCursor: Btwx.CanvasCursor[]) => {
+    debounce((currentCursor: Btwx.CanvasCursor[], paperMatrix) => {
       dispatch(setCanvasZooming({zooming: false}));
-      dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
+      dispatch(setCanvasMatrix({matrix: paperMatrix}));
       dispatch(setCanvasCursor({cursor: currentCursor.filter(c => c !== 'zoom-in' && c !== 'zoom-out')}));
     }, 50),
     []
@@ -64,7 +64,7 @@ const ZoomTool = (props: ZoomToolProps): ReactElement => {
           project.view.matrix = paperMain.projects[0].view.matrix;
         }
       });
-      debounceZoomEnd(cursor);
+      debounceZoomEnd(cursor, paperMain.projects[0].view.matrix.values);
     }
   }, [zoomEvent]);
 

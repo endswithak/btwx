@@ -2,6 +2,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { ActionCreators } from 'redux-undo';
 import { updateFramesThunk } from './layer';
 import { addSessionImages }  from './session';
+import { paperMain } from '../../canvas';
+import { RootState } from '../reducers';
 
 import {
   OPEN_DOCUMENT,
@@ -37,6 +39,54 @@ export const hydrateDocument = (payload: HydrateDocumentPayload): DocumentSettin
 
 export const hydrateDocumentThunk = (payload: HydrateDocumentPayload) => {
   return (dispatch: any, getState: any): void => {
+    const state = getState() as RootState;
+    const currentViewSettings = state.viewSettings;
+    const nextViewSettings = payload.viewSettings;
+    const canvasContainer = document.getElementById('canvas-container');
+    const currentCanvasViewSize = new paperMain.Size(canvasContainer.clientWidth, canvasContainer.clientHeight);
+    const newMatrix = payload.documentSettings.matrix;
+    let leftSidebarDiff = 0;
+    let rightSidebarDiff = 0;
+    let eventDrawerDiff = 0;
+    const leftSidebarChange = (
+      (currentViewSettings.leftSidebar.isOpen !== nextViewSettings.leftSidebar.isOpen) ||
+      (
+        (currentViewSettings.leftSidebar.isOpen === nextViewSettings.leftSidebar.isOpen) &&
+        (currentViewSettings.leftSidebar.width !== nextViewSettings.leftSidebar.width)
+      )
+    );
+    const rightSidebarChange = currentViewSettings.rightSidebar.isOpen !== nextViewSettings.rightSidebar.isOpen;
+    const eventDrawerChange = (
+      (currentViewSettings.eventDrawer.isOpen !== nextViewSettings.eventDrawer.isOpen) ||
+      (
+        (currentViewSettings.eventDrawer.isOpen === nextViewSettings.eventDrawer.isOpen) &&
+        (currentViewSettings.eventDrawer.height !== nextViewSettings.eventDrawer.height)
+      )
+    );
+    if (leftSidebarChange) {
+      if (currentViewSettings.leftSidebar.isOpen !== nextViewSettings.leftSidebar.isOpen) {
+        leftSidebarDiff = currentViewSettings.leftSidebar.isOpen ? -currentViewSettings.leftSidebar.width : -nextViewSettings.leftSidebar.width;
+      } else {
+        leftSidebarDiff = nextViewSettings.leftSidebar.width - currentViewSettings.leftSidebar.width;
+      }
+    }
+    if (rightSidebarChange) {
+      rightSidebarDiff = currentViewSettings.rightSidebar.isOpen ? -currentViewSettings.rightSidebar.width : -nextViewSettings.rightSidebar.width;
+    }
+    if (eventDrawerChange) {
+      if (currentViewSettings.eventDrawer.isOpen !== nextViewSettings.eventDrawer.isOpen) {
+        eventDrawerDiff = currentViewSettings.eventDrawer.isOpen ? -currentViewSettings.eventDrawer.height : -nextViewSettings.eventDrawer.height;
+      } else {
+        eventDrawerDiff = nextViewSettings.eventDrawer.height - currentViewSettings.eventDrawer.height;
+      }
+    }
+    const nextViewWidth = currentCanvasViewSize.width - (leftSidebarDiff + rightSidebarDiff);
+    const nextViewHeight = currentCanvasViewSize.height - eventDrawerDiff;
+    paperMain.projects[0].view.viewSize = new paperMain.Size(
+      nextViewWidth > 0 ? nextViewWidth : 0,
+      nextViewHeight > 0 ? nextViewHeight : 0
+    );
+    paperMain.projects[0].view.matrix.set(newMatrix);
     dispatch(addSessionImages({images: payload.documentSettings.images}));
     dispatch(hydrateDocument(payload));
     dispatch(ActionCreators.clearHistory());

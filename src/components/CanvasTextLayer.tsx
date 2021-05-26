@@ -168,7 +168,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
   const maskedIndex = (layerIndex - underlyingMaskIndex) + 1;
   const projectIndex = artboardItem.projectIndex;
   const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
-  const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
+  const [paperProject, setPaperProject] = useState(paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project);
   const [rendered, setRendered] = useState<boolean>(false);
   const [layerTimelines, setLayerTimelines] = useState(null);
   // const [prevRotation, setPrevRotation] = useState(layerItem.transform.rotation);
@@ -187,7 +187,6 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
     textBackground: paper.Path.Rectangle;
     textMask: paper.Path.Rectangle;
   } => {
-    const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
     const paperLayer = paperProject.getItem({ data: { id } }) as paper.Group;
     if (paperLayer) {
       const textContent = paperLayer.getItem({ data: { id: 'textContent' } }) as paper.PointText;

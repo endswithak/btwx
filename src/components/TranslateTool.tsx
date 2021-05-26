@@ -19,9 +19,9 @@ const TranslateTool = (props: TranslateToolProps): ReactElement => {
   const dispatch = useDispatch();
 
   const debounceTranslate = useCallback(
-    debounce(() => {
+    debounce((paperMatrix) => {
       // dispatch(setCanvasTranslating({translating: false}));
-      dispatch(setCanvasMatrix({matrix: paperMain.view.matrix.values}));
+      dispatch(setCanvasMatrix({matrix: paperMatrix}));
     }, 100),
     []
   );
@@ -41,7 +41,7 @@ const TranslateTool = (props: TranslateToolProps): ReactElement => {
           project.view.matrix = paperMain.projects[0].view.matrix;
         }
       });
-      debounceTranslate();
+      debounceTranslate(paperMain.projects[0].view.matrix.values);
     }
   }, [translateEvent]);
 

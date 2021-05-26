@@ -140,6 +140,30 @@ export const updateGroupParentBounds = (state: LayerState, groupParents: string[
   }
 }
 
+export const updateArtboardProjectIndices = (state: LayerState): LayerState => {
+  return state.byId['root'].children.reduce((result, current, index) => {
+    const newProjectIndex = Math.floor(index / ARTBOARDS_PER_PROJECT) + 1;
+    const isActiveArtboard = current === result.activeArtboard;
+    if (isActiveArtboard) {
+      result = {
+        ...result,
+        activeProjectIndex: newProjectIndex
+      }
+    }
+    result = {
+      ...result,
+      byId: {
+        ...result.byId,
+        [current]: {
+          ...result.byId[current],
+          projectIndex: newProjectIndex
+        } as Btwx.Artboard
+      }
+    }
+    return result;
+  }, state);
+}
+
 export const addArtboard = (state: LayerState, action: AddArtboard): LayerState => {
   let currentState = state;
   const groupParents = ['root'];
@@ -510,7 +534,7 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
     if (cs.activeArtboard === id) {
       const artboardIndex = cs.byId.root.children.indexOf(id);
       let nextActiveArtboard = null;
-      if (cs.byId.root.children.length > 1) {
+      if (cs.byId.root.children.length >= 2) {
         if (artboardIndex === 0) {
           nextActiveArtboard = cs.byId.root.children[1];
         } else {
@@ -589,16 +613,7 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
     }
     // if artboard, update project indices
     if (li.type === 'Artboard') {
-      cs = cs.byId.root.children.reduce((ar, ac, ai) => ({
-        ...ar,
-        byId: {
-          ...ar.byId,
-          [ac]: {
-            ...ar.byId[ac],
-            projectIndex: Math.floor(ai / ARTBOARDS_PER_PROJECT) + 1
-          } as Btwx.Artboard
-        }
-      }), cs)
+      cs = updateArtboardProjectIndices(cs);
     }
     return cs;
   }
@@ -693,21 +708,29 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
   if (layerItem.type === 'Artboard' || layerItem.type === 'Group') {
     if (state.selected.some((selectedItem) => currentState.byId[selectedItem].scope.includes(action.payload.id))) {
       const layersToDeselect = state.selected.filter((selectedItem) => currentState.byId[selectedItem].scope.includes(action.payload.id));
-      currentState = deselectLayers(currentState, layerActions.deselectLayers({layers:layersToDeselect }) as DeselectLayers);
+      currentState = deselectLayers(currentState, layerActions.deselectLayers({
+        layers:layersToDeselect
+      }) as DeselectLayers);
     }
   }
   // if any parents selected, deselect them
   if (currentState.selected.some((id) => layerItem.scope.includes(id))) {
     const deselectParents = currentState.selected.filter((id) => layerItem.scope.includes(id));
-    currentState = deselectLayers(currentState, layerActions.deselectLayers({layers: deselectParents }) as DeselectLayers);
+    currentState = deselectLayers(currentState, layerActions.deselectLayers({
+      layers: deselectParents
+    }) as DeselectLayers);
   }
   // if layer is an artboard, make it the active artboard
   if (layerItem.type === 'Artboard' && currentState.activeArtboard !== action.payload.id) {
-    currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: action.payload.id}) as SetActiveArtboard);
+    currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({
+      id: action.payload.id
+    }) as SetActiveArtboard);
   }
-  // if layer scope root is an artboard, make the layer scope root the active artboard
+  // if layer scope root is an artboard, make the layer scope artboard the active artboards
   if (layerItem.type !== 'Artboard' && currentState.activeArtboard !== layerItem.scope[1]) {
-    currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({id: layerItem.scope[1]}) as SetActiveArtboard);
+    currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({
+      id: layerItem.scope[1]
+    }) as SetActiveArtboard);
   }
   // handle hover
   // if (layerItem.id !== currentState.hover) {
@@ -746,7 +769,9 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
   }
   // update scope
   if (layerItem.scope[layerItem.scope.length - 1] !== currentState.scope[currentState.scope.length - 1]) {
-    currentState = setGlobalScope(currentState, layerActions.setGlobalScope({scope: layerItem.scope}) as SetGlobalScope);
+    currentState = setGlobalScope(currentState, layerActions.setGlobalScope({
+      scope: layerItem.scope
+    }) as SetGlobalScope);
   }
   // order selected by depth
   const orderedSelected = orderLayersByDepth(currentState, currentState.selected);
@@ -956,6 +981,9 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
     };
     // currentState = updateLayerBounds(currentState, action.payload.child);
   }
+  if (childItem.type === 'Artboard') {
+    currentState = updateArtboardProjectIndices(currentState);
+  }
   currentState = updateGroupParentBounds(currentState, groupParents);
   return currentState;
 };
@@ -1064,45 +1092,6 @@ export const hideLayersChildren = (state: LayerState, action: HideLayersChildren
   return currentState;
 };
 
-const updateMaskStuff = (state: LayerState, layers: string[]): LayerState => {
-  let underlyingMask: string = null;
-  let ignoreMaskChain = false;
-  return layers.reduce((result, current) => {
-    const layerItem = result.byId[current];
-    if (underlyingMask && layerItem.type !== 'Artboard' && (layerItem as Btwx.MaskableLayer).underlyingMask !== underlyingMask) {
-      result = {
-        ...result,
-        byId: {
-          ...result.byId,
-          [current]: {
-            ...result.byId[current],
-            underlyingMask: underlyingMask
-          } as Btwx.MaskableLayer
-        }
-      }
-    }
-    if (layerItem.type !== 'Artboard' && (ignoreMaskChain || (layerItem as Btwx.MaskableLayer).ignoreUnderlyingMask) && (layerItem as Btwx.MaskableLayer).masked) {
-      result = {
-        ...result,
-        byId: {
-          ...result.byId,
-          [current]: {
-            ...result.byId[current],
-            masked: false
-          } as Btwx.MaskableLayer
-        }
-      }
-    }
-    if (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask) {
-      underlyingMask = current;
-    }
-    if (layerItem.type !== 'Artboard' && (layerItem as Btwx.MaskableLayer).ignoreUnderlyingMask) {
-      ignoreMaskChain = true;
-    }
-    return result;
-  }, state);
-}
-
 export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
@@ -1203,6 +1192,10 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
         } as Btwx.MaskableLayer
       }
     };
+  }
+  //
+  if (layerItem.type === 'Artboard') {
+    currentState = updateArtboardProjectIndices(currentState);
   }
   if (isLayerIgnoringUnderlyingMask) {
     currentState = toggleLayerIgnoreUnderlyingMask(currentState, layerActions.toggleLayerIgnoreUnderlyingMask({
@@ -1351,6 +1344,9 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
       }
     };
   }
+  if (layerItem.type === 'Artboard') {
+    currentState = updateArtboardProjectIndices(currentState);
+  }
   if (isAboveIgnoringUnderlyingMask) {
     currentState = toggleLayerIgnoreUnderlyingMask(currentState, layerActions.toggleLayerIgnoreUnderlyingMask({
       id: action.payload.above
@@ -1417,13 +1413,9 @@ export const decreaseLayerScope = (state: LayerState, action: DecreaseLayerScope
 });
 
 export const clearLayerScope = (state: LayerState, action: ClearLayerScope): LayerState => {
-  const hasActiveArtboard = state.activeArtboard !== null;
-  const activeArtboardItem = hasActiveArtboard ? state.byId[state.activeArtboard] as Btwx.Artboard : null;
   return {
     ...state,
-    scope: hasActiveArtboard ? ['root', state.activeArtboard] : ['root'],
-    // scope: ['root'],
-    activeProjectIndex: hasActiveArtboard ? activeArtboardItem.projectIndex : null
+    scope: state.scope.slice(0, 1)
   }
 };
 
@@ -1488,10 +1480,15 @@ export const setLayersScope = (state: LayerState, action: SetLayersScope): Layer
 export const setGlobalScope = (state: LayerState, action: SetGlobalScope): LayerState => {
   let currentState = state;
   const hasArtboard = action.payload.scope.length > 1 && currentState.byId[action.payload.scope[1]].type === 'Artboard';
+  const artboardsMatch = hasArtboard && action.payload.scope[1] === currentState.activeArtboard;
   currentState = {
     ...currentState,
-    scope: [...action.payload.scope],
-    activeProjectIndex: hasArtboard ? (currentState.byId[action.payload.scope[1]] as Btwx.Artboard).projectIndex : null
+    scope: [...action.payload.scope]
+  }
+  if (!artboardsMatch) {
+    currentState = setActiveArtboard(currentState, layerActions.setActiveArtboard({
+      id: action.payload.scope[1]
+    }) as SetActiveArtboard);
   }
   return currentState;
 };
@@ -1952,9 +1949,11 @@ export const setLayerName = (state: LayerState, action: SetLayerName): LayerStat
 
 export const setActiveArtboard = (state: LayerState, action: SetActiveArtboard): LayerState => {
   let currentState = state;
+  const projectIndex = action.payload.id ? (state.byId[action.payload.id] as Btwx.Artboard).projectIndex : null;
   currentState = {
     ...currentState,
-    activeArtboard: action.payload.id
+    activeArtboard: action.payload.id,
+    activeProjectIndex: projectIndex
   }
   return currentState;
 };
@@ -11628,7 +11627,7 @@ export const replaceImages = (state: LayerState, action: ReplaceImages): LayerSt
 
 export const pasteLayersFromClipboard = (state: LayerState, action: PasteLayersFromClipboard): LayerState => {
   let currentState = state;
-  const topScopeId = currentState.scope[currentState.scope.length - 1] === 'root' ? currentState.activeArtboard ? currentState.activeArtboard : null : currentState.scope[currentState.scope.length - 1];
+  const topScopeId = currentState.scope[currentState.scope.length - 1] === 'root' ? currentState.activeArtboard ? currentState.activeArtboard : 'root' : currentState.scope[currentState.scope.length - 1];
   const topScopeItem = topScopeId ? currentState.byId[topScopeId] as Btwx.Artboard | Btwx.Group : null;
   currentState = {
     ...currentState,
@@ -11714,31 +11713,34 @@ export const pasteLayersFromClipboard = (state: LayerState, action: PasteLayersF
       }
     }, currentState);
   }
+  // for any layers pasted without artboards...
+  // update parent bounds those layers are pasted in
   if (topScopeItem) {
-    const newChildren = [
-      ...currentState.byId[topScopeId].children,
-      ...action.payload.clipboardLayers.topScopeChildren
-    ];
-    const layersBounds = topScopeItem.type !== 'Artboard' ? getLayersRelativeBounds(currentState, newChildren) : null;
-    currentState =  {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [topScopeId]: {
-          ...currentState.byId[topScopeId],
-          children: newChildren,
-          frame: topScopeItem.type !== 'Artboard' ? {
-            ...currentState.byId[topScopeId].frame,
-            x: layersBounds.center.x,
-            y: layersBounds.center.y,
-            innerWidth: layersBounds.width,
-            innerHeight: layersBounds.height,
-            width: layersBounds.width,
-            height: layersBounds.height
-          } : currentState.byId[topScopeId].frame
-        }
-      }
-    }
+    currentState = updateGroupParentBounds(currentState, [topScopeId]);
+    // const newChildren = [
+    //   ...currentState.byId[topScopeId].children,
+    //   ...action.payload.clipboardLayers.topScopeChildren
+    // ];
+    // const layersBounds = topScopeItem.type !== 'Artboard' ? getLayersRelativeBounds(currentState, newChildren) : null;
+    // currentState =  {
+    //   ...currentState,
+    //   byId: {
+    //     ...currentState.byId,
+    //     [topScopeId]: {
+    //       ...currentState.byId[topScopeId],
+    //       children: newChildren,
+    //       frame: topScopeItem.type !== 'Artboard' ? {
+    //         ...currentState.byId[topScopeId].frame,
+    //         x: layersBounds.center.x,
+    //         y: layersBounds.center.y,
+    //         innerWidth: layersBounds.width,
+    //         innerHeight: layersBounds.height,
+    //         width: layersBounds.width,
+    //         height: layersBounds.height
+    //       } : currentState.byId[topScopeId].frame
+    //     }
+    //   }
+    // }
   }
   // if (action.payload.clipboardLayers.activeArtboardChildren.length > 0 && action.payload.clipboardLayers.allShapeIds.some((id) => action.payload.clipboardLayers.activeArtboardChildren.includes(id))) {
   //   action.payload.clipboardLayers.allShapeIds.filter((id) =>

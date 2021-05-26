@@ -33,13 +33,13 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
   const layerItem: Btwx.Artboard = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Artboard);
   const eventsById = useSelector((state: RootState) => state.layer.present.events.byId);
   const projectIndex: number = useSelector((state: RootState) => state.layer.present.byId[id] ? (state.layer.present.byId[id] as Btwx.Artboard).projectIndex : null);
-  const project = paperScope === 'main' ? projectIndex ? paperMain.projects[projectIndex] : null : paperPreview.project;
   const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
   const [rendered, setRendered] = useState<boolean>(false);
   const [eventTimelines, setEventTimelines] = useState(null);
   const [layerTimelines, setLayerTimelines] = useState(null);
   const [eventLayers, setEventLayers] = useState(allEventTweenLayers);
   const [originEvents, setOriginEvents] = useState(layerItem.originForEvents);
+  const [project, setProject] = useState(paperScope === 'main' ? projectIndex ? paperMain.projects[projectIndex] : null : paperPreview.project);
   const dispatch = useDispatch();
 
   ///////////////////////////////////////////////////////

@@ -25,7 +25,7 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
   const maskedIndex = (layerIndex - underlyingMaskIndex) + 1;
   const projectIndex = artboardItem.projectIndex;
   const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
-  const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
+  const [paperProject, setPaperProject] = useState(paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project);
   const [rendered, setRendered] = useState<boolean>(false);
   const [layerTimelines, setLayerTimelines] = useState(null);
 
