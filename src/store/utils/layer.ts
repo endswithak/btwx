@@ -11632,6 +11632,7 @@ export const pasteLayersFromClipboard = (state: LayerState, action: PasteLayersF
   const topScopeItem = topScopeId ? currentState.byId[topScopeId] as Btwx.Artboard | Btwx.Group : null;
   currentState = {
     ...currentState,
+    allIds: [...currentState.allIds, ...action.payload.clipboardLayers.allIds],
     allArtboardIds: [
       ...currentState.allArtboardIds,
       ...action.payload.clipboardLayers.allArtboardIds
