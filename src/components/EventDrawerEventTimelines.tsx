@@ -15,7 +15,6 @@ const EventDrawerEventTimelines = (): ReactElement => {
   // const selected = useSelector((state: RootState) => state.layer.present.tweens.selected.allIds);
   const eventLayers = useSelector((state: RootState) => state.layer.present.events.byId[state.eventDrawer.event] ? state.layer.present.events.byId[state.eventDrawer.event].layers : []);
   const wiggleLayers = useSelector((state: RootState) => getWiggleLayersSelector(state, state.eventDrawer.event));
-  const isEmpty = eventLayers.length === 0;
   // const dispatch = useDispatch();
 
   // const handleMouseDown = () => {
@@ -28,7 +27,7 @@ const EventDrawerEventTimelines = (): ReactElement => {
     <div
       className='c-event-drawer-event__layers-timeline-wrap'>
       {
-        isEmpty
+        eventLayers.length === 0
         ? <EventDrawerEventTimelinesEmptyState />
         : <div className='c-event-drawer-event__layers-timeline'>
             <EventDrawerEventTimelinesHeaders />

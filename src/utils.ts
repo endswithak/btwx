@@ -137,7 +137,8 @@ export const applyLayerTimelines = ({layerItem, paperLayer, eventTimelines, even
         id: `${current}-${layerItem.id}`,
         data: {
           ...eventTimelinePaperLayers,
-          props: {}
+          props: {},
+          prevProps: {}
         }
       });
       // add layer timeline

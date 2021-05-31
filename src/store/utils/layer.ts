@@ -2394,7 +2394,8 @@ export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): L
       id: action.payload.id
     }) as DeselectLayerEventTween);
   }
-  if (currentState.events.byId[tween.event].layers.includes(tween.layer)) {
+  const onlyLayerTween = currentState.events.byId[tween.event].tweens.byLayer[tween.layer].length === 1;
+  if (currentState.events.byId[tween.event].layers.includes(tween.layer) && onlyLayerTween) {
     currentState = {
       ...currentState,
       events: {
@@ -2422,7 +2423,7 @@ export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): L
             allIds: removeItem(currentState.events.byId[tween.event].tweens.allIds, action.payload.id),
             byLayer: Object.keys(currentState.events.byId[tween.event].tweens.byLayer).reduce((result, current) => {
               if (tween.layer === current) {
-                if (currentState.events.byId[tween.event].tweens.byLayer[current].length === 1) {
+                if (onlyLayerTween) {
                   result = Object.keys(result).reduce((cr, ct) => {
                     if (ct !== current) {
                       cr = {

@@ -138,7 +138,7 @@ export const CUSTOM_WIGGLE_TWEEN_STRENGTH_MAP: { [id: string]: number | Btwx.Col
   fontSize: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
   letterSpacing: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
   lineHeight: CUSTOM_WIGGLE_TWEEN_STRENGTH_NUMBER,
-  fontWeight: 900,
+  fontWeight: 400,
   text: 'wiggle text',
   scaleX: 1,
   scaleY: 1,
