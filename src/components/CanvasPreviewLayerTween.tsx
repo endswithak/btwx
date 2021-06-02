@@ -63,60 +63,130 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     height: number;
     boundingWidth: number;
     boundingHeight: number;
-    scaleX: number;
-    scaleY: number;
     rotation: number;
     dashOffset: number;
-    dashArrayWidth: number;
-    dashArrayGap: number;
     fontSize: number;
     fontWeight: number;
     letterSpacing: number;
     lineHeight: number;
     text: string;
     shape: string;
-    strokeGradientOriginX: number;
-    strokeGradientOriginY: number;
-    strokeGradientDestinationX: number;
-    strokeGradientDestinationY: number;
-    fillGradientOriginX: number;
-    fillGradientOriginY: number;
-    fillGradientDestinationX: number;
-    fillGradientDestinationY: number;
-    strokeGradientOriginXEase: string;
-    strokeGradientOriginYEase: string;
-    strokeGradientDestinationXEase: string;
-    strokeGradientDestinationYEase: string;
-    fillGradientOriginXEase: string;
-    fillGradientOriginYEase: string;
-    fillGradientDestinationXEase: string;
-    fillGradientDestinationYEase: string;
     opacity: number;
     blur: number;
+    strokeWidth: number;
+    scaleX: number;
+    scaleY: number;
+    dashArrayWidth: number;
+    dashArrayGap: number;
     shadowColor: string;
     shadowOffsetX: number;
     shadowOffsetY: number;
     shadowBlur: number;
-    strokeWidth: number;
-    fillType: Btwx.FillStrokeTween,
-    strokeType: Btwx.FillStrokeTween,
-    fill: string[],
-    stroke: string[]
+    fillType: Btwx.FillStrokeTween;
+    fill: string;
+    fillGradientOriginX: number;
+    fillGradientOriginY: number;
+    fillGradientDestinationX: number;
+    fillGradientDestinationY: number;
+    fillGradientOriginXEase: string;
+    fillGradientOriginYEase: string;
+    fillGradientDestinationXEase: string;
+    fillGradientDestinationYEase: string;
+    strokeType: Btwx.FillStrokeTween;
+    stroke: string;
+    strokeGradientOriginX: number;
+    strokeGradientOriginY: number;
+    strokeGradientDestinationX: number;
+    strokeGradientDestinationY: number;
+    strokeGradientOriginXEase: string;
+    strokeGradientOriginYEase: string;
+    strokeGradientDestinationXEase: string;
+    strokeGradientDestinationYEase: string;
   }
 
   const getCurrentTweenProp = (prop, value) => {
-    if (Object.prototype.hasOwnProperty.call(eventLayerTimeline.data.props, prop)) {
-      return eventLayerTimeline.data.props[prop];
+    if (prop === 'fill' || prop === 'stroke') {
+      switch(eventLayerTimeline.data.props[`${prop}Type`]) {
+        case 'colorToColor':
+        case 'colorToNull':
+        case 'nullToColor': {
+          if (Object.prototype.hasOwnProperty.call(eventLayerTimeline.data.props, prop)) {
+            return { [prop]: eventLayerTimeline.data.props[prop] };
+          } else {
+            return value;
+          }
+        }
+        case 'colorToGradient':
+        case 'gradientToGradient':
+        case 'gradientToColor':
+        case 'gradientToNull':
+        case 'nullToGradient': {
+          if (Object.keys(eventLayerTimeline.data.props).some((key) => key.startsWith(`${prop}Stop`))) {
+            return Object.keys(eventLayerTimeline.data.props).reduce((result, current) => {
+              if (current.startsWith(`${prop}Stop`)) {
+                result = {
+                  ...result,
+                  [current]: eventLayerTimeline.data.props[current]
+                }
+              }
+              return result;
+            }, {});
+          } else {
+            return value;
+          }
+        }
+        default:
+          return null;
+      }
     } else {
-      return value;
+      if (Object.prototype.hasOwnProperty.call(eventLayerTimeline.data.props, prop)) {
+        return eventLayerTimeline.data.props[prop];
+      } else {
+        return value;
+      }
     }
   }
 
   const getPastTweenProp = (prop, value) => {
-    if (Object.prototype.hasOwnProperty.call(eventLayerTimeline.data.prevProps, prop)) {
-      return eventLayerTimeline.data.prevProps[prop];
+    if (prop === 'fill' || prop === 'stroke') {
+      switch(eventLayerTimeline.data.prevProps[`${prop}Type`]) {
+        case 'colorToColor':
+        case 'colorToNull':
+        case 'nullToColor': {
+          if (Object.prototype.hasOwnProperty.call(eventLayerTimeline.data.prevProps, prop)) {
+            return { [prop]: eventLayerTimeline.data.prevProps[prop] };
+          } else {
+            return value;
+          }
+        }
+        case 'colorToGradient':
+        case 'gradientToGradient':
+        case 'gradientToColor':
+        case 'gradientToNull':
+        case 'nullToGradient': {
+          if (Object.keys(eventLayerTimeline.data.prevProps).some((key) => key.startsWith(`${prop}Stop`))) {
+            return Object.keys(eventLayerTimeline.data.prevProps).reduce((result, current) => {
+              if (current.startsWith(`${prop}Stop`)) {
+                result = {
+                  ...result,
+                  [current]: eventLayerTimeline.data.prevProps[current]
+                }
+              }
+              return result;
+            }, {});
+          } else {
+            return value;
+          }
+        }
+        default:
+          return null;
+      }
     } else {
-      return value;
+      if (Object.prototype.hasOwnProperty.call(eventLayerTimeline.data.prevProps, prop)) {
+        return eventLayerTimeline.data.prevProps[prop];
+      } else {
+        return value;
+      }
     }
   }
 
@@ -146,16 +216,16 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     const opacity = originLayerItem && getProp('opacity', originLayerItem.style.opacity, prev);
     const blur = originLayerItem && getProp('blur', originLayerItem.style.blur.radius, prev);
     // shadow
-    const shadowColor = originLayerItem && getProp('shadowColor', tinyColor(originLayerItem.style.shadow.color).toRgbString(), prev);
-    const shadowOffsetX = originLayerItem && getProp('shadowOffsetX', originLayerItem.style.shadow.offset.x, prev);
-    const shadowOffsetY = originLayerItem && getProp('shadowOffsetY', originLayerItem.style.shadow.offset.y, prev);
-    const shadowBlur = originLayerItem && getProp('shadowOffsetY', originLayerItem.style.shadow.blur, prev);
+    const shadowColor = originLayerItem && getProp('shadowColor', getOriginShadowColor(), prev);
+    const shadowOffsetX = originLayerItem && getProp('shadowOffsetX', getOriginShadowOffsetX(), prev);
+    const shadowOffsetY = originLayerItem && getProp('shadowOffsetY', getOriginShadowOffsetY(), prev);
+    const shadowBlur = originLayerItem && getProp('shadowBlur', getOriginShadowBlur(), prev);
     // fill
     const fillType = originLayerItem && getProp('fillType', null, prev);
-    const fill = originLayerItem && getProp('fill', getInitialFSValue('fill', fillType), prev);
+    const fill = originLayerItem && getProp('fill', getInitialFSColor('fill', fillType), prev);
     // stroke
     const strokeType = originLayerItem && getProp('strokeType', null, prev);
-    const stroke = originLayerItem && getProp('stroke', getInitialFSValue('stroke', strokeType), prev);
+    const stroke = originLayerItem && getProp('stroke', getInitialFSColor('stroke', strokeType), prev);
     const strokeWidth = originLayerItem && getProp('strokeWidth', originLayerItem.style.stroke.width, prev);
     // Gradient origin/destination
     const strokeGradientOriginX = originLayerItem && getProp('strokeGradientOriginX', originLayerItem.style.stroke.gradient.origin.x, prev);
@@ -229,8 +299,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       strokeWidth,
       fillType,
       strokeType,
-      fill,
-      stroke
+      ...fill,
+      ...stroke,
     }
   }
 
@@ -238,21 +308,38 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     getHasSinglePropChange(currentProps, prevProps, key)
   );
 
-  const getHasSinglePropChange = (currentProps: TweenProps, prevProps: TweenProps, prop: string) => {
+  const getHasSinglePropChange = (currentProps: TweenProps, prevProps: TweenProps, prop: string): boolean => {
     const currentProp = currentProps[prop];
     const prevProp = prevProps[prop];
+    const handleFSCheck = (): boolean => {
+      switch(currentProps[`${prop}Type`]) {
+        case 'colorToColor':
+        case 'colorToNull':
+        case 'nullToColor': {
+          return currentProp !== prevProp;
+        }
+        case 'colorToGradient':
+        case 'gradientToGradient':
+        case 'gradientToColor':
+        case 'gradientToNull':
+        case 'nullToGradient': {
+          return Object.keys(currentProps).some(key => {
+            if (key.startsWith(`${prop}Stop`)) {
+              const currentStop = currentProps[key];
+              const prevStop = prevProps[key];
+              return currentStop !== prevStop;
+            } else {
+              return false;
+            }
+          });
+        }
+      }
+    }
     if (prop === 'stroke' || prop === 'fill') {
-      return currentProp && currentProp.length > 0 ? currentProp.some((color, index) => color !== prevProp[index]) : false;
+      handleFSCheck();
     } else {
       return currentProp !== prevProp;
     }
-  }
-
-  const hasTransformProp = (currentProps: TweenProps) => {
-    const hasRotation = currentProps.rotation !== 0;
-    const hasScaleX = (currentProps.scaleX && Math.abs(currentProps.scaleX) !== 1);
-    const hasScaleY = (currentProps.scaleY && Math.abs(currentProps.scaleY) !== 1);
-    return hasRotation || hasScaleX || hasScaleY;
   }
 
   const hasSomePropsChange = (currentProps: TweenProps, prevProps: TweenProps, props: string[]) =>
@@ -297,10 +384,10 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     const widthRef = isOriginLayerLine ? currentProps.boundingWidth : currentProps.width;
     const heightRef = isOriginLayerLine ? currentProps.boundingHeight : currentProps.height;
     const destinationX = currentProps[`${style}GradientDestinationX`];
-    const destinationXEase = currentProps[`${style}GradientDestinationX-ease`];
+    const destinationXEase = currentProps[`${style}GradientDestinationXEase`];
     const nextDestinationX = destinationXEase && destinationXEase === 'customWiggle' ? destinationX : (destinationX * widthRef) + paperLayer.position.x;
     const destinationY = currentProps[`${style}GradientDestinationY`];
-    const destinationYEase = currentProps[`${style}GradientDestinationY-ease`];
+    const destinationYEase = currentProps[`${style}GradientDestinationYEase`];
     const nextDestinationY = destinationYEase && destinationYEase === 'customWiggle' ? destinationY : (destinationY * heightRef) + paperLayer.position.y;
     return new paperPreview.Point(nextDestinationX, nextDestinationY);
   };
@@ -375,20 +462,34 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     }
   };
 
-  const getInitialFSValue = (style: 'fill' | 'stroke', fillType: Btwx.FillStrokeTween): string[] => {
+  const getInitialFSColor = (style: 'fill' | 'stroke', fillType: Btwx.FillStrokeTween): {
+    [id: string]: string
+  } => {
     switch(fillType) {
       case 'colorToColor':
       case 'colorToNull':
-      case 'colorToGradient':
-        return [tinyColor(originLayerItem.style[style].color).toRgbString()];
+        return {
+          [style]: tinyColor(originLayerItem.style[style].color).toRgbString()
+        };
       case 'nullToColor':
-        return [tinyColor({...destinationLayerItem.style[style].color, a: 0}).toRgbString()];
+        return {
+          [style]: tinyColor({...destinationLayerItem.style[style].color, a: 0}).toRgbString()
+        };
       case 'gradientToGradient':
       case 'gradientToColor':
       case 'gradientToNull':
-        return originLayerItem.style[style].gradient.stops.map((stop) => tinyColor(stop.color).toRgbString());
+        return originLayerItem.style[style].gradient.stops.reduce((result, current, index) => ({
+          ...result,
+          [`${style}Stop${index}Color`]: tinyColor(current.color).toRgbString(),
+          [`${style}Stop${index}Offset`]: current.position,
+        }), {});
+      case 'colorToGradient':
       case 'nullToGradient':
-        return destinationLayerItem.style[style].gradient.stops.map((stop) => tinyColor({...stop.color, a: 0}).toRgbString());
+        return destinationLayerItem.style[style].gradient.stops.reduce((result, current, index) => ({
+          ...result,
+          [`${style}Stop${index}Color`]: tinyColor({...current.color, a: 0}).toRgbString(),
+          [`${style}Stop${index}Offset`]: current.position
+        }), {});
       default:
         return null;
     }
@@ -689,7 +790,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     const stopsTimeline = gsap.timeline({
       id: tweenId,
       onStart: () => {
-        const { paperLayer, artboardBackground, textContent, textBackground, fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
+        const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
         eventLayerTimeline.data.props[`${style}GradientOriginX`] = dg.origin.x;
         eventLayerTimeline.data.props[`${style}GradientOriginY`] = dg.origin.y;
         eventLayerTimeline.data.props[`${style}GradientDestinationX`] = dg.destination.x;
@@ -711,14 +812,6 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           },
           origin: getFSOrigin(style),
           destination: getFSDestination(style)
-          // origin: new paperPreview.Point(
-          //   (dg.origin.x * paperLayer.bounds.width) + paperLayer.position.x,
-          //   (dg.origin.y * paperLayer.bounds.height) + paperLayer.position.y
-          // ),
-          // destination: new paperPreview.Point(
-          //   (dg.destination.x * paperLayer.bounds.width) + paperLayer.position.x,
-          //   (dg.destination.y * paperLayer.bounds.height) + paperLayer.position.y
-          // )
         } as Btwx.PaperGradientFill;
       }
     });
@@ -899,40 +992,60 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     }, tween.delay);
   };
 
-  const addShadowColorTween = (): void => {
+  const getOriginShadowColor = () => {
     const originShadow = originLayerItem.style.shadow;
     const destinationShadow = destinationLayerItem.style.shadow;
     let osc = originLayerItem.style.shadow.color;
+    if (!originShadow.enabled && destinationShadow.enabled) {
+      osc = {...osc, a: 0} as Btwx.Color;
+    }
+    return tinyColor(osc).toRgbString();
+  }
+
+  const getDestinationShadowColor = () => {
+    const originShadow = originLayerItem.style.shadow;
+    const destinationShadow = destinationLayerItem.style.shadow;
     let dsc = destinationLayerItem.style.shadow.color;
     if (originShadow.enabled && !destinationShadow.enabled) {
       dsc = {...dsc, a: 0} as Btwx.Color;
     }
-    if (!originShadow.enabled && destinationShadow.enabled) {
-      osc = {...osc, a: 0} as Btwx.Color;
-    }
-    eventLayerTimeline.data.props[tween.prop] = tinyColor(osc).toRgbString();
+    return tinyColor(dsc).toRgbString();
+  }
+
+  const addShadowColorTween = (): void => {
+    eventLayerTimeline.data.props[tween.prop] = getOriginShadowColor();
     eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
       [tween.prop]: tween.ease === 'customWiggle'
         ? tinyColor(tween.customWiggle.strength).toRgbString()
-        : tinyColor({h: dsc.h, s: dsc.s, l: dsc.l, a: dsc.a}).toRgbString(),
+        : getDestinationShadowColor(),
       ease: getEaseString(tween),
     }, tween.delay);
   };
 
-  const addShadowXOffsetTween = (): void => {
+  const getOriginShadowOffsetX = () => {
     const originShadow = originLayerItem.style.shadow;
     const destinationShadow = destinationLayerItem.style.shadow;
     let osx = originLayerItem.style.shadow.offset.x;
+    if (!originShadow.enabled && destinationShadow.enabled) {
+      osx = 0;
+    }
+    return osx;
+  }
+
+  const getDestinationShadowOffsetX = () => {
+    const originShadow = originLayerItem.style.shadow;
+    const destinationShadow = destinationLayerItem.style.shadow;
     let dsx = destinationLayerItem.style.shadow.offset.x;
     if (originShadow.enabled && !destinationShadow.enabled) {
       dsx = 0;
     }
-    if (!originShadow.enabled && destinationShadow.enabled) {
-      osx = 0;
-    }
-    eventLayerTimeline.data.props[tween.prop] = osx;
+    return dsx;
+  }
+
+  const addShadowOffsetXTween = (): void => {
+    eventLayerTimeline.data.props[tween.prop] = getOriginShadowOffsetX();
     eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
@@ -940,23 +1053,33 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle'
         ? `+=${tween.customWiggle.strength}`
-        : dsx,
+        : getDestinationShadowOffsetX(),
       ease: getEaseString(tween),
     }, tween.delay);
   };
 
-  const addShadowYOffsetTween = (): void => {
+  const getOriginShadowOffsetY = () => {
     const originShadow = originLayerItem.style.shadow;
     const destinationShadow = destinationLayerItem.style.shadow;
     let osy = originLayerItem.style.shadow.offset.y;
+    if (!originShadow.enabled && destinationShadow.enabled) {
+      osy = 0;
+    }
+    return osy;
+  }
+
+  const getDestinationShadowOffsetY = () => {
+    const originShadow = originLayerItem.style.shadow;
+    const destinationShadow = destinationLayerItem.style.shadow;
     let dsy = destinationLayerItem.style.shadow.offset.y;
     if (originShadow.enabled && !destinationShadow.enabled) {
       dsy = 0;
     }
-    if (!originShadow.enabled && destinationShadow.enabled) {
-      osy = 0;
-    }
-    eventLayerTimeline.data.props[tween.prop] = osy;
+    return dsy;
+  }
+
+  const addShadowOffsetYTween = (): void => {
+    eventLayerTimeline.data.props[tween.prop] = getOriginShadowOffsetY();
     eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
@@ -964,23 +1087,33 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle'
         ? `+=${tween.customWiggle.strength}`
-        : dsy,
+        : getDestinationShadowOffsetY(),
       ease: getEaseString(tween),
     }, tween.delay);
   };
 
-  const addShadowBlurTween = (): void => {
+  const getOriginShadowBlur = () => {
     const originShadow = originLayerItem.style.shadow;
     const destinationShadow = destinationLayerItem.style.shadow;
     let osb = originLayerItem.style.shadow.blur;
+    if (!originShadow.enabled && destinationShadow.enabled) {
+      osb = 0;
+    }
+    return osb;
+  }
+
+  const getDestinationShadowBlur = () => {
+    const originShadow = originLayerItem.style.shadow;
+    const destinationShadow = destinationLayerItem.style.shadow;
     let dsb = destinationLayerItem.style.shadow.blur;
     if (originShadow.enabled && !destinationShadow.enabled) {
       dsb = 0;
     }
-    if (!originShadow.enabled && destinationShadow.enabled) {
-      osb = 0;
-    }
-    eventLayerTimeline.data.props[tween.prop] = osb;
+    return dsb;
+  }
+
+  const addShadowBlurTween = (): void => {
+    eventLayerTimeline.data.props[tween.prop] = getOriginShadowBlur();
     eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
@@ -988,7 +1121,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: tween.ease === 'customWiggle'
         ? `+=${tween.customWiggle.strength}`
-        : dsb,
+        : getDestinationShadowBlur(),
       ease: getEaseString(tween),
     }, tween.delay);
   };
@@ -1449,6 +1582,13 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     }
   }
 
+  const applyShadow = (currentProps: TweenProps) => {
+    const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
+    fillRef.shadowColor = currentProps.shadowColor as any;
+    fillRef.shadowOffset = new paperPreview.Point(currentProps.shadowOffsetX, currentProps.shadowOffsetY);
+    fillRef.shadowBlur = currentProps.shadowBlur;
+  }
+
   const handleShadowColorTween = (currentProps: TweenProps, prevProps: TweenProps) => {
     if (getHasSinglePropChange(currentProps, prevProps, 'shadowColor')) {
       const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
@@ -1458,24 +1598,19 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
 
   const handleShadowOffsetXTween = (currentProps: TweenProps, prevProps: TweenProps) => {
     if (getHasSinglePropChange(currentProps, prevProps, 'shadowOffsetX')) {
-      const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-      const y = fillRef.shadowOffset ? fillRef.shadowOffset.y : prevProps.shadowOffsetY;
-      fillRef.shadowOffset = new paperPreview.Point(currentProps.shadowOffsetX, y);
+      applyShadow(currentProps);
     }
   }
 
   const handleShadowOffsetYTween = (currentProps: TweenProps, prevProps: TweenProps) => {
     if (getHasSinglePropChange(currentProps, prevProps, 'shadowOffsetY')) {
-      const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-      const x = fillRef.shadowOffset ? fillRef.shadowOffset.x : prevProps.shadowOffsetX;
-      fillRef.shadowOffset = new paperPreview.Point(x, currentProps.shadowOffsetY);
+      applyShadow(currentProps);
     }
   }
 
   const handleShadowBlurTween = (currentProps: TweenProps, prevProps: TweenProps) => {
     if (getHasSinglePropChange(currentProps, prevProps, 'shadowBlur')) {
-      const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-      fillRef.shadowBlur = currentProps.shadowBlur;
+      applyShadow(currentProps);
     }
   }
 
@@ -1513,97 +1648,45 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     }
   }
 
-  // remove stop props
-  // instead, store color/stops in fill/stroke string[] or {[number]: string}
-
-  const handleFillTween = (currentProps: TweenProps, prevProps: TweenProps) => {
-    if (currentProps.fillType && getHasSinglePropChange(currentProps, prevProps, 'fill')) {
-      let stopCount;
-      const originFill = originLayerItem.style.fill;
-      const destinationFill = destinationLayerItem.style.fill;
-      const originGradient = originFill.gradient;
+  const handleFSTween = (currentProps: TweenProps, prevProps: TweenProps, style: 'fill' | 'stroke') => {
+    if (currentProps[`${style}Type`]) {
+      const originStyle = originLayerItem.style[style];
+      const destinationStyle = destinationLayerItem.style[style];
+      const originGradient = originStyle.gradient;
       const ogStops = originGradient.stops;
-      const destinationGradient = destinationFill.gradient;
+      const destinationGradient = destinationStyle.gradient;
       const dgStops = destinationGradient.stops;
-      const handleStopColorTween = (withOffset: boolean = false) => [...Array(stopCount).keys()].forEach((id, index) => {
+      const handleStopColorTween = (count, withOffset: boolean = false) => [...Array(count).keys()].forEach((id, index) => {
         const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-        const nextStopColor = currentProps[`fillStop${index}Color`];
-        const nextStopOffset = currentProps[`fillStop${index}Offset`];
-        fillRef.fillColor.gradient.stops[index].color = nextStopColor;
-        if (withOffset) {
-          fillRef.fillColor.gradient.stops[index].offset = nextStopOffset;
+        const nextStopColor = currentProps[`${style}Stop${index}Color`];
+        const nextStopOffset = currentProps[`${style}Stop${index}Offset`];
+        if (fillRef[`${style}Color`] && fillRef[`${style}Color`].gradient && fillRef[`${style}Color`].gradient.stops[index]) {
+          fillRef[`${style}Color`].gradient.stops[index].color = nextStopColor;
+          if (withOffset) {
+            fillRef[`${style}Color`].gradient.stops[index].offset = nextStopOffset;
+          }
         }
       });
-      switch(currentProps.fillType) {
+      switch(currentProps[`${style}Type`]) {
         case 'colorToColor':
         case 'colorToNull':
         case 'nullToColor': {
           const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-          fillRef.fillColor = currentProps.fill[0] as any;
+          fillRef[`${style}Color`] = currentProps[style] as any;
           break;
         }
         case 'gradientToGradient': {
-          stopCount = ogStops.length > dgStops.length ? ogStops.length : dgStops.length;
-          handleStopColorTween(true);
+          handleStopColorTween(ogStops.length > dgStops.length ? ogStops.length : dgStops.length, true);
           break;
         }
         case 'gradientToColor':
         case 'gradientToNull': {
-          stopCount = ogStops.length;
-          handleStopColorTween();
+          handleStopColorTween(ogStops.length);
           break;
         }
         case 'colorToGradient':
         case 'nullToGradient': {
-          stopCount = dgStops.length;
-          handleStopColorTween();
-          break;
-        }
-      }
-    }
-  }
-
-  const handleStrokeTween = (currentProps: TweenProps, prevProps: TweenProps) => {
-    if (currentProps.strokeType && getHasSinglePropChange(currentProps, prevProps, 'stroke')) {
-      let stopCount;
-      const originStroke = originLayerItem.style.stroke;
-      const destinationStroke = destinationLayerItem.style.stroke;
-      const originGradient = originStroke.gradient;
-      const ogStops = originGradient.stops;
-      const destinationGradient = destinationStroke.gradient;
-      const dgStops = destinationGradient.stops;
-      const handleStopColorTween = (withOffset: boolean = false) => [...Array(stopCount).keys()].forEach((id, index) => {
-        const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-        const nextStopColor = currentProps[`strokeStop${index}Color`];
-        const nextStopOffset = currentProps[`strokeStop${index}Offset`];
-        fillRef.strokeColor.gradient.stops[index].color = nextStopColor;
-        if (withOffset) {
-          fillRef.strokeColor.gradient.stops[index].offset = nextStopOffset;
-        }
-      });
-      switch(currentProps.strokeType) {
-        case 'colorToColor':
-        case 'colorToNull':
-        case 'nullToColor': {
-          const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-          fillRef.strokeColor = currentProps.stroke[0] as any;
-          break;
-        }
-        case 'gradientToGradient': {
-          stopCount = ogStops.length > dgStops.length ? ogStops.length : dgStops.length;
-          handleStopColorTween(true);
-          break;
-        }
-        case 'gradientToColor':
-        case 'gradientToNull': {
-          stopCount = ogStops.length;
-          handleStopColorTween();
-          break;
-        }
-        case 'colorToGradient':
-        case 'nullToGradient': {
-          stopCount = dgStops.length;
-          handleStopColorTween();
+          handleStopColorTween(dgStops.length);
           break;
         }
       }
@@ -1663,7 +1746,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       // position tweens
       handleXTween(currentProps, prevProps);
       handleYTween(currentProps, prevProps);
-      //
+      // store start position
       const startPosition = paperLayer.position;
       // clear transforms
       handleClearTransforms(currentProps, prevProps);
@@ -1687,13 +1770,13 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       handleShadowOffsetYTween(currentProps, prevProps);
       handleShadowBlurTween(currentProps, prevProps);
       // fill tweens
-      handleFillTween(currentProps, prevProps);
+      handleFSTween(currentProps, prevProps, 'fill');
       handleGradientOriginFSTween(currentProps, prevProps, 'fill', 'x');
       handleGradientOriginFSTween(currentProps, prevProps, 'fill', 'y');
       handleGradientDestinationFSTween(currentProps, prevProps, 'fill', 'x');
       handleGradientDestinationFSTween(currentProps, prevProps, 'fill', 'y');
       // stroke tweens
-      handleStrokeTween(currentProps, prevProps);
+      handleFSTween(currentProps, prevProps, 'stroke');
       handleStrokeWidthTween(currentProps, prevProps);
       handleGradientOriginFSTween(currentProps, prevProps, 'stroke', 'x');
       handleGradientOriginFSTween(currentProps, prevProps, 'stroke', 'y');
@@ -1706,7 +1789,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       handleBlurTween(currentProps, prevProps);
       // apply transforms
       handleApplyTransforms(currentProps);
-      //
+      // apply start position
       paperLayer.position = startPosition;
       if (shapeMask) {
         shapeMask.position = startPosition;
@@ -1784,10 +1867,10 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         addShadowColorTween();
         break;
       case 'shadowOffsetX':
-        addShadowXOffsetTween();
+        addShadowOffsetXTween();
         break;
       case 'shadowOffsetY':
-        addShadowYOffsetTween();
+        addShadowOffsetYTween();
         break;
       case 'shadowBlur':
         addShadowBlurTween();
