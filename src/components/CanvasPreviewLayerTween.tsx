@@ -1591,8 +1591,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
 
   const handleShadowColorTween = (currentProps: TweenProps, prevProps: TweenProps) => {
     if (getHasSinglePropChange(currentProps, prevProps, 'shadowColor')) {
-      const { fillRef } = eventLayerTimeline.data as EventLayerTimelineData;
-      fillRef.shadowColor = currentProps.shadowColor as any;
+      applyShadow(currentProps);
     }
   }
 
