@@ -1963,13 +1963,11 @@ export const addLayerEvent = (state: LayerState, action: AddLayerEvent): LayerSt
   let currentState = state;
   // if an event doesnt already exist with the same layer, event, and destination
   // add tween event
-  if (!currentState.events.allIds.some((id: string) => {
-    return (
-      currentState.events.byId[id].layer === action.payload.layer &&
-      currentState.events.byId[id].listener === action.payload.listener &&
-      currentState.events.byId[id].destination === action.payload.destination
-    )
-  })) {
+  if (!currentState.events.allIds.some((id: string) => (
+    currentState.events.byId[id].layer === action.payload.layer &&
+    currentState.events.byId[id].listener === action.payload.listener &&
+    currentState.events.byId[id].destination === action.payload.destination
+  ))) {
     // add animation event
     currentState = {
       ...currentState,
@@ -2619,12 +2617,17 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
     // filter tweens by prop
     // if new layer prop matches destination prop, remove tween
     // if new destination prop matches layer prop, remove tween
+    // if has wiggle that matches prop, remove wiggle
     if (tweensByProp.length > 0) {
       currentState = tweensByProp.reduce((result: LayerState, current: string) => {
         const tween = result.tweens.byId[current];
         const layerItem = result.byId[tween.layer] as Btwx.Layer;
         const destinationLayerItem = result.byId[tween.destinationLayer] as Btwx.Layer;
         const hasTween = getEquivalentTweenProp(layerItem, destinationLayerItem, prop);
+        const hasWiggle = layerItem.tweens.byProp[prop].find(id => result.tweens.byId[id].ease === 'customWiggle');
+        if (hasWiggle) {
+          result = removeLayerTween(result, layerActions.removeLayerTween({id: hasWiggle}) as RemoveLayerTween);
+        }
         if (!hasTween) {
           result = removeLayerTween(result, layerActions.removeLayerTween({id: current}) as RemoveLayerTween);
         }
