@@ -203,11 +203,12 @@ export const DISABLE_LAYERS_VERTICAL_FLIP = 'DISABLE_LAYERS_VERTICAL_FLIP';
 export const SET_LAYER_OPACITY = 'SET_LAYER_OPACITY';
 export const SET_LAYERS_OPACITY = 'SET_LAYERS_OPACITY';
 
+export const SET_LAYER_FILL = 'SET_LAYER_FILL';
+export const SET_LAYERS_FILL = 'SET_LAYERS_FILL';
 export const ENABLE_LAYER_FILL = 'ENABLE_LAYER_FILL';
 export const ENABLE_LAYERS_FILL = 'ENABLE_LAYERS_FILL';
 export const DISABLE_LAYER_FILL = 'DISABLE_LAYER_FILL';
 export const DISABLE_LAYERS_FILL = 'DISABLE_LAYERS_FILL';
-export const SET_LAYER_FILL = 'SET_LAYER_FILL';
 export const SET_LAYER_FILL_COLOR = 'SET_LAYER_FILL_COLOR';
 export const SET_LAYERS_FILL_COLOR = 'SET_LAYERS_FILL_COLOR';
 export const SET_LAYERS_FILL_COLORS = 'SET_LAYERS_FILL_COLORS';
@@ -235,6 +236,8 @@ export const SET_LAYER_ACTIVE_GRADIENT_STOP = 'SET_LAYER_ACTIVE_GRADIENT_STOP';
 export const FLIP_LAYER_GRADIENT = 'FLIP_LAYER_GRADIENT';
 export const FLIP_LAYERS_GRADIENT = 'FLIP_LAYERS_GRADIENT';
 
+export const SET_LAYER_STROKE = 'SET_LAYER_STROKE';
+export const SET_LAYERS_STROKE = 'SET_LAYERS_STROKE';
 export const ENABLE_LAYER_STROKE = 'ENABLE_LAYER_STROKE';
 export const ENABLE_LAYERS_STROKE = 'ENABLE_LAYERS_STROKE';
 export const DISABLE_LAYER_STROKE = 'DISABLE_LAYER_STROKE';
@@ -2435,6 +2438,26 @@ export interface SetLayersFillColors {
   payload: SetLayersFillColorsPayload;
 }
 
+export interface SetLayerStrokePayload {
+  id: string;
+  stroke: { [P in keyof Btwx.Stroke]?: Btwx.Stroke[P] };
+}
+
+export interface SetLayerStroke {
+  type: typeof SET_LAYER_STROKE;
+  payload: SetLayerStrokePayload;
+}
+
+export interface SetLayersStrokePayload {
+  layers: string[];
+  stroke: { [P in keyof Btwx.Stroke]?: Btwx.Stroke[P] };
+}
+
+export interface SetLayersStroke {
+  type: typeof SET_LAYERS_STROKE;
+  payload: SetLayersStrokePayload;
+}
+
 export interface EnableLayerStrokePayload {
   id: string;
 }
@@ -3421,12 +3444,22 @@ export interface SetLayersTextTransform {
 
 export interface SetLayerFillPayload {
   id: string;
-  fill: Btwx.Fill;
+  fill: { [P in keyof Btwx.Fill]?: Btwx.Fill[P] };
 }
 
 export interface SetLayerFill {
   type: typeof SET_LAYER_FILL;
   payload: SetLayerFillPayload;
+}
+
+export interface SetLayersFillPayload {
+  layers: string[];
+  fill: { [P in keyof Btwx.Fill]?: Btwx.Fill[P] };
+}
+
+export interface SetLayersFill {
+  type: typeof SET_LAYERS_FILL;
+  payload: SetLayersFillPayload;
 }
 
 export interface SetLayerFillTypePayload {
@@ -4300,6 +4333,7 @@ export type LayerTypes = AddArtboard |
                          SetLayersFillColor |
                          SetLayersFillColors |
                          SetLayerFill |
+                         SetLayersFill |
                          SetLayerFillType |
                          SetLayersFillType |
                          SetLayerGradient |
@@ -4322,6 +4356,8 @@ export type LayerTypes = AddArtboard |
                          SetLayerActiveGradientStop |
                          FlipLayerGradient |
                          FlipLayersGradient |
+                         SetLayerStroke |
+                         SetLayersStroke |
                          EnableLayerStroke |
                          EnableLayersStroke |
                          DisableLayerStroke |

@@ -218,9 +218,12 @@ import {
   DISABLE_LAYER_FILL,
   DISABLE_LAYERS_FILL,
   SET_LAYER_FILL,
+  SET_LAYERS_FILL,
   SET_LAYER_FILL_COLOR,
   SET_LAYERS_FILL_COLOR,
   SET_LAYERS_FILL_COLORS,
+  SET_LAYER_STROKE,
+  SET_LAYERS_STROKE,
   ENABLE_LAYER_STROKE,
   ENABLE_LAYERS_STROKE,
   DISABLE_LAYER_STROKE,
@@ -547,6 +550,8 @@ import {
   SetLayerFillColorPayload,
   SetLayersFillColorPayload,
   SetLayersFillColorsPayload,
+  SetLayerStrokePayload,
+  SetLayersStrokePayload,
   EnableLayerStrokePayload,
   EnableLayersStrokePayload,
   DisableLayerStrokePayload,
@@ -632,6 +637,7 @@ import {
   SetLayerTextTransformPayload,
   SetLayersTextTransformPayload,
   SetLayerFillPayload,
+  SetLayersFillPayload,
   SetLayerFillTypePayload,
   SetLayersFillTypePayload,
   AddLayersMaskPayload,
@@ -2962,6 +2968,16 @@ export const setLayersFillColors = (payload: SetLayersFillColorsPayload): LayerT
   payload
 });
 
+export const setLayerStroke = (payload: SetLayerStrokePayload): LayerTypes => ({
+  type: SET_LAYER_STROKE,
+  payload
+});
+
+export const setLayersStroke = (payload: SetLayersStrokePayload): LayerTypes => ({
+  type: SET_LAYERS_STROKE,
+  payload
+});
+
 export const enableLayerStroke = (payload: EnableLayerStrokePayload): LayerTypes => ({
   type: ENABLE_LAYER_STROKE,
   payload
@@ -4782,6 +4798,11 @@ export const setLayersPointY = (payload: SetLayersPointYPayload): LayerTypes => 
 
 export const setLayerFill = (payload: SetLayerFillPayload): LayerTypes => ({
   type: SET_LAYER_FILL,
+  payload
+});
+
+export const setLayersFill = (payload: SetLayersFillPayload): LayerTypes => ({
+  type: SET_LAYERS_FILL,
   payload
 });
 

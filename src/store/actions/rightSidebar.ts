@@ -17,6 +17,20 @@ import {
   COLLAPSE_SHADOW_STYLES,
   EXPAND_BLUR_STYLES,
   COLLAPSE_BLUR_STYLES,
+  ENABLE_DRAGGING_FILL,
+  DISABLE_DRAGGING_FILL,
+  ENABLE_DRAGGING_STROKE,
+  DISABLE_DRAGGING_STROKE,
+  // ENABLE_DRAGGING_SHADOW,
+  // DISABLE_DRAGGING_SHADOW,
+  ENABLE_FILL_DRAGOVER,
+  DISABLE_FILL_DRAGOVER,
+  ENABLE_STROKE_DRAGOVER,
+  DISABLE_STROKE_DRAGOVER,
+  // ENABLE_SHADOW_DRAGOVER,
+  // DISABLE_SHADOW_DRAGOVER,
+  EnableDraggingFillPayload,
+  EnableDraggingStrokePayload,
   RightSidebarTypes
 } from '../actionTypes/rightSidebar';
 
@@ -91,3 +105,53 @@ export const expandBlurStyles = (): RightSidebarTypes => ({
 export const collapseBlurStyles = (): RightSidebarTypes => ({
   type: COLLAPSE_BLUR_STYLES
 });
+
+export const enableDraggingFill = (payload: EnableDraggingFillPayload): RightSidebarTypes => ({
+  type: ENABLE_DRAGGING_FILL,
+  payload
+});
+
+export const disableDraggingFill = (): RightSidebarTypes => ({
+  type: DISABLE_DRAGGING_FILL
+});
+
+export const enableDraggingStroke = (payload: EnableDraggingStrokePayload): RightSidebarTypes => ({
+  type: ENABLE_DRAGGING_STROKE,
+  payload
+});
+
+export const disableDraggingStroke = (): RightSidebarTypes => ({
+  type: DISABLE_DRAGGING_STROKE
+});
+
+// export const enableDraggingShadow = (): RightSidebarTypes => ({
+//   type: ENABLE_DRAGGING_SHADOW
+// });
+
+// export const disableDraggingShadow = (): RightSidebarTypes => ({
+//   type: DISABLE_DRAGGING_SHADOW
+// });
+
+export const enableFillDragover = (): RightSidebarTypes => ({
+  type: ENABLE_FILL_DRAGOVER
+});
+
+export const disableFillDragover = (): RightSidebarTypes => ({
+  type: DISABLE_FILL_DRAGOVER
+});
+
+export const enableStrokeDragover = (): RightSidebarTypes => ({
+  type: ENABLE_STROKE_DRAGOVER
+});
+
+export const disableStrokeDragover = (): RightSidebarTypes => ({
+  type: DISABLE_STROKE_DRAGOVER
+});
+
+// export const enableShadowDragover = (): RightSidebarTypes => ({
+//   type: ENABLE_SHADOW_DRAGOVER
+// });
+
+// export const disableShadowDragover = (): RightSidebarTypes => ({
+//   type: DISABLE_SHADOW_DRAGOVER
+// });

@@ -3,7 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
 import { getSelectedFillColor, getSelectedFillHex, getSelectedFillEnabled, getSelectedFillOpacity, getSelectedShadowColor, getSelectedShadowHex, getSelectedShadowEnabled, getSelectedShadowOpacity, getSelectedStrokeColor, getSelectedStrokeHex, getSelectedStrokeEnabled, getSelectedStrokeOpacity } from '../store/selectors/layer';
-import { enableLayersFill, setLayersFillColor, enableLayersShadow, setLayersShadowColor, enableLayersStroke, setLayersStrokeColor } from '../store/actions/layer';
+import { enableLayersFill, setLayersFillColor, enableLayersShadow, setLayersShadowColor, enableLayersStroke, setLayersStrokeColor, setLayersFill, setLayersStroke } from '../store/actions/layer';
+import { enableDraggingFill, disableDraggingFill, enableDraggingStroke, disableDraggingStroke, enableFillDragover, disableFillDragover, enableStrokeDragover, disableStrokeDragover } from '../store/actions/rightSidebar';
 import { openColorEditor } from '../store/actions/colorEditor';
 import { setTextSettingsFillColor } from '../store/actions/textSettings';
 import SidebarSectionRow from './SidebarSectionRow';
@@ -22,6 +23,11 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
   const opacityTextInputRef = useRef(null);
   const { prop } = props;
   const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const draggingFill = useSelector((state: RootState) => state.rightSidebar.draggingFill);
+  const draggingStroke = useSelector((state: RootState) => state.rightSidebar.draggingStroke);
+  // const fillDragover = useSelector((state: RootState) => state.rightSidebar.fillDragover);
+  // const strokeDragover = useSelector((state: RootState) => state.rightSidebar.strokeDragover);
+  // const shadowDragover = useSelector((state: RootState) => state.rightSidebar.shadowDragover);
   const textLayerSelected = useSelector((state: RootState) => state.layer.present.selected.some((id: string) => state.layer.present.byId[id].type === 'Text'));
   const colorValue: Btwx.Color | 'multi' = useSelector((state: RootState) => {
     switch(prop) {
@@ -67,6 +73,7 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
   const colorEditorProp = useSelector((state: RootState) => state.colorEditor.prop);
   const [enabled, setEnabled] = useState<boolean | 'multi'>(enabledValue);
   const [color, setColor] = useState<Btwx.Color | 'multi'>(colorValue);
+  const [activeDragover, setActiveDragover] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -162,6 +169,110 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
     }
   };
 
+  const handleDragStart = (e: any): void => {
+    if (colorValue !== 'multi') {
+      switch(prop) {
+        case 'fill':
+          dispatch(enableDraggingFill({
+            fill: {
+              color: colorValue,
+              enabled: true,
+              fillType: 'color'
+            }
+          }));
+          break;
+        case 'stroke':
+          dispatch(enableDraggingStroke({
+            stroke: {
+              color: colorValue,
+              enabled: true,
+              fillType: 'color'
+            }
+          }));
+          break;
+      }
+    }
+  };
+
+  const handleDragEnd = (e: any): void => {
+    if (draggingFill || draggingStroke) {
+      switch(prop) {
+        case 'fill':
+          dispatch(disableDraggingFill());
+          setActiveDragover(false);
+          break;
+        case 'stroke':
+          dispatch(disableDraggingStroke());
+          setActiveDragover(false);
+          break;
+      }
+    }
+  };
+
+  const handleDragOver = (e: any) => {
+    e.preventDefault();
+    if ((draggingFill || draggingStroke) && !activeDragover) {
+      switch(prop) {
+        case 'fill':
+          if (draggingStroke) {
+            dispatch(enableFillDragover());
+            setActiveDragover(true);
+          }
+          break;
+        case 'stroke':
+          if (draggingFill) {
+            dispatch(enableStrokeDragover());
+            setActiveDragover(true);
+          }
+          break;
+      }
+    }
+  };
+
+  const handleDragLeave = (e: any) => {
+    e.preventDefault();
+    if (draggingFill || draggingStroke) {
+      switch(prop) {
+        case 'fill':
+          if (draggingStroke) {
+            dispatch(disableFillDragover());
+            setActiveDragover(false);
+          }
+          break;
+        case 'stroke':
+          if (draggingFill) {
+            dispatch(disableStrokeDragover());
+            setActiveDragover(false);
+          }
+          break;
+      }
+    }
+  };
+
+  const handleDrop = (e: any) => {
+    e.preventDefault();
+    if (draggingFill || draggingStroke) {
+      switch(prop) {
+        case 'fill':
+          if (draggingStroke) {
+            dispatch(setLayersFill({
+              layers: selected,
+              fill: draggingStroke as any
+            }));
+          }
+          break;
+        case 'stroke':
+          if (draggingFill) {
+            dispatch(setLayersStroke({
+              layers: selected,
+              stroke: draggingFill as any
+            }));
+          }
+          break;
+      }
+    }
+  };
+
   return (
     <SidebarSectionRow>
       <SidebarSectionColumn width={'33.33%'}>
@@ -171,7 +282,14 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
               ref={colorControlRef}
               type='color'
               size='small'
+              draggable={colorValue !== 'multi' && prop !== 'shadow'}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDragLeave={handleDragLeave}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
               isActive={colorEditorOpen && colorEditorProp === prop}
+              thiccActive={activeDragover}
               multiColor={hexValue === 'multi'}
               value={`#${hexValue}`}
               onChange={() => { return; }}

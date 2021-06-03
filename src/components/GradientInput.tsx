@@ -2,9 +2,10 @@ import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
-import { enableLayersFill, enableLayersStroke, setLayersGradient } from '../store/actions/layer';
+import { enableLayersFill, enableLayersStroke, setLayersGradient, setLayersFill, setLayersStroke } from '../store/actions/layer';
 import { openGradientEditor } from '../store/actions/gradientEditor';
 import { getSelectedFillEnabled, getSelectedStrokeEnabled, getSelectedFillGradientType, getSelectedStrokeGradientType, getSelectedFillGradient, getSelectedStrokeGradient } from '../store/selectors/layer';
+import { enableDraggingFill, disableDraggingFill, enableDraggingStroke, disableDraggingStroke, enableFillDragover, disableFillDragover, enableStrokeDragover, disableStrokeDragover } from '../store/actions/rightSidebar';
 import PercentageFormGroup from './PercentageFormGroup';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
@@ -20,6 +21,9 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
   const opacityFormControlRef = useRef(null);
   const { prop } = props;
   const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const draggingFill = useSelector((state: RootState) => state.rightSidebar.draggingFill);
+  const draggingStroke = useSelector((state: RootState) => state.rightSidebar.draggingStroke);
+  // const draggingShadow = useSelector((state: RootState) => state.rightSidebar.draggingShadow);
   const gradientValue = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.selected[0]].style[prop].gradient);
   const enabledValue: boolean | 'multi' = useSelector((state: RootState) => {
     switch(prop) {
@@ -62,6 +66,7 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
   }, `linear-gradient(to right,`);
   const [enabled, setEnabled] = useState<boolean | 'multi'>(enabledValue);
   const [gradient, setGradient] = useState(gradientValue);
+  const [activeDragover, setActiveDragover] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -110,6 +115,110 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
     }
   };
 
+  const handleDragStart = (e: any): void => {
+    if (displayGradient !== 'multi') {
+      switch(prop) {
+        case 'fill':
+          dispatch(enableDraggingFill({
+            fill: {
+              gradient: displayGradient,
+              enabled: true,
+              fillType: 'gradient'
+            }
+          }));
+          break;
+        case 'stroke':
+          dispatch(enableDraggingStroke({
+            stroke: {
+              gradient: displayGradient,
+              enabled: true,
+              fillType: 'gradient'
+            }
+          }));
+          break;
+      }
+    }
+  };
+
+  const handleDragEnd = (e: any): void => {
+    if (draggingFill || draggingStroke) {
+      switch(prop) {
+        case 'fill':
+          dispatch(disableDraggingFill());
+          setActiveDragover(false);
+          break;
+        case 'stroke':
+          dispatch(disableDraggingStroke());
+          setActiveDragover(false);
+          break;
+      }
+    }
+  };
+
+  const handleDragOver = (e: any) => {
+    e.preventDefault();
+    if ((draggingFill || draggingStroke) && !activeDragover) {
+      switch(prop) {
+        case 'fill':
+          if (draggingStroke) {
+            dispatch(enableFillDragover());
+            setActiveDragover(true);
+          }
+          break;
+        case 'stroke':
+          if (draggingFill) {
+            dispatch(enableStrokeDragover());
+            setActiveDragover(true);
+          }
+          break;
+      }
+    }
+  };
+
+  const handleDragLeave = (e: any) => {
+    e.preventDefault();
+    if (draggingFill || draggingStroke) {
+      switch(prop) {
+        case 'fill':
+          if (draggingStroke) {
+            dispatch(disableFillDragover());
+            setActiveDragover(false);
+          }
+          break;
+        case 'stroke':
+          if (draggingFill) {
+            dispatch(disableStrokeDragover());
+            setActiveDragover(false);
+          }
+          break;
+      }
+    }
+  };
+
+  const handleDrop = (e: any) => {
+    e.preventDefault();
+    if (draggingFill || draggingStroke) {
+      switch(prop) {
+        case 'fill':
+          if (draggingStroke) {
+            dispatch(setLayersFill({
+              layers: selected,
+              fill: draggingStroke as any
+            }));
+          }
+          break;
+        case 'stroke':
+          if (draggingFill) {
+            dispatch(setLayersStroke({
+              layers: selected,
+              stroke: draggingFill as any
+            }));
+          }
+          break;
+      }
+    }
+  };
+
   return (
     <SidebarSectionRow>
       <SidebarSectionColumn width={'33.33%'}>
@@ -119,7 +228,14 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
               ref={colorFormControlRef}
               type='color'
               size='small'
+              draggable={displayGradient !== 'multi'}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
               isActive={gradientEditorOpen && gradientEditorProp === prop}
+              thiccActive={activeDragover}
               multiColor={displayGradient === 'multi'}
               colorGradient={displayGradient !== 'multi' ? cssGradient : null}
               value='#000000'

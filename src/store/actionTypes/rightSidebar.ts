@@ -25,6 +25,26 @@ export const COLLAPSE_SHADOW_STYLES = 'COLLAPSE_SHADOW_STYLES';
 export const EXPAND_BLUR_STYLES = 'EXPAND_BLUR_STYLES';
 export const COLLAPSE_BLUR_STYLES = 'COLLAPSE_BLUR_STYLES';
 
+export const ENABLE_DRAGGING_FILL = 'ENABLE_DRAGGING_FILL';
+export const DISABLE_DRAGGING_FILL = 'DISABLE_DRAGGING_FILL';
+
+export const ENABLE_DRAGGING_STROKE = 'ENABLE_DRAGGING_STROKE';
+export const DISABLE_DRAGGING_STROKE = 'DISABLE_DRAGGING_STROKE';
+
+// export const ENABLE_DRAGGING_SHADOW = 'ENABLE_DRAGGING_SHADOW';
+// export const DISABLE_DRAGGING_SHADOW = 'DISABLE_DRAGGING_SHADOW';
+
+//
+
+export const ENABLE_FILL_DRAGOVER = 'ENABLE_FILL_DRAGOVER';
+export const DISABLE_FILL_DRAGOVER = 'DISABLE_FILL_DRAGOVER';
+
+export const ENABLE_STROKE_DRAGOVER = 'ENABLE_STROKE_DRAGOVER';
+export const DISABLE_STROKE_DRAGOVER = 'DISABLE_STROKE_DRAGOVER';
+
+// export const ENABLE_SHADOW_DRAGOVER = 'ENABLE_SHADOW_DRAGOVER';
+// export const DISABLE_SHADOW_DRAGOVER = 'DISABLE_SHADOW_DRAGOVER';
+
 export interface ExpandShapeStyles {
   type: typeof EXPAND_SHAPE_STYLES;
 }
@@ -97,6 +117,66 @@ export interface CollapseBlurStyles {
   type: typeof COLLAPSE_BLUR_STYLES;
 }
 
+export interface EnableDraggingFillPayload {
+  fill: { [P in keyof Btwx.Fill]?: Btwx.Fill[P] };
+}
+
+export interface EnableDraggingFill {
+  type: typeof ENABLE_DRAGGING_FILL;
+  payload: EnableDraggingFillPayload;
+}
+
+export interface DisableDraggingFill {
+  type: typeof DISABLE_DRAGGING_FILL;
+}
+
+export interface EnableDraggingStrokePayload {
+  stroke: { [P in keyof Btwx.Stroke]?: Btwx.Stroke[P] };
+}
+
+export interface EnableDraggingStroke {
+  type: typeof ENABLE_DRAGGING_STROKE;
+  payload: EnableDraggingStrokePayload;
+}
+
+export interface DisableDraggingStroke {
+  type: typeof DISABLE_DRAGGING_STROKE;
+}
+
+// export interface EnableDraggingShadow {
+//   type: typeof ENABLE_DRAGGING_SHADOW;
+// }
+
+// export interface DisableDraggingShadow {
+//   type: typeof DISABLE_DRAGGING_SHADOW;
+// }
+
+//
+
+export interface EnableFillDragover {
+  type: typeof ENABLE_FILL_DRAGOVER;
+}
+
+export interface DisableFillDragover {
+  type: typeof DISABLE_FILL_DRAGOVER;
+}
+
+export interface EnableStrokeDragover {
+  type: typeof ENABLE_STROKE_DRAGOVER;
+}
+
+export interface DisableStrokeDragover {
+  type: typeof DISABLE_STROKE_DRAGOVER;
+}
+
+// export interface EnableShadowDragover {
+//   type: typeof ENABLE_SHADOW_DRAGOVER;
+// }
+
+// export interface DisableShadowDragover {
+//   type: typeof DISABLE_SHADOW_DRAGOVER;
+// }
+
 export type RightSidebarTypes = ExpandShapeStyles |
                                 CollapseShapeStyles |
                                 ExpandOpacityStyles |
@@ -114,4 +194,18 @@ export type RightSidebarTypes = ExpandShapeStyles |
                                 ExpandShadowStyles |
                                 CollapseShadowStyles |
                                 ExpandBlurStyles |
-                                CollapseBlurStyles;
+                                CollapseBlurStyles |
+                                EnableDraggingFill |
+                                DisableDraggingFill |
+                                EnableDraggingStroke |
+                                DisableDraggingFill |
+                                EnableDraggingStroke |
+                                DisableDraggingStroke |
+                                // EnableDraggingShadow |
+                                // DisableDraggingShadow |
+                                EnableFillDragover |
+                                DisableFillDragover |
+                                EnableStrokeDragover |
+                                DisableStrokeDragover;
+                                // EnableShadowDragover |
+                                // DisableShadowDragover;

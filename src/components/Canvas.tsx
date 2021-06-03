@@ -57,6 +57,7 @@ const Canvas = (): ReactElement => {
   const cursor = useSelector((state: RootState) => state.canvasSettings.cursor);
   const canvasTheme = useSelector((state: RootState) => state.preferences.canvasTheme);
   const draggingLayers = useSelector((state: RootState) => state.leftSidebar.dragging);
+  const draggingStyle = useSelector((state: RootState) => state.rightSidebar.draggingFill || state.rightSidebar.draggingStroke);
   const instanceId = useSelector((state: RootState) => state.session.instance);
   const isClean = useSelector((state: RootState) => !state.documentSettings.id && !state.layer.present.edit.id);
   const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
@@ -218,7 +219,7 @@ const Canvas = (): ReactElement => {
 
   const handleDragOver = (e) => {
     e.preventDefault();
-    if (!dragOver && !draggingLayers) {
+    if (!dragOver && !draggingLayers && !draggingStyle) {
       setDragOver(true);
     }
   }

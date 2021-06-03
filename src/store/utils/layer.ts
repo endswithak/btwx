@@ -76,7 +76,7 @@ import {
   SetLayersCustomWiggleTweenType, RemoveLayerTweens, RemoveLayersEvent, ShowLayersChildren, HideLayersChildren,
   SetLayerTreeStickyArtboard, SetLayerTweenRepeat, SetLayersTweenRepeat, SetLayerTweenYoyo, SetLayersTweenYoyo,
   SetLayerTweenRepeatDelay, SetLayersTweenRepeatDelay, SetLayerTweenYoyoEase, SetLayersTweenYoyoEase,
-  SetLayerBlurRadius, SetLayersBlurRadius, FlipLayerGradient, FlipLayersGradient, DeselectAllLayerEventTweens, DeselectAllLayerEvents, SetLayerEventEventListener, SetLayersEventEventListener
+  SetLayerBlurRadius, SetLayersBlurRadius, FlipLayerGradient, FlipLayersGradient, DeselectAllLayerEventTweens, DeselectAllLayerEvents, SetLayerEventEventListener, SetLayersEventEventListener, SetLayerStroke, SetLayersStroke, SetLayersFill
 } from '../actionTypes/layer';
 
 import {
@@ -7241,7 +7241,10 @@ export const setLayerFill = (state: LayerState, action: SetLayerFill): LayerStat
         ...currentState.byId[action.payload.id],
         style: {
           ...currentState.byId[action.payload.id].style,
-          fill: action.payload.fill
+          fill: {
+            ...currentState.byId[action.payload.id].style.fill,
+            ...action.payload.fill
+          }
         }
       }
     }
@@ -7252,6 +7255,74 @@ export const setLayerFill = (state: LayerState, action: SetLayerFill): LayerStat
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Fill',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayersFill = (state: LayerState, action: SetLayersFill): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
+    return setLayerFill(result, layerActions.setLayerFill({
+      id: current,
+      fill: action.payload.fill
+    }) as SetLayerFill);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layers Fill',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerStroke = (state: LayerState, action: SetLayerStroke): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          stroke: {
+            ...currentState.byId[action.payload.id].style.stroke,
+            ...action.payload.stroke
+          }
+        }
+      }
+    }
+  }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['stroke', 'strokeGradientOriginX', 'strokeGradientOriginY', 'strokeGradientDestinationX', 'strokeGradientDestinationY']);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layers Stroke',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayersStroke = (state: LayerState, action: SetLayersStroke): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
+    return setLayerStroke(result, layerActions.setLayerStroke({
+      id: current,
+      stroke: action.payload.stroke
+    }) as SetLayerStroke);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layers Stroke',
       undoable: true
     }
   }) as SetLayerEdit);

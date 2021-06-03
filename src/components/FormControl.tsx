@@ -15,6 +15,7 @@ export interface FormControlProps {
   isValid?: boolean;
   isInvalid?: boolean;
   isActive?: boolean;
+  thiccActive?: boolean;
   left?: ReactElement;
   right?: ReactElement;
   leftReadOnly?: boolean;
@@ -72,6 +73,7 @@ const FormControl: RefForwardingComponent<'input', FormControlProps> = forwardRe
   isValid,
   isInvalid,
   isActive,
+  thiccActive,
   sliderType,
   sliderProps,
   left,
@@ -138,6 +140,10 @@ const FormControl: RefForwardingComponent<'input', FormControlProps> = forwardRe
         }${
           isActive
           ? `${' '}c-form-control--active`
+          : ''
+        }${
+          thiccActive
+          ? `${' '}c-form-control--thicc-active`
           : ''
         }${
           sliderProps && sliderProps.thicc

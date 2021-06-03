@@ -132,6 +132,22 @@
     }
   }
 
+  &.c-form-control--thicc-active {
+    @include themed() {
+      box-shadow: 0 0 0 2px theme-prop(primary);
+    }
+    & ~ span .c-form-text {
+      @include themed() {
+        color: theme-prop(primary);
+      }
+    }
+    & ~ div svg {
+      @include themed() {
+        fill: theme-prop(primary);
+      }
+    }
+  }
+
   &.c-form-control--thicc-slider {
     @include themed() {
       &::-webkit-slider-runnable-track {

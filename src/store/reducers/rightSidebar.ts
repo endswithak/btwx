@@ -17,6 +17,18 @@ import {
   COLLAPSE_SHADOW_STYLES,
   EXPAND_BLUR_STYLES,
   COLLAPSE_BLUR_STYLES,
+  ENABLE_DRAGGING_FILL,
+  DISABLE_DRAGGING_FILL,
+  ENABLE_DRAGGING_STROKE,
+  DISABLE_DRAGGING_STROKE,
+  // ENABLE_DRAGGING_SHADOW,
+  // DISABLE_DRAGGING_SHADOW,
+  ENABLE_FILL_DRAGOVER,
+  DISABLE_FILL_DRAGOVER,
+  ENABLE_STROKE_DRAGOVER,
+  DISABLE_STROKE_DRAGOVER,
+  // ENABLE_SHADOW_DRAGOVER,
+  // DISABLE_SHADOW_DRAGOVER,
   RightSidebarTypes,
 } from '../actionTypes/rightSidebar';
 
@@ -30,6 +42,12 @@ export interface RightSidebarState {
   strokeOptionsStylesCollapsed: boolean;
   shadowStylesCollapsed: boolean;
   blurStylesCollapsed: boolean;
+  draggingFill: any;
+  draggingStroke: any;
+  draggingShadow: boolean;
+  fillDragover: boolean;
+  strokeDragover: boolean;
+  shadowDragover: boolean;
 }
 
 const initialState: RightSidebarState = {
@@ -41,7 +59,13 @@ const initialState: RightSidebarState = {
   strokeStylesCollapsed: false,
   strokeOptionsStylesCollapsed: false,
   shadowStylesCollapsed: false,
-  blurStylesCollapsed: false
+  blurStylesCollapsed: false,
+  draggingFill: null,
+  draggingStroke: null,
+  draggingShadow: false,
+  fillDragover: false,
+  strokeDragover: false,
+  shadowDragover: false
 };
 
 export default (state = initialState, action: RightSidebarTypes): RightSidebarState => {
@@ -154,6 +178,78 @@ export default (state = initialState, action: RightSidebarTypes): RightSidebarSt
         blurStylesCollapsed: true
       };
     }
+    case ENABLE_DRAGGING_FILL: {
+      return {
+        ...state,
+        draggingFill: action.payload.fill
+      };
+    }
+    case DISABLE_DRAGGING_FILL: {
+      return {
+        ...state,
+        draggingFill: null
+      };
+    }
+    case ENABLE_DRAGGING_STROKE: {
+      return {
+        ...state,
+        draggingStroke: action.payload.stroke
+      };
+    }
+    case DISABLE_DRAGGING_STROKE: {
+      return {
+        ...state,
+        draggingStroke: null
+      };
+    }
+    // case ENABLE_DRAGGING_SHADOW: {
+    //   return {
+    //     ...state,
+    //     draggingShadow: true
+    //   };
+    // }
+    // case DISABLE_DRAGGING_SHADOW: {
+    //   return {
+    //     ...state,
+    //     draggingShadow: false
+    //   };
+    // }
+    case ENABLE_FILL_DRAGOVER: {
+      return {
+        ...state,
+        fillDragover: true
+      };
+    }
+    case DISABLE_FILL_DRAGOVER: {
+      return {
+        ...state,
+        fillDragover: false
+      };
+    }
+    case ENABLE_STROKE_DRAGOVER: {
+      return {
+        ...state,
+        strokeDragover: true
+      };
+    }
+    case DISABLE_STROKE_DRAGOVER: {
+      return {
+        ...state,
+        strokeDragover: false
+      };
+    }
+    // case ENABLE_SHADOW_DRAGOVER: {
+    //   return {
+    //     ...state,
+    //     shadowDragover: true
+    //   };
+    // }
+    // case DISABLE_SHADOW_DRAGOVER: {
+    //   return {
+    //     ...state,
+    //     shadowDragover: false
+    //   };
+    // }
     default:
       return state;
   }

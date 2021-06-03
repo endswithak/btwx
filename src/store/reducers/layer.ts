@@ -174,9 +174,12 @@ import {
   DISABLE_LAYER_FILL,
   DISABLE_LAYERS_FILL,
   SET_LAYER_FILL,
+  SET_LAYERS_FILL,
   SET_LAYER_FILL_COLOR,
   SET_LAYERS_FILL_COLOR,
   SET_LAYERS_FILL_COLORS,
+  SET_LAYER_STROKE,
+  SET_LAYERS_STROKE,
   ENABLE_LAYER_STROKE,
   ENABLE_LAYERS_STROKE,
   DISABLE_LAYER_STROKE,
@@ -511,6 +514,8 @@ import {
   enableLayersFill,
   disableLayerFill,
   disableLayersFill,
+  setLayerStroke,
+  setLayersStroke,
   setLayerFillColor,
   setLayersFillColor,
   setLayersFillColors,
@@ -582,6 +587,7 @@ import {
   setLayerTextResize,
   setLayersTextResize,
   setLayerFill,
+  setLayersFill,
   setLayerFillType,
   setLayersFillType,
   setLayerGradientOrigin,
@@ -1121,6 +1127,10 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayersFillColor(state, action);
     case SET_LAYERS_FILL_COLORS:
       return setLayersFillColors(state, action);
+    case SET_LAYER_STROKE:
+      return setLayerStroke(state, action);
+    case SET_LAYERS_STROKE:
+      return setLayersStroke(state, action);
     case ENABLE_LAYER_STROKE:
       return enableLayerStroke(state, action);
     case ENABLE_LAYERS_STROKE:
@@ -1265,6 +1275,8 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayersPointY(state, action);
     case SET_LAYER_FILL:
       return setLayerFill(state, action);
+    case SET_LAYERS_FILL:
+      return setLayersFill(state, action);
     case SET_LAYER_FILL_TYPE:
       return setLayerFillType(state, action);
     case SET_LAYERS_FILL_TYPE:
@@ -1584,11 +1596,14 @@ export default undoable(baseReducer, {
       DISABLE_LAYER_FILL,
       DISABLE_LAYERS_FILL,
       SET_LAYER_FILL,
+      SET_LAYERS_FILL,
       SET_LAYER_FILL_COLOR,
       SET_LAYERS_FILL_COLOR,
       SET_LAYERS_FILL_COLORS,
       SET_LAYER_FILL_TYPE,
       SET_LAYERS_FILL_TYPE,
+      SET_LAYER_STROKE,
+      SET_LAYERS_STROKE,
       ENABLE_LAYER_STROKE,
       ENABLE_LAYERS_STROKE,
       DISABLE_LAYER_STROKE,
