@@ -2,9 +2,9 @@ import React, { useEffect, ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getDeepSelectItem, getNearestScopeAncestor } from '../store/selectors/layer';
-import { setCanvasActiveTool, setCanvasCursor } from '../store/actions/canvasSettings';
+import { setCanvasActiveTool } from '../store/actions/canvasSettings';
 import { openContextMenu } from '../store/actions/contextMenu';
-import { setLayerHover, deepSelectLayerThunk, selectLayers, deselectLayers, deselectAllLayers, setActiveArtboard, clearLayerScope, setLayerTreeScroll, showLayersChildren } from '../store/actions/layer';
+import { setLayerHover, deepSelectLayerThunk, selectLayers, deselectLayers, deselectAllLayers, setActiveArtboard, setLayerTreeScroll, showLayersChildren } from '../store/actions/layer';
 import { openTextEditorThunk } from '../store/actions/textEditor';
 import { setTextSettings } from '../store/actions/textSettings';
 
@@ -27,9 +27,6 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const activeTool = useSelector((state: RootState) => state.canvasSettings.activeTool);
   const dragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  // const draggingFill = useSelector((state: RootState) => state.rightSidebar.draggingFill);
-  // const draggingStroke = useSelector((state: RootState) => state.rightSidebar.draggingStroke);
-  // const draggingShadow = useSelector((state: RootState) => state.rightSidebar.draggingShadow);
   const resizing = useSelector((state: RootState) => state.canvasSettings.resizing);
   // const selecting = useSelector((state: RootState) => state.canvasSettings.selecting);
   const dragHandle = useSelector((state: RootState) => state.canvasSettings.dragHandle);

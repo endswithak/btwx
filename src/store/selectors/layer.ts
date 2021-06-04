@@ -3975,11 +3975,12 @@ const getSizeWiggles = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer):
         case 'Ellipse':
         case 'Custom':
         default:
-          if ((layerItem as Btwx.Shape).shapeType !== (equivalentLayerItem as Btwx.Shape).shapeType) {
-            return ['shape'];
-          } else {
-            return ['width', 'height'];
-          }
+          // if ((layerItem as Btwx.Shape).shapeType !== (equivalentLayerItem as Btwx.Shape).shapeType) {
+          //   return ['shape'];
+          // } else {
+          //   return ['width', 'height'];
+          // }
+          return ['width', 'height'];
       }
     }
     case 'Image':
@@ -3995,6 +3996,16 @@ const getSizeWiggles = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer):
       }
     case 'Artboard':
     case 'Group':
+      return [];
+  }
+}
+
+const getShapeWiggle = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): Btwx.TweenProp[] => {
+  switch(layerItem.type) {
+    case 'Shape': {
+      return ['shape'];
+    }
+    default:
       return [];
   }
 }
@@ -4057,6 +4068,7 @@ export const getPossibleProps = (layerItem: Btwx.Layer, equivalentLayerItem: Btw
   const textProps = getTextWiggles(layerItem, equivalentLayerItem);
   const positionProps = getPositionWiggles(layerItem, equivalentLayerItem);
   const sizeProps = getSizeWiggles(layerItem, equivalentLayerItem);
+  const shapeProp = getShapeWiggle(layerItem, equivalentLayerItem);
   return [
     ...contextProps,
     ...transformProps,
@@ -4066,7 +4078,8 @@ export const getPossibleProps = (layerItem: Btwx.Layer, equivalentLayerItem: Btw
     ...shadowProps,
     ...textProps,
     ...positionProps,
-    ...sizeProps
+    ...sizeProps,
+    ...shapeProp
   ];
 }
 

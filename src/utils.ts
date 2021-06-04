@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+import { paperMain } from './canvas';
 import tinyColor from 'tinycolor2';
 import mexp from 'math-expression-evaluator';
 import { DEFAULT_TWEEN_EVENTS_TYPES } from './constants';
@@ -224,6 +225,27 @@ export const evaluateHex = (hex: string): string => {
     return hex;
   } else {
     return tinyColor(hex).toHex();
+  }
+}
+
+export const evaluatePathData = (pathData: string): string => {
+  if (pathData === 'multi') {
+    return pathData;
+  } else {
+    try {
+      const shape = new paperMain.CompoundPath({
+        pathData: pathData,
+        fillColor: '#000',
+        insert: false
+      });
+      if (shape.isEmpty()) {
+        return null;
+      } else {
+        return pathData;
+      }
+    } catch(error) {
+      return null;
+    }
   }
 }
 

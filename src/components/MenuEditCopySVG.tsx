@@ -15,7 +15,8 @@ const MenuEditCopySVG = (props: MenuEditCopySVGProps): ReactElement => {
   const [menuItemTemplate, setMenuItemTemplate] = useState<any>(null);
   const accelerator = useSelector((state: RootState) => state.keyBindings.edit.copy.svg);
   const isEnabled = useSelector((state: RootState) =>
-    state.layer.present.selected.length > 0 &&
+    state.layer.present.selected.length === 1 &&
+    state.layer.present.byId[state.layer.present.selected[0]].type === 'Shape' &&
     !state.canvasSettings.dragging &&
     !state.canvasSettings.resizing &&
     !state.canvasSettings.drawing
@@ -24,7 +25,7 @@ const MenuEditCopySVG = (props: MenuEditCopySVGProps): ReactElement => {
 
   useEffect(() => {
     setMenuItemTemplate({
-      label: 'Copy SVG Code',
+      label: 'Copy Shape Path Data',
       id: MENU_ITEM_ID,
       enabled: isEnabled,
       accelerator,

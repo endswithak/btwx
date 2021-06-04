@@ -110,7 +110,7 @@ export const CUSTOM_WIGGLE_TWEEN_STRENGTH_COLOR = { h: 0, s: 0, l: 0, a: 1 };
 
 export const CUSTOM_WIGGLE_TWEEN_STRENGTH_MAP: { [id: string]: number | Btwx.Color | string } = {
   // image: null,
-  shape: null,
+  shape: 'M12,23.4551701 C16.418278,23.4551701 20,19.5228475 20,14 C20,8.4771525 16.418278,1.09869432 12,1.09869432 C7.581722,1.09869432 4,8.4771525 4,14 C4,19.5228475 7.581722,23.4551701 12,23.4551701 Z',
   fill: CUSTOM_WIGGLE_TWEEN_STRENGTH_COLOR,
   fillGradientOriginX: 5,
   fillGradientOriginY: 5,

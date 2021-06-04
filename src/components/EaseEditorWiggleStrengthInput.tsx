@@ -6,6 +6,7 @@ import { setLayersCustomWiggleTweenStrength } from '../store/actions/layer';
 import { getSelectedCustomWiggleTweensStrength, getSelectedTweensProp } from '../store/selectors/layer';
 import MathFormGroup from './MathFormGroup';
 import HexFormGroup from './HexFormGroup';
+import PathDataFormGroup from './PathDataFormGroup';
 import Form from './Form';
 
 interface EaseEditorWiggleStrengthInputProps {
@@ -112,14 +113,7 @@ const EaseEditorWiggleStrengthInput = (props: EaseEditorWiggleStrengthInputProps
     case 'fontSize':
     case 'letterSpacing':
     case 'fontWeight':
-    // case 'oblique':
     case 'lineHeight':
-    case 'fromX':
-    case 'fromY':
-    case 'toX':
-    case 'toY':
-    // case 'pointX':
-    // case 'pointY':
       return (
         <MathFormGroup
           ref={formControlRef}
@@ -130,9 +124,17 @@ const EaseEditorWiggleStrengthInput = (props: EaseEditorWiggleStrengthInputProps
           onSubmitSuccess={handleSubmitSuccess}
           submitOnBlur />
       );
-    case 'image':
     case 'shape':
-    case 'justification':
+      return (
+        <PathDataFormGroup
+          ref={formControlRef}
+          controlId='control-ee-wiggles-strength'
+          value={strength as string}
+          size='small'
+          label='Strength'
+          onSubmitSuccess={handleSubmitSuccess}
+          submitOnBlur />
+      )
     default:
       return null;
   }

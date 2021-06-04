@@ -26,7 +26,6 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const draggingFill = useSelector((state: RootState) => state.rightSidebar.draggingFill);
   const draggingStroke = useSelector((state: RootState) => state.rightSidebar.draggingStroke);
-  // const draggingShadow = useSelector((state: RootState) => state.rightSidebar.draggingShadow);
   const gradientValue = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.selected[0]].style[prop].gradient);
   const enabledValue: boolean | 'multi' = useSelector((state: RootState) => {
     switch(prop) {

@@ -6065,16 +6065,15 @@ export const copyStyleThunk = () => {
 export const copySVGThunk = () => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
-    if (state.canvasSettings.focusing && state.layer.present.selected.length > 0) {
-      const selectedPaperScopes = getSelectedProjectIndices(state);
-      const group = new paperMain.Group({insert: false});
-      state.layer.present.selected.forEach((id) => {
-        const paperLayer = getPaperLayer(id, selectedPaperScopes[id]);
-        const clone = paperLayer.clone({insert: false});
-        clone.parent = group;
-      });
-      const svg = group.exportSVG({asString: true}) as string;
-      clipboard.writeText(`<svg>${svg}</svg>`);
+    if (state.canvasSettings.focusing && state.layer.present.selected.length === 1 && state.layer.present.byId[state.layer.present.selected[0]].type === 'Shape') {
+      const id = state.layer.present.selected[0];
+      const layerItem = state.layer.present.byId[id] as Btwx.Text;
+      const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
+      const projectIndex = artboardItem.projectIndex;
+      const paperLayer = paperMain.projects[projectIndex].getItem({ data: { id }}) as paper.CompoundPath;
+      if (paperLayer && paperLayer.pathData) {
+        clipboard.writeText(paperLayer.pathData);
+      }
     }
   }
 };

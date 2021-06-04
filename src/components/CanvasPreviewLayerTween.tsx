@@ -537,7 +537,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       duration: tween.duration,
       repeat: tween.repeat,
       yoyo: tween.yoyo,
-      [tween.prop]: tinyColor({...ofc, a: 0}).toRgbString(),
+      [tween.prop]: tween.ease === 'customWiggle'
+        ? tinyColor(tween.customWiggle.strength).toRgbString()
+        : tinyColor({...ofc, a: 0}).toRgbString(),
       ease: getEaseString(tween),
     }, tween.delay);
   };
@@ -716,7 +718,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         duration: tween.duration,
         repeat: tween.repeat,
         yoyo: tween.yoyo,
-        [`${tween.prop}Stop${index}Color`]: tinyColor(dc).toRgbString(),
+        [`${tween.prop}Stop${index}Color`]: tween.ease === 'customWiggle'
+          ? tinyColor(tween.customWiggle.strength).toRgbString()
+          : tinyColor(dc).toRgbString(),
         ease: getEaseString(tween),
       }, tween.delay);
     });
@@ -759,7 +763,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         duration: tween.duration,
         repeat: tween.repeat,
         yoyo: tween.yoyo,
-        [`${tween.prop}Stop${index}Color`]: tinyColor(sc).toRgbString(),
+        [`${tween.prop}Stop${index}Color`]: tween.ease === 'customWiggle'
+          ? tinyColor(tween.customWiggle.strength).toRgbString()
+          : tinyColor(sc).toRgbString(),
         ease: getEaseString(tween),
       }, tween.delay);
     });
@@ -777,7 +783,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         duration: tween.duration,
         repeat: tween.repeat,
         yoyo: tween.yoyo,
-        [`${tween.prop}Stop${index}Color`]: tinyColor({...sc, a: 0}).toRgbString(),
+        [`${tween.prop}Stop${index}Color`]: tween.ease === 'customWiggle'
+          ? tinyColor(tween.customWiggle.strength).toRgbString()
+          : tinyColor({...sc, a: 0}).toRgbString(),
         ease: getEaseString(tween),
       }, tween.delay);
     });
@@ -822,7 +830,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         duration: tween.duration,
         repeat: tween.repeat,
         yoyo: tween.yoyo,
-        [`${tween.prop}Stop${index}Color`]: tinyColor(sc).toRgbString(),
+        [`${tween.prop}Stop${index}Color`]: tween.ease === 'customWiggle'
+          ? tinyColor(tween.customWiggle.strength).toRgbString()
+          : tinyColor(sc).toRgbString(),
         ease: getEaseString(tween),
       }, tween.delay);
     });
@@ -851,7 +861,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     // get morph data
     const morphData = [
       originWithoutRotation.pathData,
-      destinationWithoutRotation.pathData
+      tween.ease === 'customWiggle' ? tween.customWiggle.strength : destinationWithoutRotation.pathData
     ];
     MorphSVGPlugin.pathFilter(morphData);
     eventLayerTimeline.data.props[tween.prop] = morphData[0];
