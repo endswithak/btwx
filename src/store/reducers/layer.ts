@@ -223,6 +223,8 @@ import {
   SET_LAYERS_STROKE_DASH_ARRAY_WIDTH,
   SET_LAYER_STROKE_DASH_ARRAY_GAP,
   SET_LAYERS_STROKE_DASH_ARRAY_GAP,
+  SET_LAYER_SHADOW,
+  SET_LAYERS_SHADOW,
   ENABLE_LAYER_SHADOW,
   ENABLE_LAYERS_SHADOW,
   DISABLE_LAYER_SHADOW,
@@ -546,6 +548,8 @@ import {
   setLayersStrokeDashArrayWidth,
   setLayerStrokeDashArrayGap,
   setLayersStrokeDashArrayGap,
+  setLayerShadow,
+  setLayersShadow,
   enableLayerShadow,
   enableLayersShadow,
   disableLayerShadow,
@@ -1185,6 +1189,10 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayerStrokeDashArrayGap(state, action);
     case SET_LAYERS_STROKE_DASH_ARRAY_GAP:
       return setLayersStrokeDashArrayGap(state, action);
+    case SET_LAYER_SHADOW:
+      return setLayerShadow(state, action);
+    case SET_LAYERS_SHADOW:
+      return setLayersShadow(state, action);
     case ENABLE_LAYER_SHADOW:
       return enableLayerShadow(state, action);
     case ENABLE_LAYERS_SHADOW:
@@ -1642,6 +1650,8 @@ export default undoable(baseReducer, {
       SET_LAYERS_STROKE_DASH_OFFSET,
       SET_LAYER_STROKE_DASH_ARRAY,
       SET_LAYERS_STROKE_DASH_ARRAY,
+      SET_LAYER_SHADOW,
+      SET_LAYERS_SHADOW,
       ENABLE_LAYER_SHADOW,
       ENABLE_LAYERS_SHADOW,
       DISABLE_LAYER_SHADOW,

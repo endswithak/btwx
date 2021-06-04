@@ -31,10 +31,8 @@ export const DISABLE_DRAGGING_FILL = 'DISABLE_DRAGGING_FILL';
 export const ENABLE_DRAGGING_STROKE = 'ENABLE_DRAGGING_STROKE';
 export const DISABLE_DRAGGING_STROKE = 'DISABLE_DRAGGING_STROKE';
 
-// export const ENABLE_DRAGGING_SHADOW = 'ENABLE_DRAGGING_SHADOW';
-// export const DISABLE_DRAGGING_SHADOW = 'DISABLE_DRAGGING_SHADOW';
-
-//
+export const ENABLE_DRAGGING_SHADOW = 'ENABLE_DRAGGING_SHADOW';
+export const DISABLE_DRAGGING_SHADOW = 'DISABLE_DRAGGING_SHADOW';
 
 export const ENABLE_FILL_DRAGOVER = 'ENABLE_FILL_DRAGOVER';
 export const DISABLE_FILL_DRAGOVER = 'DISABLE_FILL_DRAGOVER';
@@ -143,15 +141,18 @@ export interface DisableDraggingStroke {
   type: typeof DISABLE_DRAGGING_STROKE;
 }
 
-// export interface EnableDraggingShadow {
-//   type: typeof ENABLE_DRAGGING_SHADOW;
-// }
+export interface EnableDraggingShadowPayload {
+  shadow: { [P in keyof Btwx.Shadow]?: Btwx.Shadow[P] };
+}
 
-// export interface DisableDraggingShadow {
-//   type: typeof DISABLE_DRAGGING_SHADOW;
-// }
+export interface EnableDraggingShadow {
+  type: typeof ENABLE_DRAGGING_SHADOW;
+  payload: EnableDraggingShadowPayload;
+}
 
-//
+export interface DisableDraggingShadow {
+  type: typeof DISABLE_DRAGGING_SHADOW;
+}
 
 export interface EnableFillDragover {
   type: typeof ENABLE_FILL_DRAGOVER;
@@ -201,8 +202,8 @@ export type RightSidebarTypes = ExpandShapeStyles |
                                 DisableDraggingFill |
                                 EnableDraggingStroke |
                                 DisableDraggingStroke |
-                                // EnableDraggingShadow |
-                                // DisableDraggingShadow |
+                                EnableDraggingShadow |
+                                DisableDraggingShadow |
                                 EnableFillDragover |
                                 DisableFillDragover |
                                 EnableStrokeDragover |

@@ -4,7 +4,7 @@ import debounce from 'lodash.debounce';
 import { RootState } from '../store/reducers';
 import { SetDragOverPayload } from '../store/actionTypes/leftSidebar';
 import { setDragging, setEditing, setDragOver } from '../store/actions/leftSidebar';
-import { setLayerHover, selectLayers, deselectLayers } from '../store/actions/layer';
+import { setLayerHover, selectLayers, deselectLayers, setHoverFillThunk, setHoverStrokeThunk, setHoverShadowThunk } from '../store/actions/layer';
 import { openContextMenu } from '../store/actions/contextMenu';
 import SidebarLayerDropzoneWrap from './SidebarLayerDropzoneWrap';
 import SidebarLayerTitle from './SidebarLayerTitle';
@@ -28,6 +28,9 @@ interface SidebarLayerProps {
 const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   const { id, searchTree, nestingLevel, isDragGhost, setOpen, isOpen, style, draggable, sticky } = props;
   const dragging = useSelector((state: RootState) => state.leftSidebar.dragging);
+  const draggingFill = useSelector((state: RootState) => state.rightSidebar.draggingFill);
+  const draggingStroke = useSelector((state: RootState) => state.rightSidebar.draggingStroke);
+  const draggingShadow = useSelector((state: RootState) => state.rightSidebar.draggingShadow);
   const isSelected = useSelector((state: RootState) => state.layer.present.byId[id] ? state.layer.present.byId[id].selected : null);
   const isEditing = useSelector((state: RootState) => state.leftSidebar.editing === id);
   const isArtboard = useSelector((state: RootState) => state.layer.present.byId[id] ? state.layer.present.byId[id].type === 'Artboard' && !isDragGhost : false);
@@ -120,6 +123,26 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
     }
   }
 
+  const handleDragOver = (e: any): void => {
+    e.preventDefault();
+    if (!isHover) {
+      dispatch(setLayerHover({
+        id: id
+      }));
+    }
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    if (draggingFill) {
+      dispatch(setHoverFillThunk());
+    } else if (draggingStroke) {
+      dispatch(setHoverStrokeThunk());
+    } else if (draggingShadow) {
+      dispatch(setHoverShadowThunk());
+    }
+  }
+
   return (
     <ListItem
       as='div'
@@ -144,6 +167,8 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
       hovering={isHover && !isDragGhost}
       root={isArtboard && !isDragGhost}
       draggable={!isDragGhost && draggable}
+      onDragOver={dragging ? null : handleDragOver}
+      onDrop={dragging ? null : handleDrop}
       onMouseEnter={isDragGhost ? null : handleMouseEnter}
       onMouseLeave={isDragGhost ? null : handleMouseLeave}
       onMouseDown={isDragGhost ? null : handleMouseDown}

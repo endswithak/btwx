@@ -264,6 +264,8 @@ export const SET_LAYERS_STROKE_DASH_ARRAY_GAP = 'SET_LAYERS_STROKE_DASH_ARRAY_GA
 export const SET_LAYER_STROKE_MITER_LIMIT = 'SET_LAYER_STROKE_MITER_LIMIT';
 export const SET_LAYERS_STROKE_MITER_LIMIT = 'SET_LAYERS_STROKE_MITER_LIMIT';
 
+export const SET_LAYER_SHADOW = 'SET_LAYER_SHADOW';
+export const SET_LAYERS_SHADOW = 'SET_LAYERS_SHADOW';
 export const ENABLE_LAYER_SHADOW = 'ENABLE_LAYER_SHADOW';
 export const ENABLE_LAYERS_SHADOW = 'ENABLE_LAYERS_SHADOW';
 export const DISABLE_LAYER_SHADOW = 'DISABLE_LAYER_SHADOW';
@@ -2922,6 +2924,26 @@ export interface SetLayerStrokeMiterLimit {
   payload: SetLayerStrokeMiterLimitPayload;
 }
 
+export interface SetLayerShadowPayload {
+  id: string;
+  shadow: { [P in keyof Btwx.Shadow]?: Btwx.Shadow[P] };
+}
+
+export interface SetLayerShadow {
+  type: typeof SET_LAYER_SHADOW;
+  payload: SetLayerShadowPayload;
+}
+
+export interface SetLayersShadowPayload {
+  layers: string[];
+  shadow: { [P in keyof Btwx.Shadow]?: Btwx.Shadow[P] };
+}
+
+export interface SetLayersShadow {
+  type: typeof SET_LAYERS_SHADOW;
+  payload: SetLayersShadowPayload;
+}
+
 export interface EnableLayerShadowPayload {
   id: string;
 }
@@ -4382,6 +4404,8 @@ export type LayerTypes = AddArtboard |
                          SetLayerStrokeDashArrayGap |
                          SetLayersStrokeDashArrayGap |
                          SetLayerStrokeMiterLimit |
+                         SetLayerShadow |
+                         SetLayersShadow |
                          EnableLayerShadow |
                          EnableLayersShadow |
                          DisableLayerShadow |

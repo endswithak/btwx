@@ -21,8 +21,8 @@ import {
   DISABLE_DRAGGING_FILL,
   ENABLE_DRAGGING_STROKE,
   DISABLE_DRAGGING_STROKE,
-  // ENABLE_DRAGGING_SHADOW,
-  // DISABLE_DRAGGING_SHADOW,
+  ENABLE_DRAGGING_SHADOW,
+  DISABLE_DRAGGING_SHADOW,
   ENABLE_FILL_DRAGOVER,
   DISABLE_FILL_DRAGOVER,
   ENABLE_STROKE_DRAGOVER,
@@ -44,7 +44,7 @@ export interface RightSidebarState {
   blurStylesCollapsed: boolean;
   draggingFill: any;
   draggingStroke: any;
-  draggingShadow: boolean;
+  draggingShadow: any;
   fillDragover: boolean;
   strokeDragover: boolean;
   shadowDragover: boolean;
@@ -62,7 +62,7 @@ const initialState: RightSidebarState = {
   blurStylesCollapsed: false,
   draggingFill: null,
   draggingStroke: null,
-  draggingShadow: false,
+  draggingShadow: null,
   fillDragover: false,
   strokeDragover: false,
   shadowDragover: false
@@ -202,18 +202,18 @@ export default (state = initialState, action: RightSidebarTypes): RightSidebarSt
         draggingStroke: null
       };
     }
-    // case ENABLE_DRAGGING_SHADOW: {
-    //   return {
-    //     ...state,
-    //     draggingShadow: true
-    //   };
-    // }
-    // case DISABLE_DRAGGING_SHADOW: {
-    //   return {
-    //     ...state,
-    //     draggingShadow: false
-    //   };
-    // }
+    case ENABLE_DRAGGING_SHADOW: {
+      return {
+        ...state,
+        draggingShadow: action.payload.shadow
+      };
+    }
+    case DISABLE_DRAGGING_SHADOW: {
+      return {
+        ...state,
+        draggingShadow: false
+      };
+    }
     case ENABLE_FILL_DRAGOVER: {
       return {
         ...state,

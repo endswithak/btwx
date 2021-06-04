@@ -1,10 +1,11 @@
 import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import tinyColor from 'tinycolor2';
+import gsap from 'gsap';
 import { RootState } from '../store/reducers';
 import { getSelectedFillColor, getSelectedFillHex, getSelectedFillEnabled, getSelectedFillOpacity, getSelectedShadowColor, getSelectedShadowHex, getSelectedShadowEnabled, getSelectedShadowOpacity, getSelectedStrokeColor, getSelectedStrokeHex, getSelectedStrokeEnabled, getSelectedStrokeOpacity } from '../store/selectors/layer';
 import { enableLayersFill, setLayersFillColor, enableLayersShadow, setLayersShadowColor, enableLayersStroke, setLayersStrokeColor, setLayersFill, setLayersStroke } from '../store/actions/layer';
-import { enableDraggingFill, disableDraggingFill, enableDraggingStroke, disableDraggingStroke, enableFillDragover, disableFillDragover, enableStrokeDragover, disableStrokeDragover } from '../store/actions/rightSidebar';
+import { enableDraggingFill, disableDraggingFill, enableDraggingStroke, disableDraggingStroke, enableDraggingShadow, disableDraggingShadow, enableFillDragover, disableFillDragover, enableStrokeDragover, disableStrokeDragover } from '../store/actions/rightSidebar';
 import { openColorEditor } from '../store/actions/colorEditor';
 import { setTextSettingsFillColor } from '../store/actions/textSettings';
 import SidebarSectionRow from './SidebarSectionRow';
@@ -12,6 +13,9 @@ import SidebarSectionColumn from './SidebarSectionColumn';
 import HexFormGroup from './HexFormGroup';
 import PercentageFormGroup from './PercentageFormGroup';
 import Form from './Form';
+import fillDropperCursor from '../../assets/cursor/fill-dropper.svg';
+import strokeDropperCursor from '../../assets/cursor/stroke-dropper.svg';
+import shadowDropperCursor from '../../assets/cursor/shadow-dropper.svg';
 
 interface ColorInputProps {
   prop: 'fill' | 'stroke' | 'shadow';
@@ -190,7 +194,18 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
             }
           }));
           break;
+        case 'shadow':
+          dispatch(enableDraggingShadow({
+            shadow: {
+              color: colorValue,
+              enabled: true
+            }
+          }));
+          break;
       }
+      gsap.set(colorControlRef.current, {
+        cursor: `url(${prop === 'fill' ? fillDropperCursor : prop === 'stroke' ? strokeDropperCursor : shadowDropperCursor}) 14 14, auto`
+      });
     }
   };
 
@@ -205,7 +220,14 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
           dispatch(disableDraggingStroke());
           setActiveDragover(false);
           break;
+        case 'shadow':
+          dispatch(disableDraggingShadow());
+          setActiveDragover(false);
+          break;
       }
+      gsap.set(colorControlRef.current, {
+        clearProps: 'all'
+      });
     }
   };
 
@@ -282,7 +304,7 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
               ref={colorControlRef}
               type='color'
               size='small'
-              draggable={colorValue !== 'multi' && prop !== 'shadow'}
+              draggable={colorValue !== 'multi'}
               onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
               onDragLeave={handleDragLeave}

@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
 import { base64ToBuffer } from '../utils';
-import { addImageThunk } from '../store/actions/layer';
+import { addImageThunk, setHoverFillThunk, setHoverStrokeThunk, setHoverShadowThunk } from '../store/actions/layer';
 import { setCanvasReady, setCanvasFocusing, setCanvasMeasuring, setCanvasMousePosition } from '../store/actions/canvasSettings';
 import { hydrateDocumentThunk } from '../store/actions/documentSettings';
 import { getAllProjectIndices } from '../store/selectors/layer';
@@ -57,7 +57,9 @@ const Canvas = (): ReactElement => {
   const cursor = useSelector((state: RootState) => state.canvasSettings.cursor);
   const canvasTheme = useSelector((state: RootState) => state.preferences.canvasTheme);
   const draggingLayers = useSelector((state: RootState) => state.leftSidebar.dragging);
-  const draggingStyle = useSelector((state: RootState) => state.rightSidebar.draggingFill || state.rightSidebar.draggingStroke);
+  const draggingFill = useSelector((state: RootState) => state.rightSidebar.draggingFill);
+  const draggingStroke = useSelector((state: RootState) => state.rightSidebar.draggingStroke);
+  const draggingShadow = useSelector((state: RootState) => state.rightSidebar.draggingShadow);
   const instanceId = useSelector((state: RootState) => state.session.instance);
   const isClean = useSelector((state: RootState) => !state.documentSettings.id && !state.layer.present.edit.id);
   const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
@@ -218,8 +220,11 @@ const Canvas = (): ReactElement => {
   }
 
   const handleDragOver = (e) => {
+    if (draggingFill || draggingStroke || draggingShadow) {
+      handleHitResult(e, 'mouseMove');
+    }
     e.preventDefault();
-    if (!dragOver && !draggingLayers && !draggingStyle) {
+    if (!dragOver && !draggingLayers && !draggingFill && !draggingStroke && !draggingShadow) {
       setDragOver(true);
     }
   }
@@ -230,11 +235,26 @@ const Canvas = (): ReactElement => {
 
   const handleDrop = (e) => {
     e.preventDefault();
-    let isDirty = !isClean;
-    if (e.dataTransfer.items) {
-      for(let i = 0; i < e.dataTransfer.items.length; i++) {
-        if (e.dataTransfer.items[i].kind === 'file') {
-          let file = e.dataTransfer.items[i].getAsFile();
+    if (dragOver) {
+      let isDirty = !isClean;
+      if (e.dataTransfer.items) {
+        for(let i = 0; i < e.dataTransfer.items.length; i++) {
+          if (e.dataTransfer.items[i].kind === 'file') {
+            let file = e.dataTransfer.items[i].getAsFile();
+            const isImage = file.type.startsWith('image');
+            const isDocument = file.name.endsWith('.btwx');
+            if (isImage && activeArtboard) {
+              handleImageDrop(file);
+            }
+            if (isDocument) {
+              handleDocumentDrop(file, isDirty);
+              isDirty = true;
+            }
+          }
+        }
+      } else {
+        for(let i = 0; i < e.dataTransfer.files.length; i++) {
+          let file = e.dataTransfer.files[i];
           const isImage = file.type.startsWith('image');
           const isDocument = file.name.endsWith('.btwx');
           if (isImage && activeArtboard) {
@@ -246,21 +266,14 @@ const Canvas = (): ReactElement => {
           }
         }
       }
-    } else {
-      for(let i = 0; i < e.dataTransfer.files.length; i++) {
-        let file = e.dataTransfer.files[i];
-        const isImage = file.type.startsWith('image');
-        const isDocument = file.name.endsWith('.btwx');
-        if (isImage && activeArtboard) {
-          handleImageDrop(file);
-        }
-        if (isDocument) {
-          handleDocumentDrop(file, isDirty);
-          isDirty = true;
-        }
-      }
+      setDragOver(false);
+    } else if (draggingFill) {
+      dispatch(setHoverFillThunk());
+    } else if (draggingStroke) {
+      dispatch(setHoverStrokeThunk());
+    } else if (draggingShadow) {
+      dispatch(setHoverShadowThunk());
     }
-    setDragOver(false);
   }
 
   const handleDocumentDrop = (file: File, dirty) => {

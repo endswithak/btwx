@@ -268,6 +268,8 @@ import {
   SET_LAYER_STROKE_DASH_ARRAY_GAP,
   SET_LAYERS_STROKE_DASH_ARRAY_GAP,
   SET_LAYER_STROKE_MITER_LIMIT,
+  SET_LAYER_SHADOW,
+  SET_LAYERS_SHADOW,
   ENABLE_LAYER_SHADOW,
   ENABLE_LAYERS_SHADOW,
   DISABLE_LAYER_SHADOW,
@@ -596,6 +598,8 @@ import {
   SetLayerStrokeDashArrayGapPayload,
   SetLayersStrokeDashArrayGapPayload,
   SetLayerStrokeMiterLimitPayload,
+  SetLayerShadowPayload,
+  SetLayersShadowPayload,
   EnableLayerShadowPayload,
   EnableLayersShadowPayload,
   DisableLayerShadowPayload,
@@ -2978,6 +2982,24 @@ export const setLayersStroke = (payload: SetLayersStrokePayload): LayerTypes => 
   payload
 });
 
+export const setHoverStrokeThunk = () => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    if (state.layer.present.hover) {
+      const hoverDescendents = getLayerAndDescendants(state.layer.present, state.layer.present.hover, false).filter((id) => {
+        const layerItem = state.layer.present.byId[id];
+        return layerItem.type !== 'Image' && layerItem.type !== 'Artboard';
+      });
+      if (hoverDescendents.length > 0) {
+        dispatch(setLayersStroke({
+          layers: hoverDescendents,
+          stroke: state.rightSidebar.draggingStroke
+        }));
+      }
+    }
+  }
+};
+
 export const enableLayerStroke = (payload: EnableLayerStrokePayload): LayerTypes => ({
   type: ENABLE_LAYER_STROKE,
   payload
@@ -3221,6 +3243,34 @@ export const setLayerStrokeMiterLimit = (payload: SetLayerStrokeMiterLimitPayloa
   type: SET_LAYER_STROKE_MITER_LIMIT,
   payload
 });
+
+export const setLayerShadow = (payload: SetLayerShadowPayload): LayerTypes => ({
+  type: SET_LAYER_SHADOW,
+  payload
+});
+
+export const setLayersShadow = (payload: SetLayersShadowPayload): LayerTypes => ({
+  type: SET_LAYERS_SHADOW,
+  payload
+});
+
+export const setHoverShadowThunk = () => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    if (state.layer.present.hover) {
+      const hoverDescendents = getLayerAndDescendants(state.layer.present, state.layer.present.hover, false).filter((id) => {
+        const layerItem = state.layer.present.byId[id];
+        return layerItem.type !== 'Artboard';
+      });
+      if (hoverDescendents.length > 0) {
+        dispatch(setLayersShadow({
+          layers: hoverDescendents,
+          shadow: state.rightSidebar.draggingShadow
+        }));
+      }
+    }
+  }
+};
 
 export const enableLayerShadow = (payload: EnableLayerShadowPayload): LayerTypes => ({
   type: ENABLE_LAYER_SHADOW,
@@ -4805,6 +4855,24 @@ export const setLayersFill = (payload: SetLayersFillPayload): LayerTypes => ({
   type: SET_LAYERS_FILL,
   payload
 });
+
+export const setHoverFillThunk = () => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    if (state.layer.present.hover) {
+      const hoverDescendents = getLayerAndDescendants(state.layer.present, state.layer.present.hover, false).filter((id) => {
+        const layerItem = state.layer.present.byId[id];
+        return layerItem.type !== 'Image';
+      });
+      if (hoverDescendents.length > 0) {
+        dispatch(setLayersFill({
+          layers: hoverDescendents,
+          fill: state.rightSidebar.draggingFill
+        }));
+      }
+    }
+  }
+};
 
 export const setLayerFillType = (payload: SetLayerFillTypePayload): LayerTypes => ({
   type: SET_LAYER_FILL_TYPE,

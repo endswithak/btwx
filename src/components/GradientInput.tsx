@@ -1,5 +1,6 @@
 import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import gsap from 'gsap';
 import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
 import { enableLayersFill, enableLayersStroke, setLayersGradient, setLayersFill, setLayersStroke } from '../store/actions/layer';
@@ -11,6 +12,8 @@ import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import GradientTypeSelector from './GradientTypeSelector';
 import Form from './Form';
+import fillDropperCursor from '../../assets/cursor/fill-dropper.svg';
+import strokeDropperCursor from '../../assets/cursor/stroke-dropper.svg';
 
 interface GradientInputProps {
   prop: 'fill' | 'stroke';
@@ -67,6 +70,7 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
   const [enabled, setEnabled] = useState<boolean | 'multi'>(enabledValue);
   const [gradient, setGradient] = useState(gradientValue);
   const [activeDragover, setActiveDragover] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -137,11 +141,15 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
           }));
           break;
       }
+      setDragging(true);
+      gsap.set(colorFormControlRef.current, {
+        cursor: `url(${prop === 'fill' ? fillDropperCursor : strokeDropperCursor}) 14 14, auto`
+      });
     }
   };
 
   const handleDragEnd = (e: any): void => {
-    if (draggingFill || draggingStroke) {
+    if (dragging) {
       switch(prop) {
         case 'fill':
           dispatch(disableDraggingFill());
@@ -152,6 +160,10 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
           setActiveDragover(false);
           break;
       }
+      setDragging(false);
+      gsap.set(colorFormControlRef.current, {
+        clearProps: 'all'
+      });
     }
   };
 

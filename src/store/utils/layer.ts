@@ -76,7 +76,7 @@ import {
   SetLayersCustomWiggleTweenType, RemoveLayerTweens, RemoveLayersEvent, ShowLayersChildren, HideLayersChildren,
   SetLayerTreeStickyArtboard, SetLayerTweenRepeat, SetLayersTweenRepeat, SetLayerTweenYoyo, SetLayersTweenYoyo,
   SetLayerTweenRepeatDelay, SetLayersTweenRepeatDelay, SetLayerTweenYoyoEase, SetLayersTweenYoyoEase,
-  SetLayerBlurRadius, SetLayersBlurRadius, FlipLayerGradient, FlipLayersGradient, DeselectAllLayerEventTweens, DeselectAllLayerEvents, SetLayerEventEventListener, SetLayersEventEventListener, SetLayerStroke, SetLayersStroke, SetLayersFill
+  SetLayerBlurRadius, SetLayersBlurRadius, FlipLayerGradient, FlipLayersGradient, DeselectAllLayerEventTweens, DeselectAllLayerEvents, SetLayerEventEventListener, SetLayersEventEventListener, SetLayerStroke, SetLayersStroke, SetLayersFill, SetLayerShadow, SetLayersShadow
 } from '../actionTypes/layer';
 
 import {
@@ -7323,6 +7323,55 @@ export const setLayersStroke = (state: LayerState, action: SetLayersStroke): Lay
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layers Stroke',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerShadow = (state: LayerState, action: SetLayerShadow): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        style: {
+          ...currentState.byId[action.payload.id].style,
+          shadow: {
+            ...currentState.byId[action.payload.id].style.shadow,
+            ...action.payload.shadow
+          }
+        }
+      }
+    }
+  }
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur']);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layers Shadow',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayersShadow = (state: LayerState, action: SetLayersShadow): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
+    return setLayerShadow(result, layerActions.setLayerShadow({
+      id: current,
+      shadow: action.payload.shadow
+    }) as SetLayerShadow);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layers Shadow',
       undoable: true
     }
   }) as SetLayerEdit);

@@ -21,8 +21,8 @@ import {
   DISABLE_DRAGGING_FILL,
   ENABLE_DRAGGING_STROKE,
   DISABLE_DRAGGING_STROKE,
-  // ENABLE_DRAGGING_SHADOW,
-  // DISABLE_DRAGGING_SHADOW,
+  ENABLE_DRAGGING_SHADOW,
+  DISABLE_DRAGGING_SHADOW,
   ENABLE_FILL_DRAGOVER,
   DISABLE_FILL_DRAGOVER,
   ENABLE_STROKE_DRAGOVER,
@@ -31,6 +31,7 @@ import {
   // DISABLE_SHADOW_DRAGOVER,
   EnableDraggingFillPayload,
   EnableDraggingStrokePayload,
+  EnableDraggingShadowPayload,
   RightSidebarTypes
 } from '../actionTypes/rightSidebar';
 
@@ -124,13 +125,14 @@ export const disableDraggingStroke = (): RightSidebarTypes => ({
   type: DISABLE_DRAGGING_STROKE
 });
 
-// export const enableDraggingShadow = (): RightSidebarTypes => ({
-//   type: ENABLE_DRAGGING_SHADOW
-// });
+export const enableDraggingShadow = (payload: EnableDraggingShadowPayload): RightSidebarTypes => ({
+  type: ENABLE_DRAGGING_SHADOW,
+  payload
+});
 
-// export const disableDraggingShadow = (): RightSidebarTypes => ({
-//   type: DISABLE_DRAGGING_SHADOW
-// });
+export const disableDraggingShadow = (): RightSidebarTypes => ({
+  type: DISABLE_DRAGGING_SHADOW
+});
 
 export const enableFillDragover = (): RightSidebarTypes => ({
   type: ENABLE_FILL_DRAGOVER
