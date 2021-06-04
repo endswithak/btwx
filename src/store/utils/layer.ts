@@ -2421,21 +2421,16 @@ export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): L
             allIds: removeItem(currentState.events.byId[tween.event].tweens.allIds, action.payload.id),
             byLayer: Object.keys(currentState.events.byId[tween.event].tweens.byLayer).reduce((result, current) => {
               if (tween.layer === current) {
-                if (onlyLayerTween) {
-                  result = Object.keys(result).reduce((cr, ct) => {
-                    if (ct !== current) {
-                      cr = {
-                        ...cr,
-                        [ct]: cr[ct]
-                      }
-                    }
-                    return cr;
-                  }, result);
-                } else {
+                if (!onlyLayerTween) {
                   result = {
                     ...result,
                     [current]: removeItem(currentState.events.byId[tween.event].tweens.byLayer[current], action.payload.id)
                   }
+                }
+              } else {
+                result = {
+                  ...result,
+                  [current]: currentState.events.byId[tween.event].tweens.byLayer[current]
                 }
               }
               return result;

@@ -12,13 +12,15 @@ const EventDrawerEvent = (): ReactElement => {
   const scrollPositions = useSelector((state: RootState) => eventLayers.reduce((result: number[], current, index) => {
     const prevY = result[index - 1] ? result[index - 1] : 0;
     let y = 32 + prevY;
-    const layerTweens = state.layer.present.events.byId[state.eventDrawer.event].tweens.byLayer[current];
-    layerTweens.forEach((id) => {
-      if (state.layer.present.events.byId[state.eventDrawer.event].tweens.allIds.includes(id)) {
-        y += 32;
-      }
-    });
-    result = [...result, y];
+    if (state.layer.present.events.byId[state.eventDrawer.event] && state.layer.present.events.byId[state.eventDrawer.event].tweens.byLayer[current]) {
+      const layerTweens = state.layer.present.events.byId[state.eventDrawer.event].tweens.byLayer[current];
+      layerTweens.forEach((id) => {
+        if (state.layer.present.events.byId[state.eventDrawer.event].tweens.allIds.includes(id)) {
+          y += 32;
+        }
+      });
+      result = [...result, y];
+    }
     return result;
   }, []));
   const [scrollLayer, setScrollLayer] = useState(eventLayers.length > 0 ? eventLayers[0] : null);
