@@ -1989,10 +1989,10 @@ ipcMain.on('initPasteErrorAlert', (event, args) => {
 ipcMain.on('setPreviewRecordingStopped', (event, args) => {
   const { instanceId } = JSON.parse(args);
   const instance = btwxElectron.instance.byId[instanceId];
-  instance.preview.webContents.send('setPreviewRecordingStopped', JSON.stringify({
+  instance.preview.webContents.executeJavaScript(`setPreviewRecordingStopped(${JSON.stringify({
     instanceId: instanceId,
     platform: process.platform
-  }));
+  })})`);
 });
 
 ////////////////////////////////////////////////////////////

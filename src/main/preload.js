@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer, desktopCapturer } = require('electron');
+const { contextBridge, ipcRenderer, desktopCapturer, clipboard } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
   overwriteRegisteredBinding: (params) => {
@@ -7,6 +7,18 @@ contextBridge.exposeInMainWorld('api', {
         resolve(overwrite);
       });
     });
+  },
+  readClipboardText: () => {
+    return clipboard.readText();
+  },
+  writeClipboardText: (text) => {
+    clipboard.writeText(text);
+  },
+  readClipboardImage: () => {
+    return clipboard.readImage();
+  },
+  readClipboardFormats: () => {
+    return clipboard.availableFormats();
   },
   saveInstance: () => {
     ipcRenderer.send('saveInstance');
@@ -160,6 +172,9 @@ contextBridge.exposeInMainWorld('api', {
   },
   hidePreviewTrafficLights: (params) => {
     ipcRenderer.send('hidePreviewTrafficLights', params);
+  },
+  showPreviewTrafficLights: (params) => {
+    ipcRenderer.send('showPreviewTrafficLights', params);
   },
   setDocumentRecordingStarted: (params) => {
     ipcRenderer.send('setDocumentRecordingStarted', params);

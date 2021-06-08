@@ -1,4 +1,3 @@
-// import { clipboard } from 'electron';
 import React, { ReactElement, useState, useEffect } from 'react';
 import Button from './Button';
 
@@ -13,7 +12,7 @@ const EaseEditorCopyPathButton = (props: EaseEditorCopyPathButtonProps): ReactEl
 
   const handleClick = () => {
     if (pathData) {
-      // clipboard.writeText(pathData);
+      (window as any).api.writeClipboardText(pathData);
       if (indicatorInterval) {
         clearInterval(indicatorInterval);
       }
