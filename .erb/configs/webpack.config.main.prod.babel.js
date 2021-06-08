@@ -1,18 +1,19 @@
 /**
  * Webpack config for production electron main process
  */
-
 import path from 'path';
 import webpack from 'webpack';
 import { merge } from 'webpack-merge';
 import TerserPlugin from 'terser-webpack-plugin';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import webpackPaths from './webpack.paths.js';
 import baseConfig from './webpack.config.base';
-import CheckNodeEnv from '../scripts/CheckNodeEnv';
-import DeleteSourceMaps from '../scripts/DeleteSourceMaps';
+import checkNodeEnv from '../scripts/check-node-env';
+import deleteSourceMaps from '../scripts/delete-source-maps';
 
-CheckNodeEnv('production');
-DeleteSourceMaps();
+checkNodeEnv('production');
+deleteSourceMaps();
 
 const devtoolsConfig = process.env.DEBUG_PROD === 'true' ? {
   devtool: 'source-map'
@@ -20,18 +21,16 @@ const devtoolsConfig = process.env.DEBUG_PROD === 'true' ? {
 
 export default merge(baseConfig, {
   ...devtoolsConfig,
-
   mode: 'production',
-
   target: 'electron-main',
-
-  entry: './src/main.dev.ts',
-
-  output: {
-    path: path.join(__dirname, '../../'),
-    filename: './src/main.prod.js',
+  entry: {
+    'main.prod': path.join(webpackPaths.srcMainPath, 'main.dev.ts'),
+    preload: path.join(webpackPaths.srcMainPath, 'preload.js')
   },
-
+  output: {
+    path: webpackPaths.distMainPath,
+    filename: '[name].js',
+  },
   optimization: {
     minimizer: [
       new TerserPlugin({
@@ -39,14 +38,11 @@ export default merge(baseConfig, {
       }),
     ]
   },
-
   plugins: [
     new BundleAnalyzerPlugin({
-      analyzerMode:
-        process.env.OPEN_ANALYZER === 'true' ? 'server' : 'disabled',
+      analyzerMode: process.env.OPEN_ANALYZER === 'true' ? 'server' : 'disabled',
       openAnalyzer: process.env.OPEN_ANALYZER === 'true',
     }),
-
     /**
      * Create global constants which can be configured at compile time.
      *
@@ -62,7 +58,6 @@ export default merge(baseConfig, {
       START_MINIMIZED: false,
     }),
   ],
-
   /**
    * Disables webpack processing of __dirname and __filename.
    * If you run the bundle in node.js it falls back to these values of node.js.

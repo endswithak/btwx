@@ -10,11 +10,12 @@ import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import { merge } from 'webpack-merge';
 import TerserPlugin from 'terser-webpack-plugin';
 import baseConfig from './webpack.config.base';
-import CheckNodeEnv from '../scripts/CheckNodeEnv';
-import DeleteSourceMaps from '../scripts/DeleteSourceMaps';
+import checkNodeEnv from '../scripts/check-node-env';
+import deleteSourceMaps from '../scripts/delete-source-maps';
+import webpackPaths from './webpack.paths.js';
 
-CheckNodeEnv('production');
-DeleteSourceMaps();
+checkNodeEnv('production');
+deleteSourceMaps();
 
 const devtoolsConfig = process.env.DEBUG_PROD === 'true' ? {
   devtool: 'source-map'
@@ -22,23 +23,21 @@ const devtoolsConfig = process.env.DEBUG_PROD === 'true' ? {
 
 export default merge(baseConfig, {
   ...devtoolsConfig,
-
   mode: 'production',
-
-  target: 'electron-renderer',
-
+  target: ['web', 'electron-renderer'],
   entry: [
     'core-js',
     'regenerator-runtime/runtime',
-    path.join(__dirname, '../../src/index.tsx'),
+    path.join(webpackPaths.srcRendererPath, 'index.tsx'),
   ],
-
   output: {
-    path: path.join(__dirname, '../../src/dist'),
-    publicPath: './dist/',
+    path: webpackPaths.distRendererPath,
+    publicPath: './',
     filename: 'renderer.prod.js',
+    library: {
+      type: 'umd'
+    }
   },
-
   module: {
     rules: [
       {
@@ -122,7 +121,6 @@ export default merge(baseConfig, {
       },
     ],
   },
-
   optimization: {
     minimize: true,
     minimizer:
@@ -133,7 +131,6 @@ export default merge(baseConfig, {
         new CssMinimizerPlugin(),
       ],
   },
-
   plugins: [
     /**
      * Create global constants which can be configured at compile time.
@@ -148,15 +145,23 @@ export default merge(baseConfig, {
       NODE_ENV: 'production',
       DEBUG_PROD: false,
     }),
-
     new MiniCssExtractPlugin({
       filename: 'style.css',
     }),
-
     new BundleAnalyzerPlugin({
-      analyzerMode:
-        process.env.OPEN_ANALYZER === 'true' ? 'server' : 'disabled',
+      analyzerMode: process.env.OPEN_ANALYZER === 'true' ? 'server' : 'disabled',
       openAnalyzer: process.env.OPEN_ANALYZER === 'true',
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'index.html',
+      template: path.join(webpackPaths.srcRendererPath, 'index.ejs'),
+      minify: {
+        collapseWhitespace: true,
+        removeAttributeQuotes: true,
+        removeComments: true
+      },
+      isBrowser: false,
+      isDevelopment: process.env.NODE_ENV !== 'production'
     }),
   ],
 });

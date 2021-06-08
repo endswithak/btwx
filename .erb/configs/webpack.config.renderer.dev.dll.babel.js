@@ -7,45 +7,39 @@ import path from 'path';
 import { merge } from 'webpack-merge';
 import baseConfig from './webpack.config.base';
 import { dependencies } from '../../package.json';
-import CheckNodeEnv from '../scripts/CheckNodeEnv';
+import checkNodeEnv from '../scripts/check-node-env';
+import webpackPaths from './webpack.paths.js';
 
-CheckNodeEnv('development');
+checkNodeEnv('development');
 
-const dist = path.join(__dirname, '../dll');
+const dist = webpackPaths.dllPath;
 
 export default merge(baseConfig, {
-  context: path.join(__dirname, '../..'),
-
+  context: webpackPaths.rootPath,
   devtool: 'eval',
-
   mode: 'development',
-
   target: 'electron-renderer',
-
   externals: ['fsevents', 'crypto-browserify'],
-
   /**
    * Use `module` from `webpack.config.renderer.dev.js`
    */
   module: require('./webpack.config.renderer.dev.babel').default.module,
-
   entry: {
     renderer: Object.keys(dependencies || {}),
   },
-
   output: {
-    library: 'renderer',
     path: dist,
     filename: '[name].dev.dll.js',
-    libraryTarget: 'var',
+    library: {
+      name: 'renderer',
+      type: 'var'
+    },
   },
-
   plugins: [
     new webpack.DllPlugin({
       path: path.join(dist, '[name].json'),
       name: '[name]',
     }),
-
     /**
      * Create global constants which can be configured at compile time.
      *
@@ -58,13 +52,12 @@ export default merge(baseConfig, {
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'development',
     }),
-
     new webpack.LoaderOptionsPlugin({
       debug: true,
       options: {
-        context: path.join(__dirname, '../../src'),
+        context: webpackPaths.srcPath,
         output: {
-          path: path.join(__dirname, '../dll'),
+          path: webpackPaths.dllPath,
         },
       },
     }),
