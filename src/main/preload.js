@@ -8,6 +8,13 @@ contextBridge.exposeInMainWorld('api', {
       });
     });
   },
+  checkIfSessionImageExists: (params) => {
+    return new Promise((resolve, reject) => {
+      ipcRenderer.invoke('checkIfSessionImageExists', params).then((exists) => {
+        resolve(exists);
+      });
+    });
+  },
   readClipboardText: () => {
     return clipboard.readText();
   },

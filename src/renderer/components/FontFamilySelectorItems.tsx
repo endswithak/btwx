@@ -19,7 +19,6 @@ const FontFamilySelectorItems = (props: FontFamilySelectorItemsProps): ReactElem
   const formControlRef = useRef<HTMLSelectElement>(null);
   const { itemData, search, searching, loading } = props;
   const selected = useSelector((state: RootState) => state.layer.present.selected);
-  const fontsLoaded = useSelector((state: RootState) => state.textSettings.ready);
   const fontFamilyValue = useSelector((state: RootState) => getSelectedFontFamily(state));
   const [fontFamily, setFontFamily] = useState(fontFamilyValue);
   const dispatch = useDispatch();
@@ -40,7 +39,7 @@ const FontFamilySelectorItems = (props: FontFamilySelectorItemsProps): ReactElem
   return (
     <div className='c-font-family-selector__items'>
       {
-        !fontsLoaded || loading
+        loading
         ? <LoadingIndicator />
         : itemData && itemData.length > 0
           ? <Form inline>

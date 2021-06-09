@@ -8,6 +8,7 @@
  * When running `yarn build` or `yarn build-main`, this file is compiled to
  * `./src/main.prod.js` using webpack. This gives us some performance wins.
  */
+import * as fontFinder from 'font-finder';
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import { v4 as uuidv4 } from 'uuid';
@@ -22,10 +23,11 @@ import { KeyBindingsState, initialMacState as initialMacKeyBindingsState, initia
 import { PreferencesState, initialState as initialPreferencesState } from '../renderer/store/reducers/preferences';
 import { SessionState } from '../renderer/store/reducers/session';
 import { ArtboardPresetsState, initialState as initialArtboardPresetsState } from '../renderer/store/reducers/artboardPresets';
+import { initialState as initialTextSettingsState } from '../renderer/store/reducers/textSettings';
 import { LayerState } from '../renderer/store/reducers/layer';
 import { DocumentSettingsState } from '../renderer/store/reducers/documentSettings';
 import { ViewSettingsState } from '../renderer/store/reducers/viewSettings';
-import { APP_NAME, MIN_DOCUMENT_WIDTH, MIN_DOCUMENT_HEIGHT, DEFAULT_MAC_DEVICE, MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT, PREVIEW_TOPBAR_HEIGHT, TWEEN_PROPS_MAP } from '../renderer/constants';
+import { APP_NAME, MIN_DOCUMENT_WIDTH, MIN_DOCUMENT_HEIGHT, DEFAULT_MAC_DEVICE, MAC_TITLEBAR_HEIGHT, WINDOWS_TITLEBAR_HEIGHT, PREVIEW_TOPBAR_HEIGHT, TWEEN_PROPS_MAP, WEB_SAFE_FONTS } from '../renderer/constants';
 import { THEME_DARK_RECORDING } from '../renderer/theme';
 import { addItem, removeItem } from '../renderer/store/utils/general';
 import noInstancesMenu from './menu';
@@ -83,6 +85,7 @@ export interface BtwxElectron {
     artboardPreset: Menu | null;
     tweenLayer: Menu | null;
   };
+  fontList: string[];
 }
 
 let btwxElectron: BtwxElectron = {
@@ -101,7 +104,8 @@ let btwxElectron: BtwxElectron = {
     event: null,
     artboardPreset: null,
     tweenLayer: null
-  }
+  },
+  fontList: null
 }
 
 const store = new Store({
@@ -273,6 +277,23 @@ export const createInstance = async ({
     return path.join(RESOURCES_PATH, ...paths);
   };
 
+  if (!btwxElectron.fontList) {
+    const fontList = btwxElectron.fontList ? btwxElectron.fontList : await fontFinder.list();
+    const compiledFontList = [
+      ...WEB_SAFE_FONTS,
+      ...Object.keys(fontList)
+    ].reduce((result: string[], current) => {
+      if (!result.includes(current) && !current.startsWith('.')) {
+        result = [...result, current];
+      }
+      return result;
+    }, []).sort();
+    btwxElectron = {
+      ...btwxElectron,
+      fontList: compiledFontList
+    }
+  }
+
   const INSTANCE_ID = uuidv4();
 
   btwxElectron = {
@@ -359,7 +380,11 @@ export const createInstance = async ({
       },
       preferences: store.get('preferences') as PreferencesState,
       keyBindings: store.get('keyBindings') as KeyBindingsState,
-      artboardPresets: store.get('artboardPresets') as ArtboardPresetsState
+      artboardPresets: store.get('artboardPresets') as ArtboardPresetsState,
+      textSettings: {
+        ...initialTextSettingsState,
+        systemFonts: btwxElectron.fontList
+      }
     })})`);
   });
 
@@ -1120,6 +1145,7 @@ ipcMain.handle('insertImage', (event, binding) => {
           if (!err) {
             resolve({
               buffer: data,
+              base64: data.toString('base64'),
               ext: path.extname(res.filePaths[0]).split('.').pop()
             });
           } else {
@@ -1849,6 +1875,12 @@ ipcMain.on('clearTouchBar', (event, args) => {
 ////////////////////////////////////////////////////////////
 // INSTANCE => FROM DOCUMENT RENDERER
 ////////////////////////////////////////////////////////////
+
+ipcMain.handle('checkIfSessionImageExists', (event, args) => {
+  const { sessionImages, buffer } = JSON.parse(args);
+  const checkBuffer = Buffer.from(buffer);
+  return sessionImages.allIds.length > 0 && sessionImages.allIds.find((id) => Buffer.from(sessionImages.byId[id].buffer).equals(checkBuffer));
+});
 
 ipcMain.on('resetPreviewTweeningEvent', (event, args) => {
   const { instanceId, eventId } = JSON.parse(args);

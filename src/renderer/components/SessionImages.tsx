@@ -12,7 +12,7 @@ const SessionImages = (): ReactElement => {
         sessionImages && sessionImages.allIds.length > 0
         ? sessionImages.allIds.map((id) => {
           const sessionImage = sessionImages.byId[id];
-          const base64 = bufferToBase64(Buffer.from(sessionImage.buffer));
+          const base64 = bufferToBase64(sessionImage.buffer);
           const ext = sessionImage.ext;
           return (
             <img

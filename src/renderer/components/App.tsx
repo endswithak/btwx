@@ -1,8 +1,5 @@
-import React, { ReactElement, useEffect } from 'react';
-// import * as fontFinder from 'font-finder';
-import { useSelector, useDispatch } from 'react-redux';
-import { setTextSettingsSystemFonts, setTextSettingsReady } from '../store/actions/textSettings';
-import { WEB_SAFE_FONTS } from '../constants';
+import React, { ReactElement } from 'react';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import Topbar from './Topbar';
 import EaseEditorWrap from './EaseEditorWrap';
@@ -17,36 +14,6 @@ import KeyBindings from './KeyBindings';
 const App = (): ReactElement => {
   const theme = useSelector((state: RootState) => state.preferences.theme);
   const platform = useSelector((state: RootState) => state.session.platform);
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    // (async () => {
-    //   const fontList = await fontFinder.list();
-    //   const compiledFontList = [
-    //     ...WEB_SAFE_FONTS,
-    //     ...Object.keys(fontList)
-    //   ].reduce((result: string[], current) => {
-    //     if (!result.includes(current) && !current.startsWith('.')) {
-    //       result = [...result, current];
-    //     }
-    //     return result;
-    //   }, []).sort();
-    //   dispatch(setTextSettingsSystemFonts({
-    //     systemFonts: compiledFontList
-    //   }));
-    //   dispatch(setTextSettingsReady());
-    // })();
-    const compiledFontList = WEB_SAFE_FONTS.reduce((result: string[], current) => {
-      if (!result.includes(current) && !current.startsWith('.')) {
-        result = [...result, current];
-      }
-      return result;
-    }, []).sort();
-    dispatch(setTextSettingsSystemFonts({
-      systemFonts: compiledFontList
-    }));
-    dispatch(setTextSettingsReady());
-  }, []);
 
   return (
     <div

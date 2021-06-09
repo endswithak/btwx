@@ -19,14 +19,12 @@ import { DEFAULT_TEXT_STYLE, DEFAULT_TEXT_FILL_COLOR, WEB_SAFE_FONTS } from '../
 export interface TextSettingsState extends Btwx.TextStyle {
   fillColor: Btwx.Color;
   systemFonts: string[];
-  ready: boolean;
 }
 
-const initialState: TextSettingsState = {
+export const initialState: TextSettingsState = {
   ...DEFAULT_TEXT_STYLE,
   fillColor: DEFAULT_TEXT_FILL_COLOR,
   systemFonts: WEB_SAFE_FONTS,
-  ready: false
 };
 
 export default (state = initialState, action: TextSettingsTypes): TextSettingsState => {
@@ -100,12 +98,12 @@ export default (state = initialState, action: TextSettingsTypes): TextSettingsSt
         systemFonts: action.payload.systemFonts
       };
     }
-    case SET_TEXT_SETTINGS_READY: {
-      return {
-        ...state,
-        ready: true
-      };
-    }
+    // case SET_TEXT_SETTINGS_READY: {
+    //   return {
+    //     ...state,
+    //     ready: true
+    //   };
+    // }
     default:
       return state;
   }
