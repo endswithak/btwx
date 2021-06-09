@@ -1,4 +1,3 @@
-// import { ipcRenderer } from 'electron';
 import { gsap } from 'gsap';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
@@ -16,14 +15,6 @@ interface CanvasArtboardLayerProps {
   id: string;
   paperScope: Btwx.PaperScope;
 }
-
-// comes from removeLayersThunk
-// ipcRenderer.on('resetTweeningEvent', (event, args) => {
-//   const { eventId } = JSON.parse(args);
-//   if (gsap.getById(eventId)) {
-//     gsap.getById(eventId).pause(0, false);
-//   }
-// });
 
 const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
   const { id, paperScope } = props;
@@ -270,24 +261,12 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
           instanceId: electronInstanceId,
           activeArtboard: eventItem.origin
         }));
-        // ipcRenderer.send('setDocumentPreviewTweening', JSON.stringify({
-        //   instanceId: electronInstanceId,
-        //   tweening: eventId
-        // }));
-        // ipcRenderer.send('setDocumentActiveArtboard', JSON.stringify({
-        //   instanceId: electronInstanceId,
-        //   activeArtboard: eventItem.origin
-        // }));
       },
       onUpdate: function() {
         (window as any).api.setDocumentTimelineGuidePosition(JSON.stringify({
           instanceId: electronInstanceId,
           time: this.time()
         }));
-        // ipcRenderer.send('setDocumentTimelineGuidePosition', JSON.stringify({
-        //   instanceId: electronInstanceId,
-        //   time: this.time()
-        // }));
       },
       onComplete: function() {
         paperPreview.view.center = destinationArtboardPosition;
@@ -305,14 +284,6 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
           instanceId: electronInstanceId,
           activeArtboard: eventItem.destination
         }));
-        // ipcRenderer.send('setDocumentPreviewTweening', JSON.stringify({
-        //   instanceId: electronInstanceId,
-        //   tweening: null
-        // }));
-        // ipcRenderer.send('setDocumentActiveArtboard', JSON.stringify({
-        //   instanceId: electronInstanceId,
-        //   activeArtboard: eventItem.destination
-        // }));
         this.pause(0, false);
       }
     });

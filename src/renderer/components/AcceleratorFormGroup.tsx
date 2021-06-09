@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-// import { ipcRenderer } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import React, { ReactElement, useEffect, useState, forwardRef } from 'react';
@@ -57,14 +56,6 @@ const AcceleratorFormGroup = forwardRef(function AcceleratorFormGroup(props: Acc
               setPrettyValue(pretty);
             }
           });
-          // ipcRenderer.invoke('overwriteRegisteredBinding', pretty).then((overwrite) => {
-          //   if (overwrite) {
-          //     dispatch(clearKeyBindingThunk({binding: nextValue}));
-          //     onSubmitSuccess(nextValue);
-          //     setCurrentValue(nextValue);
-          //     setPrettyValue(pretty);
-          //   }
-          // });
         } else {
           onSubmitSuccess(nextValue);
           setCurrentValue(nextValue);

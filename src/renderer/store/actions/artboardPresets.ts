@@ -1,4 +1,3 @@
-// import { ipcRenderer } from 'electron';
 import { addItem, removeItem } from '../utils/general';
 
 import {
@@ -41,22 +40,6 @@ export const addArtboardPresetThunk = (payload: AddArtboardPresetPayload) => {
         }
       }));
     });
-    // ipcRenderer.invoke('getElectronStore', 'artboardPresets').then((artboardPresets) => {
-    //   ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //     key: 'artboardPresets',
-    //     value: {
-    //       ...artboardPresets,
-    //       allIds: addItem(artboardPresets.allIds, payload.id),
-    //       byId: {
-    //         ...artboardPresets.byId,
-    //         [payload.id]: {
-    //           ...payload,
-    //           category: 'Custom'
-    //         }
-    //       }
-    //     }
-    //   }));
-    // });
   }
 };
 

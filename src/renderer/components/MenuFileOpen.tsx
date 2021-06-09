@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-// import { ipcRenderer } from 'electron';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -32,7 +31,6 @@ const MenuFileOpen = (props: MenuFileOpenProps): ReactElement => {
     });
     (window as any)[MENU_ITEM_ID] = () => {
       (window as any).api.openInstance();
-      // ipcRenderer.send('openInstance');
     }
   }, []);
 

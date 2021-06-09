@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-// import { ipcRenderer } from 'electron';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -34,7 +33,6 @@ const MenuFileSave = (props: MenuFileSaveProps): ReactElement => {
     });
     (window as any)[MENU_ITEM_ID] = () => {
       (window as any).api.saveInstance();
-      // ipcRenderer.send('saveInstance');
     }
   }, []);
 

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-// import { ipcRenderer } from 'electron';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -70,13 +69,6 @@ const Menu = (): ReactElement => {
           type: focusing ? 'default' : 'input'
         }));
       });
-      // ipcRenderer.invoke('buildDefaultApplicationMenu', JSON.stringify({
-      //   template: defaultMenu
-      // })).then(() => {
-      //   ipcRenderer.invoke('setApplicationMenu', JSON.stringify({
-      //     type: focusing ? 'default' : 'input'
-      //   }));
-      // });
     }
   }, [defaultMenu]);
 
@@ -86,9 +78,6 @@ const Menu = (): ReactElement => {
       (window as any).api.buildInputApplicationMenu(JSON.stringify({
         template: inputMenu
       }));
-      // ipcRenderer.invoke('buildInputApplicationMenu', JSON.stringify({
-      //   template: inputMenu
-      // }));
     }
   }, [inputMenu]);
 
@@ -98,9 +87,6 @@ const Menu = (): ReactElement => {
       (window as any).api.setApplicationMenu(JSON.stringify({
         type: focusing ? 'default' : 'input'
       }));
-      // ipcRenderer.invoke('setApplicationMenu', JSON.stringify({
-      //   type: focusing ? 'default' : 'input'
-      // }));
     }
   }, [focusing]);
 

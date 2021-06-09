@@ -1,4 +1,3 @@
-// import { ipcRenderer } from 'electron';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -31,7 +30,6 @@ const MenuFileNew = (props: MenuAppThemeProps): ReactElement => {
     });
     (window as any)[MENU_ITEM_ID] = () => {
       (window as any).api.newInstance();
-      // ipcRenderer.send('newInstance');
     }
   }, []);
 

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-// import { ipcRenderer } from 'electron';
 import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -298,17 +297,10 @@ const Canvas = (): ReactElement => {
             instanceId,
             documentPath: file.path
           }));
-          // ipcRenderer.send('setDocumentRepresentedFilename', JSON.stringify({
-          //   instanceId,
-          //   documentPath: file.path
-          // }));
         } else {
           (window as any).api.openDroppedDocument(JSON.stringify({
             path: file.path
           }));
-          // ipcRenderer.send('openDroppedDocument', JSON.stringify({
-          //   path: file.path
-          // }));
         }
       } catch {
         console.log('error reading dropped document');

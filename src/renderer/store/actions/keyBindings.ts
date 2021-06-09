@@ -1,5 +1,3 @@
-// import { ipcRenderer } from 'electron';
-
 import {
   SET_FILE_NEW,
   SET_FILE_SAVE,
@@ -86,10 +84,6 @@ export const setFileNewThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.file.new',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.file.new',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -105,10 +99,6 @@ export const setFileSaveThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.file.save',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.file.save',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -124,10 +114,6 @@ export const setFileSaveAsThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.file.saveAs',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.file.saveAs',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -143,10 +129,6 @@ export const setFileOpenThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.file.open',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.file.open',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -162,10 +144,6 @@ export const setEditUndoThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.edit.undo',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.edit.undo',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -181,10 +159,6 @@ export const setEditRedoThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.edit.redo',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.edit.redo',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -200,10 +174,6 @@ export const setEditCutThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.edit.cut',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.edit.cut',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -219,10 +189,6 @@ export const setEditCopyCopyThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.edit.copy.copy',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.edit.copy.copy',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -238,10 +204,6 @@ export const setEditCopyStyleThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.edit.copy.style',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.edit.copy.style',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -257,10 +219,6 @@ export const setEditCopySvgThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.edit.copy.svg',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.edit.copy.svg',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -276,10 +234,6 @@ export const setEditPastePasteThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.edit.paste.paste',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.edit.paste.paste',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -295,10 +249,6 @@ export const setEditPasteOverSelectionThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.edit.paste.overSelection',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.edit.paste.overSelection',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -314,10 +264,6 @@ export const setEditPasteStyleThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.edit.paste.style',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.edit.paste.style',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -333,10 +279,6 @@ export const setEditPasteSvgThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.edit.paste.svg',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.edit.paste.svg',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -352,10 +294,6 @@ export const setEditDeleteThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.edit.delete',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.edit.delete',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -371,10 +309,6 @@ export const setEditDuplicateThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.edit.duplicate',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.edit.duplicate',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -390,10 +324,6 @@ export const setEditSelectSelectAllThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.edit.select.selectAll',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.edit.select.selectAll',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -409,10 +339,6 @@ export const setEditSelectSelectAllArtboardsThunk = (payload: SetBindingPayload)
       key: 'keyBindings.edit.select.selectAllArtboards',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.edit.select.selectAllArtboards',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -428,10 +354,6 @@ export const setEditFindThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.edit.find',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.edit.find',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -447,10 +369,6 @@ export const setEditRenameThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.edit.rename',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.edit.rename',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -466,10 +384,6 @@ export const setInsertArtboardThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.insert.artboard',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.insert.artboard',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -485,10 +399,6 @@ export const setInsertShapeRectangleThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.insert.shape.rectangle',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.insert.shape.rectangle',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -504,10 +414,6 @@ export const setInsertShapeRoundedThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.insert.shape.rounded',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.insert.shape.rounded',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -523,10 +429,6 @@ export const setInsertShapeEllipseThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.insert.shape.ellipse',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.insert.shape.ellipse',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -542,10 +444,6 @@ export const setInsertShapePolygonThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.insert.shape.polygon',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.insert.shape.polygon',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -561,10 +459,6 @@ export const setInsertShapeStarThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.insert.shape.star',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.insert.shape.star',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -580,10 +474,6 @@ export const setInsertShapeLineThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.insert.shape.line',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.insert.shape.line',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -599,10 +489,6 @@ export const setInsertTextThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.insert.text',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.insert.text',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -618,10 +504,6 @@ export const setInsertImageThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.insert.image',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.insert.image',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -637,10 +519,6 @@ export const setLayerStyleFillThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.layer.style.fill',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.layer.style.fill',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -656,10 +534,6 @@ export const setLayerStyleStrokeThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.layer.style.stroke',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.layer.style.stroke',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -675,10 +549,6 @@ export const setLayerStyleShadowThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.layer.style.shadow',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.layer.style.shadow',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -694,10 +564,6 @@ export const setLayerTransformFlipHorizontallyThunk = (payload: SetBindingPayloa
       key: 'keyBindings.layer.transform.flipHorizontally',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.layer.transform.flipHorizontally',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -713,10 +579,6 @@ export const setLayerTransformFlipVerticallyThunk = (payload: SetBindingPayload)
       key: 'keyBindings.layer.transform.flipVertically',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.layer.transform.flipVertically',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -732,10 +594,6 @@ export const setLayerCombineUnionThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.layer.combine.union',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.layer.combine.union',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -751,10 +609,6 @@ export const setLayerCombineSubtractThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.layer.combine.subtract',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.layer.combine.subtract',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -770,10 +624,6 @@ export const setLayerCombineIntersectThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.layer.combine.intersect',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.layer.combine.intersect',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -789,10 +639,6 @@ export const setLayerCombineDifferenceThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.layer.combine.difference',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.layer.combine.difference',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -808,10 +654,6 @@ export const setLayerImageOriginalDimensionsThunk = (payload: SetBindingPayload)
       key: 'keyBindings.layer.image.originalDimensions',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.layer.image.originalDimensions',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -827,10 +669,6 @@ export const setLayerImageReplaceThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.layer.image.replace',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.layer.image.replace',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -846,10 +684,6 @@ export const setLayerMaskUseAsMaskThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.layer.mask.useAsMask',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.layer.mask.useAsMask',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -865,10 +699,6 @@ export const setLayerMaskIgnoreUnderlyingMaskThunk = (payload: SetBindingPayload
       key: 'keyBindings.layer.mask.ignoreUnderlyingMask',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.layer.mask.ignoreUnderlyingMask',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -884,10 +714,6 @@ export const setArrangeBringForwardThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.arrange.bringForward',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.arrange.bringForward',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -903,10 +729,6 @@ export const setArrangeBringToFrontThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.arrange.bringToFront',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.arrange.bringToFront',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -922,10 +744,6 @@ export const setArrangeSendBackwardThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.arrange.sendBackward',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.arrange.sendBackward',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -941,10 +759,6 @@ export const setArrangeSendToBackThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.arrange.sendToBack',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.arrange.sendToBack',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -960,10 +774,6 @@ export const setArrangeAlignLeftThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.arrange.align.left',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.arrange.align.left',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -979,10 +789,6 @@ export const setArrangeAlignCenterThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.arrange.align.center',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.arrange.align.center',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -998,10 +804,6 @@ export const setArrangeAlignRightThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.arrange.align.right',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.arrange.align.right',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -1017,10 +819,6 @@ export const setArrangeAlignTopThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.arrange.align.top',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.arrange.align.top',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -1036,10 +834,6 @@ export const setArrangeAlignMiddleThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.arrange.align.middle',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.arrange.align.middle',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -1055,10 +849,6 @@ export const setArrangeAlignBottomThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.arrange.align.bottom',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.arrange.align.bottom',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -1074,10 +864,6 @@ export const setArrangeDistributeHorizontallyThunk = (payload: SetBindingPayload
       key: 'keyBindings.arrange.distribute.horizontally',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.arrange.distribute.horizontally',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -1093,10 +879,6 @@ export const setArrangeDistributeVerticallyThunk = (payload: SetBindingPayload) 
       key: 'keyBindings.arrange.distribute.vertically',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.arrange.distribute.vertically',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -1112,10 +894,6 @@ export const setArrangeGroupThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.arrange.group',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.arrange.group',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -1131,10 +909,6 @@ export const setArrangeUngroupThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.arrange.ungroup',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.arrange.ungroup',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -1150,10 +924,6 @@ export const setViewZoomInThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.view.zoomIn',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.view.zoomIn',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -1169,10 +939,6 @@ export const setViewZoomOutThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.view.zoomOut',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.view.zoomOut',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -1188,10 +954,6 @@ export const setViewZoomFitCanvasThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.view.zoomFit.canvas',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.view.zoomFit.canvas',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -1207,10 +969,6 @@ export const setViewZoomFitSelectedThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.view.zoomFit.selected',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.view.zoomFit.selected',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -1226,10 +984,6 @@ export const setViewZoomFitActiveArtboardThunk = (payload: SetBindingPayload) =>
       key: 'keyBindings.view.zoomFit.activeArtboard',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.view.zoomFit.activeArtboard',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -1245,10 +999,6 @@ export const setViewCenterSelectedThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.view.centerSelected',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.view.centerSelected',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -1264,10 +1014,6 @@ export const setViewShowLayersThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.view.showLayers',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.view.showLayers',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -1283,10 +1029,6 @@ export const setViewShowStylesThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.view.showStyles',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.view.showStyles',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -1302,10 +1044,6 @@ export const setViewShowEventsThunk = (payload: SetBindingPayload) => {
       key: 'keyBindings.view.showEvents',
       value: payload.binding
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings.view.showEvents',
-    //   value: payload.binding
-    // }));
   }
 };
 
@@ -1324,13 +1062,6 @@ export const resetAllKeyBindingsThunk = (payload: KeyBindingsState) => {
         defaults: payload
       }
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'keyBindings',
-    //   value: {
-    //     ...payload,
-    //     defaults: payload
-    //   }
-    // }));
   }
 };
 

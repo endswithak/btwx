@@ -1,11 +1,9 @@
 import React, { ReactElement, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-// import { ipcRenderer } from 'electron';
 import { RootState } from '../store/reducers';
 import { setPreviewDevice } from '../store/actions/preview';
 import { APPLE_IPHONE_DEVICES, APPLE_IPAD_DEVICES, APPLE_WATCH_DEVICES } from '../constants';
 import IconButton from './IconButton';
-
 
 const PreviewDevice = (): ReactElement => {
   const instance = useSelector((state: RootState) => state.session.instance);
@@ -127,10 +125,6 @@ const PreviewDevice = (): ReactElement => {
       instanceId: instance,
       template: buildContextMenu()
     }));
-    // ipcRenderer.send('openPreviewDeviceContextMenu', JSON.stringify({
-    //   instanceId: instance,
-    //   template: buildContextMenu()
-    // }));
   }
 
   useEffect(() => {

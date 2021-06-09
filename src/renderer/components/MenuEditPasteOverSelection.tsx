@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-// import { ipcRenderer } from 'electron';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -43,11 +42,6 @@ const MenuEditPasteOverSelection = (props: MenuEditPasteOverSelectionProps): Rea
       }).then(() => {
         dispatch(setCanvasWaiting({waiting: false}));
       });
-      // ipcRenderer.invoke('initPastingLayers', JSON.stringify({instanceId})).then(() => {
-      //   return dispatch(pasteLayersThunk({overSelection: true}));
-      // }).then(() => {
-      //   dispatch(setCanvasWaiting({waiting: false}));
-      // });
     }
   }, []);
 

@@ -1,4 +1,3 @@
-// import { ipcRenderer } from 'electron';
 import React, { ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { paperPreview } from '../canvas';
@@ -23,10 +22,6 @@ const PreviewRewindButton = (): ReactElement => {
         instanceId: instance,
         activeArtboard: rewindOrigin
       }));
-      // ipcRenderer.send('setDocumentActiveArtboard', JSON.stringify({
-      //   instanceId: instance,
-      //   activeArtboard: rewindOrigin
-      // }));
     }
   }
 

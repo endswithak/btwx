@@ -1,4 +1,3 @@
-// import { ipcRenderer } from 'electron';
 import React, { ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -74,13 +73,6 @@ const EventDrawerStickyHeader = (props: EventDrawerStickyHeaderProps): ReactElem
         submenu: buildSubMenu()
       }]
     }));
-    // ipcRenderer.send('openTweenLayerContextMenu', JSON.stringify({
-    //   instanceId,
-    //   template: [{
-    //     label: 'Add Wiggle...',
-    //     submenu: buildSubMenu()
-    //   }]
-    // }));
   }
 
   return (

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-// import { ipcRenderer } from 'electron';
 import React, { ReactElement, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -50,16 +49,6 @@ const Touchbar = (): ReactElement => {
         isTextToolActive,
         canZoomOut
       }));
-      // ipcRenderer.send('buildEmptySelectionTouchBar', JSON.stringify({
-      //   instanceId,
-      //   isArtboardToolActive,
-      //   theme,
-      //   hasActiveArtboard,
-      //   isRectangleToolActive,
-      //   isEllipseToolActive,
-      //   isTextToolActive,
-      //   canZoomOut
-      // }));
     }
   }, [
     ready, selected, canZoomOut, focusing, isArtboardToolActive,
@@ -83,20 +72,6 @@ const Touchbar = (): ReactElement => {
         canBringForward,
         canSendBackward
       }));
-      // ipcRenderer.send('buildSelectionTouchBar', JSON.stringify({
-      //   instanceId,
-      //   canAlignLeft,
-      //   canAlignCenter,
-      //   canAlignRight,
-      //   canAlignTop,
-      //   canAlignMiddle,
-      //   canAlignBottom,
-      //   canDistribute,
-      //   canGroup,
-      //   canUngroup,
-      //   canBringForward,
-      //   canSendBackward
-      // }));
     }
   }, [
     ready, selected, canAlignLeft, canAlignCenter, canAlignRight,
@@ -109,30 +84,19 @@ const Touchbar = (): ReactElement => {
       (window as any).api.clearTouchBar(JSON.stringify({
         instanceId
       }));
-      // ipcRenderer.send('clearTouchBar', JSON.stringify({
-      //   instanceId
-      // }));
     }
-  }, [
-    ready, focusing
-  ]);
+  }, [ready, focusing]);
 
   useEffect(() => {
     if (recording) {
       (window as any).api.buildDocumentRecordingTouchBar(JSON.stringify({
         instanceId
       }));
-      // ipcRenderer.send('buildDocumentRecordingTouchBar', JSON.stringify({
-      //   instanceId
-      // }));
     } else {
       if (!focusing) {
         (window as any).api.clearTouchBar(JSON.stringify({
           instanceId
         }));
-        // ipcRenderer.send('clearTouchBar', JSON.stringify({
-        //   instanceId
-        // }));
       } else {
         if (selected.length >= 1) {
           (window as any).api.buildSelectionTouchBar(JSON.stringify({
@@ -149,20 +113,6 @@ const Touchbar = (): ReactElement => {
             canBringForward,
             canSendBackward
           }));
-          // ipcRenderer.send('buildSelectionTouchBar', JSON.stringify({
-          //   instanceId,
-          //   canAlignLeft,
-          //   canAlignCenter,
-          //   canAlignRight,
-          //   canAlignTop,
-          //   canAlignMiddle,
-          //   canAlignBottom,
-          //   canDistribute,
-          //   canGroup,
-          //   canUngroup,
-          //   canBringForward,
-          //   canSendBackward
-          // }));
         } else {
           (window as any).api.buildEmptySelectionTouchBar(JSON.stringify({
             instanceId,
@@ -174,22 +124,10 @@ const Touchbar = (): ReactElement => {
             isTextToolActive,
             canZoomOut
           }));
-          // ipcRenderer.send('buildEmptySelectionTouchBar', JSON.stringify({
-          //   instanceId,
-          //   isArtboardToolActive,
-          //   theme,
-          //   hasActiveArtboard,
-          //   isRectangleToolActive,
-          //   isEllipseToolActive,
-          //   isTextToolActive,
-          //   canZoomOut
-          // }));
         }
       }
     }
-  }, [
-    recording
-  ]);
+  }, [recording]);
 
   return null;
 }

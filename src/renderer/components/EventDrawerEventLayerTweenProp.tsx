@@ -1,4 +1,3 @@
-// import { ipcRenderer } from 'electron';
 import React, { ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -84,30 +83,6 @@ const EventDrawerEventLayerTweenProp = (props: EventDrawerEventLayerTweenPropPro
         : []
       )]
     }));
-    // ipcRenderer.send('openTweenContextMenu', JSON.stringify({
-    //   instanceId,
-    //   template: [{
-    //     label: `Edit...`,
-    //     click: {
-    //       id: 'openEaseEditor',
-    //       params: {
-    //         tween: tweenId
-    //       }
-    //     }
-    //   }, ...(
-    //     selectedWiggles.length > 0
-    //     ? [{
-    //         label: `Remove ${selectedWiggles.length > 1 ? selectedWiggles.length + ' Wiggles' : 'Wiggle'}`,
-    //         click: {
-    //           id: 'removeLayerTweens',
-    //           params: {
-    //             tweens: selectedWiggles
-    //           }
-    //         }
-    //       }]
-    //     : []
-    //   )]
-    // }));
   }
 
   return (

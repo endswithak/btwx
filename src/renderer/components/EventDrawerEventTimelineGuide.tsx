@@ -1,18 +1,6 @@
 import React, { ReactElement } from 'react';
-// import { gsap } from 'gsap';
-// import { ipcRenderer } from 'electron';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
-
-// comes from CanvasPreviewLayerEvent when event playhead updates
-// ipcRenderer.on('setDocumentTimelineGuidePosition', (event, args) => {
-//   const guide = document.getElementById(`event-drawer-guide`);
-//   const { time } = JSON.parse(args);
-//   const position = (time * 100) * 4;
-//   if (guide) {
-//     gsap.set(guide, { x: position });
-//   }
-// });
 
 const EventDrawerEventTimelineGuide = (): ReactElement => {
   // only show guide when dragging event drawer handles...

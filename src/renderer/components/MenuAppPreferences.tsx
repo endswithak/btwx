@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { ReactElement, useEffect, useState } from 'react';
-// import { ipcRenderer } from 'electron';
 
 export const MENU_ITEM_ID = 'appPreferences';
 
@@ -23,7 +22,6 @@ const MenuAppPreferences = (props: MenuAppPreferencesProps): ReactElement => {
     setPreferences(menuItemTemplate);
     (window as any)[MENU_ITEM_ID] = () => {
       (window as any).api.openPreferences();
-      // ipcRenderer.send('openPreferences');
     }
   }, [menuItemTemplate]);
 

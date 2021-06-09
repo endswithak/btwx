@@ -1,4 +1,3 @@
-// import { ipcRenderer } from 'electron';
 import React, { ReactElement, useRef, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
@@ -30,10 +29,6 @@ const PreferencesTopbar = (props: PreferencesTopbarProps): ReactElement => {
         newDirty = !allBindings.every((binding, index) => binding === allDefaultBindings.allBindings[index]);
         setDefaultBindings(allDefaultBindings);
       });
-      // ipcRenderer.invoke('getElectronStore', 'keyBindings.defaults').then((allDefaultBindings: KeyBindingsState) => {
-      //   newDirty = !allBindings.every((binding, index) => binding === allDefaultBindings.allBindings[index]);
-      //   setDefaultBindings(allDefaultBindings);
-      // });
     } else {
       newDirty = !allBindings.every((binding, index) => binding === defaultBindings.allBindings[index]);
     }

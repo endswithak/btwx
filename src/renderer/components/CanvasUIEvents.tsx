@@ -1,5 +1,4 @@
 import React, { useEffect, ReactElement } from 'react';
-// import { ipcRenderer } from 'electron';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setCanvasActiveTool, setCanvasCursor } from '../store/actions/canvasSettings';
@@ -316,31 +315,6 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
                 : []
               ]
             }));
-            // ipcRenderer.send('openEventContextMenu', JSON.stringify({
-            //   instanceId,
-            //   template: [
-            //     ...selectedEvents.length === 1
-            //     ? [{
-            //         label: 'Edit Event...',
-            //         click: {
-            //           id: 'setEventDrawerEventThunk',
-            //           params: { id: interactiveType }
-            //         }
-            //       }]
-            //     : [],
-            //     ...selectedEvents.length > 0
-            //     ? [{
-            //         label: `Remove ${selectedEvents.length === 1 ? 'Event' : `${selectedEvents.length} Events`}`,
-            //         click: {
-            //           id: 'removeLayersEvent',
-            //           params: {
-            //             events: selectedEvents
-            //           }
-            //         }
-            //       }]
-            //     : []
-            //   ]
-            // }));
           }
           break;
         }

@@ -148,9 +148,9 @@ const configureStore: any = (preloadedState, isDocumentWindow = false): typeof s
       gsap.getById(eventId).pause(0, false);
     }
   };
-  (window as any).setDocumentTimelineGuidePosition = (time): void => {
+  (window as any).setDocumentTimelineGuidePosition = (params): void => {
     const guide = document.getElementById(`event-drawer-guide`);
-    const position = (time * 100) * 4;
+    const position = (params.time * 100) * 4;
     if (guide) {
       gsap.set(guide, { x: position });
     }

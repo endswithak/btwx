@@ -1,4 +1,3 @@
-// import { ipcRenderer } from 'electron';
 import { setLayerHover } from './layer';
 import { RootState } from '../reducers';
 
@@ -47,24 +46,14 @@ export const setEventDrawerEventThunk = (payload: SetEventDrawerEventPayload) =>
       instanceId: instance,
       eventId: payload.id
     }));
-    // ipcRenderer.send('setPreviewEventDrawerEvent', JSON.stringify({
-    //   instanceId: instance,
-    //   eventId: payload.id
-    // }));
     if (payload.id) {
       (window as any).api.stickPreview(JSON.stringify({
         instanceId: state.session.instance
       }));
-      // ipcRenderer.send('stickPreview', JSON.stringify({
-      //   instanceId: state.session.instance
-      // }));
     } else {
       (window as any).api.unStickPreview(JSON.stringify({
         instanceId: state.session.instance
       }));
-      // ipcRenderer.send('unStickPreview', JSON.stringify({
-      //   instanceId: state.session.instance
-      // }));
     }
   }
 };

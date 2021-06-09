@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-// import { ipcRenderer } from 'electron';
 import tinyColor from 'tinycolor2';
 import { v4 as uuidv4 } from 'uuid';
 import { ActionCreators } from 'redux-undo';

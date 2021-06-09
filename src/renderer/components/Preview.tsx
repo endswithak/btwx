@@ -1,4 +1,3 @@
-// import { ipcRenderer } from 'electron';
 import debounce from 'lodash.debounce';
 import React, { useEffect, ReactElement, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
@@ -36,13 +35,6 @@ const Preview = (): ReactElement => {
             height: activeArtboardItem.frame.height
           }
         }));
-        // ipcRenderer.send('resizePreview', JSON.stringify({
-        //   instanceId: instance,
-        //   size: {
-        //     width: activeArtboardItem.frame.width,
-        //     height: activeArtboardItem.frame.height
-        //   }
-        // }));
       }
       if (!paperPreview.view.center.equals(activeArtboardPosition)) {
         paperPreview.view.center = activeArtboardPosition;

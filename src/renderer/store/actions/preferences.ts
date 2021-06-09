@@ -1,4 +1,3 @@
-// import { ipcRenderer } from 'electron';
 import { PreferencesState } from '../reducers/preferences';
 
 import {
@@ -41,11 +40,6 @@ export const enableDarkThemeThunk = () => {
       value: 'dark'
     }));
     (window as any).api.setNativeTheme('dark');
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'preferences.theme',
-    //   value: 'dark'
-    // }));
-    // ipcRenderer.invoke('setNativeTheme', 'dark');
   }
 };
 
@@ -61,11 +55,6 @@ export const enableLightThemeThunk = () => {
       value: 'light'
     }));
     (window as any).api.setNativeTheme('light');
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'preferences.theme',
-    //   value: 'light'
-    // }));
-    // ipcRenderer.invoke('setNativeTheme', 'light');
   }
 };
 
@@ -81,10 +70,6 @@ export const setCanvasThemeThunk = (payload: SetCanvasThemePayload) => {
       key: 'preferences.canvasTheme',
       value: payload.canvasTheme
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'preferences.canvasTheme',
-    //   value: payload.canvasTheme
-    // }));
   }
 };
 
@@ -99,10 +84,6 @@ export const enableAutoSaveThunk = () => {
       key: 'preferences.autoSave',
       value: true
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'preferences.autoSave',
-    //   value: true
-    // }));
   }
 };
 
@@ -117,10 +98,6 @@ export const disableAutoSaveThunk = () => {
       key: 'preferences.autoSave',
       value: false
     }));
-    // ipcRenderer.invoke('setElectronStore', JSON.stringify({
-    //   key: 'preferences.autoSave',
-    //   value: false
-    // }));
   }
 };
 

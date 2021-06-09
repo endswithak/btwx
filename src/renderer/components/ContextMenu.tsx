@@ -1,4 +1,3 @@
-// import { ipcRenderer } from 'electron';
 import React, { useEffect, ReactElement, useState } from 'react';
 import { useSelector } from 'react-redux';
 import LayerContextMenu from './LayerContextMenu';
@@ -41,24 +40,6 @@ const ContextMenu = (): ReactElement => {
           type: contextMenuType
         }));
       });
-      // ipcRenderer.invoke(`build${(contextMenuType as string)[0].toUpperCase()}${(contextMenuType as string).slice(1)}ContextMenu`, JSON.stringify({
-      //   template: (() => {
-      //     switch(contextMenuType) {
-      //       case 'layer':
-      //         return layerContextMenu;
-      //       case 'event':
-      //         return eventContextMenu;
-      //       case 'artboardPreset':
-      //         return artboardPresetContextMenu;
-      //       // case 'tweenLayer':
-      //       //   return tweenLayerContextMenu;
-      //     }
-      //   })()
-      // })).then(() => {
-      //   ipcRenderer.invoke('openContextMenu', JSON.stringify({
-      //     type: contextMenuType
-      //   }));
-      // });
     }
   }, [contextMenu]);
 

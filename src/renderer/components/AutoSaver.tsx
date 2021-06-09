@@ -1,6 +1,5 @@
 import React, { ReactElement, useEffect, useCallback } from 'react';
 import debounce from 'lodash.debounce';
-// import { ipcRenderer } from 'electron';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 
@@ -11,7 +10,6 @@ const AutoSaver = (): ReactElement => {
 
   const debounceSave = useCallback(debounce(() => {
     (window as any).api.saveInstance();
-    // ipcRenderer.send('saveInstance');
   }, 500), []);
 
   useEffect(() => {
