@@ -1,4 +1,3 @@
-// import { ipcRenderer } from 'electron';
 import { createStore, applyMiddleware } from 'redux';
 import { gsap } from 'gsap';
 import thunk from 'redux-thunk';
@@ -45,30 +44,18 @@ const configureStore: any = (preloadedState, isDocumentWindow = false): typeof s
           instanceId: instanceId,
           images: currentState.session.images
         }));
-        // ipcRenderer.send('hydratePreviewSessionImages', JSON.stringify({
-        //   instanceId: instanceId,
-        //   images: currentState.session.images
-        // }));
         currentSessionImages = csi;
       }
       (window as any).api.hydratePreviewLayers(JSON.stringify({
         instanceId: instanceId,
         state: currentState.layer.present
       }));
-      // ipcRenderer.send('hydratePreviewLayers', JSON.stringify({
-      //   instanceId: instanceId,
-      //   state: currentState.layer.present
-      // }));
     } else {
       if (currentActiveArtboard !== previousActiveArtboard) {
         (window as any).api.setPreviewActiveArtboard(JSON.stringify({
           instanceId: instanceId,
           activeArtboard: currentActiveArtboard
         }));
-        // ipcRenderer.send('setPreviewActiveArtboard', JSON.stringify({
-        //   instanceId: instanceId,
-        //   activeArtboard: currentActiveArtboard
-        // }));
       }
     }
   }
@@ -121,8 +108,7 @@ const configureStore: any = (preloadedState, isDocumentWindow = false): typeof s
     });
   };
   (window as any).resizePreview = (params: any): void => {
-    (window as any).api.setPreviewActiveArtboard(JSON.stringify(params));
-    // ipcRenderer.send('resizePreview', JSON.stringify(params));
+    (window as any).api.resizePreview(JSON.stringify(params));
   };
   (window as any).hydrateDocument = (state: HydrateDocumentPayload): void => {
     store.dispatch(hydrateDocumentThunk(state) as any);

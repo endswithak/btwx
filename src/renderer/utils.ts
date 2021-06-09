@@ -276,11 +276,8 @@ export const base64ToBuffer = (base64String: string): ArrayBuffer => {
   return bytes.buffer;
 }
 
-export const bufferToBase64 = (buffer: Buffer) => {
-  return btoa(
-    new Uint8Array(buffer)
-      .reduce((data, byte) => data + String.fromCharCode(byte), '')
-  );
+export const bufferToBase64 = (buffer: Buffer | ArrayBuffer) => {
+  return btoa(new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), ''));
 };
 
 export const isBetween = (x: number, min: number, max: number): boolean => {

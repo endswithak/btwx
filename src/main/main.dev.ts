@@ -1260,16 +1260,10 @@ ipcMain.on('setDocumentRecordingStarted', (event, args) => {
   });
 });
 
-// ipcMain.on('setDocumentRecordingStopped', (event, args) => {
-//   const { instanceId } = JSON.parse(args);
-//   const instance = btwxElectron.instance.byId[instanceId];
-//   instance.document.webContents.executeJavaScript(`stopPreviewRecording()`);
-// });
-
 ipcMain.handle('setDocumentRecordingStopped', (event, args) => {
-  const { instanceId, buffer } = JSON.parse(args);
+  const { instanceId, base64 }: { instanceId: string; base64: string } = JSON.parse(args);
   const instance = btwxElectron.instance.byId[instanceId];
-  const videoBuffer = Buffer.from(buffer);
+  const buffer = Buffer.from(base64, 'base64');
   instance.document.webContents.executeJavaScript(`stopPreviewRecording()`).then(() => {
     return new Promise((resolve, reject) => {
       dialog.showSaveDialog(instance.preview, {
@@ -1277,7 +1271,7 @@ ipcMain.handle('setDocumentRecordingStopped', (event, args) => {
         defaultPath: `vid-${Date.now()}.webm`
       }).then((res) => {
         if (!res.canceled && res.filePath) {
-          fs.writeFile(res.filePath, videoBuffer, (err) => {
+          fs.writeFile(res.filePath, buffer, (err) => {
             if(err) {
               return console.log(err);
             }
@@ -1810,9 +1804,10 @@ ipcMain.on('buildPreviewRecordingTouchBar', (event, args) => {
         accessibilityLabel: 'Stop Recording',
         backgroundColor: THEME_DARK_RECORDING,
         click: () => {
-          instance.preview.webContents.send('setPreviewRecordingStopped', JSON.stringify({
-            instanceId: instanceId
-          }));
+          instance.preview.webContents.executeJavaScript(`handlePreviewRecordingStopped(${JSON.stringify({
+            instanceId: instanceId,
+            platform: process.platform
+          })})`);
         }
       }),
       new TouchBarSpacer({size: 'flexible'})
@@ -1834,9 +1829,10 @@ ipcMain.on('buildDocumentRecordingTouchBar', (event, args) => {
         accessibilityLabel: 'Stop Recording',
         backgroundColor: THEME_DARK_RECORDING,
         click: () => {
-          instance.preview.webContents.send('setPreviewRecordingStopped', JSON.stringify({
-            instanceId: instanceId
-          }));
+          instance.preview.webContents.executeJavaScript(`handlePreviewRecordingStopped(${JSON.stringify({
+            instanceId: instanceId,
+            platform: process.platform
+          })})`);
         }
       }),
       new TouchBarSpacer({size: 'flexible'})
@@ -1989,7 +1985,7 @@ ipcMain.on('initPasteErrorAlert', (event, args) => {
 ipcMain.on('setPreviewRecordingStopped', (event, args) => {
   const { instanceId } = JSON.parse(args);
   const instance = btwxElectron.instance.byId[instanceId];
-  instance.preview.webContents.executeJavaScript(`setPreviewRecordingStopped(${JSON.stringify({
+  instance.preview.webContents.executeJavaScript(`handlePreviewRecordingStopped(${JSON.stringify({
     instanceId: instanceId,
     platform: process.platform
   })})`);

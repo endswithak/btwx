@@ -1,6 +1,5 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-// import { ipcRenderer } from 'electron';
 import { RootState } from '../store/reducers';
 import { APPLE_IPHONE_DEVICES, APPLE_IPAD_DEVICES, APPLE_WATCH_DEVICES } from '../constants';
 
@@ -463,10 +462,6 @@ const PreviewDevice = (): ReactElement => {
           instanceId: instance,
           size: newDevice.frame
         }));
-        // ipcRenderer.send('resizePreview', JSON.stringify({
-        //   instanceId: instance,
-        //   size: newDevice.frame
-        // }));
       }
     } else {
       if (images) {
@@ -480,13 +475,6 @@ const PreviewDevice = (): ReactElement => {
             height: activeArtboardItem.frame.height
           }
         }));
-        // ipcRenderer.send('resizePreview', JSON.stringify({
-        //   instanceId: instance,
-        //   size: {
-        //     width: activeArtboardItem.frame.width,
-        //     height: activeArtboardItem.frame.height
-        //   }
-        // }));
       }
     }
   }, [device, deviceColor]);
@@ -500,13 +488,6 @@ const PreviewDevice = (): ReactElement => {
           height: deviceOrientation === 'Landscape' ? size.width : size.height
         }
       }));
-      // ipcRenderer.send('resizePreview', JSON.stringify({
-      //   instanceId: instance,
-      //   size: {
-      //     width: deviceOrientation === 'Landscape' ? size.height : size.width,
-      //     height: deviceOrientation === 'Landscape' ? size.width : size.height
-      //   }
-      // }));
     }
   }, [deviceOrientation]);
 

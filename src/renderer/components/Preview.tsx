@@ -68,16 +68,10 @@ const Preview = (): ReactElement => {
         (window as any).api.buildPreviewRecordingTouchBar(JSON.stringify({
           instanceId: instance
         }));
-        // ipcRenderer.send('buildPreviewRecordingTouchBar', JSON.stringify({
-        //   instanceId: instance
-        // }));
       } else {
         (window as any).api.buildPreviewTouchBar(JSON.stringify({
           instanceId: instance
         }));
-        // ipcRenderer.send('buildPreviewTouchBar', JSON.stringify({
-        //   instanceId: instance
-        // }));
       }
     }
   }, [recording, activeArtboard]);
