@@ -80,7 +80,6 @@ export interface SetCanvasColorFormat {
 export interface AddDocumentImagePayload {
   id: string;
   base64: string;
-  ext: string;
 }
 
 export interface AddDocumentImage {

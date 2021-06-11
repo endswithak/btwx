@@ -16,7 +16,6 @@ export interface SetPlatform {
 export interface AddSessionImagePayload {
   id: string;
   base64: string;
-  ext: string;
 }
 
 export interface AddSessionImage {

@@ -466,9 +466,7 @@ declare namespace Btwx {
 
   interface DocumentImage {
     id: string;
-    // buffer: Buffer;
     base64: string;
-    ext: string;
   }
 
   type ClipboardType = 'layers' | 'style' | 'sketch-layers';

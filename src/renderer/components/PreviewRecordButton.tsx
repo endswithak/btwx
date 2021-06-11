@@ -59,9 +59,9 @@ const PreviewRecordButton = (): ReactElement => {
                 instanceId: instance
               }));
               previewMediaRecorder.start();
-              (window as any).api.buildRecordingTouchBar(JSON.stringify({
-                instanceId: instance
-              }));
+              // (window as any).api.buildRecordingTouchBar(JSON.stringify({
+              //   instanceId: instance
+              // }));
             }, 0.15);
           }
         });

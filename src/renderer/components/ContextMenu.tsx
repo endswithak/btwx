@@ -9,6 +9,7 @@ import { RootState } from '../store/reducers';
 const ContextMenu = (): ReactElement => {
   const contextMenuType = useSelector((state: RootState) => state.contextMenu.type);
   const contextMenuId = useSelector((state: RootState) => state.contextMenu.menuId);
+  // const instanceId = useSelector((state: RootState) => state.session.instance);
   const [layerContextMenu, setLayerContextMenu] = useState<any[] | null>(null);
   const [eventContextMenu, setEventContextMenu] = useState<any[] | null>(null);
   const [artboardPresetContextMenu, setArtboardPresetContextMenu] = useState<any[] | null>(null);

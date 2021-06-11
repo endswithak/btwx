@@ -58,7 +58,11 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.send('setDocumentTimelineGuidePosition', params);
   },
   openContextMenu: (params) => {
-    ipcRenderer.send('openContextMenu', params);
+    return new Promise((resolve, reject) => {
+      ipcRenderer.invoke('openContextMenu', params).then(() => {
+        resolve(null);
+      });
+    });
   },
   openEventContextMenu: (params) => {
     ipcRenderer.send('openEventContextMenu', params);
@@ -189,9 +193,9 @@ contextBridge.exposeInMainWorld('api', {
   setDocumentRecordingStarted: (params) => {
     ipcRenderer.send('setDocumentRecordingStarted', params);
   },
-  buildRecordingTouchBar: (params) => {
-    ipcRenderer.send('buildRecordingTouchBar', params);
-  },
+  // buildRecordingTouchBar: (params) => {
+  //   ipcRenderer.send('buildRecordingTouchBar', params);
+  // },
   setPreviewWindowSize: (params) => {
     ipcRenderer.send('setPreviewWindowSize', params);
   },

@@ -1052,8 +1052,7 @@ export const insertImageThunk = () => {
               height
             }
           },
-          base64: fullBase64,
-          ext: data.ext
+          base64: fullBase64
         }));
       }
       newImage.src = fullBase64;
@@ -1117,8 +1116,7 @@ export const addImageThunk = (payload: AddImagePayload) => {
     if (!sessionImageExists) {
       dispatch(addSessionImage({
         id: imageId,
-        base64: payload.base64,
-        ext: payload.ext
+        base64: payload.base64
       }));
     }
     dispatch(addImage({
@@ -5965,8 +5963,7 @@ export const replaceSelectedImagesThunk = () => {
           if (!sessionImageExists) {
             dispatch(addSessionImage({
               id: imageId,
-              base64: fullBase64,
-              ext: data.ext
+              base64: fullBase64
             }));
           }
           dispatch(replaceImages({
@@ -6523,8 +6520,7 @@ export const pasteLayersThunk = (props?: { overSelection?: boolean; overPoint?: 
                   height: originalDimensions.height
                 }
               },
-              base64: base64 as string,
-              ext: 'png'
+              base64: base64 as string
             }));
           } else {
             (window as any).api.initPasteWithoutArtboardAlert(JSON.stringify({

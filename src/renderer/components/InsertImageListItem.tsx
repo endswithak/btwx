@@ -2,7 +2,7 @@
 import React, { ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getPrettyAccelerator, base64ToBuffer } from '../utils';
+import { getPrettyAccelerator } from '../utils';
 import { addImageThunk } from '../store/actions/layer';
 import ListItem from './ListItem';
 
@@ -18,7 +18,6 @@ const InsertImageListItem = (props: InsertImageListItemProps): ReactElement => {
 
   const handleChange = (e) => {
     const file = e.target.files[0];
-    const ext = file.type.replace('image/', '');
     const fileReader = new FileReader();
     fileReader.addEventListener('load', function() {
       let image = new Image();
@@ -41,8 +40,7 @@ const InsertImageListItem = (props: InsertImageListItemProps): ReactElement => {
               height
             }
           },
-          base64: this.result as string,
-          ext: ext
+          base64: this.result as string
         }));
         closeDropdown();
       }

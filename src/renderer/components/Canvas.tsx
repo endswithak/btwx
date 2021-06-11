@@ -309,7 +309,6 @@ const Canvas = (): ReactElement => {
   }
 
   const handleImageDrop = (file: File) => {
-    const ext = file.type.replace('image/', '');
     const fileReader = new FileReader();
     fileReader.addEventListener('load', function() {
       let image = new Image();
@@ -332,8 +331,7 @@ const Canvas = (): ReactElement => {
               height
             }
           },
-          base64: this.result as string,
-          ext: ext
+          base64: this.result as string
         }));
       }
       image.src = this.result as string;

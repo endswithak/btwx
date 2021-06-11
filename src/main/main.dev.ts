@@ -1144,8 +1144,7 @@ ipcMain.handle('insertImage', (event, binding) => {
         fs.readFile(res.filePaths[0], (err, data) => {
           if (!err) {
             resolve({
-              buffer: data,
-              ext: path.extname(res.filePaths[0]).split('.').pop()
+              buffer: data
             });
           } else {
             dialog.showMessageBox({
@@ -1213,7 +1212,7 @@ ipcMain.on('setDocumentPreviewTweening', (event, args) => {
   });
 });
 
-ipcMain.handle('setDocumentActiveArtboard', (event, args) => {
+ipcMain.on('setDocumentActiveArtboard', (event, args) => {
   const { instanceId, activeArtboard } = JSON.parse(args);
   const instance = btwxElectron.instance.byId[instanceId];
   handleExecute({
@@ -2026,13 +2025,13 @@ ipcMain.on('setPreviewRecordingStopped', (event, args) => {
 // TITLEBAR => FROM DOCUMENT RENDERER
 ////////////////////////////////////////////////////////////
 
-ipcMain.handle('setDocumentEdited', (event, args) => {
+ipcMain.on('setDocumentEdited', (event, args) => {
   const { instanceId, edited } = JSON.parse(args);
   const instance = btwxElectron.instance.byId[instanceId];
   instance.document.setDocumentEdited(edited);
 });
 
-ipcMain.handle('maximizeDocument', (event, args) => {
+ipcMain.on('maximizeDocument', (event, args) => {
   const { instanceId } = JSON.parse(args);
   const instance = btwxElectron.instance.byId[instanceId];
   instance.document.maximize();
