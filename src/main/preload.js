@@ -22,7 +22,10 @@ contextBridge.exposeInMainWorld('api', {
     clipboard.writeText(text);
   },
   readClipboardImage: () => {
-    return clipboard.readImage();
+    return clipboard.readImage().toDataURL();
+  },
+  readClipboardImageSize: () => {
+    return clipboard.readImage().getSize();
   },
   readClipboardFormats: () => {
     return clipboard.availableFormats();

@@ -1145,7 +1145,6 @@ ipcMain.handle('insertImage', (event, binding) => {
           if (!err) {
             resolve({
               buffer: data,
-              base64: data.toString('base64'),
               ext: path.extname(res.filePaths[0]).split('.').pop()
             });
           } else {

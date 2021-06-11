@@ -23,7 +23,7 @@ import {
   getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle,
   getLayerMasked, getLayerUnderlyingMask
 } from '../utils/actions';
-import { bufferToBase64, base64ToBuffer } from '../../utils';
+import { bufferToBase64, checkSessionImageExists } from '../../utils';
 import getTheme from '../../theme';
 // import { addDocumentImage, removeDocumentImage, removeDocumentImages } from './documentSettings';
 import { addSessionImage } from './session';
@@ -1031,7 +1031,8 @@ export const addImage = (payload: AddImagePayload): LayerTypes => ({
 export const insertImageThunk = () => {
   return (dispatch: any, getState: any) => {
     (window as any).api.insertImage().then((data) => {
-      const base64Str = `data:image/${data.ext};base64,${data.base64}`;
+      const base64 = bufferToBase64(data.buffer);
+      const fullBase64 = `data:image/${data.ext};base64,${base64}`;
       const newImage = new Image();
       newImage.onload = () => {
         const width = newImage.width;
@@ -1051,121 +1052,80 @@ export const insertImageThunk = () => {
               height
             }
           },
-          buffer: data.buffer,
+          base64: fullBase64,
           ext: data.ext
         }));
       }
-      newImage.src = base64Str;
+      newImage.src = fullBase64;
     }).catch(() => {
       console.error('image could not be read');
     });
-    // ipcRenderer.invoke('insertImage').then((data) => {
-    //   const base64 = bufferToBase64(Buffer.from(data.buffer));
-    //   const base64Str = `data:image/${data.ext};base64,${base64}`;
-    //   const newImage = new Image();
-    //   newImage.onload = () => {
-    //     const width = newImage.width;
-    //     const height = newImage.height;
-    //     dispatch(addImageThunk({
-    //       layer: {
-    //         frame: {
-    //           x: 0,
-    //           y: 0,
-    //           width,
-    //           height,
-    //           innerWidth: width,
-    //           innerHeight: height
-    //         },
-    //         originalDimensions: {
-    //           width,
-    //           height
-    //         }
-    //       },
-    //       buffer: data.buffer,
-    //       ext: data.ext
-    //     }));
-    //   }
-    //   newImage.src = base64Str;
-    // }).catch(() => {
-    //   console.error('image could not be read');
-    // });
   }
 };
 
 export const addImageThunk = (payload: AddImagePayload) => {
   return (dispatch: any, getState: any): Promise<Btwx.Image> => {
     const state = getState() as RootState;
-    (window as any).api.checkIfSessionImageExists(JSON.stringify({
-      sessionImages: state.session.images,
-      buffer: payload.buffer
-    })).then((sessionImageExists) => {
-      const id = payload.layer.id ? payload.layer.id : uuidv4();
-      const imageId = sessionImageExists ? sessionImageExists : payload.layer.imageId ? payload.layer.imageId : uuidv4();
-      const name = payload.layer.name ? payload.layer.name : 'Image';
-      const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
-      const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
-      const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
-      const parent = payload.layer.parent ? payload.layer.parent : state.layer.present.activeArtboard;
-      const parentItem = state.layer.present.byId[parent];
-      const scope = [...parentItem.scope, parent];
-      const artboard = scope[1];
-      const payloadWithType = {
-        ...payload,
-        layer: {
-          ...payload.layer,
-          type: 'Image'
-        }
+    const id = payload.layer.id ? payload.layer.id : uuidv4();
+    const sessionImageExists = state.session.images.allIds.find((id) => state.session.images.byId[id].base64 === payload.base64);
+    const imageId = sessionImageExists ? sessionImageExists : payload.layer.imageId ? payload.layer.imageId : uuidv4();
+    const name = payload.layer.name ? payload.layer.name : 'Image';
+    const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
+    const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
+    const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
+    const parent = payload.layer.parent ? payload.layer.parent : state.layer.present.activeArtboard;
+    const parentItem = state.layer.present.byId[parent];
+    const scope = [...parentItem.scope, parent];
+    const artboard = scope[1];
+    const payloadWithType = {
+      ...payload,
+      layer: {
+        ...payload.layer,
+        type: 'Image'
       }
-      const style = getLayerStyle(payloadWithType);
-      const transform = getLayerTransform(payloadWithType);
-      const frame = getLayerFrame(payloadWithType);
-      const newLayer = {
-        type: 'Image',
-        id: id,
-        name: name,
-        artboard: artboard,
-        parent: parent,
-        children: null,
-        scope: scope,
-        frame: frame,
-        underlyingMask: underlyingMask,
-        ignoreUnderlyingMask: ignoreUnderlyingMask,
-        masked: masked,
-        showChildren: null,
-        selected: false,
-        hover: false,
-        events: [],
-        tweens: {
-          allIds: [],
-          asOrigin: [],
-          asDestination: [],
-          byProp: TWEEN_PROPS_MAP
-        },
-        transform: transform,
-        style: style,
-        imageId: imageId,
-        originalDimensions: payloadWithType.layer.originalDimensions
-      } as Btwx.Image;
-      // if (!documentImageExists) {
-      //   dispatch(addDocumentImage({
-      //     id: imageId,
-      //     buffer: buffer,
-      //     ext: payload.ext
-      //   }));
-      // }
-      if (!sessionImageExists) {
-        dispatch(addSessionImage({
-          id: imageId,
-          buffer: payload.buffer,
-          ext: payload.ext
-        }));
-      }
-      dispatch(addImage({
-        layer: newLayer,
-        batch: payload.batch
+    }
+    const style = getLayerStyle(payloadWithType);
+    const transform = getLayerTransform(payloadWithType);
+    const frame = getLayerFrame(payloadWithType);
+    const newLayer = {
+      type: 'Image',
+      id: id,
+      name: name,
+      artboard: artboard,
+      parent: parent,
+      children: null,
+      scope: scope,
+      frame: frame,
+      underlyingMask: underlyingMask,
+      ignoreUnderlyingMask: ignoreUnderlyingMask,
+      masked: masked,
+      showChildren: null,
+      selected: false,
+      hover: false,
+      events: [],
+      tweens: {
+        allIds: [],
+        asOrigin: [],
+        asDestination: [],
+        byProp: TWEEN_PROPS_MAP
+      },
+      transform: transform,
+      style: style,
+      imageId: imageId,
+      originalDimensions: payloadWithType.layer.originalDimensions
+    } as Btwx.Image;
+    if (!sessionImageExists) {
+      dispatch(addSessionImage({
+        id: imageId,
+        base64: payload.base64,
+        ext: payload.ext
       }));
-      return Promise.resolve(newLayer);
-    });
+    }
+    dispatch(addImage({
+      layer: newLayer,
+      batch: payload.batch
+    }));
+    return Promise.resolve(newLayer);
   }
 };
 
@@ -1193,7 +1153,7 @@ export const addLayersThunk = (payload: AddLayersPayload) => {
           //   promises.push(dispatch(addShapeGroupThunk({layer: layer as Btwx.Shape, batch: true})));
           //   break;
           case 'Image':
-            promises.push(dispatch(addImageThunk({layer: layer as Btwx.Image, batch: true, buffer: payload.buffers[(layer as Btwx.Image).imageId].buffer})));
+            promises.push(dispatch(addImageThunk({layer: layer as Btwx.Image, batch: true, base64: payload.base64[(layer as Btwx.Image).imageId].base64})));
             break;
           case 'Group':
             promises.push(dispatch(addGroupThunk({layer: layer as Btwx.Group, batch: true})));
@@ -5992,52 +5952,42 @@ export const replaceSelectedImagesThunk = () => {
     return new Promise((resolve, reject) => {
       const state = getState() as RootState;
       (window as any).api.insertImage().then((data) => {
-        (window as any).api.checkIfSessionImageExists(JSON.stringify({
-          sessionImages: state.session.images,
-          buffer: data.buffer
-        })).then((sessionImageExists) => {
-          const imageId = sessionImageExists ? sessionImageExists : uuidv4();
-          const base64Str = `data:image/${data.ext};base64,${data.base64}`;
-          const newImage = new Image();
-          newImage.onload = () => {
-            const originalDimensions = {
-              width: newImage.width,
-              height: newImage.height
-            }
-            // if (!documentImageExists) {
-            //   dispatch(addDocumentImage({
-            //     id: imageId,
-            //     buffer: buffer,
-            //     ext: data.ext
-            //   }));
-            // }
-            if (!sessionImageExists) {
-              dispatch(addSessionImage({
-                id: imageId,
-                buffer: data.buffer,
-                ext: data.ext
-              }));
-            }
-            dispatch(replaceImages({
-              layers: state.layer.present.selected,
-              imageId,
-              originalDimensions
-            }));
-            // if (allInstancesSelected) {
-            //   dispatch(removeDocumentImages({
-            //     images: [(state.layer.present.byId[state.layer.present.selected[0]] as Btwx.Image).imageId]
-            //   }));
-            // } else {
-            //   if (removedDocumentImages.length > 0) {
-            //     dispatch(removeDocumentImages({
-            //       images: removedDocumentImages
-            //     }));
-            //   }
-            // }
-            resolve(null);
+        const base64 = bufferToBase64(data.buffer);
+        const fullBase64 = `data:image/${data.ext};base64,${base64}`;
+        const sessionImageExists = state.session.images.allIds.find((id) => state.session.images.byId[id].base64 === fullBase64);
+        const imageId = sessionImageExists ? sessionImageExists : uuidv4();
+        const newImage = new Image();
+        newImage.onload = () => {
+          const originalDimensions = {
+            width: newImage.width,
+            height: newImage.height
           }
-          newImage.src = base64Str;
-        })
+          if (!sessionImageExists) {
+            dispatch(addSessionImage({
+              id: imageId,
+              base64: fullBase64,
+              ext: data.ext
+            }));
+          }
+          dispatch(replaceImages({
+            layers: state.layer.present.selected,
+            imageId,
+            originalDimensions
+          }));
+          // if (allInstancesSelected) {
+          //   dispatch(removeDocumentImages({
+          //     images: [(state.layer.present.byId[state.layer.present.selected[0]] as Btwx.Image).imageId]
+          //   }));
+          // } else {
+          //   if (removedDocumentImages.length > 0) {
+          //     dispatch(removeDocumentImages({
+          //       images: removedDocumentImages
+          //     }));
+          //   }
+          // }
+          resolve(null);
+        }
+        newImage.src = fullBase64;
       });
     });
   }
@@ -6284,30 +6234,26 @@ export const pasteLayersThunk = (props?: { overSelection?: boolean; overPoint?: 
               Object.keys(clipboardLayers.images).forEach((imgId) => {
                 const documentImage = clipboardLayers.images[imgId];
                 // const documentImageExists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(buffer));
-                (window as any).api.checkIfSessionImageExists(JSON.stringify({
-                  sessionImages: state.session.images,
-                  buffer: documentImage.buffer
-                })).then((sessionImageExists) => {
-                  if (!sessionImageExists) {
-                    // if (!documentImageExists) {
-                    //   dispatch(addDocumentImage(documentImage));
-                    // }
-                    dispatch(addSessionImage(documentImage));
-                  } else {
-                    clipboardLayers = clipboardLayers.allImageIds.filter((id) =>
-                      (clipboardLayers.byId[id] as Btwx.Image).imageId === imgId
-                    ).reduce((result, current) => ({
-                      ...result,
-                      byId: {
-                        ...result.byId,
-                        [current]: {
-                          ...result.byId[current],
-                          imageId: sessionImageExists
-                        } as Btwx.Image
-                      }
-                    }), clipboardLayers);
-                  }
-                })
+                const sessionImageExists = state.session.images.allIds.find((id) => state.session.images.byId[id].base64 === documentImage.base64);
+                if (!sessionImageExists) {
+                  // if (!documentImageExists) {
+                  //   dispatch(addDocumentImage(documentImage));
+                  // }
+                  dispatch(addSessionImage(documentImage));
+                } else {
+                  clipboardLayers = clipboardLayers.allImageIds.filter((id) =>
+                    (clipboardLayers.byId[id] as Btwx.Image).imageId === imgId
+                  ).reduce((result, current) => ({
+                    ...result,
+                    byId: {
+                      ...result.byId,
+                      [current]: {
+                        ...result.byId[current],
+                        imageId: sessionImageExists
+                      } as Btwx.Image
+                    }
+                  }), clipboardLayers);
+                }
               });
               if (clipboardLayers.type === 'sketch-layers') {
                 // Dont have galaxy brain math skillz to figure out point in plugin...
@@ -6551,9 +6497,8 @@ export const pasteLayersThunk = (props?: { overSelection?: boolean; overPoint?: 
           if (state.layer.present.activeArtboard) {
             const activeArtboardItem = state.layer.present.byId[state.layer.present.activeArtboard];
             const artboardPosition = new paperMain.Point(activeArtboardItem.frame.x, activeArtboardItem.frame.y);
-            const image = (window as any).api.readClipboardImage();
-            const buffer = image.toPNG();
-            const originalDimensions = image.getSize();
+            const base64 = (window as any).api.readClipboardImage();
+            const originalDimensions = (window as any).api.readClipboardImageSize();
             let x = 0;
             let y = 0;
             if (overSelection && state.layer.present.selected.length > 0) {
@@ -6578,7 +6523,7 @@ export const pasteLayersThunk = (props?: { overSelection?: boolean; overPoint?: 
                   height: originalDimensions.height
                 }
               },
-              buffer: buffer as any,
+              base64: base64 as string,
               ext: 'png'
             }));
           } else {

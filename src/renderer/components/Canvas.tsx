@@ -314,7 +314,6 @@ const Canvas = (): ReactElement => {
     fileReader.addEventListener('load', function() {
       let image = new Image();
       image.onload = () => {
-        const buffer = base64ToBuffer((this.result as string).replace(`data:image/${ext};base64,`, ''));
         const width = image.width;
         const height = image.height;
         dispatch(addImageThunk({
@@ -333,7 +332,7 @@ const Canvas = (): ReactElement => {
               height
             }
           },
-          buffer: buffer as any,
+          base64: this.result as string,
           ext: ext
         }));
       }

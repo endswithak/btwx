@@ -274,7 +274,7 @@ export const base64ToBuffer = (base64String: string): ArrayBuffer => {
     bytes[i] = binaryString.charCodeAt(i);
   }
   return bytes.buffer;
-}
+};
 
 export const bufferToBase64 = (buffer: Buffer | ArrayBuffer) => {
   return btoa(new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), ''));

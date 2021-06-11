@@ -460,7 +460,7 @@ export type AddImagePayload = {
     [P in keyof Btwx.Image]?: Btwx.Image[P];
   };
   batch?: boolean;
-  buffer?: Buffer;
+  base64?: string;
   ext?: string;
 }
 
