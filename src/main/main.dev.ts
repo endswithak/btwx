@@ -88,6 +88,8 @@ export interface BtwxElectron {
   fontList: string[];
 }
 
+const isDevelopment = process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
+
 let btwxElectron: BtwxElectron = {
   preferences: null,
   instance: {
@@ -115,16 +117,28 @@ const store = new Store({
       platform: process.platform
     },
     preferences: initialPreferencesState,
-    keyBindings: process.platform === 'darwin' ? {...initialMacKeyBindingsState, defaults: initialMacKeyBindingsState} : {...initialWindowsKeyBindingsState, defaults: initialWindowsKeyBindingsState},
+    keyBindings: process.platform === 'darwin' ? {
+      ...initialMacKeyBindingsState,
+      defaults: initialMacKeyBindingsState
+    } : {
+      ...initialWindowsKeyBindingsState,
+      defaults: initialWindowsKeyBindingsState
+    },
     artboardPresets: initialArtboardPresetsState
   }
 });
 
 // reset store in development
-if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true') {
+if (isDevelopment) {
   store.set({
     preferences: initialPreferencesState,
-    keyBindings: process.platform === 'darwin' ? {...initialMacKeyBindingsState, defaults: initialMacKeyBindingsState} : {...initialWindowsKeyBindingsState, defaults: initialWindowsKeyBindingsState},
+    keyBindings: process.platform === 'darwin' ? {
+      ...initialMacKeyBindingsState,
+      defaults: initialMacKeyBindingsState
+    } : {
+      ...initialWindowsKeyBindingsState,
+      defaults: initialWindowsKeyBindingsState
+    },
     artboardPresets: initialArtboardPresetsState
   });
 }
@@ -149,24 +163,10 @@ store.onDidChange('keyBindings', (newValue, oldValue) => {
   }
 });
 
-// store.onDidChange('artboardPresets', (newValue, oldValue) => {
-//   if (btwxElectron.instance.allIds.length > 0) {
-//     btwxElectron.instance.allIds.forEach((id: number) => {
-//       const instance = btwxElectron.instance.byId[id];
-//       if (instance && instance.document) {
-//         const document = instance.document;
-//         document.webContents.executeJavaScript(`hydrateArtboardPresets(${JSON.stringify(newValue)})`);
-//       }
-//     });
-//   }
-// });
-
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
   sourceMapSupport.install();
 }
-
-const isDevelopment = process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
 if (isDevelopment) {
   require('electron-debug')();
