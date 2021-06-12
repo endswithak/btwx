@@ -233,6 +233,7 @@ const ColorInput = (props: ColorInputProps): ReactElement => {
 
   const handleDragOver = (e: any) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
     if ((draggingFill || draggingStroke) && !activeDragover) {
       switch(prop) {
         case 'fill':

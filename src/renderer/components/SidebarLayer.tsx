@@ -125,6 +125,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
 
   const handleDragOver = (e: any): void => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
     if (!isHover) {
       dispatch(setLayerHover({
         id: id

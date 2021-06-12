@@ -72,6 +72,7 @@ const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement =>
 
   const handleDragOver = (e: any): void => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
     const newDropzone = getDropzone(e);
     const newCanDrop = getCanDrop(newDropzone);
     if (newDropzone !== dropzone) {

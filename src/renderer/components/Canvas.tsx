@@ -219,10 +219,11 @@ const Canvas = (): ReactElement => {
   }
 
   const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
     if (draggingFill || draggingStroke || draggingShadow) {
       handleHitResult(e, 'mouseMove');
     }
-    e.preventDefault();
     if (!dragOver && !draggingLayers && !draggingFill && !draggingStroke && !draggingShadow) {
       setDragOver(true);
     }
