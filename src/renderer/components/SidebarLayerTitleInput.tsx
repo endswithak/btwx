@@ -14,7 +14,7 @@ interface SidebarLayerTitleInputProps {
 const SidebarLayerTitleInput = (props: SidebarLayerTitleInputProps): ReactElement => {
   const formControlRef = useRef(null);
   const { id } = props;
-  const nameValue = useSelector((state: RootState) => state.layer.present.byId[id].name);
+  const nameValue = useSelector((state: RootState) => state.layer.present.byId[id] ? state.layer.present.byId[id].name : null);
   const [name, setNameInput] = useState(nameValue);
   const dispatch = useDispatch();
 

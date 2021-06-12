@@ -13,9 +13,9 @@ const SelectionFrame = (): ReactElement => {
   const selectedPaperScopes = useSelector((state: RootState) => getSelectedProjectIndices(state));
   const singleLineHandles = useSelector((state: RootState) => {
     const singleItemSelected = state.layer.present.selected.length === 1;
-    const layerItem = singleItemSelected ? state.layer.present.byId[state.layer.present.selected[0]] : null;
-    const singleShapeSelected = singleItemSelected && layerItem.type === 'Shape';
-    const singleLineSelected = singleShapeSelected && (layerItem as Btwx.Shape).shapeType === 'Line';
+    const layerItem = singleItemSelected && state.layer.present.byId[state.layer.present.selected[0]] ? state.layer.present.byId[state.layer.present.selected[0]] : null;
+    const singleShapeSelected = singleItemSelected && layerItem && layerItem.type === 'Shape';
+    const singleLineSelected = singleShapeSelected && layerItem && (layerItem as Btwx.Shape).shapeType === 'Line';
     if (singleLineSelected) {
       const lineItem = layerItem as Btwx.Line;
       const artboardItem = state.layer.present.byId[layerItem.artboard];

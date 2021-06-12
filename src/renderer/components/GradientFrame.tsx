@@ -7,7 +7,7 @@ import { getGradientOriginPoint, getGradientDestinationPoint } from '../store/se
 
 const GradientFrame = (): ReactElement => {
   const zoom = useSelector((state: RootState) => state.documentSettings.zoom);
-  const gradientValue = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.selected[0]].style[state.gradientEditor.prop].gradient);
+  const gradientValue = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.selected[0]] && state.layer.present.byId[state.layer.present.selected[0]].style[state.gradientEditor.prop].gradient);
   const stopsWithIndex = gradientValue && gradientValue.stops.map((stop, index) => ({
     ...stop,
     index
@@ -15,8 +15,8 @@ const GradientFrame = (): ReactElement => {
   const sortedStops = stopsWithIndex && stopsWithIndex.sort((a,b) => a.position - b.position);
   const originStop = sortedStops && sortedStops[0];
   const destStop = sortedStops && sortedStops[sortedStops.length - 1];
-  const originPosition = useSelector((state: RootState) => getGradientOriginPoint(state.layer.present, state.layer.present.selected[0], state.gradientEditor.prop));
-  const destinationPosition = useSelector((state: RootState) => getGradientDestinationPoint(state.layer.present, state.layer.present.selected[0], state.gradientEditor.prop));
+  const originPosition = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.selected[0]] && getGradientOriginPoint(state.layer.present, state.layer.present.selected[0], state.gradientEditor.prop));
+  const destinationPosition = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.selected[0]] && getGradientDestinationPoint(state.layer.present, state.layer.present.selected[0], state.gradientEditor.prop));
   const originSelected = originStop && originStop.index === gradientValue.activeStopIndex;
   const destinationSelected = destStop && destStop.index === gradientValue.activeStopIndex;
   const origin = {

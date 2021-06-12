@@ -3,7 +3,6 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { pasteSVGThunk } from '../store/actions/layer';
-import { canPasteSVG } from '../store/selectors/layer';
 
 export const MENU_ITEM_ID = 'editPasteSVG';
 

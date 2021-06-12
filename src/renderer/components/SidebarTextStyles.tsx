@@ -14,7 +14,7 @@ import TextTransformInput from './TextTransformInput';
 import SidebarCollapseSection from './SidebarCollapseSection';
 
 const SidebarTextStyles = (): ReactElement => {
-  const validTextSelection = useSelector((state: RootState) => state.layer.present.selected.every((id: string) => state.layer.present.byId[id].type === 'Text'));
+  const validTextSelection = useSelector((state: RootState) => state.layer.present.selected.every((id: string) => state.layer.present.byId[id] && state.layer.present.byId[id].type === 'Text'));
   const textStylesCollapsed = useSelector((state: RootState) => state.rightSidebar.textStylesCollapsed);
   const dispatch = useDispatch();
 

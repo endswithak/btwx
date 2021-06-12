@@ -27,11 +27,11 @@ interface MenuTweenAddWiggleProps {
 const MenuTweenAddWiggle = (props: MenuTweenAddWiggleProps): ReactElement => {
   const { setAddWiggle } = props;
   const [menuItemTemplate, setMenuItemTemplate] = useState<any>(null);
-  const event = useSelector((state: RootState) => state.eventDrawer.event ? state.layer.present.events.byId[state.eventDrawer.event] : null);
+  const event = useSelector((state: RootState) => state.eventDrawer.event && state.layer.present.events.byId[state.eventDrawer.event] ? state.layer.present.events.byId[state.eventDrawer.event] : null);
   const destinationChildren = useSelector((state: RootState) => event ? getLayerDescendants(state.layer.present, event.destination) : null);
   const tweenLayerHover = useSelector((state: RootState) => state.eventDrawer.tweenLayerHover);
-  const tweenLayerHoverItem = useSelector((state: RootState) => tweenLayerHover ? state.layer.present.byId[tweenLayerHover] : null);
-  const equivalentLayerItem = useSelector((state: RootState) => tweenLayerHover && destinationChildren && destinationChildren.length > 0 ? getDestinationEquivalent(state.layer.present, tweenLayerHover, destinationChildren) : null);
+  const tweenLayerHoverItem = useSelector((state: RootState) => tweenLayerHover && state.layer.present.byId[tweenLayerHover] ? state.layer.present.byId[tweenLayerHover] : null);
+  const equivalentLayerItem = useSelector((state: RootState) => tweenLayerHoverItem && destinationChildren && destinationChildren.length > 0 ? getDestinationEquivalent(state.layer.present, tweenLayerHover, destinationChildren) : null);
   const equivalentTweenProps = tweenLayerHoverItem && equivalentLayerItem ? getEquivalentTweenProps(tweenLayerHoverItem, equivalentLayerItem) : null;
   const dispatch = useDispatch();
 

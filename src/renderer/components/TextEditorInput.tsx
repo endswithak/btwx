@@ -17,7 +17,7 @@ const TextEditorInput = (): ReactElement => {
   const textSpanRef = useRef<HTMLTextAreaElement>(null);
   const textEditor = useSelector((state: RootState) => state.textEditor);
   const layerItem = useSelector((state: RootState) => state.layer.present.byId[state.textEditor.layer] as Btwx.Text);
-  const textValue = useSelector((state: RootState) => (state.layer.present.byId[state.textEditor.layer] as Btwx.Text).text);
+  const textValue = useSelector((state: RootState) => state.layer.present.byId[state.textEditor.layer] ? (state.layer.present.byId[state.textEditor.layer] as Btwx.Text).text : null);
   const [text, setText] = useState(textValue);
   const debounceText = useCallback(
     debounce((dText: string) => dispatch(setLayerTextThunk({

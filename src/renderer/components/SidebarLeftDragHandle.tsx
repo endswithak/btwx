@@ -1,7 +1,6 @@
 import React, { ReactElement, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import gsap from 'gsap';
-import { Draggable } from 'gsap/Draggable';
 import { paperMain } from '../canvas';
 import { setLeftSidebarWidth } from '../store/actions/viewSettings';
 import { RootState } from '../store/reducers';

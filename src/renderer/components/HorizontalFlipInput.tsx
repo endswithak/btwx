@@ -9,7 +9,7 @@ import Icon from './Icon';
 
 const HorizontalFlipInput = (): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
-  const horizontalFlipValue = useSelector((state: RootState) => state.layer.present.selected.every((id) => state.layer.present.byId[id].transform.horizontalFlip));
+  const horizontalFlipValue = useSelector((state: RootState) => state.layer.present.selected.every((id) => state.layer.present.byId[id] && state.layer.present.byId[id].transform.horizontalFlip));
   const disabled = useSelector((state: RootState) => !canFlipSeleted(state));
   const [horizontalFlip, setHorizontalFlip] = useState<boolean>(horizontalFlipValue);
   const dispatch = useDispatch();

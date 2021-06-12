@@ -2,7 +2,6 @@
 import React, { forwardRef, useCallback } from 'react';
 import debounce from 'lodash.debounce';
 import Form from './Form';
-import { clearTouchbar } from '../utils';
 import MathFormGroup, { MathFormGroupProps } from './MathFormGroup';
 
 const PercentageFormGroup = forwardRef(function PercentageFormGroup({

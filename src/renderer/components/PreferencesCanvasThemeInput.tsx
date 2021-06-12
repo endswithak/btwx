@@ -1,4 +1,4 @@
-import React, { ReactElement, useRef, useEffect, useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { setCanvasThemeThunk } from '../store/actions/preferences';

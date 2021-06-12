@@ -11,9 +11,9 @@ interface SidebarLayerMaskedIconProps {
 
 const SidebarLayerMaskedIcon = (props: SidebarLayerMaskedIconProps): ReactElement => {
   const { id, isDragGhost } = props;
-  const isMasked = useSelector((state: RootState) => state.layer.present.byId[id].type === 'Artboard' ? null : (state.layer.present.byId[id] as Btwx.MaskableLayer).masked);
-  const isSelected = useSelector((state: RootState) => state.layer.present.byId[id].selected);
-  const underlyingMask = useSelector((state: RootState) => state.layer.present.byId[id].type === 'Artboard' ? null : (state.layer.present.byId[id] as Btwx.MaskableLayer).underlyingMask);
+  const isMasked = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id].type === 'Artboard' ? null : state.layer.present.byId[id] && (state.layer.present.byId[id] as Btwx.MaskableLayer).masked);
+  const isSelected = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id].selected);
+  const underlyingMask = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id].type === 'Artboard' ? null : state.layer.present.byId[id] && (state.layer.present.byId[id] as Btwx.MaskableLayer).underlyingMask);
   const underlyingMaskItem = useSelector((state: RootState) => underlyingMask ? state.layer.present.byId[underlyingMask] : null);
   const editing = useSelector((state: RootState) => state.leftSidebar.editing === id);
   const underlyingMaskHover = underlyingMaskItem ? underlyingMaskItem.hover : null;

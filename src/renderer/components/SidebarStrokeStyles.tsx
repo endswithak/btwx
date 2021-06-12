@@ -10,7 +10,7 @@ import StrokeToggle from './StrokeToggle';
 import StrokeParamsInput from './StrokeParamsInput';
 
 const SidebarStrokeStyles = (): ReactElement => {
-  const validFillSelection = useSelector((state: RootState) => state.layer.present.selected.every((id: string) => state.layer.present.byId[id].type !== 'Artboard' && state.layer.present.byId[id].type !== 'Group' && state.layer.present.byId[id].type !== 'Image'));
+  const validFillSelection = useSelector((state: RootState) => state.layer.present.selected.every((id: string) => state.layer.present.byId[id] && state.layer.present.byId[id].type !== 'Artboard' && state.layer.present.byId[id].type !== 'Group' && state.layer.present.byId[id].type !== 'Image'));
   const strokeStylesCollapsed = useSelector((state: RootState) => state.rightSidebar.strokeStylesCollapsed);
   const strokeOptionsStylesCollapsed = useSelector((state: RootState) => state.rightSidebar.strokeOptionsStylesCollapsed);
   const dispatch = useDispatch();

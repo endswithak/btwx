@@ -11,7 +11,7 @@ import Icon from './Icon';
 const StrokeJoinInput = (): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const strokeJoinValue = useSelector((state: RootState) => getSelectedStrokeJoin(state));
-  const disabled = useSelector((state: RootState) => !selectedStrokeEnabled(state) || (state.layer.present.selected.every((id) => state.layer.present.byId[id].type === 'Shape' && (state.layer.present.byId[id] as Btwx.Shape).shapeType === 'Line')));
+  const disabled = useSelector((state: RootState) => !selectedStrokeEnabled(state) || (state.layer.present.selected.every((id) => state.layer.present.byId[id] && state.layer.present.byId[id].type === 'Shape' && (state.layer.present.byId[id] as Btwx.Shape).shapeType === 'Line')));
   const [strokeJoin, setStrokeJoin] = useState<Btwx.StrokeJoin | 'multi'>(strokeJoinValue);
   const dispatch = useDispatch();
 

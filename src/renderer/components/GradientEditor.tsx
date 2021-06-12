@@ -15,8 +15,8 @@ import FillTypeSelector from './FillTypeSelector';
 const GradientEditor = (): ReactElement => {
   const editorRef = useRef<HTMLDivElement>(null);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
-  const gradientValue = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.selected[0]].style[state.gradientEditor.prop].gradient);
-  const activeStopValue = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.selected[0]].style[state.gradientEditor.prop].gradient.stops.find((stop, index) => index === gradientValue.activeStopIndex));
+  const gradientValue = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.selected[0]] && state.layer.present.byId[state.layer.present.selected[0]].style[state.gradientEditor.prop].gradient);
+  const activeStopValue = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.selected[0]] && state.layer.present.byId[state.layer.present.selected[0]].style[state.gradientEditor.prop].gradient.stops.find((stop, index) => index === gradientValue.activeStopIndex));
   const gradientEditor = useSelector((state: RootState) => state.gradientEditor);
   const dispatch = useDispatch();
 

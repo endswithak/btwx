@@ -14,8 +14,8 @@ interface SidebarLayerChevronProps {
 
 const SidebarLayerChevron = (props: SidebarLayerChevronProps): ReactElement => {
   const { id, isDragGhost, isOpen, searchTree, setOpen } = props;
-  const isArtboard = useSelector((state: RootState) => state.layer.present.byId[id].type === 'Artboard');
-  const canOpen = useSelector((state: RootState) => state.layer.present.byId[id].type === 'Group' || state.layer.present.byId[id].type === 'Artboard');
+  const isArtboard = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id].type === 'Artboard');
+  const canOpen = useSelector((state: RootState) => state.layer.present.byId[id] && (state.layer.present.byId[id].type === 'Group' || state.layer.present.byId[id].type === 'Artboard'));
   // const isSelected = useSelector((state: RootState) => state.layer.present.byId[id].selected);
   const dispatch = useDispatch();
 

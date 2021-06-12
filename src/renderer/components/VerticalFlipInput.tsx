@@ -9,7 +9,7 @@ import Icon from './Icon';
 
 const VerticalFlipInput = (): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
-  const verticalFlipValue = useSelector((state: RootState) => state.layer.present.selected.every((id) => state.layer.present.byId[id].transform.verticalFlip));
+  const verticalFlipValue = useSelector((state: RootState) => state.layer.present.selected.every((id) => state.layer.present.byId[id] && state.layer.present.byId[id].transform.verticalFlip));
   const disabled = useSelector((state: RootState) => !canFlipSeleted(state));
   const [verticalFlip, setVerticalFlip] = useState<boolean>(verticalFlipValue);
   const dispatch = useDispatch();

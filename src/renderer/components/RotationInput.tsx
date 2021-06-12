@@ -10,7 +10,7 @@ import MathFormGroup from './MathFormGroup';
 const RotationInput = (): ReactElement => {
   const formControlRef = useRef<HTMLInputElement>(null);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
-  const disabled = useSelector((state: RootState) => state.layer.present.selected.some((id) => state.layer.present.byId[id].type === 'Artboard'));
+  const disabled = useSelector((state: RootState) => state.layer.present.selected.some((id) => state.layer.present.byId[id] && state.layer.present.byId[id].type === 'Artboard'));
   const rotation = useSelector((state: RootState) => getSelectedRotation(state));
   const dispatch = useDispatch();
 

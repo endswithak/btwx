@@ -24,7 +24,7 @@ const ShapeTool = (props: PaperToolProps): ReactElement => {
   const drawing = useSelector((state: RootState) => state.canvasSettings.drawing);
   const layerProjectIndices = useSelector((state: RootState) => getLayerProjectIndices(state));
   const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
-  const activeArtboardPaperScope = useSelector((state: RootState) => activeArtboard ? (state.layer.present.byId[state.layer.present.activeArtboard] as Btwx.Artboard).projectIndex : null);
+  const activeArtboardPaperScope = useSelector((state: RootState) => activeArtboard && state.layer.present.byId[state.layer.present.activeArtboard] ? (state.layer.present.byId[state.layer.present.activeArtboard] as Btwx.Artboard).projectIndex : null);
   const [handle, setHandle] = useState<Btwx.ResizeHandle>(null);
   const [maxDim, setMaxDim] = useState<number>(null);
   const [vector, setVector] = useState<paper.Point>(null);

@@ -1,5 +1,4 @@
 import React, { useEffect, ReactElement, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import MenuLayerAddEvent from './MenuLayerAddEvent';
 import MenuEditSelectAll from './MenuEditSelectAll';
 import MenuEditSelectAllArtboards from './MenuEditSelectAllArtboards';
@@ -39,7 +38,6 @@ const LayerContextMenu = (props: LayerContextMenuProps): ReactElement => {
   const [useAsMask, setUseAsMask] = useState(undefined);
   const [ignoreUnderlyingMask, setIgnoreUnderlyingMask] = useState(undefined);
   const [replaceImage, setReplaceImage] = useState(undefined);
-  const dispatch = useDispatch();
 
   useEffect(() => {
     if (addEvent && selectAll && selectAllArtboards && copyLayers && pasteLayers && pasteOverSelection && duplicate && deleteLayers && bringForward && sendBackward && group && ungroup && rename && useAsMask && ignoreUnderlyingMask && replaceImage) {

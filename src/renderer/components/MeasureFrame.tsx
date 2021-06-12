@@ -9,7 +9,7 @@ const MeasureFrame = (): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const hover = useSelector((state: RootState) => state.layer.present.hover);
   const selectedBounds = useSelector((state: RootState) => getSelectedBounds(state));
-  const hoverBounds = useSelector((state: RootState) => state.layer.present.hover ? getLayerBounds(state.layer.present, state.layer.present.hover) : null);
+  const hoverBounds = useSelector((state: RootState) => state.layer.present.hover && state.layer.present.byId[state.layer.present.hover] ? getLayerBounds(state.layer.present, state.layer.present.hover) : null);
 
   useEffect(() => {
     updateMeasureGuides(selectedBounds, { all: hoverBounds });

@@ -12,7 +12,7 @@ import Icon from './Icon';
 const VerticalAlignmentInput = (): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const verticalAlignmentValue = useSelector((state: RootState) => getSelectedVerticalAlignment(state));
-  const disabled = useSelector((state: RootState) => state.layer.present.selected.some((id) => (state.layer.present.byId[id] as Btwx.Text).textStyle.textResize !== 'fixed'));
+  const disabled = useSelector((state: RootState) => state.layer.present.selected.some((id) => state.layer.present.byId[id] && (state.layer.present.byId[id] as Btwx.Text).textStyle.textResize !== 'fixed'));
   const [verticalAlignment, setVerticalAlignment] = useState(verticalAlignmentValue);
   const dispatch = useDispatch();
 

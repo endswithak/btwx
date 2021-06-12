@@ -10,9 +10,9 @@ interface SidebarLayerTitleProps {
 
 const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
   const { id, isDragGhost } = props;
-  const name = useSelector((state: RootState) => state.layer.present.byId[id].name);
-  const isArtboard = useSelector((state: RootState) => state.layer.present.byId[id].type === 'Artboard');
-  const isSelected = useSelector((state: RootState) => state.layer.present.byId[id].selected);
+  const name = useSelector((state: RootState) => state.layer.present.byId[id] ? state.layer.present.byId[id].name : null);
+  const isArtboard = useSelector((state: RootState) => state.layer.present.byId[id] ? state.layer.present.byId[id].type === 'Artboard' : null);
+  const isSelected = useSelector((state: RootState) => state.layer.present.byId[id] ? state.layer.present.byId[id].selected : false);
   const editing = useSelector((state: RootState) => state.leftSidebar.editing === id && !isDragGhost);
 
   return (

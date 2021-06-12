@@ -7,7 +7,7 @@ import FillInput from './FillInput';
 import FillToggle from './FillToggle';
 
 const SidebarFillStyles = (): ReactElement => {
-  const validFillSelection = useSelector((state: RootState) => state.layer.present.selected.every((id) => state.layer.present.byId[id].type !== 'Group' && state.layer.present.byId[id].type !== 'Image' && !(state.layer.present.byId[id].type === 'Shape' && (state.layer.present.byId[id] as Btwx.Shape).shapeType === 'Line')));
+  const validFillSelection = useSelector((state: RootState) => state.layer.present.selected.every((id) => state.layer.present.byId[id] && state.layer.present.byId[id].type !== 'Group' && state.layer.present.byId[id].type !== 'Image' && !(state.layer.present.byId[id].type === 'Shape' && (state.layer.present.byId[id] as Btwx.Shape).shapeType === 'Line')));
   const fillStylesCollapsed = useSelector((state: RootState) => state.rightSidebar.fillStylesCollapsed);
   const dispatch = useDispatch();
 

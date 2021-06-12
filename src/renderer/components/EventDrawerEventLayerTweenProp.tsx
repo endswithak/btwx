@@ -16,9 +16,9 @@ interface EventDrawerEventLayerTweenPropProps {
 const EventDrawerEventLayerTweenProp = (props: EventDrawerEventLayerTweenPropProps): ReactElement => {
   const { tweenId } = props;
   const instanceId = useSelector((state: RootState) => state.session.instance);
-  const tweenProp = useSelector((state: RootState) => titleCase(state.layer.present.tweens.byId[tweenId].prop));
+  const tweenProp = useSelector((state: RootState) => state.layer.present.tweens.byId[tweenId] && titleCase(state.layer.present.tweens.byId[tweenId].prop));
   const selectedWiggles = useSelector((state: RootState) => state.layer.present.tweens.selected.allIds.filter((id) => state.layer.present.tweens.byId[id].ease === 'customWiggle'));
-  const isWiggle = useSelector((state: RootState) => state.layer.present.tweens.byId[tweenId].ease === 'customWiggle');
+  const isWiggle = useSelector((state: RootState) => state.layer.present.tweens.byId[tweenId] && state.layer.present.tweens.byId[tweenId].ease === 'customWiggle');
   const tweenHover = useSelector((state: RootState) => state.eventDrawer.tweenHover);
   const isSelected = useSelector((state: RootState) => state.layer.present.tweens.selected.allIds.includes(tweenId));
   const dispatch = useDispatch();
