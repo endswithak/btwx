@@ -1,8 +1,7 @@
-import React, { useContext, ReactElement, useEffect } from 'react';
+import React, { ReactElement } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import SidebarLayerTitleInput from './SidebarLayerTitleInput';
-import { ThemeContext } from './ThemeProvider';
 
 interface SidebarLayerTitleProps {
   id: string;
@@ -10,7 +9,6 @@ interface SidebarLayerTitleProps {
 }
 
 const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
-  const theme = useContext(ThemeContext);
   const { id, isDragGhost } = props;
   const name = useSelector((state: RootState) => state.layer.present.byId[id].name);
   const isArtboard = useSelector((state: RootState) => state.layer.present.byId[id].type === 'Artboard');
@@ -18,23 +16,23 @@ const SidebarLayerTitle = (props: SidebarLayerTitleProps): ReactElement => {
   const editing = useSelector((state: RootState) => state.leftSidebar.editing === id && !isDragGhost);
 
   return (
-    <div
-      className={`
-        c-sidebar-layer__name
-        ${editing
-          ? 'c-sidebar-layer__name--editing'
-          : null
-        }
-        ${isArtboard
-          ? 'c-sidebar-layer__name--artboard'
-          : null
-        }`
-      }
-      style={{
-        color: isSelected && !isDragGhost
-        ? theme.text.onPalette.primary
-        : theme.text.base
-      }}>
+    <div className={`c-sidebar-layer__name${
+      editing
+      ? `${' '}c-sidebar-layer__name--editing`
+      : ''
+    }${
+      isArtboard
+      ? `${' '}c-sidebar-layer__name--artboard`
+      : ''
+    }${
+      isSelected
+      ? `${' '}c-sidebar-layer__name--selected`
+      : ''
+    }${
+      isDragGhost
+      ? `${' '}c-sidebar-layer__name--drag-ghost`
+      : ''
+    }`}>
       {
         editing
         ? <SidebarLayerTitleInput

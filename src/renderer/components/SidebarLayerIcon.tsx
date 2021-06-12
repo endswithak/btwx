@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect } from 'react';
+import React, { ReactElement } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import Icon from './Icon';
@@ -19,7 +19,7 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
 
   return (
     <div
-      className='c-sidebar-layer__icon'
+      className={`c-sidebar-layer__icon`}
       id={`${id}-icon`}>
       <Icon
         name={(() => {
