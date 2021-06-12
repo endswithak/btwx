@@ -2192,6 +2192,6 @@ ipcMain.handle('setElectronStore', (event, args) => {
 // THEME
 ////////////////////////////////////////////////////////////
 
-ipcMain.handle('setNativeTheme', (event, key) => {
+ipcMain.on('setNativeTheme', (event, key) => {
   nativeTheme.themeSource = key;
 });
