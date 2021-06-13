@@ -1134,40 +1134,40 @@ export const addLayers = (payload: AddLayersPayload): LayerTypes => ({
   payload
 });
 
-export const addLayersThunk = (payload: AddLayersPayload) => {
-  return (dispatch: any, getState: any): Promise<any> => {
-    // const state = getState() as RootState;
-    return new Promise((resolve, reject) => {
-      const promises: Promise<any>[] = [];
-      payload.layers.forEach((layer) => {
-        switch(layer.type as Btwx.LayerType | 'ShapeGroup') {
-          case 'Artboard':
-            promises.push(dispatch(addArtboardThunk({layer: layer as Btwx.Artboard, batch: true})));
-            break;
-          case 'Shape':
-            promises.push(dispatch(addShapeThunk({layer: layer as Btwx.Shape, batch: true})));
-            break;
-          // case 'ShapeGroup':
-          //   promises.push(dispatch(addShapeGroupThunk({layer: layer as Btwx.Shape, batch: true})));
-          //   break;
-          case 'Image':
-            promises.push(dispatch(addImageThunk({layer: layer as Btwx.Image, batch: true, base64: payload.base64[(layer as Btwx.Image).imageId].base64})));
-            break;
-          case 'Group':
-            promises.push(dispatch(addGroupThunk({layer: layer as Btwx.Group, batch: true})));
-            break;
-          case 'Text':
-            promises.push(dispatch(addTextThunk({layer: layer as Btwx.Text, batch: true})));
-            break;
-        }
-      });
-      Promise.all(promises).then((layers) => {
-        dispatch(addLayers({layers: layers}));
-        resolve(layers);
-      });
-    });
-  }
-}
+// export const addLayersThunk = (payload: AddLayersPayload) => {
+//   return (dispatch: any, getState: any): Promise<any> => {
+//     // const state = getState() as RootState;
+//     return new Promise((resolve, reject) => {
+//       const promises: Promise<any>[] = [];
+//       payload.layers.forEach((layer) => {
+//         switch(layer.type as Btwx.LayerType | 'ShapeGroup') {
+//           case 'Artboard':
+//             promises.push(dispatch(addArtboardThunk({layer: layer as Btwx.Artboard, batch: true})));
+//             break;
+//           case 'Shape':
+//             promises.push(dispatch(addShapeThunk({layer: layer as Btwx.Shape, batch: true})));
+//             break;
+//           // case 'ShapeGroup':
+//           //   promises.push(dispatch(addShapeGroupThunk({layer: layer as Btwx.Shape, batch: true})));
+//           //   break;
+//           case 'Image':
+//             promises.push(dispatch(addImageThunk({layer: layer as Btwx.Image, batch: true, base64: payload.base64[(layer as Btwx.Image).imageId].base64})));
+//             break;
+//           case 'Group':
+//             promises.push(dispatch(addGroupThunk({layer: layer as Btwx.Group, batch: true})));
+//             break;
+//           case 'Text':
+//             promises.push(dispatch(addTextThunk({layer: layer as Btwx.Text, batch: true})));
+//             break;
+//         }
+//       });
+//       Promise.all(promises).then((layers) => {
+//         dispatch(addLayers({layers: layers}));
+//         resolve(layers);
+//       });
+//     });
+//   }
+// }
 
 // Remove
 

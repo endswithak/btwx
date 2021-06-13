@@ -2182,7 +2182,7 @@ export const getAllArtboardTweenDestinationLayers = createSelector(
 export const getSortedEvents = createSelector(
   [ getAllEventIds, getEventsById, getEventDrawerSort, getLayersById ],
   (allEventIds, eventById, eventSort, layerById) => {
-    const getSort = (sortBy: 'layer' | 'event' | 'artboard' | 'destinationArtboard'): string[] => {
+    const getSort = (sortBy: 'layer' | 'listener' | 'origin' | 'destination'): string[] => {
       return [...allEventIds].sort((a, b) => {
         const eventA = eventById[a];
         const eventB = eventById[b];
@@ -2190,12 +2190,12 @@ export const getSortedEvents = createSelector(
         let sortB;
         switch(sortBy) {
           case 'layer':
-          case 'artboard':
-          case 'destinationArtboard':
+          case 'origin':
+          case 'destination':
             sortA = layerById[eventA[sortBy]].name.toUpperCase();
             sortB = layerById[eventB[sortBy]].name.toUpperCase();
             break;
-          case 'event':
+          case 'listener':
             sortA = eventA[sortBy].toUpperCase();
             sortB = eventB[sortBy].toUpperCase();
             break;
@@ -2215,18 +2215,18 @@ export const getSortedEvents = createSelector(
           return getSort('layer').reverse();
         case 'layer-dsc':
           return getSort('layer');
-        case 'event-asc':
-          return getSort('event').reverse();
-        case 'event-dsc':
-          return getSort('event');
-        case 'artboard-asc':
-          return getSort('artboard').reverse();
-        case 'artboard-dsc':
-          return getSort('artboard');
-        case 'destinationArtboard-asc':
-          return getSort('destinationArtboard').reverse();
-        case 'destinationArtboard-dsc':
-          return getSort('destinationArtboard');
+        case 'listener-asc':
+          return getSort('listener').reverse();
+        case 'listener-dsc':
+          return getSort('listener');
+        case 'origin-asc':
+          return getSort('origin').reverse();
+        case 'origin-dsc':
+          return getSort('origin');
+        case 'destination-asc':
+          return getSort('destination').reverse();
+        case 'destination-dsc':
+          return getSort('destination');
       }
     } else {
       return allEventIds;
