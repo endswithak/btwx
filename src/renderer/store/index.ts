@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 import thunk from 'redux-thunk';
 import logger from 'redux-logger';
 import rootReducer, { RootState } from './reducers';
-import { closePreview, startPreviewRecording, stopPreviewRecording, setPreviewFocusing, openPreview, setPreviewTweening } from './actions/preview';
+import { closePreview, closePreviewThunk, startPreviewRecording, stopPreviewRecording, setPreviewFocusing, openPreview, setPreviewTweening } from './actions/preview';
 import { hydratePreferences } from './actions/preferences';
 import { setEventDrawerEvent, setEventDrawerEventThunk } from './actions/eventDrawer';
 import { hydrateLayers, addLayerTween, removeLayerTweens, removeLayerTween, removeLayersEvent, insertImageThunk, groupSelectedThunk, ungroupSelectedThunk, alignSelectedToLeftThunk, alignSelectedToCenterThunk, alignSelectedToRightThunk, alignSelectedToTopThunk, alignSelectedToMiddleThunk, alignSelectedToBottomThunk, distributeSelectedHorizontallyThunk, distributeSelectedVerticallyThunk, sendSelectedBackwardThunk, bringSelectedForwardThunk, removeLayersGradientStop, setLayersEventEventListener } from './actions/layer';
@@ -163,6 +163,9 @@ const configureStore: any = (preloadedState, isDocumentWindow = false): typeof s
   };
   (window as any).closePreview = (): void => {
     store.dispatch(closePreview());
+  };
+  (window as any).closePreviewThunk = (params): void => {
+    store.dispatch(closePreviewThunk(params) as any);
   };
   (window as any).setPreviewFocusing = (focusing: boolean): void => {
     store.dispatch(setPreviewFocusing({focusing}));

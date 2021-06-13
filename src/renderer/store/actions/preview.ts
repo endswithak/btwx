@@ -1,3 +1,6 @@
+import { RootState } from '../reducers';
+import { gsap } from 'gsap';
+
 import {
   OPEN_PREVIEW,
   CLOSE_PREVIEW,
@@ -22,6 +25,22 @@ export const openPreview = (): PreviewTypes => ({
 export const closePreview = (): PreviewTypes => ({
   type: CLOSE_PREVIEW
 });
+
+export const closePreviewThunk = (isPreview = false) => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    const tweeningEvent = state.preview.tweening;
+    if (tweeningEvent && isPreview) {
+      if (gsap.getById(tweeningEvent)) {
+        gsap.getById(tweeningEvent).pause(0, false);
+      }
+    }
+    if (tweeningEvent) {
+      dispatch(setPreviewTweening({tweening: null}));
+    }
+    dispatch(closePreview());
+  }
+}
 
 export const startPreviewRecording = (): PreviewTypes => ({
   type: START_PREVIEW_RECORDING

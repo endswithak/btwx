@@ -433,8 +433,8 @@ export const createInstance = async ({
   });
 
   instance.preview.on('hide', (event) => {
-    instance.preview.webContents.executeJavaScript(`closePreview()`);
-    instance.document.webContents.executeJavaScript(`closePreview()`);
+    instance.preview.webContents.executeJavaScript(`closePreviewThunk(${JSON.stringify(true)})`);
+    instance.document.webContents.executeJavaScript(`closePreviewThunk()`);
   });
 
   instance.preview.on('show', (event) => {
