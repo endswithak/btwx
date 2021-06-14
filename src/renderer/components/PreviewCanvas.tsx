@@ -4,14 +4,8 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperPreview } from '../canvas';
 import CanvasArtboardLayer from './CanvasArtboardLayer';
-import touchCursorSvg from '../../../assets/cursor/touch.svg';
 
-interface PreviewCanvasProps {
-  touchCursor: boolean;
-}
-
-const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
-  const { touchCursor } = props;
+const PreviewCanvas = (): ReactElement => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isTweening = useSelector((state: RootState) => state.preview.tweening !== null);
@@ -42,10 +36,7 @@ const PreviewCanvas = (props: PreviewCanvasProps): ReactElement => {
   return (
     <div
       className='c-canvas'
-      ref={canvasContainerRef}
-      style={{
-        cursor: touchCursor ? `url(${touchCursorSvg}) 13 13, auto` : 'default'
-      }}>
+      ref={canvasContainerRef}>
       <canvas
         id='canvas-preview'
         ref={canvasRef}

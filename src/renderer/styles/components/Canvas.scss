@@ -23,7 +23,54 @@
   }
   &.c-canvas--dragover {
     @include themed() {
+      cursor: theme-prop(insert-file-cursor) 17 17, auto;
       box-shadow: 0 0 0 2px theme-prop(primary) inset;
+    }
+  }
+  &.c-canvas--insert {
+    @include themed() {
+      cursor: theme-prop(insert-default-cursor) 17 17, auto;
+    }
+  }
+  &.c-canvas--insert-text {
+    cursor: text;
+  }
+  &.c-canvas--insert-artboard {
+    cursor: crosshair;
+  }
+  &.c-canvas--insert-rectangle {
+    @include themed() {
+      cursor: theme-prop(insert-rectangle-cursor) 17 17, auto;
+    }
+  }
+  &.c-canvas--insert-ellipse {
+    @include themed() {
+      cursor: theme-prop(insert-ellipse-cursor) 17 17, auto;
+    }
+  }
+  &.c-canvas--insert-polygon {
+    @include themed() {
+      cursor: theme-prop(insert-polygon-cursor) 17 17, auto;
+    }
+  }
+  &.c-canvas--insert-rounded {
+    @include themed() {
+      cursor: theme-prop(insert-rounded-cursor) 17 17, auto;
+    }
+  }
+  &.c-canvas--insert-star {
+    @include themed() {
+      cursor: theme-prop(insert-star-cursor) 17 17, auto;
+    }
+  }
+  &.c-canvas--insert-line {
+    @include themed() {
+      cursor: theme-prop(insert-line-cursor) 17 17, auto;
+    }
+  }
+  @each $cursor in $cursors {
+    &.c-canvas--cursor-#{$cursor} {
+      cursor: $cursor;
     }
   }
 }

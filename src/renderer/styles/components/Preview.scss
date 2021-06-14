@@ -29,6 +29,10 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
+    &.c-preview__canvas--touch {
+      cursor: url('../../assets/cursor/touch.svg') 13 13, auto;
+    }
   }
 
   .c-preview__device {

@@ -24,8 +24,7 @@ const GradientSliderStop = (props: GradientSliderProps): ReactElement => {
       if (Draggable.get(ref.current)) {
         Draggable.get(ref.current).kill();
       }
-      gsap.set(ref.current, {x: `${stop.position * 100}%`});
-      Draggable.create(ref.current, {
+      const draggable = Draggable.create(ref.current, {
         type: 'x',
         zIndexBoost: false,
         bounds: '#c-gradient-slider__slider',
@@ -50,7 +49,9 @@ const GradientSliderStop = (props: GradientSliderProps): ReactElement => {
           document.body.style.cursor = 'auto';
           setDragging(false);
         }
-      });
+      })[0];
+      gsap.set(ref.current, {x: stop.position * draggable.maxX});
+      draggable.update();
     }
   }
 

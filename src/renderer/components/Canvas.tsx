@@ -3,7 +3,6 @@ import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
-import { base64ToBuffer } from '../utils';
 import { addImageThunk, setHoverFillThunk, setHoverStrokeThunk, setHoverShadowThunk } from '../store/actions/layer';
 import { setCanvasReady, setCanvasFocusing, setCanvasMeasuring, setCanvasMousePosition } from '../store/actions/canvasSettings';
 import { hydrateDocumentThunk } from '../store/actions/documentSettings';
@@ -24,14 +23,6 @@ import GradientTool from './GradientTool';
 import CanvasUI from './CanvasUI';
 import CanvasProjects from './CanvasProjects';
 import LoadingIndicator from './LoadingIndicator';
-import insertCursor from '../../../assets/cursor/insert.svg';
-import insertRectangleCursor from '../../../assets/cursor/insert-rectangle.svg';
-import insertRoundedCursor from '../../../assets/cursor/insert-rounded.svg';
-import insertEllipseCursor from '../../../assets/cursor/insert-ellipse.svg';
-import insertPolygonCursor from '../../../assets/cursor/insert-polygon.svg';
-import insertStarCursor from '../../../assets/cursor/insert-star.svg';
-import insertLineCursor from '../../../assets/cursor/insert-line.svg';
-import insertFileCursor from '../../../assets/cursor/insert-file.svg';
 
 interface CanvasHitResult {
   layerHitResult: {
@@ -361,6 +352,42 @@ const Canvas = (): ReactElement => {
         dragOver
         ? `${' '}c-canvas--dragover`
         : ''
+      }${
+        cursor && cursor[0]
+        ? `${' '}c-canvas--cursor-${cursor[0]}`
+        : ''
+      }${
+        activeTool === 'Text'
+        ? `${' '}c-canvas--insert-text`
+        : ''
+      }${
+        activeTool === 'Artboard'
+        ? `${' '}c-canvas--insert-artboard`
+        : ''
+      }${
+        activeTool === 'Shape' && shapeToolType === 'Rectangle'
+        ? `${' '}c-canvas--insert-rectangle`
+        : ''
+      }${
+        activeTool === 'Shape' && shapeToolType === 'Ellipse'
+        ? `${' '}c-canvas--insert-ellipse`
+        : ''
+      }${
+        activeTool === 'Shape' && shapeToolType === 'Polygon'
+        ? `${' '}c-canvas--insert-polygon`
+        : ''
+      }${
+        activeTool === 'Shape' && shapeToolType === 'Rounded'
+        ? `${' '}c-canvas--insert-rounded`
+        : ''
+      }${
+        activeTool === 'Shape' && shapeToolType === 'Star'
+        ? `${' '}c-canvas--insert-star`
+        : ''
+      }${
+        activeTool === 'Shape' && shapeToolType === 'Line'
+        ? `${' '}c-canvas--insert-line`
+        : ''
       }`}
       onMouseMove={ready ? handleMouseMove : null}
       onMouseDown={ready ? handleMouseDown : null}
@@ -370,36 +397,7 @@ const Canvas = (): ReactElement => {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
       onDragLeave={handleDragEnd}
-      onDrop={handleDrop}
-      style={{
-        cursor: dragOver
-        ? `url(${insertFileCursor}) 14 14, auto`
-        : cursor[0] === 'crosshair'
-          ? (() => {
-              switch(activeTool) {
-                case 'Shape':
-                  switch(shapeToolType) {
-                    case 'Rectangle':
-                      return `url(${insertRectangleCursor}) 17 17, auto`;
-                    case 'Ellipse':
-                      return `url(${insertEllipseCursor}) 17 17, auto`;
-                    case 'Polygon':
-                      return `url(${insertPolygonCursor}) 17 17, auto`;
-                    case 'Rounded':
-                      return `url(${insertRoundedCursor}) 17 17, auto`;
-                    case 'Star':
-                      return `url(${insertStarCursor}) 17 17, auto`;
-                    case 'Line':
-                      return `url(${insertLineCursor}) 17 17, auto`;
-                    default:
-                      return `url(${insertCursor}) 17 17, auto`;
-                  }
-                default:
-                  return `url(${insertCursor}) 17 17, auto`;
-              }
-            })()
-          : cursor[0]
-      }}>
+      onDrop={handleDrop}>
       <CanvasUI />
       <CanvasProjects />
       {

@@ -26,6 +26,8 @@
   font-style: italic;
 }
 
+$cursors: auto, default, none, context-menu, help, pointer, progress, wait, cell, crosshair, text, vertical-text, alias, copy, move, no-drop, not-allowed, grab, grabbing, all-scroll, col-resize, row-resize, n-resize, e-resize, s-resize, w-resize, ne-resize, nw-resize, se-resize, sw-resize, ew-resize, ns-resize, nesw-resize, nwse-resize, zoom-in, zoom-out;
+
 $font-family: 'Space Mono', system-ui, -apple-system, Menlo, Helvetica, Arial, sans-serif;
 
 $aspect-ratios: (
@@ -471,7 +473,21 @@ $themes: (
     canvas-light-background: $theme-light-background-z0,
     barber-pole: url('../../assets/barber-pole-light.svg'),
     barber-pole-active: url('../../assets/barber-pole-light-active.svg'),
-    barber-pole-primary: url('../../assets/barber-pole-primary-light.svg')
+    barber-pole-primary: url('../../assets/barber-pole-primary-light.svg'),
+    insert-default-cursor: url('../../assets/cursor/insert.svg'),
+    insert-file-cursor: url('../../assets/cursor/insert-file.svg'),
+    insert-rectangle-cursor: url('../../assets/cursor/insert-rectangle.svg'),
+    insert-ellipse-cursor: url('../../assets/cursor/insert-ellipse.svg'),
+    insert-rounded-cursor: url('../../assets/cursor/insert-rounded.svg'),
+    insert-star-cursor: url('../../assets/cursor/insert-star.svg'),
+    insert-polygon-cursor: url('../../assets/cursor/insert-polygon.svg'),
+    insert-line-cursor: url('../../assets/cursor/insert-line.svg'),
+    insert-gradient-stop-cursor: url('../../assets/cursor/insert-gradient-stop.svg'),
+    dropper-default-cursor: url('../../assets/cursor/dropper.svg'),
+    dropper-fill-cursor: url('../../assets/cursor/dropper-fill.svg'),
+    dropper-stroke-cursor: url('../../assets/cursor/dropper-stroke.svg'),
+    dropper-shadow-cursor: url('../../assets/cursor/dropper-shadow.svg'),
+    touch-cursor: url('../../assets/cursor/touch.svg')
   ),
   dark: (
     primary: $theme-dark-primary,
@@ -565,7 +581,21 @@ $themes: (
     canvas-light-background: $theme-light-background-z0,
     barber-pole: url('../../assets/barber-pole-dark.svg'),
     barber-pole-active: url('../../assets/barber-pole-dark-active.svg'),
-    barber-pole-primary: url('../../assets/barber-pole-primary-dark.svg')
+    barber-pole-primary: url('../../assets/barber-pole-primary-dark.svg'),
+    insert-default-cursor: url('../../assets/cursor/insert.svg'),
+    insert-file-cursor: url('../../assets/cursor/insert-file.svg'),
+    insert-rectangle-cursor: url('../../assets/cursor/insert-rectangle.svg'),
+    insert-ellipse-cursor: url('../../assets/cursor/insert-ellipse.svg'),
+    insert-rounded-cursor: url('../../assets/cursor/insert-rounded.svg'),
+    insert-star-cursor: url('../../assets/cursor/insert-star.svg'),
+    insert-polygon-cursor: url('../../assets/cursor/insert-polygon.svg'),
+    insert-line-cursor: url('../../assets/cursor/insert-line.svg'),
+    insert-gradient-stop-cursor: url('../../assets/cursor/insert-gradient-stop.svg'),
+    dropper-default-cursor: url('../../assets/cursor/dropper.svg'),
+    dropper-fill-cursor: url('../../assets/cursor/dropper-fill.svg'),
+    dropper-stroke-cursor: url('../../assets/cursor/dropper-stroke.svg'),
+    dropper-shadow-cursor: url('../../assets/cursor/dropper-shadow.svg'),
+    touch-cursor: url('../../assets/cursor/touch.svg')
   ),
 );
 

@@ -85,9 +85,12 @@ const Preview = (): ReactElement => {
             <PreviewTopbar
               touchCursor={touchCursor}
               setTouchCursor={setTouchCursor} />
-            <div className='c-preview__canvas'>
-              <PreviewCanvas
-                touchCursor={touchCursor} />
+            <div className={`c-preview__canvas${
+              touchCursor
+              ? `${' '}c-preview__canvas--touch`
+              : ''
+            }`}>
+              <PreviewCanvas />
               <PreviewDevice />
             </div>
             <video
