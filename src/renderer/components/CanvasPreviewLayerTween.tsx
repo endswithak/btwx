@@ -336,7 +336,9 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       }
     }
     if (prop === 'stroke' || prop === 'fill') {
-      handleFSCheck();
+      // this is broken, future me figure it out
+      // handleFSCheck();
+      return true;
     } else {
       return currentProp !== prevProp;
     }
