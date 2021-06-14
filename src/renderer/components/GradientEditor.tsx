@@ -48,17 +48,6 @@ const GradientEditor = (): ReactElement => {
     debounceStopColorChange(gradientValue.activeStopIndex, colors[selected[0]]);
   }, [gradientValue.activeStopIndex]);
 
-  useEffect(() => {
-    document.addEventListener('mousedown', onMouseDown);
-    return (): void => {
-      if (gradientEditor.isOpen) {
-        dispatch(closeGradientEditor());
-      }
-      dispatch(setCanvasFocusing({focusing: true}));
-      document.removeEventListener('mousedown', onMouseDown);
-    }
-  }, []);
-
   const onMouseDown = (event: any): void => {
     if (editorRef.current && !editorRef.current.contains(event.target)) {
       if ((event.target.id as string).startsWith('canvas')) {
@@ -135,6 +124,19 @@ const GradientEditor = (): ReactElement => {
       }));
     }
   }
+
+  useEffect(() => {
+    document.addEventListener('mousedown', onMouseDown);
+    return (): void => {
+      if (gradientEditor.isOpen) {
+        dispatch(closeGradientEditor());
+      }
+      dispatch(setCanvasFocusing({
+        focusing: true
+      }));
+      document.removeEventListener('mousedown', onMouseDown);
+    }
+  }, []);
 
   return (
     <div

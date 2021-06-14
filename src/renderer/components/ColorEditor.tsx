@@ -5,8 +5,8 @@ import debounce from 'lodash.debounce';
 import { RootState } from '../store/reducers';
 import { closeColorEditor } from '../store/actions/colorEditor';
 import { openGradientEditor } from '../store/actions/gradientEditor';
-import { getSelectedFillColors, getSelectedShadowColors, getSelectedStrokeColors, getSelectedFillHex, getSelectedStrokeHex, getSelectedShadowHex } from '../store/selectors/layer';
-import { setLayersFillType, setLayersFillColors, setLayersStrokeColors, setLayersStrokeFillType, setLayersShadowColors, setLayersFillColor, setLayersStrokeColor, setLayersShadowColor } from '../store/actions/layer';
+import { getSelectedFillColors, getSelectedShadowColors, getSelectedStrokeColors } from '../store/selectors/layer';
+import { setLayersFillType, setLayersFillColors, setLayersStrokeColors, setLayersStrokeFillType, setLayersShadowColors } from '../store/actions/layer';
 import { setTextSettingsFillColor } from '../store/actions/textSettings';
 import { setCanvasFocusing } from '../store/actions/canvasSettings';
 import ColorPicker from './ColorPicker';
@@ -15,7 +15,6 @@ import FillTypeSelector from './FillTypeSelector';
 const ColorEditor = (): ReactElement => {
   const editorRef = useRef<HTMLDivElement>(null);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
-  const canvasFocusing = useSelector((state: RootState) => state.canvasSettings.focusing);
   const colorValues = useSelector((state: RootState) => {
     switch(state.colorEditor.prop) {
       case 'fill':
@@ -26,41 +25,42 @@ const ColorEditor = (): ReactElement => {
         return getSelectedShadowColors(state);
     }
   });
-  const includesTextLayer = useSelector((state: RootState) => state.layer.present.selected.some((id: string) => state.layer.present.byId[id].type === 'Text'));
+  const includesTextLayer = useSelector((state: RootState) => state.layer.present.selected.find((id: string) => state.layer.present.byId[id] && state.layer.present.byId[id].type === 'Text'));
   const colorEditor = useSelector((state: RootState) => state.colorEditor);
   const dispatch = useDispatch();
 
   const debounceColors = useCallback(
-    debounce((colors: { [id: string]: { [P in keyof Btwx.Color]?: Btwx.Color[P] } }) => {
+    debounce((colors: { [id: string]: { [P in keyof Btwx.Color]?: Btwx.Color[P] } }, colorValues: any, includesTextLayer: string) => {
       switch(colorEditor.prop) {
         case 'fill': {
-          dispatch(setLayersFillColors({layers: selected, fillColors: colors}));
-          // if (includesTextLayer) {
-          //   dispatch(setTextSettingsFillColor({fillColor: color}));
-          // }
+          dispatch(setLayersFillColors({
+            layers: selected,
+            fillColors: colors
+          }));
+          if (includesTextLayer) {
+            const firstTextItemColor = colorValues[includesTextLayer];
+            dispatch(setTextSettingsFillColor({
+              fillColor: firstTextItemColor
+            }));
+          }
           break;
         }
         case 'stroke':
-          dispatch(setLayersStrokeColors({layers: selected, strokeColors: colors}));
+          dispatch(setLayersStrokeColors({
+            layers: selected,
+            strokeColors: colors
+          }));
           break;
         case 'shadow':
-          dispatch(setLayersShadowColors({layers: selected, shadowColors: colors}));
+          dispatch(setLayersShadowColors({
+            layers: selected,
+            shadowColors: colors
+          }));
           break;
       }
     }, 150),
     []
   );
-
-  useEffect(() => {
-    document.addEventListener('mousedown', onMouseDown);
-    return (): void => {
-      if (colorEditor.isOpen) {
-        dispatch(closeColorEditor());
-      }
-      dispatch(setCanvasFocusing({focusing: true}));
-      document.removeEventListener('mousedown', onMouseDown);
-    }
-  }, []);
 
   const onMouseDown = (event: any): void => {
     if (editorRef.current && !editorRef.current.contains(event.target)) {
@@ -69,7 +69,7 @@ const ColorEditor = (): ReactElement => {
   }
 
   const handleColorChange = (colors: { [id: string]: { [P in keyof Btwx.Color]?: Btwx.Color[P] } }): void => {
-    debounceColors(colors);
+    debounceColors(colors, colorValues, includesTextLayer);
   }
 
   const handleLinearGradientClick = (): void => {
@@ -121,6 +121,19 @@ const ColorEditor = (): ReactElement => {
       y: colorEditor.y
     }));
   }
+
+  useEffect(() => {
+    document.addEventListener('mousedown', onMouseDown);
+    return (): void => {
+      if (colorEditor.isOpen) {
+        dispatch(closeColorEditor());
+      }
+      dispatch(setCanvasFocusing({
+        focusing: true
+      }));
+      document.removeEventListener('mousedown', onMouseDown);
+    }
+  }, []);
 
   return (
     <div

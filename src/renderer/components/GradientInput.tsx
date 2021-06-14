@@ -78,19 +78,23 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
   }, [gradientValue, selected, gradientOpacity, enabledValue]);
 
   const handleSubmitSuccess = (nextOpacity: any): void => {
-    dispatch(setLayersGradient({layers: selected, prop: prop, gradient: {
-      ...gradient,
-      stops: gradient.stops.reduce((result, current) => {
-        result = [...result, {
-          ...current,
-          color: {
-            ...current.color,
-            a: nextOpacity
-          }
-        }];
-        return result;
-      }, [])
-    }}));
+    dispatch(setLayersGradient({
+      layers: selected,
+      prop: prop,
+      gradient: {
+        ...gradient,
+        stops: gradient.stops.reduce((result, current) => {
+          result = [...result, {
+            ...current,
+            color: {
+              ...current.color,
+              a: nextOpacity
+            }
+          }];
+          return result;
+        }, [])
+      }
+    }));
   }
 
   const handleSwatchClick = (e: any): void => {
@@ -102,10 +106,14 @@ const GradientInput = (props: GradientInputProps): ReactElement => {
     if (!enabled) {
       switch(prop) {
         case 'fill':
-          dispatch(enableLayersFill({layers: selected}));
+          dispatch(enableLayersFill({
+            layers: selected
+          }));
           break;
         case 'stroke':
-          dispatch(enableLayersStroke({layers: selected}));
+          dispatch(enableLayersStroke({
+            layers: selected
+          }));
           break;
       }
     }
