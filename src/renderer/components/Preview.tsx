@@ -95,10 +95,7 @@ const Preview = (): ReactElement => {
             </div>
             <video
               id='preview-video'
-              style={{
-              position: 'absolute',
-              opacity: 0
-            }} />
+              className='c-preview__video' />
           </>
         : <EmptyState
             icon='preview'

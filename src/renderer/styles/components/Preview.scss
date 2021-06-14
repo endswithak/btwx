@@ -35,6 +35,11 @@
     }
   }
 
+  .c-preview__video {
+    position: absolute;
+    opacity: 0;
+  }
+
   .c-preview__device {
     position: absolute;
     z-index: 9999999;
