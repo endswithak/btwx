@@ -1335,36 +1335,6 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     }
   }
 
-  const handleClearTransforms = (currentProps: TweenProps, prevProps: TweenProps) => {
-    const { paperLayer, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
-    clearLayerTransforms({
-      paperLayer,
-      layerType: originLayerItem.type,
-      transform: {
-        rotation: prevProps.rotation,
-        horizontalFlip: prevProps.scaleX,
-        verticalFlip: prevProps.scaleY
-      } as any,
-      variable: true,
-      width: prevProps.boundingWidth,
-      height: prevProps.boundingHeight
-    });
-    if (shapeMask) {
-      clearLayerTransforms({
-        paperLayer: shapeMask,
-        layerType: originLayerItem.type,
-        transform: {
-          rotation: prevProps.rotation,
-          horizontalFlip: prevProps.scaleX,
-          verticalFlip: prevProps.scaleY
-        } as any,
-        variable: true,
-        width: prevProps.boundingWidth,
-        height: prevProps.boundingHeight
-      });
-    }
-  }
-
   const handleWidthTween = (currentProps: TweenProps, prevProps: TweenProps) => {
     const { paperLayer, textContent, textMask, textBackground, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
     if (getHasSinglePropChange(currentProps, prevProps, 'width')) {
@@ -1718,6 +1688,36 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   const handleGradientOD = (currentProps: TweenProps, prevProps: TweenProps) => {
     if (currentProps.strokeType || currentProps.fillType) {
       updateGradientsOD();
+    }
+  }
+
+  const handleClearTransforms = (currentProps: TweenProps, prevProps: TweenProps) => {
+    const { paperLayer, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
+    clearLayerTransforms({
+      paperLayer,
+      layerType: originLayerItem.type,
+      transform: {
+        rotation: prevProps.rotation,
+        horizontalFlip: prevProps.scaleX,
+        verticalFlip: prevProps.scaleY
+      } as any,
+      variable: true,
+      width: prevProps.boundingWidth,
+      height: prevProps.boundingHeight
+    });
+    if (shapeMask) {
+      clearLayerTransforms({
+        paperLayer: shapeMask,
+        layerType: originLayerItem.type,
+        transform: {
+          rotation: prevProps.rotation,
+          horizontalFlip: prevProps.scaleX,
+          verticalFlip: prevProps.scaleY
+        } as any,
+        variable: true,
+        width: prevProps.boundingWidth,
+        height: prevProps.boundingHeight
+      });
     }
   }
 

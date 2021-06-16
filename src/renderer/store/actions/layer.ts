@@ -6082,465 +6082,565 @@ export const pasteLayersFromClipboard = (payload: PasteLayersFromClipboardPayloa
   payload
 });
 
+interface HandlePasteText {
+  state: RootState;
+  resolve: any;
+  dispatch: any;
+  overSelection: boolean;
+}
+
+const handlePasteText = ({state, dispatch, resolve, overSelection}: HandlePasteText) => {
+  const formats = (window as any).api.readClipboardFormats();
+  if (formats.some(format => format.startsWith('text'))) {
+    const activeArtboard = state.layer.present.activeArtboard;
+    const activeArtboardItem = activeArtboard ? state.layer.present.byId[activeArtboard] as Btwx.Artboard : null;
+    const topScopeId = state.layer.present.scope[state.layer.present.scope.length - 1] === 'root'
+    ? activeArtboard
+      ? activeArtboard
+      : null
+    : state.layer.present.scope[state.layer.present.scope.length - 1];
+    const topScopeItem = topScopeId ? state.layer.present.byId[topScopeId] as Btwx.Artboard | Btwx.Group : null
+    const text = (window as any).api.readClipboardText();
+    const parsedText: Btwx.ClipboardLayers = JSON.parse(text);
+    if (parsedText.type && (parsedText.type === 'layers' || parsedText.type === 'sketch-layers')) {
+      // replace old ids with new ids
+      const withNewIds: string = parsedText.compiledIds.reduce((result: string, current: string) => {
+        const newId = uuidv4();
+        result = result.replaceAll(current, newId);
+        return result;
+      }, text);
+      // parsed layers with new ids
+      const parsedClipboardLayers: Btwx.ClipboardLayers = JSON.parse(withNewIds);
+      let rootChildrenLength = state.layer.present.byId.root.children.length;
+      let lastTopScopeChild = topScopeItem ? topScopeItem.children[topScopeItem.children.length - 1] : null;
+      let lastTopScopeChildFromClip = false;
+      // handle main layers (selected layers when copied)
+      let clipboardLayers: Btwx.ClipboardLayers = parsedClipboardLayers.main.reduce((result, current) => {
+        const layerItem = result.byId[current];
+        // handle artboard main layers
+        if (layerItem.type === 'Artboard') {
+          const projectIndex = Math.floor(rootChildrenLength / ARTBOARDS_PER_PROJECT) + 1;
+          result = {
+            ...result,
+            byId: {
+              ...result.byId,
+              [current]: {
+                ...result.byId[current],
+                projectIndex: projectIndex
+              }
+            } as any
+          }
+          rootChildrenLength++;
+        }
+        // handle non-artboard main layers
+        else {
+          // if active artboard, add non-artboard main layers to active artboard
+          if (activeArtboard) {
+            const lastTopScopeChildItem: Btwx.MaskableLayer = lastTopScopeChildFromClip ? result.byId[lastTopScopeChild] as Btwx.MaskableLayer : state.layer.present.byId[lastTopScopeChild] as Btwx.MaskableLayer;
+            const isLastTopScopeChildMask = lastTopScopeChildItem && lastTopScopeChildItem.type === 'Shape' && (lastTopScopeChildItem as Btwx.Shape).mask;
+            result = {
+              ...result,
+              byId: {
+                ...result.byId,
+                [current]: {
+                  ...result.byId[current],
+                  underlyingMask: lastTopScopeChildItem ? isLastTopScopeChildMask ? lastTopScopeChildItem.id : lastTopScopeChildItem.underlyingMask : null,
+                  parent: topScopeItem.id,
+                  artboard: activeArtboard,
+                  scope: [...topScopeItem.scope, topScopeItem.id]
+                }
+              } as any
+            }
+            if (lastTopScopeChildItem && (lastTopScopeChildItem.masked || isLastTopScopeChildMask) && !(layerItem as Btwx.MaskableLayer).ignoreUnderlyingMask) {
+              result = {
+                ...result,
+                byId: {
+                  ...result.byId,
+                  [current]: {
+                    ...result.byId[current],
+                    masked: true
+                  }
+                } as any
+              }
+            }
+            lastTopScopeChild = current;
+            if (!lastTopScopeChildFromClip) {
+              lastTopScopeChildFromClip = true;
+            }
+          }
+          // if no active artboard, create artboard for non-artboard main layers
+          else {
+            const artboardId = uuidv4();
+            const prevLayerArtboard = result.topScopeArtboards.byId[layerItem.artboard];
+            // update layerItem and others
+            result = {
+              ...result,
+              byId: {
+                ...result.byId,
+                [artboardId]: {
+                  type: 'Artboard',
+                  id: artboardId,
+                  name: layerItem.name,
+                  artboard: artboardId,
+                  parent: 'root',
+                  children: [current],
+                  scope: ['root'],
+                  projectIndex: rootChildrenLength !== 0 ? Math.floor(rootChildrenLength / ARTBOARDS_PER_PROJECT) + 1 : 1,
+                  frame: {
+                    ...layerItem.frame,
+                    innerWidth: layerItem.frame.width,
+                    innerHeight: layerItem.frame.height,
+                    x: layerItem.frame.x + prevLayerArtboard.frame.x,
+                    y: layerItem.frame.y + prevLayerArtboard.frame.y
+                  },
+                  showChildren: true,
+                  selected: false,
+                  hover: false,
+                  events: [],
+                  originForEvents: [],
+                  destinationForEvents: [],
+                  tweens: {
+                    allIds: [],
+                    asOrigin: [],
+                    asDestination: [],
+                    byProp: TWEEN_PROPS_MAP
+                  },
+                  transform: DEFAULT_TRANSFORM,
+                  style: getLayerStyle({layer:{type:'Artboard'}})
+                },
+                [current]: {
+                  ...result.byId[current],
+                  frame: {
+                    ...result.byId[current].frame,
+                    x: 0,
+                    y: 0
+                  },
+                  selected: false,
+                  hover: false,
+                  scope: ['root', artboardId],
+                  parent: artboardId,
+                  artboard: artboardId
+                }
+              } as any
+            }
+            // update other arrays
+            const newMain = result.main.slice();
+            newMain.splice(result.main.indexOf(current), 1, artboardId);
+            result = {
+              ...result,
+              allIds: [...result.allIds, artboardId],
+              allArtboardIds: [...result.allArtboardIds, artboardId],
+              compiledIds: [...result.compiledIds, artboardId],
+              topScopeChildren: result.topScopeChildren.filter((id) => id !== current),
+              main: newMain
+            }
+            // update layerItem children with new artboard and scope if group
+            if (layerItem.type === 'Group') {
+              const groups: string[] = [current];
+              const groupLayers: { [id: string]: Btwx.Layer } = {};
+              let i = 0;
+              while(i < groups.length) {
+                const groupLayerItem = result.byId[groups[i]];
+                if (groupLayerItem.children) {
+                  groupLayerItem.children.forEach((child) => {
+                    result = {
+                      ...result,
+                      byId: {
+                        ...result.byId,
+                        [child]: {
+                          ...result.byId[child],
+                          artboard: artboardId,
+                          scope: [...groupLayerItem.scope, ...groupLayerItem.id]
+                        }
+                      }
+                    }
+                    const groupChildLayerItem = result.byId[child];
+                    if (groupChildLayerItem.children && groupChildLayerItem.children.length > 0) {
+                      groups.push(child);
+                    }
+                    groupLayers[child] = groupChildLayerItem;
+                  });
+                }
+                i++;
+              }
+            }
+            rootChildrenLength++;
+          }
+        }
+        return result;
+      }, parsedClipboardLayers);
+      // create clipboard bounds
+      const clipboardBounds = new paperMain.Rectangle(
+        new paperMain.Point(
+          (clipboardLayers.bounds as number[])[1],
+          (clipboardLayers.bounds as number[])[2]
+        ),
+        new paperMain.Size(
+          (clipboardLayers.bounds as number[])[3],
+          (clipboardLayers.bounds as number[])[4]
+        )
+      );
+      // handle if clipboard position is not within viewport
+      if (!clipboardBounds.center.isInside(paperMain.view.bounds)) {
+        const pointDiff = paperMain.view.center.subtract(clipboardBounds.center).round();
+        clipboardLayers.main.forEach((id) => {
+          const clipboardLayerItem = clipboardLayers.byId[id];
+          if (clipboardLayerItem.type === 'Artboard') {
+            clipboardLayerItem.frame.x += pointDiff.x;
+            clipboardLayerItem.frame.y += pointDiff.y;
+          }
+        });
+      }
+      // handle paste over selection
+      if (overSelection && state.layer.present.selected.length > 0) {
+        const selectedBounds = getSelectedBounds(state);
+        const selectionPosition = selectedBounds.center;
+        const pointDiff = selectionPosition.subtract(clipboardBounds.center).round();
+        clipboardLayers.main.forEach((id) => {
+          const clipboardLayerItem = clipboardLayers.byId[id];
+          const prevX = clipboardLayerItem.frame.x;
+          const prevY = clipboardLayerItem.frame.y;
+          clipboardLayerItem.frame.x += pointDiff.x;
+          clipboardLayerItem.frame.y += pointDiff.y;
+          if (clipboardLayerItem.type !== 'Artboard') {
+            const prevLayerItem = parsedClipboardLayers.byId[id];
+            const prevArtboardItem = parsedClipboardLayers.topScopeArtboards.byId[prevLayerItem.artboard];
+            const artboardXDiff = activeArtboardItem.frame.x - prevArtboardItem.frame.x;
+            const artboardYDiff = activeArtboardItem.frame.y - prevArtboardItem.frame.y;
+            clipboardLayerItem.frame.x -= artboardXDiff;
+            clipboardLayerItem.frame.y -= artboardYDiff;
+            const xDiff = clipboardLayerItem.frame.x - prevX;
+            const yDiff = clipboardLayerItem.frame.y - prevY;
+            if (clipboardLayerItem.type === 'Text') {
+              (clipboardLayerItem as Btwx.Text).point.x += xDiff;
+              (clipboardLayerItem as Btwx.Text).point.y += yDiff;
+              (clipboardLayerItem as Btwx.Text).lines.forEach((line) => {
+                line.frame.x += xDiff;
+                line.frame.y += yDiff;
+                line.anchor.x += xDiff;
+                line.anchor.y += yDiff;
+              });
+            }
+            if (clipboardLayerItem.type === 'Shape' && (clipboardLayerItem as Btwx.Shape).shapeType === 'Line') {
+              (clipboardLayerItem as Btwx.Line).from.x += xDiff;
+              (clipboardLayerItem as Btwx.Line).from.y += yDiff;
+              (clipboardLayerItem as Btwx.Line).to.x += xDiff;
+              (clipboardLayerItem as Btwx.Line).to.y += yDiff;
+            }
+          }
+        });
+      }
+      // handle images
+      Object.keys(clipboardLayers.images).forEach((imgId) => {
+        const documentImage = clipboardLayers.images[imgId];
+        // const documentImageExists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(buffer));
+        const sessionImageExists = state.session.images.allIds.find((id) => state.session.images.byId[id].base64 === documentImage.base64);
+        if (!sessionImageExists) {
+          // if (!documentImageExists) {
+          //   dispatch(addDocumentImage(documentImage));
+          // }
+          dispatch(addSessionImage(documentImage));
+        } else {
+          clipboardLayers = clipboardLayers.allImageIds.filter((id) =>
+            (clipboardLayers.byId[id] as Btwx.Image).imageId === imgId
+          ).reduce((result, current) => ({
+            ...result,
+            byId: {
+              ...result.byId,
+              [current]: {
+                ...result.byId[current],
+                imageId: sessionImageExists
+              } as Btwx.Image
+            }
+          }), clipboardLayers);
+        }
+      });
+      if (clipboardLayers.type === 'sketch-layers') {
+        // Dont have galaxy brain math skillz to figure out point in plugin...
+        // so I do it here
+        clipboardLayers = clipboardLayers.allTextIds.reduce((result, current) => {
+          const textItem = clipboardLayers.byId[current] as Btwx.Text;
+          const artboardItem = (clipboardLayers.byId[textItem.artboard] ? clipboardLayers.byId[textItem.artboard] : state.layer.present.byId[textItem.artboard]) as Btwx.Artboard;
+          const point = new paperMain.Point(textItem.point.x, textItem.point.y);
+          const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
+          const getAreaTextRectangle = () => {
+            const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
+            const textPosition = new paperMain.Point(textItem.frame.x, textItem.frame.y);
+            const absPosition = textPosition.add(artboardPosition);
+            const topLeft = new paperMain.Point(
+              absPosition.x - (textItem.frame.innerWidth / 2),
+              absPosition.y - (textItem.frame.innerHeight / 2)
+            );
+            const bottomRight = new paperMain.Point(
+              absPosition.x + (textItem.frame.innerWidth / 2),
+              absPosition.y + (textItem.frame.innerHeight / 2)
+            );
+            return new paperMain.Rectangle({
+              from: topLeft,
+              to: bottomRight
+            });
+          }
+          const textContainer = new paperMain.Group({
+            insert: false,
+            children: [
+              new paperMain.Path.Rectangle({
+                rectangle: getAreaTextRectangle(),
+                // fillColor: tinyColor('#fff').setAlpha(0.01).toRgbString(),
+                // blendMode: 'multiply',
+                fillColor: '#000',
+                data: {
+                  id: 'textMask',
+                  type: 'LayerChild',
+                  layerType: 'Text'
+                },
+                clipMask: true
+              }),
+              new paperMain.Path.Rectangle({
+                rectangle: getAreaTextRectangle(),
+                // fillColor: tinyColor('#fff').setAlpha(0.01).toRgbString(),
+                // blendMode: 'multiply',
+                fillColor: tinyColor('red').setAlpha(0.25).toRgbString(),
+                data: {
+                  id: 'textBackground',
+                  type: 'LayerChild',
+                  layerType: 'Text'
+                }
+              }),
+              new paperMain.PointText({
+                point: point.add(artboardPosition),
+                data: {
+                  id: 'textContent',
+                  type: 'LayerChild',
+                  layerType: 'Text'
+                },
+                content: getContent({
+                  paragraphs: textItem.paragraphs
+                }),
+                ...getPaperStyle({
+                  style: textItem.style,
+                  textStyle: textItem.textStyle,
+                  isLine: false,
+                  layerFrame: textItem.frame,
+                  artboardFrame: artboardItem.frame
+                })
+              })
+            ]
+          });
+          const initialLineAnchor = textItem.lines[0].anchor;
+          const absAnchor = new paperMain.Point(initialLineAnchor.x, initialLineAnchor.y).add(artboardPosition);
+          const textContent = textContainer.getItem({data:{id:'textContent'}}) as paper.PointText;
+          positionTextContent({
+            paperLayer: textContainer,
+            verticalAlignment: textItem.textStyle.verticalAlignment,
+            justification: textItem.textStyle.justification,
+            textResize: textItem.textStyle.textResize
+          });
+          const pointYDiff = textContent.point.y - absAnchor.y;
+          textContainer.position.y -= pointYDiff;
+          applyLayerTransforms({
+            paperLayer: textContainer,
+            transform: textItem.transform
+          });
+          const pointWithTransforms = textContent.point.subtract(artboardPosition);
+          const positionWithTransforms = textContainer.position.subtract(artboardPosition);
+          return {
+            ...result,
+            byId: {
+              ...result.byId,
+              [current]: {
+                ...result.byId[current],
+                frame: {
+                  ...result.byId[current].frame,
+                  y: positionWithTransforms.y
+                },
+                point: {
+                  x: pointWithTransforms.x,
+                  y: pointWithTransforms.y
+                }
+              } as Btwx.Text
+            }
+          }
+        }, clipboardLayers);
+        // same goes for shape icons
+        clipboardLayers = clipboardLayers.allShapeIds.reduce((result, current) => {
+          const iconData = getShapeIcon((clipboardLayers.byId[current] as Btwx.Shape).pathData);
+          return {
+            ...result,
+            shapeIcons: {
+              ...result.shapeIcons,
+              [current]: iconData
+            }
+          }
+        }, clipboardLayers);
+      }
+      dispatch(pasteLayersFromClipboard({
+        clipboardLayers,
+        overSelection,
+        overPoint: null,
+        overLayer: null
+      }));
+      resolve(null);
+    }
+  }
+  resolve(null);
+}
+
+const handleImagePaste = ({state, dispatch, resolve, overSelection}: HandlePasteText) => {
+  const formats = (window as any).api.readClipboardFormats();
+  // if (formats.some(format => format.startsWith('text'))) {
+  //   if (state.layer.present.activeArtboard) {
+  //     const text = clipboard.readText();
+  //     const textSettings = state.textSettings;
+  //     const activeArtboardItem = state.layer.present.byId[state.layer.present.activeArtboard];
+  //     const artboardPosition = new paperMain.Point(activeArtboardItem.frame.x, activeArtboardItem.frame.y);
+  //     const youngestChild = activeArtboardItem.children[activeArtboardItem.children.length - 1];
+  //     const youngestChildItem = state.layer.present.byId[youngestChild] as Btwx.MaskableLayer;
+  //     // paste text as text layer
+  //     const textLayer = new paperMain.PointText({
+  //       point: artboardPosition,
+  //       data: {
+  //         id: 'textContent',
+  //         type: 'LayerChild',
+  //         layerType: 'Text'
+  //       },
+  //       content: text,
+  //       insert: false,
+  //       fontFamily: textSettings.fontFamily,
+  //       fontSize: textSettings.fontSize,
+  //       fontWeight: textSettings.fontWeight,
+  //       letterSpacing: textSettings.letterSpacing,
+  //       textTransform: textSettings.textTransform,
+  //       fillColor: textSettings.fillColor,
+  //       leading: getLeading({
+  //         leading: textSettings.leading,
+  //         fontSize: textSettings.fontSize
+  //       })
+  //     });
+  //     textLayer.position = artboardPosition;
+  //     const positionInArtboard = artboardPosition.subtract(textLayer.position);
+  //     const pointInArtboard = artboardPosition.subtract(textLayer.point);
+  //     const newTextLayer = {
+  //       type: 'Text',
+  //       name: text,
+  //       artboard: state.layer.present.activeArtboard,
+  //       parent: state.layer.present.activeArtboard,
+  //       children: null,
+  //       scope: ['root', state.layer.present.activeArtboard],
+  //       frame: {
+  //         x: positionInArtboard.x,
+  //         y: positionInArtboard.y,
+  //         width: textLayer.bounds.width,
+  //         height: textLayer.bounds.height,
+  //         innerWidth: textLayer.bounds.width,
+  //         innerHeight: textLayer.bounds.height
+  //       },
+  //       underlyingMask: youngestChild ? youngestChildItem.underlyingMask : null,
+  //       ignoreUnderlyingMask: false,
+  //       masked: youngestChild ? (youngestChildItem.masked || (youngestChildItem.type === 'Shape' && (youngestChildItem as Btwx.Shape).mask)) : null,
+  //       showChildren: false,
+  //       selected: false,
+  //       hover: false,
+  //       events: [],
+  //       tweens: {
+  //         allIds: [],
+  //         asOrigin: [],
+  //         asDestination: [],
+  //         byProp: TWEEN_PROPS_MAP
+  //       },
+  //       transform: DEFAULT_TRANSFORM,
+  //       style: {
+  //         ...DEFAULT_STYLE,
+  //         fill: {
+  //           ...DEFAULT_STYLE.fill,
+  //           color: textSettings.fillColor
+  //         },
+  //         stroke: {
+  //           ...DEFAULT_STYLE.stroke,
+  //           enabled: false
+  //         }
+  //       },
+  //       textStyle: {
+  //         fontSize: textSettings.fontSize,
+  //         leading: textSettings.leading,
+  //         fontWeight: textSettings.fontWeight,
+  //         fontFamily: textSettings.fontFamily,
+  //         justification: textSettings.justification,
+  //         letterSpacing: textSettings.letterSpacing,
+  //         textTransform: textSettings.textTransform,
+  //         textResize: 'autoWidth',
+  //         verticalAlignment: 'top',
+  //         fontStyle: textSettings.fontStyle
+  //       },
+  //       point: {
+  //         x: pointInArtboard.x,
+  //         y: pointInArtboard.y
+  //       },
+  //       text: text,
+  //       lines: getTextLines({
+  //         paperLayer: textLayer,
+  //         leading: getLeading({
+  //           leading: textSettings.leading,
+  //           fontSize: textSettings.fontSize
+  //         }),
+  //         artboardPosition: artboardPosition,
+  //         paragraphs: [[text]]
+  //       }),
+  //       paragraphs: [[text]]
+  //     } as Btwx.Text;
+  //     dispatch(addTextThunk({
+  //       layer: newTextLayer,
+  //       batch: false
+  //     }));
+  //   }
+  // }
+  // handle image paste
+  if (formats.some(format => format.startsWith('image'))) {
+    if (state.layer.present.activeArtboard) {
+      const activeArtboardItem = state.layer.present.byId[state.layer.present.activeArtboard];
+      const artboardPosition = new paperMain.Point(activeArtboardItem.frame.x, activeArtboardItem.frame.y);
+      const base64 = (window as any).api.readClipboardImage();
+      const originalDimensions = (window as any).api.readClipboardImageSize();
+      let x = 0;
+      let y = 0;
+      if (overSelection && state.layer.present.selected.length > 0) {
+        const selectedBounds = getSelectedBounds(state);
+        const pos = selectedBounds.center.subtract(artboardPosition);
+        x = pos.x;
+        y = pos.y;
+      }
+      dispatch(addImageThunk({
+        layer: {
+          name: 'image',
+          frame: {
+            x: x,
+            y: y,
+            width: originalDimensions.width,
+            height: originalDimensions.height,
+            innerWidth: originalDimensions.width,
+            innerHeight: originalDimensions.height
+          },
+          originalDimensions: {
+            width: originalDimensions.width,
+            height: originalDimensions.height
+          }
+        },
+        base64: base64 as string
+      }));
+    }
+  }
+  resolve(null);
+}
+
 export const pasteLayersThunk = (props?: { overSelection?: boolean; overPoint?: Btwx.Point; overLayer?: string }) => {
   return (dispatch: any, getState: any): Promise<any> => {
     return new Promise((resolve, reject) => {
       const { overSelection, overPoint, overLayer } = props;
       const state = getState() as RootState;
-      const activeArtboard = state.layer.present.activeArtboard;
-      const activeArtboardItem = state.layer.present.byId[activeArtboard] as Btwx.Artboard;
-      const topScopeId = state.layer.present.scope[state.layer.present.scope.length - 1] === 'root' ? activeArtboard ? activeArtboard : null : state.layer.present.scope[state.layer.present.scope.length - 1];
-      const topScopeItem = topScopeId ? state.layer.present.byId[topScopeId] as Btwx.Artboard | Btwx.Group : null
       try {
-        const formats = (window as any).api.readClipboardFormats();
-        if (formats.some(format => format.startsWith('text'))) {
-          const text = (window as any).api.readClipboardText();
-          const parsedText: Btwx.ClipboardLayers = JSON.parse(text);
-          if (parsedText.type && (parsedText.type === 'layers' || parsedText.type === 'sketch-layers')) {
-            const withNewIds: string = parsedText.compiledIds.reduce((result: string, current: string) => {
-              const newId = uuidv4();
-              result = result.replaceAll(current, newId);
-              return result;
-            }, text);
-            const parsedClipboardLayers: Btwx.ClipboardLayers = JSON.parse(withNewIds);
-            if (parsedClipboardLayers.allArtboardIds.length === 0 && !activeArtboard) {
-              (window as any).api.initPasteWithoutArtboardAlert(JSON.stringify({
-                instanceId: state.session.instance
-              })).then(() => {
-                resolve(null);
-              });
-              // ipcRenderer.invoke('initPasteWithoutArtboardAlert', JSON.stringify({
-              //   instanceId: state.session.instance
-              // })).then(() => {
-              //   resolve(null);
-              // });
-            } else {
-              let rootChildrenLength = state.layer.present.byId.root.children.length;
-              let lastTopScopeChild = topScopeItem ? topScopeItem.children[topScopeItem.children.length - 1] : null;
-              let lastTopScopeChildFromClip = false;
-              let clipboardLayers: Btwx.ClipboardLayers = parsedClipboardLayers.main.reduce((result, current) => {
-                const layerItem = result.byId[current];
-                if (layerItem.type === 'Artboard') {
-                  const projectIndex = Math.floor(rootChildrenLength / ARTBOARDS_PER_PROJECT) + 1;
-                  result = {
-                    ...result,
-                    byId: {
-                      ...result.byId,
-                      [current]: {
-                        ...result.byId[current],
-                        projectIndex: projectIndex
-                      }
-                    } as any
-                  }
-                  rootChildrenLength++;
-                } else {
-                  const lastTopScopeChildItem: Btwx.MaskableLayer = lastTopScopeChildFromClip ? result.byId[lastTopScopeChild] as Btwx.MaskableLayer : state.layer.present.byId[lastTopScopeChild] as Btwx.MaskableLayer;
-                  const isLastTopScopeChildMask = lastTopScopeChildItem && lastTopScopeChildItem.type === 'Shape' && (lastTopScopeChildItem as Btwx.Shape).mask;
-                  result = {
-                    ...result,
-                    byId: {
-                      ...result.byId,
-                      [current]: {
-                        ...result.byId[current],
-                        underlyingMask: lastTopScopeChildItem ? isLastTopScopeChildMask ? lastTopScopeChildItem.id : lastTopScopeChildItem.underlyingMask : null,
-                        parent: topScopeItem ? topScopeItem.id : null,
-                        artboard: topScopeItem ? topScopeItem.artboard : null,
-                        scope: topScopeItem ? [...topScopeItem.scope, topScopeItem.id] : null
-                      }
-                    } as any
-                  }
-                  if (lastTopScopeChildItem && (lastTopScopeChildItem.masked || isLastTopScopeChildMask) && !(layerItem as Btwx.MaskableLayer).ignoreUnderlyingMask) {
-                    result = {
-                      ...result,
-                      byId: {
-                        ...result.byId,
-                        [current]: {
-                          ...result.byId[current],
-                          masked: true
-                        }
-                      } as any
-                    }
-                  }
-                  lastTopScopeChild = current;
-                  if (!lastTopScopeChildFromClip) {
-                    lastTopScopeChildFromClip = true;
-                  }
-                }
-                return result;
-              }, parsedClipboardLayers);
-              const clipboardBounds = new paperMain.Rectangle(
-                new paperMain.Point(
-                  (clipboardLayers.bounds as number[])[1],
-                  (clipboardLayers.bounds as number[])[2]
-                ),
-                new paperMain.Size(
-                  (clipboardLayers.bounds as number[])[3],
-                  (clipboardLayers.bounds as number[])[4]
-                )
-              );
-              // handle if clipboard position is not within viewport
-              if (!clipboardBounds.center.isInside(paperMain.view.bounds)) {
-                const pointDiff = paperMain.view.center.subtract(clipboardBounds.center).round();
-                clipboardLayers.main.forEach((id) => {
-                  const clipboardLayerItem = clipboardLayers.byId[id];
-                  if (clipboardLayerItem.type === 'Artboard') {
-                    clipboardLayerItem.frame.x += pointDiff.x;
-                    clipboardLayerItem.frame.y += pointDiff.y;
-                  }
-                });
-              }
-              // handle paste over selection
-              if (overSelection && state.layer.present.selected.length > 0) {
-                const selectedBounds = getSelectedBounds(state);
-                const selectionPosition = selectedBounds.center;
-                const pointDiff = selectionPosition.subtract(clipboardBounds.center).round();
-                clipboardLayers.main.forEach((id) => {
-                  const clipboardLayerItem = clipboardLayers.byId[id];
-                  const prevX = clipboardLayerItem.frame.x;
-                  const prevY = clipboardLayerItem.frame.y;
-                  clipboardLayerItem.frame.x += pointDiff.x;
-                  clipboardLayerItem.frame.y += pointDiff.y;
-                  if (clipboardLayerItem.type !== 'Artboard') {
-                    const prevLayerItem = parsedClipboardLayers.byId[id];
-                    const prevArtboardItem = parsedClipboardLayers.topScopeArtboards.byId[prevLayerItem.artboard];
-                    const artboardXDiff = activeArtboardItem.frame.x - prevArtboardItem.frame.x;
-                    const artboardYDiff = activeArtboardItem.frame.y - prevArtboardItem.frame.y;
-                    clipboardLayerItem.frame.x -= artboardXDiff;
-                    clipboardLayerItem.frame.y -= artboardYDiff;
-                    const xDiff = clipboardLayerItem.frame.x - prevX;
-                    const yDiff = clipboardLayerItem.frame.y - prevY;
-                    if (clipboardLayerItem.type === 'Text') {
-                      (clipboardLayerItem as Btwx.Text).point.x += xDiff;
-                      (clipboardLayerItem as Btwx.Text).point.y += yDiff;
-                      (clipboardLayerItem as Btwx.Text).lines.forEach((line) => {
-                        line.frame.x += xDiff;
-                        line.frame.y += yDiff;
-                        line.anchor.x += xDiff;
-                        line.anchor.y += yDiff;
-                      });
-                    }
-                    if (clipboardLayerItem.type === 'Shape' && (clipboardLayerItem as Btwx.Shape).shapeType === 'Line') {
-                      (clipboardLayerItem as Btwx.Line).from.x += xDiff;
-                      (clipboardLayerItem as Btwx.Line).from.y += yDiff;
-                      (clipboardLayerItem as Btwx.Line).to.x += xDiff;
-                      (clipboardLayerItem as Btwx.Line).to.y += yDiff;
-                    }
-                  }
-                });
-              }
-              Object.keys(clipboardLayers.images).forEach((imgId) => {
-                const documentImage = clipboardLayers.images[imgId];
-                // const documentImageExists = state.documentSettings.images.allIds.length > 0 && state.documentSettings.images.allIds.find((id) => Buffer.from(state.documentSettings.images.byId[id].buffer).equals(buffer));
-                const sessionImageExists = state.session.images.allIds.find((id) => state.session.images.byId[id].base64 === documentImage.base64);
-                if (!sessionImageExists) {
-                  // if (!documentImageExists) {
-                  //   dispatch(addDocumentImage(documentImage));
-                  // }
-                  dispatch(addSessionImage(documentImage));
-                } else {
-                  clipboardLayers = clipboardLayers.allImageIds.filter((id) =>
-                    (clipboardLayers.byId[id] as Btwx.Image).imageId === imgId
-                  ).reduce((result, current) => ({
-                    ...result,
-                    byId: {
-                      ...result.byId,
-                      [current]: {
-                        ...result.byId[current],
-                        imageId: sessionImageExists
-                      } as Btwx.Image
-                    }
-                  }), clipboardLayers);
-                }
-              });
-              if (clipboardLayers.type === 'sketch-layers') {
-                // Dont have galaxy brain math skillz to figure out point in plugin...
-                // so I do it here
-                clipboardLayers = clipboardLayers.allTextIds.reduce((result, current) => {
-                  const textItem = clipboardLayers.byId[current] as Btwx.Text;
-                  const artboardItem = (clipboardLayers.byId[textItem.artboard] ? clipboardLayers.byId[textItem.artboard] : state.layer.present.byId[textItem.artboard]) as Btwx.Artboard;
-                  const point = new paperMain.Point(textItem.point.x, textItem.point.y);
-                  const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
-                  const getAreaTextRectangle = () => {
-                    const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
-                    const textPosition = new paperMain.Point(textItem.frame.x, textItem.frame.y);
-                    const absPosition = textPosition.add(artboardPosition);
-                    const topLeft = new paperMain.Point(
-                      absPosition.x - (textItem.frame.innerWidth / 2),
-                      absPosition.y - (textItem.frame.innerHeight / 2)
-                    );
-                    const bottomRight = new paperMain.Point(
-                      absPosition.x + (textItem.frame.innerWidth / 2),
-                      absPosition.y + (textItem.frame.innerHeight / 2)
-                    );
-                    return new paperMain.Rectangle({
-                      from: topLeft,
-                      to: bottomRight
-                    });
-                  }
-                  const textContainer = new paperMain.Group({
-                    insert: false,
-                    children: [
-                      new paperMain.Path.Rectangle({
-                        rectangle: getAreaTextRectangle(),
-                        // fillColor: tinyColor('#fff').setAlpha(0.01).toRgbString(),
-                        // blendMode: 'multiply',
-                        fillColor: '#000',
-                        data: {
-                          id: 'textMask',
-                          type: 'LayerChild',
-                          layerType: 'Text'
-                        },
-                        clipMask: true
-                      }),
-                      new paperMain.Path.Rectangle({
-                        rectangle: getAreaTextRectangle(),
-                        // fillColor: tinyColor('#fff').setAlpha(0.01).toRgbString(),
-                        // blendMode: 'multiply',
-                        fillColor: tinyColor('red').setAlpha(0.25).toRgbString(),
-                        data: {
-                          id: 'textBackground',
-                          type: 'LayerChild',
-                          layerType: 'Text'
-                        }
-                      }),
-                      new paperMain.PointText({
-                        point: point.add(artboardPosition),
-                        data: {
-                          id: 'textContent',
-                          type: 'LayerChild',
-                          layerType: 'Text'
-                        },
-                        content: getContent({
-                          paragraphs: textItem.paragraphs
-                        }),
-                        ...getPaperStyle({
-                          style: textItem.style,
-                          textStyle: textItem.textStyle,
-                          isLine: false,
-                          layerFrame: textItem.frame,
-                          artboardFrame: artboardItem.frame
-                        })
-                      })
-                    ]
-                  });
-                  const initialLineAnchor = textItem.lines[0].anchor;
-                  const absAnchor = new paperMain.Point(initialLineAnchor.x, initialLineAnchor.y).add(artboardPosition);
-                  const textContent = textContainer.getItem({data:{id:'textContent'}}) as paper.PointText;
-                  positionTextContent({
-                    paperLayer: textContainer,
-                    verticalAlignment: textItem.textStyle.verticalAlignment,
-                    justification: textItem.textStyle.justification,
-                    textResize: textItem.textStyle.textResize
-                  });
-                  const pointYDiff = textContent.point.y - absAnchor.y;
-                  textContainer.position.y -= pointYDiff;
-                  applyLayerTransforms({
-                    paperLayer: textContainer,
-                    transform: textItem.transform
-                  });
-                  const pointWithTransforms = textContent.point.subtract(artboardPosition);
-                  const positionWithTransforms = textContainer.position.subtract(artboardPosition);
-                  return {
-                    ...result,
-                    byId: {
-                      ...result.byId,
-                      [current]: {
-                        ...result.byId[current],
-                        frame: {
-                          ...result.byId[current].frame,
-                          y: positionWithTransforms.y
-                        },
-                        point: {
-                          x: pointWithTransforms.x,
-                          y: pointWithTransforms.y
-                        }
-                      } as Btwx.Text
-                    }
-                  }
-                }, clipboardLayers);
-                // same goes for shape icons
-                clipboardLayers = clipboardLayers.allShapeIds.reduce((result, current) => {
-                  const iconData = getShapeIcon((clipboardLayers.byId[current] as Btwx.Shape).pathData);
-                  return {
-                    ...result,
-                    shapeIcons: {
-                      ...result.shapeIcons,
-                      [current]: iconData
-                    }
-                  }
-                }, clipboardLayers);
-              }
-              dispatch(pasteLayersFromClipboard({
-                clipboardLayers,
-                overSelection,
-                overPoint,
-                overLayer
-              }));
-              resolve(null);
-            }
-          }
-        }
-        resolve(null);
+        handlePasteText({state, resolve, overSelection, dispatch});
       } catch(error) {
-        const formats = (window as any).api.readClipboardFormats();
-        // if (formats.some(format => format.startsWith('text'))) {
-        //   if (state.layer.present.activeArtboard) {
-        //     const text = clipboard.readText();
-        //     const textSettings = state.textSettings;
-        //     const activeArtboardItem = state.layer.present.byId[state.layer.present.activeArtboard];
-        //     const artboardPosition = new paperMain.Point(activeArtboardItem.frame.x, activeArtboardItem.frame.y);
-        //     const youngestChild = activeArtboardItem.children[activeArtboardItem.children.length - 1];
-        //     const youngestChildItem = state.layer.present.byId[youngestChild] as Btwx.MaskableLayer;
-        //     // paste text as text layer
-        //     const textLayer = new paperMain.PointText({
-        //       point: artboardPosition,
-        //       data: {
-        //         id: 'textContent',
-        //         type: 'LayerChild',
-        //         layerType: 'Text'
-        //       },
-        //       content: text,
-        //       insert: false,
-        //       fontFamily: textSettings.fontFamily,
-        //       fontSize: textSettings.fontSize,
-        //       fontWeight: textSettings.fontWeight,
-        //       letterSpacing: textSettings.letterSpacing,
-        //       textTransform: textSettings.textTransform,
-        //       fillColor: textSettings.fillColor,
-        //       leading: getLeading({
-        //         leading: textSettings.leading,
-        //         fontSize: textSettings.fontSize
-        //       })
-        //     });
-        //     textLayer.position = artboardPosition;
-        //     const positionInArtboard = artboardPosition.subtract(textLayer.position);
-        //     const pointInArtboard = artboardPosition.subtract(textLayer.point);
-        //     const newTextLayer = {
-        //       type: 'Text',
-        //       name: text,
-        //       artboard: state.layer.present.activeArtboard,
-        //       parent: state.layer.present.activeArtboard,
-        //       children: null,
-        //       scope: ['root', state.layer.present.activeArtboard],
-        //       frame: {
-        //         x: positionInArtboard.x,
-        //         y: positionInArtboard.y,
-        //         width: textLayer.bounds.width,
-        //         height: textLayer.bounds.height,
-        //         innerWidth: textLayer.bounds.width,
-        //         innerHeight: textLayer.bounds.height
-        //       },
-        //       underlyingMask: youngestChild ? youngestChildItem.underlyingMask : null,
-        //       ignoreUnderlyingMask: false,
-        //       masked: youngestChild ? (youngestChildItem.masked || (youngestChildItem.type === 'Shape' && (youngestChildItem as Btwx.Shape).mask)) : null,
-        //       showChildren: false,
-        //       selected: false,
-        //       hover: false,
-        //       events: [],
-        //       tweens: {
-        //         allIds: [],
-        //         asOrigin: [],
-        //         asDestination: [],
-        //         byProp: TWEEN_PROPS_MAP
-        //       },
-        //       transform: DEFAULT_TRANSFORM,
-        //       style: {
-        //         ...DEFAULT_STYLE,
-        //         fill: {
-        //           ...DEFAULT_STYLE.fill,
-        //           color: textSettings.fillColor
-        //         },
-        //         stroke: {
-        //           ...DEFAULT_STYLE.stroke,
-        //           enabled: false
-        //         }
-        //       },
-        //       textStyle: {
-        //         fontSize: textSettings.fontSize,
-        //         leading: textSettings.leading,
-        //         fontWeight: textSettings.fontWeight,
-        //         fontFamily: textSettings.fontFamily,
-        //         justification: textSettings.justification,
-        //         letterSpacing: textSettings.letterSpacing,
-        //         textTransform: textSettings.textTransform,
-        //         textResize: 'autoWidth',
-        //         verticalAlignment: 'top',
-        //         fontStyle: textSettings.fontStyle
-        //       },
-        //       point: {
-        //         x: pointInArtboard.x,
-        //         y: pointInArtboard.y
-        //       },
-        //       text: text,
-        //       lines: getTextLines({
-        //         paperLayer: textLayer,
-        //         leading: getLeading({
-        //           leading: textSettings.leading,
-        //           fontSize: textSettings.fontSize
-        //         }),
-        //         artboardPosition: artboardPosition,
-        //         paragraphs: [[text]]
-        //       }),
-        //       paragraphs: [[text]]
-        //     } as Btwx.Text;
-        //     dispatch(addTextThunk({
-        //       layer: newTextLayer,
-        //       batch: false
-        //     }));
-        //   }
-        // }
-        // handle image paste
-        if (formats.some(format => format.startsWith('image'))) {
-          if (state.layer.present.activeArtboard) {
-            const activeArtboardItem = state.layer.present.byId[state.layer.present.activeArtboard];
-            const artboardPosition = new paperMain.Point(activeArtboardItem.frame.x, activeArtboardItem.frame.y);
-            const base64 = (window as any).api.readClipboardImage();
-            const originalDimensions = (window as any).api.readClipboardImageSize();
-            let x = 0;
-            let y = 0;
-            if (overSelection && state.layer.present.selected.length > 0) {
-              const selectedBounds = getSelectedBounds(state);
-              const pos = selectedBounds.center.subtract(artboardPosition);
-              x = pos.x;
-              y = pos.y;
-            }
-            dispatch(addImageThunk({
-              layer: {
-                name: 'image',
-                frame: {
-                  x: x,
-                  y: y,
-                  width: originalDimensions.width,
-                  height: originalDimensions.height,
-                  innerWidth: originalDimensions.width,
-                  innerHeight: originalDimensions.height
-                },
-                originalDimensions: {
-                  width: originalDimensions.width,
-                  height: originalDimensions.height
-                }
-              },
-              base64: base64 as string
-            }));
-          } else {
-            (window as any).api.initPasteWithoutArtboardAlert(JSON.stringify({
-              instanceId: state.session.instance
-            })).then(() => {
-              resolve(null);
-            });
-            // ipcRenderer.invoke('initPasteWithoutArtboardAlert', JSON.stringify({
-            //   instanceId: state.session.instance
-            // })).then(() => {
-            //   resolve(null);
-            // });
-          }
-        }
-        resolve(null);
-        // ipcRenderer.invoke('initPasteErrorAlert', JSON.stringify({
-        //   instanceId: state.session.instance
-        // })).then(() => {
-        //   resolve(null);
-        // });
+        console.log(error);
+        handleImagePaste({state, resolve, overSelection, dispatch});
       }
     });
   }

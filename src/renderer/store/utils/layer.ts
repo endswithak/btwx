@@ -11746,7 +11746,12 @@ export const replaceImages = (state: LayerState, action: ReplaceImages): LayerSt
 
 export const pasteLayersFromClipboard = (state: LayerState, action: PasteLayersFromClipboard): LayerState => {
   let currentState = state;
-  const topScopeId = currentState.scope[currentState.scope.length - 1] === 'root' ? currentState.activeArtboard ? currentState.activeArtboard : 'root' : currentState.scope[currentState.scope.length - 1];
+  const activeArtboard = currentState.activeArtboard;
+  const topScopeId = currentState.scope[currentState.scope.length - 1] === 'root'
+  ? currentState.activeArtboard
+    ? currentState.activeArtboard
+    : 'root'
+  : currentState.scope[currentState.scope.length - 1];
   const topScopeItem = topScopeId ? currentState.byId[topScopeId] as Btwx.Artboard | Btwx.Group : null;
   currentState = {
     ...currentState,
@@ -11834,7 +11839,22 @@ export const pasteLayersFromClipboard = (state: LayerState, action: PasteLayersF
   }
   // for any layers pasted without artboards...
   // update parent bounds those layers are pasted in
-  if (topScopeItem) {
+  if (action.payload.clipboardLayers.allArtboardIds.length > 0) {
+    currentState = updateGroupParentBounds(currentState, ['root']);
+  }
+  if (action.payload.clipboardLayers.topScopeChildren.length > 0 && topScopeItem) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [topScopeItem.id]: {
+          ...currentState.byId[topScopeItem.id],
+          children: [...currentState.byId[topScopeItem.id].children, ...action.payload.clipboardLayers.topScopeChildren]
+        }
+      }
+    }
+  }
+  if (action.payload.clipboardLayers.topScopeChildren.length > 0 && topScopeItem && topScopeItem.type !== 'Artboard') {
     currentState = updateGroupParentBounds(currentState, [topScopeId]);
     // const newChildren = [
     //   ...currentState.byId[topScopeId].children,
