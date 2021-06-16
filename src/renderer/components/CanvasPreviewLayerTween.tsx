@@ -311,34 +311,33 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   const getHasSinglePropChange = (currentProps: TweenProps, prevProps: TweenProps, prop: string): boolean => {
     const currentProp = currentProps[prop];
     const prevProp = prevProps[prop];
-    const handleFSCheck = (): boolean => {
-      switch(currentProps[`${prop}Type`]) {
-        case 'colorToColor':
-        case 'colorToNull':
-        case 'nullToColor': {
-          return currentProp !== prevProp;
-        }
-        case 'colorToGradient':
-        case 'gradientToGradient':
-        case 'gradientToColor':
-        case 'gradientToNull':
-        case 'nullToGradient': {
-          return Object.keys(currentProps).some(key => {
-            if (key.startsWith(`${prop}Stop`)) {
-              const currentStop = currentProps[key];
-              const prevStop = prevProps[key];
-              return currentStop !== prevStop;
-            } else {
-              return false;
-            }
-          });
-        }
-      }
-    }
     if (prop === 'stroke' || prop === 'fill') {
-      // this is broken, future me figure it out
-      // handleFSCheck();
-      return true;
+      if (currentProps[`${prop}Type`]) {
+        switch(currentProps[`${prop}Type`]) {
+          case 'colorToColor':
+          case 'colorToNull':
+          case 'nullToColor': {
+            return currentProp !== prevProp;
+          }
+          case 'colorToGradient':
+          case 'gradientToGradient':
+          case 'gradientToColor':
+          case 'gradientToNull':
+          case 'nullToGradient': {
+            return Object.keys(currentProps).some(key => {
+              if (key.startsWith(`${prop}Stop`)) {
+                const currentStop = currentProps[key];
+                const prevStop = prevProps[key];
+                return currentStop !== prevStop;
+              } else {
+                return false;
+              }
+            });
+          }
+        }
+      } else {
+        return false;
+      }
     } else {
       return currentProp !== prevProp;
     }
@@ -1660,7 +1659,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   }
 
   const handleFSTween = (currentProps: TweenProps, prevProps: TweenProps, style: 'fill' | 'stroke') => {
-    if (currentProps[`${style}Type`]) {
+    if (getHasSinglePropChange(currentProps, prevProps, style)) {
       const originStyle = originLayerItem.style[style];
       const destinationStyle = destinationLayerItem.style[style];
       const originGradient = originStyle.gradient;
@@ -1717,8 +1716,6 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   }
 
   const handleGradientOD = (currentProps: TweenProps, prevProps: TweenProps) => {
-    // const gradientODProps = ['shape', 'width', 'height', 'fontSize', 'fontWeight', 'text', 'letterSpacing', 'lineHeight'];
-    // const hasGradientODPropChange = hasSomePropsChange(currentProps, prevProps, gradientODProps);
     if (currentProps.strokeType || currentProps.fillType) {
       updateGradientsOD();
     }
@@ -1752,64 +1749,61 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     const { paperLayer, shapeMask } = eventLayerTimeline.data as EventLayerTimelineData;
     const currentProps = getProps();
     const prevProps = getProps(true);
-    const hasPropChange = getHasPropChange(currentProps, prevProps);
-    if (hasPropChange) {
-      // position tweens
-      handleXTween(currentProps, prevProps);
-      handleYTween(currentProps, prevProps);
-      // store start position
-      const startPosition = paperLayer.position;
-      // clear transforms
-      handleClearTransforms(currentProps, prevProps);
-      // size tweens
-      handleShapeTween(currentProps, prevProps);
-      handleWidthTween(currentProps, prevProps);
-      handleHeightTween(currentProps, prevProps);
-      // text tweens
-      handleFontSizeTween(currentProps, prevProps);
-      handleFontWeightTween(currentProps, prevProps);
-      handleLineHeightTween(currentProps, prevProps);
-      handleTextContentTween(currentProps, prevProps);
-      handleLetterSpacingTween(currentProps, prevProps);
-      // stroke option tweens
-      handleDashOffsetTween(currentProps, prevProps);
-      handleDashArrayWidthTween(currentProps, prevProps);
-      handleDashArrayGapTween(currentProps, prevProps);
-      // shadow tweens
-      handleShadowColorTween(currentProps, prevProps);
-      handleShadowOffsetXTween(currentProps, prevProps);
-      handleShadowOffsetYTween(currentProps, prevProps);
-      handleShadowBlurTween(currentProps, prevProps);
-      // fill tweens
-      handleFSTween(currentProps, prevProps, 'fill');
-      handleGradientOriginFSTween(currentProps, prevProps, 'fill', 'x');
-      handleGradientOriginFSTween(currentProps, prevProps, 'fill', 'y');
-      handleGradientDestinationFSTween(currentProps, prevProps, 'fill', 'x');
-      handleGradientDestinationFSTween(currentProps, prevProps, 'fill', 'y');
-      // stroke tweens
-      handleFSTween(currentProps, prevProps, 'stroke');
-      handleStrokeWidthTween(currentProps, prevProps);
-      handleGradientOriginFSTween(currentProps, prevProps, 'stroke', 'x');
-      handleGradientOriginFSTween(currentProps, prevProps, 'stroke', 'y');
-      handleGradientDestinationFSTween(currentProps, prevProps, 'stroke', 'x');
-      handleGradientDestinationFSTween(currentProps, prevProps, 'stroke', 'y');
-      // update boundingWidth and boundingHeight props
-      handleBoundingSizeUpdate(currentProps);
-      // context tweens
-      handleOpacityTween(currentProps, prevProps);
-      handleBlurTween(currentProps, prevProps);
-      // apply transforms
-      handleApplyTransforms(currentProps);
-      // apply start position
-      paperLayer.position = startPosition;
-      if (shapeMask) {
-        shapeMask.position = startPosition;
-      }
-      // update gradients if position/size change
-      handleGradientOD(currentProps, prevProps);
-      // set prevProps
-      eventLayerTimeline.data.prevProps = currentProps;
+    // position tweens
+    handleXTween(currentProps, prevProps);
+    handleYTween(currentProps, prevProps);
+    // store start position
+    const startPosition = paperLayer.position;
+    // clear transforms
+    handleClearTransforms(currentProps, prevProps);
+    // size tweens
+    handleShapeTween(currentProps, prevProps);
+    handleWidthTween(currentProps, prevProps);
+    handleHeightTween(currentProps, prevProps);
+    // text tweens
+    handleFontSizeTween(currentProps, prevProps);
+    handleFontWeightTween(currentProps, prevProps);
+    handleLineHeightTween(currentProps, prevProps);
+    handleTextContentTween(currentProps, prevProps);
+    handleLetterSpacingTween(currentProps, prevProps);
+    // stroke option tweens
+    handleDashOffsetTween(currentProps, prevProps);
+    handleDashArrayWidthTween(currentProps, prevProps);
+    handleDashArrayGapTween(currentProps, prevProps);
+    // shadow tweens
+    handleShadowColorTween(currentProps, prevProps);
+    handleShadowOffsetXTween(currentProps, prevProps);
+    handleShadowOffsetYTween(currentProps, prevProps);
+    handleShadowBlurTween(currentProps, prevProps);
+    // fill tweens
+    handleFSTween(currentProps, prevProps, 'fill');
+    handleGradientOriginFSTween(currentProps, prevProps, 'fill', 'x');
+    handleGradientOriginFSTween(currentProps, prevProps, 'fill', 'y');
+    handleGradientDestinationFSTween(currentProps, prevProps, 'fill', 'x');
+    handleGradientDestinationFSTween(currentProps, prevProps, 'fill', 'y');
+    // stroke tweens
+    handleFSTween(currentProps, prevProps, 'stroke');
+    handleStrokeWidthTween(currentProps, prevProps);
+    handleGradientOriginFSTween(currentProps, prevProps, 'stroke', 'x');
+    handleGradientOriginFSTween(currentProps, prevProps, 'stroke', 'y');
+    handleGradientDestinationFSTween(currentProps, prevProps, 'stroke', 'x');
+    handleGradientDestinationFSTween(currentProps, prevProps, 'stroke', 'y');
+    // update boundingWidth and boundingHeight props
+    handleBoundingSizeUpdate(currentProps);
+    // context tweens
+    handleOpacityTween(currentProps, prevProps);
+    handleBlurTween(currentProps, prevProps);
+    // apply transforms
+    handleApplyTransforms(currentProps);
+    // apply start position
+    paperLayer.position = startPosition;
+    if (shapeMask) {
+      shapeMask.position = startPosition;
     }
+    // update gradients if position/size change
+    handleGradientOD(currentProps, prevProps);
+    // set prevProps
+    eventLayerTimeline.data.prevProps = currentProps;
   }
 
   const addTween = () => {
