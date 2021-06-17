@@ -1702,8 +1702,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         verticalFlip: prevProps.scaleY
       } as any,
       variable: true,
-      width: prevProps.boundingWidth,
-      height: prevProps.boundingHeight
+      width: currentProps.boundingWidth,
+      height: currentProps.boundingHeight
     });
     if (shapeMask) {
       clearLayerTransforms({
@@ -1715,8 +1715,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
           verticalFlip: prevProps.scaleY
         } as any,
         variable: true,
-        width: prevProps.boundingWidth,
-        height: prevProps.boundingHeight
+        width: currentProps.boundingWidth,
+        height: currentProps.boundingHeight
       });
     }
   }
@@ -1764,8 +1764,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
     handleFontSizeTween(currentProps, prevProps);
     handleFontWeightTween(currentProps, prevProps);
     handleLineHeightTween(currentProps, prevProps);
-    handleTextContentTween(currentProps, prevProps);
     handleLetterSpacingTween(currentProps, prevProps);
+    handleTextContentTween(currentProps, prevProps);
     // stroke option tweens
     handleDashOffsetTween(currentProps, prevProps);
     handleDashArrayWidthTween(currentProps, prevProps);
