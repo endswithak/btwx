@@ -495,6 +495,7 @@ declare namespace Btwx {
       [id: string]: DocumentImage;
     };
     bounds: paper.Rectangle | number[];
+    nonArtboardBounds: paper.Rectangle | number[];
     events?: {
       allIds: string[];
       byId: {

@@ -5998,6 +5998,7 @@ export const copySelectedToClipboardThunk = () => {
     if (state.canvasSettings.focusing && state.layer.present.selected.length > 0) {
       const bounds = getSelectedBounds(state);
       const fullSelected = getSelectedAndDescendentsFull(state);
+      const nonArtboardBounds = getLayersBounds(state.layer.present, fullSelected.topScopeChildren);
       const images = fullSelected.allImageIds.reduce((result: { [id: string]: Btwx.DocumentImage }, current) => {
         const layerItem = state.layer.present.byId[current];
         const imageId = (layerItem as Btwx.Image).imageId;
@@ -6011,6 +6012,7 @@ export const copySelectedToClipboardThunk = () => {
         compiledIds: [...fullSelected.compiledIds, ...Object.keys(images)],
         type: 'layers',
         bounds,
+        nonArtboardBounds,
         images,
       }));
     }
@@ -6114,9 +6116,52 @@ const handlePasteText = ({state, dispatch, resolve, overSelection}: HandlePasteT
       let rootChildrenLength = state.layer.present.byId.root.children.length;
       let lastTopScopeChild = topScopeItem ? topScopeItem.children[topScopeItem.children.length - 1] : null;
       let lastTopScopeChildFromClip = false;
-      // handle main layers (selected layers when copied)
+      const nonArtboardBounds = new paperMain.Rectangle(
+        new paperMain.Point(
+          (parsedClipboardLayers.nonArtboardBounds as number[])[1],
+          (parsedClipboardLayers.nonArtboardBounds as number[])[2]
+        ),
+        new paperMain.Size(
+          (parsedClipboardLayers.nonArtboardBounds as number[])[3],
+          (parsedClipboardLayers.nonArtboardBounds as number[])[4]
+        )
+      );
+      // create artboard for non-artboard copied layers
+      const artboardId = uuidv4();
+      let newArtboard = {
+        type: 'Artboard',
+        id: artboardId,
+        name: 'Artboard',
+        artboard: artboardId,
+        parent: 'root',
+        children: parsedClipboardLayers.topScopeChildren,
+        scope: ['root'],
+        frame: {
+          innerWidth: nonArtboardBounds.width,
+          innerHeight: nonArtboardBounds.height,
+          width: nonArtboardBounds.width,
+          height: nonArtboardBounds.height,
+          x: nonArtboardBounds.x,
+          y: nonArtboardBounds.y
+        },
+        showChildren: true,
+        selected: false,
+        hover: false,
+        events: [],
+        originForEvents: [],
+        destinationForEvents: [],
+        tweens: {
+          allIds: [],
+          asOrigin: [],
+          asDestination: [],
+          byProp: TWEEN_PROPS_MAP
+        },
+        transform: DEFAULT_TRANSFORM,
+        style: getLayerStyle({layer:{type:'Artboard'}})
+      };
       let clipboardLayers: Btwx.ClipboardLayers = parsedClipboardLayers.main.reduce((result, current) => {
         const layerItem = result.byId[current];
+        const isLast = result.topScopeChildren.length === 1 && result.topScopeChildren[0] === current;
         // handle artboard main layers
         if (layerItem.type === 'Artboard') {
           const projectIndex = Math.floor(rootChildrenLength / ARTBOARDS_PER_PROJECT) + 1;
@@ -6168,52 +6213,20 @@ const handlePasteText = ({state, dispatch, resolve, overSelection}: HandlePasteT
               lastTopScopeChildFromClip = true;
             }
           }
-          // if no active artboard, create artboard for non-artboard main layers
+          // if no active artboard, do other relevant stuff
           else {
-            const artboardId = uuidv4();
-            const prevLayerArtboard = result.topScopeArtboards.byId[layerItem.artboard];
             // update layerItem and others
+            const prevArtboard = result.topScopeArtboards.byId[result.byId[current].artboard];
             result = {
               ...result,
               byId: {
                 ...result.byId,
-                [artboardId]: {
-                  type: 'Artboard',
-                  id: artboardId,
-                  name: layerItem.name,
-                  artboard: artboardId,
-                  parent: 'root',
-                  children: [current],
-                  scope: ['root'],
-                  projectIndex: rootChildrenLength !== 0 ? Math.floor(rootChildrenLength / ARTBOARDS_PER_PROJECT) + 1 : 1,
-                  frame: {
-                    ...layerItem.frame,
-                    innerWidth: layerItem.frame.width,
-                    innerHeight: layerItem.frame.height,
-                    x: layerItem.frame.x + prevLayerArtboard.frame.x,
-                    y: layerItem.frame.y + prevLayerArtboard.frame.y
-                  },
-                  showChildren: true,
-                  selected: false,
-                  hover: false,
-                  events: [],
-                  originForEvents: [],
-                  destinationForEvents: [],
-                  tweens: {
-                    allIds: [],
-                    asOrigin: [],
-                    asDestination: [],
-                    byProp: TWEEN_PROPS_MAP
-                  },
-                  transform: DEFAULT_TRANSFORM,
-                  style: getLayerStyle({layer:{type:'Artboard'}})
-                },
                 [current]: {
                   ...result.byId[current],
                   frame: {
                     ...result.byId[current].frame,
-                    x: 0,
-                    y: 0
+                    x: ((result.byId[current].frame.x + prevArtboard.frame.x) - nonArtboardBounds.x) - nonArtboardBounds.width / 2,
+                    y: ((result.byId[current].frame.y + prevArtboard.frame.y) - nonArtboardBounds.y) - nonArtboardBounds.height / 2
                   },
                   selected: false,
                   hover: false,
@@ -6223,16 +6236,11 @@ const handlePasteText = ({state, dispatch, resolve, overSelection}: HandlePasteT
                 }
               } as any
             }
-            // update other arrays
-            const newMain = result.main.slice();
-            newMain.splice(result.main.indexOf(current), 1, artboardId);
+            // remove from topScope and main arrays
             result = {
               ...result,
-              allIds: [...result.allIds, artboardId],
-              allArtboardIds: [...result.allArtboardIds, artboardId],
-              compiledIds: [...result.compiledIds, artboardId],
               topScopeChildren: result.topScopeChildren.filter((id) => id !== current),
-              main: newMain
+              main: result.main.filter((id) => id !== current)
             }
             // update layerItem children with new artboard and scope if group
             if (layerItem.type === 'Group') {
@@ -6264,7 +6272,24 @@ const handlePasteText = ({state, dispatch, resolve, overSelection}: HandlePasteT
                 i++;
               }
             }
-            rootChildrenLength++;
+            // if last, add new artboard to arrays
+            if (isLast) {
+              result = {
+                ...result,
+                allIds: [...result.allIds, artboardId],
+                allArtboardIds: [...result.allArtboardIds, artboardId],
+                compiledIds: [...result.compiledIds, artboardId],
+                topScopeChildren: result.topScopeChildren.filter((id) => id !== current),
+                main: [...result.main, artboardId],
+                byId: {
+                  ...result.byId,
+                  [artboardId]: {
+                    ...newArtboard,
+                    projectIndex: Math.floor(rootChildrenLength / ARTBOARDS_PER_PROJECT) + 1
+                  } as Btwx.Artboard
+                }
+              }
+            }
           }
         }
         return result;

@@ -3502,10 +3502,6 @@ export const getPositionInArtboard = (layer: Btwx.Layer, artboard: Btwx.Artboard
   return new paper.Point(parseInt(xDiff.toFixed(2)), parseInt(yDiff.toFixed(2)));
 };
 
-// export const hasImageTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-//   return layerItem.type === 'Image' && (layerItem as Btwx.Image).imageId !== (equivalentLayerItem as Btwx.Image).imageId;
-// };
-
 export const hasShapeTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const validType = layerItem.type === 'Shape';
   const bothLines = validType && (layerItem as Btwx.Shape).shapeType === 'Line' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
@@ -3521,7 +3517,15 @@ export const hasShapeTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.L
   } else if (bothPolygons && (layerItem as Btwx.Polygon).sides !== (equivalentLayerItem as Btwx.Polygon).sides) {
     return true;
   } else if (bothCustom) {
-    return true;
+    const layerPath = new paperMain.CompoundPath({
+      pathData: (layerItem as Btwx.Shape).pathData,
+      insert: false
+    });
+    const eqPath = new paperMain.CompoundPath({
+      pathData: (equivalentLayerItem as Btwx.Shape).pathData,
+      insert: false
+    });
+    return layerPath.compare(eqPath);
   } else {
     return false;
   }
