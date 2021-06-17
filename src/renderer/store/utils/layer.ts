@@ -11837,11 +11837,12 @@ export const pasteLayersFromClipboard = (state: LayerState, action: PasteLayersF
       }
     }, currentState);
   }
-  // for any layers pasted without artboards...
-  // update parent bounds those layers are pasted in
+  // if artboards pasted, update root bounds
   if (action.payload.clipboardLayers.allArtboardIds.length > 0) {
     currentState = updateGroupParentBounds(currentState, ['root']);
   }
+  // if non-artboard layers pasted w/ top scope item...
+  // add layers as children to top scope item
   if (action.payload.clipboardLayers.topScopeChildren.length > 0 && topScopeItem) {
     currentState = {
       ...currentState,
@@ -11853,39 +11854,10 @@ export const pasteLayersFromClipboard = (state: LayerState, action: PasteLayersF
         }
       }
     }
+    if (topScopeItem.type !== 'Artboard') {
+      currentState = updateGroupParentBounds(currentState, [topScopeId]);
+    }
   }
-  if (action.payload.clipboardLayers.topScopeChildren.length > 0 && topScopeItem && topScopeItem.type !== 'Artboard') {
-    currentState = updateGroupParentBounds(currentState, [topScopeId]);
-    // const newChildren = [
-    //   ...currentState.byId[topScopeId].children,
-    //   ...action.payload.clipboardLayers.topScopeChildren
-    // ];
-    // const layersBounds = topScopeItem.type !== 'Artboard' ? getLayersRelativeBounds(currentState, newChildren) : null;
-    // currentState =  {
-    //   ...currentState,
-    //   byId: {
-    //     ...currentState.byId,
-    //     [topScopeId]: {
-    //       ...currentState.byId[topScopeId],
-    //       children: newChildren,
-    //       frame: topScopeItem.type !== 'Artboard' ? {
-    //         ...currentState.byId[topScopeId].frame,
-    //         x: layersBounds.center.x,
-    //         y: layersBounds.center.y,
-    //         innerWidth: layersBounds.width,
-    //         innerHeight: layersBounds.height,
-    //         width: layersBounds.width,
-    //         height: layersBounds.height
-    //       } : currentState.byId[topScopeId].frame
-    //     }
-    //   }
-    // }
-  }
-  // if (action.payload.clipboardLayers.activeArtboardChildren.length > 0 && action.payload.clipboardLayers.allShapeIds.some((id) => action.payload.clipboardLayers.activeArtboardChildren.includes(id))) {
-  //   action.payload.clipboardLayers.allShapeIds.filter((id) =>
-  //     action.payload.clipboardLayers.activeArtboardChildren.includes(id)
-  //   )
-  // }
   currentState = selectLayers(currentState, layerActions.selectLayers({
     layers: action.payload.clipboardLayers.main,
     newSelection: true

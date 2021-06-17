@@ -6192,7 +6192,14 @@ const handlePasteText = ({state, dispatch, resolve, overSelection}: HandlePasteT
                   underlyingMask: lastTopScopeChildItem ? isLastTopScopeChildMask ? lastTopScopeChildItem.id : lastTopScopeChildItem.underlyingMask : null,
                   parent: topScopeItem.id,
                   artboard: activeArtboard,
-                  scope: [...topScopeItem.scope, topScopeItem.id]
+                  scope: [...topScopeItem.scope, topScopeItem.id],
+                  events: [],
+                  tweens: {
+                    allIds: [],
+                    asOrigin: [],
+                    asDestination: [],
+                    byProp: TWEEN_PROPS_MAP
+                  },
                 }
               } as any
             }
@@ -6211,6 +6218,41 @@ const handlePasteText = ({state, dispatch, resolve, overSelection}: HandlePasteT
             lastTopScopeChild = current;
             if (!lastTopScopeChildFromClip) {
               lastTopScopeChildFromClip = true;
+            }
+            // update layerItem children with fresh events/tweens
+            if (layerItem.type === 'Group') {
+              const groups: string[] = [current];
+              const groupLayers: { [id: string]: Btwx.Layer } = {};
+              let i = 0;
+              while(i < groups.length) {
+                const groupLayerItem = result.byId[groups[i]];
+                if (groupLayerItem.children) {
+                  groupLayerItem.children.forEach((child) => {
+                    result = {
+                      ...result,
+                      byId: {
+                        ...result.byId,
+                        [child]: {
+                          ...result.byId[child],
+                          events: [],
+                          tweens: {
+                            allIds: [],
+                            asOrigin: [],
+                            asDestination: [],
+                            byProp: TWEEN_PROPS_MAP
+                          },
+                        }
+                      }
+                    }
+                    const groupChildLayerItem = result.byId[child];
+                    if (groupChildLayerItem.children && groupChildLayerItem.children.length > 0) {
+                      groups.push(child);
+                    }
+                    groupLayers[child] = groupChildLayerItem;
+                  });
+                }
+                i++;
+              }
             }
           }
           // if no active artboard, do other relevant stuff
@@ -6232,7 +6274,14 @@ const handlePasteText = ({state, dispatch, resolve, overSelection}: HandlePasteT
                   hover: false,
                   scope: ['root', artboardId],
                   parent: artboardId,
-                  artboard: artboardId
+                  artboard: artboardId,
+                  events: [],
+                  tweens: {
+                    allIds: [],
+                    asOrigin: [],
+                    asDestination: [],
+                    byProp: TWEEN_PROPS_MAP
+                  },
                 }
               } as any
             }
@@ -6258,7 +6307,14 @@ const handlePasteText = ({state, dispatch, resolve, overSelection}: HandlePasteT
                         [child]: {
                           ...result.byId[child],
                           artboard: artboardId,
-                          scope: [...groupLayerItem.scope, ...groupLayerItem.id]
+                          scope: [...groupLayerItem.scope, ...groupLayerItem.id],
+                          events: [],
+                          tweens: {
+                            allIds: [],
+                            asOrigin: [],
+                            asDestination: [],
+                            byProp: TWEEN_PROPS_MAP
+                          },
                         }
                       }
                     }
