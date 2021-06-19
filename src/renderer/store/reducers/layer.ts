@@ -336,6 +336,21 @@ import {
   SET_LAYER_TREE_SCROLL,
   SET_LAYER_TREE_STICKY_ARTBOARD,
   HYDRATE_LAYERS,
+  ENABLE_GROUP_SCROLL,
+  ENABLE_GROUPS_SCROLL,
+  DISABLE_GROUP_SCROLL,
+  DISABLE_GROUPS_SCROLL,
+  ENABLE_GROUP_SCROLL_X_AXIS,
+  ENABLE_GROUPS_SCROLL_X_AXIS,
+  DISABLE_GROUP_SCROLL_X_AXIS,
+  DISABLE_GROUPS_SCROLL_X_AXIS,
+  ENABLE_GROUP_SCROLL_Y_AXIS,
+  ENABLE_GROUPS_SCROLL_Y_AXIS,
+  DISABLE_GROUP_SCROLL_Y_AXIS,
+  DISABLE_GROUPS_SCROLL_Y_AXIS,
+  SET_GROUP_SCROLL_OVERFLOW,
+  SET_GROUPS_SCROLL_OVERFLOW,
+  SET_GROUP_SCROLL_FRAME,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -674,7 +689,22 @@ import {
   pasteLayersFromClipboard,
   setLayerTree,
   setLayerTreeScroll,
-  setLayerTreeStickyArtboard
+  setLayerTreeStickyArtboard,
+  enableGroupScroll,
+  enableGroupsScroll,
+  disableGroupScroll,
+  disableGroupsScroll,
+  enableGroupScrollXAxis,
+  enableGroupsScrollXAxis,
+  disableGroupScrollXAxis,
+  disableGroupsScrollXAxis,
+  enableGroupScrollYAxis,
+  enableGroupsScrollYAxis,
+  disableGroupScrollYAxis,
+  disableGroupsScrollYAxis,
+  setGroupScrollOverflow,
+  setGroupsScrollOverflow,
+  setGroupScrollFrame
 } from '../utils/layer';
 
 export interface LayerState {
@@ -1449,6 +1479,36 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayerTreeScroll(state, action);
     case SET_LAYER_TREE_STICKY_ARTBOARD:
       return setLayerTreeStickyArtboard(state, action);
+    case ENABLE_GROUP_SCROLL:
+      return enableGroupScroll(state, action);
+    case ENABLE_GROUPS_SCROLL:
+      return enableGroupsScroll(state, action);
+    case DISABLE_GROUP_SCROLL:
+      return disableGroupScroll(state, action);
+    case DISABLE_GROUPS_SCROLL:
+      return disableGroupsScroll(state, action);
+    case ENABLE_GROUP_SCROLL_X_AXIS:
+      return enableGroupScrollXAxis(state, action);
+    case ENABLE_GROUPS_SCROLL_X_AXIS:
+      return enableGroupsScrollXAxis(state, action);
+    case DISABLE_GROUP_SCROLL_X_AXIS:
+      return disableGroupScrollXAxis(state, action);
+    case DISABLE_GROUPS_SCROLL_X_AXIS:
+      return disableGroupsScrollXAxis(state, action);
+    case ENABLE_GROUP_SCROLL_Y_AXIS:
+      return enableGroupScrollYAxis(state, action);
+    case ENABLE_GROUPS_SCROLL_Y_AXIS:
+      return enableGroupsScrollYAxis(state, action);
+    case DISABLE_GROUP_SCROLL_Y_AXIS:
+      return disableGroupScrollYAxis(state, action);
+    case DISABLE_GROUPS_SCROLL_Y_AXIS:
+      return disableGroupsScrollYAxis(state, action);
+    case SET_GROUP_SCROLL_OVERFLOW:
+      return setGroupScrollOverflow(state, action);
+    case SET_GROUPS_SCROLL_OVERFLOW:
+      return setGroupsScrollOverflow(state, action);
+    case SET_GROUP_SCROLL_FRAME:
+      return setGroupScrollFrame(state, action);
     case HYDRATE_LAYERS:
       return {
         ...state,
@@ -1743,7 +1803,22 @@ export default undoable(baseReducer, {
       RESET_IMAGES_DIMENSIONS,
       REPLACE_IMAGE,
       REPLACE_IMAGES,
-      PASTE_LAYERS_FROM_CLIPBOARD
+      PASTE_LAYERS_FROM_CLIPBOARD,
+      ENABLE_GROUP_SCROLL,
+      ENABLE_GROUPS_SCROLL,
+      DISABLE_GROUP_SCROLL,
+      DISABLE_GROUPS_SCROLL,
+      ENABLE_GROUP_SCROLL_X_AXIS,
+      ENABLE_GROUPS_SCROLL_X_AXIS,
+      DISABLE_GROUP_SCROLL_X_AXIS,
+      DISABLE_GROUPS_SCROLL_X_AXIS,
+      ENABLE_GROUP_SCROLL_Y_AXIS,
+      ENABLE_GROUPS_SCROLL_Y_AXIS,
+      DISABLE_GROUP_SCROLL_Y_AXIS,
+      DISABLE_GROUPS_SCROLL_Y_AXIS,
+      SET_GROUP_SCROLL_OVERFLOW,
+      SET_GROUPS_SCROLL_OVERFLOW,
+      SET_GROUP_SCROLL_FRAME,
     ].includes(action.type) && !action.payload.batch;
   }
 });

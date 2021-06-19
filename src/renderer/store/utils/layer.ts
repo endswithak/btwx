@@ -76,7 +76,7 @@ import {
   SetLayersCustomWiggleTweenType, RemoveLayerTweens, RemoveLayersEvent, ShowLayersChildren, HideLayersChildren,
   SetLayerTreeStickyArtboard, SetLayerTweenRepeat, SetLayersTweenRepeat, SetLayerTweenYoyo, SetLayersTweenYoyo,
   SetLayerTweenRepeatDelay, SetLayersTweenRepeatDelay, SetLayerTweenYoyoEase, SetLayersTweenYoyoEase,
-  SetLayerBlurRadius, SetLayersBlurRadius, FlipLayerGradient, FlipLayersGradient, DeselectAllLayerEventTweens, DeselectAllLayerEvents, SetLayerEventEventListener, SetLayersEventEventListener, SetLayerStroke, SetLayersStroke, SetLayersFill, SetLayerShadow, SetLayersShadow
+  SetLayerBlurRadius, SetLayersBlurRadius, FlipLayerGradient, FlipLayersGradient, DeselectAllLayerEventTweens, DeselectAllLayerEvents, SetLayerEventEventListener, SetLayersEventEventListener, SetLayerStroke, SetLayersStroke, SetLayersFill, SetLayerShadow, SetLayersShadow, EnableGroupScroll, EnableGroupsScroll, DisableGroupScroll, DisableGroupsScroll, EnableGroupScrollXAxis, EnableGroupsScrollXAxis, DisableGroupScrollXAxis, DisableGroupsScrollXAxis, EnableGroupScrollYAxis, EnableGroupsScrollYAxis, DisableGroupScrollYAxis, DisableGroupsScrollYAxis, SetGroupScrollOverflow, SetGroupsScrollOverflow, SetGroupScrollFrame
 } from '../actionTypes/layer';
 
 import {
@@ -11907,5 +11907,313 @@ export const setLayerTreeStickyArtboard = (state: LayerState, action: SetLayerTr
       stickyArtboard: action.payload.stickyArtboard
     }
   }
+  return currentState;
+};
+
+//
+
+export const enableGroupScroll = (state: LayerState, action: EnableGroupScroll): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        scroll: {
+          ...(currentState.byId[action.payload.id] as Btwx.Group).scroll,
+          enabled: true
+        }
+      } as Btwx.Group
+    }
+  }
+  return currentState;
+};
+
+export const enableGroupsScroll = (state: LayerState, action: EnableGroupsScroll): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current, index) => {
+    return enableGroupScroll(result, layerActions.enableGroupScroll({
+      id: current
+    }) as EnableGroupScroll);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Enable Groups Scroll',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+//
+
+export const disableGroupScroll = (state: LayerState, action: DisableGroupScroll): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        scroll: {
+          ...(currentState.byId[action.payload.id] as Btwx.Group).scroll,
+          enabled: false
+        }
+      } as Btwx.Group
+    }
+  }
+  return currentState;
+};
+
+export const disableGroupsScroll = (state: LayerState, action: DisableGroupsScroll): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current, index) => {
+    return disableGroupScroll(result, layerActions.disableGroupScroll({
+      id: current
+    }) as DisableGroupScroll);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Disable Groups Scroll',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+//
+
+export const enableGroupScrollXAxis = (state: LayerState, action: EnableGroupScrollXAxis): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        scroll: {
+          ...(currentState.byId[action.payload.id] as Btwx.Group).scroll,
+          axis: {
+            ...(currentState.byId[action.payload.id] as Btwx.Group).scroll.axis,
+            x: true
+          }
+        }
+      } as Btwx.Group
+    }
+  }
+  return currentState;
+};
+
+export const enableGroupsScrollXAxis = (state: LayerState, action: EnableGroupsScrollXAxis): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current, index) => {
+    return enableGroupScrollXAxis(result, layerActions.enableGroupScrollXAxis({
+      id: current
+    }) as EnableGroupScrollXAxis);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Enable Groups Scroll X Axis',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+//
+
+export const disableGroupScrollXAxis = (state: LayerState, action: DisableGroupScrollXAxis): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        scroll: {
+          ...(currentState.byId[action.payload.id] as Btwx.Group).scroll,
+          axis: {
+            ...(currentState.byId[action.payload.id] as Btwx.Group).scroll.axis,
+            x: false
+          }
+        }
+      } as Btwx.Group
+    }
+  }
+  return currentState;
+};
+
+export const disableGroupsScrollXAxis = (state: LayerState, action: DisableGroupsScrollXAxis): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current, index) => {
+    return disableGroupScrollXAxis(result, layerActions.disableGroupScrollXAxis({
+      id: current
+    }) as DisableGroupScrollXAxis);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Disable Groups Scroll X Axis',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+//
+
+export const enableGroupScrollYAxis = (state: LayerState, action: EnableGroupScrollYAxis): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        scroll: {
+          ...(currentState.byId[action.payload.id] as Btwx.Group).scroll,
+          axis: {
+            ...(currentState.byId[action.payload.id] as Btwx.Group).scroll.axis,
+            y: true
+          }
+        }
+      } as Btwx.Group
+    }
+  }
+  return currentState;
+};
+
+export const enableGroupsScrollYAxis = (state: LayerState, action: EnableGroupsScrollYAxis): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current, index) => {
+    return enableGroupScrollYAxis(result, layerActions.enableGroupScrollYAxis({
+      id: current
+    }) as EnableGroupScrollYAxis);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Enable Groups Scroll Y Axis',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+//
+
+export const disableGroupScrollYAxis = (state: LayerState, action: DisableGroupScrollYAxis): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        scroll: {
+          ...(currentState.byId[action.payload.id] as Btwx.Group).scroll,
+          axis: {
+            ...(currentState.byId[action.payload.id] as Btwx.Group).scroll.axis,
+            y: false
+          }
+        }
+      } as Btwx.Group
+    }
+  }
+  return currentState;
+};
+
+export const disableGroupsScrollYAxis = (state: LayerState, action: DisableGroupsScrollYAxis): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current, index) => {
+    return disableGroupScrollYAxis(result, layerActions.disableGroupScrollYAxis({
+      id: current
+    }) as DisableGroupScrollYAxis);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Disable Groups Scroll Y Axis',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+//
+
+export const setGroupScrollOverflow = (state: LayerState, action: SetGroupScrollOverflow): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        scroll: {
+          ...(currentState.byId[action.payload.id] as Btwx.Group).scroll,
+          overflow: action.payload.overflow
+        }
+      } as Btwx.Group
+    }
+  }
+  return currentState;
+};
+
+export const setGroupsScrollOverflow = (state: LayerState, action: SetGroupsScrollOverflow): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current, index) => {
+    return setGroupScrollOverflow(result, layerActions.setGroupScrollOverflow({
+      id: current,
+      overflow: action.payload.overflow
+    }) as SetGroupScrollOverflow);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Groups Scroll Overflow',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setGroupScrollFrame = (state: LayerState, action: SetGroupScrollFrame): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        scroll: {
+          ...(currentState.byId[action.payload.id] as Btwx.Group).scroll,
+          frame: {
+            ...(currentState.byId[action.payload.id] as Btwx.Group).scroll.frame,
+            ...action.payload.frame
+          }
+        }
+      } as Btwx.Group
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Group Scroll Frame',
+      undoable: true
+    }
+  }) as SetLayerEdit);
   return currentState;
 };

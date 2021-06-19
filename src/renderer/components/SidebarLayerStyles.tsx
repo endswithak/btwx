@@ -7,6 +7,7 @@ import SidebarShadowStyles from './SidebarShadowStyles';
 import SidebarTextStyles from './SidebarTextStyles';
 import SidebarAlignmentStyles from './SidebarAlignmentStyles';
 import SidebarBlurStyles from './SidebarBlurStyles';
+import SidebarScrollStyles from './SidebarScrollStyles';
 import AlignDistribute from './AlignDistribute';
 import SwatchEditor from './SwatchEditor';
 import SidebarShapeStyles from './SidebarShapeStyles';
@@ -18,6 +19,7 @@ const SidebarLayerStyles = (): ReactElement => {
       {/* sections */}
       <AlignDistribute />
       <SidebarFrameStyles />
+      <SidebarScrollStyles />
       <SidebarShapeStyles />
       <SidebarOpacityStyles />
       <SidebarTextStyles />

@@ -396,6 +396,22 @@ export const DISABLE_LAYERS_BLUR = 'DISABLE_LAYERS_BLUR';
 export const SET_LAYER_BLUR_RADIUS = 'SET_LAYER_BLUR_RADIUS';
 export const SET_LAYERS_BLUR_RADIUS = 'SET_LAYERS_BLUR_RADIUS';
 
+export const ENABLE_GROUP_SCROLL = 'ENABLE_GROUP_SCROLL';
+export const ENABLE_GROUPS_SCROLL = 'ENABLE_GROUPS_SCROLL';
+export const DISABLE_GROUP_SCROLL = 'DISABLE_GROUP_SCROLL';
+export const DISABLE_GROUPS_SCROLL = 'DISABLE_GROUPS_SCROLL';
+export const ENABLE_GROUP_SCROLL_X_AXIS = 'ENABLE_GROUP_SCROLL_X_AXIS';
+export const ENABLE_GROUPS_SCROLL_X_AXIS = 'ENABLE_GROUPS_SCROLL_X_AXIS';
+export const DISABLE_GROUP_SCROLL_X_AXIS = 'DISABLE_GROUP_SCROLL_X_AXIS';
+export const DISABLE_GROUPS_SCROLL_X_AXIS = 'DISABLE_GROUPS_SCROLL_X_AXIS';
+export const ENABLE_GROUP_SCROLL_Y_AXIS = 'ENABLE_GROUP_SCROLL_Y_AXIS';
+export const ENABLE_GROUPS_SCROLL_Y_AXIS = 'ENABLE_GROUPS_SCROLL_Y_AXIS';
+export const DISABLE_GROUP_SCROLL_Y_AXIS = 'DISABLE_GROUP_SCROLL_Y_AXIS';
+export const DISABLE_GROUPS_SCROLL_Y_AXIS = 'DISABLE_GROUPS_SCROLL_Y_AXIS';
+export const SET_GROUP_SCROLL_OVERFLOW = 'SET_GROUP_SCROLL_OVERFLOW';
+export const SET_GROUPS_SCROLL_OVERFLOW = 'SET_GROUPS_SCROLL_OVERFLOW';
+export const SET_GROUP_SCROLL_FRAME = 'SET_GROUP_SCROLL_FRAME';
+
 // Artboard
 
 export type AddArtboardPayload = {
@@ -4219,6 +4235,165 @@ export interface HydrateLayers {
   payload: LayerState;
 }
 
+//
+
+export interface EnableGroupScrollPayload {
+  id: string;
+}
+
+export interface EnableGroupScroll {
+  type: typeof ENABLE_GROUP_SCROLL;
+  payload: EnableGroupScrollPayload;
+}
+
+export interface EnableGroupsScrollPayload {
+  layers: string[];
+}
+
+export interface EnableGroupsScroll {
+  type: typeof ENABLE_GROUPS_SCROLL;
+  payload: EnableGroupsScrollPayload;
+}
+
+//
+
+export interface DisableGroupScrollPayload {
+  id: string;
+}
+
+export interface DisableGroupScroll {
+  type: typeof DISABLE_GROUP_SCROLL;
+  payload: DisableGroupScrollPayload;
+}
+
+export interface DisableGroupsScrollPayload {
+  layers: string[];
+}
+
+export interface DisableGroupsScroll {
+  type: typeof DISABLE_GROUPS_SCROLL;
+  payload: DisableGroupsScrollPayload;
+}
+
+//
+
+export interface EnableGroupScrollXAxisPayload {
+  id: string;
+}
+
+export interface EnableGroupScrollXAxis {
+  type: typeof ENABLE_GROUP_SCROLL_X_AXIS;
+  payload: EnableGroupScrollXAxisPayload;
+}
+
+export interface EnableGroupsScrollXAxisPayload {
+  layers: string[];
+}
+
+export interface EnableGroupsScrollXAxis {
+  type: typeof ENABLE_GROUPS_SCROLL_X_AXIS;
+  payload: EnableGroupsScrollXAxisPayload;
+}
+
+//
+
+export interface DisableGroupScrollXAxisPayload {
+  id: string;
+}
+
+export interface DisableGroupScrollXAxis {
+  type: typeof DISABLE_GROUP_SCROLL_X_AXIS;
+  payload: DisableGroupScrollXAxisPayload;
+}
+
+export interface DisableGroupsScrollXAxisPayload {
+  layers: string[];
+}
+
+export interface DisableGroupsScrollXAxis {
+  type: typeof DISABLE_GROUPS_SCROLL_X_AXIS;
+  payload: DisableGroupsScrollXAxisPayload;
+}
+
+//
+
+export interface EnableGroupScrollYAxisPayload {
+  id: string;
+}
+
+export interface EnableGroupScrollYAxis {
+  type: typeof ENABLE_GROUP_SCROLL_Y_AXIS;
+  payload: EnableGroupScrollYAxisPayload;
+}
+
+export interface EnableGroupsScrollYAxisPayload {
+  layers: string[];
+}
+
+export interface EnableGroupsScrollYAxis {
+  type: typeof ENABLE_GROUPS_SCROLL_Y_AXIS;
+  payload: EnableGroupsScrollYAxisPayload;
+}
+
+//
+
+export interface DisableGroupScrollYAxisPayload {
+  id: string;
+}
+
+export interface DisableGroupScrollYAxis {
+  type: typeof DISABLE_GROUP_SCROLL_Y_AXIS;
+  payload: DisableGroupScrollYAxisPayload;
+}
+
+export interface DisableGroupsScrollYAxisPayload {
+  layers: string[];
+}
+
+export interface DisableGroupsScrollYAxis {
+  type: typeof DISABLE_GROUPS_SCROLL_Y_AXIS;
+  payload: DisableGroupsScrollYAxisPayload;
+}
+
+//
+
+export interface SetGroupScrollOverflowPayload {
+  id: string;
+  overflow: Btwx.ScrollOverflow;
+}
+
+export interface SetGroupScrollOverflow {
+  type: typeof SET_GROUP_SCROLL_OVERFLOW;
+  payload: SetGroupScrollOverflowPayload;
+}
+
+export interface SetGroupsScrollOverflowPayload {
+  layers: string[];
+  overflow: Btwx.ScrollOverflow;
+}
+
+export interface SetGroupsScrollOverflow {
+  type: typeof SET_GROUPS_SCROLL_OVERFLOW;
+  payload: SetGroupsScrollOverflowPayload;
+}
+
+//
+
+export interface SetGroupScrollFramePayload {
+  id: string;
+  frame: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+}
+
+export interface SetGroupScrollFrame {
+  type: typeof SET_GROUP_SCROLL_FRAME;
+  payload: SetGroupScrollFramePayload;
+}
+
 export type LayerTypes = AddArtboard |
                          AddGroup |
                          AddShape |
@@ -4561,4 +4736,19 @@ export type LayerTypes = AddArtboard |
                          SetLayerTree |
                          SetLayerTreeScroll |
                          SetLayerTreeStickyArtboard |
-                         HydrateLayers;
+                         HydrateLayers |
+                         EnableGroupScroll |
+                         EnableGroupsScroll |
+                         DisableGroupScroll |
+                         DisableGroupsScroll |
+                         EnableGroupScrollXAxis |
+                         EnableGroupsScrollXAxis |
+                         DisableGroupScrollXAxis |
+                         DisableGroupsScrollXAxis |
+                         EnableGroupScrollYAxis |
+                         EnableGroupsScrollYAxis |
+                         DisableGroupScrollYAxis |
+                         DisableGroupsScrollYAxis |
+                         SetGroupScrollOverflow |
+                         SetGroupsScrollOverflow |
+                         SetGroupScrollFrame;

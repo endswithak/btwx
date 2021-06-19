@@ -397,8 +397,31 @@ declare namespace Btwx {
     masked: boolean;
   }
 
+  interface ScrollAxis {
+    x: boolean;
+    y: boolean;
+  }
+
+  interface ScrollFrame {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }
+
+  type ScrollOverflow = 'visible' | 'hidden';
+
+  interface GroupScroll {
+    enabled: boolean;
+    axis: ScrollAxis;
+    frame: ScrollFrame;
+    overflow: ScrollOverflow;
+    // direction: 'natural' | 'inverse';
+  }
+
   interface Group extends MaskableLayer {
     type: 'Group';
+    scroll: GroupScroll;
   }
 
   type TextResize = 'autoWidth' | 'autoHeight' | 'fixed';

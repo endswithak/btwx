@@ -332,19 +332,24 @@ interface GetPaperParent {
   paperScope: Btwx.PaperScope;
   projectIndex: number;
   parent: string;
-  isParentArtboard: boolean;
+  parentType: 'Group' | 'Artboard';
   masked: boolean;
   underlyingMask: string;
 }
 
-export const getPaperParent = ({ paperScope, projectIndex, parent, isParentArtboard, masked, underlyingMask }: GetPaperParent): paper.Item => {
+export const getPaperParent = ({ paperScope, projectIndex, parent, parentType, masked, underlyingMask }: GetPaperParent): paper.Item => {
   const paperProject = paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project;
-  let paperParent = paperProject.getItem({data: {id: parent}});
-  if (isParentArtboard) {
-    paperParent = paperParent.getItem({data:{id:'artboardLayers'}});
+  let paperParent = paperProject.getItem({ data: { id: parent }});
+  switch(parentType) {
+    case 'Artboard':
+      paperParent = paperParent.getItem({ data: { id: 'artboardLayers' }});
+      break;
+    case 'Group':
+      paperParent = paperParent.getItem({ data: { id: 'groupLayers' }});
+      break;
   }
   if (masked) {
-    paperParent = paperProject.getItem({data: {id: underlyingMask}}).parent;
+    paperParent = paperProject.getItem({ data: { id: underlyingMask }}).parent;
   }
   return paperParent;
 }

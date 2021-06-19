@@ -27,6 +27,8 @@ import {
   DISABLE_FILL_DRAGOVER,
   ENABLE_STROKE_DRAGOVER,
   DISABLE_STROKE_DRAGOVER,
+  EXPAND_SCROLL_STYLES,
+  COLLAPSE_SCROLL_STYLES,
   // ENABLE_SHADOW_DRAGOVER,
   // DISABLE_SHADOW_DRAGOVER,
   EnableDraggingFillPayload,
@@ -148,6 +150,14 @@ export const enableStrokeDragover = (): RightSidebarTypes => ({
 
 export const disableStrokeDragover = (): RightSidebarTypes => ({
   type: DISABLE_STROKE_DRAGOVER
+});
+
+export const collapseScrollStyles = (): RightSidebarTypes => ({
+  type: COLLAPSE_SCROLL_STYLES
+});
+
+export const expandScrollStyles = (): RightSidebarTypes => ({
+  type: EXPAND_SCROLL_STYLES
 });
 
 // export const enableShadowDragover = (): RightSidebarTypes => ({

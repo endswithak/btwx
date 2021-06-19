@@ -1756,11 +1756,30 @@ export const canToggleSelectedFillOrStroke = createSelector(
   }
 );
 
+export const canToggleSelectedScroll = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    const keys = Object.keys(selectedById);
+    return keys.length > 0 && keys.every((id: string) => {
+      const layerItem = selectedById[id];
+      return layerItem.type === 'Group';
+    });
+  }
+);
+
 export const selectedFillEnabled = createSelector(
   [ canToggleSelectedFillOrStroke, getSelectedById ],
   (canToggle, selectedById) => {
     const keys = Object.keys(selectedById);
     return canToggle && keys.every((id) => selectedById[id].style.fill.enabled);
+  }
+);
+
+export const selectedScrollEnabled = createSelector(
+  [ canToggleSelectedScroll, getSelectedById ],
+  (canToggle, selectedById) => {
+    const keys = Object.keys(selectedById);
+    return canToggle && keys.every((id) => (selectedById[id] as Btwx.Group).scroll.enabled);
   }
 );
 

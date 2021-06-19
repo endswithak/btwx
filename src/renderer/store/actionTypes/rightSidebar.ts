@@ -40,6 +40,9 @@ export const DISABLE_FILL_DRAGOVER = 'DISABLE_FILL_DRAGOVER';
 export const ENABLE_STROKE_DRAGOVER = 'ENABLE_STROKE_DRAGOVER';
 export const DISABLE_STROKE_DRAGOVER = 'DISABLE_STROKE_DRAGOVER';
 
+export const EXPAND_SCROLL_STYLES = 'EXPAND_SCROLL_STYLES';
+export const COLLAPSE_SCROLL_STYLES = 'COLLAPSE_SCROLL_STYLES';
+
 // export const ENABLE_SHADOW_DRAGOVER = 'ENABLE_SHADOW_DRAGOVER';
 // export const DISABLE_SHADOW_DRAGOVER = 'DISABLE_SHADOW_DRAGOVER';
 
@@ -170,6 +173,14 @@ export interface DisableStrokeDragover {
   type: typeof DISABLE_STROKE_DRAGOVER;
 }
 
+export interface ExpandScrollStyles {
+  type: typeof EXPAND_SCROLL_STYLES;
+}
+
+export interface CollapseScrollStyles {
+  type: typeof COLLAPSE_SCROLL_STYLES;
+}
+
 // export interface EnableShadowDragover {
 //   type: typeof ENABLE_SHADOW_DRAGOVER;
 // }
@@ -207,6 +218,8 @@ export type RightSidebarTypes = ExpandShapeStyles |
                                 EnableFillDragover |
                                 DisableFillDragover |
                                 EnableStrokeDragover |
-                                DisableStrokeDragover;
+                                DisableStrokeDragover |
+                                ExpandScrollStyles |
+                                CollapseScrollStyles;
                                 // EnableShadowDragover |
                                 // DisableShadowDragover;

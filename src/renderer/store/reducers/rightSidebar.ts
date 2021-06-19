@@ -27,6 +27,8 @@ import {
   DISABLE_FILL_DRAGOVER,
   ENABLE_STROKE_DRAGOVER,
   DISABLE_STROKE_DRAGOVER,
+  EXPAND_SCROLL_STYLES,
+  COLLAPSE_SCROLL_STYLES,
   // ENABLE_SHADOW_DRAGOVER,
   // DISABLE_SHADOW_DRAGOVER,
   RightSidebarTypes,
@@ -42,6 +44,7 @@ export interface RightSidebarState {
   strokeOptionsStylesCollapsed: boolean;
   shadowStylesCollapsed: boolean;
   blurStylesCollapsed: boolean;
+  scrollStylesCollapsed: boolean;
   draggingFill: any;
   draggingStroke: any;
   draggingShadow: any;
@@ -60,6 +63,7 @@ const initialState: RightSidebarState = {
   strokeOptionsStylesCollapsed: false,
   shadowStylesCollapsed: false,
   blurStylesCollapsed: false,
+  scrollStylesCollapsed: false,
   draggingFill: null,
   draggingStroke: null,
   draggingShadow: null,
@@ -176,6 +180,18 @@ export default (state = initialState, action: RightSidebarTypes): RightSidebarSt
       return {
         ...state,
         blurStylesCollapsed: true
+      };
+    }
+    case EXPAND_SCROLL_STYLES: {
+      return {
+        ...state,
+        scrollStylesCollapsed: false
+      };
+    }
+    case COLLAPSE_SCROLL_STYLES: {
+      return {
+        ...state,
+        scrollStylesCollapsed: true
       };
     }
     case ENABLE_DRAGGING_FILL: {

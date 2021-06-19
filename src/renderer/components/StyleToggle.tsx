@@ -2,7 +2,7 @@ import React, { ReactElement } from 'react';
 import ToggleIconButton from './ToggleIconButton';
 
 interface StrokeOptionsToggleProps {
-  style: 'fill' | 'stroke' | 'shadow' | 'blur';
+  style: 'fill' | 'stroke' | 'shadow' | 'blur' | 'scroll';
   styleEnabled: boolean;
   setStyleEnabled(styleEnabled: boolean): void;
 }

@@ -349,7 +349,7 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
       paperScope,
       projectIndex,
       parent: layerItem.parent,
-      isParentArtboard: layerItem.parent === layerItem.artboard,
+      parentType: parentItem.type,
       masked: layerItem.masked,
       underlyingMask: layerItem.underlyingMask
     }).insertChild(
@@ -405,6 +405,8 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         let paperParent = paperProject.getItem({ data: { id: layerItem.parent } });
         if (layerItem.parent === layerItem.artboard) {
           paperParent = paperParent.getItem({ data: { id:'artboardLayers' } });
+        } else {
+          paperParent = paperParent.getItem({ data:{ id:'groupLayers' } });
         }
         paperParent.insertChild(layerIndex, paperLayer);
       }
@@ -421,6 +423,8 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
         let paperParent = paperProject.getItem({ data: { id: layerItem.parent } });
         if (layerItem.parent === layerItem.artboard) {
           paperParent = paperParent.getItem({ data: { id: 'artboardLayers' } });
+        } else {
+          paperParent = paperParent.getItem({ data:{ id:'groupLayers' } });
         }
         paperParent.insertChild(layerIndex, paperLayer);
       }

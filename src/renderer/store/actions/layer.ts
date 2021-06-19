@@ -376,6 +376,36 @@ import {
   SET_LAYER_TREE_SCROLL,
   SET_LAYER_TREE_STICKY_ARTBOARD,
   HYDRATE_LAYERS,
+  ENABLE_GROUP_SCROLL,
+  ENABLE_GROUPS_SCROLL,
+  DISABLE_GROUP_SCROLL,
+  DISABLE_GROUPS_SCROLL,
+  ENABLE_GROUP_SCROLL_X_AXIS,
+  ENABLE_GROUPS_SCROLL_X_AXIS,
+  DISABLE_GROUP_SCROLL_X_AXIS,
+  DISABLE_GROUPS_SCROLL_X_AXIS,
+  ENABLE_GROUP_SCROLL_Y_AXIS,
+  ENABLE_GROUPS_SCROLL_Y_AXIS,
+  DISABLE_GROUP_SCROLL_Y_AXIS,
+  DISABLE_GROUPS_SCROLL_Y_AXIS,
+  SET_GROUP_SCROLL_OVERFLOW,
+  SET_GROUPS_SCROLL_OVERFLOW,
+  SET_GROUP_SCROLL_FRAME,
+  EnableGroupScrollPayload,
+  EnableGroupsScrollPayload,
+  DisableGroupScrollPayload,
+  DisableGroupsScrollPayload,
+  EnableGroupScrollXAxisPayload,
+  EnableGroupsScrollXAxisPayload,
+  DisableGroupScrollXAxisPayload,
+  DisableGroupsScrollXAxisPayload,
+  EnableGroupScrollYAxisPayload,
+  EnableGroupsScrollYAxisPayload,
+  DisableGroupScrollYAxisPayload,
+  DisableGroupsScrollYAxisPayload,
+  SetGroupScrollOverflowPayload,
+  SetGroupsScrollOverflowPayload,
+  SetGroupScrollFramePayload,
   AddArtboardPayload,
   AddGroupPayload,
   AddShapePayload,
@@ -808,6 +838,20 @@ export const addGroupThunk = (payload: AddGroupPayload) => {
       children: [],
       scope: scope,
       frame: frame,
+      scroll: {
+        enabled: false,
+        axis: {
+          x: true,
+          y: true
+        },
+        frame: {
+          x: 0,
+          y: 0,
+          width: 1,
+          height: 1
+        },
+        overflow: 'visible'
+      },
       underlyingMask: underlyingMask,
       ignoreUnderlyingMask: ignoreUnderlyingMask,
       masked: masked,
@@ -7932,5 +7976,88 @@ export const updateFramesThunk = () => {
 
 export const hydrateLayers = (payload: LayerState): LayerTypes => ({
   type: HYDRATE_LAYERS,
+  payload
+});
+
+export const enableGroupScroll = (payload: EnableGroupScrollPayload): LayerTypes => ({
+  type: ENABLE_GROUP_SCROLL,
+  payload
+});
+
+export const enableGroupsScroll = (payload: EnableGroupsScrollPayload): LayerTypes => ({
+  type: ENABLE_GROUPS_SCROLL,
+  payload
+});
+
+export const disableGroupScroll = (payload: DisableGroupScrollPayload): LayerTypes => ({
+  type: DISABLE_GROUP_SCROLL,
+  payload
+});
+
+export const disableGroupsScroll = (payload: DisableGroupsScrollPayload): LayerTypes => ({
+  type: DISABLE_GROUPS_SCROLL,
+  payload
+});
+
+//
+
+export const enableGroupScrollXAxis = (payload: EnableGroupScrollXAxisPayload): LayerTypes => ({
+  type: ENABLE_GROUP_SCROLL_X_AXIS,
+  payload
+});
+
+export const enableGroupsScrollXAxis = (payload: EnableGroupsScrollXAxisPayload): LayerTypes => ({
+  type: ENABLE_GROUPS_SCROLL_X_AXIS,
+  payload
+});
+
+export const disableGroupScrollXAxis = (payload: DisableGroupScrollXAxisPayload): LayerTypes => ({
+  type: DISABLE_GROUP_SCROLL_X_AXIS,
+  payload
+});
+
+export const disableGroupsScrollXAxis = (payload: DisableGroupsScrollXAxisPayload): LayerTypes => ({
+  type: DISABLE_GROUPS_SCROLL_X_AXIS,
+  payload
+});
+
+//
+
+export const enableGroupScrollYAxis = (payload: EnableGroupScrollYAxisPayload): LayerTypes => ({
+  type: ENABLE_GROUP_SCROLL_Y_AXIS,
+  payload
+});
+
+export const enableGroupsScrollYAxis = (payload: EnableGroupsScrollYAxisPayload): LayerTypes => ({
+  type: ENABLE_GROUPS_SCROLL_Y_AXIS,
+  payload
+});
+
+export const disableGroupScrollYAxis = (payload: DisableGroupScrollYAxisPayload): LayerTypes => ({
+  type: DISABLE_GROUP_SCROLL_Y_AXIS,
+  payload
+});
+
+export const disableGroupsScrollYAxis = (payload: DisableGroupsScrollYAxisPayload): LayerTypes => ({
+  type: DISABLE_GROUPS_SCROLL_Y_AXIS,
+  payload
+});
+
+//
+
+export const setGroupScrollOverflow = (payload: SetGroupScrollOverflowPayload): LayerTypes => ({
+  type: SET_GROUP_SCROLL_OVERFLOW,
+  payload
+});
+
+export const setGroupsScrollOverflow = (payload: SetGroupsScrollOverflowPayload): LayerTypes => ({
+  type: SET_GROUPS_SCROLL_OVERFLOW,
+  payload
+});
+
+//
+
+export const setGroupScrollFrame = (payload: SetGroupScrollFramePayload): LayerTypes => ({
+  type: SET_GROUP_SCROLL_FRAME,
   payload
 });
