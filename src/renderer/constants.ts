@@ -419,6 +419,31 @@ export const DEFAULT_TRANSFORM: Btwx.Transform = {
   verticalFlip: DEFAULT_VERTICAL_FLIP
 }
 
+export const DEFAULT_SCROLL_ENABLED = false;
+export const DEFAULT_SCROLL_X_AXIS = true;
+export const DEFAULT_SCROLL_Y_AXIS = true;
+export const DEFAULT_SCROLL_FRAME_X = 'auto';
+export const DEFAULT_SCROLL_FRAME_Y = 'auto';
+export const DEFAULT_SCROLL_FRAME_WIDTH = 'auto';
+export const DEFAULT_SCROLL_FRAME_HEIGHT = 'auto';
+export const DEFAULT_SCROLL_OVERFLOW: Btwx.ScrollOverflow = 'visible';
+export const DEFAULT_SCROLL_OVERFLOW_OPTIONS: Btwx.ScrollOverflow[] = ['visible', 'hidden'];
+
+export const DEFAULT_SCROLL = {
+  enabled: DEFAULT_SCROLL_ENABLED,
+  axis: {
+    x: DEFAULT_SCROLL_X_AXIS,
+    y: DEFAULT_SCROLL_Y_AXIS
+  },
+  frame: {
+    x: DEFAULT_SCROLL_FRAME_X,
+    y: DEFAULT_SCROLL_FRAME_Y,
+    width: DEFAULT_SCROLL_FRAME_WIDTH,
+    height: DEFAULT_SCROLL_FRAME_HEIGHT
+  },
+  overflow: DEFAULT_SCROLL_OVERFLOW
+}
+
 export const DEFAULT_TEXT_VALUE = 'Type Something';
 export const DEFAULT_FONT_SIZE = 12;
 export const DEFAULT_FONT_FAMILY = 'Helvetica';

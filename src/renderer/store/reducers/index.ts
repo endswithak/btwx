@@ -24,6 +24,7 @@ import keyBindings from './keyBindings';
 import preferences from './preferences';
 import artboardPresets from './artboardPresets';
 import session from './session';
+import scrollFrameTool from './scrollFrameTool';
 
 export const reducers = {
   layer,
@@ -48,7 +49,8 @@ export const reducers = {
   keyBindings,
   preferences,
   artboardPresets,
-  session
+  session,
+  scrollFrameTool
 };
 
 const appReducer = combineReducers(reducers);

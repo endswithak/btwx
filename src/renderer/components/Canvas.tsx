@@ -17,6 +17,7 @@ import ResizeTool from './ResizeTool';
 import ShapeTool from './ShapeTool';
 import ArtboardTool from './ArtboardTool';
 import AreaSelectTool from './AreaSelectTool';
+import ScrollFrameTool from './ScrollFrameTool';
 import LineTool from './LineTool';
 import TextTool from './TextTool';
 import GradientTool from './GradientTool';
@@ -421,6 +422,7 @@ const Canvas = (): ReactElement => {
             <DragTool />
             <AreaSelectTool />
             <ResizeTool />
+            <ScrollFrameTool />
             <LineTool />
             {/* misc tools */}
             <GradientTool />

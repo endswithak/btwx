@@ -83,6 +83,35 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
     } else {
       const interactiveType = uiEvent.hitResult.item.data.interactiveType;
       switch(uiEvent.hitResult.item.data.elementId) {
+        case 'scrollFrame': {
+          if (hover) {
+            dispatch(setLayerHover({
+              id: null
+            }));
+          }
+          switch(interactiveType) {
+            case 'topLeft':
+            case 'topCenter':
+            case 'topRight':
+            case 'bottomLeft':
+            case 'bottomCenter':
+            case 'bottomRight':
+            case 'leftCenter':
+            case 'rightCenter': {
+              if (activeTool !== 'ScrollFrame') {
+                dispatch(setCanvasActiveTool({
+                  activeTool: 'ScrollFrame',
+                  resizeHandle: interactiveType,
+                  dragHandle: false,
+                  lineHandle: null,
+                  cursor: [getSelectionFrameCursor(interactiveType), ...cursor]
+                }));
+              }
+              break;
+            }
+          }
+          break;
+        }
         case 'selectionFrame': {
           if (hover) {
             dispatch(setLayerHover({

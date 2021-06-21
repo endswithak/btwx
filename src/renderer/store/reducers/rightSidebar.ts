@@ -191,7 +191,7 @@ export default (state = initialState, action: RightSidebarTypes): RightSidebarSt
     case COLLAPSE_SCROLL_STYLES: {
       return {
         ...state,
-        scrollStylesCollapsed: true
+        scrollStylesCollapsed: false
       };
     }
     case ENABLE_DRAGGING_FILL: {

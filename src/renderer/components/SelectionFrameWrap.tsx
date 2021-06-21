@@ -9,8 +9,9 @@ const SelectionFrameWrap = (): ReactElement => {
   const isResizing = useSelector((state: RootState) => state.canvasSettings.resizing);
   const isGradientEditorOpen = useSelector((state: RootState) => state.gradientEditor.isOpen);
   const isTextEditorOpen = useSelector((state: RootState) => state.textEditor.isOpen);
+  const scrollFrameToolActive = useSelector((state: RootState) => state.scrollFrameTool.isEnabled);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
-  const isEnabled = selected.length > 0 && !isGradientEditorOpen && !isTextEditorOpen && !isZooming && !isDragging && !isResizing;
+  const isEnabled = selected.length > 0 && !scrollFrameToolActive && !isGradientEditorOpen && !isTextEditorOpen && !isZooming && !isDragging && !isResizing;
 
   return (
     isEnabled

@@ -9,6 +9,7 @@ import { deselectAllLayerEvents, deselectAllLayerEventTweens, moveLayersBy, esca
 import { toggleShapeToolThunk } from '../store/actions/shapeTool';
 import { toggleTextToolThunk } from '../store/actions/textTool';
 import { toggleArtboardToolThunk } from '../store/actions/artboardTool';
+import { disableScrollFrameToolThunk } from '../store/actions/scrollFrameTool'
 import { closeArtboardPresetEditor } from '../store/actions/artboardPresetEditor';
 import { closeGradientEditor } from '../store/actions/gradientEditor';
 import { closeColorEditor } from '../store/actions/colorEditor';
@@ -27,6 +28,7 @@ const KeyBindings = (): ReactElement => {
   const easeEditorOpen = useSelector((state: RootState) => state.easeEditor.isOpen);
   const artboardPresetEditorOpen = useSelector((state: RootState) => state.artboardPresetEditor.isOpen);
   const fontFamilySelectorOpen = useSelector((state: RootState) => state.fontFamilySelector.isOpen);
+  const scrollFrameToolActive = useSelector((state: RootState) => state.canvasSettings.activeTool === 'ScrollFrame');
   const shapeToolActive = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Shape');
   const shapeToolShapeType = useSelector((state: RootState) => state.shapeTool.shapeType);
   const textToolActive = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Text');
@@ -106,7 +108,10 @@ const KeyBindings = (): ReactElement => {
               dispatch(closeFontFamilySelector());
             }
           } else {
-            if (shapeToolActive || artboardToolActive || textToolActive) {
+            if (shapeToolActive || artboardToolActive || textToolActive || scrollFrameToolActive) {
+              if (scrollFrameToolActive) {
+                dispatch(disableScrollFrameToolThunk());
+              }
               if (shapeToolActive) {
                 dispatch(toggleShapeToolThunk(shapeToolShapeType));
               }
@@ -184,7 +189,7 @@ const KeyBindings = (): ReactElement => {
     focusing, measuring, gradientEditorOpen, colorEditorOpen, easeEditorOpen,
     shapeToolActive, shapeToolShapeType, artboardToolActive, textToolActive,
     artboardPresetEditorOpen, fontFamilySelectorOpen, escapeDisabled, hasActiveInupt,
-    selectedLayers, selectedBounds, nudging, nudgeEvent
+    selectedLayers, selectedBounds, nudging, nudgeEvent, scrollFrameToolActive
   ]);
 
   useEffect(() => {

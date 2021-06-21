@@ -7,7 +7,7 @@ import MeasureGuide from '../../canvas/measureGuide';
 import {
   ARTBOARDS_PER_PROJECT, DEFAULT_TRANSFORM, DEFAULT_ARTBOARD_BACKGROUND_COLOR,
   DEFAULT_TEXT_VALUE, THEME_PRIMARY_COLOR, DEFAULT_TWEEN_EVENTS, TWEEN_PROPS_MAP,
-  DEFAULT_STYLE
+  DEFAULT_STYLE, DEFAULT_SCROLL
 } from '../../constants';
 import {
   clearLayerTransforms, applyLayerTransforms, getTextLines, positionTextContent, getTextInnerBounds,
@@ -838,20 +838,7 @@ export const addGroupThunk = (payload: AddGroupPayload) => {
       children: [],
       scope: scope,
       frame: frame,
-      scroll: {
-        enabled: false,
-        axis: {
-          x: true,
-          y: true
-        },
-        frame: {
-          x: 0,
-          y: 0,
-          width: 1,
-          height: 1
-        },
-        overflow: 'visible'
-      },
+      scroll: DEFAULT_SCROLL,
       underlyingMask: underlyingMask,
       ignoreUnderlyingMask: ignoreUnderlyingMask,
       masked: masked,
@@ -7623,6 +7610,210 @@ export const updateSelectionFrame = ({bounds, handle = 'all', rotation, lineHand
     // } else {
     //   frameWithResizeHandles.rotation = 0;
     // }
+  }
+};
+
+interface UpdateScrollFrame {
+  bounds: paper.Rectangle;
+  handle?: Btwx.SelectionFrameHandle;
+}
+
+export const updateScrollFrame = ({bounds, handle = 'all'}: UpdateScrollFrame): void => {
+  if (paperMain.project.activeLayer.data.id !== 'ui') {
+    paperMain.projects[0].activate();
+  }
+  const scrollFrame = paperMain.project.getItem({ data: { id: 'scrollFrame' } });
+  scrollFrame.removeChildren();
+  if (bounds) {
+    const frameWithResizeHandles = new paperMain.Group({
+      data: {
+        type: 'UIElementChild',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'scrollFrame'
+      },
+      parent: scrollFrame
+    });
+    const resizeDisabled = false;
+    const baseProps = {
+      point: bounds.topLeft,
+      size: [8, 8],
+      fillColor: '#fff',
+      strokeColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.24 },
+      strokeWidth: 1 / paperMain.view.zoom,
+      shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.5 },
+      shadowBlur: 1 / paperMain.view.zoom,
+      opacity: resizeDisabled ? 1 : 1,
+      parent: frameWithResizeHandles
+    }
+    const selectionTopLeft = bounds.topLeft; // bounds ? bounds.topLeft : getSelectedTopLeft(state);
+    const selectionBottomRight = bounds.bottomRight; // bounds ? bounds.bottomRight : getSelectedBottomRight(state);
+    const redFrame = new paperMain.Group({
+      data: {
+        type: 'UIElementChild',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'scrollFrame'
+      },
+      parent: frameWithResizeHandles,
+      children: [
+        new paperMain.Path.Rectangle({
+          from: selectionTopLeft,
+          to: selectionBottomRight,
+          strokeColor: 'red',
+          strokeWidth: 4 / paperMain.view.zoom,
+          data: {
+            type: 'UIElementChild',
+            interactive: false,
+            interactiveType: null,
+            elementId: 'scrollFrame'
+          }
+        })
+      ]
+    });
+    const baseFrame = new paperMain.Group({
+      opacity: 0.33,
+      data: {
+        type: 'UIElementChild',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'scrollFrame'
+      },
+      parent: frameWithResizeHandles
+    });
+    const baseFrameOverlay = new paperMain.Path.Rectangle({
+      from: selectionTopLeft,
+      to: selectionBottomRight,
+      strokeColor: '#fff',
+      strokeWidth: 1 / paperMain.view.zoom,
+      blendMode: 'multiply',
+      data: {
+        type: 'UIElementChild',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'scrollFrame'
+      },
+      parent: baseFrame
+    });
+    const baseFrameDifference = new paperMain.Path.Rectangle({
+      from: selectionTopLeft,
+      to: selectionBottomRight,
+      strokeColor: '#999',
+      strokeWidth: 1 / paperMain.view.zoom,
+      blendMode: 'difference',
+      data: {
+        type: 'UIElementChild',
+        interactive: false,
+        interactiveType: null,
+        elementId: 'scrollFrame'
+      },
+      parent: baseFrame
+    });
+    // Line selection frame
+    const topLeftHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      visible: handle === 'all' || handle === 'topLeft',
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'topLeft',
+        elementId: 'scrollFrame'
+      }
+    });
+    topLeftHandle.position = baseFrame.bounds.topLeft;
+    topLeftHandle.scaling.x = 1 / paperMain.view.zoom;
+    topLeftHandle.scaling.y = 1 / paperMain.view.zoom;
+    const topCenterHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      visible: handle === 'all' || handle === 'topCenter',
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'topCenter',
+        elementId: 'scrollFrame'
+      }
+    });
+    topCenterHandle.position = baseFrame.bounds.topCenter;
+    topCenterHandle.scaling.x = 1 / paperMain.view.zoom;
+    topCenterHandle.scaling.y = 1 / paperMain.view.zoom;
+    const topRightHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      visible: handle === 'all' || handle === 'topRight',
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'topRight',
+        elementId: 'scrollFrame'
+      }
+    });
+    topRightHandle.position = baseFrame.bounds.topRight;
+    topRightHandle.scaling.x = 1 / paperMain.view.zoom;
+    topRightHandle.scaling.y = 1 / paperMain.view.zoom;
+    const bottomLeftHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      visible: handle === 'all' || handle === 'bottomLeft',
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'bottomLeft',
+        elementId: 'scrollFrame'
+      }
+    });
+    bottomLeftHandle.position = baseFrame.bounds.bottomLeft;
+    bottomLeftHandle.scaling.x = 1 / paperMain.view.zoom;
+    bottomLeftHandle.scaling.y = 1 / paperMain.view.zoom;
+    const bottomCenterHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      visible: handle === 'all' || handle === 'bottomCenter',
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'bottomCenter',
+        elementId: 'scrollFrame'
+      }
+    });
+    bottomCenterHandle.position = baseFrame.bounds.bottomCenter;
+    bottomCenterHandle.scaling.x = 1 / paperMain.view.zoom;
+    bottomCenterHandle.scaling.y = 1 / paperMain.view.zoom;
+    const bottomRightHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      visible: handle === 'all' || handle === 'bottomRight',
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'bottomRight',
+        elementId: 'scrollFrame'
+      }
+    });
+    bottomRightHandle.position = baseFrame.bounds.bottomRight;
+    bottomRightHandle.scaling.x = 1 / paperMain.view.zoom;
+    bottomRightHandle.scaling.y = 1 / paperMain.view.zoom;
+    const rightCenterHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      visible: handle === 'all' || handle === 'rightCenter',
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'rightCenter',
+        elementId: 'scrollFrame'
+      }
+    });
+    rightCenterHandle.position = baseFrame.bounds.rightCenter;
+    rightCenterHandle.scaling.x = 1 / paperMain.view.zoom;
+    rightCenterHandle.scaling.y = 1 / paperMain.view.zoom;
+    const leftCenterHandle = new paperMain.Path.Rectangle({
+      ...baseProps,
+      visible: handle === 'all' || handle === 'leftCenter',
+      data: {
+        type: 'UIElementChild',
+        interactive: true,
+        interactiveType: 'leftCenter',
+        elementId: 'scrollFrame'
+      }
+    });
+    leftCenterHandle.position = baseFrame.bounds.leftCenter;
+    leftCenterHandle.scaling.x = 1 / paperMain.view.zoom;
+    leftCenterHandle.scaling.y = 1 / paperMain.view.zoom;
   }
 };
 

@@ -40,6 +40,7 @@ export const getTree = (state: RootState): any => state.layer.present.tree.byId;
 export const getShapeIcons = (state: RootState): any => state.layer.present.shapeIcons;
 export const getSelectedTweens = (state: RootState): any => state.layer.present.tweens.selected;
 export const getSelectedEvents = (state: RootState): any => state.layer.present.events.selected;
+export const getScrollFrameId = (state: RootState): any => state.scrollFrameTool.id;
 
 export const allTextTweensSelected = createSelector(
   [ getSelectedTweens, getTweensById ],
@@ -1711,6 +1712,47 @@ export const getSelectedInnerBounds = createSelector(
   }
 );
 
+export const getScrollFrameBounds = createSelector(
+  [ getScrollFrameId, getLayersById ],
+  (scrollFrameId, byId) => {
+    const layerItem = byId[scrollFrameId] as Btwx.Group;
+    const artboardItem = layerItem ? byId[layerItem.artboard] : null;
+    if (scrollFrameId && layerItem && artboardItem) {
+      const artboardPosition = new paper.Point(artboardItem.frame.x, artboardItem.frame.y);
+      const groupPosition = new paper.Point(layerItem.frame.x, layerItem.frame.y);
+      const groupAbsPosition = groupPosition.add(artboardPosition);
+      const layerItemBounds = new paper.Rectangle({
+        from: new paper.Point(
+          groupAbsPosition.x - (layerItem.frame.width / 2),
+          groupAbsPosition.y - (layerItem.frame.height / 2)
+        ),
+        to: new paper.Point(
+          groupAbsPosition.x + (layerItem.frame.width / 2),
+          groupAbsPosition.y + (layerItem.frame.height / 2)
+        )
+      });
+      if (layerItem.scroll.frame.x === 'auto') {
+        return layerItemBounds;
+      } else {
+        return new paperMain.Rectangle({
+          point: layerItemBounds.topLeft.add(
+            new paperMain.Point(
+              layerItem.scroll.frame.x as number,
+              layerItem.scroll.frame.y as number
+            )
+          ),
+          size: new paperMain.Size(
+            layerItem.scroll.frame.width as number,
+            layerItem.scroll.frame.height as number
+          )
+        });
+      }
+    } else {
+      return null;
+    }
+  }
+);
+
 export const getHoverBounds = createSelector(
   [ getHover, getLayersById ],
   (hover, byId) => {
@@ -2881,7 +2923,7 @@ export const getSelectedRotation = createSelector(
 export const getSelectedLeading = createSelector(
   [ getSelectedById ],
   (selectedById) => {
-    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+    return Object.keys(selectedById).reduce((result: number | 'auto' | 'multi', current: string) => {
       const layerItem = selectedById[current] as Btwx.Text;
       if (!result) {
         result = layerItem.textStyle.leading;
@@ -2890,7 +2932,7 @@ export const getSelectedLeading = createSelector(
         result = 'multi';
       }
       return result;
-    }, null) as number | 'multi';
+    }, null) as number | 'auto' | 'multi';
   }
 );
 
@@ -3003,6 +3045,54 @@ export const getSelectedVerticalAlignment = createSelector(
       }
       return result;
     }, null) as Btwx.VerticalAlignment | 'multi';
+  }
+);
+
+export const getSelectedScrollOverflow = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: Btwx.ScrollOverflow | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Group;
+      if (!result) {
+        result = layerItem.scroll.overflow;
+      }
+      if (result && layerItem.scroll.overflow !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as Btwx.ScrollOverflow | 'multi';
+  }
+);
+
+export const getSelectedScrollXAxis = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: boolean | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Group;
+      if (!result) {
+        result = layerItem.scroll.axis.x;
+      }
+      if (result && layerItem.scroll.axis.x !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as boolean | 'multi';
+  }
+);
+
+export const getSelectedScrollYAxis = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: boolean | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Group;
+      if (!result) {
+        result = layerItem.scroll.axis.y;
+      }
+      if (result && layerItem.scroll.axis.y !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as boolean | 'multi';
   }
 );
 

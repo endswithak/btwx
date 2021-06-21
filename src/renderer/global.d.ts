@@ -76,7 +76,7 @@ declare namespace Btwx {
 
   type ZoomType = 'in' | 'out';
 
-  type ToolType = 'Shape' | 'Selection' | 'Artboard' | 'Text' | 'Drag' | 'AreaSelect' | 'Resize' | 'Line' | 'Gradient' | 'Translate' | 'Zoom';
+  type ToolType = 'Shape' | 'Selection' | 'Artboard' | 'Text' | 'Drag' | 'AreaSelect' | 'Resize' | 'Line' | 'Gradient' | 'Translate' | 'Zoom' | 'ScrollFrame';
 
   type Orientation = 'Portrait' | 'Landscape';
 
@@ -403,10 +403,10 @@ declare namespace Btwx {
   }
 
   interface ScrollFrame {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
+    x: number | 'auto';
+    y: number | 'auto';
+    width: number | 'auto';
+    height: number | 'auto';
   }
 
   type ScrollOverflow = 'visible' | 'hidden';
