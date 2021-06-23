@@ -12,7 +12,9 @@ interface CanvasGroupLayerProps {
   paperScope: Btwx.PaperScope;
   eventTimelines?: {
     [id: string]: GSAPTimeline;
-  }
+  },
+  scrollXValue?: number;
+  scrollYValue?: number;
 }
 
 const debug = false;
@@ -298,6 +300,62 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
     }
   }
 
+  const handleMouseMove = (e: any) => {
+    const point = paperProject.view.getEventPoint(e);
+    const hitTest = paperProject.hitTest(point);
+    if (hitTest.item) {
+      hitTest.item.emit('mousemove', e);
+    }
+  }
+
+  const handleMouseEnter = (e: any) => {
+    const point = paperProject.view.getEventPoint(e);
+    const hitTest = paperProject.hitTest(point);
+    if (hitTest.item) {
+      hitTest.item.emit('mouseenter', e);
+    }
+  }
+
+  const handleMouseLeave = (e: any) => {
+    const point = paperProject.view.getEventPoint(e);
+    const hitTest = paperProject.hitTest(point);
+    if (hitTest.item) {
+      hitTest.item.emit('mouseleave', e);
+    }
+  }
+
+  const handleMouseDown = (e: any) => {
+    const point = paperProject.view.getEventPoint(e);
+    const hitTest = paperProject.hitTest(point);
+    if (hitTest.item) {
+      hitTest.item.emit('mousedown', e);
+    }
+  }
+
+  const handleMouseUp = (e: any) => {
+    const point = paperProject.view.getEventPoint(e);
+    const hitTest = paperProject.hitTest(point);
+    if (hitTest.item) {
+      hitTest.item.emit('mouseup', e);
+    }
+  }
+
+  const handleClick = (e: any) => {
+    const point = paperProject.view.getEventPoint(e);
+    const hitTest = paperProject.hitTest(point);
+    if (hitTest.item) {
+      hitTest.item.emit('click', e);
+    }
+  }
+
+  const handleDoubleClick = (e: any) => {
+    const point = paperProject.view.getEventPoint(e);
+    const hitTest = paperProject.hitTest(point);
+    if (hitTest.item) {
+      hitTest.item.emit('doubleclick', e);
+    }
+  }
+
   useEffect(() => {
     if (rendered) {
       const { scrollMask, scrollBackground } = getPaperLayer();
@@ -391,7 +449,15 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
                   }
                 })()
               }}
-              onWheel={handleWheel} />
+              onWheel={handleWheel}
+              onMouseMove={handleMouseMove}
+              onMouseDown={handleMouseDown}
+              onMouseUp={handleMouseUp}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              onClick={handleClick}
+              onDoubleClick={handleDoubleClick}
+              onContextMenu={handleClick} />
           : null
         }
         {
