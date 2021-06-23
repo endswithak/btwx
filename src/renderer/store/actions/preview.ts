@@ -12,9 +12,11 @@ import {
   TOGGLE_PREVIEW_DEVICE_ORIENTATION,
   ENABLE_PREVIEW_AUTOPLAY,
   DISABLE_PREVIEW_AUTOPLAY,
+  SET_PREVIEW_MATRIX,
   SetPreviewFocusingPayload,
   SetPreviewTweeningPayload,
   SetPreviewDevicePayload,
+  SetPreviewMatrixPayload,
   PreviewTypes
 } from '../actionTypes/preview';
 
@@ -75,4 +77,9 @@ export const enablePreviewAutoplay = (): PreviewTypes => ({
 
 export const disablePreviewAutoplay = (): PreviewTypes => ({
   type: DISABLE_PREVIEW_AUTOPLAY
+});
+
+export const setPreviewMatrix = (payload: SetPreviewMatrixPayload): PreviewTypes => ({
+  type: SET_PREVIEW_MATRIX,
+  payload
 });

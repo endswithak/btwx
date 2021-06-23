@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { createSelector } from 'reselect';
-// import replaceAll from 'string.prototype.replaceall';
 import tinyColor from 'tinycolor2';
 import paper from 'paper';
-// import { clipboard } from 'electron';
 import { LayerState } from '../reducers/layer';
 import { paperMain } from '../../canvas';
 import { removeItem } from '../utils/general';

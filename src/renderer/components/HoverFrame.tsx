@@ -6,6 +6,7 @@ import { getHoverBounds } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
 
 const HoverFrame = (): ReactElement => {
+  const themeName = useSelector((state: RootState) => state.preferences.theme);
   const hover = useSelector((state: RootState) => state.layer.present.hover);
   const hoverBounds = useSelector((state: RootState) => getHoverBounds(state));
   const hoverItem = useSelector((state: RootState) => state.layer.present.hover && state.layer.present.byId[state.layer.present.hover] ? state.layer.present.byId[state.layer.present.hover] : null);
@@ -13,12 +14,16 @@ const HoverFrame = (): ReactElement => {
   const zoom = useSelector((state: RootState) => state.documentSettings.zoom);
 
   useEffect(() => {
-    updateHoverFrame(hoverItem, artboardItem);
+    updateHoverFrame({
+      hoverItem,
+      artboardItem,
+      themeName
+    });
     return (): void => {
       const hoverFrame = paperMain.projects[0].getItem({ data: { id: 'hoverFrame' } });
       hoverFrame.removeChildren();
     }
-  }, [hover, hoverItem, zoom, hoverBounds]);
+  }, [hover, hoverItem, zoom, hoverBounds, themeName]);
 
   return null;
 }

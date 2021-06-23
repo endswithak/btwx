@@ -13,11 +13,11 @@ import ScrollResizeInput from './ScrollResizeInput';
 
 const SidebarScrollStyles = (): ReactElement => {
   const validScrollSelection = useSelector((state: RootState) => state.layer.present.selected.every((id) => state.layer.present.byId[id] && state.layer.present.byId[id].type === 'Group'));
-  const fillStylesCollapsed = useSelector((state: RootState) => state.rightSidebar.fillStylesCollapsed);
+  const scrollStylesCollapsed = useSelector((state: RootState) => state.rightSidebar.scrollStylesCollapsed);
   const dispatch = useDispatch();
 
   const handleClick = () => {
-    if (fillStylesCollapsed) {
+    if (scrollStylesCollapsed) {
       dispatch(expandScrollStyles());
     } else {
       dispatch(collapseScrollStyles());
@@ -28,7 +28,7 @@ const SidebarScrollStyles = (): ReactElement => {
     validScrollSelection
     ? <SidebarCollapseSection
         onClick={handleClick}
-        collapsed={fillStylesCollapsed}
+        collapsed={scrollStylesCollapsed}
         header='scroll'
         actions={[
           <ScrollToggle key='scrollToggle' />
@@ -43,7 +43,7 @@ const SidebarScrollStyles = (): ReactElement => {
         </SidebarSectionRow>
         <SidebarSectionRow>
           <SidebarSectionColumn width='33.33%'>
-            <SidebarSectionLabel text='Axis' />
+            <SidebarSectionLabel text='Direction' />
           </SidebarSectionColumn>
           <SidebarSectionColumn width='66.66%'>
             <ScrollAxisInput />

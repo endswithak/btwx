@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useRef, useEffect, ReactElement, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
+import { setPreviewMatrix } from '../store/actions/preview';
 import { paperPreview } from '../canvas';
 import CanvasArtboardLayer from './CanvasArtboardLayer';
 
@@ -12,6 +13,7 @@ const PreviewCanvas = (): ReactElement => {
   const artboards = useSelector((state: RootState) => state.layer.present.byId.root.children);
   const activeArtboardItem = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.activeArtboard]);
   const [ready, setReady] = useState(false);
+  const dispatch = useDispatch();
 
   const handleResize = (): void => {
     paperPreview.view.viewSize = new paperPreview.Size(
@@ -19,6 +21,9 @@ const PreviewCanvas = (): ReactElement => {
       canvasContainerRef.current.clientHeight
     );
     paperPreview.view.center = new paperPreview.Point(activeArtboardItem.frame.x, activeArtboardItem.frame.y);
+    dispatch(setPreviewMatrix({
+      matrix: paperPreview.view.matrix.values
+    }));
   }
 
   useEffect(() => {

@@ -1,7 +1,6 @@
 import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import tinyColor from 'tinycolor2';
-import { gsap } from 'gsap';
 import { RootState } from '../store/reducers';
 import { getLayerBounds } from '../store/selectors/layer';
 import { getLayerAbsPosition, getPaperParent } from '../store/utils/paper';
@@ -16,13 +15,14 @@ interface CanvasGroupLayerProps {
   }
 }
 
-const debug = true;
+const debug = false;
 
 const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
   const { id, paperScope, eventTimelines } = props;
   const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
   const scrollContainer = useRef<HTMLDivElement>(null);
-  const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
+  const previewMatrix = useSelector((state: RootState) => paperScope === 'preview' ? state.preview.matrix : null);
+  // const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
   const layerItem: Btwx.Group = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Group);
   const layerItemBounds: paper.Rectangle = useSelector((state: RootState) => layerItem ? getLayerBounds(state.layer.present, id) : null);
   const scrollFrameBounds = useSelector((state: RootState) => {
@@ -178,14 +178,14 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
 
   useEffect(() => {
     if (rendered) {
-      const paperLayer = paperProject.getItem({ data: { id } });
+      const { paperLayer } = getPaperLayer();
       paperLayer.data.scope = layerItem.scope;
     }
   }, [layerItem.scope]);
 
   useEffect(() => {
     if (rendered) {
-      const paperLayer = paperProject.getItem({ data: { id } });
+      const { paperLayer } = getPaperLayer();
       if (layerItem.masked) {
         const maskGroup = paperProject.getItem({ data: { id: layerItem.underlyingMask } }).parent;
         maskGroup.insertChild(maskedIndex, paperLayer);
@@ -197,7 +197,7 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
 
   useEffect(() => {
     if (rendered) {
-      const paperLayer = paperProject.getItem({ data: { id } });
+      const { paperLayer } = getPaperLayer();
       if (layerItem.masked) {
         const maskGroup = paperProject.getItem({ data: { id: layerItem.underlyingMask } }).parent;
         maskGroup.insertChild(maskedIndex, paperLayer);
@@ -215,7 +215,7 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
 
   useEffect(() => {
     if (rendered) {
-      const paperLayer = paperProject.getItem({ data: { id } });
+      const { paperLayer } = getPaperLayer();
       if (layerItem.masked) {
         const maskGroup = paperProject.getItem({ data: { id: layerItem.underlyingMask } }).parent;
         maskGroup.insertChild(maskedIndex, paperLayer);
@@ -300,7 +300,7 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
 
   useEffect(() => {
     if (rendered) {
-      const { paperLayer, scrollMask, scrollBackground } = getPaperLayer();
+      const { scrollMask, scrollBackground } = getPaperLayer();
       if (layerItem.scroll.enabled) {
         scrollBackground.visible = true;
         switch(layerItem.scroll.overflow) {
@@ -333,7 +333,7 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
       setScrollY(scrollY);
     }
     if (rendered) {
-      const { paperLayer, scrollMask, scrollBackground } = getPaperLayer();
+      const { scrollMask, scrollBackground } = getPaperLayer();
       scrollMask.bounds = scrollFrameBounds;
       scrollBackground.bounds = scrollFrameBounds;
     }
@@ -341,24 +341,8 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
     layerItem.frame.x, layerItem.frame.y, layerItem.frame.width, layerItem.frame.height,
     layerItem.scroll.frame.x, layerItem.scroll.frame.y, layerItem.scroll.frame.width,
     layerItem.scroll.frame.height, layerItem.scroll.enabled, layerItem.scroll.axis.x,
-    layerItem.scroll.axis.y, layerItem.scroll.overflow
+    layerItem.scroll.axis.y, layerItem.scroll.overflow, previewMatrix
   ]);
-
-  // useEffect(() => {
-  //   if (rendered && paperScope === 'preview') {
-  //     if (!layerItem.scroll.axis.x && scrollX) {
-  //       setScrollX(scrollX * -1);
-  //     }
-  //   }
-  // }, [layerItem.scroll.axis.x]);
-
-  // useEffect(() => {
-  //   if (rendered && paperScope === 'preview') {
-  //     if (!layerItem.scroll.axis.y && scrollY) {
-  //       setScrollY(scrollY * -1);
-  //     }
-  //   }
-  // }, [layerItem.scroll.axis.y]);
 
   useEffect(() => {
     if (rendered && paperScope === 'preview' && prevScrollX !== null && scrollX !== prevScrollX) {
@@ -396,7 +380,7 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
               style={{
                 position: 'absolute',
                 transformOrigin: 'left top',
-                background: `rgba(0, 255, 255, 0.25)`,
+                background: debug ? `rgba(0, 255, 255, 0.25)` : 'none',
                 width: scrollFrameBounds.width,
                 height: scrollFrameBounds.height,
                 ...(() => {

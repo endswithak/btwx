@@ -26,14 +26,11 @@ export const setScrollFrameToolId = (payload: SetScrollFrameToolIdPayload): Scro
 
 export const disableScrollFrameToolThunk = () => {
   return (dispatch: any, getState: any): void => {
-    const state = getState() as RootState;
-    if (state.canvasSettings.activeTool === 'ScrollFrame') {
-      dispatch(disableScrollFrameTool());
-      dispatch(setCanvasActiveTool({
-        activeTool: null,
-        drawing: false,
-        cursor: state.canvasSettings.cursor.filter(c => c !== 'crosshair')
-      }));
-    }
+    dispatch(disableScrollFrameTool());
+    dispatch(setCanvasActiveTool({
+      activeTool: null,
+      resizing: false,
+      cursor: ['auto']
+    }));
   }
 };

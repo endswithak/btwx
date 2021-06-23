@@ -7012,11 +7012,28 @@ export const redoThunk = () => {
   }
 };
 
-export const updateGradientFrame = (origin: { position: paper.Point; color: Btwx.Color; selected: boolean; index: number }, destination: { position: paper.Point; color: Btwx.Color; selected: boolean; index: number }): void => {
+interface UpdateGradientFrame {
+  origin: {
+    position: paper.Point;
+    color: Btwx.Color;
+    selected: boolean;
+    index: number;
+  };
+  destination: {
+    position: paper.Point;
+    color: Btwx.Color;
+    selected: boolean;
+    index: number;
+  };
+  themeName: Btwx.ThemeName;
+}
+
+export const updateGradientFrame = ({origin, destination, themeName}: UpdateGradientFrame): void => {
   const gradientFrame = paperMain.project.getItem({ data: { id: 'gradientFrame' } });
   gradientFrame.removeChildren();
   if (origin && destination) {
     paperMain.activate();
+    const theme = getTheme(themeName);
     const gradientFrameHandleBgProps = {
       radius: 8 / paperMain.view.zoom,
       fillColor: '#fff',
@@ -7037,7 +7054,7 @@ export const updateGradientFrame = (origin: { position: paper.Point; color: Btwx
       strokeWidth: 2 / paperMain.view.zoom,
       shadowColor: new paperMain.Color(0, 0, 0, 0.5),
       shadowBlur: 2 / paperMain.view.zoom,
-      strokeColor: THEME_PRIMARY_COLOR
+      strokeColor: theme.palette.primary
     }
     const gradientFrameLineProps = {
       from: origin.position,
@@ -7197,10 +7214,16 @@ export const updateGradientFrame = (origin: { position: paper.Point; color: Btwx
   }
 }
 
-export const updateActiveArtboardFrame = (bounds: paper.Rectangle): void => {
+interface UpdateActiveArtboardFrame {
+  bounds: paper.Rectangle;
+  themeName: Btwx.ThemeName;
+}
+
+export const updateActiveArtboardFrame = ({bounds, themeName}: UpdateActiveArtboardFrame): void => {
   if (paperMain.project.activeLayer.data.id !== 'ui') {
     paperMain.projects[0].activate();
   }
+  const theme = getTheme(themeName);
   const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'activeArtboardFrame' } });
   activeArtboardFrame.removeChildren();
   if (bounds) {
@@ -7211,7 +7234,7 @@ export const updateActiveArtboardFrame = (bounds: paper.Rectangle): void => {
       from: topLeft.subtract(new paperMain.Point(gap, gap)),
       to: bottomRight.add(new paperMain.Point(gap, gap)),
       radius: 2 * (1 / paperMain.view.zoom),
-      strokeColor: THEME_PRIMARY_COLOR,
+      strokeColor: theme.palette.primary,
       strokeWidth: 4 * (1 / paperMain.view.zoom),
       parent: activeArtboardFrame
     });
@@ -7222,9 +7245,13 @@ export const updateActiveArtboardFrameThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
     const activeArtboard = state.layer.present.activeArtboard;
+    const themeName = state.preferences.theme;
     if (activeArtboard) {
       const { paperLayer } = getItemLayers(state.layer.present, activeArtboard);
-      updateActiveArtboardFrame(paperLayer.getItem({data: {id: 'artboardBackground'}}).bounds);
+      updateActiveArtboardFrame({
+        bounds: paperLayer.getItem({data: {id: 'artboardBackground'}}).bounds,
+        themeName
+      });
     }
   }
 };
@@ -7282,15 +7309,22 @@ export const updateNameFrame = (artboards: { [id: string]: Btwx.Artboard }): voi
   }
 };
 
-export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artboard): void => {
+interface UpdateHoverFrame {
+  hoverItem: Btwx.Layer;
+  themeName: Btwx.ThemeName;
+  artboardItem?: Btwx.Artboard;
+}
+
+export const updateHoverFrame = ({hoverItem, themeName, artboardItem}: UpdateHoverFrame): void => {
   if (paperMain.project.activeLayer.data.id !== 'ui') {
     paperMain.projects[0].activate();
   }
+  const theme = getTheme(themeName);
   const hoverFrame = paperMain.project.getItem({ data: { id: 'hoverFrame' } });
   hoverFrame.removeChildren();
   if (hoverItem) {
     const hoverFrameConstants = {
-      strokeColor: THEME_PRIMARY_COLOR,
+      strokeColor: theme.palette.primary,
       strokeWidth: 2 / paperMain.view.zoom,
       parent: hoverFrame
     }
@@ -7352,7 +7386,7 @@ export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artb
                         return new paperMain.Point(current.anchor.x, current.anchor.y).add(artboardPosition);
                     }
                   })(),
-                  strokeColor: THEME_PRIMARY_COLOR,
+                  strokeColor: theme.palette.primary,
                   strokeWidth: 2 / paperMain.view.zoom,
                   parent: textLinesGroup
                 })
@@ -7379,6 +7413,7 @@ export const updateHoverFrame = (hoverItem: Btwx.Layer, artboardItem?: Btwx.Artb
 
 interface UpdateSelectionFrame {
   bounds: paper.Rectangle;
+  themeName: Btwx.ThemeName;
   handle?: Btwx.SelectionFrameHandle;
   rotation?: number;
   lineHandles?: {
@@ -7387,10 +7422,11 @@ interface UpdateSelectionFrame {
   };
 }
 
-export const updateSelectionFrame = ({bounds, handle = 'all', rotation, lineHandles}: UpdateSelectionFrame): void => {
+export const updateSelectionFrame = ({bounds, themeName, handle = 'all', rotation, lineHandles}: UpdateSelectionFrame): void => {
   if (paperMain.project.activeLayer.data.id !== 'ui') {
     paperMain.projects[0].activate();
   }
+  const theme = getTheme(themeName);
   const selectionFrame = paperMain.project.getItem({ data: { id: 'selectionFrame' } });
   selectionFrame.removeChildren();
   if (bounds) {
@@ -7615,13 +7651,15 @@ export const updateSelectionFrame = ({bounds, handle = 'all', rotation, lineHand
 
 interface UpdateScrollFrame {
   bounds: paper.Rectangle;
+  themeName: Btwx.ThemeName;
   handle?: Btwx.SelectionFrameHandle;
 }
 
-export const updateScrollFrame = ({bounds, handle = 'all'}: UpdateScrollFrame): void => {
+export const updateScrollFrame = ({bounds, themeName, handle = 'all'}: UpdateScrollFrame): void => {
   if (paperMain.project.activeLayer.data.id !== 'ui') {
     paperMain.projects[0].activate();
   }
+  const theme = getTheme(themeName);
   const scrollFrame = paperMain.project.getItem({ data: { id: 'scrollFrame' } });
   scrollFrame.removeChildren();
   if (bounds) {
@@ -7660,7 +7698,7 @@ export const updateScrollFrame = ({bounds, handle = 'all'}: UpdateScrollFrame): 
         new paperMain.Path.Rectangle({
           from: selectionTopLeft,
           to: selectionBottomRight,
-          strokeColor: 'red',
+          strokeColor: theme.palette.primary,
           strokeWidth: 4 / paperMain.view.zoom,
           data: {
             type: 'UIElementChild',
@@ -8129,6 +8167,7 @@ export const updateFramesThunk = () => {
     const state = getState() as RootState;
     const artboardItems = getAllArtboardItems(state);
     const activeArtboardBounds = getActiveArtboardBounds(state);
+    const themeName = state.preferences.theme;
     // const selectedInnerBounds = getSelectedBounds(state);
     const selectedBounds = getSelectedBounds(state);
     // const selectedRotation = getSelectedRotation(state);
@@ -8157,9 +8196,13 @@ export const updateFramesThunk = () => {
           y: artboardItem.frame.y + lineItem.to.y
         }
       } : null,
+      themeName
       // rotation: selectedRotation !== 'multi' && selectedRotation !== 0 ? selectedRotation : null
     });
-    updateActiveArtboardFrame(activeArtboardBounds);
+    updateActiveArtboardFrame({
+      bounds: activeArtboardBounds,
+      themeName
+    });
     updateEventsFrame(state);
     updateNameFrame(artboardItems);
   }

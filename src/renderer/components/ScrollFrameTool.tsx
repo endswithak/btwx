@@ -2,17 +2,17 @@
 import React, { useEffect, ReactElement, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getPaperLayer, getSelectedBounds, getLayerDescendants, getScrollFrameBounds, getLayerBounds } from '../store/selectors/layer';
+import { getPaperLayer, getScrollFrameBounds, getLayerBounds } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
 import { setCanvasResizing, setCanvasCursor, setCanvasActiveTool } from '../store/actions/canvasSettings';
 import { setGroupScrollFrame, updateScrollFrame } from '../store/actions/layer';
-import { getLayerAbsPosition } from '../store/utils/paper';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
 import { getSelectionFrameCursor } from './CanvasUIEvents';
 
 const ScrollFrameTool = (props: PaperToolProps): ReactElement => {
   const { tool, keyDownEvent, keyUpEvent, downEvent, dragEvent, upEvent } = props;
+  const themeName = useSelector((state: RootState) => state.preferences.theme);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const isEnabled = useSelector((state: RootState) => state.canvasSettings.activeTool === 'ScrollFrame');
   const resizing = useSelector((state: RootState) => state.canvasSettings.resizing);
@@ -410,7 +410,8 @@ const ScrollFrameTool = (props: PaperToolProps): ReactElement => {
         setHandle(initialHandle);
         updateScrollFrame({
           bounds: nextFromBounds,
-          handle: initialHandle
+          handle: initialHandle,
+          themeName
         });
         if (downEvent.modifiers.shift && !shiftModifier) {
           setShiftModifier(true);
@@ -598,7 +599,8 @@ const ScrollFrameTool = (props: PaperToolProps): ReactElement => {
           clearLayerPivot();
           if (selected.length > 0) {
             updateScrollFrame({
-              bounds: fromBounds
+              bounds: fromBounds,
+              themeName
             });
           }
           resetState();
@@ -645,7 +647,8 @@ const ScrollFrameTool = (props: PaperToolProps): ReactElement => {
       resizeLayers();
       updateScrollFrame({
         bounds: toBounds,
-        handle
+        handle,
+        themeName
       });
     }
   }, [toBounds]);
@@ -673,9 +676,7 @@ const ScrollFrameTool = (props: PaperToolProps): ReactElement => {
         toolEvent={dragEvent}
         preserveAspectRatio={shiftModifier || preserveAspectRatio}
         aspectRatio={fromBounds ? fromBounds.width / fromBounds.height : 1}
-        resizeHandle={handle}
-        // measure
-        />
+        resizeHandle={handle} />
     : null
   );
 }

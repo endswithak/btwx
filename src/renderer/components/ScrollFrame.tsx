@@ -7,7 +7,7 @@ import { disableScrollFrameTool } from '../store/actions/scrollFrameTool';
 import { paperMain } from '../canvas';
 
 const ScrollFrame = (): ReactElement => {
-  const theme = useSelector((state: RootState) => state.preferences.theme);
+  const themeName = useSelector((state: RootState) => state.preferences.theme);
   const scrollFrameId = useSelector((state: RootState) => state.scrollFrameTool.id);
   const scrollFrameBounds: paper.Rectangle = useSelector((state: RootState) => getScrollFrameBounds(state));
   const zoom = useSelector((state: RootState) => state.documentSettings.zoom);
@@ -20,7 +20,7 @@ const ScrollFrame = (): ReactElement => {
       if (!hitResult || !(hitResult.item && hitResult.item.data && hitResult.item.data.elementId === 'scrollFrame')) {
         dispatch(disableScrollFrameTool());
       }
-    } else {
+    } else if (event.target.id !== 'control-scroll-resize') {
       dispatch(disableScrollFrameTool());
     }
   }
@@ -28,13 +28,14 @@ const ScrollFrame = (): ReactElement => {
   useEffect(() => {
     updateScrollFrame({
       bounds: scrollFrameBounds,
-      handle: 'all'
+      handle: 'all',
+      themeName
     });
     return () => {
       const scrollFrame = paperMain.projects[0].getItem({ data: { id: 'scrollFrame' } });
       scrollFrame.removeChildren();
     }
-  }, [theme, scrollFrameBounds, zoom, scrollFrameId]);
+  }, [themeName, scrollFrameBounds, zoom, scrollFrameId]);
 
   useEffect(() => {
     document.addEventListener('mousedown', onMouseDown);

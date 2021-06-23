@@ -420,8 +420,8 @@ export const DEFAULT_TRANSFORM: Btwx.Transform = {
 }
 
 export const DEFAULT_SCROLL_ENABLED = false;
-export const DEFAULT_SCROLL_X_AXIS = true;
-export const DEFAULT_SCROLL_Y_AXIS = true;
+export const DEFAULT_SCROLL_X_AXIS = false;
+export const DEFAULT_SCROLL_Y_AXIS = false;
 export const DEFAULT_SCROLL_FRAME_X = 'auto';
 export const DEFAULT_SCROLL_FRAME_Y = 'auto';
 export const DEFAULT_SCROLL_FRAME_WIDTH = 'auto';

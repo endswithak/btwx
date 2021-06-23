@@ -9,6 +9,7 @@ import {
   TOGGLE_PREVIEW_DEVICE_ORIENTATION,
   ENABLE_PREVIEW_AUTOPLAY,
   DISABLE_PREVIEW_AUTOPLAY,
+  SET_PREVIEW_MATRIX,
   PreviewTypes
 } from '../actionTypes/preview';
 
@@ -18,6 +19,7 @@ export interface PreviewState {
   focusing: boolean;
   tweening: string;
   autoplay: boolean;
+  matrix: number[];
   device: {
     id: string;
     color: string;
@@ -31,6 +33,7 @@ export const initialState: PreviewState = {
   focusing: false,
   tweening: null,
   autoplay: true,
+  matrix: null,
   device: {
     id: null,
     color: null,
@@ -107,6 +110,12 @@ export default (state = initialState, action: PreviewTypes): PreviewState => {
       return {
         ...state,
         autoplay: false
+      };
+    }
+    case SET_PREVIEW_MATRIX: {
+      return {
+        ...state,
+        matrix: action.payload.matrix
       };
     }
     default:

@@ -28,7 +28,7 @@ const KeyBindings = (): ReactElement => {
   const easeEditorOpen = useSelector((state: RootState) => state.easeEditor.isOpen);
   const artboardPresetEditorOpen = useSelector((state: RootState) => state.artboardPresetEditor.isOpen);
   const fontFamilySelectorOpen = useSelector((state: RootState) => state.fontFamilySelector.isOpen);
-  const scrollFrameToolActive = useSelector((state: RootState) => state.canvasSettings.activeTool === 'ScrollFrame');
+  const scrollFrameToolActive = useSelector((state: RootState) => state.scrollFrameTool.isEnabled || state.canvasSettings.activeTool === 'ScrollFrame');
   const shapeToolActive = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Shape');
   const shapeToolShapeType = useSelector((state: RootState) => state.shapeTool.shapeType);
   const textToolActive = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Text');

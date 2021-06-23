@@ -55,14 +55,14 @@ const ScrollAxisInput = (): ReactElement => {
     <Form inline>
       <Form.Group controlId='control-scroll-axis'>
         <ToggleButtonGroup
-          type='checkbox'>
+          type='checkbox'
+          disabled={disabled}>
           <ToggleButtonGroup.Button
             type='checkbox'
             name='scrollXAxis'
             size='small'
             value={scrollXAxis === 'multi' ? false : scrollXAxis}
             checked={scrollXAxis === 'multi' ? false : scrollXAxis}
-            disabled={disabled}
             onChange={handleXAxisChange}>
             <Icon
               name='x-scroll'
@@ -74,7 +74,6 @@ const ScrollAxisInput = (): ReactElement => {
             size='small'
             value={scrollYAxis === 'multi' ? false : scrollYAxis}
             checked={scrollYAxis === 'multi' ? false : scrollYAxis}
-            disabled={disabled}
             onChange={handleYAxisChange}>
             <Icon
               name='y-scroll'

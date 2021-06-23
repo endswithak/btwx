@@ -8,6 +8,7 @@ export const SET_PREVIEW_DEVICE = 'SET_PREVIEW_DEVICE';
 export const TOGGLE_PREVIEW_DEVICE_ORIENTATION = 'TOGGLE_PREVIEW_DEVICE_ORIENTATION';
 export const ENABLE_PREVIEW_AUTOPLAY = 'ENABLE_PREVIEW_AUTOPLAY';
 export const DISABLE_PREVIEW_AUTOPLAY = 'DISABLE_PREVIEW_AUTOPLAY';
+export const SET_PREVIEW_MATRIX = 'SET_PREVIEW_MATRIX';
 
 export interface OpenPreview {
   type: typeof OPEN_PREVIEW;
@@ -65,6 +66,15 @@ export interface DisablePreviewAutoplay {
   type: typeof DISABLE_PREVIEW_AUTOPLAY;
 }
 
+export interface SetPreviewMatrixPayload {
+  matrix: number[];
+}
+
+export interface SetPreviewMatrix {
+  type: typeof SET_PREVIEW_MATRIX;
+  payload: SetPreviewMatrixPayload;
+}
+
 export type PreviewTypes = OpenPreview |
                            ClosePreview |
                            StartPreviewRecording |
@@ -74,4 +84,5 @@ export type PreviewTypes = OpenPreview |
                            SetPreviewDevice |
                            TogglePreviewDeviceOrientation |
                            EnablePreviewAutoplay |
-                           DisablePreviewAutoplay;
+                           DisablePreviewAutoplay |
+                           SetPreviewMatrix;

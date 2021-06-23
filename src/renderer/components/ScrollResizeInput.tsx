@@ -33,6 +33,7 @@ const ScrollResizeInput = (): ReactElement => {
     <Form inline>
       <Form.Group controlId='control-scroll-resize'>
         <ToggleButton
+          id='control-scroll-resize'
           type='checkbox'
           name='scrollResize'
           size='small'
@@ -40,7 +41,7 @@ const ScrollResizeInput = (): ReactElement => {
           value={scrollResize}
           checked={scrollResize}
           onChange={handleChange}>
-          Resize
+          { scrollResize ? 'Stop Resizing' : 'Resize' }
         </ToggleButton>
         {/* <Form.Label>
           Scroll Overflow

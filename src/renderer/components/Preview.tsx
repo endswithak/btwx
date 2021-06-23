@@ -1,7 +1,8 @@
 import debounce from 'lodash.debounce';
 import React, { useEffect, ReactElement, useState, useCallback } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { paperPreview } from '../canvas';
+import { setPreviewMatrix } from '../store/actions/preview';
 import { RootState } from '../store/reducers';
 import EmptyState from './EmptyState';
 import PreviewCanvas from './PreviewCanvas';
@@ -19,6 +20,7 @@ const Preview = (): ReactElement => {
   const recording = useSelector((state: RootState) => state.preview.recording);
   const [prevActiveArtboard, setPrevActiveArtboard] = useState(null);
   const [touchCursor, setTouchCursor] = useState(false);
+  const dispatch = useDispatch();
 
   // debounce to prevent screen bouncing when timelines autoplay
   const updatePreviewFrame = useCallback(debounce(({activeArtboard, activeArtboardItem, prevActiveArtboard, instance}) => {
@@ -39,6 +41,9 @@ const Preview = (): ReactElement => {
       if (!paperPreview.view.center.equals(activeArtboardPosition)) {
         paperPreview.view.center = activeArtboardPosition;
       }
+      dispatch(setPreviewMatrix({
+        matrix: paperPreview.view.matrix.values
+      }));
     }
     setPrevActiveArtboard(activeArtboard);
   }, 0.25), []);

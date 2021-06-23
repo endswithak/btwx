@@ -6,6 +6,7 @@ import { paperMain } from '../canvas';
 import { getGradientOriginPoint, getGradientDestinationPoint } from '../store/selectors/layer';
 
 const GradientFrame = (): ReactElement => {
+  const themeName = useSelector((state: RootState) => state.preferences.theme);
   const zoom = useSelector((state: RootState) => state.documentSettings.zoom);
   const gradientValue = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.selected[0]] && state.layer.present.byId[state.layer.present.selected[0]].style[state.gradientEditor.prop].gradient);
   const stopsWithIndex = gradientValue && gradientValue.stops.map((stop, index) => ({
@@ -33,12 +34,16 @@ const GradientFrame = (): ReactElement => {
   }
 
   useEffect(() => {
-    updateGradientFrame(origin, destination);
+    updateGradientFrame({
+      origin,
+      destination,
+      themeName
+    });
     return (): void => {
       const gradientFrame = paperMain.projects[0].getItem({ data: { id: 'gradientFrame' } });
       gradientFrame.removeChildren();
     }
-  }, [origin, destination, zoom]);
+  }, [origin, destination, zoom, themeName]);
 
   return null;
 }
