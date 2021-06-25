@@ -8,8 +8,10 @@ import SidebarSectionLabel from './SidebarSectionLabel';
 import SidebarSectionRow from './SidebarSectionRow';
 import SidebarSectionColumn from './SidebarSectionColumn';
 import ScrollOverflowInput from './ScrollOverflowInput';
-import ScrollAxisInput from './ScrollAxisInput';
+import ScrollDirectionInput from './ScrollDirectionInput';
 import ScrollResizeInput from './ScrollResizeInput';
+import HorizontalScrollInput from './HorizontalScrollInput';
+import VerticalScrollInput from './VerticalScrollInput';
 
 const SidebarScrollStyles = (): ReactElement => {
   const validScrollSelection = useSelector((state: RootState) => state.layer.present.selected.every((id) => state.layer.present.byId[id] && state.layer.present.byId[id].type === 'Group'));
@@ -18,9 +20,9 @@ const SidebarScrollStyles = (): ReactElement => {
 
   const handleClick = () => {
     if (scrollStylesCollapsed) {
-      dispatch(expandScrollStyles());
-    } else {
       dispatch(collapseScrollStyles());
+    } else {
+      dispatch(expandScrollStyles());
     }
   }
 
@@ -46,9 +48,11 @@ const SidebarScrollStyles = (): ReactElement => {
             <SidebarSectionLabel text='Direction' />
           </SidebarSectionColumn>
           <SidebarSectionColumn width='66.66%'>
-            <ScrollAxisInput />
+            <ScrollDirectionInput />
           </SidebarSectionColumn>
         </SidebarSectionRow>
+        <HorizontalScrollInput />
+        <VerticalScrollInput />
         <SidebarSectionRow>
           <SidebarSectionColumn width='100%'>
             <ScrollResizeInput />

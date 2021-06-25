@@ -380,14 +380,14 @@ import {
   ENABLE_GROUPS_SCROLL,
   DISABLE_GROUP_SCROLL,
   DISABLE_GROUPS_SCROLL,
-  ENABLE_GROUP_SCROLL_X_AXIS,
-  ENABLE_GROUPS_SCROLL_X_AXIS,
-  DISABLE_GROUP_SCROLL_X_AXIS,
-  DISABLE_GROUPS_SCROLL_X_AXIS,
-  ENABLE_GROUP_SCROLL_Y_AXIS,
-  ENABLE_GROUPS_SCROLL_Y_AXIS,
-  DISABLE_GROUP_SCROLL_Y_AXIS,
-  DISABLE_GROUPS_SCROLL_Y_AXIS,
+  ENABLE_GROUP_HORIZONTAL_SCROLL,
+  ENABLE_GROUPS_HORIZONTAL_SCROLL,
+  DISABLE_GROUP_HORIZONTAL_SCROLL,
+  DISABLE_GROUPS_HORIZONTAL_SCROLL,
+  ENABLE_GROUP_VERTICAL_SCROLL,
+  ENABLE_GROUPS_VERTICAL_SCROLL,
+  DISABLE_GROUP_VERTICAL_SCROLL,
+  DISABLE_GROUPS_VERTICAL_SCROLL,
   SET_GROUP_SCROLL_OVERFLOW,
   SET_GROUPS_SCROLL_OVERFLOW,
   SET_GROUP_SCROLL_FRAME,
@@ -395,14 +395,14 @@ import {
   EnableGroupsScrollPayload,
   DisableGroupScrollPayload,
   DisableGroupsScrollPayload,
-  EnableGroupScrollXAxisPayload,
-  EnableGroupsScrollXAxisPayload,
-  DisableGroupScrollXAxisPayload,
-  DisableGroupsScrollXAxisPayload,
-  EnableGroupScrollYAxisPayload,
-  EnableGroupsScrollYAxisPayload,
-  DisableGroupScrollYAxisPayload,
-  DisableGroupsScrollYAxisPayload,
+  EnableGroupHorizontalScrollPayload,
+  EnableGroupsHorizontalScrollPayload,
+  DisableGroupHorizontalScrollPayload,
+  DisableGroupsHorizontalScrollPayload,
+  EnableGroupVerticalScrollPayload,
+  EnableGroupsVerticalScrollPayload,
+  DisableGroupVerticalScrollPayload,
+  DisableGroupsVerticalScrollPayload,
   SetGroupScrollOverflowPayload,
   SetGroupsScrollOverflowPayload,
   SetGroupScrollFramePayload,
@@ -8235,45 +8235,45 @@ export const disableGroupsScroll = (payload: DisableGroupsScrollPayload): LayerT
 
 //
 
-export const enableGroupScrollXAxis = (payload: EnableGroupScrollXAxisPayload): LayerTypes => ({
-  type: ENABLE_GROUP_SCROLL_X_AXIS,
+export const enableGroupHorizontalScroll = (payload: EnableGroupHorizontalScrollPayload): LayerTypes => ({
+  type: ENABLE_GROUP_HORIZONTAL_SCROLL,
   payload
 });
 
-export const enableGroupsScrollXAxis = (payload: EnableGroupsScrollXAxisPayload): LayerTypes => ({
-  type: ENABLE_GROUPS_SCROLL_X_AXIS,
+export const enableGroupsHorizontalScroll = (payload: EnableGroupsHorizontalScrollPayload): LayerTypes => ({
+  type: ENABLE_GROUPS_HORIZONTAL_SCROLL,
   payload
 });
 
-export const disableGroupScrollXAxis = (payload: DisableGroupScrollXAxisPayload): LayerTypes => ({
-  type: DISABLE_GROUP_SCROLL_X_AXIS,
+export const disableGroupHorizontalScroll = (payload: DisableGroupHorizontalScrollPayload): LayerTypes => ({
+  type: DISABLE_GROUP_HORIZONTAL_SCROLL,
   payload
 });
 
-export const disableGroupsScrollXAxis = (payload: DisableGroupsScrollXAxisPayload): LayerTypes => ({
-  type: DISABLE_GROUPS_SCROLL_X_AXIS,
+export const disableGroupsHorizontalScroll = (payload: DisableGroupsHorizontalScrollPayload): LayerTypes => ({
+  type: DISABLE_GROUPS_HORIZONTAL_SCROLL,
   payload
 });
 
 //
 
-export const enableGroupScrollYAxis = (payload: EnableGroupScrollYAxisPayload): LayerTypes => ({
-  type: ENABLE_GROUP_SCROLL_Y_AXIS,
+export const enableGroupVerticalScroll = (payload: EnableGroupVerticalScrollPayload): LayerTypes => ({
+  type: ENABLE_GROUP_VERTICAL_SCROLL,
   payload
 });
 
-export const enableGroupsScrollYAxis = (payload: EnableGroupsScrollYAxisPayload): LayerTypes => ({
-  type: ENABLE_GROUPS_SCROLL_Y_AXIS,
+export const enableGroupsVerticalScroll = (payload: EnableGroupsVerticalScrollPayload): LayerTypes => ({
+  type: ENABLE_GROUPS_VERTICAL_SCROLL,
   payload
 });
 
-export const disableGroupScrollYAxis = (payload: DisableGroupScrollYAxisPayload): LayerTypes => ({
-  type: DISABLE_GROUP_SCROLL_Y_AXIS,
+export const disableGroupVerticalScroll = (payload: DisableGroupVerticalScrollPayload): LayerTypes => ({
+  type: DISABLE_GROUP_VERTICAL_SCROLL,
   payload
 });
 
-export const disableGroupsScrollYAxis = (payload: DisableGroupsScrollYAxisPayload): LayerTypes => ({
-  type: DISABLE_GROUPS_SCROLL_Y_AXIS,
+export const disableGroupsVerticalScroll = (payload: DisableGroupsVerticalScrollPayload): LayerTypes => ({
+  type: DISABLE_GROUPS_VERTICAL_SCROLL,
   payload
 });
 

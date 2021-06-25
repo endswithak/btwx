@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
-import { getLayerBounds } from '../store/selectors/layer';
+import { getLayerBounds, getLayerScrollBounds } from '../store/selectors/layer';
 import { getLayerAbsPosition, getPaperParent } from '../store/utils/paper';
 import { paperMain, paperPreview } from '../canvas';
 import CanvasLayer from './CanvasLayer';
@@ -12,12 +12,10 @@ interface CanvasGroupLayerProps {
   paperScope: Btwx.PaperScope;
   eventTimelines?: {
     [id: string]: GSAPTimeline;
-  },
-  scrollXValue?: number;
-  scrollYValue?: number;
+  }
 }
 
-const debug = false;
+const debug = true;
 
 const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
   const { id, paperScope, eventTimelines } = props;
@@ -26,43 +24,22 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
   const previewMatrix = useSelector((state: RootState) => paperScope === 'preview' ? state.preview.matrix : null);
   // const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
   const layerItem: Btwx.Group = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Group);
-  const layerItemBounds: paper.Rectangle = useSelector((state: RootState) => layerItem ? getLayerBounds(state.layer.present, id) : null);
-  const scrollFrameBounds = useSelector((state: RootState) => {
-    if (layerItemBounds) {
-      if (layerItem.scroll.frame.x === 'auto') {
-        return layerItemBounds;
-      } else {
-        return new paperLayerScope.Rectangle({
-          point: layerItemBounds.topLeft.add(
-            new paperLayerScope.Point(
-              layerItem.scroll.frame.x as number,
-              layerItem.scroll.frame.y as number
-            )
-          ),
-          size: new paperLayerScope.Size(
-            layerItem.scroll.frame.width as number,
-            layerItem.scroll.frame.height as number
-          )
-        });
-      }
-    } else {
-      return null;
-    }
-  });
   const parentItem: Btwx.Artboard | Btwx.Group = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.parent] as Btwx.Artboard | Btwx.Group : null);
   const artboardItem: Btwx.Artboard = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null);
+  const layerItemBounds: paper.Rectangle = useSelector((state: RootState) => getLayerBounds(state.layer.present, id, paperLayerScope));
+  const scrollFrameBounds = useSelector((state: RootState) => getLayerScrollBounds(state.layer.present, id, paperLayerScope));
   const layerIndex = parentItem.children.indexOf(layerItem.id);
   const underlyingMaskIndex = layerItem.underlyingMask ? parentItem.children.indexOf(layerItem.underlyingMask) : null;
   const maskedIndex = (layerIndex - underlyingMaskIndex) + 1;
   const projectIndex = artboardItem.projectIndex;
   const [paperProject, setPaperProject] = useState(paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project);
   const [rendered, setRendered] = useState<boolean>(false);
-  const [scrollX, setScrollX] = useState<number>(0);
-  const [scrollY, setScrollY] = useState<number>(0);
-  const [prevScrollX, setPrevScrollX] = useState<number>(0);
-  const [prevScrollY, setPrevScrollY] = useState<number>(0);
-  const [maxScrollX, setMaxScrollX] = useState<number>(0);
-  const [maxScrollY, setMaxScrollY] = useState<number>(0);
+  const [scrollLeft, setScrollLeft] = useState<number>(0);
+  const [scrollTop, setScrollTop] = useState<number>(0);
+  const [prevScrollLeft, setPrevScrollLeft] = useState<number>(0);
+  const [prevScrollTop, setPrevScrollTop] = useState<number>(0);
+  const [scrollWidth, setScrollWidth] = useState<number>(0);
+  const [scrollHeight, setScrollHeight] = useState<number>(0);
 
   ///////////////////////////////////////////////////////
   // HELPER FUNCTIONS
@@ -238,63 +215,63 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
   ///////////////////////////////////////////////////////
 
   const handleWheel = (e: any) => {
-    if (layerItem.scroll.axis.x) {
+    if (layerItem.scroll.direction.horizontal) {
       const deltaX = e.nativeEvent.deltaX;
-      if (maxScrollX > 0) {
-        if (deltaX > 0 && (scrollX + deltaX <= maxScrollX)) {
-          setScrollX(scrollX + deltaX);
+      if (scrollWidth > 0) {
+        if (deltaX > 0 && (scrollLeft + deltaX <= scrollWidth)) {
+          setScrollLeft(scrollLeft + deltaX);
         }
-        if (deltaX > 0 && (scrollX + deltaX > maxScrollX)) {
-          setScrollX(maxScrollX);
+        if (deltaX > 0 && (scrollLeft + deltaX > scrollWidth)) {
+          setScrollLeft(scrollWidth);
         }
-        if (deltaX < 0 && (scrollX + deltaX >= 0)) {
-          setScrollX(scrollX + deltaX);
+        if (deltaX < 0 && (scrollLeft + deltaX >= 0)) {
+          setScrollLeft(scrollLeft + deltaX);
         }
-        if (deltaX < 0 && (scrollX + deltaX < 0)) {
-          setScrollX(0);
+        if (deltaX < 0 && (scrollLeft + deltaX < 0)) {
+          setScrollLeft(0);
         }
       } else {
-        if (deltaX < 0 && (scrollX + deltaX >= maxScrollX)) {
-          setScrollX(scrollX + deltaX);
+        if (deltaX < 0 && (scrollLeft + deltaX >= scrollWidth)) {
+          setScrollLeft(scrollLeft + deltaX);
         }
-        if (deltaX < 0 && (scrollX + deltaX < maxScrollX)) {
-          setScrollX(maxScrollX);
+        if (deltaX < 0 && (scrollLeft + deltaX < scrollWidth)) {
+          setScrollLeft(scrollWidth);
         }
-        if (deltaX > 0 && (scrollX + deltaX <= 0)) {
-          setScrollX(scrollX + deltaX);
+        if (deltaX > 0 && (scrollLeft + deltaX <= 0)) {
+          setScrollLeft(scrollLeft + deltaX);
         }
-        if (deltaX > 0 && (scrollX + deltaX > 0)) {
-          setScrollX(0);
+        if (deltaX > 0 && (scrollLeft + deltaX > 0)) {
+          setScrollLeft(0);
         }
       }
     }
-    if (layerItem.scroll.axis.y) {
+    if (layerItem.scroll.direction.vertical) {
       const deltaY = e.nativeEvent.deltaY;
-      if (maxScrollY > 0) {
-        if (deltaY > 0 && (scrollY + deltaY <= maxScrollY)) {
-          setScrollY(scrollY + deltaY);
+      if (scrollHeight > 0) {
+        if (deltaY > 0 && (scrollTop + deltaY <= scrollHeight)) {
+          setScrollTop(scrollTop + deltaY);
         }
-        if (deltaY > 0 && (scrollY + deltaY > maxScrollY)) {
-          setScrollY(maxScrollY);
+        if (deltaY > 0 && (scrollTop + deltaY > scrollHeight)) {
+          setScrollTop(scrollHeight);
         }
-        if (deltaY < 0 && (scrollY + deltaY >= 0)) {
-          setScrollY(scrollY + deltaY);
+        if (deltaY < 0 && (scrollTop + deltaY >= 0)) {
+          setScrollTop(scrollTop + deltaY);
         }
-        if (deltaY < 0 && (scrollY + deltaY < 0)) {
-          setScrollY(0);
+        if (deltaY < 0 && (scrollTop + deltaY < 0)) {
+          setScrollTop(0);
         }
       } else {
-        if (deltaY < 0 && (scrollY + deltaY >= maxScrollY)) {
-          setScrollY(scrollY + deltaY);
+        if (deltaY < 0 && (scrollTop + deltaY >= scrollHeight)) {
+          setScrollTop(scrollTop + deltaY);
         }
-        if (deltaY < 0 && (scrollY + deltaY < maxScrollY)) {
-          setScrollY(maxScrollY);
+        if (deltaY < 0 && (scrollTop + deltaY < scrollHeight)) {
+          setScrollTop(scrollHeight);
         }
-        if (deltaY > 0 && (scrollY + deltaY <= 0)) {
-          setScrollY(scrollY + deltaY);
+        if (deltaY > 0 && (scrollTop + deltaY <= 0)) {
+          setScrollTop(scrollTop + deltaY);
         }
-        if (deltaY > 0 && (scrollY + deltaY > 0)) {
-          setScrollY(0);
+        if (deltaY > 0 && (scrollTop + deltaY > 0)) {
+          setScrollTop(0);
         }
       }
     }
@@ -381,14 +358,14 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
 
   useEffect(() => {
     if (paperScope === 'preview') {
-      const maxScrollX = scrollFrameBounds.width - layerItemBounds.width;
-      const maxScrollY = scrollFrameBounds.height - layerItemBounds.height;
-      const scrollX = scrollFrameBounds.left - layerItemBounds.left;
-      const scrollY = scrollFrameBounds.top - layerItemBounds.top;
-      setMaxScrollX(maxScrollX);
-      setMaxScrollY(maxScrollY);
-      setScrollX(scrollX);
-      setScrollY(scrollY);
+      const scrollWidth = scrollFrameBounds.width - layerItemBounds.width;
+      const scrollHeight = scrollFrameBounds.height - layerItemBounds.height;
+      const scrollLeft = scrollFrameBounds.left - layerItemBounds.left;
+      const scrollTop = scrollFrameBounds.top - layerItemBounds.top;
+      setScrollWidth(scrollWidth);
+      setScrollHeight(scrollHeight);
+      setScrollLeft(scrollLeft);
+      setScrollTop(scrollTop);
     }
     if (rendered) {
       const { scrollMask, scrollBackground } = getPaperLayer();
@@ -398,31 +375,31 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
   }, [
     layerItem.frame.x, layerItem.frame.y, layerItem.frame.width, layerItem.frame.height,
     layerItem.scroll.frame.x, layerItem.scroll.frame.y, layerItem.scroll.frame.width,
-    layerItem.scroll.frame.height, layerItem.scroll.enabled, layerItem.scroll.axis.x,
-    layerItem.scroll.axis.y, layerItem.scroll.overflow, previewMatrix
+    layerItem.scroll.frame.height, layerItem.scroll.enabled, layerItem.scroll.direction.horizontal,
+    layerItem.scroll.direction.vertical, layerItem.scroll.overflow, previewMatrix
   ]);
 
   useEffect(() => {
-    if (rendered && paperScope === 'preview' && prevScrollX !== null && scrollX !== prevScrollX) {
+    if (rendered && paperScope === 'preview' && prevScrollLeft !== null && scrollLeft !== prevScrollLeft) {
       const { groupLayers } = getPaperLayer();
-      const diff = scrollX - prevScrollX;
+      const diff = scrollLeft - prevScrollLeft;
       groupLayers.position.x += diff;
       // translate gets weird with gradient origin/destination
       // groupLayers.translate(new paperLayerScope.Point(diff, 0));
     }
-    setPrevScrollX(scrollX);
-  }, [scrollX]);
+    setPrevScrollLeft(scrollLeft);
+  }, [scrollLeft]);
 
   useEffect(() => {
-    if (rendered && paperScope === 'preview' && prevScrollY !== null && scrollY !== prevScrollY) {
+    if (rendered && paperScope === 'preview' && prevScrollTop !== null && scrollTop !== prevScrollTop) {
       const { groupLayers } = getPaperLayer();
-      const diff = scrollY - prevScrollY;
+      const diff = scrollTop - prevScrollTop;
       groupLayers.position.y += diff;
       // translate gets weird with gradient origin/destination
       // groupLayers.translate(new paperLayerScope.Point(0, diff));
     }
-    setPrevScrollY(scrollY);
-  }, [scrollY]);
+    setPrevScrollTop(scrollTop);
+  }, [scrollTop]);
 
   ///////////////////////////////////////////////////////
   // CHILDREN & EVENTS

@@ -420,8 +420,8 @@ export const DEFAULT_TRANSFORM: Btwx.Transform = {
 }
 
 export const DEFAULT_SCROLL_ENABLED = false;
-export const DEFAULT_SCROLL_X_AXIS = false;
-export const DEFAULT_SCROLL_Y_AXIS = false;
+export const DEFAULT_HORIZONTAL_SCROLL = false;
+export const DEFAULT_VERTICAL_SCROLL = false;
 export const DEFAULT_SCROLL_FRAME_X = 'auto';
 export const DEFAULT_SCROLL_FRAME_Y = 'auto';
 export const DEFAULT_SCROLL_FRAME_WIDTH = 'auto';
@@ -431,9 +431,9 @@ export const DEFAULT_SCROLL_OVERFLOW_OPTIONS: Btwx.ScrollOverflow[] = ['visible'
 
 export const DEFAULT_SCROLL = {
   enabled: DEFAULT_SCROLL_ENABLED,
-  axis: {
-    x: DEFAULT_SCROLL_X_AXIS,
-    y: DEFAULT_SCROLL_Y_AXIS
+  direction: {
+    horizontal: DEFAULT_HORIZONTAL_SCROLL,
+    vertical: DEFAULT_VERTICAL_SCROLL
   },
   frame: {
     x: DEFAULT_SCROLL_FRAME_X,
@@ -441,7 +441,11 @@ export const DEFAULT_SCROLL = {
     width: DEFAULT_SCROLL_FRAME_WIDTH,
     height: DEFAULT_SCROLL_FRAME_HEIGHT
   },
-  overflow: DEFAULT_SCROLL_OVERFLOW
+  overflow: DEFAULT_SCROLL_OVERFLOW,
+  scrollWidth: 0,
+  scrollHeight: 0,
+  scrollLeft: 0,
+  scrollTop: 0
 }
 
 export const DEFAULT_TEXT_VALUE = 'Type Something';

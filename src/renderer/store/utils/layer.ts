@@ -76,7 +76,12 @@ import {
   SetLayersCustomWiggleTweenType, RemoveLayerTweens, RemoveLayersEvent, ShowLayersChildren, HideLayersChildren,
   SetLayerTreeStickyArtboard, SetLayerTweenRepeat, SetLayersTweenRepeat, SetLayerTweenYoyo, SetLayersTweenYoyo,
   SetLayerTweenRepeatDelay, SetLayersTweenRepeatDelay, SetLayerTweenYoyoEase, SetLayersTweenYoyoEase,
-  SetLayerBlurRadius, SetLayersBlurRadius, FlipLayerGradient, FlipLayersGradient, DeselectAllLayerEventTweens, DeselectAllLayerEvents, SetLayerEventEventListener, SetLayersEventEventListener, SetLayerStroke, SetLayersStroke, SetLayersFill, SetLayerShadow, SetLayersShadow, EnableGroupScroll, EnableGroupsScroll, DisableGroupScroll, DisableGroupsScroll, EnableGroupScrollXAxis, EnableGroupsScrollXAxis, DisableGroupScrollXAxis, DisableGroupsScrollXAxis, EnableGroupScrollYAxis, EnableGroupsScrollYAxis, DisableGroupScrollYAxis, DisableGroupsScrollYAxis, SetGroupScrollOverflow, SetGroupsScrollOverflow, SetGroupScrollFrame
+  SetLayerBlurRadius, SetLayersBlurRadius, FlipLayerGradient, FlipLayersGradient, DeselectAllLayerEventTweens,
+  DeselectAllLayerEvents, SetLayerEventEventListener, SetLayersEventEventListener, SetLayerStroke, SetLayersStroke,
+  SetLayersFill, SetLayerShadow, SetLayersShadow, EnableGroupScroll, EnableGroupsScroll, DisableGroupScroll,
+  DisableGroupsScroll, EnableGroupHorizontalScroll, EnableGroupsHorizontalScroll, DisableGroupHorizontalScroll,
+  DisableGroupsHorizontalScroll, EnableGroupVerticalScroll, EnableGroupsVerticalScroll, DisableGroupVerticalScroll,
+  DisableGroupsVerticalScroll, SetGroupScrollOverflow, SetGroupsScrollOverflow, SetGroupScrollFrame
 } from '../actionTypes/layer';
 
 import {
@@ -85,7 +90,7 @@ import {
   getLayersBounds, getLayersRelativeBounds, orderLayersByDepth, orderLayersByLeft, orderLayersByTop,
   getEquivalentTweenProp, getLayerYoungerSiblings, getMaskableSiblings, getSiblingLayersWithUnderlyingMask,
   getItemLayers, getGradientDestination, getGradientOrigin, hasFillTween, orderLayersByRight,
-  orderLayersByMiddle, orderLayersByBottom
+  orderLayersByMiddle, orderLayersByBottom, getLayerRelativeScrollBounds, getLayerBounds
 } from '../selectors/layer';
 
 export const updateGroupParentBounds = (state: LayerState, groupParents: string[]): LayerState => {
@@ -113,6 +118,35 @@ export const updateGroupParentBounds = (state: LayerState, groupParents: string[
             }
           }
         }
+        if (groupItem.type === 'Group' && (groupItem as Btwx.Group).scroll.frame.x !== 'auto') {
+          const layerScrollBounds = getLayerRelativeScrollBounds(result, current);
+          const scrollWidth = layerScrollBounds.width - layersBounds.width;
+          const scrollHeight = layerScrollBounds.height - layersBounds.height;
+          const scrollLeft = layerScrollBounds.left - layersBounds.left;
+          const scrollTop = layerScrollBounds.top - layersBounds.top;
+          result = {
+            ...result,
+            byId: {
+              ...result.byId,
+              [current]: {
+                ...(result.byId[current] as Btwx.Group),
+                scroll: {
+                  ...(result.byId[current] as Btwx.Group).scroll,
+                  frame: {
+                    x: layerScrollBounds.x,
+                    y: layerScrollBounds.y,
+                    width: layerScrollBounds.width,
+                    height: layerScrollBounds.height
+                  },
+                  scrollWidth,
+                  scrollHeight,
+                  scrollLeft,
+                  scrollTop
+                }
+              } as Btwx.Group
+            }
+          }
+        }
       } else {
         result = {
           ...result,
@@ -129,6 +163,24 @@ export const updateGroupParentBounds = (state: LayerState, groupParents: string[
                 innerWidth: 0,
                 innerHeight: 0
               }
+            }
+          }
+        }
+        if (groupItem.type === 'Group' && (groupItem as Btwx.Group).scroll.frame.x !== 'auto') {
+          result = {
+            ...result,
+            byId: {
+              ...result.byId,
+              [current]: {
+                ...(result.byId[current] as Btwx.Group),
+                scroll: {
+                  ...(result.byId[current] as Btwx.Group).scroll,
+                  scrollWidth: 0,
+                  scrollHeight: 0,
+                  scrollLeft: 0,
+                  scrollTop: 0
+                }
+              } as Btwx.Group
             }
           }
         }
@@ -11988,7 +12040,7 @@ export const disableGroupsScroll = (state: LayerState, action: DisableGroupsScro
 
 //
 
-export const enableGroupScrollXAxis = (state: LayerState, action: EnableGroupScrollXAxis): LayerState => {
+export const enableGroupHorizontalScroll = (state: LayerState, action: EnableGroupHorizontalScroll): LayerState => {
   let currentState = state;
   currentState = {
     ...currentState,
@@ -11998,9 +12050,9 @@ export const enableGroupScrollXAxis = (state: LayerState, action: EnableGroupScr
         ...currentState.byId[action.payload.id],
         scroll: {
           ...(currentState.byId[action.payload.id] as Btwx.Group).scroll,
-          axis: {
-            ...(currentState.byId[action.payload.id] as Btwx.Group).scroll.axis,
-            x: true
+          direction: {
+            ...(currentState.byId[action.payload.id] as Btwx.Group).scroll.direction,
+            horizontal: true
           }
         }
       } as Btwx.Group
@@ -12009,18 +12061,18 @@ export const enableGroupScrollXAxis = (state: LayerState, action: EnableGroupScr
   return currentState;
 };
 
-export const enableGroupsScrollXAxis = (state: LayerState, action: EnableGroupsScrollXAxis): LayerState => {
+export const enableGroupsHorizontalScroll = (state: LayerState, action: EnableGroupsHorizontalScroll): LayerState => {
   let currentState = state;
   currentState = action.payload.layers.reduce((result, current, index) => {
-    return enableGroupScrollXAxis(result, layerActions.enableGroupScrollXAxis({
+    return enableGroupHorizontalScroll(result, layerActions.enableGroupHorizontalScroll({
       id: current
-    }) as EnableGroupScrollXAxis);
+    }) as EnableGroupHorizontalScroll);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
       payload: action.payload,
-      detail: 'Enable Groups Scroll X Axis',
+      detail: 'Enable Groups Horizontal Scroll',
       undoable: true
     }
   }) as SetLayerEdit);
@@ -12029,7 +12081,7 @@ export const enableGroupsScrollXAxis = (state: LayerState, action: EnableGroupsS
 
 //
 
-export const disableGroupScrollXAxis = (state: LayerState, action: DisableGroupScrollXAxis): LayerState => {
+export const disableGroupHorizontalScroll = (state: LayerState, action: DisableGroupHorizontalScroll): LayerState => {
   let currentState = state;
   currentState = {
     ...currentState,
@@ -12039,9 +12091,9 @@ export const disableGroupScrollXAxis = (state: LayerState, action: DisableGroupS
         ...currentState.byId[action.payload.id],
         scroll: {
           ...(currentState.byId[action.payload.id] as Btwx.Group).scroll,
-          axis: {
-            ...(currentState.byId[action.payload.id] as Btwx.Group).scroll.axis,
-            x: false
+          direction: {
+            ...(currentState.byId[action.payload.id] as Btwx.Group).scroll.direction,
+            horizontal: false
           }
         }
       } as Btwx.Group
@@ -12050,18 +12102,18 @@ export const disableGroupScrollXAxis = (state: LayerState, action: DisableGroupS
   return currentState;
 };
 
-export const disableGroupsScrollXAxis = (state: LayerState, action: DisableGroupsScrollXAxis): LayerState => {
+export const disableGroupsHorizontalScroll = (state: LayerState, action: DisableGroupsHorizontalScroll): LayerState => {
   let currentState = state;
   currentState = action.payload.layers.reduce((result, current, index) => {
-    return disableGroupScrollXAxis(result, layerActions.disableGroupScrollXAxis({
+    return disableGroupHorizontalScroll(result, layerActions.disableGroupHorizontalScroll({
       id: current
-    }) as DisableGroupScrollXAxis);
+    }) as DisableGroupHorizontalScroll);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
       payload: action.payload,
-      detail: 'Disable Groups Scroll X Axis',
+      detail: 'Disable Groups Horizontal Scroll',
       undoable: true
     }
   }) as SetLayerEdit);
@@ -12070,7 +12122,7 @@ export const disableGroupsScrollXAxis = (state: LayerState, action: DisableGroup
 
 //
 
-export const enableGroupScrollYAxis = (state: LayerState, action: EnableGroupScrollYAxis): LayerState => {
+export const enableGroupVerticalScroll = (state: LayerState, action: EnableGroupVerticalScroll): LayerState => {
   let currentState = state;
   currentState = {
     ...currentState,
@@ -12080,9 +12132,9 @@ export const enableGroupScrollYAxis = (state: LayerState, action: EnableGroupScr
         ...currentState.byId[action.payload.id],
         scroll: {
           ...(currentState.byId[action.payload.id] as Btwx.Group).scroll,
-          axis: {
-            ...(currentState.byId[action.payload.id] as Btwx.Group).scroll.axis,
-            y: true
+          direction: {
+            ...(currentState.byId[action.payload.id] as Btwx.Group).scroll.direction,
+            vertical: true
           }
         }
       } as Btwx.Group
@@ -12091,18 +12143,18 @@ export const enableGroupScrollYAxis = (state: LayerState, action: EnableGroupScr
   return currentState;
 };
 
-export const enableGroupsScrollYAxis = (state: LayerState, action: EnableGroupsScrollYAxis): LayerState => {
+export const enableGroupsVerticalScroll = (state: LayerState, action: EnableGroupsVerticalScroll): LayerState => {
   let currentState = state;
   currentState = action.payload.layers.reduce((result, current, index) => {
-    return enableGroupScrollYAxis(result, layerActions.enableGroupScrollYAxis({
+    return enableGroupVerticalScroll(result, layerActions.enableGroupVerticalScroll({
       id: current
-    }) as EnableGroupScrollYAxis);
+    }) as EnableGroupVerticalScroll);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
       payload: action.payload,
-      detail: 'Enable Groups Scroll Y Axis',
+      detail: 'Enable Groups Vertical Scroll',
       undoable: true
     }
   }) as SetLayerEdit);
@@ -12111,7 +12163,7 @@ export const enableGroupsScrollYAxis = (state: LayerState, action: EnableGroupsS
 
 //
 
-export const disableGroupScrollYAxis = (state: LayerState, action: DisableGroupScrollYAxis): LayerState => {
+export const disableGroupVerticalScroll = (state: LayerState, action: DisableGroupVerticalScroll): LayerState => {
   let currentState = state;
   currentState = {
     ...currentState,
@@ -12121,9 +12173,9 @@ export const disableGroupScrollYAxis = (state: LayerState, action: DisableGroupS
         ...currentState.byId[action.payload.id],
         scroll: {
           ...(currentState.byId[action.payload.id] as Btwx.Group).scroll,
-          axis: {
-            ...(currentState.byId[action.payload.id] as Btwx.Group).scroll.axis,
-            y: false
+          direction: {
+            ...(currentState.byId[action.payload.id] as Btwx.Group).scroll.direction,
+            vertical: false
           }
         }
       } as Btwx.Group
@@ -12132,18 +12184,18 @@ export const disableGroupScrollYAxis = (state: LayerState, action: DisableGroupS
   return currentState;
 };
 
-export const disableGroupsScrollYAxis = (state: LayerState, action: DisableGroupsScrollYAxis): LayerState => {
+export const disableGroupsVerticalScroll = (state: LayerState, action: DisableGroupsVerticalScroll): LayerState => {
   let currentState = state;
   currentState = action.payload.layers.reduce((result, current, index) => {
-    return disableGroupScrollYAxis(result, layerActions.disableGroupScrollYAxis({
+    return disableGroupVerticalScroll(result, layerActions.disableGroupVerticalScroll({
       id: current
-    }) as DisableGroupScrollYAxis);
+    }) as DisableGroupVerticalScroll);
   }, currentState);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
       payload: action.payload,
-      detail: 'Disable Groups Scroll Y Axis',
+      detail: 'Disable Groups Vertical Scroll',
       undoable: true
     }
   }) as SetLayerEdit);
@@ -12191,6 +12243,7 @@ export const setGroupsScrollOverflow = (state: LayerState, action: SetGroupsScro
 
 export const setGroupScrollFrame = (state: LayerState, action: SetGroupScrollFrame): LayerState => {
   let currentState = state;
+  const groupBounds = getLayerBounds(currentState, action.payload.id);
   currentState = {
     ...currentState,
     byId: {
@@ -12202,7 +12255,11 @@ export const setGroupScrollFrame = (state: LayerState, action: SetGroupScrollFra
           frame: {
             ...(currentState.byId[action.payload.id] as Btwx.Group).scroll.frame,
             ...action.payload.frame
-          }
+          },
+          scrollWidth: Math.abs((action.payload.frame.width ? action.payload.frame.width as number : (currentState.byId[action.payload.id] as Btwx.Group).scroll.frame.width as number) - groupBounds.width),
+          scrollHeight: Math.abs((action.payload.frame.height ? action.payload.frame.height as number : (currentState.byId[action.payload.id] as Btwx.Group).scroll.frame.height as number) - groupBounds.height),
+          scrollLeft: Math.abs((groupBounds.left + (typeof action.payload.frame.x === 'number' ? action.payload.frame.x as number : (currentState.byId[action.payload.id] as Btwx.Group).scroll.frame.x as number)) - groupBounds.left),
+          scrollTop: Math.abs((groupBounds.top + (typeof action.payload.frame.y === 'number' ? action.payload.frame.y as number : (currentState.byId[action.payload.id] as Btwx.Group).scroll.frame.y as number)) - groupBounds.top)
         }
       } as Btwx.Group
     }

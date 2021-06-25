@@ -3062,15 +3062,15 @@ export const getSelectedScrollOverflow = createSelector(
   }
 );
 
-export const getSelectedScrollXAxis = createSelector(
+export const getSelectedHorizontalScroll = createSelector(
   [ getSelectedById ],
   (selectedById) => {
     return Object.keys(selectedById).reduce((result: boolean | 'multi', current: string) => {
       const layerItem = selectedById[current] as Btwx.Group;
       if (!result) {
-        result = layerItem.scroll.axis.x;
+        result = layerItem.scroll.direction.horizontal;
       }
-      if (result && layerItem.scroll.axis.x !== result) {
+      if (result && layerItem.scroll.direction.horizontal !== result) {
         result = 'multi';
       }
       return result;
@@ -3078,19 +3078,83 @@ export const getSelectedScrollXAxis = createSelector(
   }
 );
 
-export const getSelectedScrollYAxis = createSelector(
+export const getSelectedScrollWidth = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Group;
+      if (!result) {
+        result = layerItem.scroll.scrollWidth;
+      }
+      if (result && layerItem.scroll.scrollWidth !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
+export const getSelectedScrollLeft = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Group;
+      if (!result) {
+        result = layerItem.scroll.scrollLeft;
+      }
+      if (result && layerItem.scroll.scrollLeft !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
+export const getSelectedVerticalScroll = createSelector(
   [ getSelectedById ],
   (selectedById) => {
     return Object.keys(selectedById).reduce((result: boolean | 'multi', current: string) => {
       const layerItem = selectedById[current] as Btwx.Group;
       if (!result) {
-        result = layerItem.scroll.axis.y;
+        result = layerItem.scroll.direction.vertical;
       }
-      if (result && layerItem.scroll.axis.y !== result) {
+      if (result && layerItem.scroll.direction.vertical !== result) {
         result = 'multi';
       }
       return result;
     }, null) as boolean | 'multi';
+  }
+);
+
+export const getSelectedScrollHeight = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Group;
+      if (!result) {
+        result = layerItem.scroll.scrollHeight;
+      }
+      if (result && layerItem.scroll.scrollHeight !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
+  }
+);
+
+export const getSelectedScrollTop = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.Group;
+      if (!result) {
+        result = layerItem.scroll.scrollTop;
+      }
+      if (result && layerItem.scroll.scrollTop !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as number | 'multi';
   }
 );
 
@@ -3450,14 +3514,18 @@ export const getClosestPaperLayer = (point: paper.Point, layers: paper.Item[]): 
   }, { paperLayer: null, distance: null }).paperLayer;
 };
 
-export const getLayerBounds = (store: LayerState, id: string): paper.Rectangle => {
+export const getLayerBounds = (store: LayerState, id: string, paperScope = paperMain): paper.Rectangle => {
   const layerItem = store.byId[id] as Btwx.Layer;
   const layerPosition = getAbsolutePosition(store, id);
-  const topLeft = new paperMain.Point(layerPosition.x - (layerItem.frame.width / 2), layerPosition.y - (layerItem.frame.height / 2));
-  const bottomRight = new paperMain.Point(layerPosition.x + (layerItem.frame.width / 2), layerPosition.y + (layerItem.frame.height / 2));
-  return new paperMain.Rectangle({
-    from: topLeft,
-    to: bottomRight
+  return new paperScope.Rectangle({
+    from: new paperScope.Point(
+      layerPosition.x - (layerItem.frame.width / 2),
+      layerPosition.y - (layerItem.frame.height / 2)
+    ),
+    to: new paperScope.Point(
+      layerPosition.x + (layerItem.frame.width / 2),
+      layerPosition.y + (layerItem.frame.height / 2)
+    )
   });
 };
 
@@ -3542,6 +3610,48 @@ export const getLayersRelativeBounds = (store: LayerState, layers: string[]): pa
       return result;
     }
   }, null);
+};
+
+export const getLayerScrollBounds = (store: LayerState, id: string, paperScope: any): paper.Rectangle => {
+  const layerItem = store.byId[id] as Btwx.Group;
+  const layerItemBounds = getLayerBounds(store, id, paperScope);
+  if (layerItem.scroll.frame.x === 'auto') {
+    return layerItemBounds;
+  } else {
+    return new paperScope.Rectangle({
+      point: layerItemBounds.topLeft.add(
+        new paperScope.Point(
+          layerItem.scroll.frame.x as number,
+          layerItem.scroll.frame.y as number
+        )
+      ),
+      size: new paperScope.Size(
+        layerItem.scroll.frame.width as number,
+        layerItem.scroll.frame.height as number
+      )
+    });
+  }
+};
+
+export const getLayerRelativeScrollBounds = (store: LayerState, id: string): paper.Rectangle => {
+  const layerItem = store.byId[id] as Btwx.Group;
+  const layerItemBounds = getLayerRelativeBounds(store, id);
+  if (layerItem.scroll.frame.x === 'auto') {
+    return layerItemBounds;
+  } else {
+    return new paperMain.Rectangle({
+      point: layerItemBounds.topLeft.add(
+        new paperMain.Point(
+          layerItem.scroll.frame.x as number,
+          layerItem.scroll.frame.y as number
+        )
+      ),
+      size: new paperMain.Size(
+        layerItem.scroll.frame.width as number,
+        layerItem.scroll.frame.height as number
+      )
+    });
+  }
 };
 
 export const getClipboardTopLeft = (layerItems: Btwx.Layer[]): paper.Point => {

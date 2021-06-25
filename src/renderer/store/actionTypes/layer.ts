@@ -1,4 +1,4 @@
-import { LayerState } from "../reducers/layer";
+import { LayerState } from '../reducers/layer';
 
 export const ADD_GROUP = 'ADD_GROUP';
 export const ADD_SHAPE = 'ADD_SHAPE';
@@ -400,14 +400,14 @@ export const ENABLE_GROUP_SCROLL = 'ENABLE_GROUP_SCROLL';
 export const ENABLE_GROUPS_SCROLL = 'ENABLE_GROUPS_SCROLL';
 export const DISABLE_GROUP_SCROLL = 'DISABLE_GROUP_SCROLL';
 export const DISABLE_GROUPS_SCROLL = 'DISABLE_GROUPS_SCROLL';
-export const ENABLE_GROUP_SCROLL_X_AXIS = 'ENABLE_GROUP_SCROLL_X_AXIS';
-export const ENABLE_GROUPS_SCROLL_X_AXIS = 'ENABLE_GROUPS_SCROLL_X_AXIS';
-export const DISABLE_GROUP_SCROLL_X_AXIS = 'DISABLE_GROUP_SCROLL_X_AXIS';
-export const DISABLE_GROUPS_SCROLL_X_AXIS = 'DISABLE_GROUPS_SCROLL_X_AXIS';
-export const ENABLE_GROUP_SCROLL_Y_AXIS = 'ENABLE_GROUP_SCROLL_Y_AXIS';
-export const ENABLE_GROUPS_SCROLL_Y_AXIS = 'ENABLE_GROUPS_SCROLL_Y_AXIS';
-export const DISABLE_GROUP_SCROLL_Y_AXIS = 'DISABLE_GROUP_SCROLL_Y_AXIS';
-export const DISABLE_GROUPS_SCROLL_Y_AXIS = 'DISABLE_GROUPS_SCROLL_Y_AXIS';
+export const ENABLE_GROUP_HORIZONTAL_SCROLL = 'ENABLE_GROUP_HORIZONTAL_SCROLL';
+export const ENABLE_GROUPS_HORIZONTAL_SCROLL = 'ENABLE_GROUPS_HORIZONTAL_SCROLL';
+export const DISABLE_GROUP_HORIZONTAL_SCROLL = 'DISABLE_GROUP_HORIZONTAL_SCROLL';
+export const DISABLE_GROUPS_HORIZONTAL_SCROLL = 'DISABLE_GROUPS_HORIZONTAL_SCROLL';
+export const ENABLE_GROUP_VERTICAL_SCROLL = 'ENABLE_GROUP_VERTICAL_SCROLL';
+export const ENABLE_GROUPS_VERTICAL_SCROLL = 'ENABLE_GROUPS_VERTICAL_SCROLL';
+export const DISABLE_GROUP_VERTICAL_SCROLL = 'DISABLE_GROUP_VERTICAL_SCROLL';
+export const DISABLE_GROUPS_VERTICAL_SCROLL = 'DISABLE_GROUPS_VERTICAL_SCROLL';
 export const SET_GROUP_SCROLL_OVERFLOW = 'SET_GROUP_SCROLL_OVERFLOW';
 export const SET_GROUPS_SCROLL_OVERFLOW = 'SET_GROUPS_SCROLL_OVERFLOW';
 export const SET_GROUP_SCROLL_FRAME = 'SET_GROUP_SCROLL_FRAME';
@@ -4277,82 +4277,82 @@ export interface DisableGroupsScroll {
 
 //
 
-export interface EnableGroupScrollXAxisPayload {
+export interface EnableGroupHorizontalScrollPayload {
   id: string;
 }
 
-export interface EnableGroupScrollXAxis {
-  type: typeof ENABLE_GROUP_SCROLL_X_AXIS;
-  payload: EnableGroupScrollXAxisPayload;
+export interface EnableGroupHorizontalScroll {
+  type: typeof ENABLE_GROUP_HORIZONTAL_SCROLL;
+  payload: EnableGroupHorizontalScrollPayload;
 }
 
-export interface EnableGroupsScrollXAxisPayload {
+export interface EnableGroupsHorizontalScrollPayload {
   layers: string[];
 }
 
-export interface EnableGroupsScrollXAxis {
-  type: typeof ENABLE_GROUPS_SCROLL_X_AXIS;
-  payload: EnableGroupsScrollXAxisPayload;
+export interface EnableGroupsHorizontalScroll {
+  type: typeof ENABLE_GROUPS_HORIZONTAL_SCROLL;
+  payload: EnableGroupsHorizontalScrollPayload;
 }
 
 //
 
-export interface DisableGroupScrollXAxisPayload {
+export interface DisableGroupHorizontalScrollPayload {
   id: string;
 }
 
-export interface DisableGroupScrollXAxis {
-  type: typeof DISABLE_GROUP_SCROLL_X_AXIS;
-  payload: DisableGroupScrollXAxisPayload;
+export interface DisableGroupHorizontalScroll {
+  type: typeof DISABLE_GROUP_HORIZONTAL_SCROLL;
+  payload: DisableGroupHorizontalScrollPayload;
 }
 
-export interface DisableGroupsScrollXAxisPayload {
+export interface DisableGroupsHorizontalScrollPayload {
   layers: string[];
 }
 
-export interface DisableGroupsScrollXAxis {
-  type: typeof DISABLE_GROUPS_SCROLL_X_AXIS;
-  payload: DisableGroupsScrollXAxisPayload;
+export interface DisableGroupsHorizontalScroll {
+  type: typeof DISABLE_GROUPS_HORIZONTAL_SCROLL;
+  payload: DisableGroupsHorizontalScrollPayload;
 }
 
 //
 
-export interface EnableGroupScrollYAxisPayload {
+export interface EnableGroupVerticalScrollPayload {
   id: string;
 }
 
-export interface EnableGroupScrollYAxis {
-  type: typeof ENABLE_GROUP_SCROLL_Y_AXIS;
-  payload: EnableGroupScrollYAxisPayload;
+export interface EnableGroupVerticalScroll {
+  type: typeof ENABLE_GROUP_VERTICAL_SCROLL;
+  payload: EnableGroupVerticalScrollPayload;
 }
 
-export interface EnableGroupsScrollYAxisPayload {
+export interface EnableGroupsVerticalScrollPayload {
   layers: string[];
 }
 
-export interface EnableGroupsScrollYAxis {
-  type: typeof ENABLE_GROUPS_SCROLL_Y_AXIS;
-  payload: EnableGroupsScrollYAxisPayload;
+export interface EnableGroupsVerticalScroll {
+  type: typeof ENABLE_GROUPS_VERTICAL_SCROLL;
+  payload: EnableGroupsVerticalScrollPayload;
 }
 
 //
 
-export interface DisableGroupScrollYAxisPayload {
+export interface DisableGroupVerticalScrollPayload {
   id: string;
 }
 
-export interface DisableGroupScrollYAxis {
-  type: typeof DISABLE_GROUP_SCROLL_Y_AXIS;
-  payload: DisableGroupScrollYAxisPayload;
+export interface DisableGroupVerticalScroll {
+  type: typeof DISABLE_GROUP_VERTICAL_SCROLL;
+  payload: DisableGroupVerticalScrollPayload;
 }
 
-export interface DisableGroupsScrollYAxisPayload {
+export interface DisableGroupsVerticalScrollPayload {
   layers: string[];
 }
 
-export interface DisableGroupsScrollYAxis {
-  type: typeof DISABLE_GROUPS_SCROLL_Y_AXIS;
-  payload: DisableGroupsScrollYAxisPayload;
+export interface DisableGroupsVerticalScroll {
+  type: typeof DISABLE_GROUPS_VERTICAL_SCROLL;
+  payload: DisableGroupsVerticalScrollPayload;
 }
 
 //
@@ -4741,14 +4741,14 @@ export type LayerTypes = AddArtboard |
                          EnableGroupsScroll |
                          DisableGroupScroll |
                          DisableGroupsScroll |
-                         EnableGroupScrollXAxis |
-                         EnableGroupsScrollXAxis |
-                         DisableGroupScrollXAxis |
-                         DisableGroupsScrollXAxis |
-                         EnableGroupScrollYAxis |
-                         EnableGroupsScrollYAxis |
-                         DisableGroupScrollYAxis |
-                         DisableGroupsScrollYAxis |
+                         EnableGroupHorizontalScroll |
+                         EnableGroupsHorizontalScroll |
+                         DisableGroupHorizontalScroll |
+                         DisableGroupsHorizontalScroll |
+                         EnableGroupVerticalScroll |
+                         EnableGroupsVerticalScroll |
+                         DisableGroupVerticalScroll |
+                         DisableGroupsVerticalScroll |
                          SetGroupScrollOverflow |
                          SetGroupsScrollOverflow |
                          SetGroupScrollFrame;

@@ -340,14 +340,14 @@ import {
   ENABLE_GROUPS_SCROLL,
   DISABLE_GROUP_SCROLL,
   DISABLE_GROUPS_SCROLL,
-  ENABLE_GROUP_SCROLL_X_AXIS,
-  ENABLE_GROUPS_SCROLL_X_AXIS,
-  DISABLE_GROUP_SCROLL_X_AXIS,
-  DISABLE_GROUPS_SCROLL_X_AXIS,
-  ENABLE_GROUP_SCROLL_Y_AXIS,
-  ENABLE_GROUPS_SCROLL_Y_AXIS,
-  DISABLE_GROUP_SCROLL_Y_AXIS,
-  DISABLE_GROUPS_SCROLL_Y_AXIS,
+  ENABLE_GROUP_HORIZONTAL_SCROLL,
+  ENABLE_GROUPS_HORIZONTAL_SCROLL,
+  DISABLE_GROUP_HORIZONTAL_SCROLL,
+  DISABLE_GROUPS_HORIZONTAL_SCROLL,
+  ENABLE_GROUP_VERTICAL_SCROLL,
+  ENABLE_GROUPS_VERTICAL_SCROLL,
+  DISABLE_GROUP_VERTICAL_SCROLL,
+  DISABLE_GROUPS_VERTICAL_SCROLL,
   SET_GROUP_SCROLL_OVERFLOW,
   SET_GROUPS_SCROLL_OVERFLOW,
   SET_GROUP_SCROLL_FRAME,
@@ -694,14 +694,14 @@ import {
   enableGroupsScroll,
   disableGroupScroll,
   disableGroupsScroll,
-  enableGroupScrollXAxis,
-  enableGroupsScrollXAxis,
-  disableGroupScrollXAxis,
-  disableGroupsScrollXAxis,
-  enableGroupScrollYAxis,
-  enableGroupsScrollYAxis,
-  disableGroupScrollYAxis,
-  disableGroupsScrollYAxis,
+  enableGroupHorizontalScroll,
+  enableGroupsHorizontalScroll,
+  disableGroupHorizontalScroll,
+  disableGroupsHorizontalScroll,
+  enableGroupVerticalScroll,
+  enableGroupsVerticalScroll,
+  disableGroupVerticalScroll,
+  disableGroupsVerticalScroll,
   setGroupScrollOverflow,
   setGroupsScrollOverflow,
   setGroupScrollFrame
@@ -1487,22 +1487,22 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return disableGroupScroll(state, action);
     case DISABLE_GROUPS_SCROLL:
       return disableGroupsScroll(state, action);
-    case ENABLE_GROUP_SCROLL_X_AXIS:
-      return enableGroupScrollXAxis(state, action);
-    case ENABLE_GROUPS_SCROLL_X_AXIS:
-      return enableGroupsScrollXAxis(state, action);
-    case DISABLE_GROUP_SCROLL_X_AXIS:
-      return disableGroupScrollXAxis(state, action);
-    case DISABLE_GROUPS_SCROLL_X_AXIS:
-      return disableGroupsScrollXAxis(state, action);
-    case ENABLE_GROUP_SCROLL_Y_AXIS:
-      return enableGroupScrollYAxis(state, action);
-    case ENABLE_GROUPS_SCROLL_Y_AXIS:
-      return enableGroupsScrollYAxis(state, action);
-    case DISABLE_GROUP_SCROLL_Y_AXIS:
-      return disableGroupScrollYAxis(state, action);
-    case DISABLE_GROUPS_SCROLL_Y_AXIS:
-      return disableGroupsScrollYAxis(state, action);
+    case ENABLE_GROUP_HORIZONTAL_SCROLL:
+      return enableGroupHorizontalScroll(state, action);
+    case ENABLE_GROUPS_HORIZONTAL_SCROLL:
+      return enableGroupsHorizontalScroll(state, action);
+    case DISABLE_GROUP_HORIZONTAL_SCROLL:
+      return disableGroupHorizontalScroll(state, action);
+    case DISABLE_GROUPS_HORIZONTAL_SCROLL:
+      return disableGroupsHorizontalScroll(state, action);
+    case ENABLE_GROUP_VERTICAL_SCROLL:
+      return enableGroupVerticalScroll(state, action);
+    case ENABLE_GROUPS_VERTICAL_SCROLL:
+      return enableGroupsVerticalScroll(state, action);
+    case DISABLE_GROUP_VERTICAL_SCROLL:
+      return disableGroupVerticalScroll(state, action);
+    case DISABLE_GROUPS_VERTICAL_SCROLL:
+      return disableGroupsVerticalScroll(state, action);
     case SET_GROUP_SCROLL_OVERFLOW:
       return setGroupScrollOverflow(state, action);
     case SET_GROUPS_SCROLL_OVERFLOW:
@@ -1808,14 +1808,14 @@ export default undoable(baseReducer, {
       ENABLE_GROUPS_SCROLL,
       DISABLE_GROUP_SCROLL,
       DISABLE_GROUPS_SCROLL,
-      ENABLE_GROUP_SCROLL_X_AXIS,
-      ENABLE_GROUPS_SCROLL_X_AXIS,
-      DISABLE_GROUP_SCROLL_X_AXIS,
-      DISABLE_GROUPS_SCROLL_X_AXIS,
-      ENABLE_GROUP_SCROLL_Y_AXIS,
-      ENABLE_GROUPS_SCROLL_Y_AXIS,
-      DISABLE_GROUP_SCROLL_Y_AXIS,
-      DISABLE_GROUPS_SCROLL_Y_AXIS,
+      ENABLE_GROUP_HORIZONTAL_SCROLL,
+      ENABLE_GROUPS_HORIZONTAL_SCROLL,
+      DISABLE_GROUP_HORIZONTAL_SCROLL,
+      DISABLE_GROUPS_HORIZONTAL_SCROLL,
+      ENABLE_GROUP_VERTICAL_SCROLL,
+      ENABLE_GROUPS_VERTICAL_SCROLL,
+      DISABLE_GROUP_VERTICAL_SCROLL,
+      DISABLE_GROUPS_VERTICAL_SCROLL,
       SET_GROUP_SCROLL_OVERFLOW,
       SET_GROUPS_SCROLL_OVERFLOW,
       SET_GROUP_SCROLL_FRAME,

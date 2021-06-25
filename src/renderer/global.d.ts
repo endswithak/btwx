@@ -397,9 +397,9 @@ declare namespace Btwx {
     masked: boolean;
   }
 
-  interface ScrollAxis {
-    x: boolean;
-    y: boolean;
+  interface ScrollDirection {
+    horizontal: boolean;
+    vertical: boolean;
   }
 
   interface ScrollFrame {
@@ -413,10 +413,13 @@ declare namespace Btwx {
 
   interface GroupScroll {
     enabled: boolean;
-    axis: ScrollAxis;
+    direction: ScrollDirection;
     frame: ScrollFrame;
     overflow: ScrollOverflow;
-    // direction: 'natural' | 'inverse';
+    scrollWidth: number;
+    scrollHeight: number;
+    scrollLeft: number;
+    scrollTop: number;
   }
 
   interface Group extends MaskableLayer {
