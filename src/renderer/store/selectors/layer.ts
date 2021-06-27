@@ -3084,9 +3084,9 @@ export const getSelectedScrollWidth = createSelector(
     return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
       const layerItem = selectedById[current] as Btwx.Group;
       if (!result) {
-        result = layerItem.scroll.scrollWidth;
+        result = Math.abs(layerItem.scroll.scrollWidth);
       }
-      if (result && layerItem.scroll.scrollWidth !== result) {
+      if (result && Math.abs(layerItem.scroll.scrollWidth) !== result) {
         result = 'multi';
       }
       return result;
@@ -3132,9 +3132,9 @@ export const getSelectedScrollHeight = createSelector(
     return Object.keys(selectedById).reduce((result: number | 'multi', current: string) => {
       const layerItem = selectedById[current] as Btwx.Group;
       if (!result) {
-        result = layerItem.scroll.scrollHeight;
+        result = Math.abs(layerItem.scroll.scrollHeight);
       }
-      if (result && layerItem.scroll.scrollHeight !== result) {
+      if (result && Math.abs(layerItem.scroll.scrollHeight) !== result) {
         result = 'multi';
       }
       return result;
@@ -3612,7 +3612,7 @@ export const getLayersRelativeBounds = (store: LayerState, layers: string[]): pa
   }, null);
 };
 
-export const getLayerScrollBounds = (store: LayerState, id: string, paperScope: any): paper.Rectangle => {
+export const getLayerScrollFrameBounds = (store: LayerState, id: string, paperScope = paperMain): paper.Rectangle => {
   const layerItem = store.byId[id] as Btwx.Group;
   const layerItemBounds = getLayerBounds(store, id, paperScope);
   if (layerItem.scroll.frame.x === 'auto') {
@@ -3631,6 +3631,17 @@ export const getLayerScrollBounds = (store: LayerState, id: string, paperScope: 
       )
     });
   }
+};
+
+export const getLayerScrollBounds = (store: LayerState, id: string, paperScope = paperMain): paper.Rectangle => {
+  const scrollFrameBounds = getLayerScrollFrameBounds(store, id, paperScope);
+  const groupBounds = getLayerBounds(store, id, paperScope);
+  const topLeft = paperScope.Point.min(scrollFrameBounds.topLeft, groupBounds.topLeft);
+  const bottomRight = paperScope.Point.max(scrollFrameBounds.bottomRight, groupBounds.bottomRight);
+  return new paperScope.Rectangle({
+    from: topLeft,
+    to: bottomRight
+  });
 };
 
 export const getLayerRelativeScrollBounds = (store: LayerState, id: string): paper.Rectangle => {

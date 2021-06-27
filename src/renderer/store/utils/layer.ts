@@ -90,7 +90,8 @@ import {
   getLayersBounds, getLayersRelativeBounds, orderLayersByDepth, orderLayersByLeft, orderLayersByTop,
   getEquivalentTweenProp, getLayerYoungerSiblings, getMaskableSiblings, getSiblingLayersWithUnderlyingMask,
   getItemLayers, getGradientDestination, getGradientOrigin, hasFillTween, orderLayersByRight,
-  orderLayersByMiddle, orderLayersByBottom, getLayerRelativeScrollBounds, getLayerBounds
+  orderLayersByMiddle, orderLayersByBottom, getLayerRelativeScrollBounds, getLayerBounds, getLayerScrollBounds,
+  getLayerScrollFrameBounds
 } from '../selectors/layer';
 
 export const updateGroupParentBounds = (state: LayerState, groupParents: string[]): LayerState => {
@@ -12243,7 +12244,6 @@ export const setGroupsScrollOverflow = (state: LayerState, action: SetGroupsScro
 
 export const setGroupScrollFrame = (state: LayerState, action: SetGroupScrollFrame): LayerState => {
   let currentState = state;
-  const groupBounds = getLayerBounds(currentState, action.payload.id);
   currentState = {
     ...currentState,
     byId: {
@@ -12255,11 +12255,26 @@ export const setGroupScrollFrame = (state: LayerState, action: SetGroupScrollFra
           frame: {
             ...(currentState.byId[action.payload.id] as Btwx.Group).scroll.frame,
             ...action.payload.frame
-          },
-          scrollWidth: Math.abs((action.payload.frame.width ? action.payload.frame.width as number : (currentState.byId[action.payload.id] as Btwx.Group).scroll.frame.width as number) - groupBounds.width),
-          scrollHeight: Math.abs((action.payload.frame.height ? action.payload.frame.height as number : (currentState.byId[action.payload.id] as Btwx.Group).scroll.frame.height as number) - groupBounds.height),
-          scrollLeft: Math.abs((groupBounds.left + (typeof action.payload.frame.x === 'number' ? action.payload.frame.x as number : (currentState.byId[action.payload.id] as Btwx.Group).scroll.frame.x as number)) - groupBounds.left),
-          scrollTop: Math.abs((groupBounds.top + (typeof action.payload.frame.y === 'number' ? action.payload.frame.y as number : (currentState.byId[action.payload.id] as Btwx.Group).scroll.frame.y as number)) - groupBounds.top)
+          }
+        }
+      } as Btwx.Group
+    }
+  }
+  const groupBounds = getLayerBounds(currentState, action.payload.id);
+  const scrollFrameBounds = getLayerScrollFrameBounds(currentState, action.payload.id);
+  const scrollBounds = getLayerScrollBounds(currentState, action.payload.id);
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        scroll: {
+          ...(currentState.byId[action.payload.id] as Btwx.Group).scroll,
+          scrollWidth: scrollBounds.width, // scrollFrameBounds.width - groupBounds.width,
+          scrollHeight: scrollBounds.height, // scrollFrameBounds.height - groupBounds.height,
+          scrollLeft: groupBounds.left - scrollFrameBounds.left,
+          scrollTop: groupBounds.top - scrollFrameBounds.top
         }
       } as Btwx.Group
     }

@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import tinyColor from 'tinycolor2';
 import { RootState } from '../store/reducers';
-import { getLayerBounds, getLayerScrollBounds } from '../store/selectors/layer';
+import { getLayerBounds, getLayerScrollBounds, getLayerScrollFrameBounds } from '../store/selectors/layer';
 import { getLayerAbsPosition, getPaperParent } from '../store/utils/paper';
 import { paperMain, paperPreview } from '../canvas';
 import CanvasLayer from './CanvasLayer';
@@ -26,20 +26,19 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
   const layerItem: Btwx.Group = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Group);
   const parentItem: Btwx.Artboard | Btwx.Group = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.parent] as Btwx.Artboard | Btwx.Group : null);
   const artboardItem: Btwx.Artboard = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null);
-  const layerItemBounds: paper.Rectangle = useSelector((state: RootState) => getLayerBounds(state.layer.present, id, paperLayerScope));
-  const scrollFrameBounds = useSelector((state: RootState) => getLayerScrollBounds(state.layer.present, id, paperLayerScope));
+  const layerItemBounds = useSelector((state: RootState) => getLayerBounds(state.layer.present, id, paperLayerScope));
+  const scrollFrameBounds = useSelector((state: RootState) => getLayerScrollFrameBounds(state.layer.present, id, paperLayerScope));
+  const scrollBounds = useSelector((state: RootState) => getLayerScrollBounds(state.layer.present, id, paperLayerScope));
   const layerIndex = parentItem.children.indexOf(layerItem.id);
   const underlyingMaskIndex = layerItem.underlyingMask ? parentItem.children.indexOf(layerItem.underlyingMask) : null;
   const maskedIndex = (layerIndex - underlyingMaskIndex) + 1;
   const projectIndex = artboardItem.projectIndex;
   const [paperProject, setPaperProject] = useState(paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project);
   const [rendered, setRendered] = useState<boolean>(false);
-  const [scrollLeft, setScrollLeft] = useState<number>(0);
-  const [scrollTop, setScrollTop] = useState<number>(0);
-  const [prevScrollLeft, setPrevScrollLeft] = useState<number>(0);
-  const [prevScrollTop, setPrevScrollTop] = useState<number>(0);
-  const [scrollWidth, setScrollWidth] = useState<number>(0);
-  const [scrollHeight, setScrollHeight] = useState<number>(0);
+  const [scrollLeft, setScrollLeft] = useState<number>(layerItem.scroll.scrollLeft);
+  const [scrollTop, setScrollTop] = useState<number>(layerItem.scroll.scrollTop);
+  const [scrollWidth, setScrollWidth] = useState<number>(layerItem.scroll.scrollWidth);
+  const [scrollHeight, setScrollHeight] = useState<number>(layerItem.scroll.scrollHeight);
 
   ///////////////////////////////////////////////////////
   // HELPER FUNCTIONS
@@ -224,11 +223,20 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
         if (deltaX > 0 && (scrollLeft + deltaX > scrollWidth)) {
           setScrollLeft(scrollWidth);
         }
-        if (deltaX < 0 && (scrollLeft + deltaX >= 0)) {
-          setScrollLeft(scrollLeft + deltaX);
-        }
-        if (deltaX < 0 && (scrollLeft + deltaX < 0)) {
-          setScrollLeft(0);
+        if (layerItemBounds.left > scrollFrameBounds.left) {
+          if (deltaX < 0 && (scrollLeft + deltaX >= 0)) {
+            setScrollLeft(scrollLeft + deltaX);
+          }
+          if (deltaX < 0 && (scrollLeft + deltaX < 0)) {
+            setScrollLeft(0);
+          }
+        } else {
+          if (deltaX < 0 && (scrollLeft + deltaX >= layerItemBounds.left - scrollFrameBounds.left)) {
+            setScrollLeft(scrollLeft + deltaX);
+          }
+          if (deltaX < 0 && (scrollLeft + deltaX < layerItemBounds.left - scrollFrameBounds.left)) {
+            setScrollLeft(layerItemBounds.left - scrollFrameBounds.left);
+          }
         }
       } else {
         if (deltaX < 0 && (scrollLeft + deltaX >= scrollWidth)) {
@@ -237,11 +245,20 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
         if (deltaX < 0 && (scrollLeft + deltaX < scrollWidth)) {
           setScrollLeft(scrollWidth);
         }
-        if (deltaX > 0 && (scrollLeft + deltaX <= 0)) {
-          setScrollLeft(scrollLeft + deltaX);
-        }
-        if (deltaX > 0 && (scrollLeft + deltaX > 0)) {
-          setScrollLeft(0);
+        if (layerItemBounds.top > scrollFrameBounds.top) {
+          if (deltaX > 0 && (scrollLeft + deltaX <= layerItemBounds.left - scrollFrameBounds.left)) {
+            setScrollLeft(scrollLeft + deltaX);
+          }
+          if (deltaX > 0 && (scrollLeft + deltaX > layerItemBounds.left - scrollFrameBounds.left)) {
+            setScrollLeft(layerItemBounds.left - scrollFrameBounds.left);
+          }
+        } else {
+          if (deltaX > 0 && (scrollLeft + deltaX <= 0)) {
+            setScrollLeft(scrollLeft + deltaX);
+          }
+          if (deltaX > 0 && (scrollLeft + deltaX > 0)) {
+            setScrollLeft(0);
+          }
         }
       }
     }
@@ -254,11 +271,20 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
         if (deltaY > 0 && (scrollTop + deltaY > scrollHeight)) {
           setScrollTop(scrollHeight);
         }
-        if (deltaY < 0 && (scrollTop + deltaY >= 0)) {
-          setScrollTop(scrollTop + deltaY);
-        }
-        if (deltaY < 0 && (scrollTop + deltaY < 0)) {
-          setScrollTop(0);
+        if (layerItemBounds.top > scrollFrameBounds.top) {
+          if (deltaY < 0 && (scrollTop + deltaY >= 0)) {
+            setScrollTop(scrollTop + deltaY);
+          }
+          if (deltaY < 0 && (scrollTop + deltaY < 0)) {
+            setScrollTop(0);
+          }
+        } else {
+          if (deltaY < 0 && (scrollTop + deltaY >= layerItemBounds.top - scrollFrameBounds.top)) {
+            setScrollTop(scrollTop + deltaY);
+          }
+          if (deltaY < 0 && (scrollTop + deltaY < layerItemBounds.top - scrollFrameBounds.top)) {
+            setScrollTop(layerItemBounds.top - scrollFrameBounds.top);
+          }
         }
       } else {
         if (deltaY < 0 && (scrollTop + deltaY >= scrollHeight)) {
@@ -267,11 +293,20 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
         if (deltaY < 0 && (scrollTop + deltaY < scrollHeight)) {
           setScrollTop(scrollHeight);
         }
-        if (deltaY > 0 && (scrollTop + deltaY <= 0)) {
-          setScrollTop(scrollTop + deltaY);
-        }
-        if (deltaY > 0 && (scrollTop + deltaY > 0)) {
-          setScrollTop(0);
+        if (layerItemBounds.top > scrollFrameBounds.top) {
+          if (deltaY > 0 && (scrollTop + deltaY <= layerItemBounds.top - scrollFrameBounds.top)) {
+            setScrollTop(scrollTop + deltaY);
+          }
+          if (deltaY > 0 && (scrollTop + deltaY > layerItemBounds.top - scrollFrameBounds.top)) {
+            setScrollTop(layerItemBounds.top - scrollFrameBounds.top);
+          }
+        } else {
+          if (deltaY > 0 && (scrollTop + deltaY <= 0)) {
+            setScrollTop(scrollTop + deltaY);
+          }
+          if (deltaY > 0 && (scrollTop + deltaY > 0)) {
+            setScrollTop(0);
+          }
         }
       }
     }
@@ -279,57 +314,57 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
 
   const handleMouseMove = (e: any) => {
     const point = paperProject.view.getEventPoint(e);
-    const hitTest = paperProject.hitTest(point);
-    if (hitTest.item) {
-      hitTest.item.emit('mousemove', e);
+    const hitRestlt = paperProject.hitTest(point);
+    if (hitRestlt && hitRestlt.item) {
+      hitRestlt.item.emit('mousemove', e);
     }
   }
 
   const handleMouseEnter = (e: any) => {
     const point = paperProject.view.getEventPoint(e);
-    const hitTest = paperProject.hitTest(point);
-    if (hitTest.item) {
-      hitTest.item.emit('mouseenter', e);
+    const hitRestlt = paperProject.hitTest(point);
+    if (hitRestlt && hitRestlt.item) {
+      hitRestlt.item.emit('mouseenter', e);
     }
   }
 
   const handleMouseLeave = (e: any) => {
     const point = paperProject.view.getEventPoint(e);
-    const hitTest = paperProject.hitTest(point);
-    if (hitTest.item) {
-      hitTest.item.emit('mouseleave', e);
+    const hitRestlt = paperProject.hitTest(point);
+    if (hitRestlt && hitRestlt.item) {
+      hitRestlt.item.emit('mouseleave', e);
     }
   }
 
   const handleMouseDown = (e: any) => {
     const point = paperProject.view.getEventPoint(e);
-    const hitTest = paperProject.hitTest(point);
-    if (hitTest.item) {
-      hitTest.item.emit('mousedown', e);
+    const hitRestlt = paperProject.hitTest(point);
+    if (hitRestlt && hitRestlt.item) {
+      hitRestlt.item.emit('mousedown', e);
     }
   }
 
   const handleMouseUp = (e: any) => {
     const point = paperProject.view.getEventPoint(e);
-    const hitTest = paperProject.hitTest(point);
-    if (hitTest.item) {
-      hitTest.item.emit('mouseup', e);
+    const hitRestlt = paperProject.hitTest(point);
+    if (hitRestlt && hitRestlt.item) {
+      hitRestlt.item.emit('mouseup', e);
     }
   }
 
   const handleClick = (e: any) => {
     const point = paperProject.view.getEventPoint(e);
-    const hitTest = paperProject.hitTest(point);
-    if (hitTest.item) {
-      hitTest.item.emit('click', e);
+    const hitRestlt = paperProject.hitTest(point);
+    if (hitRestlt && hitRestlt.item) {
+      hitRestlt.item.emit('click', e);
     }
   }
 
   const handleDoubleClick = (e: any) => {
     const point = paperProject.view.getEventPoint(e);
-    const hitTest = paperProject.hitTest(point);
-    if (hitTest.item) {
-      hitTest.item.emit('doubleclick', e);
+    const hitRestlt = paperProject.hitTest(point);
+    if (hitRestlt && hitRestlt.item) {
+      hitRestlt.item.emit('doubleclick', e);
     }
   }
 
@@ -357,16 +392,6 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
   }, [layerItem.scroll.enabled, layerItem.scroll.overflow]);
 
   useEffect(() => {
-    if (paperScope === 'preview') {
-      const scrollWidth = scrollFrameBounds.width - layerItemBounds.width;
-      const scrollHeight = scrollFrameBounds.height - layerItemBounds.height;
-      const scrollLeft = scrollFrameBounds.left - layerItemBounds.left;
-      const scrollTop = scrollFrameBounds.top - layerItemBounds.top;
-      setScrollWidth(scrollWidth);
-      setScrollHeight(scrollHeight);
-      setScrollLeft(scrollLeft);
-      setScrollTop(scrollTop);
-    }
     if (rendered) {
       const { scrollMask, scrollBackground } = getPaperLayer();
       scrollMask.bounds = scrollFrameBounds;
@@ -380,26 +405,32 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
   ]);
 
   useEffect(() => {
-    if (rendered && paperScope === 'preview' && prevScrollLeft !== null && scrollLeft !== prevScrollLeft) {
-      const { groupLayers } = getPaperLayer();
-      const diff = scrollLeft - prevScrollLeft;
-      groupLayers.position.x += diff;
-      // translate gets weird with gradient origin/destination
-      // groupLayers.translate(new paperLayerScope.Point(diff, 0));
+    if (rendered && paperScope === 'preview') {
+      setScrollWidth(scrollFrameBounds.width - layerItemBounds.width);
+      setScrollLeft(layerItem.scroll.scrollLeft);
     }
-    setPrevScrollLeft(scrollLeft);
-  }, [scrollLeft]);
+  }, [layerItem.scroll.scrollLeft, layerItem.scroll.scrollWidth]);
 
   useEffect(() => {
-    if (rendered && paperScope === 'preview' && prevScrollTop !== null && scrollTop !== prevScrollTop) {
-      const { groupLayers } = getPaperLayer();
-      const diff = scrollTop - prevScrollTop;
-      groupLayers.position.y += diff;
-      // translate gets weird with gradient origin/destination
-      // groupLayers.translate(new paperLayerScope.Point(0, diff));
+    if (rendered && paperScope === 'preview') {
+      setScrollHeight(scrollFrameBounds.height - layerItemBounds.height);
+      setScrollTop(layerItem.scroll.scrollTop);
     }
-    setPrevScrollTop(scrollTop);
-  }, [scrollTop]);
+  }, [layerItem.scroll.scrollTop, layerItem.scroll.scrollHeight]);
+
+  useEffect(() => {
+    if (rendered && paperScope === 'preview') {
+      const { groupLayers } = getPaperLayer();
+      groupLayers.bounds.left = scrollFrameBounds.left + scrollLeft;
+    }
+  }, [scrollLeft, layerItem.scroll.scrollLeft]);
+
+  useEffect(() => {
+    if (rendered && paperScope === 'preview') {
+      const { groupLayers } = getPaperLayer();
+      groupLayers.bounds.top = scrollFrameBounds.top + scrollTop;
+    }
+  }, [scrollTop, layerItem.scroll.scrollTop]);
 
   ///////////////////////////////////////////////////////
   // CHILDREN & EVENTS
