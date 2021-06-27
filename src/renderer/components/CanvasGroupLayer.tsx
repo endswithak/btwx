@@ -392,6 +392,12 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
   }, [layerItem.scroll.enabled, layerItem.scroll.overflow]);
 
   useEffect(() => {
+    if (rendered && paperScope === 'preview') {
+      setScrollWidth(scrollFrameBounds.width - layerItemBounds.width);
+      setScrollLeft(layerItem.scroll.scrollLeft);
+      setScrollHeight(scrollFrameBounds.height - layerItemBounds.height);
+      setScrollTop(layerItem.scroll.scrollTop);
+    }
     if (rendered) {
       const { scrollMask, scrollBackground } = getPaperLayer();
       scrollMask.bounds = scrollFrameBounds;
@@ -403,20 +409,6 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
     layerItem.scroll.frame.height, layerItem.scroll.enabled, layerItem.scroll.direction.horizontal,
     layerItem.scroll.direction.vertical, layerItem.scroll.overflow, previewMatrix
   ]);
-
-  useEffect(() => {
-    if (rendered && paperScope === 'preview') {
-      setScrollWidth(scrollFrameBounds.width - layerItemBounds.width);
-      setScrollLeft(layerItem.scroll.scrollLeft);
-    }
-  }, [layerItem.scroll.scrollLeft, layerItem.scroll.scrollWidth]);
-
-  useEffect(() => {
-    if (rendered && paperScope === 'preview') {
-      setScrollHeight(scrollFrameBounds.height - layerItemBounds.height);
-      setScrollTop(layerItem.scroll.scrollTop);
-    }
-  }, [layerItem.scroll.scrollTop, layerItem.scroll.scrollHeight]);
 
   useEffect(() => {
     if (rendered && paperScope === 'preview') {

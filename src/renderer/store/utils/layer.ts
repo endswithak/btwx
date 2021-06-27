@@ -120,11 +120,13 @@ export const updateGroupParentBounds = (state: LayerState, groupParents: string[
           }
         }
         if (groupItem.type === 'Group' && (groupItem as Btwx.Group).scroll.frame.x !== 'auto') {
-          const layerScrollBounds = getLayerRelativeScrollBounds(result, current);
-          const scrollWidth = layerScrollBounds.width - layersBounds.width;
-          const scrollHeight = layerScrollBounds.height - layersBounds.height;
-          const scrollLeft = layerScrollBounds.left - layersBounds.left;
-          const scrollTop = layerScrollBounds.top - layersBounds.top;
+          const scrollFrameBounds = getLayerRelativeScrollBounds(result, current);
+          const topLeft = paperMain.Point.min(scrollFrameBounds.topLeft, layersBounds.topLeft);
+          const bottomRight = paperMain.Point.max(scrollFrameBounds.bottomRight, layersBounds.bottomRight);
+          const scrollBounds = new paperMain.Rectangle({
+            from: topLeft,
+            to: bottomRight
+          });
           result = {
             ...result,
             byId: {
@@ -134,15 +136,15 @@ export const updateGroupParentBounds = (state: LayerState, groupParents: string[
                 scroll: {
                   ...(result.byId[current] as Btwx.Group).scroll,
                   frame: {
-                    x: layerScrollBounds.x,
-                    y: layerScrollBounds.y,
-                    width: layerScrollBounds.width,
-                    height: layerScrollBounds.height
+                    x: scrollFrameBounds.topLeft.x - layersBounds.topLeft.x,
+                    y: scrollFrameBounds.topLeft.y - layersBounds.topLeft.y,
+                    width: scrollFrameBounds.width,
+                    height: scrollFrameBounds.height
                   },
-                  scrollWidth,
-                  scrollHeight,
-                  scrollLeft,
-                  scrollTop
+                  scrollWidth: scrollBounds.width,
+                  scrollHeight: scrollBounds.height,
+                  scrollLeft: layersBounds.left - scrollFrameBounds.left,
+                  scrollTop: layersBounds.top - scrollFrameBounds.top
                 }
               } as Btwx.Group
             }
