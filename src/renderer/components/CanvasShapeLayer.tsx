@@ -11,11 +11,13 @@ interface CanvasShapeLayerProps {
   paperScope: Btwx.PaperScope;
   eventTimelines?: {
     [id: string]: GSAPTimeline;
-  }
+  };
+  scrollLeft: number;
+  scrollTop: number;
 }
 
 const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
-  const { id, paperScope, eventTimelines } = props;
+  const { id, paperScope, eventTimelines, scrollLeft, scrollTop } = props;
   const layerItem: Btwx.Shape = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Shape);
   const parentItem: Btwx.Artboard | Btwx.Group = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.parent] as Btwx.Artboard | Btwx.Group : null);
   const artboardItem: Btwx.Artboard = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null);
@@ -497,7 +499,9 @@ const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {
                 id={id}
                 eventId={eventId}
                 layerTimeline={layerTimelines[eventId]}
-                eventTimeline={eventTimelines[eventId]} />
+                eventTimeline={eventTimelines[eventId]}
+                scrollLeft={scrollLeft}
+                scrollTop={scrollTop} />
             ))
           }
         </>

@@ -32,7 +32,7 @@ const MenuTweenAddWiggle = (props: MenuTweenAddWiggleProps): ReactElement => {
   const tweenLayerHover = useSelector((state: RootState) => state.eventDrawer.tweenLayerHover);
   const tweenLayerHoverItem = useSelector((state: RootState) => tweenLayerHover && state.layer.present.byId[tweenLayerHover] ? state.layer.present.byId[tweenLayerHover] : null);
   const equivalentLayerItem = useSelector((state: RootState) => tweenLayerHoverItem && destinationChildren && destinationChildren.length > 0 ? getDestinationEquivalent(state.layer.present, tweenLayerHover, destinationChildren) : null);
-  const equivalentTweenProps = tweenLayerHoverItem && equivalentLayerItem ? getEquivalentTweenProps(tweenLayerHoverItem, equivalentLayerItem) : null;
+  const equivalentTweenProps = useSelector((state: RootState) => tweenLayerHoverItem && equivalentLayerItem ? getEquivalentTweenProps(state.layer.present, tweenLayerHoverItem, equivalentLayerItem) : null);
   const dispatch = useDispatch();
 
   const getPossibleProps = () => {

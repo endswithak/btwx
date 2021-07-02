@@ -13,7 +13,9 @@ interface CanvasLayerProps {
   paperScope: Btwx.PaperScope;
   eventTimelines?: {
     [id: string]: GSAPTimeline;
-  }
+  };
+  scrollLeft: number;
+  scrollTop: number;
 }
 
 const getLayerByIdSelector = () => getLayerById;

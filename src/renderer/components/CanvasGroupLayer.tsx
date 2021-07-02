@@ -12,7 +12,9 @@ interface CanvasGroupLayerProps {
   paperScope: Btwx.PaperScope;
   eventTimelines?: {
     [id: string]: GSAPTimeline;
-  }
+  };
+  scrollLeft: number;
+  scrollTop: number;
 }
 
 const debug = true;
@@ -314,57 +316,77 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
 
   const handleMouseMove = (e: any) => {
     const point = paperProject.view.getEventPoint(e);
-    const hitRestlt = paperProject.hitTest(point);
-    if (hitRestlt && hitRestlt.item) {
-      hitRestlt.item.emit('mousemove', e);
+    const hitRestlt = paperProject.hitTestAll(point);
+    if (hitRestlt && hitRestlt.length > 0) {
+      hitRestlt.forEach((result) => {
+        result.item.emit('mousemove', e);
+      });
     }
   }
 
   const handleMouseEnter = (e: any) => {
     const point = paperProject.view.getEventPoint(e);
-    const hitRestlt = paperProject.hitTest(point);
-    if (hitRestlt && hitRestlt.item) {
-      hitRestlt.item.emit('mouseenter', e);
+    const hitRestlt = paperProject.hitTestAll(point);
+    if (hitRestlt && hitRestlt.length > 0) {
+      hitRestlt.forEach((result) => {
+        result.item.emit('mouseenter', e);
+      });
+      // hitRestlt.item.emit('mouseenter', e);
     }
   }
 
   const handleMouseLeave = (e: any) => {
     const point = paperProject.view.getEventPoint(e);
-    const hitRestlt = paperProject.hitTest(point);
-    if (hitRestlt && hitRestlt.item) {
-      hitRestlt.item.emit('mouseleave', e);
+    const hitRestlt = paperProject.hitTestAll(point);
+    if (hitRestlt && hitRestlt.length > 0) {
+      hitRestlt.forEach((result) => {
+        result.item.emit('mouseleave', e);
+      });
+      // hitRestlt.item.emit('mouseleave', e);
     }
   }
 
   const handleMouseDown = (e: any) => {
     const point = paperProject.view.getEventPoint(e);
-    const hitRestlt = paperProject.hitTest(point);
-    if (hitRestlt && hitRestlt.item) {
-      hitRestlt.item.emit('mousedown', e);
+    const hitRestlt = paperProject.hitTestAll(point);
+    if (hitRestlt && hitRestlt.length > 0) {
+      hitRestlt.forEach((result) => {
+        result.item.emit('mousedown', e);
+      });
+      // hitRestlt.item.emit('mousedown', e);
     }
   }
 
   const handleMouseUp = (e: any) => {
     const point = paperProject.view.getEventPoint(e);
-    const hitRestlt = paperProject.hitTest(point);
-    if (hitRestlt && hitRestlt.item) {
-      hitRestlt.item.emit('mouseup', e);
+    const hitRestlt = paperProject.hitTestAll(point);
+    if (hitRestlt && hitRestlt.length > 0) {
+      hitRestlt.forEach((result) => {
+        result.item.emit('mouseup', e);
+      });
+      // hitRestlt.item.emit('mouseup', e);
     }
   }
 
   const handleClick = (e: any) => {
     const point = paperProject.view.getEventPoint(e);
-    const hitRestlt = paperProject.hitTest(point);
-    if (hitRestlt && hitRestlt.item) {
-      hitRestlt.item.emit('click', e);
+    const hitRestlt = paperProject.hitTestAll(point);
+    if (hitRestlt && hitRestlt.length > 0) {
+      hitRestlt.forEach((result) => {
+        result.item.emit('click', e);
+      });
+      // hitRestlt.item.emit('click', e);
     }
   }
 
   const handleDoubleClick = (e: any) => {
     const point = paperProject.view.getEventPoint(e);
-    const hitRestlt = paperProject.hitTest(point);
-    if (hitRestlt && hitRestlt.item) {
-      hitRestlt.item.emit('doubleclick', e);
+    const hitRestlt = paperProject.hitTestAll(point);
+    if (hitRestlt && hitRestlt.length > 0) {
+      hitRestlt.forEach((result) => {
+        result.item.emit('doubleclick', e);
+      });
+      // hitRestlt.item.emit('doubleclick', e);
     }
   }
 
@@ -466,7 +488,9 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
               key={childId}
               id={childId}
               paperScope={paperScope}
-              eventTimelines={eventTimelines} />
+              eventTimelines={eventTimelines}
+              scrollLeft={(props.scrollLeft ? props.scrollLeft + scrollLeft : scrollLeft) - layerItem.scroll.scrollLeft}
+              scrollTop={(props.scrollTop ? props.scrollTop + scrollTop : scrollTop) - layerItem.scroll.scrollTop} />
           ))
         }
       </>

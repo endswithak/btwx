@@ -2058,7 +2058,7 @@ export const addLayerEvent = (state: LayerState, action: AddLayerEvent): LayerSt
     }
     // add background tween
     if (hasFillTween(currentState.byId[action.payload.origin], currentState.byId[action.payload.destination])) {
-      const equivalentTweenProps = getEquivalentTweenProps(currentState.byId[action.payload.origin], currentState.byId[action.payload.destination]);
+      const equivalentTweenProps = getEquivalentTweenProps(currentState, currentState.byId[action.payload.origin], currentState.byId[action.payload.destination]);
       currentState = Object.keys(equivalentTweenProps).reduce((result, key: Btwx.TweenProp) => {
         if (equivalentTweenProps[key]) {
           result = addLayerTween(result, layerActions.addLayerTween({
@@ -2302,7 +2302,7 @@ export const addTweenEventLayerTweens = (state: LayerState, eventId: string, lay
   if (destinationEquivalent) {
     const currentLayerItem = state.byId[layerId];
     const equivalentLayerItem = state.byId[destinationEquivalent.id];
-    const equivalentTweenProps = getEquivalentTweenProps(currentLayerItem, equivalentLayerItem);
+    const equivalentTweenProps = getEquivalentTweenProps(currentState, currentLayerItem, equivalentLayerItem);
     currentState = Object.keys(equivalentTweenProps).reduce((result, key: Btwx.TweenProp) => {
       if (equivalentTweenProps[key]) {
         result = addLayerTween(result, layerActions.addLayerTween({
@@ -2673,7 +2673,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
         const tween = result.tweens.byId[current];
         const layerItem = result.byId[tween.layer] as Btwx.Layer;
         const destinationLayerItem = result.byId[tween.destinationLayer] as Btwx.Layer;
-        const hasTween = getEquivalentTweenProp(layerItem, destinationLayerItem, prop);
+        const hasTween = getEquivalentTweenProp(result, layerItem, destinationLayerItem, prop);
         const hasWiggle = layerItem.tweens.byProp[prop].find(id => result.tweens.byId[id].ease === 'customWiggle');
         if (hasWiggle) {
           result = removeLayerTween(result, layerActions.removeLayerTween({id: hasWiggle}) as RemoveLayerTween);
@@ -2693,7 +2693,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
       if (destinationEquivalent) {
         const layerItem = result.byId[layerId] as Btwx.Layer;
         const equivalentLayerItem = result.byId[destinationEquivalent.id] as Btwx.Layer;
-        const hasTween = getEquivalentTweenProp(layerItem, equivalentLayerItem, prop);
+        const hasTween = getEquivalentTweenProp(result, layerItem, equivalentLayerItem, prop);
         const tweenExists = tweenEvent.tweens.allIds.some((id: string) => {
           const tween = result.tweens.byId[id];
           return tween.layer === layerId && tween.prop === prop;
@@ -2719,7 +2719,7 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
       if (originEquivalent) {
         const layerItem = result.byId[layerId] as Btwx.Layer;
         const equivalentLayerItem = result.byId[originEquivalent.id] as Btwx.Layer;
-        const hasTween = getEquivalentTweenProp(layerItem, equivalentLayerItem, prop);
+        const hasTween = getEquivalentTweenProp(result, layerItem, equivalentLayerItem, prop);
         const tweenExists = tweenEvent.tweens.allIds.some((id: string) => {
           const tween = result.tweens.byId[id];
           return tween.layer === originEquivalent.id && tween.prop === prop;

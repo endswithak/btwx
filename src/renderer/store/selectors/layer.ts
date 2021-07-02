@@ -2079,7 +2079,7 @@ export const getWiggleLayersSelector = createSelector(
       if (destinationEquivalent && destinationEquivalent.type !== 'Group') {
         const currentLayerItem = layersById[current];
         const equivalentLayerItem = layersById[destinationEquivalent.id];
-        const equivalentTweenProps = getEquivalentTweenProps(currentLayerItem, equivalentLayerItem);
+        const equivalentTweenProps = getEquivalentTweenProps({byId: layersById}, currentLayerItem, equivalentLayerItem);
         result = {
           ...result,
           allIds: [...result.allIds, current],
@@ -3799,23 +3799,33 @@ export const hasFillGradientDestinationYTween = (layerItem: Btwx.Layer, equivale
   return hasFillGradientTween && !sameOriginY;
 };
 
-export const hasXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+export const hasXTween = (state: any, layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const inScrollGroup = layerItem.scope.some((id) => state.byId[id] && state.byId[id].type === 'Group' && (state.byId[id] as Btwx.Group).scroll.enabled && (state.byId[id] as Btwx.Group).scroll.direction.horizontal);
   const validType = layerItem.type === 'Shape' || layerItem.type === 'Image' || layerItem.type === 'Text';
   const xMatch = layerItem.frame.x.toFixed(2) === equivalentLayerItem.frame.x.toFixed(2);
-  if (validType) {
-    return !xMatch;
+  if (inScrollGroup) {
+    return true;
   } else {
-    return false;
+    if (validType) {
+      return !xMatch;
+    } else {
+      return false;
+    }
   }
 };
 
-export const hasYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+export const hasYTween = (state: any, layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
+  const inScrollGroup = layerItem.scope.some((id) => state.byId[id] && state.byId[id].type === 'Group' && (state.byId[id] as Btwx.Group).scroll.enabled && (state.byId[id] as Btwx.Group).scroll.direction.vertical);
   const validType = layerItem.type === 'Shape' || layerItem.type === 'Image' || layerItem.type === 'Text';
   const yMatch = layerItem.frame.y.toFixed(2) === equivalentLayerItem.frame.y.toFixed(2);
-  if (validType) {
-    return !yMatch;
+  if (inScrollGroup) {
+    return true;
   } else {
-    return false;
+    if (validType) {
+      return !yMatch;
+    } else {
+      return false;
+    }
   }
 };
 
@@ -4005,7 +4015,7 @@ export const hasScaleYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.
   return validType && !verticalFlipMatch;
 };
 
-export const getEquivalentTweenProp = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer, prop: Btwx.TweenProp): boolean => {
+export const getEquivalentTweenProp = (state: any, layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer, prop: Btwx.TweenProp): boolean => {
   switch(prop) {
     // case 'image':
     //   return hasImageTween(layerItem, equivalentLayerItem);
@@ -4022,9 +4032,9 @@ export const getEquivalentTweenProp = (layerItem: Btwx.Layer, equivalentLayerIte
     case 'fillGradientDestinationY':
       return hasFillGradientDestinationYTween(layerItem, equivalentLayerItem);
     case 'x':
-      return hasXTween(layerItem, equivalentLayerItem);
+      return hasXTween(state, layerItem, equivalentLayerItem);
     case 'y':
-      return hasYTween(layerItem, equivalentLayerItem);
+      return hasYTween(state, layerItem, equivalentLayerItem);
     case 'rotation':
       return hasRotationTween(layerItem, equivalentLayerItem);
     case 'width':
@@ -4078,7 +4088,7 @@ export const getEquivalentTweenProp = (layerItem: Btwx.Layer, equivalentLayerIte
   }
 };
 
-export const getEquivalentTweenProps = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): Btwx.TweenPropMap => ({
+export const getEquivalentTweenProps = (state: any, layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): Btwx.TweenPropMap => ({
   // image: hasImageTween(layerItem, equivalentLayerItem),
   shape: hasShapeTween(layerItem, equivalentLayerItem),
   fill: hasFillTween(layerItem, equivalentLayerItem),
@@ -4086,8 +4096,8 @@ export const getEquivalentTweenProps = (layerItem: Btwx.Layer, equivalentLayerIt
   fillGradientOriginY: hasFillGradientOriginYTween(layerItem, equivalentLayerItem),
   fillGradientDestinationX: hasFillGradientDestinationXTween(layerItem, equivalentLayerItem),
   fillGradientDestinationY: hasFillGradientDestinationYTween(layerItem, equivalentLayerItem),
-  x: hasXTween(layerItem, equivalentLayerItem),
-  y: hasYTween(layerItem, equivalentLayerItem),
+  x: hasXTween(state, layerItem, equivalentLayerItem),
+  y: hasYTween(state, layerItem, equivalentLayerItem),
   rotation: hasRotationTween(layerItem, equivalentLayerItem),
   // radius: false,
   width: hasWidthTween(layerItem, equivalentLayerItem),
@@ -4339,7 +4349,7 @@ export const getWiggleLayers = (store: LayerState, eventId: string, exclude: str
     if (destinationEquivalent && !exclude.includes(current)) {
       const currentLayerItem = store.byId[current];
       const equivalentLayerItem = store.byId[destinationEquivalent.id];
-      const equivalentTweenProps = getEquivalentTweenProps(currentLayerItem, equivalentLayerItem);
+      const equivalentTweenProps = getEquivalentTweenProps(store, currentLayerItem, equivalentLayerItem);
       result = {
         ...result,
         allIds: [...result.allIds, current],
