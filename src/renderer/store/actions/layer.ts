@@ -2509,6 +2509,148 @@ export const setLayersRotation = (payload: SetLayersRotationPayload): LayerTypes
   payload
 });
 
+// export const setLayersRotationThunk = (payload: SetLayersRotationPayload) => {
+//   return (dispatch: any, getState: any) => {
+//     const state = getState() as RootState;
+//     let bounds: { [id: string]: Btwx.Frame; } = {};
+//     let pathData: { [id: string]: string; } = {};
+//     let shapeIcon: { [id: string]: string; } = {};
+//     let point: { [id: string]: Btwx.Point; } = {};
+//     let to: { [id: string]: Btwx.Point; } = {};
+//     let from: { [id: string]: Btwx.Point; } = {};
+//     let fillGradientOrigin: { [id: string]: Btwx.Point; } = {};
+//     let fillGradientDestination: { [id: string]: Btwx.Point; } = {};
+//     let strokeGradientOrigin: { [id: string]: Btwx.Point; } = {};
+//     let strokeGradientDestination: { [id: string]: Btwx.Point; } = {};
+//     const layersWithPivot = payload.layers.reduce((result, current) => {
+//       const layerItem = state.layer.present.byId[current];
+//       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
+//       const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data:{id: current}});
+//       const pivot = paperLayer.position;
+//       return [
+//         ...result,
+//         ...getLayerAndDescendants(state.layer.present, current, false).reduce((r, c) => {
+//           return [...r, { id: c, pivot}];
+//         }, [])
+//       ];
+//     }, []);
+//     const handleRotation = ({id, pivot}: {id: string; pivot: paper.Point}) => {
+//       const layerItem = state.layer.present.byId[id];
+//       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
+//       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
+//       const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data:{id}});
+//       const clone = paperLayer.clone({insert: false}) as paper.CompoundPath;
+//       clearLayerTransforms({
+//         layerType: layerItem.type,
+//         paperLayer: clone,
+//         transform: layerItem.transform
+//       });
+//       clone.pivot = pivot;
+//       applyLayerTransforms({
+//         paperLayer: clone,
+//         transform: {
+//           ...layerItem.transform,
+//           rotation: payload.rotation
+//         }
+//       });
+//       let fillRef = null;
+//       switch(layerItem.type) {
+//         case 'Shape':
+//           fillRef = clone;
+//           break;
+//         case 'Text':
+//           fillRef = clone.getItem({data:{id:'textContent'}});
+//           break;
+//       }
+//       if (layerItem.style.fill.fillType === 'gradient') {
+//         fillGradientOrigin = {
+//           ...fillGradientOrigin,
+//           [id]: fillRef.fillColor.origin
+//         }
+//         fillGradientDestination = {
+//           ...fillGradientDestination,
+//           [id]: fillRef.fillColor.destination
+//         }
+//       }
+//       if (layerItem.style.stroke.fillType === 'gradient') {
+//         strokeGradientOrigin = {
+//           ...strokeGradientOrigin,
+//           [id]: fillRef.strokeColor.origin
+//         }
+//         strokeGradientDestination = {
+//           ...strokeGradientDestination,
+//           [id]: fillRef.strokeColor.destination
+//         }
+//       }
+//       if (layerItem.type === 'Shape') {
+//         pathData = {
+//           ...pathData,
+//           [id]: (clone as paper.CompoundPath).pathData
+//         }
+//         shapeIcon = {
+//           ...shapeIcon,
+//           [id]: getShapeIcon((clone as paper.CompoundPath).pathData)
+//         }
+//         if ((layerItem as Btwx.Shape).shapeType === 'Line') {
+//           const fromPoint = (clone as paper.Path).firstSegment.point.subtract(artboardPosition);
+//           const toPoint = (clone as paper.Path).lastSegment.point.subtract(artboardPosition);
+//           from = {
+//             ...from,
+//             [id]: {
+//               x: fromPoint.x,
+//               y: fromPoint.y
+//             }
+//           }
+//           to = {
+//             ...to,
+//             [id]: {
+//               x: toPoint.x,
+//               y: toPoint.y
+//             }
+//           }
+//         }
+//       }
+//       if (layerItem.type === 'Text') {
+//         const textContent = clone.getItem({data:{id:'textContent'}}) as paper.PointText;
+//         const newPoint = textContent.point.subtract(artboardPosition);
+//         point = {
+//           ...point,
+//           [id]: {
+//             x: newPoint.x,
+//             y: newPoint.y
+//           }
+//         }
+//       }
+//       bounds = {
+//         ...bounds,
+//         [id]: {
+//           ...layerItem.frame,
+//           width: clone.bounds.width,
+//           height: clone.bounds.height
+//         }
+//       }
+//     }
+//     layersWithPivot.forEach((itemData: {id: string; pivot: paper.Point}) => {
+//       handleRotation(itemData);
+//     });
+//     dispatch(
+//       setLayersRotation({
+//         ...payload,
+//         bounds,
+//         pathData,
+//         shapeIcon,
+//         fillGradientOrigin,
+//         fillGradientDestination,
+//         strokeGradientOrigin,
+//         strokeGradientDestination,
+//         point,
+//         from,
+//         to
+//       })
+//     )
+//   }
+// };
+
 export const setLayersRotationThunk = (payload: SetLayersRotationPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;

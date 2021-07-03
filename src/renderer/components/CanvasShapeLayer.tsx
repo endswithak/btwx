@@ -12,8 +12,8 @@ interface CanvasShapeLayerProps {
   eventTimelines?: {
     [id: string]: GSAPTimeline;
   };
-  scrollLeft: number;
-  scrollTop: number;
+  scrollLeft?: number;
+  scrollTop?: number;
 }
 
 const CanvasShapeLayer = (props: CanvasShapeLayerProps): ReactElement => {

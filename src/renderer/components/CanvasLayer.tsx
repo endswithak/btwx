@@ -14,8 +14,9 @@ interface CanvasLayerProps {
   eventTimelines?: {
     [id: string]: GSAPTimeline;
   };
-  scrollLeft: number;
-  scrollTop: number;
+  scrollLeft?: number;
+  scrollTop?: number;
+  wheelEvent?: any;
 }
 
 const getLayerByIdSelector = () => getLayerById;

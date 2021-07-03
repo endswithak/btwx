@@ -13,6 +13,7 @@ const PreviewCanvas = (): ReactElement => {
   const artboards = useSelector((state: RootState) => state.layer.present.byId.root.children);
   const activeArtboardItem = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.activeArtboard]);
   const [ready, setReady] = useState(false);
+  const [wheelEvent, setWheelEvent] = useState(null);
   const dispatch = useDispatch();
 
   const handleResize = (): void => {
@@ -38,10 +39,15 @@ const PreviewCanvas = (): ReactElement => {
     }
   }, []);
 
+  const handleWheel = (e: any) => {
+    setWheelEvent(e);
+  }
+
   return (
     <div
       className='c-canvas'
-      ref={canvasContainerRef}>
+      ref={canvasContainerRef}
+      onWheel={ready ? handleWheel : null}>
       <canvas
         id='canvas-preview'
         ref={canvasRef}
@@ -54,7 +60,10 @@ const PreviewCanvas = (): ReactElement => {
             <CanvasArtboardLayer
               key={id}
               id={id}
-              paperScope='preview' />
+              paperScope='preview'
+              wheelEvent={wheelEvent}
+              scrollLeft={0}
+              scrollTop={0} />
           ))
         : null
       }
