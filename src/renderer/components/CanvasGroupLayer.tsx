@@ -13,24 +13,28 @@ interface CanvasGroupLayerProps {
   eventTimelines?: {
     [id: string]: GSAPTimeline;
   };
-  scrollLeft?: number;
-  scrollTop?: number;
+  nestedScrollLeft?: number;
+  nestedScrollTop?: number;
   wheelEvent?: any;
 }
 
 const debug = true;
 
 const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
-  const { id, paperScope, eventTimelines } = props;
+  const { id, paperScope, eventTimelines, wheelEvent, nestedScrollLeft = 0, nestedScrollTop = 0 } = props;
   const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
-  const scrollContainer = useRef<HTMLDivElement>(null);
-  const previewMatrix = useSelector((state: RootState) => paperScope === 'preview' ? state.preview.matrix : null);
   // const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
   const layerItem: Btwx.Group = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Group);
   const parentItem: Btwx.Artboard | Btwx.Group = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.parent] as Btwx.Artboard | Btwx.Group : null);
   const artboardItem: Btwx.Artboard = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null);
   const layerItemBounds = useSelector((state: RootState) => getLayerBounds(state.layer.present, id, paperLayerScope));
   const scrollFrameBounds = useSelector((state: RootState) => getLayerScrollFrameBounds(state.layer.present, id, paperLayerScope));
+  const nestedScrollFrameBounds = scrollFrameBounds ? new paperPreview.Rectangle({
+    point: scrollFrameBounds.topLeft.add(
+      new paperPreview.Point(nestedScrollLeft, nestedScrollTop)
+    ),
+    size: scrollFrameBounds.size
+  }) : null;
   // const scrollBounds = useSelector((state: RootState) => getLayerScrollBounds(state.layer.present, id, paperLayerScope));
   const layerIndex = parentItem.children.indexOf(layerItem.id);
   const underlyingMaskIndex = layerItem.underlyingMask ? parentItem.children.indexOf(layerItem.underlyingMask) : null;
@@ -40,9 +44,9 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
   const [rendered, setRendered] = useState<boolean>(false);
   const [scrollLeft, setScrollLeft] = useState<number>(layerItem.scroll.scrollLeft);
   const [scrollTop, setScrollTop] = useState<number>(layerItem.scroll.scrollTop);
-  const [scrollWidth, setScrollWidth] = useState<number>(layerItem.scroll.scrollWidth);
-  const [scrollHeight, setScrollHeight] = useState<number>(layerItem.scroll.scrollHeight);
-  const [wheelEvent, setWheelEvent] = useState(null);
+  const [scrollWidth, setScrollWidth] = useState<number>(scrollFrameBounds.width - layerItemBounds.width);
+  const [scrollHeight, setScrollHeight] = useState<number>(scrollFrameBounds.height - layerItemBounds.height);
+  const [scrollBounds, setScrollBounds] = useState(nestedScrollFrameBounds);
 
   ///////////////////////////////////////////////////////
   // HELPER FUNCTIONS
@@ -221,7 +225,7 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
     if ((layerItem.scroll.direction.horizontal && (Math.abs(e.nativeEvent.deltaX) > Math.abs(e.nativeEvent.deltaY))) || (layerItem.scroll.direction.vertical && (Math.abs(e.nativeEvent.deltaX) < Math.abs(e.nativeEvent.deltaY))) || (layerItem.scroll.direction.horizontal && layerItem.scroll.direction.vertical)) {
       if (layerItem.scroll.direction.horizontal) {
         const deltaX = e.nativeEvent.deltaX;
-        const sl = scrollLeft + deltaX; // + (props.scrollLeft ? props.scrollLeft : 0);
+        const sl = scrollLeft + deltaX;
         if (scrollWidth > 0) {
           if (deltaX > 0 && (sl <= scrollWidth)) {
             setScrollLeft(sl);
@@ -270,7 +274,7 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
       }
       if (layerItem.scroll.direction.vertical) {
         const deltaY = e.nativeEvent.deltaY;
-        const st = scrollTop + deltaY; // + (props.scrollTop ? props.scrollTop : 0);
+        const st = scrollTop + deltaY;
         if (scrollHeight > 0) {
           if (deltaY > 0 && (st <= scrollHeight)) {
             setScrollTop(st);
@@ -317,78 +321,6 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
           }
         }
       }
-      return true;
-    }
-    return false;
-  }
-
-  const handleMouseMove = (e: any) => {
-    const point = paperProject.view.getEventPoint(e);
-    const hitRestlt = paperProject.hitTestAll(point);
-    if (hitRestlt && hitRestlt.length > 0) {
-      hitRestlt.forEach((result) => {
-        result.item.emit('mousemove', e);
-      });
-    }
-  }
-
-  const handleMouseEnter = (e: any) => {
-    const point = paperProject.view.getEventPoint(e);
-    const hitRestlt = paperProject.hitTestAll(point);
-    if (hitRestlt && hitRestlt.length > 0) {
-      hitRestlt.forEach((result) => {
-        result.item.emit('mouseenter', e);
-      });
-    }
-  }
-
-  const handleMouseLeave = (e: any) => {
-    const point = paperProject.view.getEventPoint(e);
-    const hitRestlt = paperProject.hitTestAll(point);
-    if (hitRestlt && hitRestlt.length > 0) {
-      hitRestlt.forEach((result) => {
-        result.item.emit('mouseleave', e);
-      });
-    }
-  }
-
-  const handleMouseDown = (e: any) => {
-    const point = paperProject.view.getEventPoint(e);
-    const hitRestlt = paperProject.hitTestAll(point);
-    if (hitRestlt && hitRestlt.length > 0) {
-      hitRestlt.forEach((result) => {
-        result.item.emit('mousedown', e);
-      });
-    }
-  }
-
-  const handleMouseUp = (e: any) => {
-    const point = paperProject.view.getEventPoint(e);
-    const hitRestlt = paperProject.hitTestAll(point);
-    if (hitRestlt && hitRestlt.length > 0) {
-      hitRestlt.forEach((result) => {
-        result.item.emit('mouseup', e);
-      });
-    }
-  }
-
-  const handleClick = (e: any) => {
-    const point = paperProject.view.getEventPoint(e);
-    const hitRestlt = paperProject.hitTestAll(point);
-    if (hitRestlt && hitRestlt.length > 0) {
-      hitRestlt.forEach((result) => {
-        result.item.emit('click', e);
-      });
-    }
-  }
-
-  const handleDoubleClick = (e: any) => {
-    const point = paperProject.view.getEventPoint(e);
-    const hitRestlt = paperProject.hitTestAll(point);
-    if (hitRestlt && hitRestlt.length > 0) {
-      hitRestlt.forEach((result) => {
-        result.item.emit('doubleclick', e);
-      });
     }
   }
 
@@ -416,57 +348,52 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
   }, [layerItem.scroll.enabled, layerItem.scroll.overflow]);
 
   useEffect(() => {
-    if (rendered && paperScope === 'preview') {
-      setScrollWidth(scrollFrameBounds.width - layerItemBounds.width);
-      setScrollLeft(layerItem.scroll.scrollLeft);
-      setScrollHeight(scrollFrameBounds.height - layerItemBounds.height);
-      setScrollTop(layerItem.scroll.scrollTop);
-    }
     if (rendered) {
-      const { scrollMask, scrollBackground } = getPaperLayer();
-      scrollMask.bounds = scrollFrameBounds;
-      scrollBackground.bounds = scrollFrameBounds;
+      if (paperScope === 'preview') {
+        setScrollWidth(scrollFrameBounds.width - layerItemBounds.width);
+        setScrollLeft(layerItem.scroll.scrollLeft);
+        setScrollHeight(scrollFrameBounds.height - layerItemBounds.height);
+        setScrollTop(layerItem.scroll.scrollTop);
+        setScrollBounds(nestedScrollFrameBounds);
+      } else {
+        setScrollBounds(scrollFrameBounds);
+      }
     }
   }, [
     layerItem.frame.x, layerItem.frame.y, layerItem.frame.width, layerItem.frame.height,
     layerItem.scroll.frame.x, layerItem.scroll.frame.y, layerItem.scroll.frame.width,
     layerItem.scroll.frame.height, layerItem.scroll.enabled, layerItem.scroll.direction.horizontal,
-    layerItem.scroll.direction.vertical, layerItem.scroll.overflow, previewMatrix
+    layerItem.scroll.direction.vertical, layerItem.scroll.overflow, layerItem.scroll.scrollLeft,
+    layerItem.scroll.scrollTop, layerItem.scroll.scrollHeight, layerItem.scroll.scrollWidth,
+    layerItem.scope
   ]);
 
   useEffect(() => {
     if (rendered && paperScope === 'preview') {
-      const { groupLayers } = getPaperLayer();
-      groupLayers.bounds.left = scrollFrameBounds.left + scrollLeft;
+      setScrollBounds(nestedScrollFrameBounds);
     }
-  }, [scrollLeft, layerItem.scroll.scrollLeft]);
+  }, [nestedScrollLeft, nestedScrollTop]);
 
   useEffect(() => {
-    if (rendered && paperScope === 'preview') {
-      const { groupLayers } = getPaperLayer();
-      groupLayers.bounds.top = scrollFrameBounds.top + scrollTop;
-    }
-  }, [scrollTop, layerItem.scroll.scrollTop]);
-
-  useEffect(() => {
-    if (rendered && paperScope === 'preview' && props.wheelEvent) {
-      const point = paperProject.view.getEventPoint(props.wheelEvent);
-      const box = new paperPreview.Rectangle({
-        point: scrollFrameBounds.topLeft.add(
-          new paperPreview.Point(
-            props.scrollLeft ? props.scrollLeft : 0,
-            props.scrollTop ? props.scrollTop : 0
-          )
-        ),
-        size: scrollFrameBounds.size
-      })
-      if (point.isInside(box) && handleWheel(props.wheelEvent)) {
-        setWheelEvent(null);
-      } else {
-        setWheelEvent(props.wheelEvent);
+    if (rendered) {
+      const { scrollMask, scrollBackground, groupLayers } = getPaperLayer();
+      scrollMask.bounds = scrollBounds;
+      scrollBackground.bounds = scrollBounds;
+      if (paperScope === 'preview') {
+        groupLayers.bounds.left = scrollBounds.left + scrollLeft;
+        groupLayers.bounds.top = scrollBounds.top + scrollTop;
       }
     }
-  }, [props.wheelEvent]);
+  }, [scrollBounds, scrollLeft, scrollTop]);
+
+  useEffect(() => {
+    if (rendered && paperScope === 'preview' && wheelEvent) {
+      const point = paperProject.view.getEventPoint(wheelEvent);
+      if (point.isInside(scrollBounds)) {
+        handleWheel(wheelEvent);
+      }
+    }
+  }, [wheelEvent]);
 
   ///////////////////////////////////////////////////////
   // CHILDREN & EVENTS
@@ -476,41 +403,6 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
     rendered && layerItem && layerItem.children.length > 0
     ? <>
         {
-          layerItem.scroll.enabled && paperScope === 'preview'
-          ? <div
-              ref={scrollContainer}
-              style={{
-                position: 'absolute',
-                transformOrigin: 'left top',
-                background: debug ? `rgba(0, 255, 255, 0.25)` : 'none',
-                width: scrollFrameBounds.width,
-                height: scrollFrameBounds.height,
-                ...(() => {
-                  const viewPos = paperPreview.view.projectToView(scrollFrameBounds.topLeft.add(
-                    new paperPreview.Point(
-                      props.scrollLeft ? props.scrollLeft : 0,
-                      props.scrollTop ? props.scrollTop : 0
-                    )
-                  ));
-                  return {
-                    left: viewPos.x,
-                    top: viewPos.y
-                  }
-                })()
-              }}
-              // onWheel={handleWheel}
-              // onMouseMove={handleMouseMove}
-              // onMouseDown={handleMouseDown}
-              // onMouseUp={handleMouseUp}
-              // onMouseEnter={handleMouseEnter}
-              // onMouseLeave={handleMouseLeave}
-              // onClick={handleClick}
-              // onDoubleClick={handleDoubleClick}
-              // onContextMenu={handleClick}
-              />
-          : null
-        }
-        {
           layerItem.children.map((childId) => (
             <CanvasLayer
               key={childId}
@@ -518,8 +410,8 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
               paperScope={paperScope}
               eventTimelines={eventTimelines}
               wheelEvent={wheelEvent}
-              scrollLeft={(props.scrollLeft ? props.scrollLeft + scrollLeft : scrollLeft) - layerItem.scroll.scrollLeft}
-              scrollTop={(props.scrollTop ? props.scrollTop + scrollTop : scrollTop) - layerItem.scroll.scrollTop} />
+              nestedScrollLeft={(nestedScrollLeft + scrollLeft) - layerItem.scroll.scrollLeft}
+              nestedScrollTop={(nestedScrollTop + scrollTop) - layerItem.scroll.scrollTop} />
           ))
         }
       </>

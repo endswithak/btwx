@@ -9,12 +9,12 @@ interface CanvasPreviewEventLayerTimelineProps {
   eventId: string;
   layerTimeline: GSAPTimeline;
   eventTimeline: GSAPTimeline;
-  scrollLeft: number;
-  scrollTop: number;
+  nestedScrollLeft?: number;
+  nestedScrollTop?: number;
 }
 
 const CanvasPreviewEventLayerTimeline = (props: CanvasPreviewEventLayerTimelineProps): ReactElement => {
-  const { id, eventId, layerTimeline, eventTimeline, scrollLeft, scrollTop } = props;
+  const { id, eventId, layerTimeline, eventTimeline, nestedScrollLeft, nestedScrollTop } = props;
   const eventItem = useSelector((state: RootState) => state.layer.present.events.byId[eventId]);
   const currentEventListener = useSelector((state: RootState) => eventItem ? eventItem.listener : null);
   const currentEventLayer = useSelector((state: RootState) => eventItem ? eventItem.layer : null);
@@ -51,8 +51,8 @@ const CanvasPreviewEventLayerTimeline = (props: CanvasPreviewEventLayerTimelineP
               tweenId={tweenId}
               layerTimeline={layerTimeline}
               eventTimeline={eventTimeline}
-              scrollLeft={scrollLeft}
-              scrollTop={scrollTop} />
+              nestedScrollLeft={nestedScrollLeft}
+              nestedScrollTop={nestedScrollTop} />
           ))
         }
       </>

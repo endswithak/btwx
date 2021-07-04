@@ -61,9 +61,7 @@ const PreviewCanvas = (): ReactElement => {
               key={id}
               id={id}
               paperScope='preview'
-              wheelEvent={wheelEvent}
-              scrollLeft={0}
-              scrollTop={0} />
+              wheelEvent={wheelEvent} />
           ))
         : null
       }

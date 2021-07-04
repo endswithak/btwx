@@ -14,13 +14,11 @@ import CanvasPreviewEventLayerTimeline from './CanvasPreviewEventLayerTimeline';
 interface CanvasArtboardLayerProps {
   id: string;
   paperScope: Btwx.PaperScope;
-  scrollLeft?: number;
-  scrollTop?: number;
   wheelEvent?: any;
 }
 
 const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
-  const { id, paperScope, scrollLeft, scrollTop, wheelEvent } = props;
+  const { id, paperScope, wheelEvent } = props;
   const allEventTweenLayers = useSelector((state: RootState) => paperScope === 'preview' ? getAllEventOriginTweenLayers(state, id) : null);
   const artboardItems = useSelector((state: RootState) => getAllArtboardItems(state));
   const electronInstanceId = useSelector((state: RootState) => state.session.instance);
@@ -365,9 +363,7 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
                   id={childId}
                   paperScope={paperScope}
                   eventTimelines={eventTimelines}
-                  wheelEvent={wheelEvent}
-                  scrollLeft={scrollLeft}
-                  scrollTop={scrollTop} />
+                  wheelEvent={wheelEvent} />
               ))
             : null
           }
@@ -378,8 +374,6 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
                   key={eventId}
                   id={id}
                   eventId={eventId}
-                  scrollLeft={scrollLeft}
-                  scrollTop={scrollTop}
                   layerTimeline={layerTimelines[eventId]}
                   eventTimeline={eventTimelines[eventId]} />
               ))

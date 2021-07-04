@@ -14,8 +14,8 @@ interface CanvasLayerProps {
   eventTimelines?: {
     [id: string]: GSAPTimeline;
   };
-  scrollLeft?: number;
-  scrollTop?: number;
+  nestedScrollLeft?: number;
+  nestedScrollTop?: number;
   wheelEvent?: any;
 }
 

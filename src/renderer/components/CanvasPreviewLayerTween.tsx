@@ -22,8 +22,8 @@ interface CanvasPreviewLayerTweenProps {
   tweenId: string;
   layerTimeline: GSAPTimeline;
   eventTimeline: GSAPTimeline;
-  scrollLeft: number;
-  scrollTop: number;
+  nestedScrollLeft?: number;
+  nestedScrollTop?: number;
 }
 
 export interface EventLayerTimelineData {
@@ -40,7 +40,7 @@ export interface EventLayerTimelineData {
 }
 
 const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElement => {
-  const { layerTimeline, tweenId, eventTimeline, scrollLeft, scrollTop } = props;
+  const { layerTimeline, tweenId, eventTimeline, nestedScrollLeft = 0, nestedScrollTop = 0 } = props;
   // const electronInstanceId = useSelector((state: RootState) => state.session.instance);
   const isPreviewOpen = useSelector((state: RootState) => state.preview.isOpen);
   const edit = useSelector((state: RootState) => state.layer.present.edit);
@@ -201,8 +201,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   }
 
   const getProps = (prev?: boolean): TweenProps => {
-    const x = originLayerItem && getProp('x', (originLayerItem.frame.x + originArtboardItem.frame.x) + scrollLeft, prev);
-    const y = originLayerItem && getProp('y', (originLayerItem.frame.y + originArtboardItem.frame.y) + scrollTop, prev);
+    const x = originLayerItem && getProp('x', (originLayerItem.frame.x + originArtboardItem.frame.x) + nestedScrollLeft, prev);
+    const y = originLayerItem && getProp('y', (originLayerItem.frame.y + originArtboardItem.frame.y) + nestedScrollTop, prev);
     const width = originLayerItem && getProp('width', originLayerItem.frame.innerWidth, prev);
     const height = originLayerItem && getProp('height', originLayerItem.frame.innerHeight, prev);
     const boundingWidth = originLayerItem && getProp('boundingWidth', originLayerItem.frame.width, prev);
@@ -936,8 +936,8 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   };
 
   const addXTween = (): void => {
-    // console.log((originLayerItem.frame.x + originArtboardItem.frame.x) + scrollLeft);
-    eventLayerTimeline.data.props[tween.prop] = (originLayerItem.frame.x + originArtboardItem.frame.x) + scrollLeft;
+    // console.log((originLayerItem.frame.x + originArtboardItem.frame.x) + nestedScrollLeft);
+    eventLayerTimeline.data.props[tween.prop] = (originLayerItem.frame.x + originArtboardItem.frame.x) + nestedScrollLeft;
     eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
@@ -945,14 +945,14 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: `+=${tween.ease === 'customWiggle'
         ? tween.customWiggle.strength
-        : destinationLayerItem.frame.x - (originLayerItem.frame.x + scrollLeft)}`,
+        : destinationLayerItem.frame.x - (originLayerItem.frame.x + nestedScrollLeft)}`,
       ease: getEaseString(tween),
     }, tween.delay);
   };
 
   const addYTween = (): void => {
-    // console.log((originLayerItem.frame.x + originArtboardItem.frame.x) + scrollTop);
-    eventLayerTimeline.data.props[tween.prop] = (originLayerItem.frame.y + originArtboardItem.frame.y) + scrollTop;
+    // console.log((originLayerItem.frame.x + originArtboardItem.frame.x) + nestedScrollTop);
+    eventLayerTimeline.data.props[tween.prop] = (originLayerItem.frame.y + originArtboardItem.frame.y) + nestedScrollTop;
     eventLayerTimeline.to(eventLayerTimeline.data.props, {
       id: tweenId,
       duration: tween.duration,
@@ -960,7 +960,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
       yoyo: tween.yoyo,
       [tween.prop]: `+=${tween.ease === 'customWiggle'
         ? tween.customWiggle.strength
-        : destinationLayerItem.frame.y - (originLayerItem.frame.y + scrollTop)}`,
+        : destinationLayerItem.frame.y - (originLayerItem.frame.y + nestedScrollTop)}`,
       ease: getEaseString(tween),
     }, tween.delay);
   };
@@ -1947,7 +1947,7 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
         }, {});
       }
     }
-  }, [tween, eventLayerTimeline, scrollLeft, scrollTop]);
+  }, [tween, eventLayerTimeline, nestedScrollLeft, nestedScrollTop]);
 
   useEffect(() => {
     setEventLayerTimeline(layerTimeline);
