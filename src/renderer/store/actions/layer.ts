@@ -2664,7 +2664,11 @@ export const setLayersRotationThunk = (payload: SetLayersRotationPayload) => {
     let fillGradientDestination: { [id: string]: Btwx.Point; } = {};
     let strokeGradientOrigin: { [id: string]: Btwx.Point; } = {};
     let strokeGradientDestination: { [id: string]: Btwx.Point; } = {};
-    payload.layers.forEach((id) => {
+    const rotatedLayers = payload.layers.reduce((result, current) => ([
+      ...result,
+      ...getLayerAndDescendants(state.layer.present, current, false)
+    ]), []);
+    const handleLayer = (id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
@@ -2758,10 +2762,14 @@ export const setLayersRotationThunk = (payload: SetLayersRotationPayload) => {
           height: clone.bounds.height
         }
       }
+    }
+    rotatedLayers.forEach((id) => {
+      handleLayer(id);
     });
     dispatch(
       setLayersRotation({
         ...payload,
+        layers: rotatedLayers,
         bounds,
         pathData,
         shapeIcon,
