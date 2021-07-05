@@ -412,6 +412,11 @@ export const SET_GROUP_SCROLL_OVERFLOW = 'SET_GROUP_SCROLL_OVERFLOW';
 export const SET_GROUPS_SCROLL_OVERFLOW = 'SET_GROUPS_SCROLL_OVERFLOW';
 export const SET_GROUP_SCROLL_FRAME = 'SET_GROUP_SCROLL_FRAME';
 
+export const ENABLE_GROUP_GROUP_EVENT_TWEENS = 'ENABLE_GROUP_GROUP_EVENT_TWEENS';
+export const ENABLE_GROUPS_GROUP_EVENT_TWEENS = 'ENABLE_GROUPS_GROUP_EVENT_TWEENS';
+export const DISABLE_GROUP_GROUP_EVENT_TWEENS = 'DISABLE_GROUP_GROUP_EVENT_TWEENS';
+export const DISABLE_GROUPS_GROUP_EVENT_TWEENS = 'DISABLE_GROUPS_GROUP_EVENT_TWEENS';
+
 // Artboard
 
 export type AddArtboardPayload = {
@@ -4394,6 +4399,48 @@ export interface SetGroupScrollFrame {
   payload: SetGroupScrollFramePayload;
 }
 
+//
+
+export interface EnableGroupGroupEventTweensPayload {
+  id: string;
+}
+
+export interface EnableGroupGroupEventTweens {
+  type: typeof ENABLE_GROUP_GROUP_EVENT_TWEENS;
+  payload: EnableGroupGroupEventTweensPayload;
+}
+
+export interface EnableGroupsGroupEventTweensPayload {
+  layers: string[];
+}
+
+export interface EnableGroupsGroupEventTweens {
+  type: typeof ENABLE_GROUPS_GROUP_EVENT_TWEENS;
+  payload: EnableGroupsGroupEventTweensPayload;
+}
+
+//
+
+export interface DisableGroupGroupEventTweensPayload {
+  id: string;
+}
+
+export interface DisableGroupGroupEventTweens {
+  type: typeof DISABLE_GROUP_GROUP_EVENT_TWEENS;
+  payload: DisableGroupGroupEventTweensPayload;
+}
+
+export interface DisableGroupsGroupEventTweensPayload {
+  layers: string[];
+}
+
+export interface DisableGroupsGroupEventTweens {
+  type: typeof DISABLE_GROUPS_GROUP_EVENT_TWEENS;
+  payload: DisableGroupsGroupEventTweensPayload;
+}
+
+//
+
 export type LayerTypes = AddArtboard |
                          AddGroup |
                          AddShape |
@@ -4751,4 +4798,8 @@ export type LayerTypes = AddArtboard |
                          DisableGroupsVerticalScroll |
                          SetGroupScrollOverflow |
                          SetGroupsScrollOverflow |
-                         SetGroupScrollFrame;
+                         SetGroupScrollFrame |
+                         EnableGroupGroupEventTweens |
+                         EnableGroupsGroupEventTweens |
+                         DisableGroupGroupEventTweens |
+                         DisableGroupsGroupEventTweens;

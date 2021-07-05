@@ -81,7 +81,8 @@ import {
   SetLayersFill, SetLayerShadow, SetLayersShadow, EnableGroupScroll, EnableGroupsScroll, DisableGroupScroll,
   DisableGroupsScroll, EnableGroupHorizontalScroll, EnableGroupsHorizontalScroll, DisableGroupHorizontalScroll,
   DisableGroupsHorizontalScroll, EnableGroupVerticalScroll, EnableGroupsVerticalScroll, DisableGroupVerticalScroll,
-  DisableGroupsVerticalScroll, SetGroupScrollOverflow, SetGroupsScrollOverflow, SetGroupScrollFrame
+  DisableGroupsVerticalScroll, SetGroupScrollOverflow, SetGroupsScrollOverflow, SetGroupScrollFrame,
+  EnableGroupGroupEventTweens, EnableGroupsGroupEventTweens, DisableGroupGroupEventTweens, DisableGroupsGroupEventTweens,
 } from '../actionTypes/layer';
 
 import {
@@ -12286,6 +12287,76 @@ export const setGroupScrollFrame = (state: LayerState, action: SetGroupScrollFra
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Group Scroll Frame',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+//
+
+export const enableGroupGroupEventTweens = (state: LayerState, action: EnableGroupGroupEventTweens): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        groupEventTweens: true
+      } as Btwx.Group
+    }
+  }
+  return currentState;
+};
+
+export const enableGroupsGroupEventTweens = (state: LayerState, action: EnableGroupsGroupEventTweens): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current, index) => {
+    return enableGroupGroupEventTweens(result, layerActions.enableGroupGroupEventTweens({
+      id: current
+    }) as EnableGroupGroupEventTweens);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Enable Groups Group Event Tweens',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+//
+
+export const disableGroupGroupEventTweens = (state: LayerState, action: DisableGroupGroupEventTweens): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        groupEventTweens: false
+      } as Btwx.Group
+    }
+  }
+  return currentState;
+};
+
+export const disableGroupsGroupEventTweens = (state: LayerState, action: DisableGroupsGroupEventTweens): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current, index) => {
+    return disableGroupGroupEventTweens(result, layerActions.disableGroupGroupEventTweens({
+      id: current
+    }) as DisableGroupGroupEventTweens);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Disable Groups Group Event Tweens',
       undoable: true
     }
   }) as SetLayerEdit);

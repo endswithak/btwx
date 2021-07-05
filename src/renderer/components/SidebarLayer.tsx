@@ -11,6 +11,8 @@ import SidebarLayerTitle from './SidebarLayerTitle';
 import SidebarLayerChevron from './SidebarLayerChevron';
 import SidebarLayerIcon from './SidebarLayerIcon';
 import SidebarLayerMaskedIcon from './SidebarLayerMaskedIcon';
+import SidebarLayerActiveArtboardIndicator from './SidebarLayerActiveArtboardIndicator';
+import SidebarLayerGroupEventTweensButton from './SidebarLayerGroupEventTweensButton';
 import ListItem from './ListItem';
 
 interface SidebarLayerProps {
@@ -33,10 +35,11 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   const draggingShadow = useSelector((state: RootState) => state.rightSidebar.draggingShadow);
   const isSelected = useSelector((state: RootState) => state.layer.present.byId[id] ? state.layer.present.byId[id].selected : null);
   const isEditing = useSelector((state: RootState) => state.leftSidebar.editing === id);
-  const isArtboard = useSelector((state: RootState) => state.layer.present.byId[id] ? state.layer.present.byId[id].type === 'Artboard' && !isDragGhost : false);
-  const isActiveArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard === id);
+  const isArtboard = useSelector((state: RootState) => state.layer.present.byId[id] ? state.layer.present.byId[id].type === 'Artboard' : false);
+  const isGroup = useSelector((state: RootState) => state.layer.present.byId[id] ? state.layer.present.byId[id].type === 'Group' : false);
   const isHover = useSelector((state: RootState) => id === state.layer.present.hover);
-  const hasChildren = useSelector((state: RootState) => sticky && isArtboard ? state.layer.present.byId[id] ? state.layer.present.byId[id].children.length > 0 : null : null);
+  const groupedEventTweens = useSelector((state: RootState) => isGroup && (state.layer.present.byId[id] as Btwx.Group).groupEventTweens);
+  const hasChildren = useSelector((state: RootState) => (isArtboard || isGroup) && state.layer.present.byId[id].children.length > 0);
   // const hover = useSelector((state: RootState) => state.layer.present.hover);
   // const underlyingMask = useSelector((state: RootState) => state.layer.present.byId[id].type !== 'Artboard' ? (state.layer.present.byId[id] as Btwx.MaskableLayer).underlyingMask : null);
   const editing = useSelector((state: RootState) => state.leftSidebar.editing);
@@ -199,23 +202,25 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
       <SidebarLayerTitle
         id={id}
         isDragGhost={isDragGhost} />
+      {/* {
+        isArtboard
+        ? <SidebarLayerActiveArtboardIndicator
+            id={id}
+            isDragGhost={isDragGhost} />
+        : null
+      } */}
+      {
+        isGroup
+        ? <SidebarLayerGroupEventTweensButton
+            id={id}
+            isDragGhost={isDragGhost} />
+        : null
+      }
       {
         draggable
         ? <SidebarLayerDropzoneWrap
             layer={id}
             isDragGhost={isDragGhost} />
-        : null
-      }
-      {
-        isActiveArtboard && !isDragGhost
-        ? <ListItem.Right>
-            <div
-              className={`c-sidebar-layer__icon c-sidebar-layer__icon--aa${
-                isSelected
-                ? `${' '}c-sidebar-layer__icon--aa-selected`
-                : ''
-              }`} />
-          </ListItem.Right>
         : null
       }
     </ListItem>

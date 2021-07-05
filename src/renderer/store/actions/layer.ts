@@ -391,6 +391,14 @@ import {
   SET_GROUP_SCROLL_OVERFLOW,
   SET_GROUPS_SCROLL_OVERFLOW,
   SET_GROUP_SCROLL_FRAME,
+  ENABLE_GROUP_GROUP_EVENT_TWEENS,
+  ENABLE_GROUPS_GROUP_EVENT_TWEENS,
+  DISABLE_GROUP_GROUP_EVENT_TWEENS,
+  DISABLE_GROUPS_GROUP_EVENT_TWEENS,
+  EnableGroupGroupEventTweensPayload,
+  EnableGroupsGroupEventTweensPayload,
+  DisableGroupGroupEventTweensPayload,
+  DisableGroupsGroupEventTweensPayload,
   EnableGroupScrollPayload,
   EnableGroupsScrollPayload,
   DisableGroupScrollPayload,
@@ -824,6 +832,7 @@ export const addGroupThunk = (payload: AddGroupPayload) => {
     const scope = [...parentItem.scope, parent];
     const artboard = scope[1];
     const artboardItem = state.layer.present.byId[artboard] as Btwx.Artboard;
+    const groupTweens = Object.prototype.hasOwnProperty.call(payload.layer, 'groupTweens') ? payload.layer.groupTweens : false;
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
@@ -839,6 +848,7 @@ export const addGroupThunk = (payload: AddGroupPayload) => {
       scope: scope,
       frame: frame,
       scroll: DEFAULT_SCROLL,
+      groupTweens: groupTweens,
       underlyingMask: underlyingMask,
       ignoreUnderlyingMask: ignoreUnderlyingMask,
       masked: masked,
@@ -2664,11 +2674,7 @@ export const setLayersRotationThunk = (payload: SetLayersRotationPayload) => {
     let fillGradientDestination: { [id: string]: Btwx.Point; } = {};
     let strokeGradientOrigin: { [id: string]: Btwx.Point; } = {};
     let strokeGradientDestination: { [id: string]: Btwx.Point; } = {};
-    const rotatedLayers = payload.layers.reduce((result, current) => ([
-      ...result,
-      ...getLayerAndDescendants(state.layer.present, current, false)
-    ]), []);
-    const handleLayer = (id) => {
+    payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
@@ -2762,14 +2768,10 @@ export const setLayersRotationThunk = (payload: SetLayersRotationPayload) => {
           height: clone.bounds.height
         }
       }
-    }
-    rotatedLayers.forEach((id) => {
-      handleLayer(id);
     });
     dispatch(
       setLayersRotation({
         ...payload,
-        layers: rotatedLayers,
         bounds,
         pathData,
         shapeIcon,
@@ -8443,5 +8445,27 @@ export const setGroupsScrollOverflow = (payload: SetGroupsScrollOverflowPayload)
 
 export const setGroupScrollFrame = (payload: SetGroupScrollFramePayload): LayerTypes => ({
   type: SET_GROUP_SCROLL_FRAME,
+  payload
+});
+
+//
+
+export const enableGroupGroupEventTweens = (payload: EnableGroupGroupEventTweensPayload): LayerTypes => ({
+  type: ENABLE_GROUP_GROUP_EVENT_TWEENS,
+  payload
+});
+
+export const enableGroupsGroupEventTweens = (payload: EnableGroupsGroupEventTweensPayload): LayerTypes => ({
+  type: ENABLE_GROUPS_GROUP_EVENT_TWEENS,
+  payload
+});
+
+export const disableGroupGroupEventTweens = (payload: DisableGroupGroupEventTweensPayload): LayerTypes => ({
+  type: DISABLE_GROUP_GROUP_EVENT_TWEENS,
+  payload
+});
+
+export const disableGroupsGroupEventTweens = (payload: DisableGroupsGroupEventTweensPayload): LayerTypes => ({
+  type: DISABLE_GROUPS_GROUP_EVENT_TWEENS,
   payload
 });

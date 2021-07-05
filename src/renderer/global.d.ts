@@ -424,6 +424,7 @@ declare namespace Btwx {
 
   interface Group extends MaskableLayer {
     type: 'Group';
+    groupEventTweens: boolean;
     scroll: GroupScroll;
   }
 
@@ -565,6 +566,8 @@ declare namespace Btwx {
 
   interface Tween {
     id: string;
+    // group: boolean;
+    siblings: string[];
     prop: TweenProp;
     layer: string;
     destinationLayer: string;

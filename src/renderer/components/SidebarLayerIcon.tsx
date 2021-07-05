@@ -11,6 +11,7 @@ interface SidebarLayerIconProps {
 
 const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
   const { id, isDragGhost } = props;
+  const isActiveArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard === id);
   const type = useSelector((state: RootState) => state.layer.present.byId[id] ? state.layer.present.byId[id].type : null);
   const isSelected = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id].selected);
   const isMask = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id].type === 'Shape' && (state.layer.present.byId[id] as Btwx.Shape).mask);
@@ -43,7 +44,9 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
           ? null
           : selected && !isDragGhost
             ? 'base-on-primary'
-            : 'lighter'
+            : isActiveArtboard
+              ? 'primary'
+              : 'lighter'
         }
         outline={isOpenShape || isMask} />
     </div>

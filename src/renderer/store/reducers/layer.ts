@@ -351,6 +351,10 @@ import {
   SET_GROUP_SCROLL_OVERFLOW,
   SET_GROUPS_SCROLL_OVERFLOW,
   SET_GROUP_SCROLL_FRAME,
+  ENABLE_GROUP_GROUP_EVENT_TWEENS,
+  ENABLE_GROUPS_GROUP_EVENT_TWEENS,
+  DISABLE_GROUP_GROUP_EVENT_TWEENS,
+  DISABLE_GROUPS_GROUP_EVENT_TWEENS,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -704,7 +708,11 @@ import {
   disableGroupsVerticalScroll,
   setGroupScrollOverflow,
   setGroupsScrollOverflow,
-  setGroupScrollFrame
+  setGroupScrollFrame,
+  enableGroupGroupEventTweens,
+  enableGroupsGroupEventTweens,
+  disableGroupGroupEventTweens,
+  disableGroupsGroupEventTweens,
 } from '../utils/layer';
 
 export interface LayerState {
@@ -1509,6 +1517,14 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setGroupsScrollOverflow(state, action);
     case SET_GROUP_SCROLL_FRAME:
       return setGroupScrollFrame(state, action);
+    case ENABLE_GROUP_GROUP_EVENT_TWEENS:
+      return enableGroupGroupEventTweens(state, action);
+    case ENABLE_GROUPS_GROUP_EVENT_TWEENS:
+      return enableGroupsGroupEventTweens(state, action);
+    case DISABLE_GROUP_GROUP_EVENT_TWEENS:
+      return disableGroupGroupEventTweens(state, action);
+    case DISABLE_GROUPS_GROUP_EVENT_TWEENS:
+      return disableGroupsGroupEventTweens(state, action);
     case HYDRATE_LAYERS:
       return {
         ...state,
@@ -1819,6 +1835,10 @@ export default undoable(baseReducer, {
       SET_GROUP_SCROLL_OVERFLOW,
       SET_GROUPS_SCROLL_OVERFLOW,
       SET_GROUP_SCROLL_FRAME,
+      ENABLE_GROUP_GROUP_EVENT_TWEENS,
+      ENABLE_GROUPS_GROUP_EVENT_TWEENS,
+      DISABLE_GROUP_GROUP_EVENT_TWEENS,
+      DISABLE_GROUPS_GROUP_EVENT_TWEENS,
     ].includes(action.type) && !action.payload.batch;
   }
 });
