@@ -13,12 +13,14 @@ interface CanvasImageLayerProps {
   eventTimelines?: {
     [id: string]: GSAPTimeline;
   }
+  nestedScrollLeft?: number;
+  nestedScrollTop?: number;
 }
 
 const debug = false;
 
 const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
-  const { id, paperScope, eventTimelines } = props;
+  const { id, paperScope, eventTimelines, nestedScrollLeft, nestedScrollTop } = props;
   const layerItem: Btwx.Image = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Image);
   const parentItem: Btwx.Artboard | Btwx.Group = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.parent] as Btwx.Artboard | Btwx.Group : null);
   const artboardItem: Btwx.Artboard = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null);
@@ -503,7 +505,9 @@ const CanvasImageLayer = (props: CanvasImageLayerProps): ReactElement => {
                 id={id}
                 eventId={eventId}
                 layerTimeline={layerTimelines[eventId]}
-                eventTimeline={eventTimelines[eventId]} />
+                eventTimeline={eventTimelines[eventId]}
+                nestedScrollLeft={nestedScrollLeft}
+                nestedScrollTop={nestedScrollTop} />
             ))
           }
         </>

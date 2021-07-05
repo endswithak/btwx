@@ -17,6 +17,8 @@ interface CanvasTextLayerProps {
   eventTimelines?: {
     [id: string]: GSAPTimeline;
   }
+  nestedScrollLeft?: number;
+  nestedScrollTop?: number;
 }
 
 interface GetAutoLineHeight {
@@ -158,7 +160,7 @@ export const getTextWidth = ({font, text, letterSpacing, textTransform, preview}
 const debug = false;
 
 const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
-  const { id, paperScope, eventTimelines } = props;
+  const { id, paperScope, eventTimelines, nestedScrollLeft, nestedScrollTop } = props;
   const layerItem: Btwx.Text = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Text);
   const parentItem: Btwx.Artboard | Btwx.Group = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.parent] as Btwx.Artboard | Btwx.Group : null);
   const artboardItem: Btwx.Artboard = useSelector((state: RootState) => layerItem ? state.layer.present.byId[layerItem.artboard] as Btwx.Artboard : null);
@@ -881,7 +883,9 @@ const CanvasTextLayer = (props: CanvasTextLayerProps): ReactElement => {
                 id={id}
                 eventId={eventId}
                 layerTimeline={layerTimelines[eventId]}
-                eventTimeline={eventTimelines[eventId]} />
+                eventTimeline={eventTimelines[eventId]}
+                nestedScrollLeft={nestedScrollLeft}
+                nestedScrollTop={nestedScrollTop} />
             ))
           }
         </>
