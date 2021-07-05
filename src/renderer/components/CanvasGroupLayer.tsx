@@ -35,6 +35,7 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
     ),
     size: scrollFrameBounds.size
   }) : null;
+  const isTweening = useSelector((state: RootState) => state.preview.tweening);
   // const scrollBounds = useSelector((state: RootState) => getLayerScrollBounds(state.layer.present, id, paperLayerScope));
   const layerIndex = parentItem.children.indexOf(layerItem.id);
   const underlyingMaskIndex = layerItem.underlyingMask ? parentItem.children.indexOf(layerItem.underlyingMask) : null;
@@ -367,6 +368,16 @@ const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
     layerItem.scroll.scrollTop, layerItem.scroll.scrollHeight, layerItem.scroll.scrollWidth,
     layerItem.scope
   ]);
+
+  useEffect(() => {
+    if (rendered && paperScope === 'preview' && !isTweening) {
+      setScrollWidth(scrollFrameBounds.width - layerItemBounds.width);
+      setScrollLeft(layerItem.scroll.scrollLeft);
+      setScrollHeight(scrollFrameBounds.height - layerItemBounds.height);
+      setScrollTop(layerItem.scroll.scrollTop);
+      setScrollBounds(nestedScrollFrameBounds);
+    }
+  }, [isTweening]);
 
   useEffect(() => {
     if (rendered && paperScope === 'preview') {
