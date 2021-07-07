@@ -2075,9 +2075,10 @@ export const getWiggleLayersSelector = createSelector(
     const originChildren = getLayerDescendants({byId: layersById} as any, event.origin);
     const destinationChildren = getLayerDescendants({byId: layersById} as any, event.destination);
     return originChildren.reduce((result, current) => {
+      const currentLayerItem = layersById[current];
       const destinationEquivalent = getDestinationEquivalent({byId: layersById} as any, current, destinationChildren);
-      if (destinationEquivalent && destinationEquivalent.type !== 'Group') {
-        const currentLayerItem = layersById[current];
+      const hasGroupedTweens = currentLayerItem.scope.some((id) => layersById[id].type === 'Group' && (layersById[id] as Btwx.Group).groupEventTweens);
+      if (destinationEquivalent && destinationEquivalent.type !== 'Group' && !hasGroupedTweens) {
         const equivalentLayerItem = layersById[destinationEquivalent.id];
         const equivalentTweenProps = getEquivalentTweenProps({byId: layersById}, currentLayerItem, equivalentLayerItem);
         result = {

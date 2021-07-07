@@ -45,11 +45,11 @@ const CanvasPreviewLayerTween = (props: CanvasPreviewLayerTweenProps): ReactElem
   const isPreviewOpen = useSelector((state: RootState) => state.preview.isOpen);
   const edit = useSelector((state: RootState) => state.layer.present.edit);
   const autoplay = useSelector((state: RootState) => state.preview.autoplay);
-  const tween = useSelector((state: RootState) => state.layer.present.tweens.byId[tweenId]);
+  const tween = useSelector((state: RootState) => state.layer.present.tweens.byId[tweenId] ? state.layer.present.tweens.byId[tweenId].group ? state.layer.present.tweens.byId[state.layer.present.tweens.byId[tweenId].group] : state.layer.present.tweens.byId[tweenId] : null );
   const event = useSelector((state: RootState) => tween ? state.layer.present.events.byId[tween.event] : null);
   // const eventDrawerEvent = useSelector((state: RootState) => state.eventDrawer.event);
-  const originLayerItem = useSelector((state: RootState) => tween ? state.layer.present.byId[tween.layer] : null);
-  const destinationLayerItem = useSelector((state: RootState) => tween ? state.layer.present.byId[tween.destinationLayer] : null);
+  const originLayerItem = useSelector((state: RootState) => state.layer.present.tweens.byId[tweenId] ? state.layer.present.byId[state.layer.present.tweens.byId[tweenId].layer] : null);
+  const destinationLayerItem = useSelector((state: RootState) => state.layer.present.tweens.byId[tweenId] ? state.layer.present.byId[state.layer.present.tweens.byId[tweenId].destinationLayer] : null);
   const originArtboardItem = useSelector((state: RootState) => event ? state.layer.present.byId[event.origin] as Btwx.Artboard : null);
   const destinationArtboardItem = useSelector((state: RootState) => event ? state.layer.present.byId[event.destination] as Btwx.Artboard : null);
   // const sessionImages = useSelector((state: RootState) => state.session.images.byId);

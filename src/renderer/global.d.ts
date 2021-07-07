@@ -94,7 +94,6 @@ declare namespace Btwx {
 
   type ColorFormat = 'rgb' | 'hsl';
 
-  // type TweenProp = 'image' | 'shape' | 'fill' | 'fillGradientOriginX' | 'fillGradientOriginY' | 'fillGradientDestinationX' | 'fillGradientDestinationY' | 'x' | 'y' | 'radius' | 'rotation' | 'width' | 'height' | 'stroke' | 'strokeGradientOriginX' | 'strokeGradientOriginY' | 'strokeGradientDestinationX' | 'strokeGradientDestinationY' | 'dashOffset' | 'dashArrayWidth' | 'dashArrayGap' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity' | 'fontSize' | 'lineHeight' | 'paragraph' | 'fontWeight' | 'letterSpacing' | 'oblique' | 'justification' | 'text' | 'fromX' | 'fromY' | 'toX' | 'toY' | 'pointX' | 'pointY' | 'blur';
   type TweenProp = 'shape' | 'fill' | 'fillGradientOriginX' | 'fillGradientOriginY' | 'fillGradientDestinationX' | 'fillGradientDestinationY' | 'x' | 'y' | 'rotation' | 'width' | 'height' | 'stroke' | 'strokeGradientOriginX' | 'strokeGradientOriginY' | 'strokeGradientDestinationX' | 'strokeGradientDestinationY' | 'dashOffset' | 'dashArrayWidth' | 'dashArrayGap' | 'strokeWidth' | 'shadowColor' | 'shadowOffsetX' | 'shadowOffsetY' | 'shadowBlur' | 'opacity' | 'fontSize' | 'lineHeight' | 'fontWeight' | 'letterSpacing' | 'text' | 'blur' | 'scaleX' | 'scaleY';
 
   type TweenPropMap = { [K in TweenProp]: boolean; }
@@ -369,7 +368,7 @@ declare namespace Btwx {
       asOrigin: string[];
       asDestination: string[];
       byProp: {
-        [prop: string]: string[];
+        [K in TweenProp]: string[];
       };
     };
     transform: Transform;
@@ -561,12 +560,15 @@ declare namespace Btwx {
       byLayer: {
         [id: string]: string[];
       };
+      byProp: {
+        [K in TweenProp]: string[];
+      }
     };
   }
 
   interface Tween {
     id: string;
-    // group: boolean;
+    group: string;
     siblings: string[];
     prop: TweenProp;
     layer: string;

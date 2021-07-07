@@ -1654,7 +1654,8 @@ export const addSelectedEventThunk = (listener: Btwx.EventType, destination: str
         layers: [],
         tweens: {
           allIds: [],
-          byLayer: {}
+          byLayer: {},
+          byProp: TWEEN_PROPS_MAP
         }
       });
     });

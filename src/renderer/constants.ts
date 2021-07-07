@@ -68,8 +68,7 @@ export const DEFAULT_CUSTOM_WIGGLE_TWEEN_TYPE = 'easeOut';
 export const DEFAULT_CUSTOM_WIGGLE_TWEEN_TYPES: Btwx.CustomWiggleTweenType[] = ['easeOut', 'easeInOut', 'anticipate', 'uniform', 'random'];
 
 // export const TWEEN_PROPS = ['image', 'shape', 'fill', 'fillGradientOriginX', 'fillGradientOriginY', 'fillGradientDestinationX', 'fillGradientDestinationY', 'x', 'y', 'radius', 'rotation', 'width', 'height', 'stroke', 'strokeGradientOriginX', 'strokeGradientOriginY', 'strokeGradientDestinationX', 'strokeGradientDestinationY', 'dashOffset', 'dashArrayWidth', 'dashArrayGap', 'strokeWidth', 'shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur', 'opacity', 'fontSize', 'lineHeight', 'fromX', 'fromY', 'toX', 'toY', 'blur'];
-export const TWEEN_PROPS_MAP: { [id: string]: string[] } = {
-  image: [],
+export const TWEEN_PROPS_MAP: { [K in Btwx.TweenProp]: string[] } = {
   shape: [],
   fill: [],
   fillGradientOriginX: [],
@@ -146,6 +145,7 @@ export const CUSTOM_WIGGLE_TWEEN_STRENGTH_MAP: { [id: string]: number | Btwx.Col
 }
 
 export const getDefaultTweenProps = (customWiggleProp: any = null) => ({
+  group: null,
   ease: DEFAULT_TWEEN_EASE,
   power: DEFAULT_TWEEN_POWER,
   duration: DEFAULT_TWEEN_DURATION,

@@ -29,7 +29,7 @@ const SidebarLayerGroupEventTweensButton = (props: SidebarLayerGroupEventTweensB
   }
 
   return (
-    !isDragGhost && groupEventTweens && !groupEventTweensAncestor
+    !isDragGhost && !groupEventTweensAncestor
     ? <ListItem.Right>
         <div
         className={`c-sidebar-layer__icon c-sidebar-layer__icon--chevron`}
@@ -41,8 +41,8 @@ const SidebarLayerGroupEventTweensButton = (props: SidebarLayerGroupEventTweensB
             size='small'
             checked={groupEventTweens}
             label={'Group Event Tweens'}
-            iconName='tweens'
-            activeIconName='tweens'
+            iconName='lock-tweens'
+            activeIconName='lock-tweens'
             variant={selected && groupEventTweens ? 'base-on-primary' : null} />
         </div>
       </ListItem.Right>

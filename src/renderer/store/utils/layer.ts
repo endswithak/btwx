@@ -2043,6 +2043,7 @@ export const addLayerEvent = (state: LayerState, action: AddLayerEvent): LayerSt
         }
       }
     }
+    // add event to event origin
     currentState = {
       ...currentState,
       byId: {
@@ -2050,7 +2051,14 @@ export const addLayerEvent = (state: LayerState, action: AddLayerEvent): LayerSt
         [action.payload.origin]: {
           ...currentState.byId[action.payload.origin],
           originForEvents: addItem((currentState.byId[action.payload.origin] as Btwx.Artboard).originForEvents, action.payload.id)
-        } as Btwx.Artboard,
+        } as Btwx.Artboard
+      }
+    }
+    // add event to event destination
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
         [action.payload.destination]: {
           ...currentState.byId[action.payload.destination],
           destinationForEvents: addItem((currentState.byId[action.payload.destination] as Btwx.Artboard).destinationForEvents, action.payload.id)
@@ -2322,7 +2330,21 @@ export const addTweenEventLayerTweens = (state: LayerState, eventId: string, lay
 
 export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerState => {
   let currentState = state;
-  if (!currentState.events.byId[action.payload.event].layers.includes(action.payload.layer)) {
+  const layerItem = currentState.byId[action.payload.layer];
+  const tweensGroup = layerItem.scope.find((id) => currentState.byId[id].type === 'Group' && (currentState.byId[id] as Btwx.Group).groupEventTweens);
+  if (layerItem.type === 'Group' && (layerItem as Btwx.Group).groupEventTweens) {
+    const groupDescendents = getLayerDescendants(currentState, action.payload.layer, false);
+    const eventItem = currentState.events.byId[action.payload.event];
+    const eventTweens = eventItem.tweens;
+    const groupLayersWithEventTweens = groupDescendents.filter((id) => {
+      return currentState.events.byId[action.payload.event].layers.includes(id);
+    });
+    const siblingTweens = action.payload.siblings ? action.payload.siblings : groupLayersWithEventTweens.reduce((r, c) => {
+      const layerItem = currentState.byId[c];
+      const tweensByProp = layerItem.tweens.byProp[action.payload.prop].filter((i) => eventTweens.byProp[action.payload.prop].includes(i));
+      r = [...r, ...tweensByProp];
+      return r;
+    }, []);
     currentState = {
       ...currentState,
       events: {
@@ -2331,12 +2353,48 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
           ...currentState.events.byId,
           [action.payload.event]: {
             ...currentState.events.byId[action.payload.event],
-            layers: addItem(currentState.events.byId[action.payload.event].layers, action.payload.layer)
+            layers: [
+              ...currentState.events.byId[action.payload.event].layers.filter((l) => !groupLayersWithEventTweens.includes(l) && l !== action.payload.layer),
+              action.payload.layer
+            ]
+          }
+        }
+      }
+    }
+    siblingTweens.forEach((tweenId) => {
+      currentState = {
+        ...currentState,
+        tweens: {
+          ...currentState.tweens,
+          byId: {
+            ...currentState.tweens.byId,
+            [tweenId]: {
+              ...currentState.tweens.byId[tweenId],
+              group: action.payload.id
+            }
+          }
+        }
+      }
+    });
+  } else {
+    // handle adding layer to event.layers
+    if (!currentState.events.byId[action.payload.event].layers.includes(action.payload.layer) && !tweensGroup) {
+      currentState = {
+        ...currentState,
+        events: {
+          ...currentState.events,
+          byId: {
+            ...currentState.events.byId,
+            [action.payload.event]: {
+              ...currentState.events.byId[action.payload.event],
+              layers: addItem(currentState.events.byId[action.payload.event].layers, action.payload.layer)
+            }
           }
         }
       }
     }
   }
+  // handle adding event.tweens.byLayer
   if (!currentState.events.byId[action.payload.event].tweens.byLayer[action.payload.layer]) {
     currentState = {
       ...currentState,
@@ -2378,6 +2436,27 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
       }
     }
   }
+  // handle adding event.tweens.byProp
+  currentState = {
+    ...currentState,
+    events: {
+      ...currentState.events,
+      byId: {
+        ...currentState.events.byId,
+        [action.payload.event]: {
+          ...currentState.events.byId[action.payload.event],
+          tweens: {
+            ...currentState.events.byId[action.payload.event].tweens,
+            byProp: {
+              ...currentState.events.byId[action.payload.event].tweens.byProp,
+              [action.payload.prop]: addItem(currentState.events.byId[action.payload.event].tweens.byProp[action.payload.prop], action.payload.id)
+            }
+          }
+        }
+      }
+    }
+  }
+  // handle adding tween to event.tweens.allIds
   currentState = {
     ...currentState,
     events: {
@@ -2392,7 +2471,11 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
           }
         }
       }
-    },
+    }
+  }
+  // handle adding tween to action.payload.layer
+  currentState = {
+    ...currentState,
     byId: {
       ...currentState.byId,
       [action.payload.layer]: {
@@ -2406,26 +2489,58 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
             [action.payload.prop]: addItem(currentState.byId[action.payload.layer].tweens.byProp[action.payload.prop], action.payload.id)
           }
         }
-      },
-      [action.payload.destinationLayer]: {
-        ...currentState.byId[action.payload.destinationLayer],
-        tweens: {
-          ...currentState.byId[action.payload.destinationLayer].tweens,
-          allIds: addItem(currentState.byId[action.payload.destinationLayer].tweens.allIds, action.payload.id),
-          asDestination: addItem(currentState.byId[action.payload.destinationLayer].tweens.asDestination, action.payload.id),
-          byProp: {
-            ...currentState.byId[action.payload.destinationLayer].tweens.byProp,
-            [action.payload.prop]: addItem(currentState.byId[action.payload.destinationLayer].tweens.byProp[action.payload.prop], action.payload.id)
+      }
+    }
+  }
+  // handle adding tween to action.payload.destinationLayer
+  if (action.payload.destinationLayer) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.destinationLayer]: {
+          ...currentState.byId[action.payload.destinationLayer],
+          tweens: {
+            ...currentState.byId[action.payload.destinationLayer].tweens,
+            allIds: addItem(currentState.byId[action.payload.destinationLayer].tweens.allIds, action.payload.id),
+            asDestination: addItem(currentState.byId[action.payload.destinationLayer].tweens.asDestination, action.payload.id),
+            byProp: {
+              ...currentState.byId[action.payload.destinationLayer].tweens.byProp,
+              [action.payload.prop]: addItem(currentState.byId[action.payload.destinationLayer].tweens.byProp[action.payload.prop], action.payload.id)
+            }
           }
         }
       }
-    },
+    }
+  }
+  if (tweensGroup) {
+    currentState = {
+      ...currentState,
+      tweens: {
+        ...currentState.tweens,
+        allIds: addItem(currentState.tweens.allIds, action.payload.id),
+        byId: {
+          ...currentState.tweens.byId,
+          [tweensGroup]: {
+            ...currentState.tweens.byId[tweensGroup],
+            siblings: addItem(currentState.tweens.byId[tweensGroup].siblings, action.payload.id)
+          }
+        }
+      }
+    }
+  }
+  // handle adding tween to tweens
+  currentState = {
+    ...currentState,
     tweens: {
       ...currentState.tweens,
       allIds: addItem(currentState.tweens.allIds, action.payload.id),
       byId: {
         ...currentState.tweens.byId,
-        [action.payload.id]: action.payload as Btwx.Tween
+        [action.payload.id]: {
+          ...action.payload as Btwx.Tween,
+          group: tweensGroup
+        }
       }
     }
   }
@@ -2442,14 +2557,16 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
 
 export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): LayerState => {
   const tween = state.tweens.byId[action.payload.id];
+  const layerItem = state.byId[tween.layer];
   let currentState = state;
+  const onlyLayerTween = currentState.events.byId[tween.event].tweens.byLayer[tween.layer].length === 1;
   if (currentState.tweens.selected.allIds.includes(action.payload.id)) {
     currentState = deselectLayerEventTween(currentState, layerActions.deselectLayerEventTween({
       id: action.payload.id
     }) as DeselectLayerEventTween);
   }
-  const onlyLayerTween = currentState.events.byId[tween.event].tweens.byLayer[tween.layer].length === 1;
-  if (currentState.events.byId[tween.event].layers.includes(tween.layer) && onlyLayerTween) {
+  //
+  if (layerItem.type === 'Group' && (layerItem as Btwx.Group).groupEventTweens) {
     currentState = {
       ...currentState,
       events: {
@@ -2458,12 +2575,60 @@ export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): L
           ...currentState.events.byId,
           [tween.event]: {
             ...currentState.events.byId[tween.event],
-            layers: removeItem(currentState.events.byId[tween.event].layers, tween.layer)
+            layers: Object.keys(currentState.events.byId[tween.event].tweens.byLayer).filter((l) => l !== tween.layer)
+          }
+        }
+      }
+    }
+    tween.siblings.forEach((tweenId) => {
+      currentState = {
+        ...currentState,
+        tweens: {
+          ...currentState.tweens,
+          byId: {
+            ...currentState.tweens.byId,
+            [tweenId]: {
+              ...currentState.tweens.byId[tweenId],
+              group: null
+            }
+          }
+        }
+      }
+    });
+  } else {
+    // remove tween from event.layers
+    if (currentState.events.byId[tween.event].layers.includes(tween.layer) && onlyLayerTween) {
+      currentState = {
+        ...currentState,
+        events: {
+          ...currentState.events,
+          byId: {
+            ...currentState.events.byId,
+            [tween.event]: {
+              ...currentState.events.byId[tween.event],
+              layers: removeItem(currentState.events.byId[tween.event].layers, tween.layer)
+            }
           }
         }
       }
     }
   }
+  if (tween.group) {
+    currentState = {
+      ...currentState,
+      tweens: {
+        ...currentState.tweens,
+        byId: {
+          ...currentState.tweens.byId,
+          [tween.group]: {
+            ...currentState.tweens.byId[tween.group],
+            siblings: removeItem(currentState.tweens.byId[tween.group].siblings, action.payload.id)
+          }
+        }
+      }
+    }
+  }
+  // handle removing from event.tweens
   currentState = {
     ...currentState,
     events: {
@@ -2490,11 +2655,19 @@ export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): L
                 }
               }
               return result;
-            }, {})
+            }, {}),
+            byProp: {
+              ...currentState.events.byId[tween.event].tweens.byProp,
+              [tween.prop]: removeItem(currentState.events.byId[tween.event].tweens.byProp[tween.prop], action.payload.id)
+            }
           }
         }
       }
-    },
+    }
+  }
+  // handle removing from tween.layer
+  currentState = {
+    ...currentState,
     byId: {
       ...currentState.byId,
       [tween.layer]: {
@@ -2508,20 +2681,33 @@ export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): L
             [tween.prop]: removeItem(currentState.byId[tween.layer].tweens.byProp[tween.prop], action.payload.id)
           }
         }
-      },
-      [tween.destinationLayer]: {
-        ...currentState.byId[tween.destinationLayer],
-        tweens: {
-          ...currentState.byId[tween.destinationLayer].tweens,
-          allIds: removeItem(currentState.byId[tween.destinationLayer].tweens.allIds, action.payload.id),
-          asDestination: removeItem(currentState.byId[tween.destinationLayer].tweens.asDestination, action.payload.id),
-          byProp: {
-            ...currentState.byId[tween.destinationLayer].tweens.byProp,
-            [tween.prop]: removeItem(currentState.byId[tween.destinationLayer].tweens.byProp[tween.prop], action.payload.id)
+      }
+    }
+  }
+  // handle removing from tween.destinationLayer
+  if (tween.destinationLayer) {
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [tween.destinationLayer]: {
+          ...currentState.byId[tween.destinationLayer],
+          tweens: {
+            ...currentState.byId[tween.destinationLayer].tweens,
+            allIds: removeItem(currentState.byId[tween.destinationLayer].tweens.allIds, action.payload.id),
+            asDestination: removeItem(currentState.byId[tween.destinationLayer].tweens.asDestination, action.payload.id),
+            byProp: {
+              ...currentState.byId[tween.destinationLayer].tweens.byProp,
+              [tween.prop]: removeItem(currentState.byId[tween.destinationLayer].tweens.byProp[tween.prop], action.payload.id)
+            }
           }
         }
       }
-    },
+    }
+  }
+  // handle removing from tweens
+  currentState = {
+    ...currentState,
     tweens: {
       ...currentState.tweens,
       allIds: removeItem(currentState.tweens.allIds, action.payload.id),
@@ -2533,6 +2719,79 @@ export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): L
       }, {})
     }
   }
+  // currentState = {
+  //   ...currentState,
+  //   events: {
+  //     ...currentState.events,
+  //     byId: {
+  //       ...currentState.events.byId,
+  //       [tween.event]: {
+  //         ...currentState.events.byId[tween.event],
+  //         tweens: {
+  //           ...currentState.events.byId[tween.event].tweens,
+  //           allIds: removeItem(currentState.events.byId[tween.event].tweens.allIds, action.payload.id),
+  //           byLayer: Object.keys(currentState.events.byId[tween.event].tweens.byLayer).reduce((result, current) => {
+  //             if (tween.layer === current) {
+  //               if (!onlyLayerTween) {
+  //                 result = {
+  //                   ...result,
+  //                   [current]: removeItem(currentState.events.byId[tween.event].tweens.byLayer[current], action.payload.id)
+  //                 }
+  //               }
+  //             } else {
+  //               result = {
+  //                 ...result,
+  //                 [current]: currentState.events.byId[tween.event].tweens.byLayer[current]
+  //               }
+  //             }
+  //             return result;
+  //           }, {}),
+  //           byProp: {
+  //             ...currentState.events.byId[tween.event].tweens.byProp,
+  //             [tween.prop]: removeItem(currentState.events.byId[tween.event].tweens.byProp[tween.prop], action.payload.id)
+  //           }
+  //         }
+  //       }
+  //     }
+  //   },
+  //   byId: {
+  //     ...currentState.byId,
+  //     [tween.layer]: {
+  //       ...currentState.byId[tween.layer],
+  //       tweens: {
+  //         ...currentState.byId[tween.layer].tweens,
+  //         allIds: removeItem(currentState.byId[tween.layer].tweens.allIds, action.payload.id),
+  //         asOrigin: removeItem(currentState.byId[tween.layer].tweens.asOrigin, action.payload.id),
+  //         byProp: {
+  //           ...currentState.byId[tween.layer].tweens.byProp,
+  //           [tween.prop]: removeItem(currentState.byId[tween.layer].tweens.byProp[tween.prop], action.payload.id)
+  //         }
+  //       }
+  //     },
+  //     [tween.destinationLayer]: {
+  //       ...currentState.byId[tween.destinationLayer],
+  //       tweens: {
+  //         ...currentState.byId[tween.destinationLayer].tweens,
+  //         allIds: removeItem(currentState.byId[tween.destinationLayer].tweens.allIds, action.payload.id),
+  //         asDestination: removeItem(currentState.byId[tween.destinationLayer].tweens.asDestination, action.payload.id),
+  //         byProp: {
+  //           ...currentState.byId[tween.destinationLayer].tweens.byProp,
+  //           [tween.prop]: removeItem(currentState.byId[tween.destinationLayer].tweens.byProp[tween.prop], action.payload.id)
+  //         }
+  //       }
+  //     }
+  //   },
+  //   tweens: {
+  //     ...currentState.tweens,
+  //     allIds: removeItem(currentState.tweens.allIds, action.payload.id),
+  //     byId: Object.keys(currentState.tweens.byId).reduce((result: any, key) => {
+  //       if (key !== action.payload.id) {
+  //         result[key] = currentState.tweens.byId[key];
+  //       }
+  //       return result;
+  //     }, {})
+  //   }
+  // }
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
@@ -12297,6 +12556,10 @@ export const setGroupScrollFrame = (state: LayerState, action: SetGroupScrollFra
 
 export const enableGroupGroupEventTweens = (state: LayerState, action: EnableGroupGroupEventTweens): LayerState => {
   let currentState = state;
+  const layerItem = currentState.byId[action.payload.id];
+  const artboardItem = currentState.byId[layerItem.artboard] as Btwx.Artboard;
+  const artboardEvents = artboardItem.originForEvents;
+  const groupDescendents = getLayerDescendants(currentState, action.payload.id, false);
   currentState = {
     ...currentState,
     byId: {
@@ -12307,6 +12570,35 @@ export const enableGroupGroupEventTweens = (state: LayerState, action: EnableGro
       } as Btwx.Group
     }
   }
+  currentState = artboardEvents.reduce((result, current) => {
+    const eventItem = result.events.byId[current];
+    const eventTweens = eventItem.tweens;
+    const groupLayersWithEventTweens = groupDescendents.filter((id) => {
+      return result.events.byId[current].layers.includes(id);
+    });
+    Object.keys(TWEEN_PROPS_MAP).forEach((prop) => {
+      // get group event tweens by prop
+      const groupLayersWithEventPropTweens = groupLayersWithEventTweens.reduce((r, c) => {
+        const layerItem = result.byId[c];
+        const tweensByProp = layerItem.tweens.byProp[prop].filter((i) => eventTweens.byProp[prop].includes(i));
+        r = [...r, ...tweensByProp];
+        return r;
+      }, []);
+      if (groupLayersWithEventPropTweens.length > 0) {
+        // add group tween for prop
+        result = addLayerTween(result, layerActions.addLayerTween({
+          layer: action.payload.id,
+          destinationLayer: null,
+          siblings: groupLayersWithEventPropTweens,
+          prop: prop,
+          event: current,
+          ease: DEFAULT_TWEEN_EASE,
+          ...getDefaultTweenProps(prop) as any
+        }) as AddLayerTween);
+      }
+    });
+    return result;
+  }, currentState);
   return currentState;
 };
 
@@ -12332,6 +12624,19 @@ export const enableGroupsGroupEventTweens = (state: LayerState, action: EnableGr
 
 export const disableGroupGroupEventTweens = (state: LayerState, action: DisableGroupGroupEventTweens): LayerState => {
   let currentState = state;
+  const layerItem = currentState.byId[action.payload.id];
+  const artboardItem = currentState.byId[layerItem.artboard] as Btwx.Artboard;
+  const artboardEvents = artboardItem.originForEvents;
+  // const groupDescendents = getLayerDescendants(currentState, action.payload.id, false);
+  currentState = artboardEvents.reduce((result, current) => {
+    const eventItem = result.events.byId[current];
+    if (eventItem.layers.includes(action.payload.id)) {
+      eventItem.tweens.byLayer[action.payload.id].forEach((id) => {
+        result = removeLayerTween(result, layerActions.removeLayerTween({id}) as RemoveLayerTween);
+      });
+    }
+    return result;
+  }, currentState);
   currentState = {
     ...currentState,
     byId: {
