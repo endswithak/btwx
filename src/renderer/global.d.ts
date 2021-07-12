@@ -370,6 +370,9 @@ declare namespace Btwx {
       byProp: {
         [K in TweenProp]: string[];
       };
+      // byGroup: {
+      //   [id: string]: string;
+      // };
     };
     transform: Transform;
     style: Style;
@@ -420,6 +423,16 @@ declare namespace Btwx {
     scrollLeft: number;
     scrollTop: number;
   }
+
+  // interface GroupEventTweens {
+  //   enabled: boolean;
+  //   events: {
+  //     allIds: string[];
+  //     byProp: {
+  //       [K in TweenProp]: string[];
+  //     };
+  //   }
+  // }
 
   interface Group extends MaskableLayer {
     type: 'Group';
@@ -562,7 +575,7 @@ declare namespace Btwx {
       };
       byProp: {
         [K in TweenProp]: string[];
-      }
+      };
     };
   }
 

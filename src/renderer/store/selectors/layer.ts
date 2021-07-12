@@ -3452,6 +3452,87 @@ export const isScopeGroupLayer = (store: LayerState, id: string): boolean => {
   return expandableLayers.includes(id);
 };
 
+export const getTweensByProp = (store: LayerState, tweens: string[]): {
+  [K in Btwx.TweenProp]: string[];
+} => {
+  return tweens.reduce((result, current) => {
+    const tweenItem = store.tweens.byId[current];
+    return {
+      ...result,
+      [tweenItem.prop]: [...result[tweenItem.prop], current]
+    }
+  }, TWEEN_PROPS_MAP);
+};
+
+export const getTweensByPropFull = (store: LayerState, tweens: string[]): {
+  [K in Btwx.TweenProp]: string[];
+} => {
+  return tweens.reduce((result, current) => {
+    const tweenItem = store.tweens.byId[current];
+    return {
+      ...result,
+      [tweenItem.prop]: [...result[tweenItem.prop], tweenItem]
+    }
+  }, TWEEN_PROPS_MAP);
+};
+
+export const getOriginTweensByProp = (store: LayerState, id: string): {
+  [K in Btwx.TweenProp]: string[];
+} => {
+  const layerItem = store.byId[id];
+  return getTweensByProp(store, layerItem.tweens.asOrigin);
+};
+
+export const getOriginTweensByEvent = (store: LayerState, id: string): {
+  [id: string]: string[];
+} => {
+  const layerItem = store.byId[id];
+  return layerItem.tweens.asOrigin.reduce((result, current) => {
+    const tweenItem = store.tweens.byId[current];
+    if (!result[tweenItem.event]) {
+      return {
+        ...result,
+        [tweenItem.event]: [current]
+      }
+    } else {
+      return {
+        ...result,
+        [tweenItem.event]: [...result[tweenItem.event], current]
+      }
+    }
+  }, {});
+};
+
+export const getOriginTweensByEventProp = (store: LayerState, id: string): {
+  [id: string]: {
+    [K in Btwx.TweenProp]: string[];
+  };
+} => {
+  const byEvent = getOriginTweensByEvent(store, id);
+  return Object.keys(byEvent).reduce((result, current) => {
+    const byProp = getTweensByProp(store, byEvent[current]);
+    return {
+      ...result,
+      [current]: byProp
+    }
+  }, {});
+};
+
+export const getOriginTweensByEventPropFull = (store: LayerState, id: string): {
+  [id: string]: {
+    [K in Btwx.TweenProp]: Btwx.Tween[];
+  };
+} => {
+  const byEvent = getOriginTweensByEvent(store, id);
+  return Object.keys(byEvent).reduce((result, current) => {
+    const byProp = getTweensByPropFull(store, byEvent[current]);
+    return {
+      ...result,
+      [current]: byProp
+    }
+  }, {});
+};
+
 export const getNearestScopeAncestor = (store: LayerState, id: string): Btwx.Layer => {
   let currentNode = store.byId[id];
   while(currentNode.scope.length > 1 && !store.scope.includes(currentNode.scope[currentNode.scope.length - 1])) {

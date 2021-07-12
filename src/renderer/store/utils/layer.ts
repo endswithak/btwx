@@ -92,7 +92,7 @@ import {
   getEquivalentTweenProp, getLayerYoungerSiblings, getMaskableSiblings, getSiblingLayersWithUnderlyingMask,
   getItemLayers, getGradientDestination, getGradientOrigin, hasFillTween, orderLayersByRight,
   orderLayersByMiddle, orderLayersByBottom, getLayerRelativeScrollBounds, getLayerBounds, getLayerScrollBounds,
-  getLayerScrollFrameBounds
+  getLayerScrollFrameBounds, getOriginTweensByEventProp, getOriginTweensByEventPropFull
 } from '../selectors/layer';
 
 export const updateGroupParentBounds = (state: LayerState, groupParents: string[]): LayerState => {
@@ -956,6 +956,10 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
   const isAboveMask = aboveItem && aboveItem.type === 'Shape' && (aboveItem as Btwx.Shape).mask;
   const childItemParents = childItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const layerItemParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
+  const isChildInGroupEventsGroup = (childItem.type === 'Group' && (childItem as Btwx.Group).groupEventTweens) ? childItem.id : childItem.scope.find((id) => currentState.byId[id].type === 'Group' && (currentState.byId[id] as Btwx.Group).groupEventTweens);
+  const isLayerInGroupEventsGroup = (layerItem.type === 'Group' && (layerItem as Btwx.Group).groupEventTweens) ? layerItem.id : layerItem.scope.find((id) => currentState.byId[id].type === 'Group' && (currentState.byId[id] as Btwx.Group).groupEventTweens);
+  const prevLayerGroupEventsTweens = isLayerInGroupEventsGroup ? getOriginTweensByEventPropFull(currentState, isLayerInGroupEventsGroup) : null;
+  const prevChildGroupEventsTweens = isChildInGroupEventsGroup ? getOriginTweensByEventPropFull(currentState, isChildInGroupEventsGroup) : null;
   const groupParents = [...childItemParents, ...layerItemParents].reduce((result, current) => {
     if (!result.includes(current)) {
       result = [...result, current];
@@ -981,6 +985,14 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
         }
         return result;
       }, currentState);
+    }
+  }
+  if ((isChildInGroupEventsGroup || isLayerInGroupEventsGroup) && isChildInGroupEventsGroup !== isLayerInGroupEventsGroup) {
+    if (isChildInGroupEventsGroup) {
+      currentState = disableGroupGroupEventTweens(currentState, layerActions.disableGroupGroupEventTweens({id: isChildInGroupEventsGroup}) as DisableGroupGroupEventTweens);
+    }
+    if (isLayerInGroupEventsGroup) {
+      currentState = disableGroupGroupEventTweens(currentState, layerActions.disableGroupGroupEventTweens({id: isLayerInGroupEventsGroup}) as DisableGroupGroupEventTweens);
     }
   }
   // move child
@@ -1036,6 +1048,12 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
       }
     };
     // currentState = updateLayerBounds(currentState, action.payload.child);
+  }
+  if (isLayerInGroupEventsGroup) {
+    currentState = enableGroupGroupEventTweens(currentState, layerActions.enableGroupGroupEventTweens({id: isLayerInGroupEventsGroup}) as EnableGroupGroupEventTweens, prevLayerGroupEventsTweens);
+  }
+  if (isChildInGroupEventsGroup && isChildInGroupEventsGroup !== isLayerInGroupEventsGroup && isChildInGroupEventsGroup !== childItem.id) {
+    currentState = enableGroupGroupEventTweens(currentState, layerActions.enableGroupGroupEventTweens({id: isChildInGroupEventsGroup}) as EnableGroupGroupEventTweens, prevChildGroupEventsTweens);
   }
   if (childItem.type === 'Artboard') {
     currentState = updateArtboardProjectIndices(currentState);
@@ -1162,6 +1180,10 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
   const isBelowIgnoringUnderlyingMask = belowItem.type !== 'Artboard' && (belowItem as Btwx.MaskableLayer).ignoreUnderlyingMask;
   const belowItemParents = belowItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const layerItemParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
+  const isBelowInGroupEventsGroup = belowItem.scope.find((id) => currentState.byId[id].type === 'Group' && (currentState.byId[id] as Btwx.Group).groupEventTweens);
+  const isLayerInGroupEventsGroup = (layerItem.type === 'Group' && (layerItem as Btwx.Group).groupEventTweens) ? layerItem.id : layerItem.scope.find((id) => currentState.byId[id].type === 'Group' && (currentState.byId[id] as Btwx.Group).groupEventTweens);
+  const prevBelowGroupEventsTweens = isBelowInGroupEventsGroup ? getOriginTweensByEventPropFull(currentState, isBelowInGroupEventsGroup) : null;
+  const prevLayerGroupEventsTweens = isLayerInGroupEventsGroup ? getOriginTweensByEventPropFull(currentState, isLayerInGroupEventsGroup) : null;
   const groupParents = [...belowItemParents, ...layerItemParents].reduce((result, current) => {
     if (!result.includes(current)) {
       result = [...result, current];
@@ -1195,6 +1217,14 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
     currentState = toggleLayerMask(currentState, layerActions.toggleLayerMask({
       id: action.payload.below
     }) as ToggleLayerMask);
+  }
+  if ((isLayerInGroupEventsGroup || isBelowInGroupEventsGroup) && isLayerInGroupEventsGroup !== isBelowInGroupEventsGroup) {
+    if (isLayerInGroupEventsGroup) {
+      currentState = disableGroupGroupEventTweens(currentState, layerActions.disableGroupGroupEventTweens({id: isLayerInGroupEventsGroup}) as DisableGroupGroupEventTweens);
+    }
+    if (isBelowInGroupEventsGroup) {
+      currentState = disableGroupGroupEventTweens(currentState, layerActions.disableGroupGroupEventTweens({id: isBelowInGroupEventsGroup}) as DisableGroupGroupEventTweens);
+    }
   }
   // move item
   if (layerItem.parent !== belowItem.parent) {
@@ -1273,6 +1303,21 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
       id: action.payload.below
     }) as ToggleLayerMask);
   }
+  ///////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////
+  // MIGHT BE BROKEN
+  ///////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////
+  if (isBelowInGroupEventsGroup) {
+    currentState = enableGroupGroupEventTweens(currentState, layerActions.enableGroupGroupEventTweens({id: isBelowInGroupEventsGroup}) as EnableGroupGroupEventTweens, prevBelowGroupEventsTweens);
+  }
+  if (isLayerInGroupEventsGroup && isLayerInGroupEventsGroup !== isBelowInGroupEventsGroup && isLayerInGroupEventsGroup !== layerItem.id) {
+    currentState = enableGroupGroupEventTweens(currentState, layerActions.enableGroupGroupEventTweens({id: isLayerInGroupEventsGroup}) as EnableGroupGroupEventTweens, prevLayerGroupEventsTweens);
+  }
+  ///////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////
   currentState = updateGroupParentBounds(currentState, groupParents);
   return currentState;
 };
@@ -1316,6 +1361,10 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
   const isAboveIgnoringUnderlyingMask = aboveItem.type !== 'Artboard' && (aboveItem as Btwx.MaskableLayer).ignoreUnderlyingMask;
   const aboveItemParents = aboveItem.scope.filter((id, index) => index !== 0 && index !== 1);
   const layerItemParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1);
+  const isAboveInGroupEventsGroup = aboveItem.scope.find((id) => currentState.byId[id].type === 'Group' && (currentState.byId[id] as Btwx.Group).groupEventTweens);
+  const isLayerInGroupEventsGroup = (layerItem.type === 'Group' && (layerItem as Btwx.Group).groupEventTweens) ? layerItem.id : layerItem.scope.find((id) => currentState.byId[id].type === 'Group' && (currentState.byId[id] as Btwx.Group).groupEventTweens);
+  const prevAboveGroupEventsTweens = isAboveInGroupEventsGroup ? getOriginTweensByEventPropFull(currentState, isAboveInGroupEventsGroup) : null;
+  const prevLayerGroupEventsTweens = isLayerInGroupEventsGroup ? getOriginTweensByEventPropFull(currentState, isLayerInGroupEventsGroup) : null;
   const groupParents = [...aboveItemParents, ...layerItemParents].reduce((result, current) => {
     if (!result.includes(current)) {
       result = [...result, current];
@@ -1348,6 +1397,14 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
     currentState = toggleLayerMask(currentState, layerActions.toggleLayerMask({
       id: action.payload.id
     }) as ToggleLayerMask);
+  }
+  if ((isLayerInGroupEventsGroup || isAboveInGroupEventsGroup) && isLayerInGroupEventsGroup !== isAboveInGroupEventsGroup) {
+    if (isLayerInGroupEventsGroup) {
+      currentState = disableGroupGroupEventTweens(currentState, layerActions.disableGroupGroupEventTweens({id: isLayerInGroupEventsGroup}) as DisableGroupGroupEventTweens);
+    }
+    if (isAboveInGroupEventsGroup) {
+      currentState = disableGroupGroupEventTweens(currentState, layerActions.disableGroupGroupEventTweens({id: isAboveInGroupEventsGroup}) as DisableGroupGroupEventTweens);
+    }
   }
   if (layerItem.parent !== aboveItem.parent) {
     currentState = {
@@ -1423,6 +1480,21 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
       id: action.payload.id
     }) as ToggleLayerMask);
   }
+  ///////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////
+  // MIGHT BE BROKEN
+  ///////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////
+  if (isAboveInGroupEventsGroup) {
+    currentState = enableGroupGroupEventTweens(currentState, layerActions.enableGroupGroupEventTweens({id: isAboveInGroupEventsGroup}) as EnableGroupGroupEventTweens, prevAboveGroupEventsTweens);
+  }
+  if (isLayerInGroupEventsGroup && isLayerInGroupEventsGroup !== isAboveInGroupEventsGroup && isLayerInGroupEventsGroup !== layerItem.id) {
+    currentState = enableGroupGroupEventTweens(currentState, layerActions.enableGroupGroupEventTweens({id: isLayerInGroupEventsGroup}) as EnableGroupGroupEventTweens, prevLayerGroupEventsTweens);
+  }
+  ///////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////
   currentState = updateGroupParentBounds(currentState, groupParents);
   return currentState;
 };
@@ -2339,7 +2411,7 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
     const groupLayersWithEventTweens = groupDescendents.filter((id) => {
       return currentState.events.byId[action.payload.event].layers.includes(id);
     });
-    const siblingTweens = action.payload.siblings ? action.payload.siblings : groupLayersWithEventTweens.reduce((r, c) => {
+    const siblingTweens = groupLayersWithEventTweens.reduce((r, c) => {
       const layerItem = currentState.byId[c];
       const tweensByProp = layerItem.tweens.byProp[action.payload.prop].filter((i) => eventTweens.byProp[action.payload.prop].includes(i));
       r = [...r, ...tweensByProp];
@@ -2376,19 +2448,18 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
         }
       }
     });
-  } else {
-    // handle adding layer to event.layers
-    if (!currentState.events.byId[action.payload.event].layers.includes(action.payload.layer) && !tweensGroup) {
-      currentState = {
-        ...currentState,
-        events: {
-          ...currentState.events,
-          byId: {
-            ...currentState.events.byId,
-            [action.payload.event]: {
-              ...currentState.events.byId[action.payload.event],
-              layers: addItem(currentState.events.byId[action.payload.event].layers, action.payload.layer)
-            }
+  }
+  // handle adding layer to event.layers
+  if (!currentState.events.byId[action.payload.event].layers.includes(action.payload.layer)) {
+    currentState = {
+      ...currentState,
+      events: {
+        ...currentState.events,
+        byId: {
+          ...currentState.events.byId,
+          [action.payload.event]: {
+            ...currentState.events.byId[action.payload.event],
+            layers: addItem(currentState.events.byId[action.payload.event].layers, action.payload.layer)
           }
         }
       }
@@ -2513,22 +2584,6 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
       }
     }
   }
-  if (tweensGroup) {
-    currentState = {
-      ...currentState,
-      tweens: {
-        ...currentState.tweens,
-        allIds: addItem(currentState.tweens.allIds, action.payload.id),
-        byId: {
-          ...currentState.tweens.byId,
-          [tweensGroup]: {
-            ...currentState.tweens.byId[tweensGroup],
-            siblings: addItem(currentState.tweens.byId[tweensGroup].siblings, action.payload.id)
-          }
-        }
-      }
-    }
-  }
   // handle adding tween to tweens
   currentState = {
     ...currentState,
@@ -2537,11 +2592,54 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
       allIds: addItem(currentState.tweens.allIds, action.payload.id),
       byId: {
         ...currentState.tweens.byId,
-        [action.payload.id]: {
-          ...action.payload as Btwx.Tween,
-          group: tweensGroup
+        // [action.payload.id]: {
+        //   ...action.payload as Btwx.Tween,
+        //   group: tweensGroup
+        // }
+        [action.payload.id]: action.payload as Btwx.Tween
+      }
+    }
+  }
+  if (tweensGroup) {
+    const groupTweens = getOriginTweensByEventProp(state, tweensGroup);
+    if (groupTweens[action.payload.event] && groupTweens[action.payload.event][action.payload.prop][0]) {
+      currentState = {
+        ...currentState,
+        events: {
+          ...currentState.events,
+          byId: {
+            ...currentState.events.byId,
+            [action.payload.event]: {
+              ...currentState.events.byId[action.payload.event],
+              layers: removeItem(currentState.events.byId[action.payload.event].layers, action.payload.layer)
+            }
+          }
+        },
+        tweens: {
+          ...currentState.tweens,
+          allIds: addItem(currentState.tweens.allIds, action.payload.id),
+          byId: {
+            ...currentState.tweens.byId,
+            [action.payload.id]: {
+              ...currentState.tweens.byId[action.payload.id],
+              group: groupTweens[action.payload.event][action.payload.prop][0]
+            },
+            [tweensGroup]: {
+              ...currentState.tweens.byId[tweensGroup],
+              siblings: addItem(currentState.tweens.byId[tweensGroup].siblings, action.payload.id)
+            }
+          }
         }
       }
+    } else {
+      currentState = addLayerTween(currentState, layerActions.addLayerTween({
+        layer: tweensGroup,
+        destinationLayer: null,
+        prop: action.payload.prop,
+        event: action.payload.event,
+        ease: DEFAULT_TWEEN_EASE,
+        ...getDefaultTweenProps(action.payload.prop) as any
+      }) as AddLayerTween);
     }
   }
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
@@ -2554,6 +2652,225 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
   }) as SetLayerEdit);
   return currentState;
 };
+
+// const addLayerTweenToGroupTween = (state: LayerState, id: string, group: string): LayerState => {
+//   let currentState = state;
+//   const layerTween = state.tweens.byId[id];
+//   currentState = {
+//     ...currentState,
+//     tweens: {
+//       ...currentState.tweens,
+//       byId: {
+//         ...currentState.tweens.byId,
+//         [id]: {
+//           ...currentState.tweens[id],
+//           group: group
+//         },
+//         [group]: {
+//           ...currentState.tweens[group],
+//           siblings: addItem(currentState.tweens[group].siblings, id)
+//         }
+//       }
+//     },
+//     events: {
+//       ...currentState.events,
+//       byId: {
+//         ...currentState.events.byId,
+//         [layerTween.event]: {
+//           ...currentState.events.byId[layerTween.event],
+//           layers: removeItem(currentState.events.byId[layerTween.event].layers, id)
+//         }
+//       }
+//     }
+//   }
+//   return currentState;
+// }
+
+// const removeLayerTweenFromGroupTween = (state: LayerState, id: string, group: string): LayerState => {
+//   let currentState = state;
+//   const layerTween = state.tweens.byId[id];
+//   currentState = {
+//     ...currentState,
+//     tweens: {
+//       ...currentState.tweens,
+//       byId: {
+//         ...currentState.tweens.byId,
+//         [id]: {
+//           ...currentState.tweens[id],
+//           group: null
+//         },
+//         [group]: {
+//           ...currentState.tweens[group],
+//           siblings: currentState.tweens[group].siblings.filter((ti) => ti !== id)
+//         }
+//       }
+//     },
+//     events: {
+//       ...currentState.events,
+//       byId: {
+//         ...currentState.events.byId,
+//         [layerTween.event]: {
+//           ...currentState.events.byId[layerTween.event],
+//           layers: addItem(currentState.events.byId[layerTween.event].layers, id)
+//         }
+//       }
+//     }
+//   }
+//   return currentState;
+// }
+
+// // change to only update groups when group children change
+// export const updateGroupEventTweens = (state: LayerState, id: string): LayerState => {
+//   let currentState = state;
+//   const layerItem = state.byId[id] as Btwx.Group;
+//   const artboardItem = currentState.byId[layerItem.artboard] as Btwx.Artboard;
+//   const hasScopedGroupEventTweens = layerItem.scope.find((si) =>
+//     state.byId[si].type === 'Group' && (state.byId[si] as Btwx.Group).groupEventTweens
+//   );
+//   if (layerItem.groupEventTweens) {
+//     if (hasScopedGroupEventTweens) {
+
+//     } else {
+//       const groupDescendents = getLayerDescendants(currentState, id, false);
+//       const groupItemTweens = getOriginTweensByEventProp(currentState, id);
+//       currentState = groupDescendents.reduce((result, current) => {
+
+//       }, currentState);
+//     }
+//   }
+// }
+
+// // 1. need to update layer tweens when moving between groups (if groupEventTweens)
+// // 2. need to update groupEventTweens if moving groups with stacked groupEventTweens
+// // 3. need prop for easier referenceing between thingamajigs
+// export const updateLayerGroupEventTweens = (state: LayerState, id: string): LayerState => {
+//   let currentState = state;
+//   const layerItem = state.byId[id];
+//   const hasScopedGroupEventTweens = layerItem.scope.find((si) => state.byId[si].type === 'Group' && (state.byId[si] as Btwx.Group).groupEventTweens);
+//   if (hasScopedGroupEventTweens) {
+//     const layerItemTweens = getOriginTweensByEventProp(currentState, id);
+//     const groupItemTweens = getOriginTweensByEventProp(currentState, hasScopedGroupEventTweens);
+//     currentState = Object.keys(layerItemTweens).reduce((result, current) => {
+//       return Object.keys(layerItemTweens[current]).reduce((r, c) => {
+//         const layerEventPropTween = layerItemTweens[current][c][0];
+//         const groupEventPropTween = groupItemTweens[current][c][0];
+//         if (layerEventPropTween) {
+//           const layerEventPropTweenItem = state.tweens.byId[layerEventPropTween];
+//           if (layerEventPropTweenItem.group && layerEventPropTweenItem.group !== groupEventPropTween) {
+//             r = {
+//               ...r,
+//               tweens: {
+//                 ...r.tweens,
+//                 byId: {
+//                   ...r.tweens.byId,
+//                   [layerEventPropTweenItem.group]: {
+//                     ...result.tweens[layerEventPropTweenItem.group],
+//                     siblings: result.tweens[layerEventPropTweenItem.group].siblings.filter((ti) => ti !== layerEventPropTween)
+//                   }
+//                 }
+//               }
+//             }
+//           }
+//           let groupTweenId;
+//           if (groupEventPropTween) {
+//             groupTweenId = groupEventPropTween;
+//           } else {
+//             r = addLayerTween(r, layerActions.addLayerTween({
+//               layer: hasScopedGroupEventTweens,
+//               destinationLayer: null,
+//               prop: c,
+//               event: current,
+//               ease: DEFAULT_TWEEN_EASE,
+//               ...getDefaultTweenProps(c) as any
+//             }) as AddLayerTween);
+//             groupTweenId = r.tweens.allIds[r.tweens.allIds.length - 1];
+//           }
+//           if (r.events.byId[r.tweens[groupTweenId].event].layers.includes(id)) {
+//             r = {
+//               ...r,
+//               events: {
+//                 ...r.events,
+//                 byId: {
+//                   ...r.events.byId,
+//                   [r.tweens[groupTweenId].event]: {
+//                     ...r.events.byId[r.tweens[groupTweenId].event],
+//                     layers: removeItem(r.events.byId[r.tweens[groupTweenId].event].layers, id)
+//                   }
+//                 }
+//               }
+//             }
+//           }
+//           r = {
+//             ...r,
+//             tweens: {
+//               ...r.tweens,
+//               byId: {
+//                 ...r.tweens.byId,
+//                 [layerEventPropTween]: {
+//                   ...r.tweens[layerEventPropTween],
+//                   group: groupTweenId
+//                 },
+//                 [groupTweenId]: {
+//                   ...r.tweens[groupTweenId],
+//                   siblings: [
+//                     ...r.tweens[groupTweenId].siblings.filter((ti) => ti !== layerEventPropTween),
+//                     layerEventPropTween
+//                   ]
+//                 }
+//               }
+//             }
+//           }
+//         }
+//         return r;
+//       }, result);
+//     }, currentState);
+//     // get all tweens
+//     // if non-group
+//     //  if no group tweens, create one
+//     //    add groupEvents group anscestor to tweens
+//     // if group w/ groupEvents
+//     //  remove all group tweens
+//     // if out of groupEvents
+//     //  remove group from tweens & add back to event layers
+//     // currentState = layerItem.tweens.asOrigin.reduce((result, current) => {
+//     //   const tween = result.tweens.byId[current];
+//     //   const groupItem = result.byId[hasScopedGroupEventTweens];
+//     //   const tweenGroup = groupItem.tweens.asOrigin.find((ti) => {
+//     //     const groupTween = result.tweens.byId[ti];
+//     //     if (tween.prop === groupTween.prop) {
+//     //       if (groupItem.tweens.byProp[tween.prop].length === 0) {
+//     //         // add group tween
+//     //         result = addLayerTween(result, layerActions.addLayerTween({
+//     //           layer: groupItem.id,
+//     //           destinationLayer: null,
+//     //           prop: tween.prop,
+//     //           event: tween.event,
+//     //           ease: DEFAULT_TWEEN_EASE,
+//     //           ...getDefaultTweenProps(tween.prop) as any
+//     //         }) as AddLayerTween);
+//     //         return result.tweens.allIds[result.tweens.allIds.length - 1];
+//     //       } else {
+//     //         return groupTween.id;
+//     //       }
+//     //     }
+//     //   });
+//     //   result = {
+//     //     ...result,
+//     //     tweens: {
+//     //       ...result.tweens,
+//     //       byId: {
+//     //         ...result.tweens.byId,
+//     //         [current]: {
+//     //           ...result.tweens[current],
+//     //           group:
+//     //         }
+//     //       }
+//     //     }
+//     //   }
+//     //   return result;
+//     // }, currentState);
+//   }
+// }
 
 export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): LayerState => {
   const tween = state.tweens.byId[action.payload.id];
@@ -2719,79 +3036,6 @@ export const removeLayerTween = (state: LayerState, action: RemoveLayerTween): L
       }, {})
     }
   }
-  // currentState = {
-  //   ...currentState,
-  //   events: {
-  //     ...currentState.events,
-  //     byId: {
-  //       ...currentState.events.byId,
-  //       [tween.event]: {
-  //         ...currentState.events.byId[tween.event],
-  //         tweens: {
-  //           ...currentState.events.byId[tween.event].tweens,
-  //           allIds: removeItem(currentState.events.byId[tween.event].tweens.allIds, action.payload.id),
-  //           byLayer: Object.keys(currentState.events.byId[tween.event].tweens.byLayer).reduce((result, current) => {
-  //             if (tween.layer === current) {
-  //               if (!onlyLayerTween) {
-  //                 result = {
-  //                   ...result,
-  //                   [current]: removeItem(currentState.events.byId[tween.event].tweens.byLayer[current], action.payload.id)
-  //                 }
-  //               }
-  //             } else {
-  //               result = {
-  //                 ...result,
-  //                 [current]: currentState.events.byId[tween.event].tweens.byLayer[current]
-  //               }
-  //             }
-  //             return result;
-  //           }, {}),
-  //           byProp: {
-  //             ...currentState.events.byId[tween.event].tweens.byProp,
-  //             [tween.prop]: removeItem(currentState.events.byId[tween.event].tweens.byProp[tween.prop], action.payload.id)
-  //           }
-  //         }
-  //       }
-  //     }
-  //   },
-  //   byId: {
-  //     ...currentState.byId,
-  //     [tween.layer]: {
-  //       ...currentState.byId[tween.layer],
-  //       tweens: {
-  //         ...currentState.byId[tween.layer].tweens,
-  //         allIds: removeItem(currentState.byId[tween.layer].tweens.allIds, action.payload.id),
-  //         asOrigin: removeItem(currentState.byId[tween.layer].tweens.asOrigin, action.payload.id),
-  //         byProp: {
-  //           ...currentState.byId[tween.layer].tweens.byProp,
-  //           [tween.prop]: removeItem(currentState.byId[tween.layer].tweens.byProp[tween.prop], action.payload.id)
-  //         }
-  //       }
-  //     },
-  //     [tween.destinationLayer]: {
-  //       ...currentState.byId[tween.destinationLayer],
-  //       tweens: {
-  //         ...currentState.byId[tween.destinationLayer].tweens,
-  //         allIds: removeItem(currentState.byId[tween.destinationLayer].tweens.allIds, action.payload.id),
-  //         asDestination: removeItem(currentState.byId[tween.destinationLayer].tweens.asDestination, action.payload.id),
-  //         byProp: {
-  //           ...currentState.byId[tween.destinationLayer].tweens.byProp,
-  //           [tween.prop]: removeItem(currentState.byId[tween.destinationLayer].tweens.byProp[tween.prop], action.payload.id)
-  //         }
-  //       }
-  //     }
-  //   },
-  //   tweens: {
-  //     ...currentState.tweens,
-  //     allIds: removeItem(currentState.tweens.allIds, action.payload.id),
-  //     byId: Object.keys(currentState.tweens.byId).reduce((result: any, key) => {
-  //       if (key !== action.payload.id) {
-  //         result[key] = currentState.tweens.byId[key];
-  //       }
-  //       return result;
-  //     }, {})
-  //   }
-  // }
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
@@ -2950,6 +3194,11 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
       const tweenEvent = result.events.byId[current];
       const destinationArtboardChildren = layerItem.type === 'Artboard' ? null : getLayerDescendants(result, tweenEvent.destination);
       const destinationEquivalent = layerItem.type === 'Artboard' ? result.byId[tweenEvent.destination] : getDestinationEquivalent(result, layerId, destinationArtboardChildren);
+      ////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////
+      // NEED TO ADD GROUP SHIT HERE
+      ////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////
       if (destinationEquivalent) {
         const layerItem = result.byId[layerId] as Btwx.Layer;
         const equivalentLayerItem = result.byId[destinationEquivalent.id] as Btwx.Layer;
@@ -12554,51 +12803,62 @@ export const setGroupScrollFrame = (state: LayerState, action: SetGroupScrollFra
 
 //
 
-export const enableGroupGroupEventTweens = (state: LayerState, action: EnableGroupGroupEventTweens): LayerState => {
+export const enableGroupGroupEventTweens = (state: LayerState, action: EnableGroupGroupEventTweens, other?: { [id: string]: { [K in Btwx.TweenProp]: Btwx.Tween[] } }): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
   const artboardItem = currentState.byId[layerItem.artboard] as Btwx.Artboard;
   const artboardEvents = artboardItem.originForEvents;
-  const groupDescendents = getLayerDescendants(currentState, action.payload.id, false);
-  currentState = {
-    ...currentState,
-    byId: {
-      ...currentState.byId,
-      [action.payload.id]: {
-        ...currentState.byId[action.payload.id],
-        groupEventTweens: true
-      } as Btwx.Group
-    }
-  }
-  currentState = artboardEvents.reduce((result, current) => {
-    const eventItem = result.events.byId[current];
-    const eventTweens = eventItem.tweens;
-    const groupLayersWithEventTweens = groupDescendents.filter((id) => {
-      return result.events.byId[current].layers.includes(id);
-    });
-    Object.keys(TWEEN_PROPS_MAP).forEach((prop) => {
-      // get group event tweens by prop
-      const groupLayersWithEventPropTweens = groupLayersWithEventTweens.reduce((r, c) => {
-        const layerItem = result.byId[c];
-        const tweensByProp = layerItem.tweens.byProp[prop].filter((i) => eventTweens.byProp[prop].includes(i));
-        r = [...r, ...tweensByProp];
-        return r;
-      }, []);
-      if (groupLayersWithEventPropTweens.length > 0) {
-        // add group tween for prop
-        result = addLayerTween(result, layerActions.addLayerTween({
-          layer: action.payload.id,
-          destinationLayer: null,
-          siblings: groupLayersWithEventPropTweens,
-          prop: prop,
-          event: current,
-          ease: DEFAULT_TWEEN_EASE,
-          ...getDefaultTweenProps(prop) as any
-        }) as AddLayerTween);
+  const inGroupEventTweensGroup = layerItem.scope.find((id) => currentState.byId[id].type === 'Group' && (currentState.byId[id] as Btwx.Group).groupEventTweens);
+  if (!inGroupEventTweensGroup) {
+    const groupDescendents = getLayerDescendants(currentState, action.payload.id, false);
+    currentState = {
+      ...currentState,
+      byId: {
+        ...currentState.byId,
+        [action.payload.id]: {
+          ...currentState.byId[action.payload.id],
+          groupEventTweens: true
+        } as Btwx.Group
       }
-    });
-    return result;
-  }, currentState);
+    }
+    currentState = artboardEvents.reduce((result, current) => {
+      const eventItem = result.events.byId[current];
+      const eventTweens = eventItem.tweens;
+      const groupLayersWithEventTweens = groupDescendents.filter((id) => {
+        return result.events.byId[current].layers.includes(id);
+      });
+      Object.keys(TWEEN_PROPS_MAP).forEach((prop) => {
+        // get group event tweens by prop
+        const groupLayersWithEventPropTweens = groupLayersWithEventTweens.reduce((r, c) => {
+          const layerItem = result.byId[c];
+          const tweensByProp = layerItem.tweens.byProp[prop].filter((i) => eventTweens.byProp[prop].includes(i));
+          r = [...r, ...tweensByProp];
+          return r;
+        }, []);
+        if (groupLayersWithEventPropTweens.length > 0) {
+          if (other && other[current] && other[current][prop] && other[current][prop][0]) {
+            // add group tween for prop
+            result = addLayerTween(result, layerActions.addLayerTween({
+              ...other[current][prop][0],
+              siblings: groupLayersWithEventPropTweens
+            }) as AddLayerTween);
+          } else {
+            // add group tween for prop
+            result = addLayerTween(result, layerActions.addLayerTween({
+              layer: action.payload.id,
+              destinationLayer: null,
+              siblings: groupLayersWithEventPropTweens,
+              prop: prop,
+              event: current,
+              ease: DEFAULT_TWEEN_EASE,
+              ...getDefaultTweenProps(prop) as any
+            }) as AddLayerTween);
+          }
+        }
+      });
+      return result;
+    }, currentState);
+  }
   return currentState;
 };
 

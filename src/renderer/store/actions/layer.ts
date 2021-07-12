@@ -832,7 +832,7 @@ export const addGroupThunk = (payload: AddGroupPayload) => {
     const scope = [...parentItem.scope, parent];
     const artboard = scope[1];
     const artboardItem = state.layer.present.byId[artboard] as Btwx.Artboard;
-    const groupTweens = Object.prototype.hasOwnProperty.call(payload.layer, 'groupTweens') ? payload.layer.groupTweens : false;
+    const groupEventTweens = Object.prototype.hasOwnProperty.call(payload.layer, 'groupEventTweens') ? payload.layer.groupEventTweens : false;
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
@@ -848,7 +848,7 @@ export const addGroupThunk = (payload: AddGroupPayload) => {
       scope: scope,
       frame: frame,
       scroll: DEFAULT_SCROLL,
-      groupTweens: groupTweens,
+      groupEventTweens: groupEventTweens,
       underlyingMask: underlyingMask,
       ignoreUnderlyingMask: ignoreUnderlyingMask,
       masked: masked,

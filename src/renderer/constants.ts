@@ -146,6 +146,7 @@ export const CUSTOM_WIGGLE_TWEEN_STRENGTH_MAP: { [id: string]: number | Btwx.Col
 
 export const getDefaultTweenProps = (customWiggleProp: any = null) => ({
   group: null,
+  siblings: [],
   ease: DEFAULT_TWEEN_EASE,
   power: DEFAULT_TWEEN_POWER,
   duration: DEFAULT_TWEEN_DURATION,
