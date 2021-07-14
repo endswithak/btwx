@@ -12,12 +12,14 @@ const EventDrawerEventTimelineTweens = (props: EventDrawerEventTimelineTweensPro
   const eventLayerTweens = useSelector((state: RootState) => state.layer.present.events.byId[state.eventDrawer.event] && state.layer.present.events.byId[state.eventDrawer.event].tweens.byLayer[layerId] ? state.layer.present.events.byId[state.eventDrawer.event].tweens.byLayer[layerId] : []);
   const sortedProps: string[] = useSelector((state: RootState) => eventLayerTweens.reduce((result, current) => {
     const tween = state.layer.present.tweens.byId[current];
-    result = [...result, tween.prop];
+    if (!result.includes(tween.prop)) {
+      result = [...result, tween.prop];
+    }
     return result;
   }, []).sort());
   const orderedLayerTweensByProp: string[] = useSelector((state: RootState) => sortedProps.reduce((result, current: Btwx.TweenProp) => {
-    const tween = eventLayerTweens.find((id: string) => state.layer.present.tweens.byId[id].prop === current);
-    result = [...result, tween];
+    const tweens = eventLayerTweens.filter((id: string) => state.layer.present.tweens.byId[id].prop === current);
+    result = [...result, ...tweens];
     return result;
   }, []));
 

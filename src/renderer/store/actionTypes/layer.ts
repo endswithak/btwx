@@ -417,6 +417,8 @@ export const ENABLE_GROUPS_GROUP_EVENT_TWEENS = 'ENABLE_GROUPS_GROUP_EVENT_TWEEN
 export const DISABLE_GROUP_GROUP_EVENT_TWEENS = 'DISABLE_GROUP_GROUP_EVENT_TWEENS';
 export const DISABLE_GROUPS_GROUP_EVENT_TWEENS = 'DISABLE_GROUPS_GROUP_EVENT_TWEENS';
 
+export const ADD_GROUP_WIGGLES = 'ADD_GROUP_WIGGLES';
+
 // Artboard
 
 export type AddArtboardPayload = {
@@ -4441,6 +4443,18 @@ export interface DisableGroupsGroupEventTweens {
 
 //
 
+export interface AddGroupsWigglesPayload {
+  layers: string[];
+  byLayer: {
+    [id: string]: AddLayerTweenPayload;
+  }
+}
+
+export interface AddGroupsWiggles {
+  type: typeof ADD_GROUP_WIGGLES;
+  payload: AddGroupsWigglesPayload;
+}
+
 export type LayerTypes = AddArtboard |
                          AddGroup |
                          AddShape |
@@ -4802,4 +4816,5 @@ export type LayerTypes = AddArtboard |
                          EnableGroupGroupEventTweens |
                          EnableGroupsGroupEventTweens |
                          DisableGroupGroupEventTweens |
-                         DisableGroupsGroupEventTweens;
+                         DisableGroupsGroupEventTweens |
+                         AddGroupsWiggles;

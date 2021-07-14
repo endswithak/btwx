@@ -6,7 +6,7 @@ import rootReducer, { RootState } from './reducers';
 import { closePreview, closePreviewThunk, startPreviewRecording, stopPreviewRecording, setPreviewFocusing, openPreview, setPreviewTweening } from './actions/preview';
 import { hydratePreferences } from './actions/preferences';
 import { setEventDrawerEvent, setEventDrawerEventThunk } from './actions/eventDrawer';
-import { hydrateLayers, addLayerTween, removeLayerTweens, removeLayerTween, removeLayersEvent, insertImageThunk, groupSelectedThunk, ungroupSelectedThunk, alignSelectedToLeftThunk, alignSelectedToCenterThunk, alignSelectedToRightThunk, alignSelectedToTopThunk, alignSelectedToMiddleThunk, alignSelectedToBottomThunk, distributeSelectedHorizontallyThunk, distributeSelectedVerticallyThunk, sendSelectedBackwardThunk, bringSelectedForwardThunk, removeLayersGradientStop, setLayersEventEventListener } from './actions/layer';
+import { hydrateLayers, addLayerTween, addGroupWiggles, removeLayerTweens, removeLayerTween, removeLayersEvent, insertImageThunk, groupSelectedThunk, ungroupSelectedThunk, alignSelectedToLeftThunk, alignSelectedToCenterThunk, alignSelectedToRightThunk, alignSelectedToTopThunk, alignSelectedToMiddleThunk, alignSelectedToBottomThunk, distributeSelectedHorizontallyThunk, distributeSelectedVerticallyThunk, sendSelectedBackwardThunk, bringSelectedForwardThunk, removeLayersGradientStop, setLayersEventEventListener } from './actions/layer';
 import { openEaseEditor, closeEaseEditor } from './actions/easeEditor';
 import { zoomInThunk, zoomOutThunk } from './actions/zoomTool';
 import { toggleArtboardToolThunk } from './actions/artboardTool';
@@ -130,6 +130,9 @@ const configureStore: any = (preloadedState, isDocumentWindow = false): typeof s
   };
   (window as any).addLayerTween = (params: any): void => {
     store.dispatch(addLayerTween(params));
+  };
+  (window as any).addGroupWiggles = (params: any): void => {
+    store.dispatch(addGroupWiggles(params));
   };
   (window as any).removeLayerTweens = (params: any): void => {
     store.dispatch(removeLayerTweens(params));

@@ -74,7 +74,8 @@ const EventDrawerEventLayers = (props: EventDrawerEventLayersProps): ReactElemen
                   scrollLayer={scrollLayer}
                   equivalentId={wiggleLayers.map[scrollLayer]}
                   equivalentTweenProps={wiggleLayers.propsMap[scrollLayer]}
-                  eventId={eventItem.id} />
+                  eventId={eventItem.id}
+                  group={wiggleLayers.group[scrollLayer]} />
               : null
             }
             <ScrollSyncPane>
@@ -89,18 +90,22 @@ const EventDrawerEventLayers = (props: EventDrawerEventLayersProps): ReactElemen
                         id={layer}
                         equivalentId={wiggleLayers.map[layer]}
                         equivalentTweenProps={wiggleLayers.propsMap[layer]}
-                        eventId={eventItem.id} />
+                        eventId={eventItem.id}
+                        group={wiggleLayers.group[layer]} />
                     ))
                   }
                   {
-                    wiggleLayers.allIds.filter((id) => !eventLayers.includes(id)).map((layerId) => (
-                      <EventDrawerEventLayer
-                        key={layerId}
-                        id={layerId}
-                        equivalentId={wiggleLayers.map[layerId]}
-                        equivalentTweenProps={wiggleLayers.propsMap[layerId]}
-                        eventId={eventItem.id} />
-                    ))
+                    wiggleLayers.allIds.filter((id) => !eventLayers.includes(id)).map((layerId) => {
+                      return (
+                        <EventDrawerEventLayer
+                          key={layerId}
+                          id={layerId}
+                          equivalentId={wiggleLayers.map[layerId]}
+                          equivalentTweenProps={wiggleLayers.propsMap[layerId]}
+                          eventId={eventItem.id}
+                          group={wiggleLayers.group[layerId]} />
+                      )
+                    })
                   }
                 </ListGroup>
               </div>

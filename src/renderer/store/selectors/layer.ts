@@ -2069,18 +2069,120 @@ export const getAllEventOriginTweenLayers = createSelector(
 //   }
 // );
 
+// export const getWiggleLayersSelector = createSelector(
+//   [ getLayersById, getEventById ],
+//   (layersById, event) => {
+//     const originChildren = getLayerDescendants({byId: layersById} as any, event.origin);
+//     const destinationChildren = getLayerDescendants({byId: layersById} as any, event.destination);
+//     return originChildren.reduce((result, current) => {
+//       const currentLayerItem = layersById[current];
+//       const destinationEquivalent = getDestinationEquivalent({byId: layersById} as any, current, destinationChildren);
+//       const hasGroupedTweens = currentLayerItem.scope.find((id) => layersById[id].type === 'Group' && (layersById[id] as Btwx.Group).groupEventTweens);
+//       if (destinationEquivalent && destinationEquivalent.type !== 'Group' && !hasGroupedTweens) {
+//         const equivalentLayerItem = layersById[destinationEquivalent.id];
+//         const equivalentTweenProps = getEquivalentTweenProps({byId: layersById}, currentLayerItem, equivalentLayerItem);
+//         result = {
+//           ...result,
+//           allIds: [...result.allIds, current],
+//           byId: {
+//             ...result.byId,
+//             [current]: layersById[current]
+//           },
+//           equivalent: {
+//             ...result.equivalent,
+//             allIds: [...result.equivalent.allIds, equivalentLayerItem.id],
+//             byId: {
+//               ...result.equivalent.byId,
+//               [equivalentLayerItem.id]: equivalentLayerItem
+//             }
+//           },
+//           map: {
+//             ...result.map,
+//             [current]: equivalentLayerItem.id
+//           },
+//           propsMap: {
+//             ...result.propsMap,
+//             [current]: equivalentTweenProps
+//           }
+//         };
+//       }
+//       return result;
+//     }, {
+//       allIds: [],
+//       byId: {},
+//       equivalent: {
+//         allIds: [],
+//         byId: {} },
+//         map: {},
+//         propsMap: {}
+//       }
+//     );
+//   }
+// );
+
+interface WiggleLayersSelector {
+  allIds: string[];
+  byId: {
+    [id: string]: Btwx.Layer;
+  };
+  map: {
+    [id: string]: string;
+  };
+  propsMap: {
+    [id: string]: Btwx.TweenProp[];
+  };
+  equivalent: {
+    allIds: string[];
+    byId: {
+      [id: string]: Btwx.Layer;
+    };
+  };
+  group: {
+    [id: string]: {
+      allIds: string[];
+      byId: {
+        [id: string]: Btwx.Layer;
+      };
+      byProp: {
+        [K in Btwx.TweenProp]: string[];
+      };
+      map: {
+        [id: string]: string;
+      };
+      propsMap: {
+        [id: string]: Btwx.TweenProp[];
+      };
+      equivalent: {
+        allIds: string[];
+        byId: {
+          [id: string]: Btwx.Layer;
+        };
+      };
+    };
+  };
+}
+
 export const getWiggleLayersSelector = createSelector(
-  [ getLayersById, getEventById ],
-  (layersById, event) => {
+  [ getLayersById, getEventById, getTweensById ],
+  (layersById, event, tweensById) => {
     const originChildren = getLayerDescendants({byId: layersById} as any, event.origin);
     const destinationChildren = getLayerDescendants({byId: layersById} as any, event.destination);
     return originChildren.reduce((result, current) => {
       const currentLayerItem = layersById[current];
       const destinationEquivalent = getDestinationEquivalent({byId: layersById} as any, current, destinationChildren);
-      const hasGroupedTweens = currentLayerItem.scope.some((id) => layersById[id].type === 'Group' && (layersById[id] as Btwx.Group).groupEventTweens);
+      const hasGroupedTweens = currentLayerItem.scope.find((id) => layersById[id].type === 'Group' && (layersById[id] as Btwx.Group).groupEventTweens);
       if (destinationEquivalent && destinationEquivalent.type !== 'Group' && !hasGroupedTweens) {
         const equivalentLayerItem = layersById[destinationEquivalent.id];
         const equivalentTweenProps = getEquivalentTweenProps({byId: layersById}, currentLayerItem, equivalentLayerItem);
+        const possibleProps = getPossibleProps(currentLayerItem, equivalentLayerItem);
+        const availableTweenProps = Object.keys(equivalentTweenProps).reduce((rep, cep) => {
+          const isAvailable = !event.tweens.byProp[cep].some((id) => tweensById[id].layer === current) && possibleProps.includes(cep);
+          rep = {
+            ...rep,
+            [cep]: isAvailable
+          }
+          return rep;
+        }, {});
         result = {
           ...result,
           allIds: [...result.allIds, current],
@@ -2102,21 +2204,104 @@ export const getWiggleLayersSelector = createSelector(
           },
           propsMap: {
             ...result.propsMap,
-            [current]: equivalentTweenProps
+            [current]: availableTweenProps
           }
         };
+      } else if (currentLayerItem.type === 'Group' && (currentLayerItem as Btwx.Group).groupEventTweens) {
+        const groupChildren = getLayerDescendants({byId: layersById} as any, current, false);
+        result = {
+          ...result,
+          allIds: [...result.allIds, current],
+          map: {
+            ...result.map,
+            [current]: null
+          },
+          group: {
+            ...result.group,
+            [current]: {
+              allIds: [],
+              byProp: TWEEN_PROPS_MAP,
+              byId: {},
+              map: {},
+              propsMap: {},
+              equivalent: {
+                allIds: [],
+                byId: {}
+              }
+            }
+          }
+        }
+        result = groupChildren.reduce((r, c) => {
+          const currentLayerItem = layersById[c];
+          const destinationEquivalent = getDestinationEquivalent({byId: layersById} as any, c, destinationChildren);
+          if (destinationEquivalent && destinationEquivalent.type !== 'Group') {
+            const equivalentLayerItem = layersById[destinationEquivalent.id];
+            const equivalentTweenProps = getEquivalentTweenProps({byId: layersById}, currentLayerItem, equivalentLayerItem);
+            const possibleProps = getPossibleProps(currentLayerItem, equivalentLayerItem);
+            const availableTweenProps = Object.keys(equivalentTweenProps).reduce((rep, cep) => {
+              const isAvailable = equivalentTweenProps[cep] && !event.tweens.byProp[cep].some((id) => tweensById[id].layer === current && tweensById[id].ease === 'customWiggle') && possibleProps.includes(cep);
+              rep = {
+                ...rep,
+                [cep]: isAvailable
+              }
+              return rep;
+            }, {});
+            r = {
+              ...r,
+              group: {
+                ...r.group,
+                [current]: {
+                  ...r.group[current],
+                  allIds: [...r.group[current].allIds, c],
+                  byProp: Object.keys(r.group[current].byProp).reduce((rp, cp) => {
+                    const eqProp = availableTweenProps[cp];
+                    if (eqProp) {
+                      rp = {
+                        ...rp,
+                        [cp]: [...rp[cp], c]
+                      }
+                    }
+                    return rp;
+                  }, r.group[current].byProp),
+                  byId: {
+                    ...r.group[current].byId,
+                    [c]: layersById[c]
+                  },
+                  equivalent: {
+                    ...r.group[current].equivalent,
+                    allIds: [...r.group[current].equivalent.allIds, equivalentLayerItem.id],
+                    byId: {
+                      ...r.group[current].equivalent.byId,
+                      [equivalentLayerItem.id]: equivalentLayerItem
+                    }
+                  },
+                  map: {
+                    ...r.group[current].map,
+                    [c]: equivalentLayerItem.id
+                  },
+                  propsMap: {
+                    ...r.group[current].propsMap,
+                    [c]: equivalentTweenProps
+                  }
+                }
+              }
+            };
+          }
+          return r;
+        }, result);
       }
       return result;
     }, {
       allIds: [],
       byId: {},
+      map: {},
+      propsMap: {},
       equivalent: {
         allIds: [],
-        byId: {} },
-        map: {},
-        propsMap: {}
-      }
-    );
+        byId: {}
+      },
+      group: {}
+    });
   }
 );
 

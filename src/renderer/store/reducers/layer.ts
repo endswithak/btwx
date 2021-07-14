@@ -355,6 +355,7 @@ import {
   ENABLE_GROUPS_GROUP_EVENT_TWEENS,
   DISABLE_GROUP_GROUP_EVENT_TWEENS,
   DISABLE_GROUPS_GROUP_EVENT_TWEENS,
+  ADD_GROUP_WIGGLES,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -713,6 +714,7 @@ import {
   enableGroupsGroupEventTweens,
   disableGroupGroupEventTweens,
   disableGroupsGroupEventTweens,
+  addGroupWiggles
 } from '../utils/layer';
 
 export interface LayerState {
@@ -1525,6 +1527,8 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return disableGroupGroupEventTweens(state, action);
     case DISABLE_GROUPS_GROUP_EVENT_TWEENS:
       return disableGroupsGroupEventTweens(state, action);
+    case ADD_GROUP_WIGGLES:
+      return addGroupWiggles(state, action);
     case HYDRATE_LAYERS:
       return {
         ...state,
@@ -1839,6 +1843,7 @@ export default undoable(baseReducer, {
       ENABLE_GROUPS_GROUP_EVENT_TWEENS,
       DISABLE_GROUP_GROUP_EVENT_TWEENS,
       DISABLE_GROUPS_GROUP_EVENT_TWEENS,
+      ADD_GROUP_WIGGLES,
     ].includes(action.type) && !action.payload.batch;
   }
 });

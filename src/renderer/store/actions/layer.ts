@@ -395,6 +395,7 @@ import {
   ENABLE_GROUPS_GROUP_EVENT_TWEENS,
   DISABLE_GROUP_GROUP_EVENT_TWEENS,
   DISABLE_GROUPS_GROUP_EVENT_TWEENS,
+  ADD_GROUP_WIGGLES,
   EnableGroupGroupEventTweensPayload,
   EnableGroupsGroupEventTweensPayload,
   DisableGroupGroupEventTweensPayload,
@@ -744,6 +745,7 @@ import {
   PasteLayersFromClipboardPayload,
   SetLayerTreeScrollPayload,
   SetLayerTreeStickyArtboardPayload,
+  AddGroupsWigglesPayload,
   LayerTypes
 } from '../actionTypes/layer';
 import { LayerState } from '../reducers/layer';
@@ -8468,5 +8470,10 @@ export const disableGroupGroupEventTweens = (payload: DisableGroupGroupEventTwee
 
 export const disableGroupsGroupEventTweens = (payload: DisableGroupsGroupEventTweensPayload): LayerTypes => ({
   type: DISABLE_GROUPS_GROUP_EVENT_TWEENS,
+  payload
+});
+
+export const addGroupWiggles = (payload: AddGroupWigglesPayload): LayerTypes => ({
+  type: ADD_GROUP_WIGGLES,
   payload
 });
