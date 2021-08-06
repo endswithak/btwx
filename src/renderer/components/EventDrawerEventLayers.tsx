@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { ScrollSyncPane } from 'react-scroll-sync';
 import { RootState } from '../store/reducers';
@@ -20,7 +20,21 @@ interface EventDrawerEventLayersProps {
 const EventDrawerEventLayers = (props: EventDrawerEventLayersProps): ReactElement => {
   const { scrollLayer } = props;
   const eventLayers = useSelector((state: RootState) => state.layer.present.events.byId[state.eventDrawer.event] ? state.layer.present.events.byId[state.eventDrawer.event].layers : null);
+  const sortedEventLayers = useSelector((state: RootState) => {
+    return eventLayers.sort((a, b) => {
+      const nameA = state.layer.present.byId[a].name.toUpperCase();
+      const nameB = state.layer.present.byId[b].name.toUpperCase();
+      return (nameA < nameB) ? -1 : (nameA > nameB) ? 1 : 0;
+    });
+  });
   const wiggleLayers = useSelector((state: RootState) => getWiggleLayersSelector(state, state.eventDrawer.event));
+  const sortedWiggleLayers = useSelector((state: RootState) => {
+    return wiggleLayers.allIds.filter((id) => !eventLayers.includes(id)).sort((a, b) => {
+      const nameA = state.layer.present.byId[a].name.toUpperCase();
+      const nameB = state.layer.present.byId[b].name.toUpperCase();
+      return (nameA < nameB) ? -1 : (nameA > nameB) ? 1 : 0;
+    });
+  });
   const eventItem = useSelector((state: RootState) => state.layer.present.events.byId[state.eventDrawer.event]);
   const artboardItem = useSelector((state: RootState) => state.layer.present.byId[eventItem.origin]);
   const eventDrawerEventLayersWidth = useSelector((state: RootState) => state.viewSettings.eventDrawer.layersWidth);
@@ -84,7 +98,7 @@ const EventDrawerEventLayers = (props: EventDrawerEventLayersProps): ReactElemen
                 className='c-event-drawer-event-layers__layers'>
                 <ListGroup>
                   {
-                    eventLayers.map((layer) => (
+                    sortedEventLayers.map((layer) => (
                       <EventDrawerEventLayer
                         key={layer}
                         id={layer}
@@ -95,17 +109,15 @@ const EventDrawerEventLayers = (props: EventDrawerEventLayersProps): ReactElemen
                     ))
                   }
                   {
-                    wiggleLayers.allIds.filter((id) => !eventLayers.includes(id)).map((layerId) => {
-                      return (
-                        <EventDrawerEventLayer
-                          key={layerId}
-                          id={layerId}
-                          equivalentId={wiggleLayers.map[layerId]}
-                          equivalentTweenProps={wiggleLayers.propsMap[layerId]}
-                          eventId={eventItem.id}
-                          group={wiggleLayers.group[layerId]} />
-                      )
-                    })
+                    sortedWiggleLayers.map((layerId) => (
+                      <EventDrawerEventLayer
+                        key={layerId}
+                        id={layerId}
+                        equivalentId={wiggleLayers.map[layerId]}
+                        equivalentTweenProps={wiggleLayers.propsMap[layerId]}
+                        eventId={eventItem.id}
+                        group={wiggleLayers.group[layerId]} />
+                    ))
                   }
                 </ListGroup>
               </div>

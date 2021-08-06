@@ -14,7 +14,21 @@ const EventDrawerEventTimelines = (): ReactElement => {
   const timelineRef = useRef<HTMLDivElement>(null);
   // const selected = useSelector((state: RootState) => state.layer.present.tweens.selected.allIds);
   const eventLayers = useSelector((state: RootState) => state.layer.present.events.byId[state.eventDrawer.event] ? state.layer.present.events.byId[state.eventDrawer.event].layers : []);
+  const sortedEventLayers = useSelector((state: RootState) => {
+    return eventLayers.sort((a, b) => {
+      const nameA = state.layer.present.byId[a].name.toUpperCase();
+      const nameB = state.layer.present.byId[b].name.toUpperCase();
+      return (nameA < nameB) ? -1 : (nameA > nameB) ? 1 : 0;
+    });
+  });
   const wiggleLayers = useSelector((state: RootState) => getWiggleLayersSelector(state, state.eventDrawer.event));
+  const sortedWiggleLayers = useSelector((state: RootState) => {
+    return wiggleLayers.allIds.filter((id) => !eventLayers.includes(id)).sort((a, b) => {
+      const nameA = state.layer.present.byId[a].name.toUpperCase();
+      const nameB = state.layer.present.byId[b].name.toUpperCase();
+      return (nameA < nameB) ? -1 : (nameA > nameB) ? 1 : 0;
+    });
+  });
   // const dispatch = useDispatch();
 
   // const handleMouseDown = () => {
@@ -38,7 +52,7 @@ const EventDrawerEventTimelines = (): ReactElement => {
                 className='c-event-drawer-event-layers-timeline__layers'>
                 <EventDrawerEventClearSelection />
                 {
-                  eventLayers.map((layer, index) => (
+                  sortedEventLayers.map((layer, index) => (
                     <EventDrawerEventTimeline
                       key={index}
                       id={layer} />
@@ -46,7 +60,7 @@ const EventDrawerEventTimelines = (): ReactElement => {
                 }
                 {/* make space for wiggle layers */}
                 {
-                  wiggleLayers.allIds.filter((id) => !eventLayers.includes(id)).map((layerId) => (
+                  sortedWiggleLayers.map((layerId) => (
                     <div
                       key={layerId}
                       className='c-event-drawer-event__layer-timeline'>

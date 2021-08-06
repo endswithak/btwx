@@ -9,7 +9,14 @@ import EventDrawerEventTimelines from './EventDrawerEventTimelines';
 
 const EventDrawerEvent = (): ReactElement => {
   const eventLayers = useSelector((state: RootState) => state.layer.present.events.byId[state.eventDrawer.event] ? state.layer.present.events.byId[state.eventDrawer.event].layers : []);
-  const scrollPositions = useSelector((state: RootState) => eventLayers.reduce((result: number[], current, index) => {
+  const sortedEventLayers = useSelector((state: RootState) => {
+    return eventLayers.sort((a, b) => {
+      const nameA = state.layer.present.byId[a].name.toUpperCase();
+      const nameB = state.layer.present.byId[b].name.toUpperCase();
+      return (nameA < nameB) ? -1 : (nameA > nameB) ? 1 : 0;
+    });
+  });
+  const scrollPositions = useSelector((state: RootState) => sortedEventLayers.reduce((result: number[], current, index) => {
     const prevY = result[index - 1] ? result[index - 1] : 0;
     let y = 32 + prevY;
     if (state.layer.present.events.byId[state.eventDrawer.event] && state.layer.present.events.byId[state.eventDrawer.event].tweens.byLayer[current]) {
@@ -23,7 +30,7 @@ const EventDrawerEvent = (): ReactElement => {
     }
     return result;
   }, []));
-  const [scrollLayer, setScrollLayer] = useState(eventLayers.length > 0 ? eventLayers[0] : null);
+  const [scrollLayer, setScrollLayer] = useState(sortedEventLayers.length > 0 ? sortedEventLayers[0] : null);
 
   const getScrollLayer = () => {
     const tweenLayers = document.getElementById('event-drawer-event-layers');

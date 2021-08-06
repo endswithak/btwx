@@ -2239,7 +2239,7 @@ export const getWiggleLayersSelector = createSelector(
             const equivalentTweenProps = getEquivalentTweenProps({byId: layersById}, currentLayerItem, equivalentLayerItem);
             const possibleProps = getPossibleProps(currentLayerItem, equivalentLayerItem);
             const availableTweenProps = Object.keys(equivalentTweenProps).reduce((rep, cep) => {
-              const isAvailable = equivalentTweenProps[cep] && !event.tweens.byProp[cep].some((id) => tweensById[id].layer === current && tweensById[id].ease === 'customWiggle') && possibleProps.includes(cep);
+              const isAvailable = !equivalentTweenProps[cep] && !event.tweens.byProp[cep].some((id) => tweensById[id].layer === current && tweensById[id].ease === 'customWiggle') && possibleProps.includes(cep);
               rep = {
                 ...rep,
                 [cep]: isAvailable

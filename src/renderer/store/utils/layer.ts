@@ -2448,7 +2448,27 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
       }
     }
     currentState = siblingTweens.reduce((r, c) => {
-      return {
+      if (isGroupWiggle) {
+        const prevProps = r.tweens.byId[c] as Btwx.Tween;
+        r = {
+          ...r,
+          tweens: {
+            ...r.tweens,
+            byId: {
+              ...r.tweens.byId,
+              [c]: {
+                ...r.tweens.byId[c],
+                ...action.payload,
+                id: prevProps.id,
+                layer: prevProps.layer,
+                destinationLayer: prevProps.destinationLayer,
+                siblings: []
+              }
+            }
+          }
+        }
+      }
+      r = {
         ...r,
         tweens: {
           ...r.tweens,
@@ -2461,6 +2481,7 @@ export const addLayerTween = (state: LayerState, action: AddLayerTween): LayerSt
           }
         }
       }
+      return r;
     }, currentState);
   }
   // handle adding layer to event.layers
@@ -12879,50 +12900,81 @@ export const enableGroupGroupEventTweens = (state: LayerState, action: EnableGro
           const suppliedWiggle = suppliedTweens && other[current][prop].find((c) => c.siblings.some((sib) => groupDescendents.includes(res.tweens.byId[sib].layer) && res.tweens.byId[sib].ease === 'customWiggle'));
           const suppliedNonWiggle = suppliedTweens && other[current][prop].find((c) => c.siblings.some((sib) => groupDescendents.includes(res.tweens.byId[sib].layer) && res.tweens.byId[sib].ease !== 'customWiggle'));
           if (suppliedWiggle) {
+            // const wiggleLayers = getWiggleLayersSelector({layer: { present: res }} as any, current);
+            // const groupWiggleLayers = wiggleLayers.group[action.payload.id].byProp[prop];
+            // const nonSuppliedWiggleLayers = groupWiggleLayers && groupWiggleLayers.filter((lid) => !suppliedWiggle.siblings.some((tid) => res.tweens.byId[tid].layer === lid));
+            // if (nonSuppliedWiggleLayers && nonSuppliedWiggleLayers.length > 0) {
+            //   res = nonSuppliedWiggleLayers.reduce((r, c) => {
+            //     return addLayerTween(r, layerActions.addLayerTween({
+            //       ...suppliedWiggle,
+            //       layer: c,
+            //       destinationLayer: wiggleLayers.group[action.payload.id].map[c],
+            //       prop: prop,
+            //       event: current,
+            //       ease: 'customWiggle'
+            //     }) as AddLayerTween);
+            //   }, res);
+            // }
             const wiggleLayers = getWiggleLayersSelector({layer: { present: res }} as any, current);
-            const groupWiggleLayers = wiggleLayers.group[action.payload.id][prop];
-            const nonSuppliedWiggleLayers = groupWiggleLayers && groupWiggleLayers.filter((lid) => !suppliedWiggle.siblings.some((tid) => res.tweens.byId[tid].layer === lid));
+            const groupWiggleLayers = wiggleLayers.group[action.payload.id].byProp[prop];
+            res = addLayerTween(res, layerActions.addLayerTween({
+              ...suppliedWiggle,
+            }) as AddLayerTween);
+            const nonSuppliedWiggleLayers = groupWiggleLayers && groupWiggleLayers.filter((lid) => !res.tweens.byId[res.tweens.allIds[res.tweens.allIds.length - 1]].siblings.some((tid) => res.tweens.byId[tid].layer === lid));
             if (nonSuppliedWiggleLayers && nonSuppliedWiggleLayers.length > 0) {
               res = nonSuppliedWiggleLayers.reduce((r, c) => {
                 return addLayerTween(r, layerActions.addLayerTween({
                   ...suppliedWiggle,
+                  siblings: [],
                   layer: c,
                   destinationLayer: wiggleLayers.group[action.payload.id].map[c],
-                  prop: current,
+                  prop: prop,
                   event: current,
                   ease: 'customWiggle'
                 }) as AddLayerTween);
               }, res);
             }
-            res = addLayerTween(res, layerActions.addLayerTween({
-              ...suppliedWiggle,
-            }) as AddLayerTween);
           } else {
             if (wiggleTweens.length > 0) {
+              // const wiggleLayers = getWiggleLayersSelector({layer: { present: res }} as any, current);
+              // const groupWiggleLayers = wiggleLayers.group[action.payload.id].byProp[prop];
+              // const nonSuppliedWiggleLayers = groupWiggleLayers && groupWiggleLayers.filter((lid) => !wiggleTweens.some((tid) => res.tweens.byId[tid].layer === lid));
+              // if (nonSuppliedWiggleLayers && nonSuppliedWiggleLayers.length > 0) {
+              //   res = nonSuppliedWiggleLayers.reduce((r, c) => {
+              //     return addLayerTween(r, layerActions.addLayerTween({
+              //       ...suppliedWiggle,
+              //       layer: c,
+              //       destinationLayer: wiggleLayers.group[action.payload.id].map[c],
+              //       prop: prop,
+              //       event: current,
+              //       ease: 'customWiggle'
+              //     }) as AddLayerTween);
+              //   }, res);
+              // }
               const wiggleLayers = getWiggleLayersSelector({layer: { present: res }} as any, current);
-              const groupWiggleLayers = wiggleLayers.group[action.payload.id][prop];
-              const nonSuppliedWiggleLayers = groupWiggleLayers && groupWiggleLayers.filter((lid) => !wiggleTweens.some((tid) => res.tweens.byId[tid].layer === lid));
-              if (nonSuppliedWiggleLayers && nonSuppliedWiggleLayers.length > 0) {
-                res = nonSuppliedWiggleLayers.reduce((r, c) => {
-                  return addLayerTween(r, layerActions.addLayerTween({
-                    ...suppliedWiggle,
-                    layer: c,
-                    destinationLayer: wiggleLayers.group[action.payload.id].map[c],
-                    prop: current,
-                    event: current,
-                    ease: 'customWiggle'
-                  }) as AddLayerTween);
-                }, res);
-              }
+              const groupWiggleLayers = wiggleLayers.group[action.payload.id].byProp[prop];
               res = addLayerTween(res, layerActions.addLayerTween({
                 layer: action.payload.id,
                 destinationLayer: null,
-                siblings: wiggleTweens,
+                // siblings: wiggleTweens,
                 prop: prop,
                 event: current,
                 ...getDefaultTweenProps(prop) as any,
                 ease: 'customWiggle',
               }) as AddLayerTween);
+              const nonSuppliedWiggleLayers = groupWiggleLayers && groupWiggleLayers.filter((lid) => !res.tweens.byId[res.tweens.allIds[res.tweens.allIds.length - 1]].siblings.some((tid) => res.tweens.byId[tid].layer === lid));
+              if (nonSuppliedWiggleLayers && nonSuppliedWiggleLayers.length > 0) {
+                res = nonSuppliedWiggleLayers.reduce((r, c) => {
+                  return addLayerTween(r, layerActions.addLayerTween({
+                    layer: c,
+                    destinationLayer: wiggleLayers.group[action.payload.id].map[c],
+                    prop: prop,
+                    event: current,
+                    ...getDefaultTweenProps(prop) as any,
+                    ease: 'customWiggle'
+                  }) as AddLayerTween);
+                }, res);
+              }
             }
           }
           if (suppliedNonWiggle) {
@@ -12934,7 +12986,7 @@ export const enableGroupGroupEventTweens = (state: LayerState, action: EnableGro
               res = addLayerTween(res, layerActions.addLayerTween({
                 layer: action.payload.id,
                 destinationLayer: null,
-                siblings: nonWiggleTweens,
+                // siblings: nonWiggleTweens,
                 prop: prop,
                 event: current,
                 ease: DEFAULT_TWEEN_EASE,
