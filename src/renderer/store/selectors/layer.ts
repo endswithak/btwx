@@ -2005,7 +2005,7 @@ export const getAllEventOriginTweenLayers = createSelector(
   (layerById, eventsById) => {
     return (layerById as Btwx.Artboard).originForEvents.reduce((result, current) => {
       const event = eventsById[current];
-      event.layers.forEach((id) => {
+      Object.keys(event.tweens.byLayer).forEach((id) => {
         if (!result.includes(id)) {
           result = [...result, id];
         }
