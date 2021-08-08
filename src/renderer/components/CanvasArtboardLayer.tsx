@@ -285,7 +285,9 @@ const CanvasArtboardLayer = (props: CanvasArtboardLayerProps): ReactElement => {
           instanceId: electronInstanceId,
           activeArtboard: eventItem.destination
         }));
-        this.pause(0, false);
+        if (this) {
+          this.pause(0, false);
+        }
       }
     });
   }

@@ -3241,15 +3241,6 @@ export const updateLayerTweensByProp = (state: LayerState, layerId: string, prop
       const tweenEvent = result.events.byId[current];
       const destinationArtboardChildren = layerItem.type === 'Artboard' ? null : getLayerDescendants(result, tweenEvent.destination);
       const destinationEquivalent = layerItem.type === 'Artboard' ? result.byId[tweenEvent.destination] : getDestinationEquivalent(result, layerId, destinationArtboardChildren);
-      ////////////////////////////////////////////////////
-      ////////////////////////////////////////////////////
-      // NEED TO ADD GROUP SHIT HERE
-      ////////////////////////////////////////////////////
-      ////////////////////////////////////////////////////
-      // might not be needed? group tweens added in...
-      // addLayerTween
-      ////////////////////////////////////////////////////
-      ////////////////////////////////////////////////////
       if (destinationEquivalent) {
         const layerItem = result.byId[layerId] as Btwx.Layer;
         const equivalentLayerItem = result.byId[destinationEquivalent.id] as Btwx.Layer;

@@ -39,19 +39,27 @@ export const removePaperLayerEventListeners = (paperLayer) => {
 }
 
 interface AddPaperLayerEventListener {
+  eventItem: Btwx.Event;
   eventTimeline: GSAPTimeline;
   eventListener: Btwx.EventType;
   paperLayer: paper.Item;
 }
 
-export const addPaperLayerEventListener = ({eventTimeline, eventListener, paperLayer}: AddPaperLayerEventListener): any => {
+export const addPaperLayerEventListener = ({eventItem, eventTimeline, eventListener, paperLayer}: AddPaperLayerEventListener): any => {
+  const handleEmptyTimeline = () => {
+    if (eventItem.tweens.allIds.length === 0) {
+      eventTimeline.eventCallback('onComplete')();
+    } else {
+      eventTimeline.play();
+    }
+  }
   const callback = (e: paper.MouseEvent | paper.KeyEvent): void => {
     if (eventListener === 'rightclick') {
       if ((e as any).event.which === 3) {
-        eventTimeline.play();
+        handleEmptyTimeline();
       }
     } else {
-      eventTimeline.play();
+      handleEmptyTimeline();
     }
   };
   paperLayer.on(eventListener === 'rightclick' ? 'click' : eventListener, callback);
@@ -153,6 +161,7 @@ export const applyLayerTimelines = ({layerItem, paperLayer, eventTimelines, even
     // add event listener if event layer
     if (eventItem.layer === layerItem.id) {
       addPaperLayerEventListener({
+        eventItem,
         eventTimeline,
         paperLayer,
         eventListener: eventItem.listener

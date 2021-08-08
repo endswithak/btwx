@@ -33,6 +33,7 @@ const CanvasPreviewEventLayerTimeline = (props: CanvasPreviewEventLayerTimelineP
     if (currentEventListener && (prevEventListener !== currentEventListener && id === eventLayer)) {
       removePaperLayerEventListeners(layerTimeline.data.paperLayer);
       addPaperLayerEventListener({
+        eventItem,
         eventTimeline,
         eventListener: currentEventListener,
         paperLayer: layerTimeline.data.paperLayer
