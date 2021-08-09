@@ -28,6 +28,10 @@ const SidebarLayerGroupEventTweensButton = (props: SidebarLayerGroupEventTweensB
     }
   }
 
+  const handleMouseDown = (e: any) => {
+    e.stopPropagation();
+  }
+
   return (
     !isDragGhost && !groupEventTweensAncestor
     ? <ListItem.Right>
@@ -36,6 +40,7 @@ const SidebarLayerGroupEventTweensButton = (props: SidebarLayerGroupEventTweensB
         id={searchTree ? `search-tree-${id}-group-event-tweens-icon` : `${id}-group-event-tweens-icon`}>
           <ToggleIconButton
             value={groupEventTweens}
+            onMouseDown={handleMouseDown}
             type='checkbox'
             onChange={handleChange}
             size='small'

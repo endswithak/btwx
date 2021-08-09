@@ -18,7 +18,10 @@ const RotationInput = (): ReactElement => {
     if (nextRotation === 360 || nextRotation === -360) {
       nextRotation = 0;
     }
-    dispatch(setLayersRotationThunk({layers: selected, rotation: nextRotation}));
+    dispatch(setLayersRotationThunk({
+      layers: selected,
+      rotation: nextRotation
+    }));
   }
 
   return (
@@ -33,7 +36,8 @@ const RotationInput = (): ReactElement => {
       right={<Form.Text>°</Form.Text>}
       onSubmitSuccess={handleSubmitSuccess}
       submitOnBlur
-      canvasAutoFocus />
+      canvasAutoFocus
+      canDirty />
   );
 }
 

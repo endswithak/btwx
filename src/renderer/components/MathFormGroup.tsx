@@ -19,6 +19,7 @@ export interface MathFormGroupProps {
   inline?: boolean;
   min?: number;
   max?: number;
+  canDirty?: boolean;
   onSubmitSuccess(value: any): void;
   onSubmitError?(): void;
   onBlur?(e: any): void;
@@ -28,7 +29,7 @@ export interface MathFormGroupProps {
 const getFixedValue = (v) => !isNaN(v) ? Number(Number(v).toFixed(2)) : v;
 
 const MathFormGroup = forwardRef(function MathFormGroup(props: MathFormGroupProps, ref: any) {
-  const { controlId, disabled, size, inline, min, max, submitOnBlur, canvasAutoFocus, placeholder, right, rightReadOnly = true, left, leftReadOnly = true, label, value, onSubmitSuccess, onSubmitError, onBlur, onFocus } = props;
+  const { canDirty = false, controlId, disabled, size, inline, min, max, submitOnBlur, canvasAutoFocus, placeholder, right, rightReadOnly = true, left, leftReadOnly = true, label, value, onSubmitSuccess, onSubmitError, onBlur, onFocus } = props;
   const initialEval = evaluateExp(value);
   const validInitialEval = initialEval !== null;
   const aboveRange = max !== undefined && validInitialEval && initialEval > max;
@@ -51,7 +52,7 @@ const MathFormGroup = forwardRef(function MathFormGroup(props: MathFormGroupProp
   }
 
   const handleSubmit = (e: any): void => {
-    if (valid && dirty) {
+    if ((valid && dirty) || (valid && canDirty)) {
       setCurrentValue(getFixedValue(evaluation));
       onSubmitSuccess(Number(evaluation));
     } else {
