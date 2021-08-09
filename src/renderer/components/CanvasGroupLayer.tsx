@@ -18,7 +18,7 @@ interface CanvasGroupLayerProps {
   wheelEvent?: any;
 }
 
-const debug = true;
+const debug = false;
 
 const CanvasGroupLayer = (props: CanvasGroupLayerProps): ReactElement => {
   const { id, paperScope, eventTimelines, wheelEvent, nestedScrollLeft = 0, nestedScrollTop = 0 } = props;
