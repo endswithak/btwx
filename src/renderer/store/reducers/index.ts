@@ -25,6 +25,7 @@ import preferences from './preferences';
 import artboardPresets from './artboardPresets';
 import session from './session';
 import scrollFrameTool from './scrollFrameTool';
+import vectorEditTool from './vectorEditTool';
 
 export const reducers = {
   layer,
@@ -50,7 +51,8 @@ export const reducers = {
   preferences,
   artboardPresets,
   session,
-  scrollFrameTool
+  scrollFrameTool,
+  vectorEditTool
 };
 
 const appReducer = combineReducers(reducers);

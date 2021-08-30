@@ -4,6 +4,19 @@ import { RootState } from '../store/reducers';
 import { updateEventsFrameThunk } from '../store/actions/layer';
 import { paperMain } from '../canvas';
 
+export const eventsFrameId = 'eventsFrame';
+
+export const eventsFrameJSON = `[
+  "Group", {
+    "applyMatrix": true,
+    "name": "Artboard Events",
+    "data": {
+      "id": "${eventsFrameId}",
+      "type": "UIElement"
+    }
+  }
+]`;
+
 const EventsFrame = (): ReactElement => {
   const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
   const activeArtboardEvents = useSelector((state: RootState) => state.layer.present.byId[state.layer.present.activeArtboard] && (state.layer.present.byId[state.layer.present.activeArtboard] as Btwx.Artboard).originForEvents);
@@ -21,7 +34,7 @@ const EventsFrame = (): ReactElement => {
   useEffect(() => {
     dispatch(updateEventsFrameThunk());
     return (): void => {
-      const eventsFrame = paperMain.projects[0].getItem({ data: { id: 'eventsFrame' } });
+      const eventsFrame = paperMain.projects[0].getItem({ data: { id: eventsFrameId } });
       eventsFrame.removeChildren();
     }
   }, [

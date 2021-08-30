@@ -89,11 +89,38 @@ const Canvas = (): ReactElement => {
     );
   };
 
+  const getHitResultLocation = (hitResult: paper.HitResult): (number[][][]|number[]|number)[] => {
+    if (hitResult.type === 'curve' || hitResult.type === 'stroke') {
+      const loc = hitResult.location;
+      const curveSegment1Point = [loc.curve.segment1.point.x, loc.curve.segment1.point.y];
+      const curveSegment1HandleIn = loc.curve.segment1.handleIn ? [loc.curve.segment1.handleIn.x, loc.curve.segment1.handleIn.y] : null;
+      const curveSegment1HandleOut = loc.curve.segment1.handleOut ? [loc.curve.segment1.handleOut.x, loc.curve.segment1.handleOut.y] : null;
+      const curveSegment1 = [curveSegment1Point, curveSegment1HandleIn, curveSegment1HandleOut];
+      const curveSegment2Point = [loc.curve.segment2.point.x, loc.curve.segment2.point.y];
+      const curveSegment2HandleIn = loc.curve.segment2.handleIn ? [loc.curve.segment2.handleIn.x, loc.curve.segment2.handleIn.y] : null;
+      const curveSegment2HandleOut = loc.curve.segment2.handleOut ? [loc.curve.segment2.handleOut.x, loc.curve.segment2.handleOut.y] : null;
+      const curveSegment2 = [curveSegment2Point, curveSegment2HandleIn, curveSegment2HandleOut];
+      const curveLocationCurve = [curveSegment1, curveSegment2];
+      const curveLocationTime = loc.time;
+      const curveLocationPoint = loc.point ? [loc.point.x, loc.point.y] : null;
+      return [curveLocationCurve, curveLocationTime, curveLocationPoint];
+    } else {
+      return null;
+    }
+  };
+
   const handleHitResult = (e: any, eventType: CanvasEventType): void => {
     const { layerHitResult, uiHitResult } = allProjectIndices.reduce((result: CanvasHitResult, current, index) => {
       const project = paperMain.projects[current];
       if (project) {
-        const hitResult = project.hitTest(project.view.getEventPoint(e));
+        const hitResult = project.hitTest(project.view.getEventPoint(e), {
+          fill: true,
+          stroke: false,
+          curves: true,
+          handles: true,
+          segments: true,
+          tolerance: 5
+        });
         if (hitResult) {
           if (current === 0) {
             result.uiHitResult = hitResult;
@@ -132,6 +159,8 @@ const Canvas = (): ReactElement => {
                 return layerHitResult.hitResult.item.data.id;
             }
           })(),
+          hitResultType: layerHitResult.hitResult.type,
+          hitResultLocation: getHitResultLocation(layerHitResult.hitResult),
           projectIndex: layerHitResult.projectIndex,
           eventType: eventType,
           event: e.nativeEvent,
@@ -146,6 +175,7 @@ const Canvas = (): ReactElement => {
         });
         setLayerEvent({
           hitResult: null,
+          rawHitResult: null,
           projectIndex: null,
           eventType: eventType,
           event: e.nativeEvent,

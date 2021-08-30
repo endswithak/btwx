@@ -11,6 +11,7 @@ import { setLayersFillType, setLayersGradientType, setLayersGradientStopColor, s
 import ColorPicker from './ColorPicker';
 import GradientSlider from './GradientSlider';
 import FillTypeSelector from './FillTypeSelector';
+import { gradientFrameId } from './GradientFrame';
 
 const GradientEditor = (): ReactElement => {
   const editorRef = useRef<HTMLDivElement>(null);
@@ -53,7 +54,7 @@ const GradientEditor = (): ReactElement => {
       if ((event.target.id as string).startsWith('canvas')) {
         const eventPoint = paperMain.view.getEventPoint(event);
         const hitResult = paperMain.project.hitTest(eventPoint);
-        if (!hitResult || !(hitResult.item && hitResult.item.data && hitResult.item.data.elementId === 'gradientFrame')) {
+        if (!hitResult || !(hitResult.item && hitResult.item.data && hitResult.item.data.elementId === gradientFrameId)) {
           dispatch(closeGradientEditor());
         }
       } else {

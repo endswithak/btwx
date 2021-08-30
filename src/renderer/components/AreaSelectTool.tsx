@@ -7,6 +7,7 @@ import { setCanvasSelecting } from '../store/actions/canvasSettings';
 import { areaSelectLayers } from '../store/actions/layer';
 import { getLayerProjectIndices } from '../store/selectors/layer';
 import PaperTool, { PaperToolProps } from './PaperTool';
+import { eventsFrameId } from './EventsFrame';
 
 const AreaSelectTool = (props: PaperToolProps): ReactElement => {
   const { tool, downEvent, dragEvent, upEvent } = props;
@@ -91,7 +92,7 @@ const AreaSelectTool = (props: PaperToolProps): ReactElement => {
           const getEvents = () => {
             return paperMain.projects[0].getItems({
               data: (data: any) => {
-                return data && data.elementId && data.elementId === 'eventsFrame';
+                return data && data.elementId && data.elementId === eventsFrameId;
               },
               overlapping: areaSelectBounds
             }).reverse().reduce((result, current) => {

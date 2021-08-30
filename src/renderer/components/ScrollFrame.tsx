@@ -6,6 +6,19 @@ import { updateScrollFrame } from '../store/actions/layer';
 import { disableScrollFrameTool } from '../store/actions/scrollFrameTool';
 import { paperMain } from '../canvas';
 
+export const scrollFrameId = 'scrollFrame';
+
+export const scrollFrameJSON = `[
+  "Group", {
+    "applyMatrix": true,
+    "name": "Scroll Frame",
+    "data": {
+      "id": "${scrollFrameId}",
+      "type": "UIElement"
+    }
+  }
+]`;
+
 const ScrollFrame = (): ReactElement => {
   const themeName = useSelector((state: RootState) => state.preferences.theme);
   const scrollFrameId = useSelector((state: RootState) => state.scrollFrameTool.id);
@@ -17,7 +30,7 @@ const ScrollFrame = (): ReactElement => {
     if ((event.target.id as string).startsWith('canvas')) {
       const eventPoint = paperMain.view.getEventPoint(event);
       const hitResult = paperMain.project.hitTest(eventPoint);
-      if (!hitResult || !(hitResult.item && hitResult.item.data && hitResult.item.data.elementId === 'scrollFrame')) {
+      if (!hitResult || !(hitResult.item && hitResult.item.data && hitResult.item.data.elementId === scrollFrameId)) {
         dispatch(disableScrollFrameTool());
       }
     } else if (event.target.id !== 'control-scroll-resize') {
@@ -32,7 +45,7 @@ const ScrollFrame = (): ReactElement => {
       themeName
     });
     return () => {
-      const scrollFrame = paperMain.projects[0].getItem({ data: { id: 'scrollFrame' } });
+      const scrollFrame = paperMain.projects[0].getItem({ data: { id: scrollFrameId } });
       scrollFrame.removeChildren();
     }
   }, [themeName, scrollFrameBounds, zoom, scrollFrameId]);

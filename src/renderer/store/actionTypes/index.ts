@@ -20,6 +20,7 @@ import { KeyBindingsTypes } from './keyBindings';
 import { PreferencesTypes } from './preferences';
 import { ArtboardPresetsTypes } from './artboardPresets';
 import { SessionTypes } from './session';
+import { VectorEditToolTypes } from './vectorEditTool';
 
 export type RootAction = ArtboardPresetEditorTypes |
                          ArtboardPresetsTypes |
@@ -42,4 +43,5 @@ export type RootAction = ArtboardPresetEditorTypes |
                          FontFamilySelectorTypes |
                          KeyBindingsTypes |
                          PreferencesTypes |
-                         SessionTypes;
+                         SessionTypes |
+                         VectorEditToolTypes;

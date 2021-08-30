@@ -6,6 +6,12 @@ import { setLayerHover, setLayerActiveGradientStop, selectLayers, deselectLayers
 import { getAllArtboardItems } from '../store/selectors/layer';
 import { openContextMenu } from '../store/actions/contextMenu';
 import { setEventDrawerEventThunk, setEventDrawerEventHoverThunk } from '../store/actions/eventDrawer';
+import { selectionFrameId } from './SelectionFrame';
+import { scrollFrameId } from './ScrollFrame';
+import { gradientFrameId } from './GradientFrame';
+import { eventsFrameId } from './EventsFrame';
+import { namesFrameId } from './NamesFrame';
+import { vectorEditFrameId } from './VectorEditFrame';
 
 export const getSelectionFrameCursor = (handle): Btwx.CanvasCursor => {
   switch(handle) {
@@ -58,6 +64,10 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
   const eventDrawerHover = useSelector((state: RootState) => state.eventDrawer.eventHover);
   const eventDrawerEvent = useSelector((state: RootState) => state.eventDrawer.event);
   const gradientEditorProp = useSelector((state: RootState) => state.gradientEditor.prop);
+  const vectorEditToolLayerId = useSelector((state: RootState) => state.vectorEditTool.layerId);
+  const vectorEditToolCurveHover = useSelector((state: RootState) => state.vectorEditTool.curveHover);
+  const vectorEditToolSelectedSegment = useSelector((state: RootState) => state.vectorEditTool.selectedSegment);
+  const vectorEditToolSelectedSegmentType = useSelector((state: RootState) => state.vectorEditTool.selectedSegmentType);
   const dispatch = useDispatch();
 
   const handleMouseMove = (): void => {
@@ -83,7 +93,10 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
     } else {
       const interactiveType = uiEvent.hitResult.item.data.interactiveType;
       switch(uiEvent.hitResult.item.data.elementId) {
-        case 'scrollFrame': {
+        case vectorEditFrameId: {
+          return;
+        }
+        case scrollFrameId: {
           if (hover) {
             dispatch(setLayerHover({
               id: null
@@ -112,7 +125,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           }
           break;
         }
-        case 'selectionFrame': {
+        case selectionFrameId: {
           if (hover) {
             dispatch(setLayerHover({
               id: null
@@ -165,7 +178,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           }
           break;
         }
-        case 'gradientFrame': {
+        case gradientFrameId: {
           if (hover) {
             dispatch(setLayerHover({
               id: null
@@ -180,7 +193,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           }
           break;
         }
-        case 'eventsFrame': {
+        case eventsFrameId: {
           if (interactiveType && eventDrawerHover !== interactiveType) {
             dispatch(setEventDrawerEventHoverThunk({
               id: interactiveType
@@ -193,7 +206,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           }
           break;
         }
-        case 'namesFrame': {
+        case namesFrameId: {
           if (interactiveType && hover !== interactiveType) {
             dispatch(setLayerHover({
               id: interactiveType
@@ -224,7 +237,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
     } else {
       const interactiveType = uiEvent.hitResult.item.data.interactiveType;
       switch(uiEvent.hitResult.item.data.elementId) {
-        case 'eventsFrame': {
+        case eventsFrameId: {
           const isSelected = selectedEvents.includes(interactiveType);
           if (uiEvent.event.shiftKey) {
             if (isSelected) {
@@ -246,7 +259,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           }
           break;
         }
-        case 'gradientFrame': {
+        case gradientFrameId: {
           if (interactiveType && interactiveType !== 'connector') {
             dispatch(setLayerActiveGradientStop({
               id: selected[0],
@@ -256,7 +269,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           }
           break;
         }
-        case 'namesFrame': {
+        case namesFrameId: {
           if (interactiveType) {
             const artboardItem = artboardItems[interactiveType];
             if (uiEvent.event.shiftKey) {
@@ -296,7 +309,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
     } else {
       const interactiveType = uiEvent.hitResult.item.data.interactiveType;
       switch(uiEvent.hitResult.item.data.elementId) {
-        case 'eventsFrame': {
+        case eventsFrameId: {
           if (interactiveType && eventDrawerEvent !== interactiveType) {
             dispatch(setEventDrawerEventThunk({
               id: interactiveType
@@ -317,7 +330,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
     } else {
       const interactiveType = uiEvent.hitResult.item.data.interactiveType;
       switch(uiEvent.hitResult.item.data.elementId) {
-        case 'eventsFrame': {
+        case eventsFrameId: {
           if (interactiveType) {
             (window as any).api.openEventContextMenu(JSON.stringify({
               instanceId,
@@ -347,7 +360,7 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           }
           break;
         }
-        case 'namesFrame': {
+        case namesFrameId: {
           if (interactiveType) {
             dispatch(openContextMenu({
               type: 'layer',

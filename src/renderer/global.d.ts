@@ -164,6 +164,8 @@ declare namespace Btwx {
 
   type SnapZoneType = 'left' | 'right' | 'top' | 'bottom' | 'center' | 'middle';
 
+  type SelectedSegmentType = 'point' | 'handleIn' | 'handleOut';
+
   interface SnapZones {
     top: paper.Rectangle;
     middle: paper.Rectangle;

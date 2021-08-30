@@ -5,6 +5,19 @@ import { updateNameFrame } from '../store/actions/layer';
 import { getAllArtboardItems } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
 
+export const namesFrameId = 'namesFrame';
+
+export const namesFrameJSON = `[
+  "Group", {
+    "applyMatrix": true,
+    "name": "Name Frame",
+    "data":{
+      "id": "${namesFrameId}",
+      "type": "UIElement"
+    }
+  }
+]`;
+
 const NamesFrame = (): ReactElement => {
   const zoom = useSelector((state: RootState) => state.documentSettings.zoom);
   const artboards = useSelector((state: RootState) => getAllArtboardItems(state));
@@ -12,8 +25,8 @@ const NamesFrame = (): ReactElement => {
   useEffect(() => {
     updateNameFrame(artboards);
     return (): void => {
-      const activeArtboardFrame = paperMain.projects[0].getItem({ data: { id: 'namesFrame' } });
-      activeArtboardFrame.removeChildren();
+      const namesFrame = paperMain.projects[0].getItem({ data: { id: namesFrameId } });
+      namesFrame.removeChildren();
     }
   }, [zoom, artboards]);
 

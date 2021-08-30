@@ -8,6 +8,7 @@ import { setCanvasDragging } from '../store/actions/canvasSettings';
 import { moveLayersBy, duplicateLayers, updateSelectionFrame } from '../store/actions/layer';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
+import { selectionFrameId } from './SelectionFrame';
 
 const DragTool = (props: PaperToolProps): ReactElement => {
   const { tool, downEvent, dragEvent, upEvent, keyDownEvent, keyUpEvent } = props;
@@ -122,7 +123,7 @@ const DragTool = (props: PaperToolProps): ReactElement => {
       if (keyDownEvent && isEnabled && originalSelection && dragging && toBounds) {
         if (keyDownEvent.key === 'alt') {
           updateDuplicatePreview(true);
-          const selectionFrame = paperMain.project.getItem({ data: { id: 'selectionFrame' } });
+          const selectionFrame = paperMain.project.getItem({ data: { id: selectionFrameId } });
           selectionFrame.removeChildren();
           originalSelection.forEach((item, index) => {
             const paperLayer = getPaperLayer(item.id, item.projectIndex);

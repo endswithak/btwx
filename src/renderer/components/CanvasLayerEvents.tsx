@@ -7,10 +7,13 @@ import { openContextMenu } from '../store/actions/contextMenu';
 import { setLayerHover, deepSelectLayerThunk, selectLayers, deselectLayers, deselectAllLayers, setActiveArtboard, setLayerTreeScroll, showLayersChildren } from '../store/actions/layer';
 import { openTextEditorThunk } from '../store/actions/textEditor';
 import { setTextSettings } from '../store/actions/textSettings';
+import { enableVectorEditToolThunk, disableVectorEditTool, setVectorEditToolCurveHover } from '../store/actions/vectorEditTool';
 
 interface CanvasLayerEventsProps {
   layerEvent: {
     hitResult: string;
+    hitResultType: string;
+    hitResultLocation: any;
     projectIndex: number;
     empty: boolean;
     eventType: 'mouseMove' | 'mouseDown' | 'mouseUp' | 'doubleClick' | 'contextMenu';
@@ -31,12 +34,22 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   // const selecting = useSelector((state: RootState) => state.canvasSettings.selecting);
   const dragHandle = useSelector((state: RootState) => state.canvasSettings.dragHandle);
   const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
+  const vectorEditToolEnabled = useSelector((state: RootState) => state.vectorEditTool.isEnabled);
+  const vectorEditToolLayerId = useSelector((state: RootState) => state.vectorEditTool.layerId);
+  const vectorEditToolCurveHover = useSelector((state: RootState) => state.vectorEditTool.curveHover);
+  const vectorEditToolSelectedSegment = useSelector((state: RootState) => state.vectorEditTool.selectedSegment);
+  const vectorEditToolSelectedSegmentType = useSelector((state: RootState) => state.vectorEditTool.selectedSegmentType);
   const dispatch = useDispatch();
 
   const handleMouseMove = (): void => {
     if (layerEvent.empty) {
       if (hover) {
         dispatch(setLayerHover({id: null}));
+      }
+      if (vectorEditToolEnabled && vectorEditToolCurveHover) {
+        dispatch(setVectorEditToolCurveHover({
+          curveHover: null
+        }));
       }
     } else {
       if (nearestScopeAncestor && nearestScopeAncestor.type === 'Artboard') {
@@ -58,6 +71,11 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
           if (deepSelectItem && (hover !== deepSelectItem.id)) {
             dispatch(setLayerHover({id: deepSelectItem.id}));
           }
+          if (vectorEditToolEnabled && deepSelectItem.type === 'Shape' && layerEvent.hitResultType === 'curve') {
+            dispatch(setVectorEditToolCurveHover({
+              curveHover: layerEvent.hitResultLocation
+            }));
+          }
           if (activeTool !== 'Drag' || (activeTool === 'Drag' && dragHandle)) {
             dispatch(setCanvasActiveTool({
               activeTool: 'Drag',
@@ -69,6 +87,11 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
       } else {
         if (nearestScopeAncestor && (hover !== nearestScopeAncestor.id)) {
           dispatch(setLayerHover({id: nearestScopeAncestor.id}));
+        }
+        if (vectorEditToolEnabled && nearestScopeAncestor.type === 'Shape' && layerEvent.hitResultType === 'curve') {
+          dispatch(setVectorEditToolCurveHover({
+            curveHover: layerEvent.hitResultLocation
+          }));
         }
         if (activeTool !== 'Drag' || (activeTool === 'Drag' && dragHandle)) {
           dispatch(setCanvasActiveTool({
@@ -85,6 +108,9 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
     if (layerEvent.empty) {
       if (selected.length > 0 && !layerEvent.event.shiftKey) {
         dispatch(deselectAllLayers());
+      }
+      if (vectorEditToolEnabled) {
+        dispatch(disableVectorEditTool());
       }
     } else {
       if (layerEvent.event.shiftKey) {
@@ -200,6 +226,9 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
       } else {
         if (layerItem.type === 'Text') {
           dispatch(openTextEditorThunk(layerItem.id, layerEvent.projectIndex));
+        }
+        if (layerItem.type === 'Shape' && vectorEditToolLayerId !== layerItem.id) {
+          dispatch(enableVectorEditToolThunk(layerItem.id, layerEvent.projectIndex));
         }
       }
     }

@@ -33,6 +33,15 @@ import { openGradientEditor, closeGradientEditor } from './gradientEditor';
 import { RootState } from '../reducers';
 import { getContent, getParagraphs, getLeading } from '../../components/CanvasTextLayer';
 import { getIconData } from '../../components/Icon';
+import { measureFrameId } from '../../components/MeasureFrame';
+import { activeArtboardFrameId } from '../../components/ActiveArtboardFrame';
+import { selectionFrameId } from '../../components/SelectionFrame';
+import { scrollFrameId } from '../../components/ScrollFrame';
+import { gradientFrameId } from '../../components/GradientFrame';
+import { eventsFrameId } from '../../components/EventsFrame';
+import { hoverFrameId } from '../../components/HoverFrame';
+import { namesFrameId } from '../../components/NamesFrame';
+import { vectorEditFrameId } from '../../components/VectorEditFrame';
 
 import {
   ADD_ARTBOARD,
@@ -7195,7 +7204,7 @@ interface UpdateGradientFrame {
 }
 
 export const updateGradientFrame = ({origin, destination, themeName}: UpdateGradientFrame): void => {
-  const gradientFrame = paperMain.project.getItem({ data: { id: 'gradientFrame' } });
+  const gradientFrame = paperMain.project.getItem({ data: { id: gradientFrameId } });
   gradientFrame.removeChildren();
   if (origin && destination) {
     paperMain.activate();
@@ -7234,7 +7243,7 @@ export const updateGradientFrame = ({origin, destination, themeName}: UpdateGrad
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'origin',
-        elementId: 'gradientFrame',
+        elementId: gradientFrameId,
         stopIndex: origin.index
       }
     });
@@ -7251,7 +7260,7 @@ export const updateGradientFrame = ({origin, destination, themeName}: UpdateGrad
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'origin',
-        elementId: 'gradientFrame',
+        elementId: gradientFrameId,
         stopIndex: origin.index
       }
     });
@@ -7263,7 +7272,7 @@ export const updateGradientFrame = ({origin, destination, themeName}: UpdateGrad
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'origin',
-        elementId: 'gradientFrame',
+        elementId: gradientFrameId,
         stopIndex: origin.index
       }
     });
@@ -7274,7 +7283,7 @@ export const updateGradientFrame = ({origin, destination, themeName}: UpdateGrad
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'destination',
-        elementId: 'gradientFrame',
+        elementId: gradientFrameId,
         stopIndex: destination.index
       }
     });
@@ -7291,7 +7300,7 @@ export const updateGradientFrame = ({origin, destination, themeName}: UpdateGrad
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'destination',
-        elementId: 'gradientFrame',
+        elementId: gradientFrameId,
         stopIndex: destination.index
       }
     });
@@ -7303,7 +7312,7 @@ export const updateGradientFrame = ({origin, destination, themeName}: UpdateGrad
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'destination',
-        elementId: 'gradientFrame',
+        elementId: gradientFrameId,
         stopIndex: destination.index
       }
     });
@@ -7316,7 +7325,7 @@ export const updateGradientFrame = ({origin, destination, themeName}: UpdateGrad
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'connector',
-        elementId: 'gradientFrame'
+        elementId: gradientFrameId
       }
     });
     const gradientFrameLineLight = new paperMain.Path.Line({
@@ -7328,7 +7337,7 @@ export const updateGradientFrame = ({origin, destination, themeName}: UpdateGrad
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'connector',
-        elementId: 'gradientFrame'
+        elementId: gradientFrameId
       }
     });
     const gradientFrameOriginHandle = new paperMain.Group({
@@ -7337,7 +7346,7 @@ export const updateGradientFrame = ({origin, destination, themeName}: UpdateGrad
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'origin',
-        elementId: 'gradientFrame',
+        elementId: gradientFrameId,
         stopIndex: origin.index
       },
       insert: false,
@@ -7349,7 +7358,7 @@ export const updateGradientFrame = ({origin, destination, themeName}: UpdateGrad
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'destination',
-        elementId: 'gradientFrame',
+        elementId: gradientFrameId,
         stopIndex: destination.index
       },
       insert: false,
@@ -7361,7 +7370,7 @@ export const updateGradientFrame = ({origin, destination, themeName}: UpdateGrad
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'connector',
-        elementId: 'gradientFrame'
+        elementId: gradientFrameId
       },
       insert: false,
       children: [gradientFrameLineDark, gradientFrameLineLight]
@@ -7372,7 +7381,7 @@ export const updateGradientFrame = ({origin, destination, themeName}: UpdateGrad
         type: 'UIElement',
         interactive: false,
         interactiveType: null,
-        elementId: 'gradientFrame'
+        elementId: gradientFrameId
       },
       children: [gradientFrameLines, gradientFrameOriginHandle, gradientFrameDestinationHandle],
       parent: gradientFrame
@@ -7390,7 +7399,7 @@ export const updateActiveArtboardFrame = ({bounds, themeName}: UpdateActiveArtbo
     paperMain.projects[0].activate();
   }
   const theme = getTheme(themeName);
-  const activeArtboardFrame = paperMain.project.getItem({ data: { id: 'activeArtboardFrame' } });
+  const activeArtboardFrame = paperMain.project.getItem({ data: { id: activeArtboardFrameId } });
   activeArtboardFrame.removeChildren();
   if (bounds) {
     const topLeft = bounds.topLeft;
@@ -7426,7 +7435,7 @@ export const updateNameFrame = (artboards: { [id: string]: Btwx.Artboard }): voi
   if (paperMain.project.activeLayer.data.id !== 'ui') {
     paperMain.projects[0].activate();
   }
-  const namesFrame = paperMain.project.getItem({ data: { id: 'namesFrame' } });
+  const namesFrame = paperMain.project.getItem({ data: { id: namesFrameId } });
   namesFrame.removeChildren();
   if (artboards) {
     Object.keys(artboards).forEach((id: string) => {
@@ -7445,7 +7454,7 @@ export const updateNameFrame = (artboards: { [id: string]: Btwx.Artboard }): voi
           type: 'UIElementChild',
           interactive: true,
           interactiveType: artboardItem.id,
-          elementId: 'namesFrame'
+          elementId: namesFrameId
         }
       });
       const textBackground = new paperMain.Path.Rectangle({
@@ -7458,7 +7467,7 @@ export const updateNameFrame = (artboards: { [id: string]: Btwx.Artboard }): voi
           type: 'UIElementChild',
           interactive: true,
           interactiveType: artboardItem.id,
-          elementId: 'namesFrame'
+          elementId: namesFrameId
         }
       });
       const textContainer = new paperMain.Group({
@@ -7468,7 +7477,7 @@ export const updateNameFrame = (artboards: { [id: string]: Btwx.Artboard }): voi
           type: 'UIElementChild',
           interactive: true,
           interactiveType: artboardItem.id,
-          elementId: 'namesFrame'
+          elementId: namesFrameId
         }
       });
     });
@@ -7486,7 +7495,7 @@ export const updateHoverFrame = ({hoverItem, themeName, artboardItem}: UpdateHov
     paperMain.projects[0].activate();
   }
   const theme = getTheme(themeName);
-  const hoverFrame = paperMain.project.getItem({ data: { id: 'hoverFrame' } });
+  const hoverFrame = paperMain.project.getItem({ data: { id: hoverFrameId } });
   hoverFrame.removeChildren();
   if (hoverItem) {
     const hoverFrameConstants = {
@@ -7579,7 +7588,6 @@ export const updateHoverFrame = ({hoverItem, themeName, artboardItem}: UpdateHov
 
 interface UpdateSelectionFrame {
   bounds: paper.Rectangle;
-  themeName: Btwx.ThemeName;
   handle?: Btwx.SelectionFrameHandle;
   rotation?: number;
   lineHandles?: {
@@ -7588,12 +7596,11 @@ interface UpdateSelectionFrame {
   };
 }
 
-export const updateSelectionFrame = ({bounds, themeName, handle = 'all', rotation, lineHandles}: UpdateSelectionFrame): void => {
+export const updateSelectionFrame = ({bounds, handle = 'all', rotation, lineHandles}: UpdateSelectionFrame): void => {
   if (paperMain.project.activeLayer.data.id !== 'ui') {
     paperMain.projects[0].activate();
   }
-  const theme = getTheme(themeName);
-  const selectionFrame = paperMain.project.getItem({ data: { id: 'selectionFrame' } });
+  const selectionFrame = paperMain.project.getItem({ data: { id: selectionFrameId } });
   selectionFrame.removeChildren();
   if (bounds) {
     const frameWithResizeHandles = new paperMain.Group({
@@ -7601,7 +7608,7 @@ export const updateSelectionFrame = ({bounds, themeName, handle = 'all', rotatio
         type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
-        elementId: 'selectionFrame'
+        elementId: selectionFrameId
       },
       parent: selectionFrame
     });
@@ -7625,7 +7632,7 @@ export const updateSelectionFrame = ({bounds, themeName, handle = 'all', rotatio
         type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
-        elementId: 'selectionFrame'
+        elementId: selectionFrameId
       },
       parent: frameWithResizeHandles
     });
@@ -7639,7 +7646,7 @@ export const updateSelectionFrame = ({bounds, themeName, handle = 'all', rotatio
         type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
-        elementId: 'selectionFrame'
+        elementId: selectionFrameId
       },
       parent: baseFrame
     });
@@ -7653,7 +7660,7 @@ export const updateSelectionFrame = ({bounds, themeName, handle = 'all', rotatio
         type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
-        elementId: 'selectionFrame'
+        elementId: selectionFrameId
       },
       parent: baseFrame
     });
@@ -7665,7 +7672,7 @@ export const updateSelectionFrame = ({bounds, themeName, handle = 'all', rotatio
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'move',
-        elementId: 'selectionFrame'
+        elementId: selectionFrameId
       },
       parent: selectionFrame
     });
@@ -7681,7 +7688,7 @@ export const updateSelectionFrame = ({bounds, themeName, handle = 'all', rotatio
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'lineFrom',
-          elementId: 'selectionFrame'
+          elementId: selectionFrameId
         }
       });
       fromHandle.position = new paperMain.Point(lineHandles.from.x, lineHandles.from.y);
@@ -7694,7 +7701,7 @@ export const updateSelectionFrame = ({bounds, themeName, handle = 'all', rotatio
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'lineTo',
-          elementId: 'selectionFrame'
+          elementId: selectionFrameId
         }
       });
       toHandle.position = new paperMain.Point(lineHandles.to.x, lineHandles.to.y);
@@ -7708,7 +7715,7 @@ export const updateSelectionFrame = ({bounds, themeName, handle = 'all', rotatio
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'topLeft',
-          elementId: 'selectionFrame'
+          elementId: selectionFrameId
         }
       });
       topLeftHandle.position = baseFrame.bounds.topLeft;
@@ -7721,7 +7728,7 @@ export const updateSelectionFrame = ({bounds, themeName, handle = 'all', rotatio
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'topCenter',
-          elementId: 'selectionFrame'
+          elementId: selectionFrameId
         }
       });
       topCenterHandle.position = baseFrame.bounds.topCenter;
@@ -7734,7 +7741,7 @@ export const updateSelectionFrame = ({bounds, themeName, handle = 'all', rotatio
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'topRight',
-          elementId: 'selectionFrame'
+          elementId: selectionFrameId
         }
       });
       topRightHandle.position = baseFrame.bounds.topRight;
@@ -7747,7 +7754,7 @@ export const updateSelectionFrame = ({bounds, themeName, handle = 'all', rotatio
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'bottomLeft',
-          elementId: 'selectionFrame'
+          elementId: selectionFrameId
         }
       });
       bottomLeftHandle.position = baseFrame.bounds.bottomLeft;
@@ -7760,7 +7767,7 @@ export const updateSelectionFrame = ({bounds, themeName, handle = 'all', rotatio
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'bottomCenter',
-          elementId: 'selectionFrame'
+          elementId: selectionFrameId
         }
       });
       bottomCenterHandle.position = baseFrame.bounds.bottomCenter;
@@ -7773,7 +7780,7 @@ export const updateSelectionFrame = ({bounds, themeName, handle = 'all', rotatio
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'bottomRight',
-          elementId: 'selectionFrame'
+          elementId: selectionFrameId
         }
       });
       bottomRightHandle.position = baseFrame.bounds.bottomRight;
@@ -7786,7 +7793,7 @@ export const updateSelectionFrame = ({bounds, themeName, handle = 'all', rotatio
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'rightCenter',
-          elementId: 'selectionFrame'
+          elementId: selectionFrameId
         }
       });
       rightCenterHandle.position = baseFrame.bounds.rightCenter;
@@ -7799,7 +7806,7 @@ export const updateSelectionFrame = ({bounds, themeName, handle = 'all', rotatio
           type: 'UIElementChild',
           interactive: true,
           interactiveType: 'leftCenter',
-          elementId: 'selectionFrame'
+          elementId: selectionFrameId
         }
       });
       leftCenterHandle.position = baseFrame.bounds.leftCenter;
@@ -7815,6 +7822,195 @@ export const updateSelectionFrame = ({bounds, themeName, handle = 'all', rotatio
   }
 };
 
+interface UpdateVectorEditFrame {
+  layerId: string;
+  themeName: Btwx.ThemeName;
+  pathData: string;
+  curveHover: paper.CurveLocation;
+  segments: paper.Segment[];
+  selectedSegment: paper.Segment;
+  selectedSegmentType: Btwx.SelectedSegmentType;
+}
+
+export const updateVectorEditFrame = ({layerId, themeName, pathData, curveHover, segments, selectedSegment, selectedSegmentType}: UpdateVectorEditFrame): void => {
+  if (paperMain.project.activeLayer.data.id !== 'ui') {
+    paperMain.projects[0].activate();
+  }
+  const theme = getTheme(themeName);
+  const vectorEditFrame = paperMain.project.getItem({ data: { id: vectorEditFrameId } });
+  vectorEditFrame.removeChildren();
+  if (pathData) {
+    const createHandle = (type: 'In' | 'Out') => {
+      const handlePoint = type === 'In' ? selectedSegment.handleIn : selectedSegment.handleOut;
+      const handleId = `handle${type}`;
+      const strokeWidth = selectedSegmentType === handleId ? 2 : 1;
+      const handleGroup = new paperMain.Group({
+        data: {
+          type: 'UIElementChild',
+          interactive: false,
+          interactiveType: null,
+          elementId: vectorEditFrameId
+        },
+        children: [
+          // connector line
+          new paperMain.Group({
+            opacity: 0.33,
+            data: {
+              type: 'UIElementChild',
+              interactive: false,
+              interactiveType: null,
+              elementId: vectorEditFrameId
+            },
+            children: [
+              new paperMain.Path.Line({
+                from: selectedSegment.point,
+                to: selectedSegment.point.add(handlePoint),
+                strokeColor: '#fff',
+                strokeWidth: 1 / paperMain.view.zoom,
+                blendMode: 'multiply',
+                data: {
+                  type: 'UIElementChild',
+                  interactive: false,
+                  interactiveType: null,
+                  elementId: vectorEditFrameId
+                }
+              }),
+              new paperMain.Path.Line({
+                from: selectedSegment.point,
+                to: selectedSegment.point.add(handlePoint),
+                strokeColor: '#999',
+                strokeWidth: 1 / paperMain.view.zoom,
+                blendMode: 'difference',
+                data: {
+                  type: 'UIElementChild',
+                  interactive: false,
+                  interactiveType: null,
+                  elementId: vectorEditFrameId
+                }
+              })
+            ]
+          })
+        ],
+        parent: vectorEditFrame
+      });
+      const handle = new paperMain.Path.Ellipse({
+        center: selectedSegment.point.add(handlePoint),
+        radius: new paperMain.Size(3, 3),
+        fillColor: '#fff',
+        strokeColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.24 },
+        strokeWidth: strokeWidth / paperMain.view.zoom,
+        shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.5 },
+        shadowBlur: 1 / paperMain.view.zoom,
+        data: {
+          type: 'UIElementChild',
+          interactive: true,
+          interactiveType: handleId,
+          elementId: vectorEditFrameId
+        },
+        parent: handleGroup
+      })
+      handle.scaling.x = 1 / paperMain.view.zoom;
+      handle.scaling.y = 1 / paperMain.view.zoom;
+    }
+    // base frame
+    const baseFrame = new paperMain.Group({
+      opacity: 0.33,
+      data: {
+        type: 'UIElementChild',
+        interactive: false,
+        interactiveType: null,
+        elementId: vectorEditFrameId
+      },
+      children: [
+        new paperMain.Path({
+          pathData: pathData,
+          strokeColor: '#fff',
+          strokeWidth: 1 / paperMain.view.zoom,
+          blendMode: 'multiply',
+          data: {
+            type: 'UIElementChild',
+            interactive: false,
+            interactiveType: null,
+            elementId: vectorEditFrameId
+          }
+        }),
+        new paperMain.Path({
+          pathData: pathData,
+          strokeColor: '#999',
+          strokeWidth: 1 / paperMain.view.zoom,
+          blendMode: 'difference',
+          data: {
+            type: 'UIElementChild',
+            interactive: false,
+            interactiveType: null,
+            elementId: vectorEditFrameId
+          }
+        })
+      ],
+      parent: vectorEditFrame
+    })
+    if (curveHover) {
+      const curveHoverPath = new paperMain.Path({
+        segments: [curveHover.curve.segment1, curveHover.curve.segment2],
+        strokeColor: theme.palette.primary,
+        strokeWidth: 2 / paperMain.view.zoom,
+        data: {
+          type: 'UIElementChild',
+          interactive: false,
+          interactiveType: null,
+          elementId: vectorEditFrameId
+        },
+        parent: vectorEditFrame
+      });
+      const curveHoverPoint = new paperMain.Path.Ellipse({
+        center: curveHover.point,
+        radius: new paperMain.Size(3, 3),
+        fillColor: theme.palette.primary,
+        data: {
+          type: 'UIElementChild',
+          interactive: false,
+          interactiveType: null,
+          elementId: vectorEditFrameId
+        },
+        parent: vectorEditFrame
+      })
+      curveHoverPoint.scaling.x = 1 / paperMain.view.zoom;
+      curveHoverPoint.scaling.y = 1 / paperMain.view.zoom;
+    }
+    if (selectedSegment && selectedSegment.handleIn) {
+      createHandle('In');
+    }
+    if (selectedSegment && selectedSegment.handleOut) {
+      createHandle('Out');
+    }
+    if (segments && segments.length > 0) {
+      for (let i = 0; i < segments.length; i++) {
+        const segment = segments[i];
+        const isSelected = selectedSegment && selectedSegment.point.equals(segment.point) && selectedSegmentType === 'point';
+        const strokeWidth = isSelected ? 2 : 1;
+        const segmentPoint = new paperMain.Path.Ellipse({
+          center: segment.point,
+          radius: new paperMain.Size(4, 4),
+          fillColor: '#fff',
+          strokeColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.24 },
+          strokeWidth: strokeWidth / paperMain.view.zoom,
+          shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.5 },
+          shadowBlur: 1 / paperMain.view.zoom,
+          data: {
+            type: 'UIElementChild',
+            interactive: true,
+            interactiveType: 'segmentPoint',
+            elementId: vectorEditFrameId
+          },
+          parent: vectorEditFrame
+        });
+        segmentPoint.scaling.x = 1 / paperMain.view.zoom;
+        segmentPoint.scaling.y = 1 / paperMain.view.zoom;
+      }
+    }
+  }
+};
+
 interface UpdateScrollFrame {
   bounds: paper.Rectangle;
   themeName: Btwx.ThemeName;
@@ -7826,7 +8022,7 @@ export const updateScrollFrame = ({bounds, themeName, handle = 'all'}: UpdateScr
     paperMain.projects[0].activate();
   }
   const theme = getTheme(themeName);
-  const scrollFrame = paperMain.project.getItem({ data: { id: 'scrollFrame' } });
+  const scrollFrame = paperMain.project.getItem({ data: { id: scrollFrameId } });
   scrollFrame.removeChildren();
   if (bounds) {
     const frameWithResizeHandles = new paperMain.Group({
@@ -7834,7 +8030,7 @@ export const updateScrollFrame = ({bounds, themeName, handle = 'all'}: UpdateScr
         type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
-        elementId: 'scrollFrame'
+        elementId: scrollFrameId
       },
       parent: scrollFrame
     });
@@ -7857,7 +8053,7 @@ export const updateScrollFrame = ({bounds, themeName, handle = 'all'}: UpdateScr
         type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
-        elementId: 'scrollFrame'
+        elementId: scrollFrameId
       },
       parent: frameWithResizeHandles,
       children: [
@@ -7870,7 +8066,7 @@ export const updateScrollFrame = ({bounds, themeName, handle = 'all'}: UpdateScr
             type: 'UIElementChild',
             interactive: false,
             interactiveType: null,
-            elementId: 'scrollFrame'
+            elementId: scrollFrameId
           }
         })
       ]
@@ -7881,7 +8077,7 @@ export const updateScrollFrame = ({bounds, themeName, handle = 'all'}: UpdateScr
         type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
-        elementId: 'scrollFrame'
+        elementId: scrollFrameId
       },
       parent: frameWithResizeHandles
     });
@@ -7895,7 +8091,7 @@ export const updateScrollFrame = ({bounds, themeName, handle = 'all'}: UpdateScr
         type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
-        elementId: 'scrollFrame'
+        elementId: scrollFrameId
       },
       parent: baseFrame
     });
@@ -7909,7 +8105,7 @@ export const updateScrollFrame = ({bounds, themeName, handle = 'all'}: UpdateScr
         type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
-        elementId: 'scrollFrame'
+        elementId: scrollFrameId
       },
       parent: baseFrame
     });
@@ -7921,7 +8117,7 @@ export const updateScrollFrame = ({bounds, themeName, handle = 'all'}: UpdateScr
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'topLeft',
-        elementId: 'scrollFrame'
+        elementId: scrollFrameId
       }
     });
     topLeftHandle.position = baseFrame.bounds.topLeft;
@@ -7934,7 +8130,7 @@ export const updateScrollFrame = ({bounds, themeName, handle = 'all'}: UpdateScr
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'topCenter',
-        elementId: 'scrollFrame'
+        elementId: scrollFrameId
       }
     });
     topCenterHandle.position = baseFrame.bounds.topCenter;
@@ -7947,7 +8143,7 @@ export const updateScrollFrame = ({bounds, themeName, handle = 'all'}: UpdateScr
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'topRight',
-        elementId: 'scrollFrame'
+        elementId: scrollFrameId
       }
     });
     topRightHandle.position = baseFrame.bounds.topRight;
@@ -7960,7 +8156,7 @@ export const updateScrollFrame = ({bounds, themeName, handle = 'all'}: UpdateScr
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'bottomLeft',
-        elementId: 'scrollFrame'
+        elementId: scrollFrameId
       }
     });
     bottomLeftHandle.position = baseFrame.bounds.bottomLeft;
@@ -7973,7 +8169,7 @@ export const updateScrollFrame = ({bounds, themeName, handle = 'all'}: UpdateScr
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'bottomCenter',
-        elementId: 'scrollFrame'
+        elementId: scrollFrameId
       }
     });
     bottomCenterHandle.position = baseFrame.bounds.bottomCenter;
@@ -7986,7 +8182,7 @@ export const updateScrollFrame = ({bounds, themeName, handle = 'all'}: UpdateScr
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'bottomRight',
-        elementId: 'scrollFrame'
+        elementId: scrollFrameId
       }
     });
     bottomRightHandle.position = baseFrame.bounds.bottomRight;
@@ -7999,7 +8195,7 @@ export const updateScrollFrame = ({bounds, themeName, handle = 'all'}: UpdateScr
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'rightCenter',
-        elementId: 'scrollFrame'
+        elementId: scrollFrameId
       }
     });
     rightCenterHandle.position = baseFrame.bounds.rightCenter;
@@ -8012,7 +8208,7 @@ export const updateScrollFrame = ({bounds, themeName, handle = 'all'}: UpdateScr
         type: 'UIElementChild',
         interactive: true,
         interactiveType: 'leftCenter',
-        elementId: 'scrollFrame'
+        elementId: scrollFrameId
       }
     });
     leftCenterHandle.position = baseFrame.bounds.leftCenter;
@@ -8027,7 +8223,7 @@ export const updateEventsFrame = (state: RootState): void => {
   }
   const selectedEvents = state.layer.present.events.selected;
   const editingEvent = state.eventDrawer.event !== null;
-  const eventsFrame = paperMain.project.getItem({ data: { id: 'eventsFrame' } });
+  const eventsFrame = paperMain.project.getItem({ data: { id: eventsFrameId } });
   const events = (getArtboardEventItems(state) as {
     eventItems: Btwx.Event[];
     eventLayers: {
@@ -8067,7 +8263,7 @@ export const updateEventsFrame = (state: RootState): void => {
           type: 'UIElementChild',
           interactive: true,
           interactiveType: event.id,
-          elementId: 'eventsFrame'
+          elementId: eventsFrameId
         }
       });
       const tweenEventDestinationIndicatorBackground = new paperMain.Path.Ellipse({
@@ -8080,7 +8276,7 @@ export const updateEventsFrame = (state: RootState): void => {
           type: 'UIElementChild',
           interactive: true,
           interactiveType: event.id,
-          elementId: 'eventsFrame'
+          elementId: eventsFrameId
         }
       });
       const tweenEventOriginIndicator = new paperMain.Path.Ellipse({
@@ -8091,7 +8287,7 @@ export const updateEventsFrame = (state: RootState): void => {
           type: 'UIElementChild',
           interactive: true,
           interactiveType: event.id,
-          elementId: 'eventsFrame'
+          elementId: eventsFrameId
         }
       });
       const tweenEventIconBackground = new paperMain.Path.Ellipse({
@@ -8103,7 +8299,7 @@ export const updateEventsFrame = (state: RootState): void => {
           type: 'UIElementChild',
           interactive: true,
           interactiveType: event.id,
-          elementId: 'eventsFrame'
+          elementId: eventsFrameId
         }
       });
       const tweenEventIcon = new paperMain.CompoundPath({
@@ -8150,7 +8346,7 @@ export const updateEventsFrame = (state: RootState): void => {
           type: 'UIElementChild',
           interactive: true,
           interactiveType: event.id,
-          elementId: 'eventsFrame'
+          elementId: eventsFrameId
         }
       });
       tweenEventIcon.fitBounds(tweenEventOriginIndicator.bounds);
@@ -8165,7 +8361,7 @@ export const updateEventsFrame = (state: RootState): void => {
           type: 'UIElementChild',
           interactive: true,
           interactiveType: event.id,
-          elementId: 'eventsFrame'
+          elementId: eventsFrameId
         }
       });
       const tweenEventText = new paperMain.PointText({
@@ -8184,7 +8380,7 @@ export const updateEventsFrame = (state: RootState): void => {
           type: 'UIElementChild',
           interactive: true,
           interactiveType: event.id,
-          elementId: 'eventsFrame'
+          elementId: eventsFrameId
         }
       });
       const eventFrame = new paperMain.Group({
@@ -8194,7 +8390,7 @@ export const updateEventsFrame = (state: RootState): void => {
           type: 'UIElementChild',
           interactive: true,
           interactiveType: event.id,
-          elementId: 'eventsFrame'
+          elementId: eventsFrameId
         },
         parent: eventsFrame,
         // opacity: groupOpacity
@@ -8212,7 +8408,7 @@ export const updateEventsFrame = (state: RootState): void => {
           type: 'UIElementChild',
           interactive: true,
           interactiveType: event.id,
-          elementId: 'eventsFrame'
+          elementId: eventsFrameId
         }
       });
       eventFrameBackground.sendToBack();
@@ -8232,7 +8428,7 @@ export const updateMeasureGuides = (bounds: paper.Rectangle, measureTo: { top?: 
   if (paperMain.project.activeLayer.data.id !== 'ui') {
     paperMain.projects[0].activate();
   }
-  const measureGuides = paperMain.project.getItem({ data: { id: 'measureGuides' } });
+  const measureGuides = paperMain.project.getItem({ data: { id: measureFrameId } });
   measureGuides.removeChildren();
   if (measureTo) {
     let hasTopMeasure;

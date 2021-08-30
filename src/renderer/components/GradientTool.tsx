@@ -8,6 +8,7 @@ import { setCanvasResizing } from '../store/actions/canvasSettings';
 import { getPaperLayer, getSelectedProjectIndices, getPaperProp, getSelectedById } from '../store/selectors/layer';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
+import { gradientFrameId } from './GradientFrame';
 
 const GradientTool = (props: PaperToolProps): ReactElement => {
   const { tool, downEvent, dragEvent, upEvent } = props;
@@ -141,7 +142,7 @@ const GradientTool = (props: PaperToolProps): ReactElement => {
   const updateGradients = (): void => {
     const originHandle = paperMain.project.getItem({data: { id: 'gradientFrameOriginHandle' }});
     const destinationHandle = paperMain.project.getItem({data: { id: 'gradientFrameDestinationHandle' }});
-    const gradientFrame = paperMain.project.getItem({data: { id: 'gradientFrame' }});
+    const gradientFrame = paperMain.project.getItem({data: { id: gradientFrameId }});
     const lines = paperMain.project.getItems({data: { id: 'gradientFrameLine' }});
     const paperProp = getPaperProp(gradientProp);
     switch(handle) {

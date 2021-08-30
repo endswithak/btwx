@@ -1,5 +1,6 @@
 import { paperMain } from '../canvas';
 import { THEME_PRIMARY_COLOR } from '../constants';
+import { measureFrameId } from '../components/MeasureFrame';
 
 class MeasureGuide {
   guide: 'top' | 'bottom' | 'left' | 'right';
@@ -25,7 +26,7 @@ class MeasureGuide {
         type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
-        elementId: 'measureFrame',
+        elementId: measureFrameId,
         guide: this.guide
       }
     });
@@ -41,7 +42,7 @@ class MeasureGuide {
         type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
-        elementId: 'measureFrame',
+        elementId: measureFrameId,
         guide: this.guide
       }
     });
@@ -56,7 +57,7 @@ class MeasureGuide {
         type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
-        elementId: 'measureFrame',
+        elementId: measureFrameId,
         guide: this.guide
       }
     });
@@ -72,7 +73,7 @@ class MeasureGuide {
         type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
-        elementId: 'measureFrame',
+        elementId: measureFrameId,
         guide: this.guide
       }
     });
@@ -87,7 +88,7 @@ class MeasureGuide {
         type: 'UIElementChild',
         interactive: false,
         interactiveType: null,
-        elementId: 'measureFrame',
+        elementId: measureFrameId,
         guide: this.guide
       }
     });
@@ -100,10 +101,10 @@ class MeasureGuide {
         type: 'UIElement',
         interactive: false,
         interactiveType: null,
-        elementId: 'measureFrame',
+        elementId: measureFrameId,
         guide: this.guide
       },
-      parent: paperMain.project.getItem({data: {id: 'measureGuides'}})
+      parent: paperMain.project.getItem({data: {id: measureFrameId}})
     });
     if (removeOpts) {
       measureGuide.removeOn({

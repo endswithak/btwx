@@ -5,6 +5,19 @@ import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
 import { getGradientOriginPoint, getGradientDestinationPoint } from '../store/selectors/layer';
 
+export const gradientFrameId = 'gradientFrame';
+
+export const gradientFrameJSON = `[
+  "Group", {
+    "applyMatrix": true,
+    "name": "Gradient Frame",
+    "data":{
+      "id": "${gradientFrameId}",
+      "type": "UIElement"
+    }
+  }
+]`;
+
 const GradientFrame = (): ReactElement => {
   const themeName = useSelector((state: RootState) => state.preferences.theme);
   const zoom = useSelector((state: RootState) => state.documentSettings.zoom);
@@ -40,7 +53,7 @@ const GradientFrame = (): ReactElement => {
       themeName
     });
     return (): void => {
-      const gradientFrame = paperMain.projects[0].getItem({ data: { id: 'gradientFrame' } });
+      const gradientFrame = paperMain.projects[0].getItem({ data: { id: gradientFrameId } });
       gradientFrame.removeChildren();
     }
   }, [origin, destination, zoom, themeName]);

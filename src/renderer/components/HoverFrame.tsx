@@ -5,6 +5,19 @@ import { updateHoverFrame } from '../store/actions/layer';
 import { getHoverBounds } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
 
+export const hoverFrameId = 'hoverFrame';
+
+export const hoverFrameJSON = `[
+  "Group", {
+    "applyMatrix": true,
+    "name": "Hover Frame",
+    "data": {
+      "id": "${hoverFrameId}",
+      "type": "UIElement"
+    }
+  }
+]`;
+
 const HoverFrame = (): ReactElement => {
   const themeName = useSelector((state: RootState) => state.preferences.theme);
   const hover = useSelector((state: RootState) => state.layer.present.hover);
@@ -20,7 +33,7 @@ const HoverFrame = (): ReactElement => {
       themeName
     });
     return (): void => {
-      const hoverFrame = paperMain.projects[0].getItem({ data: { id: 'hoverFrame' } });
+      const hoverFrame = paperMain.projects[0].getItem({ data: { id: hoverFrameId } });
       hoverFrame.removeChildren();
     }
   }, [hover, hoverItem, zoom, hoverBounds, themeName]);

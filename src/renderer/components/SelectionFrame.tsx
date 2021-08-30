@@ -5,6 +5,19 @@ import { getSelectedBounds, getSelectedInnerBounds, getSelectedProjectIndices, g
 import { updateSelectionFrame } from '../store/actions/layer';
 import { paperMain } from '../canvas';
 
+export const selectionFrameId = 'selectionFrame';
+
+export const selectionFrameJSON = `[
+  "Group", {
+    "applyMatrix": true,
+    "name": "Selection Frame",
+    "data": {
+      "id": "${selectionFrameId}",
+      "type": "UIElement"
+    }
+  }
+]`;
+
 const SelectionFrame = (): ReactElement => {
   const theme = useSelector((state: RootState) => state.preferences.theme);
   const selectedBounds = useSelector((state: RootState) => getSelectedBounds(state));
@@ -56,7 +69,7 @@ const SelectionFrame = (): ReactElement => {
       lineHandles: singleLineHandles
     });
     return () => {
-      const selectionFrame = paperMain.projects[0].getItem({ data: { id: 'selectionFrame' } });
+      const selectionFrame = paperMain.projects[0].getItem({ data: { id: selectionFrameId } });
       selectionFrame.removeChildren();
     }
   }, [theme, selectedBounds, selectedInnerBounds, singleLineHandles, selectedPaperScopes, selectedRotation, zoom]);

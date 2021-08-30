@@ -5,6 +5,19 @@ import { updateMeasureGuides } from '../store/actions/layer';
 import { getSelectedBounds, getLayerBounds } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
 
+export const measureFrameId = 'measureFrame';
+
+export const measureFrameJSON = `[
+  "Group", {
+    "applyMatrix": true,
+    "name": "Measure Guides",
+    "data":{
+      "id": "${measureFrameId}",
+      "type": "UIElement"
+    }
+  }
+]`;
+
 const MeasureFrame = (): ReactElement => {
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const hover = useSelector((state: RootState) => state.layer.present.hover);
@@ -14,7 +27,7 @@ const MeasureFrame = (): ReactElement => {
   useEffect(() => {
     updateMeasureGuides(selectedBounds, { all: hoverBounds });
     return () => {
-      const measureFrame = paperMain.project.getItem({ data: { id: 'measureGuides' } });
+      const measureFrame = paperMain.project.getItem({ data: { id: measureFrameId } });
       measureFrame.removeChildren();
     }
   }, [hoverBounds, selectedBounds]);

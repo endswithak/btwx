@@ -7,6 +7,7 @@ import { updateMeasureGuides } from '../store/actions/layer';
 import { getPaperLayersBounds, getClosestPaperLayer, getLayerProjectIndices } from '../store/selectors/layer';
 import Guide from '../canvas/guide';
 import { isBetween } from '../utils';
+import { measureFrameId } from './MeasureFrame';
 
 interface SnapToolProps {
   toolEvent: paper.ToolEvent;
@@ -736,7 +737,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
     setSnapBreakThreshholdMax(4 / paperMain.view.zoom);
     return () => {
       const debugGuides = ['SnapZoneTop', 'SnapZoneMiddle', 'SnapZoneBottom', 'SnapZoneLeft', 'SnapZoneCenter', 'SnapZoneRight'];
-      const measureGuides = paperMain.projects[0].getItem({ data: { id: 'measureGuides' } });
+      const measureGuides = paperMain.projects[0].getItem({ data: { id: measureFrameId } });
       const snapGuides =  paperMain.projects[0].getItem({ data: { id: 'snapGuides' } });
       measureGuides.removeChildren();
       snapGuides.removeChildren();
@@ -753,7 +754,7 @@ const SnapTool = (props: SnapToolProps): ReactElement => {
 
   useEffect(() => {
     if (snapBounds) {
-      const measureGuides = paperMain.projects[0].getItem({ data: { id: 'measureGuides' } });
+      const measureGuides = paperMain.projects[0].getItem({ data: { id: measureFrameId } });
       const snapGuides =  paperMain.projects[0].getItem({ data: { id: 'snapGuides' } });
       measureGuides.removeChildren();
       snapGuides.removeChildren();
