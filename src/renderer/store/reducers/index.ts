@@ -26,6 +26,7 @@ import artboardPresets from './artboardPresets';
 import session from './session';
 import scrollFrameTool from './scrollFrameTool';
 import vectorEditTool from './vectorEditTool';
+import measureTool from './measureTool';
 
 export const reducers = {
   layer,
@@ -52,7 +53,8 @@ export const reducers = {
   artboardPresets,
   session,
   scrollFrameTool,
-  vectorEditTool
+  vectorEditTool,
+  measureTool
 };
 
 const appReducer = combineReducers(reducers);

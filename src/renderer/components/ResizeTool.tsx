@@ -6,12 +6,13 @@ import { RootState } from '../store/reducers';
 import { getPaperLayer, getSelectedBounds, getSelectedInnerBounds, getLayerDescendants, getSelectedRotation } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
 import { setCanvasResizing, setCanvasCursor, setCanvasActiveTool } from '../store/actions/canvasSettings';
-import { scaleLayersThunk, updateSelectionFrame } from '../store/actions/layer';
+import { scaleLayersThunk } from '../store/actions/layer';
 import { positionTextContent } from '../store/utils/paper';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
 import { getContent, getParagraphs } from './CanvasTextLayer';
 import { getSelectionFrameCursor } from './CanvasUIEvents';
+import { updateSelectionFrame } from './SelectionFrame';
 
 const ResizeTool = (props: PaperToolProps): ReactElement => {
   const { tool, keyDownEvent, keyUpEvent, downEvent, dragEvent, upEvent } = props;

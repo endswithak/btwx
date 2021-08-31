@@ -5,10 +5,11 @@ import { isBetween } from '../utils';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
-import { setLineFromThunk, setLineToThunk, updateSelectionFrame } from '../store/actions/layer';
+import { setLineFromThunk, setLineToThunk } from '../store/actions/layer';
 import { getPaperLayer, getSelectedProjectIndices } from '../store/selectors/layer';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
+import { updateSelectionFrame } from './SelectionFrame';
 
 const LineTool = (props: PaperToolProps): ReactElement => {
   const { tool, keyDownEvent, keyUpEvent, downEvent, dragEvent, upEvent } = props;

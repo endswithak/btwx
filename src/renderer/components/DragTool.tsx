@@ -5,10 +5,10 @@ import { RootState } from '../store/reducers';
 import { getLayerProjectIndex, getPaperLayer, getPaperLayersBounds, getSelectedProjectIndices, getSelectedRotation } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
 import { setCanvasDragging } from '../store/actions/canvasSettings';
-import { moveLayersBy, duplicateLayers, updateSelectionFrame } from '../store/actions/layer';
+import { moveLayersBy, duplicateLayers } from '../store/actions/layer';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
-import { selectionFrameId } from './SelectionFrame';
+import { selectionFrameId, updateSelectionFrame } from './SelectionFrame';
 
 const DragTool = (props: PaperToolProps): ReactElement => {
   const { tool, downEvent, dragEvent, upEvent, keyDownEvent, keyUpEvent } = props;

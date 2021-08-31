@@ -3,8 +3,7 @@ import React, { ReactElement, useEffect, useState, useCallback } from 'react';
 import debounce from 'lodash.debounce';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getSelectedBounds } from '../store/selectors/layer';
-import { setCanvasMeasuring } from '../store/actions/canvasSettings';
+import { getSelectedBounds, getLayerBounds } from '../store/selectors/layer';
 import { deselectAllLayerEvents, deselectAllLayerEventTweens, moveLayersBy, escapeLayerScopeThunk } from '../store/actions/layer';
 import { toggleShapeToolThunk } from '../store/actions/shapeTool';
 import { toggleTextToolThunk } from '../store/actions/textTool';
@@ -15,14 +14,18 @@ import { closeGradientEditor } from '../store/actions/gradientEditor';
 import { closeColorEditor } from '../store/actions/colorEditor';
 import { closeEaseEditor } from '../store/actions/easeEditor';
 import { closeFontFamilySelector } from '../store/actions/fontFamilySelector';
+import { enableMeasureTool, disableMeasureTool } from '../store/actions/measureTool';
 import SnapTool from './SnapTool';
 
 const KeyBindings = (): ReactElement => {
   const selectedLayers = useSelector((state: RootState) => state.layer.present.selected);
   const selectedBounds = useSelector((state: RootState) => getSelectedBounds(state));
+  const hoverBounds = useSelector((state: RootState) => state.layer.present.hover && state.layer.present.byId[state.layer.present.hover] ? getLayerBounds(state.layer.present, state.layer.present.hover) : null);
   const focusing = useSelector((state: RootState) => state.canvasSettings.focusing);
   const escapeDisabled = useSelector((state: RootState) => state.canvasSettings.selecting || state.canvasSettings.dragging || state.canvasSettings.resizing || state.canvasSettings.drawing);
-  const measuring = useSelector((state: RootState) => state.canvasSettings.measuring);
+  const measuring = useSelector((state: RootState) => state.measureTool.isEnabled);
+  const selected = useSelector((state: RootState) => state.layer.present.selected);
+  const hover = useSelector((state: RootState) => state.layer.present.hover);
   const gradientEditorOpen = useSelector((state: RootState) => state.gradientEditor.isOpen);
   const colorEditorOpen = useSelector((state: RootState) => state.colorEditor.isOpen);
   const easeEditorOpen = useSelector((state: RootState) => state.easeEditor.isOpen);
@@ -33,6 +36,7 @@ const KeyBindings = (): ReactElement => {
   const shapeToolShapeType = useSelector((state: RootState) => state.shapeTool.shapeType);
   const textToolActive = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Text');
   const artboardToolActive = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Artboard');
+  const canMeasure = selected.length > 0 && hover && !selected.includes(hover);
   const activeInput = (document.activeElement && (document.activeElement.nodeName === 'INPUT' || document.activeElement.nodeName === 'TEXTAREA'));
   const [hasActiveInupt, setHasActiveInput] = useState(activeInput);
   const [nudging, setNudging] = useState(false);
@@ -147,9 +151,14 @@ const KeyBindings = (): ReactElement => {
         handleNudge('right');
         break;
       case 'Alt':
-        dispatch(setCanvasMeasuring({
-          measuring: true
-        }));
+        if (canMeasure) {
+          dispatch(enableMeasureTool({
+            bounds: [selectedBounds.x, selectedBounds.y, selectedBounds.width, selectedBounds.height],
+            measureTo: {
+              all: [hoverBounds.x, hoverBounds.y, hoverBounds.width, hoverBounds.height]
+            }
+          }));
+        }
         break;
       case 'Escape':
         handleEscape();
@@ -161,17 +170,13 @@ const KeyBindings = (): ReactElement => {
     switch(e.key) {
       case 'Alt': {
         if (measuring) {
-          dispatch(setCanvasMeasuring({
-            measuring: false
-          }));
+          dispatch(disableMeasureTool());
         }
         break;
       }
       default: {
         if (measuring) {
-          dispatch(setCanvasMeasuring({
-            measuring: false
-          }));
+          dispatch(disableMeasureTool());
         }
         break;
       }
@@ -186,10 +191,10 @@ const KeyBindings = (): ReactElement => {
       document.removeEventListener('keyup', handleKeyUp);
     }
   }, [
-    focusing, measuring, gradientEditorOpen, colorEditorOpen, easeEditorOpen,
+    focusing, measuring, canMeasure, gradientEditorOpen, colorEditorOpen, easeEditorOpen,
     shapeToolActive, shapeToolShapeType, artboardToolActive, textToolActive,
     artboardPresetEditorOpen, fontFamilySelectorOpen, escapeDisabled, hasActiveInupt,
-    selectedLayers, selectedBounds, nudging, nudgeEvent, scrollFrameToolActive
+    selectedLayers, selectedBounds, hoverBounds, nudging, nudgeEvent, scrollFrameToolActive
   ]);
 
   useEffect(() => {

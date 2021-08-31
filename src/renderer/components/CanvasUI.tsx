@@ -22,6 +22,12 @@ import { namesFrameJSON } from './NamesFrame';
 import VectorEditFrameWrap from './VectorEditFrameWrap';
 import { vectorEditFrameJSON } from './VectorEditFrame';
 
+export const activateUI = () => {
+  if (paperMain.project.activeLayer.data.id !== 'ui') {
+    paperMain.projects[0].activate();
+  }
+}
+
 const CanvasUI = (): ReactElement => {
   const ref = useRef<HTMLCanvasElement>(null);
   const ready = useSelector((state: RootState) => state.canvasSettings.ready);
@@ -35,6 +41,10 @@ const CanvasUI = (): ReactElement => {
         "type": "UI"
       },
       "children": [
+        ["Group",{"applyMatrix":true,"name":"Drawing Preview","data":{"id":"drawingPreview","type":"UIElement"}}],
+        ["Group",{"applyMatrix":true,"name":"Static Guides","data":{"id":"staticGuides","type":"UIElement"}}],
+        ["Group",{"applyMatrix":true,"name":"Snap Guides","data":{"id":"snapGuides","type":"UIElement"}}],
+        ["Group",{"applyMatrix":true,"name":"Tooltips","data":{"id":"tooltips","type":"UIElement"}}],
         ${eventsFrameJSON},
         ${activeArtboardFrameJSON},
         ${vectorEditFrameJSON},
@@ -43,11 +53,7 @@ const CanvasUI = (): ReactElement => {
         ${scrollFrameJSON},
         ${selectionFrameJSON},
         ${namesFrameJSON},
-        ${measureFrameJSON},
-        ["Group",{"applyMatrix":true,"name":"Drawing Preview","data":{"id":"drawingPreview","type":"UIElement"}}],
-        ["Group",{"applyMatrix":true,"name":"Static Guides","data":{"id":"staticGuides","type":"UIElement"}}],
-        ["Group",{"applyMatrix":true,"name":"Snap Guides","data":{"id":"snapGuides","type":"UIElement"}}],
-        ["Group",{"applyMatrix":true,"name":"Tooltips","data":{"id":"tooltips","type":"UIElement"}}]
+        ${measureFrameJSON}
       ]
     }
   ]]`;
