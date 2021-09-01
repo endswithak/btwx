@@ -21,7 +21,7 @@ import {
   getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle,
   getLayerMasked, getLayerUnderlyingMask
 } from '../utils/actions';
-import { bufferToBase64 } from '../../utils';
+import { bufferToBase64, rawPointToPaperPoint } from '../../utils';
 // import { addDocumentImage, removeDocumentImage, removeDocumentImages } from './documentSettings';
 import { addSessionImage } from './session';
 import { setEventDrawerEventThunk } from './eventDrawer';
@@ -1452,8 +1452,8 @@ export const escapeLayerScopeThunk = () => {
   return (dispatch: any, getState: any): void => {
     const state = getState() as RootState;
     const nextScope = state.layer.present.scope.filter((id, index) => index !== state.layer.present.scope.length - 1);
-    if (state.canvasSettings.mouse && state.canvasSettings.mouse.paperX && state.canvasSettings.mouse.paperY) {
-      const point = new paperMain.Point(state.canvasSettings.mouse.paperX, state.canvasSettings.mouse.paperY)
+    if (state.canvasSettings.cursorPaperPoint) {
+      const point = rawPointToPaperPoint(state.canvasSettings.cursorPaperPoint);
       const hitResult = paperMain.project.hitTest(point);
       const validHitResult = hitResult && hitResult.item && hitResult.item.data && hitResult.item.data.type && (hitResult.item.data.type === 'Layer' || hitResult.item.data.type === 'LayerChild' || hitResult.item.data.type === 'LayerContainer');
       if (validHitResult) {

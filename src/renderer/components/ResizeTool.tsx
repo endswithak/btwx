@@ -5,14 +5,15 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getPaperLayer, getSelectedBounds, getSelectedInnerBounds, getLayerDescendants, getSelectedRotation } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
-import { setCanvasResizing, setCanvasCursor, setCanvasActiveTool } from '../store/actions/canvasSettings';
+import { paperRectToRawRect } from '../utils';
+import { setCanvasResizing, setCanvasCursor, setCanvasActiveTool, setCanvasResizeHandle } from '../store/actions/canvasSettings';
 import { scaleLayersThunk } from '../store/actions/layer';
 import { positionTextContent } from '../store/utils/paper';
+import { setSelectionToolBounds } from '../store/actions/selectionTool';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
 import { getContent, getParagraphs } from './CanvasTextLayer';
 import { getSelectionFrameCursor } from './CanvasUIEvents';
-import { updateSelectionFrame } from './SelectionFrame';
 
 const ResizeTool = (props: PaperToolProps): ReactElement => {
   const { tool, keyDownEvent, keyUpEvent, downEvent, dragEvent, upEvent } = props;
@@ -701,11 +702,9 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
         setOriginalSelection(nextOriginalSelection);
         setHandle(initialHandle);
         // setPivotHandle(getPivotHandle(initialHandle));
-        updateSelectionFrame({
-          bounds: nextFromBounds,
-          // rotation: selectedRotation !== 'multi' && selectedRotation !== 0 ? selectedRotation : null,
-          handle: initialHandle
-        });
+        dispatch(setSelectionToolBounds({
+          bounds: paperRectToRawRect(nextFromBounds)
+        }));
         if (downEvent.modifiers.shift && !shiftModifier) {
           setShiftModifier(true);
         }
@@ -876,6 +875,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
         setVerticalFlip(nextVerticalFlip);
         if (nextHandle !== handle) {
           dispatch(setCanvasCursor({cursor: [getSelectionFrameCursor(nextHandle)]}));
+          dispatch(setCanvasResizeHandle({resizeHandle: nextHandle}));
         }
         if (!resizing) {
           dispatch(setCanvasResizing({resizing: true}));
@@ -925,10 +925,9 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
         if (fromPivot) {
           clearLayerPivots();
           if (selected.length > 0) {
-            updateSelectionFrame({
-              bounds: fromBounds,
-              // rotation: selectedRotation !== 'multi' && selectedRotation !== 0 ? selectedRotation : null
-            });
+            dispatch(setSelectionToolBounds({
+              bounds: paperRectToRawRect(fromBounds)
+            }));
           }
           resetState();
         }
@@ -972,11 +971,9 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
   useEffect(() => {
     if (toBounds && isEnabled && dragEvent) {
       resizeLayers();
-      updateSelectionFrame({
-        bounds: toBounds,
-        // rotation: selectedRotation !== 'multi' && selectedRotation !== 0 ? selectedRotation : null,
-        handle
-      });
+      dispatch(setSelectionToolBounds({
+        bounds: paperRectToRawRect(toBounds)
+      }));
     }
   }, [toBounds]);
 

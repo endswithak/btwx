@@ -3,13 +3,14 @@ import {
   SET_CANVAS_DRAWING,
   SET_CANVAS_TYPING,
   SET_CANVAS_RESIZING,
+  SET_CANVAS_RESIZE_HANDLE,
   SET_CANVAS_SELECTING,
   SET_CANVAS_DRAGGING,
   SET_CANVAS_ZOOMING,
   SET_CANVAS_MEASURING,
   SET_CANVAS_FOCUSING,
   RESET_CANVAS_SETTINGS,
-  SET_CANVAS_MOUSE_POSITION,
+  SET_CANVAS_CURSOR_POSITION,
   SET_CANVAS_TRANSLATING,
   SET_CANVAS_WAITING,
   SET_CANVAS_ZOOM_TYPE,
@@ -19,12 +20,13 @@ import {
   SetCanvasDrawingPayload,
   SetCanvasTypingPayload,
   SetCanvasResizingPayload,
+  SetCanvasResizeHandlePayload,
   SetCanvasDraggingPayload,
   SetCanvasZoomingPayload,
   SetCanvasSelectingPayload,
   SetCanvasMeasuringPayload,
   SetCanvasFocusingPayload,
-  SetCanvasMousePositionPayload,
+  SetCanvasCursorPositionPayload,
   SetCanvasTranslatingPayload,
   SetCanvasWaitingPayload,
   SetCanvasZoomTypePayload,
@@ -49,6 +51,11 @@ export const setCanvasTyping = (payload: SetCanvasTypingPayload): CanvasSettings
 
 export const setCanvasResizing = (payload: SetCanvasResizingPayload): CanvasSettingsTypes => ({
   type: SET_CANVAS_RESIZING,
+  payload
+});
+
+export const setCanvasResizeHandle = (payload: SetCanvasResizeHandlePayload): CanvasSettingsTypes => ({
+  type: SET_CANVAS_RESIZE_HANDLE,
   payload
 });
 
@@ -81,8 +88,8 @@ export const resetCanvasSettings = (): CanvasSettingsTypes => ({
   type: RESET_CANVAS_SETTINGS
 });
 
-export const setCanvasMousePosition = (payload: SetCanvasMousePositionPayload): CanvasSettingsTypes => ({
-  type: SET_CANVAS_MOUSE_POSITION,
+export const setCanvasCursorPosition = (payload: SetCanvasCursorPositionPayload): CanvasSettingsTypes => ({
+  type: SET_CANVAS_CURSOR_POSITION,
   payload
 });
 

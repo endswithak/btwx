@@ -64,7 +64,9 @@ declare namespace Btwx {
 
   type PaperScope = 'main' | 'preview';
 
-  type SelectionFrameHandle = ResizeHandle | LineHandle | 'move' | 'none' | 'all';
+  type SelectionFrameHandle = ResizeHandle | LineHandle | 'move' | 'none' | 'all' | 'lineAll';
+
+  type SelectionToolHandle = ResizeHandle | LineHandle | 'move' | 'none' | 'all' | 'lineAll';
 
   type GradientHandle = 'origin' | 'destination' | 'connector';
 

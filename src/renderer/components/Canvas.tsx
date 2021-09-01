@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
 import { addImageThunk, setHoverFillThunk, setHoverStrokeThunk, setHoverShadowThunk } from '../store/actions/layer';
-import { setCanvasReady, setCanvasFocusing, setCanvasMeasuring, setCanvasMousePosition } from '../store/actions/canvasSettings';
+import { setCanvasReady, setCanvasFocusing, setCanvasMeasuring, setCanvasCursorPosition } from '../store/actions/canvasSettings';
 import { hydrateDocumentThunk } from '../store/actions/documentSettings';
 import { getAllProjectIndices } from '../store/selectors/layer';
 import CanvasLayerEvents from './CanvasLayerEvents';
@@ -20,6 +20,7 @@ import AreaSelectTool from './AreaSelectTool';
 import ScrollFrameTool from './ScrollFrameTool';
 import LineTool from './LineTool';
 import TextTool from './TextTool';
+import SelectionTool from './SelectionTool';
 import GradientTool from './GradientTool';
 import CanvasUI from './CanvasUI';
 import CanvasProjects from './CanvasProjects';
@@ -189,13 +190,9 @@ const Canvas = (): ReactElement => {
     if (e.buttons === 0) {
       const canvasEventPoint = paperMain.view.getEventPoint(e);
       handleHitResult(e, 'mouseMove');
-      dispatch(setCanvasMousePosition({
-        mouse: {
-          x: e.clientX,
-          y: e.clientY,
-          paperX: canvasEventPoint.x,
-          paperY: canvasEventPoint.y
-        }
+      dispatch(setCanvasCursorPosition({
+        cursorClientPoint: [e.clientX, e.clientY],
+        cursorPaperPoint: [canvasEventPoint.x, canvasEventPoint.y]
       }));
     }
   }
@@ -456,6 +453,7 @@ const Canvas = (): ReactElement => {
             <LineTool />
             {/* misc tools */}
             <GradientTool />
+            <SelectionTool />
             {/* debug tools */}
             {
               isDevelopment

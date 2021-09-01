@@ -3,6 +3,7 @@ export const SET_CANVAS_ACTIVE_TOOL = 'SET_CANVAS_ACTIVE_TOOL';
 export const SET_CANVAS_DRAWING = 'SET_CANVAS_DRAWING';
 export const SET_CANVAS_TYPING = 'SET_CANVAS_TYPING';
 export const SET_CANVAS_RESIZING = 'SET_CANVAS_RESIZING';
+export const SET_CANVAS_RESIZE_HANDLE = 'SET_CANVAS_RESIZE_HANDLE';
 export const SET_CANVAS_SELECTING = 'SET_CANVAS_SELECTING';
 export const SET_CANVAS_DRAGGING = 'SET_CANVAS_DRAGGING';
 export const SET_CANVAS_ZOOMING = 'SET_CANVAS_ZOOMING';
@@ -11,7 +12,7 @@ export const SET_CANVAS_FOCUSING = 'SET_CANVAS_FOCUSING';
 export const SET_CANVAS_TRANSLATING = 'SET_CANVAS_TRANSLATING';
 export const SET_CANVAS_WAITING = 'SET_CANVAS_WAITING';
 export const RESET_CANVAS_SETTINGS = 'RESET_CANVAS_SETTINGS';
-export const SET_CANVAS_MOUSE_POSITION = 'SET_CANVAS_MOUSE_POSITION';
+export const SET_CANVAS_CURSOR_POSITION = 'SET_CANVAS_CURSOR_POSITION';
 export const SET_CANVAS_ZOOM_TYPE = 'SET_CANVAS_ZOOM_TYPE';
 export const SET_CANVAS_CURSOR = 'SET_CANVAS_CURSOR';
 
@@ -62,6 +63,15 @@ export interface SetCanvasResizingPayload {
 export interface SetCanvasResizing {
   type: typeof SET_CANVAS_RESIZING;
   payload: SetCanvasResizingPayload;
+}
+
+export interface SetCanvasResizeHandlePayload {
+  resizeHandle: Btwx.ResizeHandle;
+}
+
+export interface SetCanvasResizeHandle {
+  type: typeof SET_CANVAS_RESIZE_HANDLE;
+  payload: SetCanvasResizeHandlePayload;
 }
 
 export interface SetCanvasSelectingPayload {
@@ -132,18 +142,14 @@ export interface ResetCanvasSettings {
   type: typeof RESET_CANVAS_SETTINGS;
 }
 
-export interface SetCanvasMousePositionPayload {
-  mouse: {
-    x: number;
-    y: number;
-    paperX: number;
-    paperY: number;
-  };
+export interface SetCanvasCursorPositionPayload {
+  cursorClientPoint: number[];
+  cursorPaperPoint: number[];
 }
 
-export interface SetCanvasMousePosition {
-  type: typeof SET_CANVAS_MOUSE_POSITION;
-  payload: SetCanvasMousePositionPayload;
+export interface SetCanvasCursorPosition {
+  type: typeof SET_CANVAS_CURSOR_POSITION;
+  payload: SetCanvasCursorPositionPayload;
 }
 
 export interface SetCanvasZoomTypePayload {
@@ -172,6 +178,7 @@ export type CanvasSettingsTypes = SetCanvasActiveTool |
                                   SetCanvasDrawing |
                                   SetCanvasTyping |
                                   SetCanvasResizing |
+                                  SetCanvasResizeHandle |
                                   SetCanvasSelecting |
                                   SetCanvasDragging |
                                   SetCanvasZooming |
@@ -180,7 +187,7 @@ export type CanvasSettingsTypes = SetCanvasActiveTool |
                                   SetCanvasTranslating |
                                   SetCanvasWaiting |
                                   ResetCanvasSettings |
-                                  SetCanvasMousePosition |
+                                  SetCanvasCursorPosition |
                                   SetCanvasZoomType |
                                   SetCanvasCursor |
                                   SetCanvasReady;

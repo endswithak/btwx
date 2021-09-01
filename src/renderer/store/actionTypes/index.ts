@@ -22,6 +22,7 @@ import { ArtboardPresetsTypes } from './artboardPresets';
 import { SessionTypes } from './session';
 import { VectorEditToolTypes } from './vectorEditTool';
 import { MeasureToolTypes } from './measureTool';
+import { SelectionToolTypes } from './selectionTool';
 
 export type RootAction = ArtboardPresetEditorTypes |
                          ArtboardPresetsTypes |
@@ -46,4 +47,5 @@ export type RootAction = ArtboardPresetEditorTypes |
                          PreferencesTypes |
                          SessionTypes |
                          VectorEditToolTypes |
-                         MeasureToolTypes;
+                         MeasureToolTypes |
+                         SelectionToolTypes;

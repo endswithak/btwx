@@ -40,6 +40,42 @@ export const getSelectedTweens = (state: RootState): any => state.layer.present.
 export const getSelectedEvents = (state: RootState): any => state.layer.present.events.selected;
 export const getScrollFrameId = (state: RootState): any => state.scrollFrameTool.id;
 
+export const getSingleLineSelected = createSelector(
+  [ getLayersById, getSelected ],
+  (layersById, selected) => {
+    const singleItemSelected = selected.length === 1;
+    const selectedItem = layersById[selected[0]];
+    const singleShapeSelected = singleItemSelected && selectedItem.type === 'Shape';
+    const singleLineSelected = singleShapeSelected && (selectedItem as Btwx.Shape).shapeType === 'Line';
+    return singleLineSelected;
+  }
+);
+
+export const getSelectedLineId = createSelector(
+  [ getSingleLineSelected, getSelected ],
+  (singleLineSelected, selected) => singleLineSelected && selected[0]
+);
+
+export const getSelectedLineAbsFromPoint = createSelector(
+  [ getLayersById, getSelectedLineId ],
+  (layersById, selectedLineId) =>
+    selectedLineId &&
+    getAbsLineFromPoint({
+      lineItem: layersById[selectedLineId] as Btwx.Line,
+      artboardItem: layersById[layersById[selectedLineId].artboard] as Btwx.Artboard
+    })
+);
+
+export const getSelectedLineAbsToPoint = createSelector(
+  [ getLayersById, getSelectedLineId ],
+  (layersById, selectedLineId) =>
+    selectedLineId &&
+    getAbsLineToPoint({
+      lineItem: layersById[selectedLineId] as Btwx.Line,
+      artboardItem: layersById[layersById[selectedLineId].artboard] as Btwx.Artboard
+    })
+);
+
 export const allTextTweensSelected = createSelector(
   [ getSelectedTweens, getTweensById ],
   (selectedTweens, tweensById) => {
@@ -4680,6 +4716,24 @@ export const getGradientDestinationPoint = (store: LayerState, id: string, prop:
   const layerPosition = getAbsolutePosition(store, id);
   return new paperMain.Point((destination.x * (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)) + layerPosition.x, (destination.y * (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)) + layerPosition.y);
 };
+
+export const getAbsLineFromPoint = ({
+  lineItem,
+  artboardItem
+}: {
+  lineItem: Btwx.Line,
+  artboardItem: Btwx.Artboard
+}): paper.Point =>
+  new paperMain.Point(artboardItem.frame.x + lineItem.from.x, artboardItem.frame.y + lineItem.from.y);
+
+export const getAbsLineToPoint = ({
+  lineItem,
+  artboardItem
+}: {
+  lineItem: Btwx.Line,
+  artboardItem: Btwx.Artboard
+}): paper.Point =>
+  new paperMain.Point(artboardItem.frame.x + lineItem.to.x, artboardItem.frame.y + lineItem.to.y);
 
 export const getLineFromPoint = (layerItem: Btwx.Line): paper.Point => {
   return new paperMain.Point((layerItem.from.x * layerItem.frame.innerWidth) + layerItem.frame.x, (layerItem.from.y * layerItem.frame.innerWidth) + layerItem.frame.y);

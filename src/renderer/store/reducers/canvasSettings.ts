@@ -5,11 +5,12 @@ import {
   SET_CANVAS_ZOOMING,
   SET_CANVAS_SELECTING,
   SET_CANVAS_RESIZING,
+  SET_CANVAS_RESIZE_HANDLE,
   SET_CANVAS_DRAGGING,
   SET_CANVAS_MEASURING,
   SET_CANVAS_FOCUSING,
   RESET_CANVAS_SETTINGS,
-  SET_CANVAS_MOUSE_POSITION,
+  SET_CANVAS_CURSOR_POSITION,
   SET_CANVAS_TRANSLATING,
   SET_CANVAS_WAITING,
   SET_CANVAS_ZOOM_TYPE,
@@ -21,12 +22,8 @@ import {
 export interface CanvasSettingsState {
   ready: boolean;
   activeTool: Btwx.ToolType;
-  mouse: {
-    x: number;
-    y: number;
-    paperX: number;
-    paperY: number;
-  };
+  cursorClientPoint: number[];
+  cursorPaperPoint: number[];
   drawing: boolean;
   typing: boolean;
   resizing: boolean;
@@ -48,7 +45,8 @@ export interface CanvasSettingsState {
 const initialState: CanvasSettingsState = {
   ready: false,
   activeTool: null,
-  mouse: null,
+  cursorClientPoint: null,
+  cursorPaperPoint: null,
   drawing: false,
   typing: false,
   resizing: false,
@@ -106,6 +104,12 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
         resizing: action.payload.resizing
       };
     }
+    case SET_CANVAS_RESIZE_HANDLE: {
+      return {
+        ...state,
+        resizeHandle: action.payload.resizeHandle
+      };
+    }
     case SET_CANVAS_SELECTING: {
       return {
         ...state,
@@ -143,10 +147,11 @@ export default (state = initialState, action: CanvasSettingsTypes): CanvasSettin
         ...initialState
       };
     }
-    case SET_CANVAS_MOUSE_POSITION: {
+    case SET_CANVAS_CURSOR_POSITION: {
       return {
         ...state,
-        mouse: action.payload.mouse
+        cursorClientPoint: action.payload.cursorClientPoint,
+        cursorPaperPoint: action.payload.cursorPaperPoint
       };
     }
     case SET_CANVAS_TRANSLATING: {

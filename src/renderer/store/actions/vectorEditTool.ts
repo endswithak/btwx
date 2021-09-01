@@ -1,6 +1,7 @@
 import { getPaperLayer } from '../selectors/layer';
 import { paperMain } from '../../canvas';
 import { RootState } from '../reducers';
+import { getPathItemSegments, paperSegToRawSeg } from '../../utils';
 
 import {
   ENABLE_VECTOR_EDIT_TOOL,
@@ -26,40 +27,10 @@ export const enableVectorEditTool = (payload: EnableVectorEditToolPayload): Vect
 
 export const enableVectorEditToolThunk = (id: string, projectIndex: number) => {
   return (dispatch: any, getState: any) => {
-    const state = getState() as RootState;
     const paperLayer = getPaperLayer(id, projectIndex) as paper.PathItem;
-    const segments: number[][][] = [];
-    const compoundPaths: paper.PathItem[] = [paperLayer];
-    let i = 0;
-    while(i < compoundPaths.length) {
-      const layer = compoundPaths[i];
-      if (layer.hasChildren()) {
-        layer.children.forEach((child) => {
-          if (child.hasChildren()) {
-            compoundPaths.push(child as paper.PathItem);
-          } else {
-            if ((child as paper.Path).segments && (child as paper.Path).segments.length > 0) {
-              (child as paper.Path).segments.forEach((seg) => {
-                const point = [seg.point.x, seg.point.y];
-                const handleIn = seg.handleIn ? [seg.handleIn.x, seg.handleIn.y] : null;
-                const handleOut = seg.handleOut ? [seg.handleOut.x, seg.handleOut.y] : null;
-                segments.push([point, handleIn, handleOut]);
-              });
-            }
-          }
-        });
-      } else {
-        if ((layer as paper.Path).segments && (layer as paper.Path).segments.length > 0) {
-          (layer as paper.Path).segments.forEach((seg) => {
-            const point = [seg.point.x, seg.point.y];
-            const handleIn = seg.handleIn ? [seg.handleIn.x, seg.handleIn.y] : null;
-            const handleOut = seg.handleOut ? [seg.handleOut.x, seg.handleOut.y] : null;
-            segments.push([point, handleIn, handleOut]);
-          });
-        }
-      }
-      i++;
-    }
+    const segments = getPathItemSegments(paperLayer).map((segment) =>
+      paperSegToRawSeg(segment)
+    );
     dispatch(enableVectorEditTool({
       layerId: id,
       pathData: paperLayer.pathData,

@@ -27,6 +27,7 @@ import session from './session';
 import scrollFrameTool from './scrollFrameTool';
 import vectorEditTool from './vectorEditTool';
 import measureTool from './measureTool';
+import selectionTool from './selectionTool';
 
 export const reducers = {
   layer,
@@ -54,7 +55,8 @@ export const reducers = {
   session,
   scrollFrameTool,
   vectorEditTool,
-  measureTool
+  measureTool,
+  selectionTool
 };
 
 const appReducer = combineReducers(reducers);

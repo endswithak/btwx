@@ -2,6 +2,7 @@ import React, { ReactElement, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
+import { rawRectToPaperRect } from '../utils';
 import getTheme from '../theme';
 import { activateUI } from './CanvasUI';
 
@@ -304,13 +305,13 @@ const MeasureFrame = (): ReactElement => {
 
   useEffect(() => {
     updateMeasureFrame({
-      bounds: new paperMain.Rectangle(measureFrameBounds[0], measureFrameBounds[1], measureFrameBounds[2], measureFrameBounds[3]),
+      bounds: rawRectToPaperRect(measureFrameBounds),
       measureTo: {
-        top: measureFrameMeasureTo.top && new paperMain.Rectangle(measureFrameMeasureTo.top[0], measureFrameMeasureTo.top[1], measureFrameMeasureTo.top[2], measureFrameMeasureTo.top[3]),
-        bottom: measureFrameMeasureTo.bottom && new paperMain.Rectangle(measureFrameMeasureTo.bottom[0], measureFrameMeasureTo.bottom[1], measureFrameMeasureTo.bottom[2], measureFrameMeasureTo.bottom[3]),
-        left: measureFrameMeasureTo.left && new paperMain.Rectangle(measureFrameMeasureTo.left[0], measureFrameMeasureTo.left[1], measureFrameMeasureTo.left[2], measureFrameMeasureTo.left[3]),
-        right: measureFrameMeasureTo.right && new paperMain.Rectangle(measureFrameMeasureTo.right[0], measureFrameMeasureTo.right[1], measureFrameMeasureTo.right[2], measureFrameMeasureTo.right[3]),
-        all: measureFrameMeasureTo.all && new paperMain.Rectangle(measureFrameMeasureTo.all[0], measureFrameMeasureTo.all[1], measureFrameMeasureTo.all[2], measureFrameMeasureTo.all[3])
+        top: measureFrameMeasureTo.top && rawRectToPaperRect(measureFrameMeasureTo.top),
+        bottom: measureFrameMeasureTo.bottom && rawRectToPaperRect(measureFrameMeasureTo.bottom),
+        left: measureFrameMeasureTo.left && rawRectToPaperRect(measureFrameMeasureTo.left),
+        right: measureFrameMeasureTo.right && rawRectToPaperRect(measureFrameMeasureTo.right),
+        all: measureFrameMeasureTo.all && rawRectToPaperRect(measureFrameMeasureTo.all)
       },
       themeName
     });

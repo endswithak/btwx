@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useEffect, ReactElement, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { isBetween } from '../utils';
+import { isBetween, paperRectToRawRect, paperPointToRawPoint } from '../utils';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
@@ -9,7 +9,7 @@ import { setLineFromThunk, setLineToThunk } from '../store/actions/layer';
 import { getPaperLayer, getSelectedProjectIndices } from '../store/selectors/layer';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
-import { updateSelectionFrame } from './SelectionFrame';
+import { setSelectionTool } from '../store/actions/selectionTool';
 
 const LineTool = (props: PaperToolProps): ReactElement => {
   const { tool, keyDownEvent, keyUpEvent, downEvent, dragEvent, upEvent } = props;
@@ -41,6 +41,9 @@ const LineTool = (props: PaperToolProps): ReactElement => {
     setIsHorizontal(false);
     setIsVertical(false);
     setOriginalPaperSelection(null);
+    if (resizing) {
+      dispatch(setCanvasResizing({resizing: false}));
+    }
   }
 
   const handleSnapToolUpdate = (snapToolBounds: paper.Rectangle, xSnapPoint: Btwx.SnapPoint, ySnapPoint: Btwx.SnapPoint): void => {
@@ -57,14 +60,11 @@ const LineTool = (props: PaperToolProps): ReactElement => {
         setToHandlePosition(toHandle.position);
         setHandle(initialHandle as Btwx.LineHandle);
         setOriginalPaperSelection(selectedPaperLayer.children[0] as paper.Path);
-        updateSelectionFrame({
-          bounds: selectedPaperLayer.bounds,
-          handle: initialHandle,
-          lineHandles: {
-            from: fromHandle.position,
-            to: toHandle.position
-          }
-        });
+        dispatch(setSelectionTool({
+          bounds: paperRectToRawRect(selectedPaperLayer.bounds),
+          lineFromPoint: paperPointToRawPoint(fromHandle.position),
+          lineToPoint: paperPointToRawPoint(toHandle.position)
+        }));
       }
     } catch(err) {
       console.error(`Line Tool Error -- On Mouse Down -- ${err}`);
@@ -155,9 +155,7 @@ const LineTool = (props: PaperToolProps): ReactElement => {
             break;
           }
         }
-        if (resizing) {
-          dispatch(setCanvasResizing({resizing: false}));
-        }
+        resetState();
       }
     } catch(err) {
       console.error(`Line Tool Error -- On Mouse Up -- ${err}`);
@@ -225,7 +223,7 @@ const LineTool = (props: PaperToolProps): ReactElement => {
     if (toBounds && isEnabled) {
       const nextPosition = new paperMain.Point(toBounds.center.x, toBounds.center.y);
       const selectedPaperLayer = getPaperLayer(selected[0], selectedProjectIndices[selected[0]]);
-      let lineHandles: { from: any; to: any };
+      let lineHandles: { from: paper.Point; to: paper.Point };
       switch(handle) {
         case 'lineTo': {
           lineHandles = { from: fromHandlePosition, to: nextPosition };
@@ -238,11 +236,11 @@ const LineTool = (props: PaperToolProps): ReactElement => {
           break;
         }
       }
-      updateSelectionFrame({
-        bounds: selectedPaperLayer.bounds,
-        handle: initialHandle,
-        lineHandles
-      });
+      dispatch(setSelectionTool({
+        bounds: paperRectToRawRect(selectedPaperLayer.bounds),
+        lineFromPoint: paperPointToRawPoint(lineHandles.from),
+        lineToPoint: paperPointToRawPoint(lineHandles.to)
+      }));
     }
   }, [toBounds]);
 

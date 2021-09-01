@@ -302,3 +302,99 @@ export const isBetween = (x: number, min: number, max: number): boolean => {
     return true;
   }
 };
+
+export const rawRectToPaperRect = (rect: number[]): paper.Rectangle =>
+  new paperMain.Rectangle(rect[0], rect[1], rect[2], rect[3]);
+
+export const paperRectToRawRect = (rect: paper.Rectangle): number[] =>
+  [rect.x, rect.y, rect.width, rect.height];
+
+export const rawPointToPaperPoint = (point: number[]): paper.Point =>
+  new paperMain.Point(point[0], point[1]);
+
+export const paperPointToRawPoint = (point: paper.Point): number[] =>
+  [point.x, point.y];
+
+export const rawSegToPaperSeg = (seg: number[][]): paper.Segment =>
+  new paperMain.Segment({
+    point: seg[0],
+    handleIn: seg[1],
+    handleOut: seg[2]
+  });
+
+export const paperSegToRawSeg = (seg: paper.Segment): number[][] =>
+  [
+    paperPointToRawPoint(seg.point),
+    seg.handleIn ? paperPointToRawPoint(seg.handleIn) : null,
+    seg.handleOut ? paperPointToRawPoint(seg.handleOut) : null
+  ];
+
+export const rawCurveToPaperCurve = (curve: number[][][]): paper.Curve =>
+  new paperMain.Curve(rawSegToPaperSeg(curve[0]), rawSegToPaperSeg(curve[1]));
+
+export const paperCurveToRawCurve = (seg: paper.Curve): number[][][] =>
+  [paperSegToRawSeg(seg.segment1),paperSegToRawSeg(seg.segment2)];
+
+export const rawCurveLocToPaperCurveLoc = (curveLoc: (number[][][]|number[]|number)[]): paper.CurveLocation =>
+  new paperMain.CurveLocation(
+    rawCurveToPaperCurve(curveLoc[0] as number[][][]),
+    curveLoc[1] as number,
+    curveLoc[2] ? rawPointToPaperPoint(curveLoc[2] as number[]) : null
+  );
+
+export const paperCurveLocToRawCurveLoc = (curveLoc: paper.CurveLocation): (number[][][]|number[]|number)[] =>
+  [
+    paperCurveToRawCurve(curveLoc.curve),
+    curveLoc.time,
+    curveLoc.point ? paperPointToRawPoint(curveLoc.point) : null
+  ];
+
+export const getCompoundPathPaths = (compoundPath: paper.CompoundPath): paper.Path[] => {
+  const paths: paper.Path[] = [];
+  const compoundPaths: paper.PathItem[] = [compoundPath];
+  let i = 0;
+  while(i < compoundPaths.length) {
+    const layer = compoundPaths[i];
+    layer.children.forEach((child) => {
+      if (child.hasChildren()) {
+        compoundPaths.push(child as paper.PathItem);
+      } else {
+        paths.push(child as paper.Path);
+      }
+    });
+    i++;
+  }
+  return paths;
+}
+
+export const getPathItemSegments = (pathItem: paper.PathItem): paper.Segment[] => {
+  if (pathItem.hasChildren()) {
+    return getCompoundPathPaths(pathItem as paper.CompoundPath).reduce((result, current) => {
+      return [...result, ...current.segments];
+    }, []);
+  } else {
+    return (pathItem as paper.Path).segments;
+  }
+}
+
+export const getLineResizeHandlePos = (bounds: paper.Rectangle, point: paper.Point): paper.Segment[] => {
+  const corners = [{name: 'topLeft', point: bounds.topLeft}, {name: 'topRight', point: bounds.topRight}, {name: 'bottomLeft', point:  bounds.bottomLeft}, {name: 'bottomRight', point: bounds.bottomRight}];
+  const closestCorner = corners.reduce((result, current) => {
+    if (!result.name) {
+      result = {
+        name: current.name,
+        distance: point.getDistance(current.point)
+      }
+    } else {
+      const nextDistance = point.getDistance(current.point);
+      if (nextDistance < result.distance) {
+        result = {
+          name: current.name,
+          distance: nextDistance
+        }
+      }
+    }
+    return result;
+  }, { name: null, distance: null });
+  return closestCorner.name;
+}
