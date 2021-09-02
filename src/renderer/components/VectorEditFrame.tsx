@@ -2,8 +2,9 @@ import React, { ReactElement, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import getTheme from '../theme';
-import { activateUI } from './CanvasUI';
 import { paperMain } from '../canvas';
+import { rawSegToPaperSeg, rawCurveLocToPaperCurveLoc } from '../utils';
+import { activateUI } from './CanvasUI';
 
 export const vectorEditFrameId = 'vectorEditFrame';
 
@@ -31,7 +32,6 @@ export const clearVectorEditFrame = () => {
 export const updateVectorEditFrame = ({
   layerId,
   themeName,
-  pathData,
   curveHover,
   segments,
   selectedSegment,
@@ -39,7 +39,6 @@ export const updateVectorEditFrame = ({
 }: {
   layerId: string;
   themeName: Btwx.ThemeName;
-  pathData: string;
   curveHover: paper.CurveLocation;
   segments: paper.Segment[];
   selectedSegment: paper.Segment;
@@ -47,12 +46,12 @@ export const updateVectorEditFrame = ({
 }): void => {
   activateUI();
   clearVectorEditFrame();
-  if (pathData) {
+  if (segments.length > 0) {
     const vectorEditFrame = getVectorEditFrame();
     const theme = getTheme(themeName);
     const createHandle = (type: 'In' | 'Out') => {
       const handlePoint = type === 'In' ? selectedSegment.handleIn : selectedSegment.handleOut;
-      const handleId = `handle${type}`;
+      const handleId = `segmentHandle${type}`;
       const strokeWidth = selectedSegmentType === handleId ? 2 : 1;
       const handleGroup = new paperMain.Group({
         data: {
@@ -123,42 +122,42 @@ export const updateVectorEditFrame = ({
       handle.scaling.y = 1 / paperMain.view.zoom;
     }
     // base frame
-    const baseFrame = new paperMain.Group({
-      opacity: 0.33,
-      data: {
-        type: 'UIElementChild',
-        interactive: false,
-        interactiveType: null,
-        elementId: vectorEditFrameId
-      },
-      children: [
-        new paperMain.Path({
-          pathData: pathData,
-          strokeColor: '#fff',
-          strokeWidth: 1 / paperMain.view.zoom,
-          blendMode: 'multiply',
-          data: {
-            type: 'UIElementChild',
-            interactive: false,
-            interactiveType: null,
-            elementId: vectorEditFrameId
-          }
-        }),
-        new paperMain.Path({
-          pathData: pathData,
-          strokeColor: '#999',
-          strokeWidth: 1 / paperMain.view.zoom,
-          blendMode: 'difference',
-          data: {
-            type: 'UIElementChild',
-            interactive: false,
-            interactiveType: null,
-            elementId: vectorEditFrameId
-          }
-        })
-      ],
-      parent: vectorEditFrame
-    })
+    // const baseFrame = new paperMain.Group({
+    //   opacity: 0.33,
+    //   data: {
+    //     type: 'UIElementChild',
+    //     interactive: false,
+    //     interactiveType: null,
+    //     elementId: vectorEditFrameId
+    //   },
+    //   children: [
+    //     new paperMain.Path({
+    //       segments: segments,
+    //       strokeColor: '#fff',
+    //       strokeWidth: 1 / paperMain.view.zoom,
+    //       blendMode: 'multiply',
+    //       data: {
+    //         type: 'UIElementChild',
+    //         interactive: false,
+    //         interactiveType: null,
+    //         elementId: vectorEditFrameId
+    //       }
+    //     }),
+    //     new paperMain.Path({
+    //       segments: segments,
+    //       strokeColor: '#999',
+    //       strokeWidth: 1 / paperMain.view.zoom,
+    //       blendMode: 'difference',
+    //       data: {
+    //         type: 'UIElementChild',
+    //         interactive: false,
+    //         interactiveType: null,
+    //         elementId: vectorEditFrameId
+    //       }
+    //     })
+    //   ],
+    //   parent: vectorEditFrame
+    // })
     if (curveHover) {
       const curveHoverPath = new paperMain.Path({
         segments: [curveHover.curve.segment1, curveHover.curve.segment2],
@@ -196,7 +195,7 @@ export const updateVectorEditFrame = ({
     if (segments && segments.length > 0) {
       for (let i = 0; i < segments.length; i++) {
         const segment = segments[i];
-        const isSelected = selectedSegment && selectedSegment.point.equals(segment.point) && selectedSegmentType === 'point';
+        const isSelected = selectedSegment && selectedSegment.point.equals(segment.point) && selectedSegmentType === 'segmentPoint';
         const strokeWidth = isSelected ? 2 : 1;
         const segmentPoint = new paperMain.Path.Ellipse({
           center: segment.point,
@@ -207,6 +206,7 @@ export const updateVectorEditFrame = ({
           shadowColor: { hue: 0, saturation: 0, lightness: 0, alpha: 0.5 },
           shadowBlur: 1 / paperMain.view.zoom,
           data: {
+            segmentIndex: i,
             type: 'UIElementChild',
             interactive: true,
             interactiveType: 'segmentPoint',
@@ -225,46 +225,22 @@ const VectorEditFrame = (): ReactElement => {
   const themeName = useSelector((state: RootState) => state.preferences.theme);
   const zoom = useSelector((state: RootState) => state.documentSettings.zoom);
   const layerId = useSelector((state: RootState) => state.vectorEditTool.layerId);
-  const pathData = useSelector((state: RootState) => state.vectorEditTool.pathData);
+  // const pathData = useSelector((state: RootState) => state.vectorEditTool.pathData);
   const segments = useSelector((state: RootState) => state.vectorEditTool.segments);
   const curveHover = useSelector((state: RootState) => state.vectorEditTool.curveHover);
   const selectedSegment = useSelector((state: RootState) => state.vectorEditTool.selectedSegment);
   const selectedSegmentType = useSelector((state: RootState) => state.vectorEditTool.selectedSegmentType);
 
   useEffect(() => {
-    const paperSegments = segments && segments.map((arr) => {
-      return new paperMain.Segment({
-        point: arr[0],
-        handleIn: arr[1],
-        handleOut: arr[2]
-      });
-    });
-    const paperCurveHover = curveHover && (() => {
-      const curveSegment1 = new paperMain.Segment({
-        point: curveHover[0][0][0],
-        handleIn: curveHover[0][0][1],
-        handleOut: curveHover[0][0][2]
-      });
-      const curveSegment2 = new paperMain.Segment({
-        point: curveHover[0][1][0],
-        handleIn: curveHover[0][1][1],
-        handleOut: curveHover[0][1][2]
-      });
-      const curve = new paperMain.Curve(curveSegment1, curveSegment2);
-      const curvePoint = curveHover[2] && new paperMain.Point(curveHover[2] as number[]);
-      return new paperMain.CurveLocation(curve, curveHover[1] as number, curvePoint);
-    })();
-    const paperSelectedSegment = selectedSegment && (() => {
-      return new paperMain.Segment({
-        point: selectedSegment[0],
-        handleIn: selectedSegment[1],
-        handleOut: selectedSegment[2]
-      });
-    })();
+    const paperSegments = segments && segments.map((arr) =>
+      rawSegToPaperSeg(arr)
+    );
+    const paperCurveHover = curveHover && rawCurveLocToPaperCurveLoc(curveHover);
+    const paperSelectedSegment = selectedSegment && rawSegToPaperSeg(selectedSegment);
     updateVectorEditFrame({
       layerId,
       themeName,
-      pathData,
+      // pathData,
       segments: paperSegments,
       curveHover: paperCurveHover,
       selectedSegment: paperSelectedSegment,
@@ -273,7 +249,7 @@ const VectorEditFrame = (): ReactElement => {
     return (): void => {
       clearVectorEditFrame();
     }
-  }, [zoom, themeName, layerId, pathData, segments, curveHover, selectedSegment, selectedSegmentType]);
+  }, [zoom, themeName, layerId, segments, curveHover, selectedSegment, selectedSegmentType]);
 
   return null;
 }

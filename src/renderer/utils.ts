@@ -376,25 +376,3 @@ export const getPathItemSegments = (pathItem: paper.PathItem): paper.Segment[] =
     return (pathItem as paper.Path).segments;
   }
 }
-
-export const getLineResizeHandlePos = (bounds: paper.Rectangle, point: paper.Point): paper.Segment[] => {
-  const corners = [{name: 'topLeft', point: bounds.topLeft}, {name: 'topRight', point: bounds.topRight}, {name: 'bottomLeft', point:  bounds.bottomLeft}, {name: 'bottomRight', point: bounds.bottomRight}];
-  const closestCorner = corners.reduce((result, current) => {
-    if (!result.name) {
-      result = {
-        name: current.name,
-        distance: point.getDistance(current.point)
-      }
-    } else {
-      const nextDistance = point.getDistance(current.point);
-      if (nextDistance < result.distance) {
-        result = {
-          name: current.name,
-          distance: nextDistance
-        }
-      }
-    }
-    return result;
-  }, { name: null, distance: null });
-  return closestCorner.name;
-}

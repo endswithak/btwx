@@ -7,7 +7,7 @@ import { openContextMenu } from '../store/actions/contextMenu';
 import { setLayerHover, deepSelectLayerThunk, selectLayers, deselectLayers, deselectAllLayers, setActiveArtboard, setLayerTreeScroll, showLayersChildren } from '../store/actions/layer';
 import { openTextEditorThunk } from '../store/actions/textEditor';
 import { setTextSettings } from '../store/actions/textSettings';
-import { enableVectorEditToolThunk, disableVectorEditTool, setVectorEditToolCurveHover } from '../store/actions/vectorEditTool';
+import { enableVectorEditToolThunk, setVectorEditToolCurveHover } from '../store/actions/vectorEditTool';
 
 interface CanvasLayerEventsProps {
   layerEvent: {
@@ -108,9 +108,6 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
     if (layerEvent.empty) {
       if (selected.length > 0 && !layerEvent.event.shiftKey) {
         dispatch(deselectAllLayers());
-      }
-      if (vectorEditToolEnabled) {
-        dispatch(disableVectorEditTool());
       }
     } else {
       if (layerEvent.event.shiftKey) {
@@ -260,7 +257,7 @@ const CanvasLayerEvents = (props: CanvasLayerEventsProps): ReactElement => {
   }
 
   useEffect(() => {
-    if (layerEvent && !dragging && !resizing && activeTool !== 'Artboard' && activeTool !== 'Shape' && activeTool !== 'Text') {
+    if (layerEvent && !dragging && !resizing && activeTool !== 'Artboard' && activeTool !== 'Shape' && activeTool !== 'Text' && activeTool !== 'VectorEdit') {
       switch(layerEvent.eventType) {
         case 'contextMenu':
           handleContextMenu();

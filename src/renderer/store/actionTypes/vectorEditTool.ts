@@ -5,13 +5,18 @@ export const SET_VECTOR_EDIT_TOOL_PATH_DATA = 'SET_VECTOR_EDIT_TOOL_PATH_DATA';
 export const SET_VECTOR_EDIT_TOOL_SEGMENTS = 'SET_VECTOR_EDIT_TOOL_SEGMENTS';
 export const SET_VECTOR_EDIT_TOOL_CURVE_HOVER = 'SET_VECTOR_EDIT_TOOL_CURVE_HOVER';
 export const SET_VECTOR_EDIT_TOOL_SELECTED_SEGMENT = 'SET_VECTOR_EDIT_TOOL_SELECTED_SEGMENT';
+export const SET_VECTOR_EDIT_TOOL_SELECTED_SEGMENT_TYPE = 'SET_VECTOR_EDIT_TOOL_SELECTED_SEGMENT_TYPE';
+export const SET_VECTOR_EDIT_TOOL_SEGMENT_HOVER = 'SET_VECTOR_EDIT_TOOL_SEGMENT_HOVER';
+export const SET_VECTOR_EDIT_TOOL_SEGMENT_HOVER_TYPE = 'SET_VECTOR_EDIT_TOOL_SEGMENT_HOVER_TYPE';
+export const SET_VECTOR_EDIT_TOOL = 'SET_VECTOR_EDIT_TOOL';
 
 export interface EnableVectorEditToolPayload {
   layerId: string;
-  pathData: string;
+  // pathData: string;
   segments: number[][][];
   curveHover: (number[][][]|number[]|number)[];
   selectedSegment: number[][];
+  selectedSegmentIndex: number;
   selectedSegmentType: Btwx.SelectedSegmentType;
 }
 
@@ -62,6 +67,7 @@ interface SetVectorEditToolCurveHover {
 
 export interface SetVectorEditToolSelectedSegmentPayload {
   selectedSegment: number[][];
+  selectedSegmentIndex: number;
   selectedSegmentType: Btwx.SelectedSegmentType;
 }
 
@@ -70,10 +76,60 @@ interface SetVectorEditToolSelectedSegment {
   payload: SetVectorEditToolSelectedSegmentPayload;
 }
 
+export interface SetVectorEditToolSelectedSegmentTypePayload {
+  selectedSegmentType: Btwx.SelectedSegmentType;
+}
+
+interface SetVectorEditToolSelectedSegmentType {
+  type: typeof SET_VECTOR_EDIT_TOOL_SELECTED_SEGMENT_TYPE;
+  payload: SetVectorEditToolSelectedSegmentTypePayload;
+}
+
+export interface SetVectorEditToolSegmentHoverPayload {
+  segmentHover: number[][];
+  segmentHoverIndex: number;
+  segmentHoverType: Btwx.SelectedSegmentType;
+}
+
+interface SetVectorEditToolSegmentHover {
+  type: typeof SET_VECTOR_EDIT_TOOL_SEGMENT_HOVER;
+  payload: SetVectorEditToolSegmentHoverPayload;
+}
+
+export interface SetVectorEditToolSegmentHoverTypePayload {
+  segmentHoverType: Btwx.SelectedSegmentType;
+}
+
+interface SetVectorEditToolSegmentHoverType {
+  type: typeof SET_VECTOR_EDIT_TOOL_SEGMENT_HOVER_TYPE;
+  payload: SetVectorEditToolSegmentHoverTypePayload;
+}
+
+export interface SetVectorEditToolPayload {
+  layerId?: string;
+  segments?: number[][][];
+  curveHover?: (number[][][]|number[]|number)[];
+  selectedSegment?: number[][];
+  selectedSegmentIndex?: number;
+  selectedSegmentType?: Btwx.SelectedSegmentType;
+  segmentHover?: number[][];
+  segmentHoverIndex?: number;
+  segmentHoverType?: Btwx.SelectedSegmentType;
+}
+
+interface SetVectorEditTool {
+  type: typeof SET_VECTOR_EDIT_TOOL;
+  payload: SetVectorEditToolPayload;
+}
+
 export type VectorEditToolTypes = EnableVectorEditTool |
                                   DisableVectorEditTool |
                                   SetVectorEditToolLayerId |
                                   SetVectorEditToolPathData |
                                   SetVectorEditToolSegments |
                                   SetVectorEditToolCurveHover |
-                                  SetVectorEditToolSelectedSegment;
+                                  SetVectorEditToolSelectedSegment |
+                                  SetVectorEditToolSelectedSegmentType |
+                                  SetVectorEditToolSegmentHover |
+                                  SetVectorEditToolSegmentHoverType |
+                                  SetVectorEditTool;

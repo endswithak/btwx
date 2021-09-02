@@ -3,6 +3,7 @@ import React, { ReactElement, useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
+import { paperCurveLocToRawCurveLoc } from '../utils';
 import { addImageThunk, setHoverFillThunk, setHoverStrokeThunk, setHoverShadowThunk } from '../store/actions/layer';
 import { setCanvasReady, setCanvasFocusing, setCanvasMeasuring, setCanvasCursorPosition } from '../store/actions/canvasSettings';
 import { hydrateDocumentThunk } from '../store/actions/documentSettings';
@@ -22,6 +23,7 @@ import LineTool from './LineTool';
 import TextTool from './TextTool';
 import SelectionTool from './SelectionTool';
 import GradientTool from './GradientTool';
+import VectorEditTool from './VectorEditTool';
 import CanvasUI from './CanvasUI';
 import CanvasProjects from './CanvasProjects';
 import LoadingIndicator from './LoadingIndicator';
@@ -92,19 +94,7 @@ const Canvas = (): ReactElement => {
 
   const getHitResultLocation = (hitResult: paper.HitResult): (number[][][]|number[]|number)[] => {
     if (hitResult.type === 'curve' || hitResult.type === 'stroke') {
-      const loc = hitResult.location;
-      const curveSegment1Point = [loc.curve.segment1.point.x, loc.curve.segment1.point.y];
-      const curveSegment1HandleIn = loc.curve.segment1.handleIn ? [loc.curve.segment1.handleIn.x, loc.curve.segment1.handleIn.y] : null;
-      const curveSegment1HandleOut = loc.curve.segment1.handleOut ? [loc.curve.segment1.handleOut.x, loc.curve.segment1.handleOut.y] : null;
-      const curveSegment1 = [curveSegment1Point, curveSegment1HandleIn, curveSegment1HandleOut];
-      const curveSegment2Point = [loc.curve.segment2.point.x, loc.curve.segment2.point.y];
-      const curveSegment2HandleIn = loc.curve.segment2.handleIn ? [loc.curve.segment2.handleIn.x, loc.curve.segment2.handleIn.y] : null;
-      const curveSegment2HandleOut = loc.curve.segment2.handleOut ? [loc.curve.segment2.handleOut.x, loc.curve.segment2.handleOut.y] : null;
-      const curveSegment2 = [curveSegment2Point, curveSegment2HandleIn, curveSegment2HandleOut];
-      const curveLocationCurve = [curveSegment1, curveSegment2];
-      const curveLocationTime = loc.time;
-      const curveLocationPoint = loc.point ? [loc.point.x, loc.point.y] : null;
-      return [curveLocationCurve, curveLocationTime, curveLocationPoint];
+      return paperCurveLocToRawCurveLoc(hitResult.location);
     } else {
       return null;
     }
@@ -441,19 +431,20 @@ const Canvas = (): ReactElement => {
               zoomEvent={zoomEvent} />
             <TranslateTool
               translateEvent={translateEvent} />
+            <SelectionTool />
             {/* user activated tools */}
             <ArtboardTool />
             <ShapeTool />
             <TextTool />
+            <ScrollFrameTool />
+            <VectorEditTool />
             {/* hover activated tools */}
             <DragTool />
             <AreaSelectTool />
             <ResizeTool />
-            <ScrollFrameTool />
             <LineTool />
             {/* misc tools */}
             <GradientTool />
-            <SelectionTool />
             {/* debug tools */}
             {
               isDevelopment

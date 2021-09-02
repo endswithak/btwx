@@ -2,31 +2,40 @@ import {
   ENABLE_VECTOR_EDIT_TOOL,
   DISABLE_VECTOR_EDIT_TOOL,
   SET_VECTOR_EDIT_TOOL_LAYER_ID,
-  SET_VECTOR_EDIT_TOOL_PATH_DATA,
   SET_VECTOR_EDIT_TOOL_SEGMENTS,
   SET_VECTOR_EDIT_TOOL_CURVE_HOVER,
   SET_VECTOR_EDIT_TOOL_SELECTED_SEGMENT,
+  SET_VECTOR_EDIT_TOOL_SELECTED_SEGMENT_TYPE,
+  SET_VECTOR_EDIT_TOOL_SEGMENT_HOVER,
+  SET_VECTOR_EDIT_TOOL_SEGMENT_HOVER_TYPE,
+  SET_VECTOR_EDIT_TOOL,
   VectorEditToolTypes,
 } from '../actionTypes/vectorEditTool';
 
 export interface VectorEditState {
   isEnabled: boolean;
   layerId: string;
-  pathData: string;
   segments: number[][][];
   curveHover: (number[][][]|number[]|number)[];
   selectedSegment: number[][];
+  selectedSegmentIndex: number;
   selectedSegmentType: Btwx.SelectedSegmentType;
+  segmentHover: number[][];
+  segmentHoverIndex: number;
+  segmentHoverType: Btwx.SelectedSegmentType;
 }
 
 const initialState: VectorEditState = {
   isEnabled: false,
   layerId: null,
-  pathData: null,
   segments: null,
   curveHover: null,
   selectedSegment: null,
-  selectedSegmentType: null
+  selectedSegmentIndex: null,
+  selectedSegmentType: null,
+  segmentHover: null,
+  segmentHoverIndex: null,
+  segmentHoverType: null
 };
 
 export default (state = initialState, action: VectorEditToolTypes): VectorEditState => {
@@ -36,10 +45,10 @@ export default (state = initialState, action: VectorEditToolTypes): VectorEditSt
         ...state,
         isEnabled: true,
         layerId: action.payload.layerId,
-        pathData: action.payload.pathData,
         segments: action.payload.segments,
         curveHover: action.payload.curveHover,
         selectedSegment: action.payload.selectedSegment,
+        selectedSegmentIndex: action.payload.selectedSegmentIndex,
         selectedSegmentType: action.payload.selectedSegmentType
       };
     }
@@ -48,23 +57,20 @@ export default (state = initialState, action: VectorEditToolTypes): VectorEditSt
         ...state,
         isEnabled: false,
         layerId: null,
-        pathData: null,
         segments: null,
         curveHover: null,
         selectedSegment: null,
-        selectedSegmentType: null
+        selectedSegmentIndex: null,
+        selectedSegmentType: null,
+        segmentHover: null,
+        segmentHoverIndex: null,
+        segmentHoverType: null
       };
     }
     case SET_VECTOR_EDIT_TOOL_LAYER_ID: {
       return {
         ...state,
         layerId: action.payload.layerId
-      };
-    }
-    case SET_VECTOR_EDIT_TOOL_PATH_DATA: {
-      return {
-        ...state,
-        pathData: action.payload.pathData
       };
     }
     case SET_VECTOR_EDIT_TOOL_SEGMENTS: {
@@ -83,7 +89,34 @@ export default (state = initialState, action: VectorEditToolTypes): VectorEditSt
       return {
         ...state,
         selectedSegment: action.payload.selectedSegment,
+        selectedSegmentIndex: action.payload.selectedSegmentIndex,
         selectedSegmentType: action.payload.selectedSegmentType
+      };
+    }
+    case SET_VECTOR_EDIT_TOOL_SELECTED_SEGMENT_TYPE: {
+      return {
+        ...state,
+        selectedSegmentType: action.payload.selectedSegmentType
+      };
+    }
+    case SET_VECTOR_EDIT_TOOL_SEGMENT_HOVER: {
+      return {
+        ...state,
+        segmentHover: action.payload.segmentHover,
+        segmentHoverIndex: action.payload.segmentHoverIndex,
+        segmentHoverType: action.payload.segmentHoverType
+      };
+    }
+    case SET_VECTOR_EDIT_TOOL_SEGMENT_HOVER_TYPE: {
+      return {
+        ...state,
+        segmentHoverType: action.payload.segmentHoverType
+      };
+    }
+    case SET_VECTOR_EDIT_TOOL: {
+      return {
+        ...state,
+        ...action.payload
       };
     }
     default:

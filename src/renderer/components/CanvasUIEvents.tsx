@@ -1,11 +1,13 @@
 import React, { useEffect, ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
+import { paperSegToRawSeg } from '../utils';
 import { setCanvasActiveTool, setCanvasCursor } from '../store/actions/canvasSettings';
 import { setLayerHover, setLayerActiveGradientStop, selectLayers, deselectLayers, setLayerTreeScroll, deselectLayerEvents, selectLayerEvents } from '../store/actions/layer';
 import { getAllArtboardItems } from '../store/selectors/layer';
 import { openContextMenu } from '../store/actions/contextMenu';
 import { setEventDrawerEventThunk, setEventDrawerEventHoverThunk } from '../store/actions/eventDrawer';
+import { setVectorEditToolSelectedSegment, setVectorEditToolSegmentHover, setVectorEditToolSegmentHoverType, setVectorEditToolSelectedSegmentType, disableVectorEditToolThunk } from '../store/actions/vectorEditTool';
 import { selectionFrameId } from './SelectionFrame';
 import { scrollFrameId } from './ScrollFrame';
 import { gradientFrameId } from './GradientFrame';
@@ -66,8 +68,13 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
   const gradientEditorProp = useSelector((state: RootState) => state.gradientEditor.prop);
   const vectorEditToolLayerId = useSelector((state: RootState) => state.vectorEditTool.layerId);
   const vectorEditToolCurveHover = useSelector((state: RootState) => state.vectorEditTool.curveHover);
+  const vectorEditToolSegments = useSelector((state: RootState) => state.vectorEditTool.segments);
   const vectorEditToolSelectedSegment = useSelector((state: RootState) => state.vectorEditTool.selectedSegment);
+  const vectorEditToolSelectedSegmentIndex = useSelector((state: RootState) => state.vectorEditTool.selectedSegmentIndex);
   const vectorEditToolSelectedSegmentType = useSelector((state: RootState) => state.vectorEditTool.selectedSegmentType);
+  const vectorEditToolSegmentHover = useSelector((state: RootState) => state.vectorEditTool.segmentHover);
+  const vectorEditToolSegmentHoverIndex = useSelector((state: RootState) => state.vectorEditTool.segmentHoverIndex);
+  const vectorEditToolSegmentHoverType = useSelector((state: RootState) => state.vectorEditTool.segmentHoverType);
   const dispatch = useDispatch();
 
   const handleMouseMove = (): void => {
@@ -82,6 +89,13 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           cursor: ['auto']
         }));
       }
+      if (vectorEditToolSegmentHover) {
+        dispatch(setVectorEditToolSegmentHover({
+          segmentHover: null,
+          segmentHoverIndex: null,
+          segmentHoverType: null
+        }));
+      }
       if (eventDrawerHover !== null) {
         dispatch(setEventDrawerEventHoverThunk({
           id: null
@@ -94,7 +108,29 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
       const interactiveType = uiEvent.hitResult.item.data.interactiveType;
       switch(uiEvent.hitResult.item.data.elementId) {
         case vectorEditFrameId: {
-          return;
+          if (interactiveType) {
+            const segmentIndex = uiEvent.hitResult.item.data.segmentIndex;
+            switch(interactiveType) {
+              case 'segmentHandleIn':
+              case 'segmentHandleOut':
+                if (vectorEditToolSegmentHoverType !== interactiveType) {
+                  dispatch(setVectorEditToolSegmentHoverType({
+                    segmentHoverType: interactiveType as 'segmentHandleIn' | 'segmentHandleOut'
+                  }));
+                }
+                break;
+              case 'segmentPoint':
+                if (vectorEditToolSegmentHoverIndex !== segmentIndex) {
+                  dispatch(setVectorEditToolSegmentHover({
+                    segmentHover: vectorEditToolSegments[uiEvent.hitResult.item.data.segmentIndex as number],
+                    segmentHoverIndex: uiEvent.hitResult.item.data.segmentIndex as number,
+                    segmentHoverType: interactiveType as 'segmentPoint'
+                  }));
+                }
+                break;
+            }
+          }
+          break;
         }
         case scrollFrameId: {
           if (hover) {
@@ -234,9 +270,32 @@ const CanvasUIEvents = (props: CanvasUIEventsProps): ReactElement => {
           events: selectedEvents
         }));
       }
+      if (activeTool === 'VectorEdit') {
+        dispatch(disableVectorEditToolThunk());
+      }
     } else {
       const interactiveType = uiEvent.hitResult.item.data.interactiveType;
       switch(uiEvent.hitResult.item.data.elementId) {
+        case vectorEditFrameId: {
+          if (interactiveType) {
+            switch(interactiveType) {
+              case 'segmentHandleIn':
+              case 'segmentHandleOut':
+                dispatch(setVectorEditToolSelectedSegmentType({
+                  selectedSegmentType: interactiveType as 'segmentHandleIn' | 'segmentHandleOut'
+                }));
+                break;
+              case 'segmentPoint':
+                dispatch(setVectorEditToolSelectedSegment({
+                  selectedSegment: vectorEditToolSegments[uiEvent.hitResult.item.data.segmentIndex as number],
+                  selectedSegmentIndex: uiEvent.hitResult.item.data.segmentIndex as number,
+                  selectedSegmentType: interactiveType as 'segmentPoint'
+                }));
+                break;
+            }
+          }
+          break;
+        }
         case eventsFrameId: {
           const isSelected = selectedEvents.includes(interactiveType);
           if (uiEvent.event.shiftKey) {

@@ -78,7 +78,7 @@ declare namespace Btwx {
 
   type ZoomType = 'in' | 'out';
 
-  type ToolType = 'Shape' | 'Selection' | 'Artboard' | 'Text' | 'Drag' | 'AreaSelect' | 'Resize' | 'Line' | 'Gradient' | 'Translate' | 'Zoom' | 'ScrollFrame';
+  type ToolType = 'Shape' | 'Selection' | 'Artboard' | 'Text' | 'Drag' | 'AreaSelect' | 'Resize' | 'Line' | 'Gradient' | 'Translate' | 'Zoom' | 'ScrollFrame' | 'VectorEdit';
 
   type Orientation = 'Portrait' | 'Landscape';
 
@@ -166,7 +166,7 @@ declare namespace Btwx {
 
   type SnapZoneType = 'left' | 'right' | 'top' | 'bottom' | 'center' | 'middle';
 
-  type SelectedSegmentType = 'point' | 'handleIn' | 'handleOut';
+  type SelectedSegmentType = 'segmentPoint' | 'segmentHandleIn' | 'segmentHandleOut';
 
   interface SnapZones {
     top: paper.Rectangle;
