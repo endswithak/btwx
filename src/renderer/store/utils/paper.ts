@@ -3,12 +3,17 @@ import paper from 'paper';
 import tinyColor from 'tinycolor2';
 import { DEFAULT_ROUNDED_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_RADIUS, DEFAULT_STAR_POINTS, DEFAULT_LINE_FROM, DEFAULT_LINE_TO } from '../../constants';
 import { paperMain, paperPreview } from '../../canvas';
+import { rawSegToPaperSeg } from '../../utils';
 import { getLeading } from '../../components/CanvasTextLayer';
 
-export const getShapeIcon = (pathData): string => {
+export const getShapeIcon = (segments: number[][][][]): string => {
   const layerIcon = new paperMain.CompoundPath({
-    pathData: pathData,
-    insert: false
+    insert: false,
+    children: segments.map((pathSegments) =>
+      new paperMain.Path({
+        segments: pathSegments
+      })
+    )
   });
   layerIcon.fitBounds(new paperMain.Rectangle({
     point: new paperMain.Point(0,0),
@@ -430,7 +435,7 @@ export const getPaperStyle = ({ style, textStyle, layerFrame, artboardFrame, isL
   };
 }
 
-export const getPaperLayerIndex = (layerItem: Btwx.Layer, parentItem: Btwx.Artboard | Btwx.Group): number => {
+export const getPaperLayerIndex = (layerItem: Btwx.Layer, parentItem: Btwx.Artboard | Btwx.Group | Btwx.CompoundShape): number => {
   const layerIndex = parentItem.children.indexOf(layerItem.id);
   const underlyingMaskIndex = (layerItem as Btwx.Text).underlyingMask ? parentItem.children.indexOf((layerItem as Btwx.Text).underlyingMask) : null;
   return (layerItem as Btwx.Text).masked ? (layerIndex - underlyingMaskIndex) + 1 : layerIndex;

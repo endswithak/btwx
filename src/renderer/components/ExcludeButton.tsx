@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { applyBooleanOperationThunk } from '../store/actions/layer';
+import { boolSelectedThunk } from '../store/actions/layer';
 import { canBooleanSelected } from '../store/selectors/layer';
 import StackedButton from './StackedButton';
 import Icon from './Icon';
@@ -12,7 +12,7 @@ const ExcludeButton = (): ReactElement => {
 
   const handleExcludeClick = (): void => {
     if (canExclude) {
-      dispatch(applyBooleanOperationThunk('exclude'));
+      dispatch(boolSelectedThunk('exclude'));
     }
   }
 
@@ -24,7 +24,7 @@ const ExcludeButton = (): ReactElement => {
       size='small'>
       <Icon
         size='small'
-        name='combine-difference' />
+        name='combine-exclude' />
     </StackedButton>
   );
 }

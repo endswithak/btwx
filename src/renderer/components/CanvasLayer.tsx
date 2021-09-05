@@ -3,6 +3,7 @@ import { useSelector, shallowEqual } from 'react-redux';
 import { getLayerById } from '../store/selectors/layer';
 import { RootState } from '../store/reducers';
 import CanvasArtboardLayer from './CanvasArtboardLayer';
+import CanvasCompoundShapeLayer from './CanvasCompoundShapeLayer';
 import CanvasShapeLayer from './CanvasShapeLayer';
 import CanvasTextLayer from './CanvasTextLayer';
 import CanvasImageLayer from './CanvasImageLayer';
@@ -17,6 +18,10 @@ interface CanvasLayerProps {
   nestedScrollLeft?: number;
   nestedScrollTop?: number;
   wheelEvent?: any;
+  nestedSubPathFlag?: string;
+  deepestSubPath?: string;
+  setNestedSubPathFlag?(subPathFlag: string): void;
+  setNestedBoolFlag?(boolFlag: string): void;
 }
 
 const getLayerByIdSelector = () => getLayerById;
@@ -45,6 +50,11 @@ const CanvasLayer = (props: CanvasLayerProps): ReactElement => {
       case 'Shape':
         return (
           <CanvasShapeLayer
+            {...props} />
+        );
+      case 'CompoundShape':
+        return (
+          <CanvasCompoundShapeLayer
             {...props} />
         );
       case 'Text':

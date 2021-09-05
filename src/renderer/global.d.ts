@@ -2,7 +2,7 @@ declare module 'lodash.debounce';
 declare module 'lodash.clonedeep';
 declare module 'react-scroll-sync';
 declare module 'string.prototype.replaceall';
-declare var MediaRecorder: any;
+// declare var MediaRecorder: any;
 
 declare namespace Btwx {
 
@@ -100,7 +100,7 @@ declare namespace Btwx {
 
   type TweenPropMap = { [K in TweenProp]: boolean; }
 
-  type LayerType = 'Root' | 'Group' | 'Shape' | 'Artboard' | 'Text' | 'Image';
+  type LayerType = 'Root' | 'Group' | 'Shape' | 'CompoundShape' | 'Artboard' | 'Text' | 'Image';
 
   type BlendMode = 'normal' | 'darken' | 'multiply' | 'color-burn' | 'lighten' | 'screen' | 'color-dodge' | 'overlay' | 'soft-light' | 'hard-light' | 'difference' | 'exclusion' | 'hue' | 'saturation' | 'color' | 'luminosity' | 'add' | 'subtract' | 'average' | 'pin-light' | 'negation' | 'source-over' | 'source-in' | 'source-out' | 'source-atop' | 'destination-over' | 'destination-in' | 'destination-out' | 'destination-atop' | 'lighter' | 'darker' | 'copy' | 'xor';
 
@@ -156,7 +156,7 @@ declare namespace Btwx {
 
   type DeviceOrientationType = 'Landscape' | 'Portrait';
 
-  type BooleanOperation = 'unite' | 'intersect' | 'subtract' | 'exclude' | 'divide';
+  type BooleanOperation = 'none' | 'unite' | 'intersect' | 'subtract' | 'exclude' | 'divide';
 
   type EventSortBy = 'layer' | 'event' | 'artboard' | 'destinationArtboard';
 
@@ -167,6 +167,8 @@ declare namespace Btwx {
   type SnapZoneType = 'left' | 'right' | 'top' | 'bottom' | 'center' | 'middle';
 
   type SelectedSegmentType = 'segmentPoint' | 'segmentHandleIn' | 'segmentHandleOut';
+
+  type FillRule = 'nonzero' | 'evenodd';
 
   interface SnapZones {
     top: paper.Rectangle;
@@ -360,10 +362,10 @@ declare namespace Btwx {
     name: string;
     artboard: string;
     parent: string;
-    children: string[];
+    // children: string[];
     scope: string[];
     frame: Frame;
-    showChildren: boolean;
+    // showChildren: boolean;
     selected: boolean;
     hover: boolean;
     events: string[];
@@ -382,25 +384,35 @@ declare namespace Btwx {
     style: Style;
   }
 
-  interface Root extends Layer {
+  interface LayerWithChildren extends Layer {
+    children: string[];
+    showChildren: boolean;
+  }
+
+  interface Root extends LayerWithChildren {
     type: 'Root';
     id: 'root';
     parent: null;
-    children: string[];
     scope: string[];
   }
 
-  interface Artboard extends Layer {
+  interface Artboard extends LayerWithChildren {
     type: 'Artboard';
     originForEvents: string[];
     destinationForEvents: string[];
     projectIndex: number;
   }
 
-  interface MaskableLayer extends Layer {
+  interface MaskableLayer {
     underlyingMask: string;
     ignoreUnderlyingMask: boolean;
     masked: boolean;
+  }
+
+  interface PathLayer {
+    mask: boolean;
+    closed: boolean;
+    bool: BooleanOperation;
   }
 
   interface ScrollDirection {
@@ -438,7 +450,7 @@ declare namespace Btwx {
   //   }
   // }
 
-  interface Group extends MaskableLayer {
+  interface Group extends LayerWithChildren, MaskableLayer {
     type: 'Group';
     groupEventTweens: boolean;
     scroll: GroupScroll;
@@ -446,7 +458,7 @@ declare namespace Btwx {
 
   type TextResize = 'autoWidth' | 'autoHeight' | 'fixed';
 
-  interface Text extends MaskableLayer {
+  interface Text extends Layer, MaskableLayer {
     type: 'Text';
     text: string;
     lines: TextLine[];
@@ -466,7 +478,7 @@ declare namespace Btwx {
     anchor: Point;
   }
 
-  interface Image extends MaskableLayer {
+  interface Image extends Layer, MaskableLayer {
     type: 'Image';
     imageId: string;
     originalDimensions: {
@@ -475,12 +487,15 @@ declare namespace Btwx {
     };
   }
 
-  interface Shape extends MaskableLayer {
+  interface Shape extends Layer, MaskableLayer, PathLayer {
     type: 'Shape';
     shapeType: ShapeType;
-    closed: boolean;
-    pathData: string;
-    mask: boolean;
+    segments: number[][][];
+  }
+
+  interface CompoundShape extends LayerWithChildren, MaskableLayer, PathLayer {
+    type: 'CompoundShape';
+    fillRule: FillRule;
   }
 
   interface Polygon extends Shape {

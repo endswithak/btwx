@@ -16,6 +16,7 @@ const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement =>
   const { layer, isParent } = props;
   const ref = useRef<HTMLDivElement>(null);
   const layerItem = useSelector((state: RootState) => state.layer.present.byId[layer]);
+  const parentItem = useSelector((state: RootState) => layerItem && state.layer.present.byId[layerItem.parent]);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const selectedById = useSelector((state: RootState) => getSelectedById(state));
   const [dropzone, setDropzone] = useState(null);
@@ -30,7 +31,8 @@ const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement =>
     const aboveCenter = y < center;
     switch(layerItem.type) {
       case 'Artboard':
-      case 'Group': {
+      case 'Group':
+      case 'CompoundShape': {
         if (isBetween(y, rect.top, rect.top + padding)) {
           return 'top';
         } else if (isBetween(y, rect.bottom - padding, rect.bottom)) {
@@ -48,16 +50,48 @@ const SidebarLayerDropzone = (props: SidebarLayerDropzoneProps): ReactElement =>
   }
 
   const canDropCenter = (): boolean => {
-    const something1 = selected.some(id => document.getElementById(id) && document.getElementById(id).contains(ref.current));
-    const something2 = selected.some(id => selectedById[id].type === 'Artboard') && (layerItem.type === 'Artboard' || layerItem.type === 'Group');
-    return !something1 && !something2;
+    const droppingInSelf = selected.some(id => {
+      const selectedItem = document.getElementById(id);
+      return selectedItem && selectedItem.contains(ref.current);
+    });
+    const onlyShapeItemsSelected = selected.every(id => selectedById[id].type === 'Shape' || selectedById[id].type === 'CompoundShape');
+    const noArtboardsSelected = selected.every(id => selectedById[id].type !== 'Artboard');
+    const onlyArtboardsSelected = selected.every(id => selectedById[id].type === 'Artboard');
+    switch(layerItem.type) {
+      case 'Root':
+        return onlyArtboardsSelected;
+      case 'Artboard':
+      case 'Group':
+        return !droppingInSelf && noArtboardsSelected;
+      case 'CompoundShape':
+        return !droppingInSelf && onlyShapeItemsSelected;
+    }
   }
 
   const canDropTopBottom = (): boolean => {
-    const something1 = selected.some(id => document.getElementById(id) && document.getElementById(id).contains(ref.current));
-    const something2 = selected.some(id => selectedById[id].type === 'Artboard') && layerItem.parent !== 'root';
-    const something3 = selected.some(id => selectedById[id].type !== 'Artboard') && layerItem.type === 'Artboard';
-    return !something1 && !something2 && !something3;
+    const droppingInSelf = selected.some(id => {
+      const selectedItem = document.getElementById(id);
+      return selectedItem && selectedItem.contains(ref.current);
+    });
+    const onlyShapeItemsSelected = selected.every(id => selectedById[id].type === 'Shape' || selectedById[id].type === 'CompoundShape');
+    const noArtboardsSelected = selected.every(id => selectedById[id].type !== 'Artboard');
+    const onlyArtboardsSelected = selected.every(id => selectedById[id].type === 'Artboard');
+    switch(layerItem.type) {
+      case 'Artboard':
+        return !droppingInSelf && onlyArtboardsSelected;
+      case 'Group':
+      case 'Image':
+      case 'Text':
+        return !droppingInSelf && noArtboardsSelected;
+      case 'Shape':
+      case 'CompoundShape':
+        switch(parentItem.type) {
+          case 'CompoundShape':
+            return !droppingInSelf && onlyShapeItemsSelected;
+          default:
+            return !droppingInSelf && noArtboardsSelected;
+        }
+    }
   }
 
   const getCanDrop = (dropzone: Btwx.Dropzone): boolean => {

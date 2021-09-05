@@ -2,6 +2,7 @@ import { LayerState } from '../reducers/layer';
 
 export const ADD_GROUP = 'ADD_GROUP';
 export const ADD_SHAPE = 'ADD_SHAPE';
+export const ADD_COMPOUND_SHAPE = 'ADD_COMPOUND_SHAPE';
 export const ADD_ARTBOARD = 'ADD_ARTBOARD';
 export const ADD_TEXT = 'ADD_TEXT';
 export const ADD_IMAGE = 'ADD_IMAGE';
@@ -419,6 +420,12 @@ export const DISABLE_GROUPS_GROUP_EVENT_TWEENS = 'DISABLE_GROUPS_GROUP_EVENT_TWE
 
 export const ADD_GROUP_WIGGLES = 'ADD_GROUP_WIGGLES';
 
+export const SET_LAYER_SEGMENTS = 'SET_LAYER_SEGMENTS';
+export const SET_LAYER_BOOL = 'SET_LAYER_BOOL';
+export const SET_LAYERS_BOOL = 'SET_LAYERS_BOOL';
+export const SET_LAYER_FILL_RULE = 'SET_LAYER_FILL_RULE';
+export const SET_LAYERS_FILL_RULE = 'SET_LAYERS_FILL_RULE';
+
 // Artboard
 
 export type AddArtboardPayload = {
@@ -460,6 +467,21 @@ export type AddShapePayload = {
 export interface AddShape {
   type: typeof ADD_SHAPE;
   payload: AddShapePayload;
+}
+
+// CompoundShape
+
+export type AddCompoundShapePayload = {
+  layer: {
+    [P in keyof Btwx.CompoundShape]?: Btwx.CompoundShape[P];
+  };
+  shapeIcon?: string;
+  batch?: boolean;
+}
+
+export interface AddCompoundShape {
+  type: typeof ADD_COMPOUND_SHAPE;
+  payload: AddCompoundShapePayload;
 }
 
 // Text
@@ -3820,7 +3842,7 @@ export interface SetLayersBlendMode {
 
 export interface UniteLayersPayload {
   layers: string[];
-  booleanLayer?: Btwx.Shape;
+  compoundShape?: Btwx.CompoundShape;
 }
 
 export interface UniteLayers {
@@ -3830,7 +3852,7 @@ export interface UniteLayers {
 
 export interface IntersectLayersPayload {
   layers: string[];
-  booleanLayer?: Btwx.Shape;
+  compoundShape?: Btwx.CompoundShape;
 }
 
 export interface IntersectLayers {
@@ -3840,7 +3862,7 @@ export interface IntersectLayers {
 
 export interface SubtractLayersPayload {
   layers: string[];
-  booleanLayer?: Btwx.Shape;
+  compoundShape?: Btwx.CompoundShape;
 }
 
 export interface SubtractLayers {
@@ -3850,7 +3872,7 @@ export interface SubtractLayers {
 
 export interface ExcludeLayersPayload {
   layers: string[];
-  booleanLayer?: Btwx.Shape;
+  compoundShape?: Btwx.CompoundShape;
 }
 
 export interface ExcludeLayers {
@@ -3860,7 +3882,7 @@ export interface ExcludeLayers {
 
 export interface DivideLayersPayload {
   layers: string[];
-  booleanLayer?: Btwx.Shape;
+  compoundShape?: Btwx.CompoundShape;
 }
 
 export interface DivideLayers {
@@ -4443,21 +4465,74 @@ export interface DisableGroupsGroupEventTweens {
 
 //
 
-export interface AddGroupsWigglesPayload {
+export interface AddGroupWigglesPayload {
   layers: string[];
   byLayer: {
     [id: string]: AddLayerTweenPayload;
   }
 }
 
-export interface AddGroupsWiggles {
+export interface AddGroupWiggles {
   type: typeof ADD_GROUP_WIGGLES;
-  payload: AddGroupsWigglesPayload;
+  payload: AddGroupWigglesPayload;
+}
+
+//
+
+export interface SetLayerSegmentsPayload {
+  id: string;
+  segments: number[][][];
+}
+
+export interface SetLayerSegments {
+  type: typeof SET_LAYER_SEGMENTS;
+  payload: SetLayerSegmentsPayload;
+}
+
+export interface SetLayerBoolPayload {
+  id: string;
+  bool: Btwx.BooleanOperation;
+}
+
+export interface SetLayerBool {
+  type: typeof SET_LAYER_BOOL;
+  payload: SetLayerBoolPayload;
+}
+
+export interface SetLayersBoolPayload {
+  layers: string[];
+  bool: Btwx.BooleanOperation;
+}
+
+export interface SetLayersBool {
+  type: typeof SET_LAYERS_BOOL;
+  payload: SetLayersBoolPayload;
+}
+
+export interface SetLayerFillRulePayload {
+  id: string;
+  fillRule: Btwx.FillRule;
+}
+
+export interface SetLayerFillRule {
+  type: typeof SET_LAYER_FILL_RULE;
+  payload: SetLayerFillRulePayload;
+}
+
+export interface SetLayersFillRulePayload {
+  layers: string[];
+  fillRule: Btwx.FillRule;
+}
+
+export interface SetLayersFillRule {
+  type: typeof SET_LAYERS_FILL_RULE;
+  payload: SetLayersFillRulePayload;
 }
 
 export type LayerTypes = AddArtboard |
                          AddGroup |
                          AddShape |
+                         AddCompoundShape |
                          AddText |
                          AddImage |
                          AddLayers |
@@ -4817,4 +4892,9 @@ export type LayerTypes = AddArtboard |
                          EnableGroupsGroupEventTweens |
                          DisableGroupGroupEventTweens |
                          DisableGroupsGroupEventTweens |
-                         AddGroupsWiggles;
+                         AddGroupWiggles |
+                         SetLayerSegments |
+                         SetLayerBool |
+                         SetLayersBool |
+                         SetLayerFillRule |
+                         SetLayersFillRule;

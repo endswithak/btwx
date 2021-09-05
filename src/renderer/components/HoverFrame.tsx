@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getHoverBounds } from '../store/selectors/layer';
+import { getHoverBounds, getShapeItemSegments } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
 import getTheme from '../theme';
 import { activateUI } from './CanvasUI';
@@ -32,11 +32,16 @@ export const clearHoverFrame = () => {
 export const updateHoverFrame = ({
   hoverItem,
   themeName,
-  artboardItem
+  artboardItem,
+  segmentMap
 }: {
   hoverItem: Btwx.Layer;
   themeName: Btwx.ThemeName;
   artboardItem?: Btwx.Artboard;
+  segmentMap: {
+    segments: number[][][][];
+    closedMap: boolean[];
+  };
 }): void => {
   activateUI();
   clearHoverFrame();
@@ -65,11 +70,17 @@ export const updateHoverFrame = ({
       )
     });
     switch(hoverItem.type) {
-      case 'Shape': {
+      case 'Shape':
+      case 'CompoundShape': {
         const hoverItemPath = new paperMain.CompoundPath({
           ...hoverFrameConstants,
           closed: (hoverItem as Btwx.Shape).closed,
-          pathData: (hoverItem as Btwx.Shape).pathData
+          children: segmentMap.segments.map((pathSegments, index) =>
+            new paperMain.Path({
+              segments: pathSegments,
+              closed: segmentMap.closedMap[index]
+            })
+          )
         });
         hoverItemPath.position = hoverItemBounds.center;
         break;
@@ -138,17 +149,19 @@ const HoverFrame = (): ReactElement => {
   const hoverItem = useSelector((state: RootState) => state.layer.present.hover && state.layer.present.byId[state.layer.present.hover] ? state.layer.present.byId[state.layer.present.hover] : null);
   const artboardItem = useSelector((state: RootState) => state.layer.present.hover && state.layer.present.byId[state.layer.present.hover] && state.layer.present.byId[state.layer.present.hover].type !== 'Artboard' ? state.layer.present.byId[state.layer.present.byId[state.layer.present.hover].artboard] : null) as Btwx.Artboard;
   const zoom = useSelector((state: RootState) => state.documentSettings.zoom);
+  const segmentMap = useSelector((state: RootState) => hoverItem.type === 'Shape' || hoverItem.type === 'CompoundShape' ? getShapeItemSegments(state, hoverItem.id) : null);
 
   useEffect(() => {
     updateHoverFrame({
       hoverItem,
       artboardItem,
-      themeName
+      themeName,
+      segmentMap
     });
     return (): void => {
       clearHoverFrame();
     }
-  }, [hover, hoverItem, zoom, hoverBounds, themeName]);
+  }, [hover, hoverItem, zoom, hoverBounds, themeName, segmentMap]);
 
   return null;
 }

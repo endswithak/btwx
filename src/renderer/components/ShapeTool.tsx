@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, useEffect, ReactElement, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { isBetween } from '../utils';
+import { isBetween, paperSegToRawSeg } from '../utils';
 import { RootState } from '../store/reducers';
 import { DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_POINTS, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
 import Tooltip from '../canvas/tooltip';
@@ -377,7 +377,7 @@ const ShapeTool = (props: PaperToolProps): ReactElement => {
               rotation: shapeType === 'Line' ? lineVector.angle : DEFAULT_TRANSFORM.rotation
             },
             closed: shapeType !== 'Line',
-            pathData: paperLayer.pathData,
+            segments: paperLayer.segments.map((seg) => paperSegToRawSeg(seg)),
             ...(() => {
               switch(shapeType) {
                 case 'Ellipse':

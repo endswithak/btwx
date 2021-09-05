@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { applyBooleanOperationThunk } from '../store/actions/layer';
+import { boolSelectedThunk } from '../store/actions/layer';
 import { canBooleanSelected } from '../store/selectors/layer';
 import StackedButton from './StackedButton';
 import Icon from './Icon';
@@ -12,7 +12,7 @@ const IntersectButton = (): ReactElement => {
 
   const handleIntersectClick = (): void => {
     if (canIntersect) {
-      dispatch(applyBooleanOperationThunk('intersect'));
+      dispatch(boolSelectedThunk('intersect'));
     }
   }
 

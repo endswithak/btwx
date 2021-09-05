@@ -15,7 +15,7 @@ import {
   getLayerAndDescendants, getLayersBounds, getNearestScopeAncestor, getSelectedBounds,
   getPaperLayer, getItemLayers, getSelectedProjectIndices, getAbsolutePosition,
   getActiveArtboardBounds, getAllArtboardItems, getSelectedAndDescendentsFull,
-  getLayerDescendants
+  getLayerDescendants, orderLayersByDepth
 } from '../selectors/layer';
 import {
   getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle,
@@ -38,6 +38,7 @@ import {
   ADD_ARTBOARD,
   ADD_GROUP,
   ADD_SHAPE,
+  ADD_COMPOUND_SHAPE,
   ADD_TEXT,
   ADD_IMAGE,
   ADD_LAYERS,
@@ -396,6 +397,11 @@ import {
   DISABLE_GROUP_GROUP_EVENT_TWEENS,
   DISABLE_GROUPS_GROUP_EVENT_TWEENS,
   ADD_GROUP_WIGGLES,
+  SET_LAYER_SEGMENTS,
+  SET_LAYER_BOOL,
+  SET_LAYERS_BOOL,
+  SET_LAYER_FILL_RULE,
+  SET_LAYERS_FILL_RULE,
   EnableGroupGroupEventTweensPayload,
   EnableGroupsGroupEventTweensPayload,
   DisableGroupGroupEventTweensPayload,
@@ -418,6 +424,7 @@ import {
   AddArtboardPayload,
   AddGroupPayload,
   AddShapePayload,
+  AddCompoundShapePayload,
   AddTextPayload,
   AddImagePayload,
   AddLayersPayload,
@@ -745,7 +752,12 @@ import {
   PasteLayersFromClipboardPayload,
   SetLayerTreeScrollPayload,
   SetLayerTreeStickyArtboardPayload,
-  AddGroupsWigglesPayload,
+  AddGroupWigglesPayload,
+  SetLayerSegmentsPayload,
+  SetLayerBoolPayload,
+  SetLayersBoolPayload,
+  SetLayerFillRulePayload,
+  SetLayersFillRulePayload,
   LayerTypes
 } from '../actionTypes/layer';
 import { LayerState } from '../reducers/layer';
@@ -891,6 +903,8 @@ export const addShapeThunk = (payload: AddShapePayload) => {
     const scope = [...parentItem.scope, parent];
     const artboard = scope[1];
     const artboardItem = state.layer.present.byId[artboard] as Btwx.Artboard;
+    const bool = payload.layer.bool ? payload.layer.bool : 'none';
+    const segments = payload.layer.segments ? payload.layer.segments : null;
     const shapeType = payload.layer.shapeType ? payload.layer.shapeType : 'Rectangle';
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
@@ -905,10 +919,10 @@ export const addShapeThunk = (payload: AddShapePayload) => {
     }
     const frame = getLayerFrame(payloadWithType);
     const shapeOpts = getLayerShapeOpts(payloadWithType);
-    const pathData = getLayerPathData(payloadWithType);
+    // const pathData = getLayerPathData(payloadWithType);
     const style = getLayerStyle(payloadWithType);
     const transform = getLayerTransform(payloadWithType);
-    const shapeIcon = getShapeIcon(pathData);
+    // const shapeIcon = getShapeIcon([segments]);
     const mask = payload.layer.mask ? payload.layer.mask : false;
     const newLayer = {
       type: 'Shape',
@@ -937,12 +951,83 @@ export const addShapeThunk = (payload: AddShapePayload) => {
       closed: payload.layer.closed,
       mask: mask,
       shapeType: shapeType,
-      pathData: pathData,
+      segments: segments,
+      bool: bool,
       ...shapeOpts
     } as Btwx.Shape;
     dispatch(addShape({
       layer: newLayer,
-      shapeIcon,
+      // shapeIcon,
+      batch: payload.batch
+    }));
+    return Promise.resolve(newLayer);
+  }
+};
+
+// compound shape
+
+export const addCompoundShape = (payload: AddCompoundShapePayload): LayerTypes => ({
+  type: ADD_COMPOUND_SHAPE,
+  payload
+});
+
+export const addCompoundShapeThunk = (payload: AddCompoundShapePayload) => {
+  return (dispatch: any, getState: any): Promise<Btwx.CompoundShape> => {
+    const state = getState() as RootState;
+    const id = payload.layer.id ? payload.layer.id : uuidv4();
+    const parent = payload.layer.parent ? payload.layer.parent : state.layer.present.activeArtboard;
+    const parentItem = state.layer.present.byId[parent];
+    const scope = [...parentItem.scope, parent];
+    const artboard = scope[1];
+    const artboardItem = state.layer.present.byId[artboard] as Btwx.Artboard;
+    const bool = payload.layer.bool ? payload.layer.bool : 'none';
+    const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
+    const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
+    const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
+    const name = payload.layer.name ? payload.layer.name : 'Compound Shape';
+    const payloadWithType = {
+      ...payload,
+      layer: {
+        ...payload.layer,
+        type: 'CompoundShape'
+      }
+    }
+    const frame = getLayerFrame(payloadWithType);
+    // const pathData = getLayerPathData(payloadWithType);
+    const style = getLayerStyle(payloadWithType);
+    const transform = getLayerTransform(payloadWithType);
+    // const shapeIcon = getShapeIcon([segments]);
+    const mask = payload.layer.mask ? payload.layer.mask : false;
+    const showChildren = payload.layer.showChildren ? payload.layer.showChildren : true;
+    const newLayer = {
+      type: 'CompoundShape',
+      id: id,
+      name: name,
+      artboard: artboard,
+      parent: parent,
+      children: [],
+      scope: scope,
+      frame: frame,
+      underlyingMask: underlyingMask,
+      ignoreUnderlyingMask: ignoreUnderlyingMask,
+      masked: masked,
+      showChildren: showChildren,
+      selected: false,
+      hover: false,
+      events: [],
+      tweens: {
+        allIds: [],
+        asOrigin: [],
+        asDestination: [],
+        byProp: TWEEN_PROPS_MAP
+      },
+      transform: transform,
+      style: style,
+      mask: mask,
+      bool: bool
+    } as Btwx.CompoundShape;
+    dispatch(addCompoundShape({
+      layer: newLayer,
       batch: payload.batch
     }));
     return Promise.resolve(newLayer);
@@ -1522,24 +1607,85 @@ export const groupSelectedThunk = () => {
     return new Promise((resolve, reject) => {
       const state = getState() as RootState;
       // get bounds of layers to group
-      const layersBounds = getSelectedBounds(state);
+      const layersBounds = state.selectionTool.bounds;
       // add group
       dispatch(addGroupThunk({
         layer: {
           selected: true,
           frame: {
-            x: layersBounds.center.x,
-            y: layersBounds.center.y,
-            width: layersBounds.width,
-            height: layersBounds.height,
-            innerWidth: layersBounds.width,
-            innerHeight: layersBounds.height
+            x: layersBounds[0],
+            y: layersBounds[1],
+            width: layersBounds[2],
+            height: layersBounds[3],
+            innerWidth: layersBounds[2],
+            innerHeight: layersBounds[3]
           }
         },
         batch: true
       })).then((newGroup: Btwx.Group) => {
         dispatch(groupLayers({layers: state.layer.present.selected, group: newGroup}));
         resolve(newGroup);
+      });
+    });
+  }
+};
+
+export const boolSelectedThunk = (bool: Btwx.BooleanOperation) => {
+  return (dispatch: any, getState: any): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      const state = getState() as RootState;
+      const topItem = state.layer.present.byId[state.layer.present.selected[0]];
+      // get bounds of layers to group
+      const layersBounds = state.selectionTool.bounds;
+      // add group
+      dispatch(addCompoundShapeThunk({
+        layer: {
+          selected: true,
+          frame: {
+            x: layersBounds[0],
+            y: layersBounds[1],
+            width: layersBounds[2],
+            height: layersBounds[3],
+            innerWidth: layersBounds[2],
+            innerHeight: layersBounds[3]
+          },
+          style: topItem.style
+        },
+        batch: true
+      })).then((newCompoundShape: Btwx.CompoundShape) => {
+        switch(bool) {
+          case 'unite':
+            dispatch(uniteLayers({
+              layers: state.layer.present.selected,
+              compoundShape: newCompoundShape
+            }));
+            break;
+          case 'intersect':
+            dispatch(intersectLayers({
+              layers: state.layer.present.selected,
+              compoundShape: newCompoundShape
+            }));
+            break;
+          case 'subtract':
+            dispatch(subtractLayers({
+              layers: state.layer.present.selected,
+              compoundShape: newCompoundShape
+            }));
+            break;
+          case 'exclude':
+            dispatch(excludeLayers({
+              layers: state.layer.present.selected,
+              compoundShape: newCompoundShape
+            }));
+            break;
+          case 'divide':
+            dispatch(divideLayers({
+              layers: state.layer.present.selected,
+              compoundShape: newCompoundShape
+            }));
+            break;
+        }
+        resolve(newCompoundShape);
       });
     });
   }
@@ -2199,7 +2345,7 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     let pathData: { [id: string]: string } = {};
-    let shapeIcon: { [id: string]: string } = {};
+    // let shapeIcon: { [id: string]: string } = {};
     let bounds: { [id: string]: Btwx.Frame } = {};
     let paragraphs: { [id: string]: string[][] } = {};
     let lines: { [id: string]: Btwx.TextLine[] } = {};
@@ -2229,10 +2375,10 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
             ...pathData,
             [id]: (clone as paper.CompoundPath).pathData
           }
-          shapeIcon = {
-            ...shapeIcon,
-            [id]: getShapeIcon((clone as paper.CompoundPath).pathData)
-          }
+          // shapeIcon = {
+          //   ...shapeIcon,
+          //   [id]: getShapeIcon((clone as paper.CompoundPath).pathData)
+          // }
           if ((layerItem as Btwx.Shape).shapeType === 'Line') {
             clone.position = startPosition;
             const fromPoint = (clone as paper.Path).firstSegment.point.subtract(artboardPosition);
@@ -2352,7 +2498,7 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
       setLayersWidth({
         ...payload,
         pathData,
-        shapeIcon,
+        // shapeIcon,
         bounds,
         paragraphs,
         lines,
@@ -2378,7 +2524,7 @@ export const setLayersHeightThunk = (payload: SetLayersHeightPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     let pathData: { [id: string]: string } = {};
-    let shapeIcon: { [id: string]: string } = {};
+    // let shapeIcon: { [id: string]: string } = {};
     let bounds: { [id: string]: Btwx.Frame } = {};
     let paragraphs: { [id: string]: string[][] } = {};
     let lines: { [id: string]: Btwx.TextLine[] } = {};
@@ -2407,10 +2553,10 @@ export const setLayersHeightThunk = (payload: SetLayersHeightPayload) => {
             ...pathData,
             [id]: (clone as paper.CompoundPath).pathData
           }
-          shapeIcon = {
-            ...shapeIcon,
-            [id]: getShapeIcon((clone as paper.CompoundPath).pathData)
-          }
+          // shapeIcon = {
+          //   ...shapeIcon,
+          //   [id]: getShapeIcon((clone as paper.CompoundPath).pathData)
+          // }
           if ((layerItem as Btwx.Shape).shapeType === 'Line') {
             const fromPoint = (clone as paper.Path).firstSegment.point.subtract(artboardPosition);
             const toPoint = (clone as paper.Path).lastSegment.point.subtract(artboardPosition);
@@ -2501,7 +2647,7 @@ export const setLayersHeightThunk = (payload: SetLayersHeightPayload) => {
       setLayersHeight({
         ...payload,
         pathData,
-        shapeIcon,
+        // shapeIcon,
         bounds,
         lines,
         textResize,
@@ -2669,7 +2815,7 @@ export const setLayersRotationThunk = (payload: SetLayersRotationPayload) => {
     const state = getState() as RootState;
     let bounds: { [id: string]: Btwx.Frame; } = {};
     let pathData: { [id: string]: string; } = {};
-    let shapeIcon: { [id: string]: string; } = {};
+    // let shapeIcon: { [id: string]: string; } = {};
     let point: { [id: string]: Btwx.Point; } = {};
     let to: { [id: string]: Btwx.Point; } = {};
     let from: { [id: string]: Btwx.Point; } = {};
@@ -2739,10 +2885,10 @@ export const setLayersRotationThunk = (payload: SetLayersRotationPayload) => {
           ...pathData,
           [id]: (clone as paper.CompoundPath).pathData
         }
-        shapeIcon = {
-          ...shapeIcon,
-          [id]: getShapeIcon((clone as paper.CompoundPath).pathData)
-        }
+        // shapeIcon = {
+        //   ...shapeIcon,
+        //   [id]: getShapeIcon((clone as paper.CompoundPath).pathData)
+        // }
         if ((layerItem as Btwx.Shape).shapeType === 'Line') {
           const fromPoint = (clone as paper.Path).firstSegment.point.subtract(artboardPosition);
           const toPoint = (clone as paper.Path).lastSegment.point.subtract(artboardPosition);
@@ -2788,7 +2934,7 @@ export const setLayersRotationThunk = (payload: SetLayersRotationPayload) => {
         layers: allLayers,
         bounds,
         pathData,
-        shapeIcon,
+        // shapeIcon,
         fillGradientOrigin,
         fillGradientDestination,
         strokeGradientOrigin,
@@ -2869,7 +3015,7 @@ export const setLayersHorizontalFlipThunk = (payload: (EnableLayersHorizontalFli
     let to = {} as { [id: string]: Btwx.Point };
     let point = {} as { [id: string]: Btwx.Point };
     let pathData = {} as { [id: string]: string };
-    let shapeIcon = {} as { [id: string]: string };
+    // let shapeIcon = {} as { [id: string]: string };
     const handleLayers = (layers: string[]) => {
       layers.forEach((id) => {
         compiledLayers.push(id);
@@ -2885,10 +3031,10 @@ export const setLayersHorizontalFlipThunk = (payload: (EnableLayersHorizontalFli
             ...pathData,
             [id]: (duplicate as paper.CompoundPath).pathData
           }
-          shapeIcon = {
-            ...shapeIcon,
-            [id]: getShapeIcon((duplicate as paper.CompoundPath).pathData)
-          }
+          // shapeIcon = {
+          //   ...shapeIcon,
+          //   [id]: getShapeIcon((duplicate as paper.CompoundPath).pathData)
+          // }
           if ((layerItem as Btwx.Shape).shapeType === 'Line') {
             const fromPoint = (duplicate as paper.Path).firstSegment.point.subtract(artboardPosition);
             const toPoint = (duplicate as paper.Path).lastSegment.point.subtract(artboardPosition);
@@ -2928,7 +3074,7 @@ export const setLayersHorizontalFlipThunk = (payload: (EnableLayersHorizontalFli
       dispatch(enableLayersHorizontalFlip({
         layers: compiledLayers,
         pathData,
-        shapeIcon,
+        // shapeIcon,
         from,
         to,
         point
@@ -2937,7 +3083,7 @@ export const setLayersHorizontalFlipThunk = (payload: (EnableLayersHorizontalFli
       dispatch(disableLayersHorizontalFlip({
         layers: compiledLayers,
         pathData,
-        shapeIcon,
+        // shapeIcon,
         from,
         to,
         point
@@ -3001,7 +3147,7 @@ export const setLayersVerticalFlipThunk = (payload: (EnableLayersVerticalFlipPay
     let to = {} as { [id: string]: Btwx.Point };
     let point = {} as { [id: string]: Btwx.Point };
     let pathData = {} as { [id: string]: string };
-    let shapeIcon = {} as { [id: string]: string };
+    // let shapeIcon = {} as { [id: string]: string };
     const handleLayers = (layers: string[]) => {
       layers.forEach((id) => {
         compiledLayers.push(id);
@@ -3017,10 +3163,10 @@ export const setLayersVerticalFlipThunk = (payload: (EnableLayersVerticalFlipPay
             ...pathData,
             [id]: (duplicate as paper.CompoundPath).pathData
           }
-          shapeIcon = {
-            ...shapeIcon,
-            [id]: getShapeIcon((duplicate as paper.CompoundPath).pathData)
-          }
+          // shapeIcon = {
+          //   ...shapeIcon,
+          //   [id]: getShapeIcon((duplicate as paper.CompoundPath).pathData)
+          // }
           if ((layerItem as Btwx.Shape).shapeType === 'Line') {
             const fromPoint = (duplicate as paper.Path).firstSegment.point.subtract(artboardPosition);
             const toPoint = (duplicate as paper.Path).lastSegment.point.subtract(artboardPosition);
@@ -3060,7 +3206,7 @@ export const setLayersVerticalFlipThunk = (payload: (EnableLayersVerticalFlipPay
       dispatch(enableLayersVerticalFlip({
         layers: compiledLayers,
         pathData,
-        shapeIcon,
+        // shapeIcon,
         from,
         to,
         point
@@ -3069,7 +3215,7 @@ export const setLayersVerticalFlipThunk = (payload: (EnableLayersVerticalFlipPay
       dispatch(disableLayersVerticalFlip({
         layers: compiledLayers,
         pathData,
-        shapeIcon,
+        // shapeIcon,
         from,
         to,
         point
@@ -3567,7 +3713,7 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     let pathData = {} as { [id: string]: string };
-    let shapeIcon = {} as { [id: string]: string };
+    // let shapeIcon = {} as { [id: string]: string };
     let rotation = {} as { [id: string]: number };
     let bounds = {} as { [id: string]: Btwx.Frame };
     let from = {} as { [id: string]: Btwx.Point };
@@ -3595,10 +3741,10 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
           ...pathData,
           [id]: (paperLayer as paper.CompoundPath).pathData
         }
-        shapeIcon = {
-          ...shapeIcon,
-          [id]: getShapeIcon((paperLayer as paper.CompoundPath).pathData)
-        }
+        // shapeIcon = {
+        //   ...shapeIcon,
+        //   [id]: getShapeIcon((paperLayer as paper.CompoundPath).pathData)
+        // }
         if (isLine) {
           const fromPoint = (paperLayer as paper.Path).firstSegment.point.subtract(artboardPosition);
           const toPoint = (paperLayer as paper.Path).lastSegment.point.subtract(artboardPosition);
@@ -3760,7 +3906,7 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
         ...payload,
         point,
         pathData,
-        shapeIcon,
+        // shapeIcon,
         bounds,
         from,
         to,
@@ -5434,84 +5580,84 @@ export const divideLayers = (payload: DivideLayersPayload): LayerTypes => ({
   payload
 });
 
-export const applyBooleanOperationThunk = (booleanOperation: Btwx.BooleanOperation) => {
-  return (dispatch: any, getState: any): Promise<Btwx.Shape> => {
-    return new Promise((resolve, reject) => {
-      const state = getState() as RootState;
-      const selectedPaperScopes = getSelectedProjectIndices(state);
-      const selected = state.layer.present.selected;
-      const topLayer = selected[0];
-      const layerItem = state.layer.present.byId[topLayer];
-      const topLayerPaperScope = selectedPaperScopes[topLayer];
-      let booleanLayers = getPaperLayer(topLayer, topLayerPaperScope) as paper.Path | paper.CompoundPath;
-      for (let i = 1; i < selected.length; i++) {
-        booleanLayers = booleanLayers[booleanOperation](getPaperLayer(selected[i], selectedPaperScopes[selected[i]]) as paper.Path | paper.CompoundPath, { insert: false }) as paper.Path | paper.CompoundPath;
-      }
-      if (booleanLayers.pathData) {
-        let position = booleanLayers.position;
-        if (state.layer.present.byId[layerItem.parent].type === 'Artboard') {
-          const artboardPosition = getAbsolutePosition(state.layer.present, layerItem.parent);
-          position = position.subtract(artboardPosition).round();
-        }
-        dispatch(addShapeThunk({
-          layer: {
-            name: 'Combined Shape',
-            parent: layerItem.parent,
-            frame: {
-              x: position.x,
-              y: position.y,
-              width: booleanLayers.bounds.width,
-              height: booleanLayers.bounds.height,
-              innerWidth: booleanLayers.bounds.width,
-              innerHeight: booleanLayers.bounds.height
-            },
-            style: layerItem.style,
-            closed: true,
-            shapeType: 'Custom',
-            pathData: booleanLayers.pathData
-          },
-          batch: true
-        })).then((newShape: Btwx.Shape) => {
-          switch(booleanOperation) {
-            case 'divide':
-              dispatch(divideLayers({
-                layers: selected,
-                booleanLayer: newShape
-              }));
-              break;
-            case 'exclude':
-              dispatch(excludeLayers({
-                layers: selected,
-                booleanLayer: newShape
-              }));
-              break;
-            case 'intersect':
-              dispatch(intersectLayers({
-                layers: selected,
-                booleanLayer: newShape
-              }));
-              break;
-            case 'subtract':
-              dispatch(subtractLayers({
-                layers: selected,
-                booleanLayer: newShape
-              }));
-              break;
-            case 'unite':
-              dispatch(uniteLayers({
-                layers: selected,
-                booleanLayer: newShape
-              }));
-              break;
-          }
-          resolve(newShape);
-        });
-      } else {
-        dispatch(removeLayers({layers: selected}));
-      }
-    });
-  }
-};
+// export const applyBooleanOperationThunk = (booleanOperation: Btwx.BooleanOperation) => {
+//   return (dispatch: any, getState: any): Promise<Btwx.Shape> => {
+//     return new Promise((resolve, reject) => {
+//       const state = getState() as RootState;
+//       const selectedPaperScopes = getSelectedProjectIndices(state);
+//       const selected = state.layer.present.selected;
+//       const topLayer = selected[0];
+//       const layerItem = state.layer.present.byId[topLayer];
+//       const topLayerPaperScope = selectedPaperScopes[topLayer];
+//       let booleanLayers = getPaperLayer(topLayer, topLayerPaperScope) as paper.Path | paper.CompoundPath;
+//       for (let i = 1; i < selected.length; i++) {
+//         booleanLayers = booleanLayers[booleanOperation](getPaperLayer(selected[i], selectedPaperScopes[selected[i]]) as paper.Path | paper.CompoundPath, { insert: false }) as paper.Path | paper.CompoundPath;
+//       }
+//       if (booleanLayers.pathData) {
+//         let position = booleanLayers.position;
+//         if (state.layer.present.byId[layerItem.parent].type === 'Artboard') {
+//           const artboardPosition = getAbsolutePosition(state.layer.present, layerItem.parent);
+//           position = position.subtract(artboardPosition).round();
+//         }
+//         dispatch(addShapeThunk({
+//           layer: {
+//             name: 'Combined Shape',
+//             parent: layerItem.parent,
+//             frame: {
+//               x: position.x,
+//               y: position.y,
+//               width: booleanLayers.bounds.width,
+//               height: booleanLayers.bounds.height,
+//               innerWidth: booleanLayers.bounds.width,
+//               innerHeight: booleanLayers.bounds.height
+//             },
+//             style: layerItem.style,
+//             closed: true,
+//             shapeType: 'Custom',
+//             pathData: booleanLayers.pathData
+//           },
+//           batch: true
+//         })).then((newShape: Btwx.Shape) => {
+//           switch(booleanOperation) {
+//             case 'divide':
+//               dispatch(divideLayers({
+//                 layers: selected,
+//                 booleanLayer: newShape
+//               }));
+//               break;
+//             case 'exclude':
+//               dispatch(excludeLayers({
+//                 layers: selected,
+//                 booleanLayer: newShape
+//               }));
+//               break;
+//             case 'intersect':
+//               dispatch(intersectLayers({
+//                 layers: selected,
+//                 booleanLayer: newShape
+//               }));
+//               break;
+//             case 'subtract':
+//               dispatch(subtractLayers({
+//                 layers: selected,
+//                 booleanLayer: newShape
+//               }));
+//               break;
+//             case 'unite':
+//               dispatch(uniteLayers({
+//                 layers: selected,
+//                 booleanLayer: newShape
+//               }));
+//               break;
+//           }
+//           resolve(newShape);
+//         });
+//       } else {
+//         dispatch(removeLayers({layers: selected}));
+//       }
+//     });
+//   }
+// };
 
 export const setRoundedRadius = (payload: SetRoundedRadiusPayload): LayerTypes => ({
   type: SET_ROUNDED_RADIUS,
@@ -5527,7 +5673,7 @@ export const setRoundedRadiiThunk = (payload: SetRoundedRadiiPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     const pathData: string[] = [];
-    const shapeIcon: string[] = [];
+    // const shapeIcon: string[] = [];
     const bounds: Btwx.Frame[] = [];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
@@ -5553,7 +5699,7 @@ export const setRoundedRadiiThunk = (payload: SetRoundedRadiiPayload) => {
       });
       paperLayerPath.pathData = newShape.pathData;
       pathData.push(clone.pathData);
-      shapeIcon.push(getShapeIcon(clone.pathData));
+      // shapeIcon.push(getShapeIcon(clone.pathData));
       bounds.push({
         ...layerItem.frame,
         width: clone.bounds.width,
@@ -5564,7 +5710,7 @@ export const setRoundedRadiiThunk = (payload: SetRoundedRadiiPayload) => {
       setRoundedRadii({
         ...payload,
         pathData,
-        shapeIcon,
+        // shapeIcon,
         bounds
       })
     )
@@ -5585,7 +5731,7 @@ export const setPolygonsSidesThunk = (payload: SetPolygonsSidesPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     const pathData: string[] = [];
-    const shapeIcon: string[] = [];
+    // const shapeIcon: string[] = [];
     const bounds: Btwx.Frame[] = [];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
@@ -5614,7 +5760,7 @@ export const setPolygonsSidesThunk = (payload: SetPolygonsSidesPayload) => {
       newShape.position = startPosition;
       paperLayerPath.pathData = newShape.pathData;
       pathData.push(clone.pathData);
-      shapeIcon.push(getShapeIcon(clone.pathData));
+      // shapeIcon.push(getShapeIcon(clone.pathData));
       bounds.push({
         ...layerItem.frame,
         width: clone.bounds.width,
@@ -5625,7 +5771,7 @@ export const setPolygonsSidesThunk = (payload: SetPolygonsSidesPayload) => {
       setPolygonsSides({
         ...payload,
         pathData,
-        shapeIcon,
+        // shapeIcon,
         bounds
       })
     )
@@ -5646,7 +5792,7 @@ export const setStarsPointsThunk = (payload: SetStarsPointsPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     const pathData: string[] = [];
-    const shapeIcon: string[] = [];
+    // const shapeIcon: string[] = [];
     const bounds: Btwx.Frame[] = [];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
@@ -5677,7 +5823,7 @@ export const setStarsPointsThunk = (payload: SetStarsPointsPayload) => {
       newShape.position = startPosition;
       paperLayerPath.pathData = newShape.pathData;
       pathData.push(clone.pathData);
-      shapeIcon.push(getShapeIcon(clone.pathData));
+      // shapeIcon.push(getShapeIcon(clone.pathData));
       bounds.push({
         ...layerItem.frame,
         width: clone.bounds.width,
@@ -5688,7 +5834,7 @@ export const setStarsPointsThunk = (payload: SetStarsPointsPayload) => {
       setStarsPoints({
         ...payload,
         pathData,
-        shapeIcon,
+        // shapeIcon,
         bounds
       })
     )
@@ -5709,7 +5855,7 @@ export const setStarsRadiusThunk = (payload: SetStarsRadiusPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     const pathData: string[] = [];
-    const shapeIcon: string[] = [];
+    // const shapeIcon: string[] = [];
     const bounds: Btwx.Frame[] = [];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
@@ -5740,7 +5886,7 @@ export const setStarsRadiusThunk = (payload: SetStarsRadiusPayload) => {
       newShape.position = startPosition;
       paperLayerPath.pathData = newShape.pathData;
       pathData.push(clone.pathData);
-      shapeIcon.push(getShapeIcon(clone.pathData));
+      // shapeIcon.push(getShapeIcon(clone.pathData));
       bounds.push({
         ...layerItem.frame,
         width: clone.bounds.width,
@@ -5751,7 +5897,7 @@ export const setStarsRadiusThunk = (payload: SetStarsRadiusPayload) => {
       setStarsRadius({
         ...payload,
         pathData,
-        shapeIcon,
+        // shapeIcon,
         bounds
       })
     )
@@ -5772,7 +5918,7 @@ export const setLinesFromXThunk = (payload: SetLinesFromXPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     const pathData: string[] = [];
-    const shapeIcon: string[] = [];
+    // const shapeIcon: string[] = [];
     const bounds: Btwx.Frame[] = [];
     const rotation: number[] = [];
     payload.layers.forEach((id) => {
@@ -5788,7 +5934,7 @@ export const setLinesFromXThunk = (payload: SetLinesFromXPayload) => {
       const positionInArtboard = clone.position.subtract(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y)).round();
       rotation.push(vector.angle);
       pathData.push(clone.pathData);
-      shapeIcon.push(getShapeIcon(clone.pathData));
+      // shapeIcon.push(getShapeIcon(clone.pathData));
       bounds.push({
         ...layerItem.frame,
         x: positionInArtboard.x,
@@ -5803,7 +5949,7 @@ export const setLinesFromXThunk = (payload: SetLinesFromXPayload) => {
       setLinesFromX({
         ...payload,
         pathData,
-        shapeIcon,
+        // shapeIcon,
         bounds,
         rotation
       })
@@ -5825,7 +5971,7 @@ export const setLinesFromYThunk = (payload: SetLinesFromYPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     const pathData: string[] = [];
-    const shapeIcon: string[] = [];
+    // const shapeIcon: string[] = [];
     const bounds: Btwx.Frame[] = [];
     const rotation: number[] = [];
     payload.layers.forEach((id) => {
@@ -5841,7 +5987,7 @@ export const setLinesFromYThunk = (payload: SetLinesFromYPayload) => {
       const positionInArtboard = clone.position.subtract(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y)).round();
       rotation.push(vector.angle);
       pathData.push(clone.pathData);
-      shapeIcon.push(getShapeIcon(clone.pathData));
+      // shapeIcon.push(getShapeIcon(clone.pathData));
       bounds.push({
         ...layerItem.frame,
         x: positionInArtboard.x,
@@ -5856,7 +6002,7 @@ export const setLinesFromYThunk = (payload: SetLinesFromYPayload) => {
       setLinesFromY({
         ...payload,
         pathData,
-        shapeIcon,
+        // shapeIcon,
         bounds,
         rotation
       })
@@ -5884,7 +6030,7 @@ export const setLineFromThunk = (payload: SetLineFromPayload) => {
     const positionInArtboard = paperLayer.position.subtract(artboardPosition).round();
     const rotation = vector.angle;
     const pathData = paperLayer.pathData;
-    const shapeIcon = getShapeIcon(paperLayer.pathData);
+    // const shapeIcon = getShapeIcon(paperLayer.pathData);
     const bounds = {
       ...layerItem.frame,
       x: positionInArtboard.x,
@@ -5900,7 +6046,7 @@ export const setLineFromThunk = (payload: SetLineFromPayload) => {
         x: relFrom.x,
         y: relFrom.y,
         pathData,
-        shapeIcon,
+        // shapeIcon,
         bounds,
         rotation
       })
@@ -5922,7 +6068,7 @@ export const setLinesToXThunk = (payload: SetLinesToXPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     const pathData: string[] = [];
-    const shapeIcon: string[] = [];
+    // const shapeIcon: string[] = [];
     const bounds: Btwx.Frame[] = [];
     const rotation: number[] = [];
     payload.layers.forEach((id) => {
@@ -5938,7 +6084,7 @@ export const setLinesToXThunk = (payload: SetLinesToXPayload) => {
       const positionInArtboard = clone.position.subtract(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y)).round();
       rotation.push(vector.angle);
       pathData.push(clone.pathData);
-      shapeIcon.push(getShapeIcon(clone.pathData));
+      // shapeIcon.push(getShapeIcon(clone.pathData));
       bounds.push({
         ...layerItem.frame,
         x: positionInArtboard.x,
@@ -5953,7 +6099,7 @@ export const setLinesToXThunk = (payload: SetLinesToXPayload) => {
       setLinesToX({
         ...payload,
         pathData,
-        shapeIcon,
+        // shapeIcon,
         bounds,
         rotation
       })
@@ -5975,7 +6121,7 @@ export const setLinesToYThunk = (payload: SetLinesToYPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     const pathData: string[] = [];
-    const shapeIcon: string[] = [];
+    // const shapeIcon: string[] = [];
     const bounds: Btwx.Frame[] = [];
     const rotation: number[] = [];
     payload.layers.forEach((id) => {
@@ -5991,7 +6137,7 @@ export const setLinesToYThunk = (payload: SetLinesToYPayload) => {
       const positionInArtboard = clone.position.subtract(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y)).round();
       rotation.push(vector.angle);
       pathData.push(clone.pathData);
-      shapeIcon.push(getShapeIcon(clone.pathData));
+      // shapeIcon.push(getShapeIcon(clone.pathData));
       bounds.push({
         ...layerItem.frame,
         x: positionInArtboard.x,
@@ -6006,7 +6152,7 @@ export const setLinesToYThunk = (payload: SetLinesToYPayload) => {
       setLinesToY({
         ...payload,
         pathData,
-        shapeIcon,
+        // shapeIcon,
         bounds,
         rotation
       })
@@ -6034,7 +6180,7 @@ export const setLineToThunk = (payload: SetLineToPayload) => {
     const positionInArtboard = paperLayer.position.subtract(artboardPosition).round();
     const rotation = vector.angle;
     const pathData = paperLayer.pathData;
-    const shapeIcon = getShapeIcon(paperLayer.pathData);
+    // const shapeIcon = getShapeIcon(paperLayer.pathData);
     const bounds = {
       ...layerItem.frame,
       x: positionInArtboard.x,
@@ -6050,7 +6196,7 @@ export const setLineToThunk = (payload: SetLineToPayload) => {
         x: relTo.x,
         y: relTo.y,
         pathData,
-        shapeIcon,
+        // shapeIcon,
         bounds,
         rotation
       })
@@ -6744,10 +6890,10 @@ const handlePasteText = ({state, dispatch, resolve, overSelection}: HandlePasteT
           const iconData = getShapeIcon((clipboardLayers.byId[current] as Btwx.Shape).pathData);
           return {
             ...result,
-            shapeIcons: {
-              ...result.shapeIcons,
-              [current]: iconData
-            }
+            // shapeIcons: {
+            //   ...result.shapeIcons,
+            //   [current]: iconData
+            // }
           }
         }, clipboardLayers);
       }
@@ -7357,5 +7503,30 @@ export const disableGroupsGroupEventTweens = (payload: DisableGroupsGroupEventTw
 
 export const addGroupWiggles = (payload: AddGroupWigglesPayload): LayerTypes => ({
   type: ADD_GROUP_WIGGLES,
+  payload
+});
+
+export const setLayerSegments = (payload: SetLayerSegmentsPayload): LayerTypes => ({
+  type: SET_LAYER_SEGMENTS,
+  payload
+});
+
+export const setLayerBool = (payload: SetLayerBoolPayload): LayerTypes => ({
+  type: SET_LAYER_BOOL,
+  payload
+});
+
+export const setLayersBool = (payload: SetLayersBoolPayload): LayerTypes => ({
+  type: SET_LAYERS_BOOL,
+  payload
+});
+
+export const setLayerFillRule = (payload: SetLayerFillRulePayload): LayerTypes => ({
+  type: SET_LAYER_FILL_RULE,
+  payload
+});
+
+export const setLayersFillRule = (payload: SetLayersFillRulePayload): LayerTypes => ({
+  type: SET_LAYERS_FILL_RULE,
   payload
 });

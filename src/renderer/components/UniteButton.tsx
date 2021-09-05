@@ -2,7 +2,7 @@ import React, { ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { canBooleanSelected } from '../store/selectors/layer';
-import { applyBooleanOperationThunk } from '../store/actions/layer';
+import { boolSelectedThunk } from '../store/actions/layer';
 import StackedButton from './StackedButton';
 import Icon from './Icon';
 
@@ -12,7 +12,7 @@ const UniteButton = (): ReactElement => {
 
   const handleUniteClick = (): void => {
     if (canUnite) {
-      dispatch(applyBooleanOperationThunk('unite'));
+      dispatch(boolSelectedThunk('unite'));
     }
   }
 
@@ -23,7 +23,7 @@ const UniteButton = (): ReactElement => {
       disabled={!canUnite}
       size='small'>
       <Icon
-        name='combine-union'
+        name='combine-unite'
         size='small' />
     </StackedButton>
   );

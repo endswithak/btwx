@@ -2,6 +2,7 @@ import React, { ReactElement } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import Icon from './Icon';
+import ShapeIcon from './ShapeIcon';
 
 interface SidebarLayerIconProps {
   id: string;
@@ -22,33 +23,43 @@ const SidebarLayerIcon = (props: SidebarLayerIconProps): ReactElement => {
     <div
       className={`c-sidebar-layer__icon`}
       id={`${id}-icon`}>
-      <Icon
-        name={(() => {
-          switch(type) {
-            case 'Artboard':
-              return 'artboard'
-            case 'Group':
-              return 'folder';
-            case 'Shape':
-              return 'shape';
-            case 'Text':
-              return 'text';
-            case 'Image':
-              return 'image';
-          }
-        })()}
-        size={(type === 'Shape' || type === 'Text') ? 'small' : null}
-        shapeId={type === 'Shape' ? id : null}
-        variant={
-          isOpenShape || isMask
-          ? null
-          : selected && !isDragGhost
-            ? 'base-on-primary'
-            : isActiveArtboard
-              ? 'primary'
-              : 'lighter'
-        }
-        outline={isOpenShape || isMask} />
+      {
+        type === 'Shape' || type === 'CompoundShape'
+        ? <ShapeIcon
+            id={id}
+            size='small'
+            variant={
+              isOpenShape || isMask
+              ? null
+              : selected && !isDragGhost
+                ? 'base-on-primary'
+                : isActiveArtboard
+                  ? 'primary'
+                  : 'lighter'
+            }
+            outline={isOpenShape || isMask} />
+        : <Icon
+            name={(() => {
+              switch(type) {
+                case 'Artboard':
+                  return 'artboard'
+                case 'Group':
+                  return 'folder';
+                case 'Text':
+                  return 'text';
+                case 'Image':
+                  return 'image';
+              }
+            })()}
+            size={type === 'Text' ? 'small' : null}
+            variant={
+              selected && !isDragGhost
+              ? 'base-on-primary'
+              : isActiveArtboard
+                ? 'primary'
+                : 'lighter'
+            } />
+      }
     </div>
   );
 }

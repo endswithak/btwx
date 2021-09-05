@@ -4,6 +4,7 @@ import {
   ADD_ARTBOARD,
   ADD_GROUP,
   ADD_SHAPE,
+  ADD_COMPOUND_SHAPE,
   ADD_TEXT,
   ADD_IMAGE,
   ADD_LAYERS,
@@ -356,12 +357,18 @@ import {
   DISABLE_GROUP_GROUP_EVENT_TWEENS,
   DISABLE_GROUPS_GROUP_EVENT_TWEENS,
   ADD_GROUP_WIGGLES,
+  SET_LAYER_SEGMENTS,
+  SET_LAYER_BOOL,
+  SET_LAYERS_BOOL,
+  SET_LAYER_FILL_RULE,
+  SET_LAYERS_FILL_RULE,
   LayerTypes
 } from '../actionTypes/layer';
 
 import {
   addArtboard,
   addShape,
+  addCompoundShape,
   addGroup,
   addText,
   addImage,
@@ -714,7 +721,12 @@ import {
   enableGroupsGroupEventTweens,
   disableGroupGroupEventTweens,
   disableGroupsGroupEventTweens,
-  addGroupWiggles
+  addGroupWiggles,
+  setLayerSegments,
+  setLayerBool,
+  setLayersBool,
+  setLayerFillRule,
+  setLayersFillRule
 } from '../utils/layer';
 
 export interface LayerState {
@@ -829,6 +841,8 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return addGroup(state, action);
     case ADD_SHAPE:
       return addShape(state, action);
+    case ADD_COMPOUND_SHAPE:
+      return addCompoundShape(state, action);
     case ADD_TEXT:
       return addText(state, action);
     case ADD_IMAGE:
@@ -1529,6 +1543,16 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return disableGroupsGroupEventTweens(state, action);
     case ADD_GROUP_WIGGLES:
       return addGroupWiggles(state, action);
+    case SET_LAYER_SEGMENTS:
+      return setLayerSegments(state, action);
+    case SET_LAYER_BOOL:
+      return setLayerBool(state, action);
+    case SET_LAYERS_BOOL:
+      return setLayersBool(state, action);
+    case SET_LAYER_FILL_RULE:
+      return setLayerFillRule(state, action);
+    case SET_LAYERS_FILL_RULE:
+      return setLayersFillRule(state, action);
     case HYDRATE_LAYERS:
       return {
         ...state,
@@ -1546,6 +1570,7 @@ export default undoable(baseReducer, {
       ADD_ARTBOARD,
       ADD_GROUP,
       ADD_SHAPE,
+      ADD_COMPOUND_SHAPE,
       ADD_TEXT,
       ADD_IMAGE,
       ADD_LAYERS,
@@ -1844,6 +1869,11 @@ export default undoable(baseReducer, {
       DISABLE_GROUP_GROUP_EVENT_TWEENS,
       DISABLE_GROUPS_GROUP_EVENT_TWEENS,
       ADD_GROUP_WIGGLES,
+      SET_LAYER_SEGMENTS,
+      SET_LAYER_BOOL,
+      SET_LAYERS_BOOL,
+      SET_LAYER_FILL_RULE,
+      SET_LAYERS_FILL_RULE,
     ].includes(action.type) && !action.payload.batch;
   }
 });

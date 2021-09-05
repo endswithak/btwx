@@ -40,6 +40,85 @@ export const getSelectedTweens = (state: RootState): any => state.layer.present.
 export const getSelectedEvents = (state: RootState): any => state.layer.present.events.selected;
 export const getScrollFrameId = (state: RootState): any => state.scrollFrameTool.id;
 
+export const getCompoundShapePathSegments = createSelector(
+  [ getLayerById, getLayersById ],
+  (layerById, layersById) => {
+    const segments: number[][][][] = [];
+    const compoundShapes: Btwx.CompoundShape[] = [layerById as Btwx.CompoundShape];
+    let i = 0;
+    while(i < compoundShapes.length) {
+      const layer = compoundShapes[i];
+      layer.children.forEach((child) => {
+        const childItem = layersById[child];
+        if (childItem.type === 'CompoundShape') {
+          compoundShapes.push(childItem as Btwx.CompoundShape);
+        } else {
+          segments.push((childItem as Btwx.Shape).segments);
+        }
+      });
+      i++;
+    }
+    return segments;
+  }
+);
+
+export const getShapeItemSegments = createSelector(
+  [ getLayerById, getLayersById ],
+  (layerById, layersById) => {
+    const closedMap: boolean[] = [];
+    const segments: number[][][][] = [];
+    const compoundShapes: Btwx.CompoundShape[] = [layerById as Btwx.CompoundShape];
+    let i = 0;
+    while(i < compoundShapes.length) {
+      const layerItem = compoundShapes[i] as Btwx.CompoundShape | Btwx.Shape;
+      if (layerItem.type === 'CompoundShape') {
+        layerItem.children.forEach((child) => {
+          const childItem = layersById[child];
+          if (childItem.type === 'CompoundShape') {
+            compoundShapes.push(childItem as Btwx.CompoundShape);
+          } else {
+            segments.push((childItem as Btwx.Shape).segments);
+            closedMap.push((childItem as Btwx.Shape).closed);
+          }
+        });
+      } else {
+        segments.push((layerItem as Btwx.Shape).segments);
+        closedMap.push((layerItem as Btwx.Shape).closed);
+      }
+      i++;
+    }
+    return {
+      segments,
+      closedMap
+    };
+  }
+);
+
+export const getDeepestSubPath = createSelector(
+  [ getLayerById, getLayersById ],
+  (layerById, layersById) => {
+    let compoundShapes: string[] = [layerById.id];
+    let i = 0;
+    let deepestCompoundShape = layerById.id;
+    while(i < compoundShapes.length) {
+      const layerItem = layersById[compoundShapes[0]] as Btwx.CompoundShape;
+      layerItem.children.forEach((childId, childIndex) => {
+        const childItem = layersById[childId];
+        if (childItem.type === 'CompoundShape') {
+          compoundShapes.push(childId);
+          if (childIndex === layerItem.children.length - 1) {
+            deepestCompoundShape = childId;
+          }
+        }
+      });
+      compoundShapes = compoundShapes.slice(1);
+    }
+    console.log(deepestCompoundShape);
+    const deepestCompoundShapeItem = (layersById[deepestCompoundShape] as Btwx.CompoundShape);
+    return deepestCompoundShapeItem.children[deepestCompoundShapeItem.children.length - 1];
+  }
+);
+
 export const getSingleLineSelected = createSelector(
   [ getLayersById, getSelected ],
   (layersById, selected) => {
@@ -1892,7 +1971,7 @@ export const canBooleanSelected = createSelector(
     const keys = Object.keys(selectedById);
     return keys.length >= 2 && keys.every((id: string) => {
       const layerItem = selectedById[id];
-      return layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line';
+      return (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') && (layerItem as Btwx.Shape).shapeType !== 'Line';
     });
   }
 );

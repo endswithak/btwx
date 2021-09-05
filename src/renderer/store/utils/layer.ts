@@ -8,7 +8,7 @@ import { paperMain } from '../../canvas';
 import { ARTBOARDS_PER_PROJECT, TWEEN_PROPS_MAP, DEFAULT_TWEEN_EASE, getDefaultTweenProps } from '../../constants';
 
 import {
-  AddGroup, AddShape, SelectLayer, DeselectLayer, RemoveLayer,
+  AddGroup, AddShape, AddCompoundShape, SelectLayer, DeselectLayer, RemoveLayer,
   AddLayerChild, InsertLayerChild, InsertLayerAbove, InsertLayerBelow,
   GroupLayers, UngroupLayers, UngroupLayer, DeselectAllLayers, RemoveLayers,
   HideLayerChildren, ShowLayerChildren, DecreaseLayerScope, NewLayerScope, SetLayerHover,
@@ -82,7 +82,7 @@ import {
   DisableGroupsScroll, EnableGroupHorizontalScroll, EnableGroupsHorizontalScroll, DisableGroupHorizontalScroll,
   DisableGroupsHorizontalScroll, EnableGroupVerticalScroll, EnableGroupsVerticalScroll, DisableGroupVerticalScroll,
   DisableGroupsVerticalScroll, SetGroupScrollOverflow, SetGroupsScrollOverflow, SetGroupScrollFrame,
-  EnableGroupGroupEventTweens, EnableGroupsGroupEventTweens, DisableGroupGroupEventTweens, DisableGroupsGroupEventTweens, AddGroupsWiggles,
+  EnableGroupGroupEventTweens, EnableGroupsGroupEventTweens, DisableGroupGroupEventTweens, DisableGroupsGroupEventTweens, AddGroupsWiggles, SetLayerSegments, SetLayerBool, SetLayerFillRule, SetLayersBool, SetLayersFillRule, SetLayerLastSubPath,
 } from '../actionTypes/layer';
 
 import {
@@ -318,6 +318,62 @@ export const addShape = (state: LayerState, action: AddShape): LayerState => {
         actionType: action.type,
         payload: action.payload,
         detail: 'Add Shape',
+        treeEdit: true,
+        undoable: true
+      }
+    }) as SetLayerEdit);
+  }
+  return currentState;
+};
+
+export const addCompoundShape = (state: LayerState, action: AddCompoundShape): LayerState => {
+  let currentState = state;
+  const parentItem = state.byId[action.payload.layer.parent];
+  const groupParents = action.payload.layer.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
+  // add shape
+  currentState = {
+    ...currentState,
+    allIds: addItem(currentState.allIds, action.payload.layer.id),
+    byId: {
+      ...currentState.byId,
+      [action.payload.layer.id]: action.payload.layer as Btwx.CompoundShape,
+      [action.payload.layer.parent]: {
+        ...currentState.byId[action.payload.layer.parent],
+        children: addItem(
+          (currentState.byId[action.payload.layer.parent] as Btwx.Group).children,
+          action.payload.layer.id
+        ),
+      } as Btwx.Group
+    },
+    allShapeIds: addItem(state.allShapeIds, action.payload.layer.id),
+    shapeIcons: {
+      ...currentState.shapeIcons,
+      [action.payload.layer.id]: action.payload.shapeIcon
+    }
+  }
+  currentState = updateLayerTweensByProps(currentState, action.payload.layer.id, 'all');
+  currentState = updateGroupParentBounds(currentState, groupParents);
+  if (!action.payload.batch) {
+    if (!(parentItem as Btwx.Group | Btwx.Artboard | Btwx.CompoundShape).showChildren) {
+      currentState = showLayerChildren(currentState, layerActions.showLayerChildren({
+        id: action.payload.layer.parent
+      }) as ShowLayerChildren);
+    }
+    currentState = selectLayers(currentState, layerActions.selectLayers({
+      layers: [action.payload.layer.id],
+      newSelection: true
+    }) as SelectLayers);
+    currentState = setLayerTreeScroll(currentState, layerActions.setLayerTreeScroll({
+      scroll: action.payload.layer.id
+    }) as SetLayerTreeScroll);
+    // currentState = setLayerTreeStickyArtboard(currentState, layerActions.setLayerTreeStickyArtboard({
+    //   stickyArtboard: action.payload.layer.artboard
+    // }) as SetLayerTreeStickyArtboard);
+    currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+      edit: {
+        actionType: action.type,
+        payload: action.payload,
+        detail: 'Add Compound Shape',
         treeEdit: true,
         undoable: true
       }
@@ -966,8 +1022,14 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
     }
     return result;
   }, layerItem.type === 'Group' ? [action.payload.id] : []).reverse();
+  //
+  if (isChildMask && layerItem.type === 'CompoundShape') {
+    currentState = toggleLayerMask(currentState, layerActions.toggleLayerMask({
+      id: action.payload.child
+    }) as ToggleLayerMask);
+  }
   // if mask, handle previous underlying siblings
-  if (isChildMask) {
+  if (isChildMask && layerItem.type !== 'CompoundShape') {
     const maskSiblings = getMaskableSiblings(currentState, action.payload.child);
     if (maskSiblings.length > 0) {
       currentState = maskSiblings.reduce((result: LayerState, current) => {
@@ -1020,7 +1082,7 @@ export const addLayerChild = (state: LayerState, action: AddLayerChild): LayerSt
       }
     };
     currentState = setLayerScope(currentState, layerActions.setLayerScope({id: action.payload.child, scope: [...layerItem.scope, action.payload.id]}) as SetLayerScope);
-    if (childItem.type === 'Group') {
+    if (childItem.type === 'Group' || childItem.type === 'CompoundShape') {
       currentState = updateNestedScopes(currentState, action.payload.child);
     }
   } else {
@@ -1170,11 +1232,11 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
   const belowItem = currentState.byId[action.payload.below];
-  const layerParent = currentState.byId[layerItem.parent] as Btwx.Group | Btwx.Artboard;
+  const layerParent = currentState.byId[layerItem.parent] as Btwx.Group | Btwx.Artboard | Btwx.CompoundShape;
   const layerIndex = layerParent.children.indexOf(action.payload.id);
   const isLayerMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
   const isLayerIgnoringUnderlyingMask = layerItem.type !== 'Artboard' && (layerItem as Btwx.MaskableLayer).ignoreUnderlyingMask;
-  const belowParent = currentState.byId[belowItem.parent] as Btwx.Group | Btwx.Artboard;
+  const belowParent = currentState.byId[belowItem.parent] as Btwx.Group | Btwx.Artboard | Btwx.CompoundShape;
   const belowIndex = belowParent.children.indexOf(action.payload.below);
   const isBelowMask = belowItem.type === 'Shape' && (belowItem as Btwx.Shape).mask;
   const isBelowIgnoringUnderlyingMask = belowItem.type !== 'Artboard' && (belowItem as Btwx.MaskableLayer).ignoreUnderlyingMask;
@@ -1250,7 +1312,7 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
       id: action.payload.id,
       scope: [...belowParent.scope, belowItem.parent]
     }) as SetLayerScope);
-    if (layerItem.type === 'Group') {
+    if (layerItem.type === 'Group' || layerItem.type === 'CompoundShape') {
       currentState = updateNestedScopes(currentState, action.payload.id);
     }
   } else {
@@ -1283,22 +1345,22 @@ export const insertLayerBelow = (state: LayerState, action: InsertLayerBelow): L
   if (layerItem.type === 'Artboard') {
     currentState = updateArtboardProjectIndices(currentState);
   }
-  if (isLayerIgnoringUnderlyingMask) {
+  if (isLayerIgnoringUnderlyingMask && belowParent.type !== 'CompoundShape') {
     currentState = toggleLayerIgnoreUnderlyingMask(currentState, layerActions.toggleLayerIgnoreUnderlyingMask({
       id: action.payload.id
     }) as ToggleLayerIgnoreUnderlyingMask);
   }
-  if (isLayerMask) {
+  if (isLayerMask && belowParent.type !== 'CompoundShape') {
     currentState = toggleLayerMask(currentState, layerActions.toggleLayerMask({
       id: action.payload.id
     }) as ToggleLayerMask);
   }
-  if (isBelowIgnoringUnderlyingMask) {
+  if (isBelowIgnoringUnderlyingMask && belowParent.type !== 'CompoundShape') {
     currentState = toggleLayerIgnoreUnderlyingMask(currentState, layerActions.toggleLayerIgnoreUnderlyingMask({
       id: action.payload.below
     }) as ToggleLayerIgnoreUnderlyingMask);
   }
-  if (isBelowMask) {
+  if (isBelowMask && belowParent.type !== 'CompoundShape') {
     currentState = toggleLayerMask(currentState, layerActions.toggleLayerMask({
       id: action.payload.below
     }) as ToggleLayerMask);
@@ -1351,11 +1413,11 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
   const aboveItem = currentState.byId[action.payload.above];
-  const layerParent = currentState.byId[layerItem.parent] as Btwx.Group | Btwx.Artboard;
+  const layerParent = currentState.byId[layerItem.parent] as Btwx.Group | Btwx.Artboard | Btwx.CompoundShape;
   const layerIndex = layerParent.children.indexOf(action.payload.id);
   const isLayerMask = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).mask;
   const isLayerIgnoringUnderlyingMask = layerItem.type !== 'Artboard' && (layerItem as Btwx.MaskableLayer).ignoreUnderlyingMask;
-  const aboveParentItem = currentState.byId[aboveItem.parent];
+  const aboveParentItem = currentState.byId[aboveItem.parent] as Btwx.Group | Btwx.Artboard | Btwx.CompoundShape;;
   const aboveIndex = aboveParentItem.children.indexOf(action.payload.above);
   const isAboveMask = aboveItem.type === 'Shape' && (aboveItem as Btwx.Shape).mask;
   const isAboveIgnoringUnderlyingMask = aboveItem.type !== 'Artboard' && (aboveItem as Btwx.MaskableLayer).ignoreUnderlyingMask;
@@ -1429,7 +1491,7 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
       id: action.payload.id,
       scope: [...aboveParentItem.scope, aboveItem.parent]
     }) as SetLayerScope);
-    if (layerItem.type === 'Group') {
+    if (layerItem.type === 'Group' || layerItem.type === 'CompoundShape') {
       currentState = updateNestedScopes(currentState, action.payload.id);
     }
   } else {
@@ -1460,22 +1522,22 @@ export const insertLayerAbove = (state: LayerState, action: InsertLayerAbove): L
   if (layerItem.type === 'Artboard') {
     currentState = updateArtboardProjectIndices(currentState);
   }
-  if (isAboveIgnoringUnderlyingMask) {
+  if (isAboveIgnoringUnderlyingMask && aboveParentItem.type !== 'CompoundShape') {
     currentState = toggleLayerIgnoreUnderlyingMask(currentState, layerActions.toggleLayerIgnoreUnderlyingMask({
       id: action.payload.above
     }) as ToggleLayerIgnoreUnderlyingMask);
   }
-  if (isAboveMask) {
+  if (isAboveMask && aboveParentItem.type !== 'CompoundShape') {
     currentState = toggleLayerMask(currentState, layerActions.toggleLayerMask({
       id: action.payload.above
     }) as ToggleLayerMask);
   }
-  if (isLayerIgnoringUnderlyingMask) {
+  if (isLayerIgnoringUnderlyingMask && aboveParentItem.type !== 'CompoundShape') {
     currentState = toggleLayerIgnoreUnderlyingMask(currentState, layerActions.toggleLayerIgnoreUnderlyingMask({
       id: action.payload.id
     }) as ToggleLayerIgnoreUnderlyingMask);
   }
-  if (isLayerMask) {
+  if (isLayerMask && aboveParentItem.type !== 'CompoundShape') {
     currentState = toggleLayerMask(currentState, layerActions.toggleLayerMask({
       id: action.payload.id
     }) as ToggleLayerMask);
@@ -1628,15 +1690,18 @@ export const updateNestedScopes = (state: LayerState, id: string): LayerState =>
   let i = 0;
   const currentScope = [...layerItem.scope, id];
   while(i < groups.length) {
-    const groupLayer = state.byId[groups[i]];
-    if (groupLayer.children) {
-      groupLayer.children.forEach((child) => {
-        const childLayerItem = state.byId[child];
-        if (childLayerItem.children && childLayerItem.children.length > 0) {
+    const groupItem = state.byId[groups[i]] as Btwx.Group | Btwx.CompoundShape;
+    if (groupItem.children) {
+      groupItem.children.forEach((child) => {
+        const childItem = state.byId[child];
+        if (childItem.children && childItem.children.length > 0) {
           groups.push(child);
           currentScope.push(child);
         }
-        currentState = setLayerScope(currentState, layerActions.setLayerScope({id: child, scope: currentScope}) as SetLayerScope);
+        currentState = setLayerScope(currentState, layerActions.setLayerScope({
+          id: child,
+          scope: currentScope
+        }) as SetLayerScope);
       });
     }
     i++;
@@ -11261,176 +11326,261 @@ export const setLayersBlendMode = (state: LayerState, action: SetLayersBlendMode
 
 export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState => {
   let currentState = state;
-  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({
-    id: action.payload.booleanLayer.id,
-    above: action.payload.layers[0]
-  }) as InsertLayerAbove);
-  currentState = removeLayers(currentState, layerActions.removeLayers({
-    layers: action.payload.layers
-  }) as RemoveLayers);
-  const layerItem = state.byId[action.payload.booleanLayer.id];
-  if (layerItem.style.fill.fillType === 'gradient') {
-    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({
-      id: action.payload.booleanLayer.id,
-      prop: 'fill',
-      gradient: layerItem.style.fill.gradient
-    }) as SetLayerGradient);
+  // const orderedLayersByDepth = orderLayersByDepth(currentState, action.payload.layers);
+  // move group above top layer
+  currentState = insertLayerBelow(currentState, layerActions.insertLayerBelow({
+    id: action.payload.compoundShape.id,
+    below: action.payload.layers[0]
+  }) as InsertLayerBelow);
+  // add layers to group
+  currentState = action.payload.layers.reduce((result, current) => {
+    return addLayerChild(result, layerActions.addLayerChild({
+      id: action.payload.compoundShape.id,
+      child: current
+    }) as AddLayerChild);
+  }, currentState);
+  // set layers bool
+  currentState = setLayersBool(currentState, layerActions.setLayersBool({
+    layers: action.payload.layers.slice(1),
+    bool: 'unite'
+  }) as SetLayersBool);
+  // select final group
+  currentState = selectLayers(currentState, layerActions.selectLayers({
+    layers: [action.payload.compoundShape.id],
+    newSelection: true
+  }) as SelectLayers);
+  //
+  const compoundShapeBounds = getLayersRelativeBounds(currentState, action.payload.layers);
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.compoundShape.id]: {
+        ...currentState.byId[action.payload.compoundShape.id],
+        frame: {
+          ...currentState.byId[action.payload.compoundShape.id].frame,
+          x: compoundShapeBounds.center.x,
+          y: compoundShapeBounds.center.y,
+          innerWidth: compoundShapeBounds.width,
+          innerHeight: compoundShapeBounds.height,
+          width: compoundShapeBounds.width,
+          height: compoundShapeBounds.height,
+        }
+      }
+    }
   }
-  if (layerItem.style.stroke.fillType === 'gradient') {
-    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({
-      id: action.payload.booleanLayer.id,
-      prop: 'stroke',
-      gradient: layerItem.style.stroke.gradient
-    }) as SetLayerGradient);
-  }
+  currentState = setLayerTreeScroll(currentState, layerActions.setLayerTreeScroll({
+    scroll: action.payload.compoundShape.id
+  }) as SetLayerTreeScroll);
+  // currentState = setLayerTreeStickyArtboard(currentState, layerActions.setLayerTreeStickyArtboard({
+  //   stickyArtboard: action.payload.group.artboard
+  // }) as SetLayerTreeStickyArtboard);
+  // set layer edit
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
       payload: action.payload,
-      detail: 'Boolean Union',
+      detail: 'Unite Layers',
+      treeEdit: true,
       undoable: true
     }
   }) as SetLayerEdit);
+  // return final state
   return currentState;
 };
 
 export const intersectLayers = (state: LayerState, action: IntersectLayers): LayerState => {
   let currentState = state;
-  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({
-    id: action.payload.booleanLayer.id,
-    above: action.payload.layers[0]
-  }) as InsertLayerAbove);
-  currentState = removeLayers(currentState, layerActions.removeLayers({
-    layers: action.payload.layers
-  }) as RemoveLayers);
-  const layerItem = state.byId[action.payload.booleanLayer.id];
-  if (layerItem.style.fill.fillType === 'gradient') {
-    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({
-      id: action.payload.booleanLayer.id,
-      prop: 'fill',
-      gradient: layerItem.style.fill.gradient
-    }) as SetLayerGradient);
+  // const orderedLayersByDepth = orderLayersByDepth(currentState, action.payload.layers);
+  // move group above top layer
+  currentState = insertLayerBelow(currentState, layerActions.insertLayerBelow({
+    id: action.payload.compoundShape.id,
+    below: action.payload.layers[0]
+  }) as InsertLayerBelow);
+  // add layers to group
+  currentState = action.payload.layers.reduce((result, current) => {
+    return addLayerChild(result, layerActions.addLayerChild({
+      id: action.payload.compoundShape.id,
+      child: current
+    }) as AddLayerChild);
+  }, currentState);
+  // set layers bool
+  currentState = setLayersBool(currentState, layerActions.setLayersBool({
+    layers: action.payload.layers.slice(1),
+    bool: 'intersect'
+  }) as SetLayersBool);
+  // select final group
+  currentState = selectLayers(currentState, layerActions.selectLayers({
+    layers: [action.payload.compoundShape.id],
+    newSelection: true
+  }) as SelectLayers);
+  //
+  const compoundShapeBounds = getLayersRelativeBounds(currentState, action.payload.layers);
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.compoundShape.id]: {
+        ...currentState.byId[action.payload.compoundShape.id],
+        frame: {
+          ...currentState.byId[action.payload.compoundShape.id].frame,
+          x: compoundShapeBounds.center.x,
+          y: compoundShapeBounds.center.y,
+          innerWidth: compoundShapeBounds.width,
+          innerHeight: compoundShapeBounds.height,
+          width: compoundShapeBounds.width,
+          height: compoundShapeBounds.height,
+        }
+      }
+    }
   }
-  if (layerItem.style.stroke.fillType === 'gradient') {
-    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({
-      id: action.payload.booleanLayer.id,
-      prop: 'stroke',
-      gradient: layerItem.style.stroke.gradient
-    }) as SetLayerGradient);
-  }
+  currentState = setLayerTreeScroll(currentState, layerActions.setLayerTreeScroll({
+    scroll: action.payload.compoundShape.id
+  }) as SetLayerTreeScroll);
+  // currentState = setLayerTreeStickyArtboard(currentState, layerActions.setLayerTreeStickyArtboard({
+  //   stickyArtboard: action.payload.group.artboard
+  // }) as SetLayerTreeStickyArtboard);
+  // set layer edit
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
       payload: action.payload,
-      detail: 'Boolean Intersect',
+      detail: 'Intersect Layers',
+      treeEdit: true,
       undoable: true
     }
   }) as SetLayerEdit);
+  // return final state
   return currentState;
 };
 
 export const subtractLayers = (state: LayerState, action: SubtractLayers): LayerState => {
   let currentState = state;
-  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({
-    id: action.payload.booleanLayer.id,
-    above: action.payload.layers[0]
-  }) as InsertLayerAbove);
-  currentState = removeLayers(currentState, layerActions.removeLayers({
-    layers: action.payload.layers
-  }) as RemoveLayers);
-  const layerItem = state.byId[action.payload.booleanLayer.id];
-  if (layerItem.style.fill.fillType === 'gradient') {
-    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({
-      id: action.payload.booleanLayer.id,
-      prop: 'fill',
-      gradient: layerItem.style.fill.gradient
-    }) as SetLayerGradient);
+  // const orderedLayersByDepth = orderLayersByDepth(currentState, action.payload.layers);
+  // move group above top layer
+  currentState = insertLayerBelow(currentState, layerActions.insertLayerBelow({
+    id: action.payload.compoundShape.id,
+    below: action.payload.layers[0]
+  }) as InsertLayerBelow);
+  // add layers to group
+  currentState = action.payload.layers.reduce((result, current) => {
+    return addLayerChild(result, layerActions.addLayerChild({
+      id: action.payload.compoundShape.id,
+      child: current
+    }) as AddLayerChild);
+  }, currentState);
+  // set layers bool
+  currentState = setLayersBool(currentState, layerActions.setLayersBool({
+    layers: action.payload.layers.slice(1),
+    bool: 'subtract'
+  }) as SetLayersBool);
+  // select final group
+  currentState = selectLayers(currentState, layerActions.selectLayers({
+    layers: [action.payload.compoundShape.id],
+    newSelection: true
+  }) as SelectLayers);
+  //
+  const compoundShapeBounds = getLayersRelativeBounds(currentState, action.payload.layers);
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.compoundShape.id]: {
+        ...currentState.byId[action.payload.compoundShape.id],
+        frame: {
+          ...currentState.byId[action.payload.compoundShape.id].frame,
+          x: compoundShapeBounds.center.x,
+          y: compoundShapeBounds.center.y,
+          innerWidth: compoundShapeBounds.width,
+          innerHeight: compoundShapeBounds.height,
+          width: compoundShapeBounds.width,
+          height: compoundShapeBounds.height,
+        }
+      }
+    }
   }
-  if (layerItem.style.stroke.fillType === 'gradient') {
-    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({
-      id: action.payload.booleanLayer.id,
-      prop: 'stroke',
-      gradient: layerItem.style.stroke.gradient
-    }) as SetLayerGradient);
-  }
+  currentState = setLayerTreeScroll(currentState, layerActions.setLayerTreeScroll({
+    scroll: action.payload.compoundShape.id
+  }) as SetLayerTreeScroll);
+  // currentState = setLayerTreeStickyArtboard(currentState, layerActions.setLayerTreeStickyArtboard({
+  //   stickyArtboard: action.payload.group.artboard
+  // }) as SetLayerTreeStickyArtboard);
+  // set layer edit
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
       payload: action.payload,
-      detail: 'Boolean Subtract',
+      detail: 'Subtract Layers',
+      treeEdit: true,
       undoable: true
     }
   }) as SetLayerEdit);
+  // return final state
   return currentState;
 };
 
 export const excludeLayers = (state: LayerState, action: ExcludeLayers): LayerState => {
   let currentState = state;
-  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({
-    id: action.payload.booleanLayer.id,
-    above: action.payload.layers[0]
-  }) as InsertLayerAbove);
-  currentState = removeLayers(currentState, layerActions.removeLayers({
-    layers: action.payload.layers
-  }) as RemoveLayers);
-  const layerItem = state.byId[action.payload.booleanLayer.id];
-  if (layerItem.style.fill.fillType === 'gradient') {
-    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({
-      id: action.payload.booleanLayer.id,
-      prop: 'fill',
-      gradient: layerItem.style.fill.gradient
-    }) as SetLayerGradient);
+  // const orderedLayersByDepth = orderLayersByDepth(currentState, action.payload.layers);
+  // move group above top layer
+  currentState = insertLayerBelow(currentState, layerActions.insertLayerBelow({
+    id: action.payload.compoundShape.id,
+    below: action.payload.layers[0]
+  }) as InsertLayerBelow);
+  // add layers to group
+  currentState = action.payload.layers.reduce((result, current) => {
+    return addLayerChild(result, layerActions.addLayerChild({
+      id: action.payload.compoundShape.id,
+      child: current
+    }) as AddLayerChild);
+  }, currentState);
+  // set layers bool
+  currentState = setLayersBool(currentState, layerActions.setLayersBool({
+    layers: action.payload.layers.slice(1),
+    bool: 'exclude'
+  }) as SetLayersBool);
+  // select final group
+  currentState = selectLayers(currentState, layerActions.selectLayers({
+    layers: [action.payload.compoundShape.id],
+    newSelection: true
+  }) as SelectLayers);
+  //
+  const compoundShapeBounds = getLayersRelativeBounds(currentState, action.payload.layers);
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.compoundShape.id]: {
+        ...currentState.byId[action.payload.compoundShape.id],
+        frame: {
+          ...currentState.byId[action.payload.compoundShape.id].frame,
+          x: compoundShapeBounds.center.x,
+          y: compoundShapeBounds.center.y,
+          innerWidth: compoundShapeBounds.width,
+          innerHeight: compoundShapeBounds.height,
+          width: compoundShapeBounds.width,
+          height: compoundShapeBounds.height,
+        }
+      }
+    }
   }
-  if (layerItem.style.stroke.fillType === 'gradient') {
-    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({
-      id: action.payload.booleanLayer.id,
-      prop: 'stroke',
-      gradient: layerItem.style.stroke.gradient
-    }) as SetLayerGradient);
-  }
+  currentState = setLayerTreeScroll(currentState, layerActions.setLayerTreeScroll({
+    scroll: action.payload.compoundShape.id
+  }) as SetLayerTreeScroll);
+  // currentState = setLayerTreeStickyArtboard(currentState, layerActions.setLayerTreeStickyArtboard({
+  //   stickyArtboard: action.payload.group.artboard
+  // }) as SetLayerTreeStickyArtboard);
+  // set layer edit
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
       payload: action.payload,
-      detail: 'Boolean Difference',
+      detail: 'Exclude Layers',
+      treeEdit: true,
       undoable: true
     }
   }) as SetLayerEdit);
-  return currentState;
-};
-
-export const divideLayers = (state: LayerState, action: DivideLayers): LayerState => {
-  let currentState = state;
-  currentState = insertLayerAbove(currentState, layerActions.insertLayerAbove({
-    id: action.payload.booleanLayer.id,
-    above: action.payload.layers[0]
-  }) as InsertLayerAbove);
-  currentState = removeLayers(currentState, layerActions.removeLayers({
-    layers: action.payload.layers
-  }) as RemoveLayers);
-  const layerItem = state.byId[action.payload.booleanLayer.id];
-  if (layerItem.style.fill.fillType === 'gradient') {
-    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({
-      id: action.payload.booleanLayer.id,
-      prop: 'fill',
-      gradient: layerItem.style.fill.gradient
-    }) as SetLayerGradient);
-  }
-  if (layerItem.style.stroke.fillType === 'gradient') {
-    currentState = setLayerGradient(currentState, layerActions.setLayerGradient({
-      id: action.payload.booleanLayer.id,
-      prop: 'stroke',
-      gradient: layerItem.style.stroke.gradient
-    }) as SetLayerGradient);
-  }
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
-    edit: {
-      actionType: action.type,
-      payload: action.payload,
-      detail: 'Boolean Divide',
-      undoable: true
-    }
-  }) as SetLayerEdit);
+  // return final state
   return currentState;
 };
 
@@ -13045,6 +13195,136 @@ export const addGroupWiggles = (state: LayerState, action: AddGroupsWiggles): La
       actionType: action.type,
       payload: action.payload,
       detail: 'Add Layer Wiggles',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerSegments = (state: LayerState, action: SetLayerSegments): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        segments: action.payload.segments
+      } as Btwx.Shape
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Segments',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerBool = (state: LayerState, action: SetLayerBool): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        bool: action.payload.bool
+      } as Btwx.Shape | Btwx.CompoundShape
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Boolean Operation',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayersBool = (state: LayerState, action: SetLayersBool): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current) => {
+    return setLayerBool(result, layerActions.setLayerBool({
+      id: current,
+      bool: action.payload.bool
+    }) as SetLayerBool);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layers Boolean Operation',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerFillRule = (state: LayerState, action: SetLayerFillRule): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        fillRule: action.payload.fillRule
+      } as Btwx.CompoundShape
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Fill Rule',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayersFillRule = (state: LayerState, action: SetLayersFillRule): LayerState => {
+  let currentState = state;
+  currentState = action.payload.layers.reduce((result, current, index) => {
+    return setLayerFillRule(result, layerActions.setLayerFillRule({
+      id: current,
+      fillRule: action.payload.fillRule
+    }) as SetLayerFillRule);
+  }, currentState);
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layers Fill Rule',
+      undoable: true
+    }
+  }) as SetLayerEdit);
+  return currentState;
+};
+
+export const setLayerLastSubPath = (state: LayerState, action: SetLayerLastSubPath): LayerState => {
+  let currentState = state;
+  currentState = {
+    ...currentState,
+    byId: {
+      ...currentState.byId,
+      [action.payload.id]: {
+        ...currentState.byId[action.payload.id],
+        lastSubPath: action.payload.lastSubPath
+      } as Btwx.CompoundShape
+    }
+  }
+  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
+    edit: {
+      actionType: action.type,
+      payload: action.payload,
+      detail: 'Set Layer Last Sub Path',
       undoable: true
     }
   }) as SetLayerEdit);
