@@ -2173,6 +2173,23 @@ ipcMain.handle('openContextMenu', (event, args) => {
   }
 });
 
+ipcMain.handle('openBoolContextMenu', (event, args) => {
+  const { theme } = JSON.parse(args);
+  const RESOURCES_PATH = app.isPackaged ? path.join(process.resourcesPath, 'assets/images') : path.join(__dirname, '../../assets/images');
+  const templateWithActions = buildContentMenuTemplate(args, btwxElectron, 'document');
+  const templateWithIcons = templateWithActions.map((item) => {
+    if (item.label) {
+      return {
+        ...item,
+        icon: nativeImage.createFromPath(`${RESOURCES_PATH}/combine-${(item.label as string).toLowerCase()}-${theme}.png`)
+      }
+    } else {
+      return item;
+    }
+  });
+  Menu.buildFromTemplate(templateWithIcons).popup();
+});
+
 ////////////////////////////////////////////////////////////
 // STORE
 ////////////////////////////////////////////////////////////

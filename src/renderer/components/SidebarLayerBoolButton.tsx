@@ -1,10 +1,9 @@
 import React, { ReactElement } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
+import capitalize from 'lodash.capitalize';
 import { RootState } from '../store/reducers';
-import { enableGroupGroupEventTweens, disableGroupGroupEventTweens } from '../store/actions/layer';
-import ToggleIconButton from './ToggleIconButton';
 import ListItem from './ListItem';
-import Icon from './Icon';
+import IconButton from './IconButton';
 
 interface SidebarLayerGroupEventTweensButtonProps {
   id: string;
@@ -16,43 +15,52 @@ interface SidebarLayerGroupEventTweensButtonProps {
 const SidebarLayerBoolButton = (props: SidebarLayerGroupEventTweensButtonProps): ReactElement => {
   const { id, isDragGhost, searchTree } = props;
   const bool = useSelector((state: RootState) => state.layer.present.byId[id] && (state.layer.present.byId[id] as Btwx.Shape | Btwx.CompoundShape).bool);
-  const groupEventTweensAncestor = useSelector((state: RootState) => state.layer.present.byId[id] ? state.layer.present.byId[id].scope.some((sid) => state.layer.present.byId[sid] && state.layer.present.byId[sid].type === 'Group' && (state.layer.present.byId[sid] as Btwx.Group).groupEventTweens) : false);
-  const isSelected = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[id].selected);
-  const selected = typeof props.isSelected === 'boolean' ? props.isSelected : isSelected;
-  const dispatch = useDispatch();
+  const theme = useSelector((state: RootState) => state.preferences.theme);
+  const instanceId = useSelector((state: RootState) => state.session.instance);
 
-  // const handleChange = () => {
-  //   if (groupEventTweens) {
-  //     dispatch(disableGroupGroupEventTweens({id}));
-  //   } else {
-  //     dispatch(enableGroupGroupEventTweens({id}));
-  //   }
-  // }
+  const buildContextMenu = () => {
+    const boolTypes = ['none', 'unite', 'subtract', 'intersect', 'exclude'];
+    return boolTypes.reduce((result, current) => {
+      const item = {
+        label: capitalize(current),
+        type: 'checkbox',
+        checked: bool === current,
+        click: {
+          id: 'setLayerBool',
+          params: {
+            id: id,
+            bool: current
+          }
+        }
+      }
+      if (current === 'none') {
+        result = [...result, item, { type: 'separator' }];
+      } else {
+        result = [...result, item];
+      }
+      return result;
+    }, []);
+  }
 
-  // const handleMouseDown = (e: any) => {
-  //   e.stopPropagation();
-  // }
+  const handleMouseDown = (e: any) => {
+    e.stopPropagation();
+    (window as any).api.openBoolContextMenu(JSON.stringify({
+      instanceId: instanceId,
+      template: buildContextMenu(),
+      theme: theme
+    }));
+  }
 
   return (
-    !isDragGhost && !groupEventTweensAncestor && bool !== 'none'
+    !isDragGhost
     ? <ListItem.Right>
         <div
         className={`c-sidebar-layer__icon c-sidebar-layer__icon--chevron`}
         id={searchTree ? `search-tree-${id}-group-event-tweens-icon` : `${id}-group-event-tweens-icon`}>
-          <Icon
-            name={`combine-${bool}`}
-            size='small' />
-          {/* <ToggleIconButton
-            value={groupEventTweens}
-            onMouseDown={handleMouseDown}
-            type='checkbox'
-            onChange={handleChange}
+          <IconButton
+            iconName={`combine-${bool}`}
             size='small'
-            checked={groupEventTweens}
-            label={'Group Event Tweens'}
-            iconName='lock-tweens'
-            activeIconName='lock-tweens'
-            variant={selected && groupEventTweens ? 'base-on-primary' : null} /> */}
+            onMouseDown={handleMouseDown} />
         </div>
       </ListItem.Right>
     : null

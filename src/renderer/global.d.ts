@@ -511,11 +511,6 @@ declare namespace Btwx {
     radius: number;
   }
 
-  interface Line extends Shape {
-    from: Point;
-    to: Point;
-  }
-
   interface CurvePoint {
     point: Point;
     handleIn: Point;

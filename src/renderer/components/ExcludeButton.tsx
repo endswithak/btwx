@@ -18,7 +18,7 @@ const ExcludeButton = (): ReactElement => {
 
   return (
     <StackedButton
-      label='Difference'
+      label='Exclude'
       onClick={handleExcludeClick}
       disabled={!canExclude}
       size='small'>

@@ -460,7 +460,6 @@ export type AddShapePayload = {
   layer: {
     [P in keyof Btwx.Shape]?: Btwx.Shape[P];
   };
-  shapeIcon?: string;
   batch?: boolean;
 }
 
@@ -475,7 +474,6 @@ export type AddCompoundShapePayload = {
   layer: {
     [P in keyof Btwx.CompoundShape]?: Btwx.CompoundShape[P];
   };
-  shapeIcon?: string;
   batch?: boolean;
 }
 
@@ -1868,6 +1866,7 @@ export interface SetLayersCustomWiggleTweenType {
 export interface SetLayerXPayload {
   id: string;
   x: number;
+  segments?: number[][][];
 }
 
 export interface SetLayerX {
@@ -1878,6 +1877,9 @@ export interface SetLayerX {
 export interface SetLayersXPayload {
   layers: string[];
   x: number;
+  segments?: {
+    [id: string]: number[][][];
+  };
 }
 
 export interface SetLayersX {
@@ -1887,7 +1889,7 @@ export interface SetLayersX {
 
 export interface SetLayerYPayload {
   id: string;
-  y: number;
+  segments?: number[][][];
 }
 
 export interface SetLayerY {
@@ -1898,6 +1900,9 @@ export interface SetLayerY {
 export interface SetLayersYPayload {
   layers: string[];
   y: number;
+  segments?: {
+    [id: string]: number[][][];
+  };
 }
 
 export interface SetLayersY {
@@ -1908,6 +1913,7 @@ export interface SetLayersY {
 export interface SetLayerLeftPayload {
   id: string;
   left: number;
+  segments?: number[][][];
 }
 
 export interface SetLayerLeft {
@@ -1918,6 +1924,9 @@ export interface SetLayerLeft {
 export interface SetLayersLeftPayload {
   layers: string[];
   left: number;
+  segments?: {
+    [id: string]: number[][][];
+  };
 }
 
 export interface SetLayersLeft {
@@ -1928,6 +1937,7 @@ export interface SetLayersLeft {
 export interface SetLayerCenterPayload {
   id: string;
   center: number;
+  segments?: number[][][];
 }
 
 export interface SetLayerCenter {
@@ -1938,6 +1948,9 @@ export interface SetLayerCenter {
 export interface SetLayersCenterPayload {
   layers: string[];
   center: number;
+  segments?: {
+    [id: string]: number[][][];
+  };
 }
 
 export interface SetLayersCenter {
@@ -1948,6 +1961,7 @@ export interface SetLayersCenter {
 export interface SetLayerRightPayload {
   id: string;
   right: number;
+  segments?: number[][][];
 }
 
 export interface SetLayerRight {
@@ -1958,6 +1972,9 @@ export interface SetLayerRight {
 export interface SetLayersRightPayload {
   layers: string[];
   right: number;
+  segments?: {
+    [id: string]: number[][][];
+  };
 }
 
 export interface SetLayersRight {
@@ -1968,6 +1985,7 @@ export interface SetLayersRight {
 export interface SetLayerTopPayload {
   id: string;
   top: number;
+  segments?: number[][][];
 }
 
 export interface SetLayerTop {
@@ -1978,6 +1996,9 @@ export interface SetLayerTop {
 export interface SetLayersTopPayload {
   layers: string[];
   top: number;
+  segments?: {
+    [id: string]: number[][][];
+  };
 }
 
 export interface SetLayersTop {
@@ -1988,6 +2009,7 @@ export interface SetLayersTop {
 export interface SetLayerMiddlePayload {
   id: string;
   middle: number;
+  segments?: number[][][];
 }
 
 export interface SetLayerMiddle {
@@ -1998,6 +2020,9 @@ export interface SetLayerMiddle {
 export interface SetLayersMiddlePayload {
   layers: string[];
   middle: number;
+  segments?: {
+    [id: string]: number[][][];
+  };
 }
 
 export interface SetLayersMiddle {
@@ -2008,6 +2033,7 @@ export interface SetLayersMiddle {
 export interface SetLayerBottomPayload {
   id: string;
   bottom: number;
+  segments?: number[][][];
 }
 
 export interface SetLayerBottom {
@@ -2018,6 +2044,9 @@ export interface SetLayerBottom {
 export interface SetLayersBottomPayload {
   layers: string[];
   bottom: number;
+  segments?: {
+    [id: string]: number[][][];
+  };
 }
 
 export interface SetLayersBottom {
@@ -2028,14 +2057,11 @@ export interface SetLayersBottom {
 export interface SetLayerWidthPayload {
   id: string;
   width: number;
-  pathData?: string;
-  shapeIcon?: string;
+  segments?: number[][][];
   bounds?: Btwx.Frame;
   lines?: Btwx.TextLine[];
   paragraphs?: string[][];
   textResize?: Btwx.TextResize;
-  from?: Btwx.Point;
-  to?: Btwx.Point;
 }
 
 export interface SetLayerWidth {
@@ -2046,15 +2072,12 @@ export interface SetLayerWidth {
 export interface SetLayersWidthPayload {
   layers: string[];
   width: number;
-  pathData?: {
-    [id: string]: string;
-  };
-  shapeIcon?: {
-    [id: string]: string;
+  segments?: {
+    [id: string]: number[][][];
   };
   bounds?: {
     [id: string]: Btwx.Frame;
-  }
+  };
   lines?: {
     [id: string]: Btwx.TextLine[];
   };
@@ -2063,12 +2086,6 @@ export interface SetLayersWidthPayload {
   };
   textResize?: {
     [id: string]: Btwx.TextResize;
-  };
-  from?: {
-    [id: string]: Btwx.Point;
-  };
-  to?: {
-    [id: string]: Btwx.Point;
   };
 }
 
@@ -2080,14 +2097,11 @@ export interface SetLayersWidth {
 export interface SetLayerHeightPayload {
   id: string;
   height: number;
-  pathData?: string;
-  shapeIcon?: string;
+  segments?: number[][][];
   bounds?: Btwx.Frame;
   lines?: Btwx.TextLine[];
   paragraphs?: string[][];
   textResize?: Btwx.TextResize;
-  from?: Btwx.Point;
-  to?: Btwx.Point;
 }
 
 export interface SetLayerHeight {
@@ -2098,11 +2112,8 @@ export interface SetLayerHeight {
 export interface SetLayersHeightPayload {
   layers: string[];
   height: number;
-  pathData?: {
-    [id: string]: string;
-  };
-  shapeIcon?: {
-    [id: string]: string;
+  segments?: {
+    [id: string]: number[][][];
   };
   bounds?: {
     [id: string]: Btwx.Frame;
@@ -2115,12 +2126,6 @@ export interface SetLayersHeightPayload {
   };
   textResize?: {
     [id: string]: Btwx.TextResize;
-  };
-  from?: {
-    [id: string]: Btwx.Point;
-  };
-  to?: {
-    [id: string]: Btwx.Point;
   };
 }
 
@@ -2133,11 +2138,8 @@ export interface SetLayerRotationPayload {
   id: string;
   rotation: number;
   bounds?: Btwx.Frame;
-  pathData?: string;
-  shapeIcon?: string;
+  segments?: number[][][];
   point?: Btwx.Point;
-  from?: Btwx.Point;
-  to?: Btwx.Point;
   fillGradientOrigin?: Btwx.Point;
   fillGradientDestination?: Btwx.Point;
   strokeGradientOrigin?: Btwx.Point;
@@ -2155,19 +2157,10 @@ export interface SetLayersRotationPayload {
   bounds?: {
     [id: string]: Btwx.Frame;
   };
-  pathData?: {
-    [id: string]: string;
-  };
-  shapeIcon?: {
-    [id: string]: string;
+  segments?: {
+    [id: string]: number[][][];
   };
   point?: {
-    [id: string]: Btwx.Point;
-  };
-  from?: {
-    [id: string]: Btwx.Point;
-  };
-  to?: {
     [id: string]: Btwx.Point;
   };
   fillGradientOrigin?: {
@@ -2267,11 +2260,8 @@ export interface SetLayersBlurRadius {
 
 export interface EnableLayerHorizontalFlipPayload {
   id: string;
-  from?: Btwx.Point;
-  to?: Btwx.Point;
   point?: Btwx.Point;
-  pathData?: string;
-  shapeIcon?: string;
+  segments?: number[][][];
 }
 
 export interface EnableLayerHorizontalFlip {
@@ -2281,20 +2271,11 @@ export interface EnableLayerHorizontalFlip {
 
 export interface EnableLayersHorizontalFlipPayload {
   layers: string[];
-  from?: {
-    [id: string]: Btwx.Point;
-  };
-  to?: {
-    [id: string]: Btwx.Point;
-  };
   point?: {
     [id: string]: Btwx.Point;
   };
-  pathData?: {
-    [id: string]: string;
-  };
-  shapeIcon?: {
-    [id: string]: string;
+  segments?: {
+    [id: string]: number[][][];
   };
 }
 
@@ -2305,11 +2286,8 @@ export interface EnableLayersHorizontalFlip {
 
 export interface DisableLayerHorizontalFlipPayload {
   id: string;
-  from?: Btwx.Point;
-  to?: Btwx.Point;
   point?: Btwx.Point;
-  pathData?: string;
-  shapeIcon?: string;
+  segments?: number[][][];
 }
 
 export interface DisableLayerHorizontalFlip {
@@ -2319,20 +2297,11 @@ export interface DisableLayerHorizontalFlip {
 
 export interface DisableLayersHorizontalFlipPayload {
   layers: string[];
-  from?: {
-    [id: string]: Btwx.Point;
-  };
-  to?: {
-    [id: string]: Btwx.Point;
-  };
   point?: {
     [id: string]: Btwx.Point;
   };
-  pathData?: {
-    [id: string]: string;
-  };
-  shapeIcon?: {
-    [id: string]: string;
+  segments?: {
+    [id: string]: number[][][];
   };
 }
 
@@ -2343,11 +2312,8 @@ export interface DisableLayersHorizontalFlip {
 
 export interface EnableLayerVerticalFlipPayload {
   id: string;
-  from?: Btwx.Point;
-  to?: Btwx.Point;
   point?: Btwx.Point;
-  pathData?: string;
-  shapeIcon?: string;
+  segments?: number[][][];
 }
 
 export interface EnableLayerVerticalFlip {
@@ -2357,20 +2323,11 @@ export interface EnableLayerVerticalFlip {
 
 export interface EnableLayersVerticalFlipPayload {
   layers: string[];
-  from?: {
-    [id: string]: Btwx.Point;
-  };
-  to?: {
-    [id: string]: Btwx.Point;
-  };
   point?: {
     [id: string]: Btwx.Point;
   };
-  pathData?: {
-    [id: string]: string;
-  };
-  shapeIcon?: {
-    [id: string]: string;
+  segments?: {
+    [id: string]: number[][][];
   };
 }
 
@@ -2381,11 +2338,8 @@ export interface EnableLayersVerticalFlip {
 
 export interface DisableLayerVerticalFlipPayload {
   id: string;
-  from?: Btwx.Point;
-  to?: Btwx.Point;
   point?: Btwx.Point;
-  pathData?: string;
-  shapeIcon?: string;
+  segments?: number[][][];
 }
 
 export interface DisableLayerVerticalFlip {
@@ -2395,20 +2349,11 @@ export interface DisableLayerVerticalFlip {
 
 export interface DisableLayersVerticalFlipPayload {
   layers: string[];
-  from?: {
-    [id: string]: Btwx.Point;
-  };
-  to?: {
-    [id: string]: Btwx.Point;
-  };
   point?: {
     [id: string]: Btwx.Point;
   };
-  pathData?: {
-    [id: string]: string;
-  };
-  shapeIcon?: {
-    [id: string]: string;
+  segments?: {
+    [id: string]: number[][][];
   };
 }
 
@@ -3122,11 +3067,8 @@ export interface ScaleLayerPayload {
   scale: Btwx.Point;
   verticalFlip: boolean;
   horizontalFlip: boolean;
-  pathData?: string;
-  shapeIcon?: string;
+  segments?: number[][][];
   bounds?: Btwx.Frame;
-  from?: Btwx.Point;
-  to?: Btwx.Point;
   point?: Btwx.Point;
   lines?: Btwx.TextLine[];
   rotation?: number;
@@ -3144,20 +3086,11 @@ export interface ScaleLayersPayload {
   scale: Btwx.Point;
   verticalFlip: boolean;
   horizontalFlip: boolean;
-  pathData?: {
-    [id: string]: string;
-  };
-  shapeIcon?: {
-    [id: string]: string;
+  segments?: {
+    [id: string]: number[][][];
   };
   bounds?: {
     [id: string]: Btwx.Frame;
-  };
-  from?: {
-    [id: string]: Btwx.Point;
-  };
-  to?: {
-    [id: string]: Btwx.Point;
   };
   point?: {
     [id: string]: Btwx.Point;
@@ -3893,8 +3826,7 @@ export interface DivideLayers {
 export interface SetRoundedRadiusPayload {
   id: string;
   radius: number;
-  pathData?: string;
-  shapeIcon?: string;
+  segments?: number[][][];
   bounds?: Btwx.Frame;
 }
 
@@ -3906,9 +3838,12 @@ export interface SetRoundedRadius {
 export interface SetRoundedRadiiPayload {
   layers: string[];
   radius: number;
-  pathData?: string[];
-  shapeIcon?: string[];
-  bounds?: Btwx.Frame[];
+  segments?: {
+    [id: string]: number[][][];
+  };
+  bounds?: {
+    [id: string]: Btwx.Frame;
+  };
 }
 
 export interface SetRoundedRadii {
@@ -3919,8 +3854,7 @@ export interface SetRoundedRadii {
 export interface SetPolygonSidesPayload {
   id: string;
   sides: number;
-  pathData?: string;
-  shapeIcon?: string;
+  segments?: number[][][];
   bounds?: Btwx.Frame;
 }
 
@@ -3932,9 +3866,12 @@ export interface SetPolygonSides {
 export interface SetPolygonsSidesPayload {
   layers: string[];
   sides: number;
-  pathData?: string[];
-  shapeIcon?: string[];
-  bounds?: Btwx.Frame[];
+  segments?: {
+    [id: string]: number[][][];
+  };
+  bounds?: {
+    [id: string]: Btwx.Frame;
+  };
 }
 
 export interface SetPolygonsSides {
@@ -3945,8 +3882,7 @@ export interface SetPolygonsSides {
 export interface SetStarPointsPayload {
   id: string;
   points: number;
-  pathData?: string;
-  shapeIcon?: string;
+  segments?: number[][][];
   bounds?: Btwx.Frame;
 }
 
@@ -3958,9 +3894,12 @@ export interface SetStarPoints {
 export interface SetStarsPointsPayload {
   layers: string[];
   points: number;
-  pathData?: string[];
-  shapeIcon?: string[];
-  bounds?: Btwx.Frame[];
+  segments?: {
+    [id: string]: number[][][];
+  };
+  bounds?: {
+    [id: string]: Btwx.Frame;
+  };
 }
 
 export interface SetStarsPoints {
@@ -3971,8 +3910,7 @@ export interface SetStarsPoints {
 export interface SetStarRadiusPayload {
   id: string;
   radius: number;
-  pathData?: string;
-  shapeIcon?: string;
+  segments?: number[][][];
   bounds?: Btwx.Frame;
 }
 
@@ -3984,9 +3922,12 @@ export interface SetStarRadius {
 export interface SetStarsRadiusPayload {
   layers: string[];
   radius: number;
-  pathData?: string[];
-  shapeIcon?: string[];
-  bounds?: Btwx.Frame[];
+  segments?: {
+    [id: string]: number[][][];
+  };
+  bounds?: {
+    [id: string]: Btwx.Frame;
+  };
 }
 
 export interface SetStarsRadius {
@@ -3998,8 +3939,7 @@ export interface SetLineFromXPayload {
   id: string;
   x: number;
   setEdit?: boolean;
-  pathData?: string;
-  shapeIcon?: string;
+  segments?: number[][][];
   bounds?: Btwx.Frame;
   rotation?: number;
 }
@@ -4013,10 +3953,15 @@ export interface SetLinesFromXPayload {
   layers: string[];
   x: number;
   setEdit?: boolean;
-  pathData?: string[];
-  shapeIcon?: string[];
-  bounds?: Btwx.Frame[];
-  rotation?: number[];
+  segments?: {
+    [id: string]: number[][][];
+  };
+  bounds?: {
+    [id: string]: Btwx.Frame;
+  };
+  rotation?: {
+    [id: string]: number;
+  };
 }
 
 export interface SetLinesFromX {
@@ -4028,8 +3973,7 @@ export interface SetLineFromYPayload {
   id: string;
   y: number;
   setEdit?: boolean;
-  pathData?: string;
-  shapeIcon?: string;
+  segments?: number[][][];
   bounds?: Btwx.Frame;
   rotation?: number;
 }
@@ -4043,10 +3987,15 @@ export interface SetLinesFromYPayload {
   layers: string[];
   y: number;
   setEdit?: boolean;
-  pathData?: string[];
-  shapeIcon?: string[];
-  bounds?: Btwx.Frame[];
-  rotation?: number[];
+  segments?: {
+    [id: string]: number[][][];
+  };
+  bounds?: {
+    [id: string]: Btwx.Frame;
+  };
+  rotation?: {
+    [id: string]: number;
+  };
 }
 
 export interface SetLinesFromY {
@@ -4056,10 +4005,9 @@ export interface SetLinesFromY {
 
 export interface SetLineFromPayload {
   id: string;
-  x: number;
-  y: number;
-  pathData?: string;
-  shapeIcon?: string;
+  x?: number;
+  y?: number;
+  segments?: number[][][];
   bounds?: Btwx.Frame;
   rotation?: number;
 }
@@ -4073,8 +4021,7 @@ export interface SetLineToXPayload {
   id: string;
   x: number;
   setEdit?: boolean;
-  pathData?: string;
-  shapeIcon?: string;
+  segments?: number[][][];
   bounds?: Btwx.Frame;
   rotation?: number;
 }
@@ -4088,10 +4035,15 @@ export interface SetLinesToXPayload {
   layers: string[];
   x: number;
   setEdit?: boolean;
-  pathData?: string[];
-  shapeIcon?: string[];
-  bounds?: Btwx.Frame[];
-  rotation?: number[];
+  segments?: {
+    [id: string]: number[][][];
+  };
+  bounds?: {
+    [id: string]: Btwx.Frame;
+  };
+  rotation?: {
+    [id: string]: number;
+  };
 }
 
 export interface SetLinesToX {
@@ -4103,8 +4055,7 @@ export interface SetLineToYPayload {
   id: string;
   y: number;
   setEdit?: boolean;
-  pathData?: string;
-  shapeIcon?: string;
+  segments?: number[][][];
   bounds?: Btwx.Frame;
   rotation?: number;
 }
@@ -4118,10 +4069,15 @@ export interface SetLinesToYPayload {
   layers: string[];
   y: number;
   setEdit?: boolean;
-  pathData?: string[];
-  shapeIcon?: string[];
-  bounds?: Btwx.Frame[];
-  rotation?: number[];
+  segments?: {
+    [id: string]: number[][][];
+  };
+  bounds?: {
+    [id: string]: Btwx.Frame;
+  };
+  rotation?: {
+    [id: string]: number;
+  };
 }
 
 export interface SetLinesToY {
@@ -4131,10 +4087,9 @@ export interface SetLinesToY {
 
 export interface SetLineToPayload {
   id: string;
-  x: number;
-  y: number;
-  pathData?: string;
-  shapeIcon?: string;
+  x?: number;
+  y?: number;
+  segments?: number[][][];
   bounds?: Btwx.Frame;
   rotation?: number;
 }

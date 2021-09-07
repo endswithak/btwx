@@ -3614,7 +3614,7 @@ export const getLayerDescendants = (state: LayerState, layer: string, includeGro
         if (includeGroups) {
           layers.push(child);
         } else {
-          if (childLayer.type !== 'Group') {
+          if (childLayer.type !== 'Group' || childLayer.type !== 'CompoundShape') {
             layers.push(child);
           }
         }

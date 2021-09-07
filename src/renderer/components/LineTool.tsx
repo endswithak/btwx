@@ -140,17 +140,13 @@ const LineTool = (props: PaperToolProps): ReactElement => {
         switch(handle) {
           case 'lineFrom': {
             dispatch(setLineFromThunk({
-              id: selected[0],
-              x: toBounds.center.x,
-              y: toBounds.center.y
+              id: selected[0]
             }));
             break;
           }
           case 'lineTo': {
             dispatch(setLineToThunk({
-              id: selected[0],
-              x: toBounds.center.x,
-              y: toBounds.center.y
+              id: selected[0]
             }));
             break;
           }

@@ -376,3 +376,58 @@ export const getPathItemSegments = (pathItem: paper.PathItem): paper.Segment[] =
     return (pathItem as paper.Path).segments;
   }
 }
+
+export const getRawPathItemSegments = (pathItem: paper.PathItem): number[][][] =>
+  getPathItemSegments(pathItem).map((seg) => paperSegToRawSeg(seg));
+
+export const getShapePath = (shape: paper.Group): paper.Path => {
+  const maskGroup = shape.getItem({
+    data: { id: 'maskGroup' },
+    recursive: false
+  }) as paper.Group;
+  const maskedLayers = maskGroup && maskGroup.getItem({
+    data: { id: 'maskedLayers' },
+    recursive: false
+  }) as paper.Group;
+  return maskGroup
+  ? maskedLayers && maskedLayers.getItem({
+      data: { id: 'shapePath' },
+      recursive: false
+    }) as paper.Path
+  : shape && shape.getItem({
+      data: { id: 'shapePath' },
+      recursive: false
+    }) as paper.Path;
+}
+
+export const getCompoundShapePath = (compoundShape: paper.Group): paper.CompoundPath => {
+  const maskGroup = compoundShape.getItem({
+    data: { id: 'maskGroup' },
+    recursive: false
+  }) as paper.Group;
+  const maskedLayers = maskGroup && maskGroup.getItem({
+    data: { id: 'maskedLayers' },
+    recursive: false
+  }) as paper.Group;
+  return maskGroup
+  ? maskedLayers && maskedLayers.getItem({
+      data: { id: 'compoundShapePath' },
+      recursive: false
+    }) as paper.Path
+  : compoundShape && compoundShape.getItem({
+      data: { id: 'compoundShapePath' },
+      recursive: false
+    }) as paper.Path;
+}
+
+export const getShapeItemPathItem = (shapeItem: paper.Group): paper.PathItem => {
+  switch(shapeItem.data.type) {
+    case 'CompoundShape':
+      return getCompoundShapePath(shapeItem);
+    case 'Shape':
+      return getShapePath(shapeItem);
+  }
+}
+
+export const getShapeItemRawPathSegments = (shapeItem: paper.Group): number[][][] =>
+  getRawPathItemSegments(getShapeItemPathItem(shapeItem))

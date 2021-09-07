@@ -64,6 +64,13 @@ contextBridge.exposeInMainWorld('api', {
       });
     });
   },
+  openBoolContextMenu: (params) => {
+    return new Promise((resolve, reject) => {
+      ipcRenderer.invoke('openBoolContextMenu', params).then(() => {
+        resolve(null);
+      });
+    });
+  },
   openEventContextMenu: (params) => {
     ipcRenderer.send('openEventContextMenu', params);
   },

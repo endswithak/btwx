@@ -736,6 +736,7 @@ export interface LayerState {
   allIds: string[];
   allArtboardIds: string[];
   allShapeIds: string[];
+  allCompoundShapeIds: string[];
   allGroupIds: string[];
   allTextIds: string[];
   allImageIds: string[];
@@ -794,6 +795,7 @@ export const initialState: LayerState = {
   allIds: ['root'],
   allArtboardIds: [],
   allShapeIds: [],
+  allCompoundShapeIds: [],
   allGroupIds: [],
   allTextIds: [],
   allImageIds: [],

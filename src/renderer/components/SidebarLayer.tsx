@@ -43,6 +43,10 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
   const isHover = useSelector((state: RootState) => id === state.layer.present.hover);
   const groupedEventTweens = useSelector((state: RootState) => isGroup && (state.layer.present.byId[id] as Btwx.Group).groupEventTweens);
   const hasChildren = useSelector((state: RootState) => (isArtboard || isGroup || isCompoundShape) && (state.layer.present.byId[id] as Btwx.Artboard | Btwx.Group | Btwx.CompoundShape).children.length > 0);
+  const parentCompoundShape = useSelector((state: RootState) => state.layer.present.byId[id] && state.layer.present.byId[state.layer.present.byId[id].parent] && state.layer.present.byId[state.layer.present.byId[id].parent].type === 'CompoundShape');
+  const hasSiblings = useSelector((state: RootState) => parentCompoundShape && (state.layer.present.byId[state.layer.present.byId[id].parent] as Btwx.CompoundShape).children.length > 1);
+  const oldestSibling = useSelector((state: RootState) => hasSiblings && (state.layer.present.byId[state.layer.present.byId[id].parent] as Btwx.CompoundShape).children[0] === id);
+  const canBool = parentCompoundShape && hasSiblings && !oldestSibling
   // const hover = useSelector((state: RootState) => state.layer.present.hover);
   // const underlyingMask = useSelector((state: RootState) => state.layer.present.byId[id].type !== 'Artboard' ? (state.layer.present.byId[id] as Btwx.MaskableLayer).underlyingMask : null);
   const editing = useSelector((state: RootState) => state.leftSidebar.editing);
@@ -213,7 +217,7 @@ const SidebarLayer = (props: SidebarLayerProps): ReactElement => {
         : null
       } */}
       {
-        isShape || isCompoundShape
+        canBool
         ? <SidebarLayerBoolButton
             id={id}
             isDragGhost={isDragGhost} />

@@ -21,7 +21,7 @@ import {
   getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle,
   getLayerMasked, getLayerUnderlyingMask
 } from '../utils/actions';
-import { bufferToBase64, rawPointToPaperPoint } from '../../utils';
+import { bufferToBase64, rawPointToPaperPoint, getShapeItemRawPathSegments, getShapeItemPathItem } from '../../utils';
 // import { addDocumentImage, removeDocumentImage, removeDocumentImages } from './documentSettings';
 import { addSessionImage } from './session';
 import { setEventDrawerEventThunk } from './eventDrawer';
@@ -2261,6 +2261,35 @@ export const setLayersX = (payload: SetLayersXPayload): LayerTypes => ({
   payload
 });
 
+export const setLayersXThunk = (payload: SetLayersXPayload) => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    let segments: { [id: string]: number[][][] } = {};
+    payload.layers.forEach((id) => {
+      const layerItem = state.layer.present.byId[id];
+      const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
+      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
+      const clone = paperLayer.clone({insert: false}) as paper.Item;
+      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
+      if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') {
+        clone.position.x = artboardPosition.x + payload.x;
+        if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') {
+          segments = {
+            ...segments,
+            [id]: getShapeItemRawPathSegments(clone as paper.Group)
+          }
+        }
+      }
+    });
+    dispatch(
+      setLayersX({
+        ...payload,
+        segments
+      })
+    )
+  }
+};
+
 export const setLayerY = (payload: SetLayerYPayload): LayerTypes => ({
   type: SET_LAYER_Y,
   payload
@@ -2270,6 +2299,35 @@ export const setLayersY = (payload: SetLayersYPayload): LayerTypes => ({
   type: SET_LAYERS_Y,
   payload
 });
+
+export const setLayersYThunk = (payload: SetLayersYPayload) => {
+  return (dispatch: any, getState: any) => {
+    const state = getState() as RootState;
+    let segments: { [id: string]: number[][][] } = {};
+    payload.layers.forEach((id) => {
+      const layerItem = state.layer.present.byId[id];
+      const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
+      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
+      const clone = paperLayer.clone({insert: false}) as paper.Item;
+      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
+      if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') {
+        clone.position.y = artboardPosition.y + payload.y;
+        if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') {
+          segments = {
+            ...segments,
+            [id]: getShapeItemRawPathSegments(clone as paper.Group)
+          }
+        }
+      }
+    });
+    dispatch(
+      setLayersY({
+        ...payload,
+        segments
+      })
+    )
+  }
+};
 
 export const setLayerLeft = (payload: SetLayerLeftPayload): LayerTypes => ({
   type: SET_LAYER_LEFT,
@@ -2344,22 +2402,18 @@ export const setLayersWidth = (payload: SetLayersWidthPayload): LayerTypes => ({
 export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
-    let pathData: { [id: string]: string } = {};
-    // let shapeIcon: { [id: string]: string } = {};
+    let segments: { [id: string]: number[][][] } = {};
     let bounds: { [id: string]: Btwx.Frame } = {};
     let paragraphs: { [id: string]: string[][] } = {};
     let lines: { [id: string]: Btwx.TextLine[] } = {};
     let textResize: { [id: string]: Btwx.TextResize } = {};
-    let from: { [id: string]: Btwx.Point } = {};
-    let to: { [id: string]: Btwx.Point } = {};
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
       const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
       const clone = paperLayer.clone({insert: false}) as paper.Item;
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
-      if (layerItem.type === 'Shape' || layerItem.type === 'Image') {
-        const startPosition = clone.position;
+      if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape' || layerItem.type === 'Image') {
         clearLayerTransforms({
           layerType: layerItem.type,
           paperLayer: clone,
@@ -2370,33 +2424,10 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
           paperLayer: clone,
           transform: layerItem.transform
         });
-        if (layerItem.type === 'Shape') {
-          pathData = {
-            ...pathData,
-            [id]: (clone as paper.CompoundPath).pathData
-          }
-          // shapeIcon = {
-          //   ...shapeIcon,
-          //   [id]: getShapeIcon((clone as paper.CompoundPath).pathData)
-          // }
-          if ((layerItem as Btwx.Shape).shapeType === 'Line') {
-            clone.position = startPosition;
-            const fromPoint = (clone as paper.Path).firstSegment.point.subtract(artboardPosition);
-            const toPoint = (clone as paper.Path).lastSegment.point.subtract(artboardPosition);
-            from = {
-              ...from,
-              [id]: {
-                x: fromPoint.x,
-                y: fromPoint.y
-              }
-            }
-            to = {
-              ...to,
-              [id]: {
-                x: toPoint.x,
-                y: toPoint.y
-              }
-            }
+        if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') {
+          segments = {
+            ...segments,
+            [id]: getShapeItemRawPathSegments(clone as paper.Group)
           }
         }
         bounds = {
@@ -2497,14 +2528,11 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
     dispatch(
       setLayersWidth({
         ...payload,
-        pathData,
-        // shapeIcon,
+        segments,
         bounds,
         paragraphs,
         lines,
-        textResize,
-        from,
-        to
+        textResize
       })
     )
   }
@@ -2523,21 +2551,18 @@ export const setLayersHeight = (payload: SetLayersHeightPayload): LayerTypes => 
 export const setLayersHeightThunk = (payload: SetLayersHeightPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
-    let pathData: { [id: string]: string } = {};
-    // let shapeIcon: { [id: string]: string } = {};
+    let segments: { [id: string]: number[][][] } = {};
     let bounds: { [id: string]: Btwx.Frame } = {};
     let paragraphs: { [id: string]: string[][] } = {};
     let lines: { [id: string]: Btwx.TextLine[] } = {};
     let textResize: { [id: string]: Btwx.TextResize } = {};
-    let from: { [id: string]: Btwx.Point } = {};
-    let to: { [id: string]: Btwx.Point } = {};
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
       const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
       const clone = paperLayer.clone({insert: false});
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
-      if (layerItem.type === 'Shape' || layerItem.type === 'Image') {
+      if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape' || layerItem.type === 'Image') {
         clearLayerTransforms({
           layerType: layerItem.type,
           paperLayer: clone,
@@ -2548,32 +2573,10 @@ export const setLayersHeightThunk = (payload: SetLayersHeightPayload) => {
           paperLayer: clone,
           transform: layerItem.transform
         });
-        if (layerItem.type === 'Shape') {
-          pathData = {
-            ...pathData,
-            [id]: (clone as paper.CompoundPath).pathData
-          }
-          // shapeIcon = {
-          //   ...shapeIcon,
-          //   [id]: getShapeIcon((clone as paper.CompoundPath).pathData)
-          // }
-          if ((layerItem as Btwx.Shape).shapeType === 'Line') {
-            const fromPoint = (clone as paper.Path).firstSegment.point.subtract(artboardPosition);
-            const toPoint = (clone as paper.Path).lastSegment.point.subtract(artboardPosition);
-            from = {
-              ...from,
-              [id]: {
-                x: fromPoint.x,
-                y: fromPoint.y
-              }
-            }
-            to = {
-              ...to,
-              [id]: {
-                x: toPoint.x,
-                y: toPoint.y
-              }
-            }
+        if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') {
+          segments = {
+            ...segments,
+            [id]: getShapeItemRawPathSegments(clone as paper.Group)
           }
         }
         bounds = {
@@ -2646,13 +2649,10 @@ export const setLayersHeightThunk = (payload: SetLayersHeightPayload) => {
     dispatch(
       setLayersHeight({
         ...payload,
-        pathData,
-        // shapeIcon,
+        segments,
         bounds,
         lines,
-        textResize,
-        from,
-        to
+        textResize
       })
     )
   }
@@ -2814,11 +2814,8 @@ export const setLayersRotationThunk = (payload: SetLayersRotationPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     let bounds: { [id: string]: Btwx.Frame; } = {};
-    let pathData: { [id: string]: string; } = {};
-    // let shapeIcon: { [id: string]: string; } = {};
+    let segments: { [id: string]: number[][][] } = {};
     let point: { [id: string]: Btwx.Point; } = {};
-    let to: { [id: string]: Btwx.Point; } = {};
-    let from: { [id: string]: Btwx.Point; } = {};
     let fillGradientOrigin: { [id: string]: Btwx.Point; } = {};
     let fillGradientDestination: { [id: string]: Btwx.Point; } = {};
     let strokeGradientOrigin: { [id: string]: Btwx.Point; } = {};
@@ -2838,7 +2835,7 @@ export const setLayersRotationThunk = (payload: SetLayersRotationPayload) => {
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
       const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data:{id}});
-      const clone = paperLayer.clone({insert: false}) as paper.CompoundPath;
+      const clone = paperLayer.clone({insert: false}) as paper.Group;
       clearLayerTransforms({
         layerType: layerItem.type,
         paperLayer: clone,
@@ -2854,7 +2851,8 @@ export const setLayersRotationThunk = (payload: SetLayersRotationPayload) => {
       let fillRef = null;
       switch(layerItem.type) {
         case 'Shape':
-          fillRef = clone;
+        case 'CompoundShape':
+          fillRef = getShapeItemPathItem(clone as paper.Group);
           break;
         case 'Text':
           fillRef = clone.getItem({data:{id:'textContent'}});
@@ -2880,32 +2878,10 @@ export const setLayersRotationThunk = (payload: SetLayersRotationPayload) => {
           [id]: fillRef.strokeColor.destination
         }
       }
-      if (layerItem.type === 'Shape') {
-        pathData = {
-          ...pathData,
-          [id]: (clone as paper.CompoundPath).pathData
-        }
-        // shapeIcon = {
-        //   ...shapeIcon,
-        //   [id]: getShapeIcon((clone as paper.CompoundPath).pathData)
-        // }
-        if ((layerItem as Btwx.Shape).shapeType === 'Line') {
-          const fromPoint = (clone as paper.Path).firstSegment.point.subtract(artboardPosition);
-          const toPoint = (clone as paper.Path).lastSegment.point.subtract(artboardPosition);
-          from = {
-            ...from,
-            [id]: {
-              x: fromPoint.x,
-              y: fromPoint.y
-            }
-          }
-          to = {
-            ...to,
-            [id]: {
-              x: toPoint.x,
-              y: toPoint.y
-            }
-          }
+      if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') {
+        segments = {
+          ...segments,
+          [id]: getShapeItemRawPathSegments(clone as paper.Group)
         }
       }
       if (layerItem.type === 'Text') {
@@ -2933,15 +2909,12 @@ export const setLayersRotationThunk = (payload: SetLayersRotationPayload) => {
         ...payload,
         layers: allLayers,
         bounds,
-        pathData,
-        // shapeIcon,
+        segments,
         fillGradientOrigin,
         fillGradientDestination,
         strokeGradientOrigin,
         strokeGradientDestination,
-        point,
-        from,
-        to
+        point
       })
     )
   }
@@ -3011,11 +2984,8 @@ export const setLayersHorizontalFlipThunk = (payload: (EnableLayersHorizontalFli
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
     const compiledLayers = [];
-    let from = {} as { [id: string]: Btwx.Point };
-    let to = {} as { [id: string]: Btwx.Point };
     let point = {} as { [id: string]: Btwx.Point };
-    let pathData = {} as { [id: string]: string };
-    // let shapeIcon = {} as { [id: string]: string };
+    let segments: { [id: string]: number[][][] } = {};
     const handleLayers = (layers: string[]) => {
       layers.forEach((id) => {
         compiledLayers.push(id);
@@ -3024,33 +2994,12 @@ export const setLayersHorizontalFlipThunk = (payload: (EnableLayersHorizontalFli
         const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
         const projectIndex = artboardItem.projectIndex;
         const paperLayer = paperMain.projects[projectIndex].getItem({ data: { id } });
-        const duplicate = paperLayer.clone({insert: false});
-        duplicate.scale(-1, 1);
-        if (layerItem.type === 'Shape') {
-          pathData = {
-            ...pathData,
-            [id]: (duplicate as paper.CompoundPath).pathData
-          }
-          // shapeIcon = {
-          //   ...shapeIcon,
-          //   [id]: getShapeIcon((duplicate as paper.CompoundPath).pathData)
-          // }
-          if ((layerItem as Btwx.Shape).shapeType === 'Line') {
-            const fromPoint = (duplicate as paper.Path).firstSegment.point.subtract(artboardPosition);
-            const toPoint = (duplicate as paper.Path).lastSegment.point.subtract(artboardPosition);
-            // const vector = toPoint.subtract(fromPoint).round();
-            from = {
-              ...from,
-              [id]: {
-                x: fromPoint.x
-              } as Btwx.Point
-            }
-            to = {
-              ...to,
-              [id]: {
-                x: toPoint.x
-              } as Btwx.Point
-            }
+        const clone = paperLayer.clone({insert: false});
+        clone.scale(-1, 1);
+        if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') {
+          segments = {
+            ...segments,
+            [id]: getShapeItemRawPathSegments(clone as paper.Group)
           }
         }
         if (layerItem.type === 'Text') {
@@ -3073,19 +3022,13 @@ export const setLayersHorizontalFlipThunk = (payload: (EnableLayersHorizontalFli
     if (payload.enabled) {
       dispatch(enableLayersHorizontalFlip({
         layers: compiledLayers,
-        pathData,
-        // shapeIcon,
-        from,
-        to,
+        segments,
         point
       }));
     } else {
       dispatch(disableLayersHorizontalFlip({
         layers: compiledLayers,
-        pathData,
-        // shapeIcon,
-        from,
-        to,
+        segments,
         point
       }));
     }
@@ -3146,8 +3089,7 @@ export const setLayersVerticalFlipThunk = (payload: (EnableLayersVerticalFlipPay
     let from = {} as { [id: string]: Btwx.Point };
     let to = {} as { [id: string]: Btwx.Point };
     let point = {} as { [id: string]: Btwx.Point };
-    let pathData = {} as { [id: string]: string };
-    // let shapeIcon = {} as { [id: string]: string };
+    let segments: { [id: string]: number[][][] } = {};
     const handleLayers = (layers: string[]) => {
       layers.forEach((id) => {
         compiledLayers.push(id);
@@ -3156,33 +3098,12 @@ export const setLayersVerticalFlipThunk = (payload: (EnableLayersVerticalFlipPay
         const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
         const projectIndex = artboardItem.projectIndex;
         const paperLayer = paperMain.projects[projectIndex].getItem({ data: { id } });
-        const duplicate = paperLayer.clone({insert: false});
-        duplicate.scale(1, -1);
-        if (layerItem.type === 'Shape') {
-          pathData = {
-            ...pathData,
-            [id]: (duplicate as paper.CompoundPath).pathData
-          }
-          // shapeIcon = {
-          //   ...shapeIcon,
-          //   [id]: getShapeIcon((duplicate as paper.CompoundPath).pathData)
-          // }
-          if ((layerItem as Btwx.Shape).shapeType === 'Line') {
-            const fromPoint = (duplicate as paper.Path).firstSegment.point.subtract(artboardPosition);
-            const toPoint = (duplicate as paper.Path).lastSegment.point.subtract(artboardPosition);
-            // const vector = toPoint.subtract(fromPoint).round();
-            from = {
-              ...from,
-              [id]: {
-                y: fromPoint.y
-              } as Btwx.Point
-            }
-            to = {
-              ...to,
-              [id]: {
-                y: toPoint.y
-              } as Btwx.Point
-            }
+        const clone = paperLayer.clone({insert: false});
+        clone.scale(1, -1);
+        if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') {
+          segments = {
+            ...segments,
+            [id]: getShapeItemRawPathSegments(clone as paper.Group)
           }
         }
         if (layerItem.type === 'Text') {
@@ -3205,19 +3126,13 @@ export const setLayersVerticalFlipThunk = (payload: (EnableLayersVerticalFlipPay
     if (payload.enabled) {
       dispatch(enableLayersVerticalFlip({
         layers: compiledLayers,
-        pathData,
-        // shapeIcon,
-        from,
-        to,
+        segments,
         point
       }));
     } else {
       dispatch(disableLayersVerticalFlip({
         layers: compiledLayers,
-        pathData,
-        // shapeIcon,
-        from,
-        to,
+        segments,
         point
       }));
     }
@@ -5672,15 +5587,14 @@ export const setRoundedRadii = (payload: SetRoundedRadiiPayload): LayerTypes => 
 export const setRoundedRadiiThunk = (payload: SetRoundedRadiiPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
-    const pathData: string[] = [];
-    // const shapeIcon: string[] = [];
-    const bounds: Btwx.Frame[] = [];
+    let segments: { [id: string]: number[][][] } = {};
+    let bounds: { [id: string]: Btwx.Frame } = {};
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
       const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data:{id}});
-      const clone = paperLayer.clone({insert: false}) as paper.CompoundPath;
-      const paperLayerPath = clone.children[0] as paper.Path;
+      const clone = paperLayer.clone({insert: false}) as paper.Group;
+      const paperLayerPath = getShapeItemPathItem(clone);
       clearLayerTransforms({
         layerType: layerItem.type,
         paperLayer: clone,
@@ -5698,19 +5612,23 @@ export const setRoundedRadiiThunk = (payload: SetRoundedRadiiPayload) => {
         transform: layerItem.transform
       });
       paperLayerPath.pathData = newShape.pathData;
-      pathData.push(clone.pathData);
-      // shapeIcon.push(getShapeIcon(clone.pathData));
-      bounds.push({
-        ...layerItem.frame,
-        width: clone.bounds.width,
-        height: clone.bounds.height
-      });
+      segments = {
+        ...segments,
+        [id]: getShapeItemRawPathSegments(clone as paper.Group)
+      }
+      bounds = {
+        ...bounds,
+        [id]: {
+          ...layerItem.frame,
+          width: clone.bounds.width,
+          height: clone.bounds.height
+        }
+      }
     });
     dispatch(
       setRoundedRadii({
         ...payload,
-        pathData,
-        // shapeIcon,
+        segments,
         bounds
       })
     )
@@ -5730,15 +5648,14 @@ export const setPolygonsSides = (payload: SetPolygonsSidesPayload): LayerTypes =
 export const setPolygonsSidesThunk = (payload: SetPolygonsSidesPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
-    const pathData: string[] = [];
-    // const shapeIcon: string[] = [];
-    const bounds: Btwx.Frame[] = [];
+    let segments: { [id: string]: number[][][] } = {};
+    let bounds: { [id: string]: Btwx.Frame } = {};
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
       const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data:{id}});
-      const clone = paperLayer.clone({insert: false}) as paper.CompoundPath;
-      const paperLayerPath = clone.children[0] as paper.Path;
+      const clone = paperLayer.clone({insert: false}) as paper.Group;
+      const paperLayerPath = getShapeItemPathItem(clone);
       const startPosition = paperLayerPath.position;
       clearLayerTransforms({
         layerType: layerItem.type,
@@ -5759,19 +5676,23 @@ export const setPolygonsSidesThunk = (payload: SetPolygonsSidesPayload) => {
       });
       newShape.position = startPosition;
       paperLayerPath.pathData = newShape.pathData;
-      pathData.push(clone.pathData);
-      // shapeIcon.push(getShapeIcon(clone.pathData));
-      bounds.push({
-        ...layerItem.frame,
-        width: clone.bounds.width,
-        height: clone.bounds.height
-      });
+      segments = {
+        ...segments,
+        [id]: getShapeItemRawPathSegments(clone as paper.Group)
+      }
+      bounds = {
+        ...bounds,
+        [id]: {
+          ...layerItem.frame,
+          width: clone.bounds.width,
+          height: clone.bounds.height
+        }
+      }
     });
     dispatch(
       setPolygonsSides({
         ...payload,
-        pathData,
-        // shapeIcon,
+        segments,
         bounds
       })
     )
@@ -5791,15 +5712,14 @@ export const setStarsPoints = (payload: SetStarsPointsPayload): LayerTypes => ({
 export const setStarsPointsThunk = (payload: SetStarsPointsPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
-    const pathData: string[] = [];
-    // const shapeIcon: string[] = [];
-    const bounds: Btwx.Frame[] = [];
+    let segments: { [id: string]: number[][][] } = {};
+    let bounds: { [id: string]: Btwx.Frame } = {};
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
       const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data:{id}});
-      const clone = paperLayer.clone({insert: false}) as paper.CompoundPath;
-      const paperLayerPath = clone.children[0] as paper.Path;
+      const clone = paperLayer.clone({insert: false}) as paper.Group;
+      const paperLayerPath = getShapeItemPathItem(clone);
       const startPosition = paperLayerPath.position;
       clearLayerTransforms({
         layerType: layerItem.type,
@@ -5822,19 +5742,23 @@ export const setStarsPointsThunk = (payload: SetStarsPointsPayload) => {
       });
       newShape.position = startPosition;
       paperLayerPath.pathData = newShape.pathData;
-      pathData.push(clone.pathData);
-      // shapeIcon.push(getShapeIcon(clone.pathData));
-      bounds.push({
-        ...layerItem.frame,
-        width: clone.bounds.width,
-        height: clone.bounds.height
-      });
+      segments = {
+        ...segments,
+        [id]: getShapeItemRawPathSegments(clone as paper.Group)
+      }
+      bounds = {
+        ...bounds,
+        [id]: {
+          ...layerItem.frame,
+          width: clone.bounds.width,
+          height: clone.bounds.height
+        }
+      }
     });
     dispatch(
       setStarsPoints({
         ...payload,
-        pathData,
-        // shapeIcon,
+        segments,
         bounds
       })
     )
@@ -5854,15 +5778,14 @@ export const setStarsRadius = (payload: SetStarsRadiusPayload): LayerTypes => ({
 export const setStarsRadiusThunk = (payload: SetStarsRadiusPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
-    const pathData: string[] = [];
-    // const shapeIcon: string[] = [];
-    const bounds: Btwx.Frame[] = [];
+    let segments: { [id: string]: number[][][] } = {};
+    let bounds: { [id: string]: Btwx.Frame } = {};
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
       const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data:{id}});
-      const clone = paperLayer.clone({insert: false}) as paper.CompoundPath;
-      const paperLayerPath = clone.children[0] as paper.Path;
+      const clone = paperLayer.clone({insert: false}) as paper.Group;
+      const paperLayerPath = getShapeItemPathItem(clone);
       const startPosition = paperLayerPath.position;
       clearLayerTransforms({
         layerType: layerItem.type,
@@ -5885,19 +5808,23 @@ export const setStarsRadiusThunk = (payload: SetStarsRadiusPayload) => {
       });
       newShape.position = startPosition;
       paperLayerPath.pathData = newShape.pathData;
-      pathData.push(clone.pathData);
-      // shapeIcon.push(getShapeIcon(clone.pathData));
-      bounds.push({
-        ...layerItem.frame,
-        width: clone.bounds.width,
-        height: clone.bounds.height
-      });
+      segments = {
+        ...segments,
+        [id]: getShapeItemRawPathSegments(clone as paper.Group)
+      }
+      bounds = {
+        ...bounds,
+        [id]: {
+          ...layerItem.frame,
+          width: clone.bounds.width,
+          height: clone.bounds.height
+        }
+      }
     });
     dispatch(
       setStarsRadius({
         ...payload,
-        pathData,
-        // shapeIcon,
+        segments,
         bounds
       })
     )
@@ -5917,39 +5844,43 @@ export const setLinesFromX = (payload: SetLinesFromXPayload): LayerTypes => ({
 export const setLinesFromXThunk = (payload: SetLinesFromXPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
-    const pathData: string[] = [];
-    // const shapeIcon: string[] = [];
-    const bounds: Btwx.Frame[] = [];
-    const rotation: number[] = [];
+    let segments: { [id: string]: number[][][] } = {};
+    let bounds: { [id: string]: Btwx.Frame } = {};
+    let rotation: { [id: string]: number } = {};
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
       const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
-      const clone = paperLayer.clone({insert: false}) as paper.Path;
-      const paperFromX = artboardItem.frame.x + payload.x;
-      clone.firstSegment.point.x = paperFromX;
-      const fromPoint = clone.firstSegment.point.round();
-      const toPoint = clone.lastSegment.point.round();
-      const vector = toPoint.subtract(fromPoint).round();
+      const clone = paperLayer.clone({insert: false}) as paper.Group;
+      const path = getShapeItemPathItem(clone as paper.Group) as paper.Path;
+      path.segments[0].point.x = artboardItem.frame.x + payload.x;
+      const vector = path.segments[1].point.subtract(path.segments[0].point).round();
       const positionInArtboard = clone.position.subtract(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y)).round();
-      rotation.push(vector.angle);
-      pathData.push(clone.pathData);
-      // shapeIcon.push(getShapeIcon(clone.pathData));
-      bounds.push({
-        ...layerItem.frame,
-        x: positionInArtboard.x,
-        y: positionInArtboard.y,
-        innerWidth: Math.round(vector.length),
-        innerHeight: 0,
-        width: clone.bounds.width,
-        height: clone.bounds.height
-      });
+      rotation = {
+        ...rotation,
+        [id]: vector.angle
+      }
+      segments = {
+        ...segments,
+        [id]: getShapeItemRawPathSegments(clone as paper.Group)
+      }
+      bounds = {
+        ...bounds,
+        [id]: {
+          ...layerItem.frame,
+          x: positionInArtboard.x,
+          y: positionInArtboard.y,
+          innerWidth: Math.round(vector.length),
+          innerHeight: 0,
+          width: clone.bounds.width,
+          height: clone.bounds.height
+        }
+      }
     });
     dispatch(
       setLinesFromX({
         ...payload,
-        pathData,
-        // shapeIcon,
+        segments,
         bounds,
         rotation
       })
@@ -5970,39 +5901,43 @@ export const setLinesFromY = (payload: SetLinesFromYPayload): LayerTypes => ({
 export const setLinesFromYThunk = (payload: SetLinesFromYPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
-    const pathData: string[] = [];
-    // const shapeIcon: string[] = [];
-    const bounds: Btwx.Frame[] = [];
-    const rotation: number[] = [];
+    let segments: { [id: string]: number[][][] } = {};
+    let bounds: { [id: string]: Btwx.Frame } = {};
+    let rotation: { [id: string]: number } = {};
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
       const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
-      const clone = paperLayer.clone({insert: false}) as paper.Path;
-      const paperFromY = artboardItem.frame.y + payload.y;
-      clone.firstSegment.point.y = paperFromY;
-      const fromPoint = clone.firstSegment.point.round();
-      const toPoint = clone.lastSegment.point.round();
-      const vector = toPoint.subtract(fromPoint).round();
+      const clone = paperLayer.clone({insert: false}) as paper.Group;
+      const path = getShapeItemPathItem(clone as paper.Group) as paper.Path;
+      path.segments[0].point.y = artboardItem.frame.y + payload.y;
+      const vector = path.segments[1].point.subtract(path.segments[0].point).round();
       const positionInArtboard = clone.position.subtract(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y)).round();
-      rotation.push(vector.angle);
-      pathData.push(clone.pathData);
-      // shapeIcon.push(getShapeIcon(clone.pathData));
-      bounds.push({
-        ...layerItem.frame,
-        x: positionInArtboard.x,
-        y: positionInArtboard.y,
-        innerWidth: Math.round(vector.length),
-        innerHeight: 0,
-        width: clone.bounds.width,
-        height: clone.bounds.height
-      });
+      rotation = {
+        ...rotation,
+        [id]: vector.angle
+      }
+      segments = {
+        ...segments,
+        [id]: getShapeItemRawPathSegments(clone as paper.Group)
+      }
+      bounds = {
+        ...bounds,
+        [id]: {
+          ...layerItem.frame,
+          x: positionInArtboard.x,
+          y: positionInArtboard.y,
+          innerWidth: Math.round(vector.length),
+          innerHeight: 0,
+          width: clone.bounds.width,
+          height: clone.bounds.height
+        }
+      }
     });
     dispatch(
       setLinesFromY({
         ...payload,
-        pathData,
-        // shapeIcon,
+        segments,
         bounds,
         rotation
       })
@@ -6020,17 +5955,12 @@ export const setLineFromThunk = (payload: SetLineFromPayload) => {
     const state = getState() as RootState;
     const layerItem = state.layer.present.byId[payload.id];
     const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
-    const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id: payload.id}}) as paper.CompoundPath;
+    const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id: payload.id}}) as paper.Group;
+    const path = getShapeItemPathItem(paperLayer as paper.Group) as paper.Path;
     const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
-    const from = new paperMain.Point(payload.x, payload.y);
-    const relFrom = from.subtract(artboardPosition).round();
-    const fromPoint = paperLayer.firstSegment.point.round();
-    const toPoint = paperLayer.lastSegment.point.round();
-    const vector = toPoint.subtract(fromPoint).round();
     const positionInArtboard = paperLayer.position.subtract(artboardPosition).round();
+    const vector = path.segments[0].point.subtract(path.segments[1].point).round();
     const rotation = vector.angle;
-    const pathData = paperLayer.pathData;
-    // const shapeIcon = getShapeIcon(paperLayer.pathData);
     const bounds = {
       ...layerItem.frame,
       x: positionInArtboard.x,
@@ -6043,10 +5973,7 @@ export const setLineFromThunk = (payload: SetLineFromPayload) => {
     dispatch(
       setLineFrom({
         ...payload,
-        x: relFrom.x,
-        y: relFrom.y,
-        pathData,
-        // shapeIcon,
+        segments: getShapeItemRawPathSegments(paperLayer as paper.Group),
         bounds,
         rotation
       })
@@ -6067,39 +5994,43 @@ export const setLinesToX = (payload: SetLinesToXPayload): LayerTypes => ({
 export const setLinesToXThunk = (payload: SetLinesToXPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
-    const pathData: string[] = [];
-    // const shapeIcon: string[] = [];
-    const bounds: Btwx.Frame[] = [];
-    const rotation: number[] = [];
+    let segments: { [id: string]: number[][][] } = {};
+    let bounds: { [id: string]: Btwx.Frame } = {};
+    let rotation: { [id: string]: number } = {};
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
       const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
-      const clone = paperLayer.clone({insert: false}) as paper.Path;
-      const paperToX = artboardItem.frame.x + payload.x;
-      clone.lastSegment.point.x = paperToX;
-      const fromPoint = clone.firstSegment.point.round();
-      const toPoint = clone.lastSegment.point.round();
-      const vector = toPoint.subtract(fromPoint).round();
+      const clone = paperLayer.clone({insert: false}) as paper.Group;
+      const path = getShapeItemPathItem(clone as paper.Group) as paper.Path;
+      path.segments[1].point.y = artboardItem.frame.x + payload.x;
+      const vector = path.segments[1].point.subtract(path.segments[0].point).round();
       const positionInArtboard = clone.position.subtract(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y)).round();
-      rotation.push(vector.angle);
-      pathData.push(clone.pathData);
-      // shapeIcon.push(getShapeIcon(clone.pathData));
-      bounds.push({
-        ...layerItem.frame,
-        x: positionInArtboard.x,
-        y: positionInArtboard.y,
-        innerWidth: Math.round(vector.length),
-        innerHeight: 0,
-        width: clone.bounds.width,
-        height: clone.bounds.height
-      });
+      rotation = {
+        ...rotation,
+        [id]: vector.angle
+      }
+      segments = {
+        ...segments,
+        [id]: getShapeItemRawPathSegments(clone as paper.Group)
+      }
+      bounds = {
+        ...bounds,
+        [id]: {
+          ...layerItem.frame,
+          x: positionInArtboard.x,
+          y: positionInArtboard.y,
+          innerWidth: Math.round(vector.length),
+          innerHeight: 0,
+          width: clone.bounds.width,
+          height: clone.bounds.height
+        }
+      }
     });
     dispatch(
       setLinesToX({
         ...payload,
-        pathData,
-        // shapeIcon,
+        segments,
         bounds,
         rotation
       })
@@ -6120,39 +6051,43 @@ export const setLinesToY = (payload: SetLinesToYPayload): LayerTypes => ({
 export const setLinesToYThunk = (payload: SetLinesToYPayload) => {
   return (dispatch: any, getState: any) => {
     const state = getState() as RootState;
-    const pathData: string[] = [];
-    // const shapeIcon: string[] = [];
-    const bounds: Btwx.Frame[] = [];
-    const rotation: number[] = [];
+    let segments: { [id: string]: number[][][] } = {};
+    let bounds: { [id: string]: Btwx.Frame } = {};
+    let rotation: { [id: string]: number } = {};
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
       const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
-      const clone = paperLayer.clone({insert: false}) as paper.Path;
-      const paperToY = artboardItem.frame.y + payload.y;
-      clone.lastSegment.point.y = paperToY;
-      const fromPoint = clone.firstSegment.point.round();
-      const toPoint = clone.lastSegment.point.round();
-      const vector = toPoint.subtract(fromPoint).round();
+      const clone = paperLayer.clone({insert: false}) as paper.Group;
+      const path = getShapeItemPathItem(clone as paper.Group) as paper.Path;
+      path.segments[1].point.y = artboardItem.frame.y + payload.y;
+      const vector = path.segments[1].point.subtract(path.segments[0].point).round();
       const positionInArtboard = clone.position.subtract(new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y)).round();
-      rotation.push(vector.angle);
-      pathData.push(clone.pathData);
-      // shapeIcon.push(getShapeIcon(clone.pathData));
-      bounds.push({
-        ...layerItem.frame,
-        x: positionInArtboard.x,
-        y: positionInArtboard.y,
-        innerWidth: Math.round(vector.length),
-        innerHeight: 0,
-        width: clone.bounds.width,
-        height: clone.bounds.height
-      });
+      rotation = {
+        ...rotation,
+        [id]: vector.angle
+      }
+      segments = {
+        ...segments,
+        [id]: getShapeItemRawPathSegments(clone as paper.Group)
+      }
+      bounds = {
+        ...bounds,
+        [id]: {
+          ...layerItem.frame,
+          x: positionInArtboard.x,
+          y: positionInArtboard.y,
+          innerWidth: Math.round(vector.length),
+          innerHeight: 0,
+          width: clone.bounds.width,
+          height: clone.bounds.height
+        }
+      }
     });
     dispatch(
       setLinesToY({
         ...payload,
-        pathData,
-        // shapeIcon,
+        segments,
         bounds,
         rotation
       })
@@ -6170,17 +6105,12 @@ export const setLineToThunk = (payload: SetLineToPayload) => {
     const state = getState() as RootState;
     const layerItem = state.layer.present.byId[payload.id];
     const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
-    const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id: payload.id}}) as paper.CompoundPath;
+    const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id: payload.id}}) as paper.Group;
+    const path = getShapeItemPathItem(paperLayer as paper.Group) as paper.Path;
     const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
-    const to = new paperMain.Point(payload.x, payload.y);
-    const relTo = to.subtract(artboardPosition).round();
-    const fromPoint = paperLayer.firstSegment.point.round();
-    const toPoint = paperLayer.lastSegment.point.round();
-    const vector = toPoint.subtract(fromPoint).round();
     const positionInArtboard = paperLayer.position.subtract(artboardPosition).round();
+    const vector = path.segments[0].point.subtract(path.segments[1].point).round();
     const rotation = vector.angle;
-    const pathData = paperLayer.pathData;
-    // const shapeIcon = getShapeIcon(paperLayer.pathData);
     const bounds = {
       ...layerItem.frame,
       x: positionInArtboard.x,
@@ -6193,10 +6123,7 @@ export const setLineToThunk = (payload: SetLineToPayload) => {
     dispatch(
       setLineTo({
         ...payload,
-        x: relTo.x,
-        y: relTo.y,
-        pathData,
-        // shapeIcon,
+        segments: getShapeItemRawPathSegments(paperLayer as paper.Group),
         bounds,
         rotation
       })

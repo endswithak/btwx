@@ -76,8 +76,10 @@ const CanvasCompoundShapeLayer = ({
   const [rendered, setRendered] = useState<boolean>(false);
   const [layerTimelines, setLayerTimelines] = useState(null);
   // triggered whenever any subpath geometry or index changes
-  // causes compoundShape to re-render itself and all subpaths
   const [boolFlag, setBoolFlag] = useState(uuidv4());
+  // triggered whenever boolFlag updates
+  // causes compoundShape to re-render itself and all subpaths
+  const [boolRenderFlag, setBoolRenderFlag] = useState(uuidv4());
   // triggerd when last subPath is rendered
   // lets compoundShape know when to apply its own bool operation if present
   // (need to apply subpath bool operations before compoundPath bool operations)
@@ -407,7 +409,7 @@ const CanvasCompoundShapeLayer = ({
     if (rendered) {
       const { compoundShapePath } = getPaperLayer();
       compoundShapePath.removeChildren();
-      console.log('boolFlag AHHHHHHHHHHHHHHHHHHHHHHHHHHHH');
+      setBoolRenderFlag(uuidv4());
     }
   }, [boolFlag]);
 
@@ -750,7 +752,7 @@ const CanvasCompoundShapeLayer = ({
           {
             layerItem.children.map((childId) => (
               <CanvasLayer
-                key={parentItem.type === 'CompoundShape' ? childId : `${childId}-${boolFlag}`}
+                key={parentItem.type === 'CompoundShape' ? childId : `${childId}-${boolRenderFlag}`}
                 id={childId}
                 paperScope={paperScope}
                 nestedSubPathFlag={parentItem.type === 'CompoundShape' ? nestedSubPathFlag : subPathFlag}
