@@ -21,7 +21,7 @@ import {
   getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle,
   getLayerMasked, getLayerUnderlyingMask
 } from '../utils/actions';
-import { bufferToBase64, rawPointToPaperPoint, getShapeItemRawPathSegments, getShapeItemPathItem } from '../../utils';
+import { bufferToBase64, rawPointToPaperPoint, getShapeItemRawPathSegments, getShapeItemPathItem, getCompoundShapeBoolPath } from '../../utils';
 // import { addDocumentImage, removeDocumentImage, removeDocumentImages } from './documentSettings';
 import { addSessionImage } from './session';
 import { setEventDrawerEventThunk } from './eventDrawer';
@@ -402,6 +402,7 @@ import {
   SET_LAYERS_BOOL,
   SET_LAYER_FILL_RULE,
   SET_LAYERS_FILL_RULE,
+  UPDATE_COMPOUND_SHAPE_FRAME,
   EnableGroupGroupEventTweensPayload,
   EnableGroupsGroupEventTweensPayload,
   DisableGroupGroupEventTweensPayload,
@@ -758,6 +759,7 @@ import {
   SetLayersBoolPayload,
   SetLayerFillRulePayload,
   SetLayersFillRulePayload,
+  UpdateCompoundShapeFramePayload,
   LayerTypes
 } from '../actionTypes/layer';
 import { LayerState } from '../reducers/layer';
@@ -1634,20 +1636,35 @@ export const boolSelectedThunk = (bool: Btwx.BooleanOperation) => {
   return (dispatch: any, getState: any): Promise<any> => {
     return new Promise((resolve, reject) => {
       const state = getState() as RootState;
-      const topItem = state.layer.present.byId[state.layer.present.selected[0]];
-      // get bounds of layers to group
-      const layersBounds = state.selectionTool.bounds;
+      const selected = state.layer.present.selected;
+      const topLayer = selected[0];
+      const topItem = state.layer.present.byId[topLayer];
+      const topItemArtboard = topItem.artboard;
+      const topItemArtboardItem = state.layer.present.byId[topItem.artboard];
+      const selectedPaperScopes = getSelectedProjectIndices(state);
+      const topLayerPaperScope = selectedPaperScopes[topLayer];
+      const booledLayers = new paperMain.CompoundPath({
+        insert: false,
+        children: [
+          getShapeItemPathItem(getPaperLayer(topLayer, topLayerPaperScope) as paper.Group).clone()
+        ]
+      });
+      for (let i = 1; i < selected.length; i++) {
+        const boolWithA = booledLayers.children[booledLayers.children.length - 1]
+        const booledOther = boolWithA[bool](getShapeItemPathItem(getPaperLayer(selected[i], selectedPaperScopes[selected[i]]) as paper.Group).clone());
+        boolWithA.replaceWith(booledOther);
+      }
       // add group
       dispatch(addCompoundShapeThunk({
         layer: {
           selected: true,
           frame: {
-            x: layersBounds[0],
-            y: layersBounds[1],
-            width: layersBounds[2],
-            height: layersBounds[3],
-            innerWidth: layersBounds[2],
-            innerHeight: layersBounds[3]
+            x: booledLayers.bounds.center.x - topItemArtboardItem.frame.x,
+            y: booledLayers.bounds.center.y - topItemArtboardItem.frame.y,
+            width: booledLayers.bounds.width,
+            height: booledLayers.bounds.height,
+            innerWidth: booledLayers.bounds.width,
+            innerHeight: booledLayers.bounds.height
           },
           style: topItem.style
         },
@@ -2261,35 +2278,6 @@ export const setLayersX = (payload: SetLayersXPayload): LayerTypes => ({
   payload
 });
 
-export const setLayersXThunk = (payload: SetLayersXPayload) => {
-  return (dispatch: any, getState: any) => {
-    const state = getState() as RootState;
-    let segments: { [id: string]: number[][][] } = {};
-    payload.layers.forEach((id) => {
-      const layerItem = state.layer.present.byId[id];
-      const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
-      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
-      const clone = paperLayer.clone({insert: false}) as paper.Item;
-      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
-      if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') {
-        clone.position.x = artboardPosition.x + payload.x;
-        if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') {
-          segments = {
-            ...segments,
-            [id]: getShapeItemRawPathSegments(clone as paper.Group)
-          }
-        }
-      }
-    });
-    dispatch(
-      setLayersX({
-        ...payload,
-        segments
-      })
-    )
-  }
-};
-
 export const setLayerY = (payload: SetLayerYPayload): LayerTypes => ({
   type: SET_LAYER_Y,
   payload
@@ -2299,35 +2287,6 @@ export const setLayersY = (payload: SetLayersYPayload): LayerTypes => ({
   type: SET_LAYERS_Y,
   payload
 });
-
-export const setLayersYThunk = (payload: SetLayersYPayload) => {
-  return (dispatch: any, getState: any) => {
-    const state = getState() as RootState;
-    let segments: { [id: string]: number[][][] } = {};
-    payload.layers.forEach((id) => {
-      const layerItem = state.layer.present.byId[id];
-      const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
-      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
-      const clone = paperLayer.clone({insert: false}) as paper.Item;
-      const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
-      if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') {
-        clone.position.y = artboardPosition.y + payload.y;
-        if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') {
-          segments = {
-            ...segments,
-            [id]: getShapeItemRawPathSegments(clone as paper.Group)
-          }
-        }
-      }
-    });
-    dispatch(
-      setLayersY({
-        ...payload,
-        segments
-      })
-    )
-  }
-};
 
 export const setLayerLeft = (payload: SetLayerLeftPayload): LayerTypes => ({
   type: SET_LAYER_LEFT,
@@ -2407,13 +2366,82 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
     let paragraphs: { [id: string]: string[][] } = {};
     let lines: { [id: string]: Btwx.TextLine[] } = {};
     let textResize: { [id: string]: Btwx.TextResize } = {};
+    let layers = [...payload.layers];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
       const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
       const clone = paperLayer.clone({insert: false}) as paper.Item;
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
-      if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape' || layerItem.type === 'Image') {
+      if (layerItem.type === 'CompoundShape') {
+        const descendents = getLayerDescendants(state.layer.present, layerItem.id);
+        const widthDiff = payload.width - layerItem.frame.innerWidth;
+        // clear all descendent transforms
+        descendents.forEach((descendentId) => {
+          layers.push(descendentId);
+          const descendentItem = state.layer.present.byId[descendentId];
+          const descendentPaperLayer = clone.getItem({data: {id: descendentId}});
+          clearLayerTransforms({
+            layerType: descendentItem.type,
+            paperLayer: descendentPaperLayer,
+            transform: descendentItem.transform
+          });
+        });
+        clearLayerTransforms({
+          layerType: layerItem.type,
+          paperLayer: clone,
+          transform: layerItem.transform
+        });
+        //
+        const originalPos = clone.position;
+        // set compoundShapeLayers width
+        clone.bounds.width += widthDiff;
+        clone.position = originalPos;
+        // apply all descendent transforms
+        // record all descendent bounds
+        descendents.forEach((descendentId) => {
+          const descendentItem = state.layer.present.byId[descendentId];
+          const descendentPaperLayer = clone.getItem({data: {id: descendentId}});
+          const pathItem = getShapeItemPathItem(descendentPaperLayer as paper.Group);
+          const innerWidth = pathItem.bounds.width;
+          applyLayerTransforms({
+            paperLayer: descendentPaperLayer,
+            transform: descendentItem.transform
+          });
+          if (descendentItem.type === 'Shape') {
+            segments = {
+              ...segments,
+              [descendentId]: getShapeItemRawPathSegments(descendentPaperLayer as paper.Group)
+            }
+          }
+          bounds = {
+            ...bounds,
+            [descendentId]: {
+              ...descendentItem.frame,
+              innerWidth: innerWidth,
+              x: pathItem.bounds.center.x - artboardItem.frame.x,
+              y: pathItem.bounds.center.y - artboardItem.frame.y,
+              width: pathItem.bounds.width,
+              height: pathItem.bounds.height
+            }
+          }
+        });
+        // applyLayerTransforms({
+        //   paperLayer: clone,
+        //   transform: layerItem.transform
+        // });
+        // // record compoundShapeLayers bounds
+        // bounds = {
+        //   ...bounds,
+        //   [id]: {
+        //     ...layerItem.frame,
+        //     innerWidth: payload.width,
+        //     width: compoundShapePathItem.bounds.width,
+        //     height: compoundShapePathItem.bounds.height
+        //   }
+        // }
+      }
+      if (layerItem.type === 'Shape' || layerItem.type === 'Image') {
         clearLayerTransforms({
           layerType: layerItem.type,
           paperLayer: clone,
@@ -2424,7 +2452,7 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
           paperLayer: clone,
           transform: layerItem.transform
         });
-        if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') {
+        if (layerItem.type === 'Shape') {
           segments = {
             ...segments,
             [id]: getShapeItemRawPathSegments(clone as paper.Group)
@@ -2528,6 +2556,7 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
     dispatch(
       setLayersWidth({
         ...payload,
+        layers,
         segments,
         bounds,
         paragraphs,
@@ -2556,13 +2585,82 @@ export const setLayersHeightThunk = (payload: SetLayersHeightPayload) => {
     let paragraphs: { [id: string]: string[][] } = {};
     let lines: { [id: string]: Btwx.TextLine[] } = {};
     let textResize: { [id: string]: Btwx.TextResize } = {};
+    let layers = [...payload.layers];
     payload.layers.forEach((id) => {
       const layerItem = state.layer.present.byId[id];
       const artboardItem = state.layer.present.byId[layerItem.artboard] as Btwx.Artboard;
       const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
       const clone = paperLayer.clone({insert: false});
       const artboardPosition = new paperMain.Point(artboardItem.frame.x, artboardItem.frame.y);
-      if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape' || layerItem.type === 'Image') {
+      if (layerItem.type === 'CompoundShape') {
+        const descendents = getLayerDescendants(state.layer.present, layerItem.id);
+        const heightDiff = payload.height - layerItem.frame.innerHeight;
+        // clear all descendent transforms
+        descendents.forEach((descendentId) => {
+          layers.push(descendentId);
+          const descendentItem = state.layer.present.byId[descendentId];
+          const descendentPaperLayer = clone.getItem({data: {id: descendentId}});
+          clearLayerTransforms({
+            layerType: descendentItem.type,
+            paperLayer: descendentPaperLayer,
+            transform: descendentItem.transform
+          });
+        });
+        clearLayerTransforms({
+          layerType: layerItem.type,
+          paperLayer: clone,
+          transform: layerItem.transform
+        });
+        //
+        const originalPos = clone.position;
+        // set compoundShapeLayers width
+        clone.bounds.height += heightDiff;
+        clone.position = originalPos;
+        // apply all descendent transforms
+        // record all descendent bounds
+        descendents.forEach((descendentId) => {
+          const descendentItem = state.layer.present.byId[descendentId];
+          const descendentPaperLayer = clone.getItem({data: {id: descendentId}});
+          const pathItem = getShapeItemPathItem(descendentPaperLayer as paper.Group);
+          const innerHeight = pathItem.bounds.height;
+          applyLayerTransforms({
+            paperLayer: descendentPaperLayer,
+            transform: descendentItem.transform
+          });
+          if (descendentItem.type === 'Shape') {
+            segments = {
+              ...segments,
+              [descendentId]: getShapeItemRawPathSegments(descendentPaperLayer as paper.Group)
+            }
+          }
+          bounds = {
+            ...bounds,
+            [descendentId]: {
+              ...descendentItem.frame,
+              innerHeight: innerHeight,
+              x: pathItem.bounds.center.x - artboardItem.frame.x,
+              y: pathItem.bounds.center.y - artboardItem.frame.y,
+              width: pathItem.bounds.width,
+              height: pathItem.bounds.height
+            }
+          }
+        });
+        // applyLayerTransforms({
+        //   paperLayer: clone,
+        //   transform: layerItem.transform
+        // });
+        // // record compoundShapeLayers bounds
+        // bounds = {
+        //   ...bounds,
+        //   [id]: {
+        //     ...layerItem.frame,
+        //     innerWidth: payload.width,
+        //     width: compoundShapePathItem.bounds.width,
+        //     height: compoundShapePathItem.bounds.height
+        //   }
+        // }
+      }
+      if (layerItem.type === 'Shape' || layerItem.type === 'Image') {
         clearLayerTransforms({
           layerType: layerItem.type,
           paperLayer: clone,
@@ -2573,7 +2671,7 @@ export const setLayersHeightThunk = (payload: SetLayersHeightPayload) => {
           paperLayer: clone,
           transform: layerItem.transform
         });
-        if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') {
+        if (layerItem.type === 'Shape') {
           segments = {
             ...segments,
             [id]: getShapeItemRawPathSegments(clone as paper.Group)
@@ -2649,6 +2747,7 @@ export const setLayersHeightThunk = (payload: SetLayersHeightPayload) => {
     dispatch(
       setLayersHeight({
         ...payload,
+        layers,
         segments,
         bounds,
         lines,
@@ -3655,35 +3754,6 @@ export const scaleLayersThunk = (payload: ScaleLayersPayload) => {
         pathData = {
           ...pathData,
           [id]: (paperLayer as paper.CompoundPath).pathData
-        }
-        // shapeIcon = {
-        //   ...shapeIcon,
-        //   [id]: getShapeIcon((paperLayer as paper.CompoundPath).pathData)
-        // }
-        if (isLine) {
-          const fromPoint = (paperLayer as paper.Path).firstSegment.point.subtract(artboardPosition);
-          const toPoint = (paperLayer as paper.Path).lastSegment.point.subtract(artboardPosition);
-          const vector = toPoint.subtract(fromPoint);
-          innerWidth = vector.length;
-          innerHeight = 0;
-          from = {
-            ...from,
-            [id]: {
-              x: fromPoint.x,
-              y: fromPoint.y
-            }
-          }
-          to = {
-            ...to,
-            [id]: {
-              x: toPoint.x,
-              y: toPoint.y
-            }
-          }
-          rotation = {
-            ...rotation,
-            [id]: vector.angle
-          }
         }
       }
       if (isText) {
@@ -7455,5 +7525,10 @@ export const setLayerFillRule = (payload: SetLayerFillRulePayload): LayerTypes =
 
 export const setLayersFillRule = (payload: SetLayersFillRulePayload): LayerTypes => ({
   type: SET_LAYERS_FILL_RULE,
+  payload
+});
+
+export const updateCompoundShapeFrame = (payload: UpdateCompoundShapeFramePayload): LayerTypes => ({
+  type: UPDATE_COMPOUND_SHAPE_FRAME,
   payload
 });

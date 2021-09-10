@@ -1,10 +1,11 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getPaperStyle, getLayerAbsPosition, getPaperParent, getPaperLayerIndex, getPaperFillColor, getPaperStrokeColor } from '../store/utils/paper';
+import { getPaperStyle, getLayerAbsPosition, getPaperLayerIndex, getPaperFillColor, getPaperStrokeColor } from '../store/utils/paper';
 import { paperMain, paperPreview } from '../canvas';
-import { applyLayerTimelines, rawSegToPaperSeg } from '../utils';
+import { setPathData, removePathData } from '../store/actions/pathData';
+import { applyLayerTimelines, rawSegToPaperSeg, getShapeIconPathData } from '../utils';
 import CanvasPreviewEventLayerTimeline from './CanvasPreviewEventLayerTimeline';
 
 interface CanvasShapeLayerProps {
@@ -36,12 +37,13 @@ const CanvasShapeLayer = ({
   const eventsById = useSelector((state: RootState) => state.layer.present.events.byId);
   const layerIndex = parentItem.children.indexOf(layerItem.id);
   const underlyingMaskIndex = layerItem.underlyingMask ? parentItem.children.indexOf(layerItem.underlyingMask) : null;
-  const maskedIndex = (layerIndex - underlyingMaskIndex) + 1;
+  const maskedIndex = layerIndex - underlyingMaskIndex;
   const projectIndex = artboardItem.projectIndex;
   const paperLayerScope = paperScope === 'main' ? paperMain : paperPreview;
   const [paperProject, setPaperProject] = useState(paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project);
   const [rendered, setRendered] = useState<boolean>(false);
   const [layerTimelines, setLayerTimelines] = useState(null);
+  const dispatch = useDispatch();
 
   ///////////////////////////////////////////////////////
   // HELPER FUNCTIONS
@@ -95,6 +97,7 @@ const CanvasShapeLayer = ({
             layerId: id
           }
         }),
+        shapePath.clone(),
         new paperLayerScope.Group({
           name: 'maskedLayers',
           data: {
@@ -102,10 +105,7 @@ const CanvasShapeLayer = ({
             type: 'LayerContainer',
             layerType: 'Shape',
             layerId: id
-          },
-          children: [
-            shapePath.clone()
-          ]
+          }
         })
       ]
     });
@@ -133,60 +133,6 @@ const CanvasShapeLayer = ({
     }
     return shapeLayerGroup;
   }
-
-  // const createShape = (): paper.Item => {
-  //   const shapePaperLayer = new paperLayerScope.Path({
-  //     name: `shape-${layerItem.name}`,
-  //     segments: layerItem.segments,
-  //     closed: layerItem.closed,
-  //     position: getLayerAbsPosition(layerItem.frame, artboardItem.frame),
-  //     insert: false,
-  //     data: {
-  //       id: id,
-  //       type: 'Layer',
-  //       layerType: 'Shape',
-  //       shapeType: layerItem.shapeType,
-  //       scope: layerItem.scope
-  //     },
-  //     ...getPaperStyle({
-  //       style: layerItem.style,
-  //       textStyle: null,
-  //       isLine: layerItem.shapeType === 'Line',
-  //       layerFrame: layerItem.frame,
-  //       artboardFrame: artboardItem.frame
-  //     })
-  //   });
-  //   if (layerItem.mask) {
-  //     return new paperLayerScope.Group({
-  //       name: 'MaskGroup',
-  //       data: {
-  //         id: 'maskGroup',
-  //         type: 'LayerContainer',
-  //         layerType: 'Shape',
-  //         layerId: id
-  //       },
-  //       insert: false,
-  //       children: [
-  //         new paperLayerScope.Path({
-  //           name: 'mask',
-  //           segments: layerItem.segments,
-  //           position: shapePaperLayer.position,
-  //           fillColor: 'black',
-  //           clipMask: true,
-  //           data: {
-  //             id: 'mask',
-  //             type: 'LayerChild',
-  //             layerType: 'Shape',
-  //             layerId: id
-  //           }
-  //         }),
-  //         shapePaperLayer
-  //       ]
-  //     });
-  //   } else {
-  //     return shapePaperLayer;
-  //   }
-  // }
 
   const getParentPaperLayer = (): {
     parent: paper.Group;
@@ -236,7 +182,7 @@ const CanvasShapeLayer = ({
       recursive: false
     }) as paper.Path;
     const parentCompoundShapePath = parentItem.type === 'CompoundShape' && parentItem.mask
-    ? parentMaskedLayers && parentMaskedLayers.getItem({
+    ? parentMaskGroup && parentMaskGroup.getItem({
         data: { id: 'compoundShapePath' },
         recursive: false
       }) as paper.Path
@@ -372,8 +318,8 @@ const CanvasShapeLayer = ({
       getPaperLayerIndex(layerItem, parentItem),
       createShapeGroup()
     );
+    const shapePath = createShapePath();
     if (parentItem.type === 'CompoundShape') {
-      const shapePath = createShapePath();
       if (layerItem.bool !== 'none') {
         const boolWith = parentCompoundShapePath.children[parentCompoundShapePath.children.length - 1];
         const newComposite = boolWith[layerItem.bool](shapePath);
@@ -391,6 +337,11 @@ const CanvasShapeLayer = ({
       }
     }
     setRendered(true);
+    dispatch(setPathData({
+      id: id,
+      pathData: shapePath.pathData,
+      icon: getShapeIconPathData(shapePath.pathData)
+    }));
     return (): void => {
       const {
         paperLayer,
@@ -439,8 +390,7 @@ const CanvasShapeLayer = ({
         const { underlyingMaskGroupMaskedLayers } = getUnderlyingMaskPaperLayer();
         // unmask currently masked layers
         if (layerItem.mask) {
-          const nonMaskChildren = maskedLayers.children.slice(1, maskedLayers.children.length);
-          maskedLayers.parent.insertChildren(maskedLayers.index, nonMaskChildren);
+          paperLayer.parent.insertChildren(layerIndex, maskedLayers.children);
         }
         // if masked, add to underlyingMaskGroupMaskedLayers
         if (layerItem.masked) {
@@ -472,7 +422,7 @@ const CanvasShapeLayer = ({
         // move shapePath back into shapeGroup
         paperLayer.insertChildren(0, [shapePath]);
         // move masked layers out of mask group
-        paperLayer.parent.insertChildren(paperLayer.index, maskedLayers.children);
+        paperLayer.parent.insertChildren(layerIndex, maskedLayers.children);
         // remove mask group
         maskGroup.remove();
       }
@@ -508,31 +458,6 @@ const CanvasShapeLayer = ({
   }, [layerItem.underlyingMask]);
 
   ///////////////////////////////////////////////////////
-  // PATHDATA
-  ///////////////////////////////////////////////////////
-
-  // useEffect(() => {
-  //   if (rendered) {
-  //     const { paperLayer, mask } = getPaperLayer();
-  //     const absPosition = getLayerAbsPosition(layerItem.frame, artboardItem.frame);
-  //     paperLayer.pathData = layerItem.pathData;
-  //     paperLayer.children.forEach((item) => {
-  //       item.data = {
-  //         id: 'shapePartial',
-  //         type: 'LayerChild',
-  //         layerType: 'Shape',
-  //         layerId: id
-  //       };
-  //     });
-  //     paperLayer.position = absPosition;
-  //     if (layerItem.mask) {
-  //       mask.pathData = paperLayer.pathData;
-  //       mask.position = absPosition;
-  //     }
-  //   }
-  // }, [layerItem.pathData]);
-
-  ///////////////////////////////////////////////////////
   // SEGMENTS
   ///////////////////////////////////////////////////////
 
@@ -554,7 +479,13 @@ const CanvasShapeLayer = ({
           mask.closed = layerItem.closed;
           mask.position = shapePath.position;
         }
+        dispatch(setPathData({
+          id: id,
+          pathData: shapePath.pathData,
+          icon: getShapeIconPathData(shapePath.pathData)
+        }));
       }
+
     }
   }, [layerItem.segments]);
 
@@ -576,19 +507,6 @@ const CanvasShapeLayer = ({
       }
     }
   }, [layerItem.frame.x, layerItem.frame.y, artboardItem.frame.innerWidth, artboardItem.frame.innerHeight]);
-
-  // useEffect(() => {
-  //   if (rendered) {
-  //     const absoluteY = layerItem.frame.y + artboardItem.frame.y;
-  //     const paperLayer = paperProject.getItem({ data: { id } });
-  //     paperLayer.position.y = absoluteY;
-  //     if (layerItem.mask) {
-  //       const maskGroup = paperLayer.parent;
-  //       const mask = maskGroup.children[0];
-  //       mask.position = paperLayer.position;
-  //     }
-  //   }
-  // }, [layerItem.frame.y, artboardItem.frame.innerHeight]);
 
   ///////////////////////////////////////////////////////
   // BOOL
@@ -726,7 +644,7 @@ const CanvasShapeLayer = ({
 
   if (paperScope === 'preview') {
     useEffect(() => {
-      if (rendered && eventTimelines) {
+      if (rendered && eventTimelines && parentItem.type !== 'CompoundShape') {
         const { paperLayer } = getPaperLayer();
         setLayerTimelines(applyLayerTimelines({
           paperLayer,

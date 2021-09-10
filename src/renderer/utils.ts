@@ -19,6 +19,18 @@ export interface RefForwardingComponent<TInitial extends React.ElementType, P = 
   <As extends React.ElementType = TInitial>(props: React.PropsWithChildren<ReplaceProps<As, AsProp<As> & P>>): React.ReactElement | null;
 }
 
+export const getShapeIconPathData = (pathData: string): string => {
+  const layerIcon = new paperMain.CompoundPath({
+    insert: false,
+    pathData: pathData
+  });
+  layerIcon.fitBounds(new paperMain.Rectangle({
+    point: new paperMain.Point(0,0),
+    size: new paperMain.Size(24,24)
+  }));
+  return layerIcon.pathData;
+}
+
 export const evaluateExp = (expression: any): any => {
   if (expression === 'multi') {
     return expression;
@@ -318,15 +330,15 @@ export const paperPointToRawPoint = (point: paper.Point): number[] =>
 export const rawSegToPaperSeg = (seg: number[][]): paper.Segment =>
   new paperMain.Segment({
     point: seg[0],
-    handleIn: seg[1],
-    handleOut: seg[2]
+    handleIn: seg[1] ? seg[1] : null,
+    handleOut: seg[2] ? seg[2] : null
   });
 
 export const paperSegToRawSeg = (seg: paper.Segment): number[][] =>
   [
     paperPointToRawPoint(seg.point),
-    seg.handleIn ? paperPointToRawPoint(seg.handleIn) : null,
-    seg.handleOut ? paperPointToRawPoint(seg.handleOut) : null
+    ...(seg.handleIn ? [paperPointToRawPoint(seg.handleIn)] : []),
+    ...(seg.handleOut ? [paperPointToRawPoint(seg.handleOut)] : [])
   ];
 
 export const rawCurveToPaperCurve = (curve: number[][][]): paper.Curve =>
@@ -368,7 +380,7 @@ export const getCompoundPathPaths = (compoundPath: paper.CompoundPath): paper.Pa
 }
 
 export const getPathItemSegments = (pathItem: paper.PathItem): paper.Segment[] => {
-  if (pathItem.hasChildren()) {
+  if (pathItem.className === 'CompoundPath') {
     return getCompoundPathPaths(pathItem as paper.CompoundPath).reduce((result, current) => {
       return [...result, ...current.segments];
     }, []);
@@ -385,19 +397,15 @@ export const getShapePath = (shape: paper.Group): paper.Path => {
     data: { id: 'maskGroup' },
     recursive: false
   }) as paper.Group;
-  const maskedLayers = maskGroup && maskGroup.getItem({
-    data: { id: 'maskedLayers' },
-    recursive: false
-  }) as paper.Group;
   return maskGroup
-  ? maskedLayers && maskedLayers.getItem({
-      data: { id: 'shapePath' },
-      recursive: false
-    }) as paper.Path
-  : shape && shape.getItem({
-      data: { id: 'shapePath' },
-      recursive: false
-    }) as paper.Path;
+    ? maskGroup.getItem({
+        data: { id: 'shapePath' },
+        recursive: false
+      }) as paper.Path
+    : shape && shape.getItem({
+        data: { id: 'shapePath' },
+        recursive: false
+      }) as paper.Path;
 }
 
 export const getCompoundShapePath = (compoundShape: paper.Group): paper.CompoundPath => {
@@ -405,23 +413,19 @@ export const getCompoundShapePath = (compoundShape: paper.Group): paper.Compound
     data: { id: 'maskGroup' },
     recursive: false
   }) as paper.Group;
-  const maskedLayers = maskGroup && maskGroup.getItem({
-    data: { id: 'maskedLayers' },
-    recursive: false
-  }) as paper.Group;
   return maskGroup
-  ? maskedLayers && maskedLayers.getItem({
-      data: { id: 'compoundShapePath' },
-      recursive: false
-    }) as paper.Path
-  : compoundShape && compoundShape.getItem({
-      data: { id: 'compoundShapePath' },
-      recursive: false
-    }) as paper.Path;
+    ? maskGroup.getItem({
+        data: { id: 'compoundShapePath' },
+        recursive: false
+      }) as paper.Path
+    : compoundShape && compoundShape.getItem({
+        data: { id: 'compoundShapePath' },
+        recursive: false
+      }) as paper.Path;
 }
 
 export const getShapeItemPathItem = (shapeItem: paper.Group): paper.PathItem => {
-  switch(shapeItem.data.type) {
+  switch(shapeItem.data.layerType) {
     case 'CompoundShape':
       return getCompoundShapePath(shapeItem);
     case 'Shape':
@@ -429,5 +433,50 @@ export const getShapeItemPathItem = (shapeItem: paper.Group): paper.PathItem => 
   }
 }
 
+export const getShapeItemMaskPathItem = (shapeItem: paper.Group): paper.PathItem => {
+  const maskGroup = shapeItem.getItem({
+    data: { id: 'maskGroup' },
+    recursive: false
+  }) as paper.Group;
+  return maskGroup
+    ? maskGroup.getItem({
+        data: { id: 'mask' },
+        recursive: false
+      }) as paper.Path
+    : null;
+}
+
 export const getShapeItemRawPathSegments = (shapeItem: paper.Group): number[][][] =>
-  getRawPathItemSegments(getShapeItemPathItem(shapeItem))
+  getRawPathItemSegments(getShapeItemPathItem(shapeItem));
+
+export const getCompoundShapeBoolPath = (id: string, layersById: any): any => {
+  const handleCompoundShape = (cid: string, layersById: any, composite: paper.PathItem = new paperMain.CompoundPath({insert: false})) => {
+    const layerItem = layersById[cid];
+    for (let i = 0; i < layerItem.children.length; i++) {
+      const childItem = layersById[id];
+      const artboardItem = layersById[childItem.artboard] as Btwx.Artboard;
+      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
+      const pathLayer = getShapeItemPathItem(paperLayer as paper.Group).clone({insert: false});
+      if (childItem.type !== 'CompoundShape') {
+        if (childItem.bool === 'none' || i === 0) {
+          composite.addChild(pathLayer);
+        } else {
+          const boolWith = composite.children[composite.children.length - 1];
+          const newBool = boolWith[childItem.bool](pathLayer);
+          boolWith.replaceWith(newBool);
+        }
+      } else {
+        const newComposite = handleCompoundShape(layerItem.children[i], layersById, composite);
+        if (childItem.bool === 'none' || i === 0) {
+          composite.addChild(newComposite);
+        } else {
+          const boolWith = composite.children[composite.children.length - 1];
+          const newBool = boolWith[childItem.bool](newComposite);
+          boolWith.replaceWith(newBool);
+        }
+      }
+    }
+    return composite;
+  }
+  return handleCompoundShape(id, layersById);
+}

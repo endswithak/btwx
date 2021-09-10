@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getLayerProjectIndex, getPaperLayer, getPaperLayersBounds, getSelectedProjectIndices, getSingleLineSelected } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
-import { paperRectToRawRect } from '../utils';
+import { paperRectToRawRect, getShapeItemPathItem, getShapeItemMaskPathItem } from '../utils';
 import { setCanvasDragging } from '../store/actions/canvasSettings';
 import { moveLayersBy, duplicateLayers } from '../store/actions/layer';
 import { setSelectionToolBounds } from '../store/actions/selectionTool';
@@ -62,11 +62,21 @@ const DragTool = (props: PaperToolProps): ReactElement => {
         const paperLayer = getPaperLayer(id, selectedProjectIndices[id]);
         const ogLayer = originalPaperSelection[index];
         if (paperLayer && ogLayer) {
-          const absPosition = ogLayer.position;
-          paperLayer.position.x = absPosition.x + vector.x;
-          paperLayer.position.y = absPosition.y + vector.y;
-          if (paperLayer.data.layerType === 'Shape' && paperLayer.parent.data.id === 'maskGroup' && paperLayer.index === 1) {
-            paperLayer.parent.children[0].position = paperLayer.position;
+          if (paperLayer.data.layerType === 'Shape' || paperLayer.data.layerType === 'CompoundShape') {
+            const pathItem = getShapeItemPathItem(paperLayer as paper.Group);
+            const ogPathItem = getShapeItemPathItem(originalPaperSelection[index] as paper.Group);
+            const absPosition = ogPathItem.position;
+            pathItem.position.x = absPosition.x + vector.x;
+            pathItem.position.y = absPosition.y + vector.y;
+            const maskPathItem = getShapeItemMaskPathItem(paperLayer as paper.Group);
+            if (maskPathItem) {
+              maskPathItem.position.x = absPosition.x + vector.x;
+              maskPathItem.position.y = absPosition.y + vector.y;
+            }
+          } else {
+            const absPosition = ogLayer.position;
+            paperLayer.position.x = absPosition.x + vector.x;
+            paperLayer.position.y = absPosition.y + vector.y;
           }
         }
       });
@@ -126,12 +136,28 @@ const DragTool = (props: PaperToolProps): ReactElement => {
             const paperLayer = getPaperLayer(item.id, item.projectIndex);
             const ogLayer = originalPaperSelection[index];
             if (paperLayer && ogLayer) {
-              const absPosition = ogLayer.position;
-              paperLayer.position.x = absPosition.x;
-              paperLayer.position.y = absPosition.y;
-              if (paperLayer.data.layerType === 'Shape' && paperLayer.parent.data.id === 'maskGroup' && paperLayer.index === 1) {
-                paperLayer.parent.children[0].position = paperLayer.position;
+              if (paperLayer.data.layerType === 'Shape' || paperLayer.data.layerType === 'CompoundShape') {
+                const pathItem = getShapeItemPathItem(paperLayer as paper.Group);
+                const ogPathItem = getShapeItemPathItem(originalPaperSelection[index] as paper.Group);
+                const absPosition = ogPathItem.position;
+                pathItem.position.x = absPosition.x;
+                pathItem.position.y = absPosition.y;
+                const maskPathItem = getShapeItemMaskPathItem(paperLayer as paper.Group);
+                if (maskPathItem) {
+                  maskPathItem.position.x = absPosition.x;
+                  maskPathItem.position.y = absPosition.y;
+                }
+              } else {
+                const absPosition = ogLayer.position;
+                paperLayer.position.x = absPosition.x;
+                paperLayer.position.y = absPosition.y;
               }
+              // const absPosition = ogLayer.position;
+              // paperLayer.position.x = absPosition.x;
+              // paperLayer.position.y = absPosition.y;
+              // if (paperLayer.data.layerType === 'Shape' && paperLayer.parent.data.id === 'maskGroup' && paperLayer.index === 1) {
+              //   paperLayer.parent.children[0].position = paperLayer.position;
+              // }
             }
           });
         }

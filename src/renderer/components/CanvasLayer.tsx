@@ -22,6 +22,7 @@ interface CanvasLayerProps {
   deepestSubPath?: string;
   setNestedSubPathFlag?(subPathFlag: string): void;
   setNestedBoolFlag?(boolFlag: string): void;
+  setNestedSubCompoundPathFlag?(nestedSubCompoundPathFlag: string): void;
 }
 
 const getLayerByIdSelector = () => getLayerById;

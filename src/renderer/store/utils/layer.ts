@@ -82,7 +82,7 @@ import {
   DisableGroupsScroll, EnableGroupHorizontalScroll, EnableGroupsHorizontalScroll, DisableGroupHorizontalScroll,
   DisableGroupsHorizontalScroll, EnableGroupVerticalScroll, EnableGroupsVerticalScroll, DisableGroupVerticalScroll,
   DisableGroupsVerticalScroll, SetGroupScrollOverflow, SetGroupsScrollOverflow, SetGroupScrollFrame,
-  EnableGroupGroupEventTweens, EnableGroupsGroupEventTweens, DisableGroupGroupEventTweens, DisableGroupsGroupEventTweens, AddGroupsWiggles, SetLayerSegments, SetLayerBool, SetLayerFillRule, SetLayersBool, SetLayersFillRule, SetLayerLastSubPath,
+  EnableGroupGroupEventTweens, EnableGroupsGroupEventTweens, DisableGroupGroupEventTweens, DisableGroupsGroupEventTweens, AddGroupsWiggles, SetLayerSegments, SetLayerBool, SetLayerFillRule, SetLayersBool, SetLayersFillRule, SetLayerLastSubPath, UpdateCompoundShapeFrame,
 } from '../actionTypes/layer';
 
 import {
@@ -345,7 +345,7 @@ export const addCompoundShape = (state: LayerState, action: AddCompoundShape): L
         ),
       } as Btwx.Group
     },
-    allCompoundShapeIds: addItem(state.allShapeIds, action.payload.layer.id),
+    allCompoundShapeIds: addItem(state.allCompoundShapeIds, action.payload.layer.id),
     // shapeIcons: {
     //   ...currentState.shapeIcons,
     //   [action.payload.layer.id]: action.payload.shapeIcon
@@ -616,6 +616,12 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
           allShapeIds: removeItem(cs.allShapeIds, id)
         }
         break;
+      case 'CompoundShape':
+        cs = {
+          ...cs,
+          allCompoundShapeIds: removeItem(cs.allCompoundShapeIds, id)
+        }
+        break;
       case 'Group':
         cs = {
           ...cs,
@@ -731,7 +737,8 @@ export const removeLayer = (state: LayerState, action: RemoveLayer): LayerState 
   }
   switch(layerItem.type) {
     case 'Artboard':
-    case 'Group': {
+    case 'Group':
+    case 'CompoundShape': {
       const layerAndDescendants = getLayerAndDescendants(currentState, action.payload.id);
       currentState = layerAndDescendants.reduce((result, current) => {
         return rm(result, current, true);
@@ -817,11 +824,11 @@ export const selectLayer = (state: LayerState, action: SelectLayer): LayerState 
   const layerItem = currentState.byId[action.payload.id];
   // if layer is an artboard or group and current selection includes...
   // any of its descendants, deselect those descendants
-  if (layerItem.type === 'Artboard' || layerItem.type === 'Group') {
+  if (layerItem.type === 'Artboard' || layerItem.type === 'Group' || layerItem.type === 'CompoundShape') {
     if (state.selected.some((selectedItem) => currentState.byId[selectedItem].scope.includes(action.payload.id))) {
       const layersToDeselect = state.selected.filter((selectedItem) => currentState.byId[selectedItem].scope.includes(action.payload.id));
       currentState = deselectLayers(currentState, layerActions.deselectLayers({
-        layers:layersToDeselect
+        layers: layersToDeselect
       }) as DeselectLayers);
     }
   }
@@ -901,7 +908,7 @@ export const deepSelectLayer = (state: LayerState, action: DeepSelectLayer): Lay
   const layerItem = state.byId[action.payload.id];
   const nearestScopeAncestor = getNearestScopeAncestor(currentState, action.payload.id);
   const deepSelectItem = getDeepSelectItem(currentState, action.payload.id);
-  if (nearestScopeAncestor.type === 'Group' || nearestScopeAncestor.type === 'Artboard') {
+  if (nearestScopeAncestor.type === 'Group' || nearestScopeAncestor.type === 'Artboard' || nearestScopeAncestor.type === 'CompoundShape') {
     currentState = showLayerChildren(currentState, layerActions.showLayerChildren({id: nearestScopeAncestor.id}) as ShowLayerChildren);
   }
   currentState = selectLayers(currentState, layerActions.selectLayers({layers: [deepSelectItem.id], newSelection: true}) as SelectLayers);
@@ -2027,93 +2034,109 @@ export const moveLayersTo = (state: LayerState, action: MoveLayersTo): LayerStat
 export const moveLayerBy = (state: LayerState, action: MoveLayerBy): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
-  const groupParents = layerItem.type === 'Artboard' ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
-  const ml = (cs: LayerState, id: string): LayerState => {
-    const li = cs.byId[id];
-    const isLine = li.type === 'Shape' && (li as Btwx.Shape).shapeType === 'Line';
-    const isText = li.type === 'Text';
-    if (isLine) {
-      cs = {
-        ...cs,
-        byId: {
-          ...cs.byId,
-          [id]: {
-            ...cs.byId[id],
-            from: {
-              x: (cs.byId[id] as Btwx.Line).from.x + action.payload.x,
-              y: (cs.byId[id] as Btwx.Line).from.y + action.payload.y
-            },
-            to: {
-              x: (cs.byId[id] as Btwx.Line).to.x + action.payload.x,
-              y: (cs.byId[id] as Btwx.Line).to.y + action.payload.y
-            }
-          } as Btwx.Line
-        }
-      }
-    }
-    if (isText) {
-      cs = {
-        ...cs,
-        byId: {
-          ...cs.byId,
-          [id]: {
-            ...cs.byId[id],
-            point: {
-              x: (cs.byId[id] as Btwx.Text).point.x + action.payload.x,
-              y: (cs.byId[id] as Btwx.Text).point.y + action.payload.y
-            },
-            lines: (cs.byId[id] as Btwx.Text).lines.reduce((lr, lc) => {
-              return [
-                ...lr,
-                {
-                  ...lc,
-                  frame: {
-                    ...lc.frame,
-                    x: lc.frame.x + action.payload.x,
-                    y: lc.frame.y + action.payload.y
-                  },
-                  anchor: {
-                    ...lc.anchor,
-                    x: lc.anchor.x + action.payload.x,
-                    y: lc.anchor.y + action.payload.y
-                  }
-                }
-              ]
-            }, [])
-          } as Btwx.Text
-        }
-      }
-    }
-    cs = {
-      ...cs,
-      byId: {
-        ...cs.byId,
-        [id]: {
-          ...cs.byId[id],
-          frame: {
-            ...cs.byId[id].frame,
-            x: cs.byId[id].frame.x + action.payload.x,
-            y: cs.byId[id].frame.y + action.payload.y
-          }
-        } as Btwx.Text
-      }
-    }
-    if (li.type !== 'Group' && li.type !== 'Artboard') {
-      cs = updateLayerTweensByProps(cs, id, ['x', 'y']);
-    }
-    return cs;
-  }
+  currentState = setLayerX(currentState, layerActions.setLayerX({
+    id: action.payload.id,
+    x: layerItem.frame.x + action.payload.x
+  }) as SetLayerX);
+  currentState = setLayerY(currentState, layerActions.setLayerY({
+    id: action.payload.id,
+    y: layerItem.frame.y + action.payload.y
+  }) as SetLayerY);
+  // const groupParents = layerItem.type === 'Artboard' ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
+  // const ml = (cs: LayerState, id: string): LayerState => {
+  //   const li = cs.byId[id];
+  //   cs = setLayerX(cs, layerActions.setLayerX({
+  //     id: id,
+  //     x: li.frame.x + action.payload.x
+  //   }) as SetLayerX);
+  //   cs = setLayerY(cs, layerActions.setLayerY({
+  //     id: id,
+  //     y: li.frame.y + action.payload.y
+  //   }) as SetLayerY);
+  //   // const isLine = li.type === 'Shape' && (li as Btwx.Shape).shapeType === 'Line';
+  //   // const isText = li.type === 'Text';
+  //   // if (isLine) {
+  //   //   cs = {
+  //   //     ...cs,
+  //   //     byId: {
+  //   //       ...cs.byId,
+  //   //       [id]: {
+  //   //         ...cs.byId[id],
+  //   //         from: {
+  //   //           x: (cs.byId[id] as Btwx.Line).from.x + action.payload.x,
+  //   //           y: (cs.byId[id] as Btwx.Line).from.y + action.payload.y
+  //   //         },
+  //   //         to: {
+  //   //           x: (cs.byId[id] as Btwx.Line).to.x + action.payload.x,
+  //   //           y: (cs.byId[id] as Btwx.Line).to.y + action.payload.y
+  //   //         }
+  //   //       } as Btwx.Line
+  //   //     }
+  //   //   }
+  //   // }
+  //   // if (isText) {
+  //   //   cs = {
+  //   //     ...cs,
+  //   //     byId: {
+  //   //       ...cs.byId,
+  //   //       [id]: {
+  //   //         ...cs.byId[id],
+  //   //         point: {
+  //   //           x: (cs.byId[id] as Btwx.Text).point.x + action.payload.x,
+  //   //           y: (cs.byId[id] as Btwx.Text).point.y + action.payload.y
+  //   //         },
+  //   //         lines: (cs.byId[id] as Btwx.Text).lines.reduce((lr, lc) => {
+  //   //           return [
+  //   //             ...lr,
+  //   //             {
+  //   //               ...lc,
+  //   //               frame: {
+  //   //                 ...lc.frame,
+  //   //                 x: lc.frame.x + action.payload.x,
+  //   //                 y: lc.frame.y + action.payload.y
+  //   //               },
+  //   //               anchor: {
+  //   //                 ...lc.anchor,
+  //   //                 x: lc.anchor.x + action.payload.x,
+  //   //                 y: lc.anchor.y + action.payload.y
+  //   //               }
+  //   //             }
+  //   //           ]
+  //   //         }, [])
+  //   //       } as Btwx.Text
+  //   //     }
+  //   //   }
+  //   // }
+  //   // cs = {
+  //   //   ...cs,
+  //   //   byId: {
+  //   //     ...cs.byId,
+  //   //     [id]: {
+  //   //       ...cs.byId[id],
+  //   //       frame: {
+  //   //         ...cs.byId[id].frame,
+  //   //         x: cs.byId[id].frame.x + action.payload.x,
+  //   //         y: cs.byId[id].frame.y + action.payload.y
+  //   //       }
+  //   //     } as Btwx.Text
+  //   //   }
+  //   // }
+  //   // if (li.type !== 'Group' && li.type !== 'Artboard') {
+  //   //   cs = updateLayerTweensByProps(cs, id, ['x', 'y']);
+  //   // }
+  //   return cs;
+  // }
   // update layer bounds
-  if (layerItem.type === 'Group') {
-    const layerAndDescendants = getLayerAndDescendants(currentState, action.payload.id);
-    currentState = layerAndDescendants.reduce((result, current) => {
-      return ml(result, current);
-    }, currentState);
-  } else {
-    currentState = ml(currentState, action.payload.id);
-  }
+  // if (layerItem.type === 'Group') {
+  //   const layerAndDescendants = getLayerAndDescendants(currentState, action.payload.id);
+  //   currentState = layerAndDescendants.reduce((result, current) => {
+  //     return ml(result, current);
+  //   }, currentState);
+  // } else {
+  //   currentState = ml(currentState, action.payload.id);
+  // }
   // update parent layer bounds
-  currentState = updateGroupParentBounds(currentState, groupParents);
+  // currentState = updateGroupParentBounds(currentState, groupParents);
   return currentState;
 };
 
@@ -5091,8 +5114,8 @@ export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
   const layerItem = currentState.byId[action.payload.id];
   const isArtboard = layerItem.type === 'Artboard';
   const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
-  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
   const isText = layerItem.type === 'Text';
+  const isShape = layerItem.type === 'Shape';
   const diff = action.payload.x - layerItem.frame.x;
   currentState = {
     ...currentState,
@@ -5107,22 +5130,23 @@ export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
       }
     }
   }
-  if (isLine) {
+  if (isShape) {
     currentState = {
       ...currentState,
       byId: {
         ...currentState.byId,
         [action.payload.id]: {
           ...currentState.byId[action.payload.id],
-          from: {
-            ...(currentState.byId[action.payload.id] as Btwx.Line).from,
-            x: (currentState.byId[action.payload.id] as Btwx.Line).from.x + diff
-          },
-          to: {
-            ...(currentState.byId[action.payload.id] as Btwx.Line).to,
-            x: (currentState.byId[action.payload.id] as Btwx.Line).to.x + diff
-          }
-        } as Btwx.Line
+          segments: (currentState.byId[action.payload.id] as Btwx.Shape).segments.map((segment) => {
+            return segment.map((segmentPoint, index) => {
+              if (index === 0) {
+                return [segmentPoint[0] + diff, segmentPoint[1]];
+              } else {
+                return segmentPoint;
+              }
+            });
+          })
+        } as Btwx.Shape
       }
     }
   }
@@ -5158,11 +5182,11 @@ export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
     }
   }
   currentState = updateGroupParentBounds(currentState, groupParents);
-  if (layerItem.type === 'Group') {
+  if (layerItem.type === 'Group' || layerItem.type === 'CompoundShape') {
     const layerAndDescendants = getLayerDescendants(currentState, action.payload.id);
     currentState = layerAndDescendants.reduce((result, current) => {
       const descendantItem = result.byId[current];
-      const isLine = descendantItem.type === 'Shape' && (descendantItem as Btwx.Shape).shapeType === 'Line';
+      const isShape = descendantItem.type === 'Shape';
       const isText = descendantItem.type === 'Text';
       result = {
         ...result,
@@ -5177,22 +5201,23 @@ export const setLayerX = (state: LayerState, action: SetLayerX): LayerState => {
           }
         }
       }
-      if (isLine) {
+      if (isShape) {
         result = {
           ...result,
           byId: {
             ...result.byId,
             [current]: {
               ...result.byId[current],
-              from: {
-                ...(result.byId[current] as Btwx.Line).from,
-                x: (result.byId[current] as Btwx.Line).from.x + diff
-              },
-              to: {
-                ...(result.byId[current] as Btwx.Line).to,
-                x: (result.byId[current] as Btwx.Line).to.x + diff
-              }
-            } as Btwx.Line
+              segments: (result.byId[current] as Btwx.Shape).segments.map((segment) => {
+                return segment.map((segmentPoint, index) => {
+                  if (index === 0) {
+                    return [segmentPoint[0] + diff, segmentPoint[1]];
+                  } else {
+                    return segmentPoint;
+                  }
+                });
+              })
+            } as Btwx.Shape
           }
         }
       }
@@ -5262,7 +5287,7 @@ export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
   const layerItem = currentState.byId[action.payload.id];
   const isArtboard = layerItem.type === 'Artboard';
   const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
-  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
+  const isShape = layerItem.type === 'Shape';
   const isText = layerItem.type === 'Text';
   const diff = action.payload.y - layerItem.frame.y;
   currentState = {
@@ -5278,22 +5303,23 @@ export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
       }
     }
   }
-  if (isLine) {
+  if (isShape) {
     currentState = {
       ...currentState,
       byId: {
         ...currentState.byId,
         [action.payload.id]: {
           ...currentState.byId[action.payload.id],
-          from: {
-            ...(currentState.byId[action.payload.id] as Btwx.Line).from,
-            y: (currentState.byId[action.payload.id] as Btwx.Line).from.y + diff
-          },
-          to: {
-            ...(currentState.byId[action.payload.id] as Btwx.Line).to,
-            y: (currentState.byId[action.payload.id] as Btwx.Line).to.y + diff
-          }
-        } as Btwx.Line
+          segments: (currentState.byId[action.payload.id] as Btwx.Shape).segments.map((segment) => {
+            return segment.map((segmentPoint, index) => {
+              if (index === 0) {
+                return [segmentPoint[0], segmentPoint[1] + diff];
+              } else {
+                return segmentPoint;
+              }
+            });
+          })
+        } as Btwx.Shape
       }
     }
   }
@@ -5329,11 +5355,11 @@ export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
     }
   }
   currentState = updateGroupParentBounds(currentState, groupParents);
-  if (layerItem.type === 'Group') {
+  if (layerItem.type === 'Group' || layerItem.type === 'CompoundShape') {
     const layerAndDescendants = getLayerDescendants(currentState, action.payload.id);
     currentState = layerAndDescendants.reduce((result, current) => {
       const descendantItem = result.byId[current];
-      const isLine = descendantItem.type === 'Shape' && (descendantItem as Btwx.Shape).shapeType === 'Line';
+      const isShape = descendantItem.type === 'Shape';
       const isText = descendantItem.type === 'Text';
       result = {
         ...result,
@@ -5348,22 +5374,23 @@ export const setLayerY = (state: LayerState, action: SetLayerY): LayerState => {
           }
         }
       }
-      if (isLine) {
+      if (isShape) {
         result = {
           ...result,
           byId: {
             ...result.byId,
             [current]: {
               ...result.byId[current],
-              from: {
-                ...(result.byId[current] as Btwx.Line).from,
-                y: (result.byId[current] as Btwx.Line).from.y + diff
-              },
-              to: {
-                ...(result.byId[current] as Btwx.Line).to,
-                y: (result.byId[current] as Btwx.Line).to.y + diff
-              }
-            } as Btwx.Line
+              segments: (result.byId[current] as Btwx.Shape).segments.map((segment) => {
+                return segment.map((segmentPoint, index) => {
+                  if (index === 0) {
+                    return [segmentPoint[0], segmentPoint[1] + diff];
+                  } else {
+                    return segmentPoint;
+                  }
+                });
+              })
+            } as Btwx.Shape
           }
         }
       }
@@ -5432,136 +5459,155 @@ export const setLayerLeft = (state: LayerState, action: SetLayerLeft): LayerStat
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
   const isArtboard = layerItem.type === 'Artboard';
-  const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
-  const isText = layerItem.type === 'Text';
+  // const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
+  // const isText = layerItem.type === 'Text';
+  // const isShape = layerItem.type === 'Shape';
   const x = action.payload.left + (layerItem.frame.width / 2);
-  const diff = x - layerItem.frame.x;
-  const segments = action.payload.segments;
-  currentState = {
-    ...currentState,
-    byId: {
-      ...currentState.byId,
-      [action.payload.id]: {
-        ...currentState.byId[action.payload.id],
-        frame: {
-          ...currentState.byId[action.payload.id].frame,
-          x: x
-        }
-      }
-    }
-  }
-  if (segments) {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          segments
-        } as Btwx.Shape
-      }
-    }
-  }
-  if (isText) {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          point: {
-            ...(currentState.byId[action.payload.id] as Btwx.Text).point,
-            x: (currentState.byId[action.payload.id] as Btwx.Text).point.x + diff
-          },
-          lines: (currentState.byId[action.payload.id] as Btwx.Text).lines.reduce((lr, lc) => {
-            return [
-              ...lr,
-              {
-                ...lc,
-                frame: {
-                  ...lc.frame,
-                  x: lc.frame.x + diff
-                },
-                anchor: {
-                  ...lc.anchor,
-                  x: lc.anchor.x + diff
-                }
-              }
-            ]
-          }, [])
-        } as Btwx.Text
-      }
-    }
-  }
-  currentState = updateGroupParentBounds(currentState, groupParents);
-  if (layerItem.type === 'Group') {
-    const layerDescendants = getLayerDescendants(currentState, action.payload.id);
-    currentState = layerDescendants.reduce((result, current) => {
-      const descendantItem = result.byId[current];
-      const isText = descendantItem.type === 'Text';
-      result = {
-        ...result,
-        byId: {
-          ...result.byId,
-          [current]: {
-            ...result.byId[current],
-            frame: {
-              ...result.byId[current].frame,
-              x: result.byId[current].frame.x + diff
-            }
-          }
-        }
-      }
-      if (isText) {
-        result = {
-          ...result,
-          byId: {
-            ...result.byId,
-            [current]: {
-              ...result.byId[current],
-              point: {
-                ...(result.byId[current] as Btwx.Text).point,
-                x: (result.byId[current] as Btwx.Text).point.x + diff
-              },
-              lines: (result.byId[current] as Btwx.Text).lines.reduce((lr, lc) => {
-                return [
-                  ...lr,
-                  {
-                    ...lc,
-                    frame: {
-                      ...lc.frame,
-                      x: lc.frame.x + diff
-                    },
-                    anchor: {
-                      ...lc.anchor,
-                      x: lc.anchor.x + diff
-                    }
-                  }
-                ]
-              }, [])
-            } as Btwx.Text
-          }
-        }
-      }
-      if (descendantItem.type !== 'Group') {
-        result = updateLayerTweensByProps(result, current, ['x']);
-      }
-      return result;
-    }, currentState);
-  } else {
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
-  }
+  // const diff = x - layerItem.frame.x;
+  currentState = setLayerX(currentState, layerActions.setLayerX({
+    id: action.payload.id,
+    x: x
+  }) as SetLayerX);
+  // currentState = {
+  //   ...currentState,
+  //   byId: {
+  //     ...currentState.byId,
+  //     [action.payload.id]: {
+  //       ...currentState.byId[action.payload.id],
+  //       frame: {
+  //         ...currentState.byId[action.payload.id].frame,
+  //         x: x
+  //       }
+  //     }
+  //   }
+  // }
+  // if (isShape) {
+  //   currentState = {
+  //     ...currentState,
+  //     byId: {
+  //       ...currentState.byId,
+  //       [action.payload.id]: {
+  //         ...currentState.byId[action.payload.id],
+  //         segments: (currentState.byId[action.payload.id] as Btwx.Shape).segments.map((segment) => {
+  //           return segment.map((segmentPoint) => [segmentPoint[0] + diff, segmentPoint[1]]);
+  //         })
+  //       } as Btwx.Shape
+  //     }
+  //   }
+  // }
+  // if (isText) {
+  //   currentState = {
+  //     ...currentState,
+  //     byId: {
+  //       ...currentState.byId,
+  //       [action.payload.id]: {
+  //         ...currentState.byId[action.payload.id],
+  //         point: {
+  //           ...(currentState.byId[action.payload.id] as Btwx.Text).point,
+  //           x: (currentState.byId[action.payload.id] as Btwx.Text).point.x + diff
+  //         },
+  //         lines: (currentState.byId[action.payload.id] as Btwx.Text).lines.reduce((lr, lc) => {
+  //           return [
+  //             ...lr,
+  //             {
+  //               ...lc,
+  //               frame: {
+  //                 ...lc.frame,
+  //                 x: lc.frame.x + diff
+  //               },
+  //               anchor: {
+  //                 ...lc.anchor,
+  //                 x: lc.anchor.x + diff
+  //               }
+  //             }
+  //           ]
+  //         }, [])
+  //       } as Btwx.Text
+  //     }
+  //   }
+  // }
+  // currentState = updateGroupParentBounds(currentState, groupParents);
+  // if (layerItem.type === 'Group' || layerItem.type === 'CompoundShape') {
+  //   const layerDescendants = getLayerDescendants(currentState, action.payload.id);
+  //   currentState = layerDescendants.reduce((result, current) => {
+  //     const descendantItem = result.byId[current];
+  //     const isText = descendantItem.type === 'Text';
+  //     const isShape = descendantItem.type === 'Shape';
+  //     result = {
+  //       ...result,
+  //       byId: {
+  //         ...result.byId,
+  //         [current]: {
+  //           ...result.byId[current],
+  //           frame: {
+  //             ...result.byId[current].frame,
+  //             x: result.byId[current].frame.x + diff
+  //           }
+  //         }
+  //       }
+  //     }
+  //     if (isShape) {
+  //       result = {
+  //         ...result,
+  //         byId: {
+  //           ...result.byId,
+  //           [current]: {
+  //             ...result.byId[current],
+  //             segments: (result.byId[current] as Btwx.Shape).segments.map((segment) => {
+  //               return segment.map((segmentPoint) => [segmentPoint[0] + diff, segmentPoint[1]]);
+  //             })
+  //           } as Btwx.Shape
+  //         }
+  //       }
+  //     }
+  //     if (isText) {
+  //       result = {
+  //         ...result,
+  //         byId: {
+  //           ...result.byId,
+  //           [current]: {
+  //             ...result.byId[current],
+  //             point: {
+  //               ...(result.byId[current] as Btwx.Text).point,
+  //               x: (result.byId[current] as Btwx.Text).point.x + diff
+  //             },
+  //             lines: (result.byId[current] as Btwx.Text).lines.reduce((lr, lc) => {
+  //               return [
+  //                 ...lr,
+  //                 {
+  //                   ...lc,
+  //                   frame: {
+  //                     ...lc.frame,
+  //                     x: lc.frame.x + diff
+  //                   },
+  //                   anchor: {
+  //                     ...lc.anchor,
+  //                     x: lc.anchor.x + diff
+  //                   }
+  //                 }
+  //               ]
+  //             }, [])
+  //           } as Btwx.Text
+  //         }
+  //       }
+  //     }
+  //     if (descendantItem.type !== 'Group') {
+  //       result = updateLayerTweensByProps(result, current, ['x']);
+  //     }
+  //     return result;
+  //   }, currentState);
+  // } else {
+  //   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
+  // }
   return currentState;
 };
 
 export const setLayersLeft = (state: LayerState, action: SetLayersLeft): LayerState => {
   let currentState = state;
   currentState = action.payload.layers.reduce((result, current) => {
-    const segments = action.payload.segments ? action.payload.segments[current] : null;
     return setLayerLeft(result, layerActions.setLayerLeft({
       id: current,
-      left: action.payload.left,
-      segments
+      left: action.payload.left
     }) as SetLayerLeft);
   }, state);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
@@ -5579,150 +5625,144 @@ export const setLayerCenter = (state: LayerState, action: SetLayerCenter): Layer
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
   const isArtboard = layerItem.type === 'Artboard';
-  const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
-  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
-  const diff = action.payload.center - layerItem.frame.x;
-  currentState = {
-    ...currentState,
-    byId: {
-      ...currentState.byId,
-      [action.payload.id]: {
-        ...currentState.byId[action.payload.id],
-        frame: {
-          ...currentState.byId[action.payload.id].frame,
-          x: action.payload.center
-        }
-      }
-    }
-  }
-  if (layerItem.type === 'Text') {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          point: {
-            ...(currentState.byId[action.payload.id] as Btwx.Text).point,
-            x: (currentState.byId[action.payload.id] as Btwx.Text).point.x + diff
-          },
-          lines: (currentState.byId[action.payload.id] as Btwx.Text).lines.reduce((lr, lc) => {
-            return [
-              ...lr,
-              {
-                ...lc,
-                frame: {
-                  ...lc.frame,
-                  x: lc.frame.x + diff
-                },
-                anchor: {
-                  ...lc.anchor,
-                  x: lc.anchor.x + diff
-                }
-              }
-            ]
-          }, [])
-        } as Btwx.Text
-      }
-    }
-  }
-  if (isLine) {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          from: {
-            ...(currentState.byId[action.payload.id] as Btwx.Line).from,
-            x: (currentState.byId[action.payload.id] as Btwx.Line).from.x + diff
-          },
-          to: {
-            ...(currentState.byId[action.payload.id] as Btwx.Line).to,
-            x: (currentState.byId[action.payload.id] as Btwx.Line).to.x + diff
-          }
-        } as Btwx.Line
-      }
-    }
-  }
-  currentState = updateGroupParentBounds(currentState, groupParents);
-  if (layerItem.type === 'Group') {
-    const layerDescendants = getLayerDescendants(currentState, action.payload.id);
-    currentState = layerDescendants.reduce((result, current) => {
-      const descendantItem = result.byId[current];
-      const isLine = descendantItem.type === 'Shape' && (descendantItem as Btwx.Shape).shapeType === 'Line';
-      const isText = descendantItem.type === 'Text';
-      result = {
-        ...result,
-        byId: {
-          ...result.byId,
-          [current]: {
-            ...result.byId[current],
-            frame: {
-              ...result.byId[current].frame,
-              x: result.byId[current].frame.x + diff
-            }
-          }
-        }
-      }
-      if (isText) {
-        result = {
-          ...result,
-          byId: {
-            ...result.byId,
-            [current]: {
-              ...result.byId[current],
-              point: {
-                ...(result.byId[current] as Btwx.Text).point,
-                x: (result.byId[current] as Btwx.Text).point.x + diff
-              },
-              lines: (result.byId[current] as Btwx.Text).lines.reduce((lr, lc) => {
-                return [
-                  ...lr,
-                  {
-                    ...lc,
-                    frame: {
-                      ...lc.frame,
-                      x: lc.frame.x + diff
-                    },
-                    anchor: {
-                      ...lc.anchor,
-                      x: lc.anchor.x + diff
-                    }
-                  }
-                ]
-              }, [])
-            } as Btwx.Text
-          }
-        }
-      }
-      if (isLine) {
-        result = {
-          ...result,
-          byId: {
-            ...result.byId,
-            [current]: {
-              ...result.byId[current],
-              from: {
-                ...(result.byId[current] as Btwx.Line).from,
-                x: (result.byId[current] as Btwx.Line).from.x + diff
-              },
-              to: {
-                ...(result.byId[current] as Btwx.Line).to,
-                x: (result.byId[current] as Btwx.Line).to.x + diff
-              }
-            } as Btwx.Line
-          }
-        }
-      }
-      if (descendantItem.type !== 'Group') {
-        result = updateLayerTweensByProps(result, current, ['x']);
-      }
-      return result;
-    }, currentState);
-  } else {
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
-  }
+  // const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
+  // const isShape = layerItem.type === 'Shape';
+  // const diff = action.payload.center - layerItem.frame.x;
+  currentState = setLayerX(currentState, layerActions.setLayerX({
+    id: action.payload.id,
+    x: action.payload.center
+  }) as SetLayerX);
+  // currentState = {
+  //   ...currentState,
+  //   byId: {
+  //     ...currentState.byId,
+  //     [action.payload.id]: {
+  //       ...currentState.byId[action.payload.id],
+  //       frame: {
+  //         ...currentState.byId[action.payload.id].frame,
+  //         x: action.payload.center
+  //       }
+  //     }
+  //   }
+  // }
+  // if (isShape) {
+  //   currentState = {
+  //     ...currentState,
+  //     byId: {
+  //       ...currentState.byId,
+  //       [action.payload.id]: {
+  //         ...currentState.byId[action.payload.id],
+  //         segments: (currentState.byId[action.payload.id] as Btwx.Shape).segments.map((segment) => {
+  //           return segment.map((segmentPoint) => [segmentPoint[0] + diff, segmentPoint[1]]);
+  //         })
+  //       } as Btwx.Shape
+  //     }
+  //   }
+  // }
+  // if (layerItem.type === 'Text') {
+  //   currentState = {
+  //     ...currentState,
+  //     byId: {
+  //       ...currentState.byId,
+  //       [action.payload.id]: {
+  //         ...currentState.byId[action.payload.id],
+  //         point: {
+  //           ...(currentState.byId[action.payload.id] as Btwx.Text).point,
+  //           x: (currentState.byId[action.payload.id] as Btwx.Text).point.x + diff
+  //         },
+  //         lines: (currentState.byId[action.payload.id] as Btwx.Text).lines.reduce((lr, lc) => {
+  //           return [
+  //             ...lr,
+  //             {
+  //               ...lc,
+  //               frame: {
+  //                 ...lc.frame,
+  //                 x: lc.frame.x + diff
+  //               },
+  //               anchor: {
+  //                 ...lc.anchor,
+  //                 x: lc.anchor.x + diff
+  //               }
+  //             }
+  //           ]
+  //         }, [])
+  //       } as Btwx.Text
+  //     }
+  //   }
+  // }
+  // currentState = updateGroupParentBounds(currentState, groupParents);
+  // if (layerItem.type === 'Group' || layerItem.type === 'CompoundShape') {
+  //   const layerDescendants = getLayerDescendants(currentState, action.payload.id);
+  //   currentState = layerDescendants.reduce((result, current) => {
+  //     const descendantItem = result.byId[current];
+  //     const isShape = descendantItem.type === 'Shape';
+  //     const isText = descendantItem.type === 'Text';
+  //     result = {
+  //       ...result,
+  //       byId: {
+  //         ...result.byId,
+  //         [current]: {
+  //           ...result.byId[current],
+  //           frame: {
+  //             ...result.byId[current].frame,
+  //             x: result.byId[current].frame.x + diff
+  //           }
+  //         }
+  //       }
+  //     }
+  //     if (isShape) {
+  //       result = {
+  //         ...result,
+  //         byId: {
+  //           ...result.byId,
+  //           [current]: {
+  //             ...result.byId[current],
+  //             segments: (result.byId[current] as Btwx.Shape).segments.map((segment) => {
+  //               return segment.map((segmentPoint) => [segmentPoint[0] + diff, segmentPoint[1]]);
+  //             })
+  //           } as Btwx.Shape
+  //         }
+  //       }
+  //     }
+  //     if (isText) {
+  //       result = {
+  //         ...result,
+  //         byId: {
+  //           ...result.byId,
+  //           [current]: {
+  //             ...result.byId[current],
+  //             point: {
+  //               ...(result.byId[current] as Btwx.Text).point,
+  //               x: (result.byId[current] as Btwx.Text).point.x + diff
+  //             },
+  //             lines: (result.byId[current] as Btwx.Text).lines.reduce((lr, lc) => {
+  //               return [
+  //                 ...lr,
+  //                 {
+  //                   ...lc,
+  //                   frame: {
+  //                     ...lc.frame,
+  //                     x: lc.frame.x + diff
+  //                   },
+  //                   anchor: {
+  //                     ...lc.anchor,
+  //                     x: lc.anchor.x + diff
+  //                   }
+  //                 }
+  //               ]
+  //             }, [])
+  //           } as Btwx.Text
+  //         }
+  //       }
+  //     }
+  //     if (descendantItem.type !== 'Group') {
+  //       result = updateLayerTweensByProps(result, current, ['x']);
+  //     }
+  //     return result;
+  //   }, currentState);
+  // } else {
+  //   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
+  // }
   return currentState;
 };
 
@@ -5749,151 +5789,145 @@ export const setLayerRight = (state: LayerState, action: SetLayerRight): LayerSt
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
   const isArtboard = layerItem.type === 'Artboard';
-  const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
-  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
+  // const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
+  // const isShape = layerItem.type === 'Shape';
   const x = action.payload.right - (layerItem.frame.width / 2);
-  const diff = x - layerItem.frame.x;
-  currentState = {
-    ...currentState,
-    byId: {
-      ...currentState.byId,
-      [action.payload.id]: {
-        ...currentState.byId[action.payload.id],
-        frame: {
-          ...currentState.byId[action.payload.id].frame,
-          x: x
-        }
-      }
-    }
-  }
-  if (layerItem.type === 'Text') {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          point: {
-            ...(currentState.byId[action.payload.id] as Btwx.Text).point,
-            x: (currentState.byId[action.payload.id] as Btwx.Text).point.x + diff
-          },
-          lines: (currentState.byId[action.payload.id] as Btwx.Text).lines.reduce((lr, lc) => {
-            return [
-              ...lr,
-              {
-                ...lc,
-                frame: {
-                  ...lc.frame,
-                  x: lc.frame.x + diff
-                },
-                anchor: {
-                  ...lc.anchor,
-                  x: lc.anchor.x + diff
-                }
-              }
-            ]
-          }, [])
-        } as Btwx.Text
-      }
-    }
-  }
-  if (isLine) {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          from: {
-            ...(currentState.byId[action.payload.id] as Btwx.Line).from,
-            x: (currentState.byId[action.payload.id] as Btwx.Line).from.x + diff
-          },
-          to: {
-            ...(currentState.byId[action.payload.id] as Btwx.Line).to,
-            x: (currentState.byId[action.payload.id] as Btwx.Line).to.x + diff
-          }
-        } as Btwx.Line
-      }
-    }
-  }
-  currentState = updateGroupParentBounds(currentState, groupParents);
-  if (layerItem.type === 'Group') {
-    const layerDescendants = getLayerDescendants(currentState, action.payload.id);
-    currentState = layerDescendants.reduce((result, current) => {
-      const descendantItem = result.byId[current];
-      const isLine = descendantItem.type === 'Shape' && (descendantItem as Btwx.Shape).shapeType === 'Line';
-      const isText = descendantItem.type === 'Text';
-      result = {
-        ...result,
-        byId: {
-          ...result.byId,
-          [current]: {
-            ...result.byId[current],
-            frame: {
-              ...result.byId[current].frame,
-              x: result.byId[current].frame.x + diff
-            }
-          }
-        }
-      }
-      if (isText) {
-        result = {
-          ...result,
-          byId: {
-            ...result.byId,
-            [current]: {
-              ...result.byId[current],
-              point: {
-                ...(result.byId[current] as Btwx.Text).point,
-                x: (result.byId[current] as Btwx.Text).point.x + diff
-              },
-              lines: (result.byId[current] as Btwx.Text).lines.reduce((lr, lc) => {
-                return [
-                  ...lr,
-                  {
-                    ...lc,
-                    frame: {
-                      ...lc.frame,
-                      x: lc.frame.x + diff
-                    },
-                    anchor: {
-                      ...lc.anchor,
-                      x: lc.anchor.x + diff
-                    }
-                  }
-                ]
-              }, [])
-            } as Btwx.Text
-          }
-        }
-      }
-      if (isLine) {
-        result = {
-          ...result,
-          byId: {
-            ...result.byId,
-            [current]: {
-              ...result.byId[current],
-              from: {
-                ...(result.byId[current] as Btwx.Line).from,
-                x: (result.byId[current] as Btwx.Line).from.x + diff
-              },
-              to: {
-                ...(result.byId[current] as Btwx.Line).to,
-                x: (result.byId[current] as Btwx.Line).to.x + diff
-              }
-            } as Btwx.Line
-          }
-        }
-      }
-      if (descendantItem.type !== 'Group') {
-        result = updateLayerTweensByProps(result, current, ['x']);
-      }
-      return result;
-    }, currentState);
-  } else {
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
-  }
+  currentState = setLayerX(currentState, layerActions.setLayerX({
+    id: action.payload.id,
+    x: x
+  }) as SetLayerX);
+  // const diff = x - layerItem.frame.x;
+  // currentState = {
+  //   ...currentState,
+  //   byId: {
+  //     ...currentState.byId,
+  //     [action.payload.id]: {
+  //       ...currentState.byId[action.payload.id],
+  //       frame: {
+  //         ...currentState.byId[action.payload.id].frame,
+  //         x: x
+  //       }
+  //     }
+  //   }
+  // }
+  // if (isShape) {
+  //   currentState = {
+  //     ...currentState,
+  //     byId: {
+  //       ...currentState.byId,
+  //       [action.payload.id]: {
+  //         ...currentState.byId[action.payload.id],
+  //         segments: (currentState.byId[action.payload.id] as Btwx.Shape).segments.map((segment) => {
+  //           return segment.map((segmentPoint) => [segmentPoint[0] + diff, segmentPoint[1]]);
+  //         })
+  //       } as Btwx.Shape
+  //     }
+  //   }
+  // }
+  // if (layerItem.type === 'Text') {
+  //   currentState = {
+  //     ...currentState,
+  //     byId: {
+  //       ...currentState.byId,
+  //       [action.payload.id]: {
+  //         ...currentState.byId[action.payload.id],
+  //         point: {
+  //           ...(currentState.byId[action.payload.id] as Btwx.Text).point,
+  //           x: (currentState.byId[action.payload.id] as Btwx.Text).point.x + diff
+  //         },
+  //         lines: (currentState.byId[action.payload.id] as Btwx.Text).lines.reduce((lr, lc) => {
+  //           return [
+  //             ...lr,
+  //             {
+  //               ...lc,
+  //               frame: {
+  //                 ...lc.frame,
+  //                 x: lc.frame.x + diff
+  //               },
+  //               anchor: {
+  //                 ...lc.anchor,
+  //                 x: lc.anchor.x + diff
+  //               }
+  //             }
+  //           ]
+  //         }, [])
+  //       } as Btwx.Text
+  //     }
+  //   }
+  // }
+  // currentState = updateGroupParentBounds(currentState, groupParents);
+  // if (layerItem.type === 'Group' || layerItem.type === 'CompoundShape') {
+  //   const layerDescendants = getLayerDescendants(currentState, action.payload.id);
+  //   currentState = layerDescendants.reduce((result, current) => {
+  //     const descendantItem = result.byId[current];
+  //     const isShape = descendantItem.type === 'Shape';
+  //     const isText = descendantItem.type === 'Text';
+  //     result = {
+  //       ...result,
+  //       byId: {
+  //         ...result.byId,
+  //         [current]: {
+  //           ...result.byId[current],
+  //           frame: {
+  //             ...result.byId[current].frame,
+  //             x: result.byId[current].frame.x + diff
+  //           }
+  //         }
+  //       }
+  //     }
+  //     if (isShape) {
+  //       result = {
+  //         ...result,
+  //         byId: {
+  //           ...result.byId,
+  //           [current]: {
+  //             ...result.byId[current],
+  //             segments: (result.byId[current] as Btwx.Shape).segments.map((segment) => {
+  //               return segment.map((segmentPoint) => [segmentPoint[0] + diff, segmentPoint[1]]);
+  //             })
+  //           } as Btwx.Shape
+  //         }
+  //       }
+  //     }
+  //     if (isText) {
+  //       result = {
+  //         ...result,
+  //         byId: {
+  //           ...result.byId,
+  //           [current]: {
+  //             ...result.byId[current],
+  //             point: {
+  //               ...(result.byId[current] as Btwx.Text).point,
+  //               x: (result.byId[current] as Btwx.Text).point.x + diff
+  //             },
+  //             lines: (result.byId[current] as Btwx.Text).lines.reduce((lr, lc) => {
+  //               return [
+  //                 ...lr,
+  //                 {
+  //                   ...lc,
+  //                   frame: {
+  //                     ...lc.frame,
+  //                     x: lc.frame.x + diff
+  //                   },
+  //                   anchor: {
+  //                     ...lc.anchor,
+  //                     x: lc.anchor.x + diff
+  //                   }
+  //                 }
+  //               ]
+  //             }, [])
+  //           } as Btwx.Text
+  //         }
+  //       }
+  //     }
+  //     if (descendantItem.type !== 'Group') {
+  //       result = updateLayerTweensByProps(result, current, ['x']);
+  //     }
+  //     return result;
+  //   }, currentState);
+  // } else {
+  //   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['x']);
+  // }
   return currentState;
 };
 
@@ -5920,151 +5954,145 @@ export const setLayerTop = (state: LayerState, action: SetLayerTop): LayerState 
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
   const isArtboard = layerItem.type === 'Artboard';
-  const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
-  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
+  // const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
+  // const isShape = layerItem.type === 'Shape';
   const y = action.payload.top + (layerItem.frame.height / 2);
-  const diff = y - layerItem.frame.y;
-  currentState = {
-    ...currentState,
-    byId: {
-      ...currentState.byId,
-      [action.payload.id]: {
-        ...currentState.byId[action.payload.id],
-        frame: {
-          ...currentState.byId[action.payload.id].frame,
-          y: y
-        }
-      }
-    }
-  }
-  if (layerItem.type === 'Text') {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          point: {
-            ...(currentState.byId[action.payload.id] as Btwx.Text).point,
-            y: (currentState.byId[action.payload.id] as Btwx.Text).point.y + diff
-          },
-          lines: (currentState.byId[action.payload.id] as Btwx.Text).lines.reduce((lr, lc) => {
-            return [
-              ...lr,
-              {
-                ...lc,
-                frame: {
-                  ...lc.frame,
-                  y: lc.frame.y + diff
-                },
-                anchor: {
-                  ...lc.anchor,
-                  y: lc.anchor.y + diff
-                }
-              }
-            ]
-          }, [])
-        } as Btwx.Text
-      }
-    }
-  }
-  if (isLine) {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          from: {
-            ...(currentState.byId[action.payload.id] as Btwx.Line).from,
-            y: (currentState.byId[action.payload.id] as Btwx.Line).from.y + diff
-          },
-          to: {
-            ...(currentState.byId[action.payload.id] as Btwx.Line).to,
-            y: (currentState.byId[action.payload.id] as Btwx.Line).to.y + diff
-          }
-        } as Btwx.Line
-      }
-    }
-  }
-  currentState = updateGroupParentBounds(currentState, groupParents);
-  if (layerItem.type === 'Group') {
-    const layerDescendants = getLayerDescendants(currentState, action.payload.id);
-    currentState = layerDescendants.reduce((result, current) => {
-      const descendantItem = result.byId[current];
-      const isLine = descendantItem.type === 'Shape' && (descendantItem as Btwx.Shape).shapeType === 'Line';
-      const isText = descendantItem.type === 'Text';
-      result = {
-        ...result,
-        byId: {
-          ...result.byId,
-          [current]: {
-            ...result.byId[current],
-            frame: {
-              ...result.byId[current].frame,
-              y: result.byId[current].frame.y + diff
-            }
-          }
-        }
-      }
-      if (isText) {
-        result = {
-          ...result,
-          byId: {
-            ...result.byId,
-            [current]: {
-              ...result.byId[current],
-              point: {
-                ...(result.byId[current] as Btwx.Text).point,
-                y: (result.byId[current] as Btwx.Text).point.y + diff
-              },
-              lines: (result.byId[current] as Btwx.Text).lines.reduce((lr, lc) => {
-                return [
-                  ...lr,
-                  {
-                    ...lc,
-                    frame: {
-                      ...lc.frame,
-                      y: lc.frame.y + diff
-                    },
-                    anchor: {
-                      ...lc.anchor,
-                      y: lc.anchor.y + diff
-                    }
-                  }
-                ]
-              }, [])
-            } as Btwx.Text
-          }
-        }
-      }
-      if (isLine) {
-        result = {
-          ...result,
-          byId: {
-            ...result.byId,
-            [current]: {
-              ...result.byId[current],
-              from: {
-                ...(result.byId[current] as Btwx.Line).from,
-                y: (result.byId[current] as Btwx.Line).from.y + diff
-              },
-              to: {
-                ...(result.byId[current] as Btwx.Line).to,
-                y: (result.byId[current] as Btwx.Line).to.y + diff
-              }
-            } as Btwx.Line
-          }
-        }
-      }
-      if (descendantItem.type !== 'Group') {
-        result = updateLayerTweensByProps(result, current, ['y']);
-      }
-      return result;
-    }, currentState);
-  } else {
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
-  }
+  // const diff = y - layerItem.frame.y;
+  currentState = setLayerY(currentState, layerActions.setLayerY({
+    id: action.payload.id,
+    y: y
+  }) as SetLayerY);
+  // currentState = {
+  //   ...currentState,
+  //   byId: {
+  //     ...currentState.byId,
+  //     [action.payload.id]: {
+  //       ...currentState.byId[action.payload.id],
+  //       frame: {
+  //         ...currentState.byId[action.payload.id].frame,
+  //         y: y
+  //       }
+  //     }
+  //   }
+  // }
+  // if (isShape) {
+  //   currentState = {
+  //     ...currentState,
+  //     byId: {
+  //       ...currentState.byId,
+  //       [action.payload.id]: {
+  //         ...currentState.byId[action.payload.id],
+  //         segments: (currentState.byId[action.payload.id] as Btwx.Shape).segments.map((segment) => {
+  //           return segment.map((segmentPoint) => [segmentPoint[0], segmentPoint[1] + diff]);
+  //         })
+  //       } as Btwx.Shape
+  //     }
+  //   }
+  // }
+  // if (layerItem.type === 'Text') {
+  //   currentState = {
+  //     ...currentState,
+  //     byId: {
+  //       ...currentState.byId,
+  //       [action.payload.id]: {
+  //         ...currentState.byId[action.payload.id],
+  //         point: {
+  //           ...(currentState.byId[action.payload.id] as Btwx.Text).point,
+  //           y: (currentState.byId[action.payload.id] as Btwx.Text).point.y + diff
+  //         },
+  //         lines: (currentState.byId[action.payload.id] as Btwx.Text).lines.reduce((lr, lc) => {
+  //           return [
+  //             ...lr,
+  //             {
+  //               ...lc,
+  //               frame: {
+  //                 ...lc.frame,
+  //                 y: lc.frame.y + diff
+  //               },
+  //               anchor: {
+  //                 ...lc.anchor,
+  //                 y: lc.anchor.y + diff
+  //               }
+  //             }
+  //           ]
+  //         }, [])
+  //       } as Btwx.Text
+  //     }
+  //   }
+  // }
+  // currentState = updateGroupParentBounds(currentState, groupParents);
+  // if (layerItem.type === 'Group') {
+  //   const layerDescendants = getLayerDescendants(currentState, action.payload.id);
+  //   currentState = layerDescendants.reduce((result, current) => {
+  //     const descendantItem = result.byId[current];
+  //     const isShape = descendantItem.type === 'Shape';
+  //     const isText = descendantItem.type === 'Text';
+  //     result = {
+  //       ...result,
+  //       byId: {
+  //         ...result.byId,
+  //         [current]: {
+  //           ...result.byId[current],
+  //           frame: {
+  //             ...result.byId[current].frame,
+  //             y: result.byId[current].frame.y + diff
+  //           }
+  //         }
+  //       }
+  //     }
+  //     if (isShape) {
+  //       result = {
+  //         ...result,
+  //         byId: {
+  //           ...result.byId,
+  //           [current]: {
+  //             ...result.byId[current],
+  //             segments: (result.byId[current] as Btwx.Shape).segments.map((segment) => {
+  //               return segment.map((segmentPoint) => [segmentPoint[0], segmentPoint[1] + diff]);
+  //             })
+  //           } as Btwx.Shape
+  //         }
+  //       }
+  //     }
+  //     if (isText) {
+  //       result = {
+  //         ...result,
+  //         byId: {
+  //           ...result.byId,
+  //           [current]: {
+  //             ...result.byId[current],
+  //             point: {
+  //               ...(result.byId[current] as Btwx.Text).point,
+  //               y: (result.byId[current] as Btwx.Text).point.y + diff
+  //             },
+  //             lines: (result.byId[current] as Btwx.Text).lines.reduce((lr, lc) => {
+  //               return [
+  //                 ...lr,
+  //                 {
+  //                   ...lc,
+  //                   frame: {
+  //                     ...lc.frame,
+  //                     y: lc.frame.y + diff
+  //                   },
+  //                   anchor: {
+  //                     ...lc.anchor,
+  //                     y: lc.anchor.y + diff
+  //                   }
+  //                 }
+  //               ]
+  //             }, [])
+  //           } as Btwx.Text
+  //         }
+  //       }
+  //     }
+  //     if (descendantItem.type !== 'Group') {
+  //       result = updateLayerTweensByProps(result, current, ['y']);
+  //     }
+  //     return result;
+  //   }, currentState);
+  // } else {
+  //   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
+  // }
   return currentState;
 };
 
@@ -6089,152 +6117,146 @@ export const setLayersTop = (state: LayerState, action: SetLayersTop): LayerStat
 
 export const setLayerMiddle = (state: LayerState, action: SetLayerMiddle): LayerState => {
   let currentState = state;
-  const layerItem = currentState.byId[action.payload.id];
-  const isArtboard = layerItem.type === 'Artboard';
-  const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
-  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
-  const diff = action.payload.middle - layerItem.frame.y;
-  currentState = {
-    ...currentState,
-    byId: {
-      ...currentState.byId,
-      [action.payload.id]: {
-        ...currentState.byId[action.payload.id],
-        frame: {
-          ...currentState.byId[action.payload.id].frame,
-          y: action.payload.middle
-        }
-      }
-    }
-  }
-  if (layerItem.type === 'Text') {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          point: {
-            ...(currentState.byId[action.payload.id] as Btwx.Text).point,
-            y: (currentState.byId[action.payload.id] as Btwx.Text).point.y + diff
-          },
-          lines: (currentState.byId[action.payload.id] as Btwx.Text).lines.reduce((lr, lc) => {
-            return [
-              ...lr,
-              {
-                ...lc,
-                frame: {
-                  ...lc.frame,
-                  y: lc.frame.y + diff
-                },
-                anchor: {
-                  ...lc.anchor,
-                  y: lc.anchor.y + diff
-                }
-              }
-            ]
-          }, [])
-        } as Btwx.Text
-      }
-    }
-  }
-  if (isLine) {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          from: {
-            ...(currentState.byId[action.payload.id] as Btwx.Line).from,
-            y: (currentState.byId[action.payload.id] as Btwx.Line).from.y + diff
-          },
-          to: {
-            ...(currentState.byId[action.payload.id] as Btwx.Line).to,
-            y: (currentState.byId[action.payload.id] as Btwx.Line).to.y + diff
-          }
-        } as Btwx.Line
-      }
-    }
-  }
-  currentState = updateGroupParentBounds(currentState, groupParents);
-  if (layerItem.type === 'Group') {
-    const layerDescendants = getLayerDescendants(currentState, action.payload.id);
-    currentState = layerDescendants.reduce((result, current) => {
-      const descendantItem = result.byId[current];
-      const isLine = descendantItem.type === 'Shape' && (descendantItem as Btwx.Shape).shapeType === 'Line';
-      const isText = descendantItem.type === 'Text';
-      result = {
-        ...result,
-        byId: {
-          ...result.byId,
-          [current]: {
-            ...result.byId[current],
-            frame: {
-              ...result.byId[current].frame,
-              y: result.byId[current].frame.y + diff
-            }
-          }
-        }
-      }
-      if (isText) {
-        result = {
-          ...result,
-          byId: {
-            ...result.byId,
-            [current]: {
-              ...result.byId[current],
-              point: {
-                ...(result.byId[current] as Btwx.Text).point,
-                y: (result.byId[current] as Btwx.Text).point.y + diff
-              },
-              lines: (result.byId[current] as Btwx.Text).lines.reduce((lr, lc) => {
-                return [
-                  ...lr,
-                  {
-                    ...lc,
-                    frame: {
-                      ...lc.frame,
-                      y: lc.frame.y + diff
-                    },
-                    anchor: {
-                      ...lc.anchor,
-                      y: lc.anchor.y + diff
-                    }
-                  }
-                ]
-              }, [])
-            } as Btwx.Text
-          }
-        }
-      }
-      if (isLine) {
-        result = {
-          ...result,
-          byId: {
-            ...result.byId,
-            [current]: {
-              ...result.byId[current],
-              from: {
-                ...(result.byId[current] as Btwx.Line).from,
-                y: (result.byId[current] as Btwx.Line).from.y + diff
-              },
-              to: {
-                ...(result.byId[current] as Btwx.Line).to,
-                y: (result.byId[current] as Btwx.Line).to.y + diff
-              }
-            } as Btwx.Line
-          }
-        }
-      }
-      if (descendantItem.type !== 'Group') {
-        result = updateLayerTweensByProps(result, current, ['y']);
-      }
-      return result;
-    }, currentState);
-  } else {
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
-  }
+  // const layerItem = currentState.byId[action.payload.id];
+  // const isArtboard = layerItem.type === 'Artboard';
+  // const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
+  // const isShape = layerItem.type === 'Shape';
+  // const diff = action.payload.middle - layerItem.frame.y;
+  currentState = setLayerY(currentState, layerActions.setLayerY({
+    id: action.payload.id,
+    y: action.payload.middle
+  }) as SetLayerY);
+  // currentState = {
+  //   ...currentState,
+  //   byId: {
+  //     ...currentState.byId,
+  //     [action.payload.id]: {
+  //       ...currentState.byId[action.payload.id],
+  //       frame: {
+  //         ...currentState.byId[action.payload.id].frame,
+  //         y: action.payload.middle
+  //       }
+  //     }
+  //   }
+  // }
+  // if (isShape) {
+  //   currentState = {
+  //     ...currentState,
+  //     byId: {
+  //       ...currentState.byId,
+  //       [action.payload.id]: {
+  //         ...currentState.byId[action.payload.id],
+  //         segments: (currentState.byId[action.payload.id] as Btwx.Shape).segments.map((segment) => {
+  //           return segment.map((segmentPoint) => [segmentPoint[0], segmentPoint[1] + diff]);
+  //         })
+  //       } as Btwx.Shape
+  //     }
+  //   }
+  // }
+  // if (layerItem.type === 'Text') {
+  //   currentState = {
+  //     ...currentState,
+  //     byId: {
+  //       ...currentState.byId,
+  //       [action.payload.id]: {
+  //         ...currentState.byId[action.payload.id],
+  //         point: {
+  //           ...(currentState.byId[action.payload.id] as Btwx.Text).point,
+  //           y: (currentState.byId[action.payload.id] as Btwx.Text).point.y + diff
+  //         },
+  //         lines: (currentState.byId[action.payload.id] as Btwx.Text).lines.reduce((lr, lc) => {
+  //           return [
+  //             ...lr,
+  //             {
+  //               ...lc,
+  //               frame: {
+  //                 ...lc.frame,
+  //                 y: lc.frame.y + diff
+  //               },
+  //               anchor: {
+  //                 ...lc.anchor,
+  //                 y: lc.anchor.y + diff
+  //               }
+  //             }
+  //           ]
+  //         }, [])
+  //       } as Btwx.Text
+  //     }
+  //   }
+  // }
+  // currentState = updateGroupParentBounds(currentState, groupParents);
+  // if (layerItem.type === 'Group') {
+  //   const layerDescendants = getLayerDescendants(currentState, action.payload.id);
+  //   currentState = layerDescendants.reduce((result, current) => {
+  //     const descendantItem = result.byId[current];
+  //     const isShape = descendantItem.type === 'Shape';
+  //     const isText = descendantItem.type === 'Text';
+  //     result = {
+  //       ...result,
+  //       byId: {
+  //         ...result.byId,
+  //         [current]: {
+  //           ...result.byId[current],
+  //           frame: {
+  //             ...result.byId[current].frame,
+  //             y: result.byId[current].frame.y + diff
+  //           }
+  //         }
+  //       }
+  //     }
+  //     if (isShape) {
+  //       result = {
+  //         ...result,
+  //         byId: {
+  //           ...result.byId,
+  //           [current]: {
+  //             ...result.byId[current],
+  //             segments: (result.byId[current] as Btwx.Shape).segments.map((segment) => {
+  //               return segment.map((segmentPoint) => [segmentPoint[0], segmentPoint[1] + diff]);
+  //             })
+  //           } as Btwx.Shape
+  //         }
+  //       }
+  //     }
+  //     if (isText) {
+  //       result = {
+  //         ...result,
+  //         byId: {
+  //           ...result.byId,
+  //           [current]: {
+  //             ...result.byId[current],
+  //             point: {
+  //               ...(result.byId[current] as Btwx.Text).point,
+  //               y: (result.byId[current] as Btwx.Text).point.y + diff
+  //             },
+  //             lines: (result.byId[current] as Btwx.Text).lines.reduce((lr, lc) => {
+  //               return [
+  //                 ...lr,
+  //                 {
+  //                   ...lc,
+  //                   frame: {
+  //                     ...lc.frame,
+  //                     y: lc.frame.y + diff
+  //                   },
+  //                   anchor: {
+  //                     ...lc.anchor,
+  //                     y: lc.anchor.y + diff
+  //                   }
+  //                 }
+  //               ]
+  //             }, [])
+  //           } as Btwx.Text
+  //         }
+  //       }
+  //     }
+  //     if (descendantItem.type !== 'Group') {
+  //       result = updateLayerTweensByProps(result, current, ['y']);
+  //     }
+  //     return result;
+  //   }, currentState);
+  // } else {
+  //   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
+  // }
   return currentState;
 };
 
@@ -6260,152 +6282,146 @@ export const setLayersMiddle = (state: LayerState, action: SetLayersMiddle): Lay
 export const setLayerBottom = (state: LayerState, action: SetLayerBottom): LayerState => {
   let currentState = state;
   const layerItem = currentState.byId[action.payload.id];
-  const isArtboard = layerItem.type === 'Artboard';
-  const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
-  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
+  // const isArtboard = layerItem.type === 'Artboard';
+  // const groupParents = isArtboard ? ['root'] : layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
+  // const isShape = layerItem.type === 'Shape';
   const y = action.payload.bottom - (layerItem.frame.height / 2);
-  const diff = y - layerItem.frame.y;
-  currentState = {
-    ...currentState,
-    byId: {
-      ...currentState.byId,
-      [action.payload.id]: {
-        ...currentState.byId[action.payload.id],
-        frame: {
-          ...currentState.byId[action.payload.id].frame,
-          y: currentState.byId[action.payload.id].frame.y + diff
-        }
-      }
-    }
-  }
-  if (layerItem.type === 'Text') {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          point: {
-            ...(currentState.byId[action.payload.id] as Btwx.Text).point,
-            y: (currentState.byId[action.payload.id] as Btwx.Text).point.y + diff
-          },
-          lines: (currentState.byId[action.payload.id] as Btwx.Text).lines.reduce((lr, lc) => {
-            return [
-              ...lr,
-              {
-                ...lc,
-                frame: {
-                  ...lc.frame,
-                  y: lc.frame.y + diff
-                },
-                anchor: {
-                  ...lc.anchor,
-                  y: lc.anchor.y + diff
-                }
-              }
-            ]
-          }, [])
-        } as Btwx.Text
-      }
-    }
-  }
-  if (isLine) {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          from: {
-            ...(currentState.byId[action.payload.id] as Btwx.Line).from,
-            y: (currentState.byId[action.payload.id] as Btwx.Line).from.y + diff
-          },
-          to: {
-            ...(currentState.byId[action.payload.id] as Btwx.Line).to,
-            y: (currentState.byId[action.payload.id] as Btwx.Line).to.y + diff
-          }
-        } as Btwx.Line
-      }
-    }
-  }
-  currentState = updateGroupParentBounds(currentState, groupParents);
-  if (layerItem.type === 'Group') {
-    const layerDescendants = getLayerDescendants(currentState, action.payload.id);
-    currentState = layerDescendants.reduce((result, current) => {
-      const descendantItem = result.byId[current];
-      const isLine = descendantItem.type === 'Shape' && (descendantItem as Btwx.Shape).shapeType === 'Line';
-      const isText = descendantItem.type === 'Text';
-      result = {
-        ...result,
-        byId: {
-          ...result.byId,
-          [current]: {
-            ...result.byId[current],
-            frame: {
-              ...result.byId[current].frame,
-              y: result.byId[current].frame.y + diff
-            }
-          }
-        }
-      }
-      if (isText) {
-        result = {
-          ...result,
-          byId: {
-            ...result.byId,
-            [current]: {
-              ...result.byId[current],
-              point: {
-                ...(result.byId[current] as Btwx.Text).point,
-                y: (result.byId[current] as Btwx.Text).point.y + diff
-              },
-              lines: (result.byId[current] as Btwx.Text).lines.reduce((lr, lc) => {
-                return [
-                  ...lr,
-                  {
-                    ...lc,
-                    frame: {
-                      ...lc.frame,
-                      y: lc.frame.y + diff
-                    },
-                    anchor: {
-                      ...lc.anchor,
-                      y: lc.anchor.y + diff
-                    }
-                  }
-                ]
-              }, [])
-            } as Btwx.Text
-          }
-        }
-      }
-      if (isLine) {
-        result = {
-          ...result,
-          byId: {
-            ...result.byId,
-            [current]: {
-              ...result.byId[current],
-              from: {
-                ...(result.byId[current] as Btwx.Line).from,
-                y: (result.byId[current] as Btwx.Line).from.y + diff
-              },
-              to: {
-                ...(result.byId[current] as Btwx.Line).to,
-                y: (result.byId[current] as Btwx.Line).to.y + diff
-              }
-            } as Btwx.Line
-          }
-        }
-      }
-      if (descendantItem.type !== 'Group') {
-        result = updateLayerTweensByProps(result, current, ['y']);
-      }
-      return result;
-    }, currentState);
-  } else {
-    currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
-  }
+  // const diff = y - layerItem.frame.y;
+  currentState = setLayerY(currentState, layerActions.setLayerY({
+    id: action.payload.id,
+    y: y
+  }) as SetLayerY);
+  // currentState = {
+  //   ...currentState,
+  //   byId: {
+  //     ...currentState.byId,
+  //     [action.payload.id]: {
+  //       ...currentState.byId[action.payload.id],
+  //       frame: {
+  //         ...currentState.byId[action.payload.id].frame,
+  //         y: currentState.byId[action.payload.id].frame.y + diff
+  //       }
+  //     }
+  //   }
+  // }
+  // if (isShape) {
+  //   currentState = {
+  //     ...currentState,
+  //     byId: {
+  //       ...currentState.byId,
+  //       [action.payload.id]: {
+  //         ...currentState.byId[action.payload.id],
+  //         segments: (currentState.byId[action.payload.id] as Btwx.Shape).segments.map((segment) => {
+  //           return segment.map((segmentPoint) => [segmentPoint[0], segmentPoint[1] + diff]);
+  //         })
+  //       } as Btwx.Shape
+  //     }
+  //   }
+  // }
+  // if (layerItem.type === 'Text') {
+  //   currentState = {
+  //     ...currentState,
+  //     byId: {
+  //       ...currentState.byId,
+  //       [action.payload.id]: {
+  //         ...currentState.byId[action.payload.id],
+  //         point: {
+  //           ...(currentState.byId[action.payload.id] as Btwx.Text).point,
+  //           y: (currentState.byId[action.payload.id] as Btwx.Text).point.y + diff
+  //         },
+  //         lines: (currentState.byId[action.payload.id] as Btwx.Text).lines.reduce((lr, lc) => {
+  //           return [
+  //             ...lr,
+  //             {
+  //               ...lc,
+  //               frame: {
+  //                 ...lc.frame,
+  //                 y: lc.frame.y + diff
+  //               },
+  //               anchor: {
+  //                 ...lc.anchor,
+  //                 y: lc.anchor.y + diff
+  //               }
+  //             }
+  //           ]
+  //         }, [])
+  //       } as Btwx.Text
+  //     }
+  //   }
+  // }
+  // currentState = updateGroupParentBounds(currentState, groupParents);
+  // if (layerItem.type === 'Group') {
+  //   const layerDescendants = getLayerDescendants(currentState, action.payload.id);
+  //   currentState = layerDescendants.reduce((result, current) => {
+  //     const descendantItem = result.byId[current];
+  //     const isShape = descendantItem.type === 'Shape';
+  //     const isText = descendantItem.type === 'Text';
+  //     result = {
+  //       ...result,
+  //       byId: {
+  //         ...result.byId,
+  //         [current]: {
+  //           ...result.byId[current],
+  //           frame: {
+  //             ...result.byId[current].frame,
+  //             y: result.byId[current].frame.y + diff
+  //           }
+  //         }
+  //       }
+  //     }
+  //     if (isShape) {
+  //       result = {
+  //         ...result,
+  //         byId: {
+  //           ...result.byId,
+  //           [current]: {
+  //             ...result.byId[current],
+  //             segments: (result.byId[current] as Btwx.Shape).segments.map((segment) => {
+  //               return segment.map((segmentPoint) => [segmentPoint[0], segmentPoint[1] + diff]);
+  //             })
+  //           } as Btwx.Shape
+  //         }
+  //       }
+  //     }
+  //     if (isText) {
+  //       result = {
+  //         ...result,
+  //         byId: {
+  //           ...result.byId,
+  //           [current]: {
+  //             ...result.byId[current],
+  //             point: {
+  //               ...(result.byId[current] as Btwx.Text).point,
+  //               y: (result.byId[current] as Btwx.Text).point.y + diff
+  //             },
+  //             lines: (result.byId[current] as Btwx.Text).lines.reduce((lr, lc) => {
+  //               return [
+  //                 ...lr,
+  //                 {
+  //                   ...lc,
+  //                   frame: {
+  //                     ...lc.frame,
+  //                     y: lc.frame.y + diff
+  //                   },
+  //                   anchor: {
+  //                     ...lc.anchor,
+  //                     y: lc.anchor.y + diff
+  //                   }
+  //                 }
+  //               ]
+  //             }, [])
+  //           } as Btwx.Text
+  //         }
+  //       }
+  //     }
+  //     if (descendantItem.type !== 'Group') {
+  //       result = updateLayerTweensByProps(result, current, ['y']);
+  //     }
+  //     return result;
+  //   }, currentState);
+  // } else {
+  //   currentState = updateLayerTweensByProps(currentState, action.payload.id, ['y']);
+  // }
   return currentState;
 };
 
@@ -6445,7 +6461,7 @@ export const setLayerWidth = (state: LayerState, action: SetLayerWidth): LayerSt
         ...currentState.byId,
         [action.payload.id]: {
           ...currentState.byId[action.payload.id],
-          segments: action.payload.segments
+          segments: segments
         } as Btwx.Shape
       }
     }
@@ -6840,12 +6856,8 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
   const layerItem = currentState.byId[action.payload.id];
   const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
   const isShape = layerItem.type === 'Shape';
-  const isLine = isShape && (layerItem as Btwx.Shape).shapeType === 'Line';
   const point = action.payload.point;
-  const from = action.payload.from;
-  const to = action.payload.to;
-  const pathData = action.payload.pathData;
-  const shapeIcon = action.payload.shapeIcon;
+  const segments = action.payload.segments;
   const bounds = action.payload.bounds;
   const fillGradientOrigin = action.payload.fillGradientOrigin;
   const fillGradientDestination = action.payload.fillGradientDestination;
@@ -6896,27 +6908,18 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
       destination: strokeGradientDestination
     }) as SetLayerGradientDestination);
   }
-  if (pathData) {
+  if (segments) {
     currentState = {
       ...currentState,
       byId: {
         ...currentState.byId,
         [action.payload.id]: {
           ...currentState.byId[action.payload.id],
-          pathData: action.payload.pathData
+          segments: segments
         } as Btwx.Shape
       }
     }
     currentState = updateLayerTweensByProps(currentState, action.payload.id, ['shape']);
-  }
-  if (shapeIcon) {
-    currentState = {
-      ...currentState,
-      shapeIcons: {
-        ...currentState.shapeIcons,
-        [action.payload.id]: shapeIcon
-      }
-    }
   }
   if (point) {
     currentState = {
@@ -6930,36 +6933,6 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
             ...point
           }
         } as Btwx.Text
-      }
-    }
-  }
-  if (from) {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          from: {
-            ...(currentState.byId[action.payload.id] as Btwx.Line).from,
-            ...from
-          }
-        } as Btwx.Line
-      }
-    }
-  }
-  if (to) {
-    currentState = {
-      ...currentState,
-      byId: {
-        ...currentState.byId,
-        [action.payload.id]: {
-          ...currentState.byId[action.payload.id],
-          to: {
-            ...(currentState.byId[action.payload.id] as Btwx.Line).to,
-            ...to
-          }
-        } as Btwx.Line
       }
     }
   }
@@ -6994,12 +6967,9 @@ export const setLayerRotation = (state: LayerState, action: SetLayerRotation): L
 export const setLayersRotation = (state: LayerState, action: SetLayersRotation): LayerState => {
   let currentState = state;
   currentState = action.payload.layers.reduce((result, current, index) => {
-    const pathData = action.payload.pathData ? action.payload.pathData[current] : null;
-    const shapeIcon = action.payload.shapeIcon ? action.payload.shapeIcon[current] : null;
+    const segments = action.payload.segments ? action.payload.segments[current] : null;
     const bounds = action.payload.bounds ? action.payload.bounds[current] : null;
     const point = action.payload.point ? action.payload.point[current] : null;
-    const from = action.payload.point ? action.payload.from[current] : null;
-    const to = action.payload.point ? action.payload.to[current] : null;
     const fillGradientOrigin = action.payload.fillGradientOrigin ? action.payload.fillGradientOrigin[current] : null;
     const fillGradientDestination = action.payload.fillGradientDestination ? action.payload.fillGradientDestination[current] : null;
     const strokeGradientOrigin = action.payload.strokeGradientOrigin ? action.payload.strokeGradientOrigin[current] : null;
@@ -7007,16 +6977,13 @@ export const setLayersRotation = (state: LayerState, action: SetLayersRotation):
     return setLayerRotation(result, layerActions.setLayerRotation({
       id: current,
       rotation: action.payload.rotation,
-      pathData,
+      segments,
       fillGradientOrigin,
       fillGradientDestination,
       strokeGradientOrigin,
       strokeGradientDestination,
-      shapeIcon,
       bounds,
-      point,
-      from,
-      to
+      point
     }) as SetLayerRotation);
     // if (layerItem.type === 'Group') {
     //   const layerAndDescendants = getLayerAndDescendants(result, current);
@@ -10847,11 +10814,13 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
       case 'Shape':
         cs = {
           ...cs,
-          allShapeIds: addItem(cs.allShapeIds, duplicateId),
-          shapeIcons: {
-            ...cs.shapeIcons,
-            [duplicateId]: cs.shapeIcons[id]
-          }
+          allShapeIds: addItem(cs.allShapeIds, duplicateId)
+        }
+        break;
+      case 'CompoundShape':
+        cs = {
+          ...cs,
+          allCompoundShapeIds: addItem(cs.allCompoundShapeIds, duplicateId)
         }
         break;
       case 'Group':
@@ -10911,6 +10880,14 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
       }
     }
     if (offset) {
+      // currentState = setLayerX(currentState, layerActions.setLayerX({
+      //   id: duplicateId,
+      //   x: cs.byId[duplicateId].frame.x + offset.x
+      // }) as SetLayerX);
+      // currentState = setLayerY(currentState, layerActions.setLayerY({
+      //   id: duplicateId,
+      //   y: cs.byId[duplicateId].frame.y + offset.y
+      // }) as SetLayerY);
       cs = {
         ...cs,
         byId: {
@@ -10922,6 +10899,26 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
               x: cs.byId[duplicateId].frame.x + offset.x,
               y: cs.byId[duplicateId].frame.y + offset.y
             }
+          }
+        }
+      }
+      if (itemToDuplicate.type === 'Shape') {
+        cs = {
+          ...cs,
+          byId: {
+            ...cs.byId,
+            [duplicateId]: {
+              ...cs.byId[duplicateId],
+              segments: (cs.byId[duplicateId] as Btwx.Shape).segments.map((segment) => {
+                return segment.map((segmentPoint, index) => {
+                  if (index === 0) {
+                    return [segmentPoint[0] + offset.x, segmentPoint[1] + offset.y];
+                  } else {
+                    return segmentPoint;
+                  }
+                });
+              })
+            } as Btwx.Shape
           }
         }
       }
@@ -10952,25 +10949,6 @@ export const duplicateLayer = (state: LayerState, action: DuplicateLayer): {
                 }
               })
             } as Btwx.Text
-          }
-        }
-      }
-      if (itemToDuplicate.type === 'Shape' && (itemToDuplicate as Btwx.Shape).shapeType === 'Line') {
-        cs = {
-          ...cs,
-          byId: {
-            ...cs.byId,
-            [duplicateId]: {
-              ...cs.byId[duplicateId],
-              from: {
-                x: (cs.byId[duplicateId] as Btwx.Line).from.x + offset.x,
-                y: (cs.byId[duplicateId] as Btwx.Line).from.y + offset.y
-              },
-              to: {
-                x: (cs.byId[duplicateId] as Btwx.Line).to.x + offset.x,
-                y: (cs.byId[duplicateId] as Btwx.Line).to.y + offset.y
-              },
-            } as Btwx.Line
           }
         }
       }
@@ -11265,25 +11243,25 @@ export const uniteLayers = (state: LayerState, action: UniteLayers): LayerState 
     newSelection: true
   }) as SelectLayers);
   //
-  const compoundShapeBounds = getLayersRelativeBounds(currentState, action.payload.layers);
-  currentState = {
-    ...currentState,
-    byId: {
-      ...currentState.byId,
-      [action.payload.compoundShape.id]: {
-        ...currentState.byId[action.payload.compoundShape.id],
-        frame: {
-          ...currentState.byId[action.payload.compoundShape.id].frame,
-          x: compoundShapeBounds.center.x,
-          y: compoundShapeBounds.center.y,
-          innerWidth: compoundShapeBounds.width,
-          innerHeight: compoundShapeBounds.height,
-          width: compoundShapeBounds.width,
-          height: compoundShapeBounds.height,
-        }
-      }
-    }
-  }
+  // const compoundShapeBounds = getLayersRelativeBounds(currentState, action.payload.layers);
+  // currentState = {
+  //   ...currentState,
+  //   byId: {
+  //     ...currentState.byId,
+  //     [action.payload.compoundShape.id]: {
+  //       ...currentState.byId[action.payload.compoundShape.id],
+  //       frame: {
+  //         ...currentState.byId[action.payload.compoundShape.id].frame,
+  //         x: compoundShapeBounds.center.x,
+  //         y: compoundShapeBounds.center.y,
+  //         innerWidth: compoundShapeBounds.width,
+  //         innerHeight: compoundShapeBounds.height,
+  //         width: compoundShapeBounds.width,
+  //         height: compoundShapeBounds.height,
+  //       }
+  //     }
+  //   }
+  // }
   currentState = setLayerTreeScroll(currentState, layerActions.setLayerTreeScroll({
     scroll: action.payload.compoundShape.id
   }) as SetLayerTreeScroll);
@@ -11330,25 +11308,25 @@ export const intersectLayers = (state: LayerState, action: IntersectLayers): Lay
     newSelection: true
   }) as SelectLayers);
   //
-  const compoundShapeBounds = getLayersRelativeBounds(currentState, action.payload.layers);
-  currentState = {
-    ...currentState,
-    byId: {
-      ...currentState.byId,
-      [action.payload.compoundShape.id]: {
-        ...currentState.byId[action.payload.compoundShape.id],
-        frame: {
-          ...currentState.byId[action.payload.compoundShape.id].frame,
-          x: compoundShapeBounds.center.x,
-          y: compoundShapeBounds.center.y,
-          innerWidth: compoundShapeBounds.width,
-          innerHeight: compoundShapeBounds.height,
-          width: compoundShapeBounds.width,
-          height: compoundShapeBounds.height,
-        }
-      }
-    }
-  }
+  // const compoundShapeBounds = getLayersRelativeBounds(currentState, action.payload.layers);
+  // currentState = {
+  //   ...currentState,
+  //   byId: {
+  //     ...currentState.byId,
+  //     [action.payload.compoundShape.id]: {
+  //       ...currentState.byId[action.payload.compoundShape.id],
+  //       frame: {
+  //         ...currentState.byId[action.payload.compoundShape.id].frame,
+  //         x: compoundShapeBounds.center.x,
+  //         y: compoundShapeBounds.center.y,
+  //         innerWidth: compoundShapeBounds.width,
+  //         innerHeight: compoundShapeBounds.height,
+  //         width: compoundShapeBounds.width,
+  //         height: compoundShapeBounds.height,
+  //       }
+  //     }
+  //   }
+  // }
   currentState = setLayerTreeScroll(currentState, layerActions.setLayerTreeScroll({
     scroll: action.payload.compoundShape.id
   }) as SetLayerTreeScroll);
@@ -11395,25 +11373,25 @@ export const subtractLayers = (state: LayerState, action: SubtractLayers): Layer
     newSelection: true
   }) as SelectLayers);
   //
-  const compoundShapeBounds = getLayersRelativeBounds(currentState, action.payload.layers);
-  currentState = {
-    ...currentState,
-    byId: {
-      ...currentState.byId,
-      [action.payload.compoundShape.id]: {
-        ...currentState.byId[action.payload.compoundShape.id],
-        frame: {
-          ...currentState.byId[action.payload.compoundShape.id].frame,
-          x: compoundShapeBounds.center.x,
-          y: compoundShapeBounds.center.y,
-          innerWidth: compoundShapeBounds.width,
-          innerHeight: compoundShapeBounds.height,
-          width: compoundShapeBounds.width,
-          height: compoundShapeBounds.height,
-        }
-      }
-    }
-  }
+  // const compoundShapeBounds = getLayersRelativeBounds(currentState, action.payload.layers);
+  // currentState = {
+  //   ...currentState,
+  //   byId: {
+  //     ...currentState.byId,
+  //     [action.payload.compoundShape.id]: {
+  //       ...currentState.byId[action.payload.compoundShape.id],
+  //       frame: {
+  //         ...currentState.byId[action.payload.compoundShape.id].frame,
+  //         x: compoundShapeBounds.center.x,
+  //         y: compoundShapeBounds.center.y,
+  //         innerWidth: compoundShapeBounds.width,
+  //         innerHeight: compoundShapeBounds.height,
+  //         width: compoundShapeBounds.width,
+  //         height: compoundShapeBounds.height,
+  //       }
+  //     }
+  //   }
+  // }
   currentState = setLayerTreeScroll(currentState, layerActions.setLayerTreeScroll({
     scroll: action.payload.compoundShape.id
   }) as SetLayerTreeScroll);
@@ -11460,25 +11438,25 @@ export const excludeLayers = (state: LayerState, action: ExcludeLayers): LayerSt
     newSelection: true
   }) as SelectLayers);
   //
-  const compoundShapeBounds = getLayersRelativeBounds(currentState, action.payload.layers);
-  currentState = {
-    ...currentState,
-    byId: {
-      ...currentState.byId,
-      [action.payload.compoundShape.id]: {
-        ...currentState.byId[action.payload.compoundShape.id],
-        frame: {
-          ...currentState.byId[action.payload.compoundShape.id].frame,
-          x: compoundShapeBounds.center.x,
-          y: compoundShapeBounds.center.y,
-          innerWidth: compoundShapeBounds.width,
-          innerHeight: compoundShapeBounds.height,
-          width: compoundShapeBounds.width,
-          height: compoundShapeBounds.height,
-        }
-      }
-    }
-  }
+  // const compoundShapeBounds = getLayersRelativeBounds(currentState, action.payload.layers);
+  // currentState = {
+  //   ...currentState,
+  //   byId: {
+  //     ...currentState.byId,
+  //     [action.payload.compoundShape.id]: {
+  //       ...currentState.byId[action.payload.compoundShape.id],
+  //       frame: {
+  //         ...currentState.byId[action.payload.compoundShape.id].frame,
+  //         x: compoundShapeBounds.center.x,
+  //         y: compoundShapeBounds.center.y,
+  //         innerWidth: compoundShapeBounds.width,
+  //         innerHeight: compoundShapeBounds.height,
+  //         width: compoundShapeBounds.width,
+  //         height: compoundShapeBounds.height,
+  //       }
+  //     }
+  //   }
+  // }
   currentState = setLayerTreeScroll(currentState, layerActions.setLayerTreeScroll({
     scroll: action.payload.compoundShape.id
   }) as SetLayerTreeScroll);
@@ -13209,23 +13187,30 @@ export const setLayersFillRule = (state: LayerState, action: SetLayersFillRule):
   return currentState;
 };
 
-export const setLayerLastSubPath = (state: LayerState, action: SetLayerLastSubPath): LayerState => {
+export const updateCompoundShapeFrame = (state: LayerState, action: UpdateCompoundShapeFrame): LayerState => {
   let currentState = state;
+  const layerItem = currentState.byId[action.payload.id];
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
   currentState = {
     ...currentState,
     byId: {
       ...currentState.byId,
       [action.payload.id]: {
         ...currentState.byId[action.payload.id],
-        lastSubPath: action.payload.lastSubPath
+        frame: {
+          ...currentState.byId[action.payload.id].frame,
+          ...action.payload.frame
+        }
       } as Btwx.CompoundShape
     }
   }
+  currentState = updateGroupParentBounds(currentState, groupParents);
+  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['width', 'height', 'x', 'y']);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
       payload: action.payload,
-      detail: 'Set Layer Last Sub Path',
+      detail: 'Update Compound Shape Frame',
       undoable: true
     }
   }) as SetLayerEdit);

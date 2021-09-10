@@ -68,6 +68,7 @@ const Canvas = (): ReactElement => {
     return (
       hitResult &&
       hitResult.item &&
+      hitResult.item.visible &&
       hitResult.item.data &&
       hitResult.item.data.type &&
       (

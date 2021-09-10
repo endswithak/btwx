@@ -3,17 +3,13 @@ import paper from 'paper';
 import tinyColor from 'tinycolor2';
 import { DEFAULT_ROUNDED_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_RADIUS, DEFAULT_STAR_POINTS, DEFAULT_LINE_FROM, DEFAULT_LINE_TO } from '../../constants';
 import { paperMain, paperPreview } from '../../canvas';
-import { rawSegToPaperSeg } from '../../utils';
+import { rawSegToPaperSeg, getShapeItemPathItem } from '../../utils';
 import { getLeading } from '../../components/CanvasTextLayer';
 
-export const getShapeIcon = (segments: number[][][][]): string => {
+export const getShapeIconPathData = (pathData: string): string => {
   const layerIcon = new paperMain.CompoundPath({
     insert: false,
-    children: segments.map((pathSegments) =>
-      new paperMain.Path({
-        segments: pathSegments
-      })
-    )
+    pathData: pathData
   });
   layerIcon.fitBounds(new paperMain.Rectangle({
     point: new paperMain.Point(0,0),
@@ -124,7 +120,8 @@ export const clearLayerTransforms = ({ layerType, paperLayer, transform, variabl
   let decomposeLayer: paper.Item;
   switch(layerType) {
     case 'Shape':
-      decomposeLayer = paperLayer;
+    case 'CompoundShape':
+      decomposeLayer = getShapeItemPathItem(paperLayer as paper.Group);
       break;
     case 'Text':
       decomposeLayer = paperLayer.getItem({data:{id:'textContent'}});
@@ -145,7 +142,7 @@ export const clearLayerTransforms = ({ layerType, paperLayer, transform, variabl
     //   height / paperLayer.bounds.height
     // );
     // paperLayer.rotation = -transform.rotation;
-    if (layerType !== 'Shape') {
+    if (layerType !== 'Shape' && layerType !== 'CompoundShape') {
       paperLayer.scale(
         decomposeLayer.matrix.scaling.x < 0 ? -1 : 1,
         decomposeLayer.matrix.scaling.y < 0 ? -1 : 1
@@ -160,7 +157,7 @@ export const clearLayerTransforms = ({ layerType, paperLayer, transform, variabl
       ((transform.horizontalFlip as any) !== -1 && (transform.horizontalFlip as any) !== 1) ? width / paperLayer.bounds.width : 1,
       ((transform.verticalFlip as any) !== -1 && (transform.verticalFlip as any) !== 1) ? height / paperLayer.bounds.height : 1
     );
-    if (layerType !== 'Shape') {
+    if (layerType !== 'Shape' && layerType !== 'CompoundShape') {
       paperLayer.rotation = -decomposeLayer.matrix.rotation;
     } else {
       paperLayer.rotation = -transform.rotation;
@@ -171,7 +168,7 @@ export const clearLayerTransforms = ({ layerType, paperLayer, transform, variabl
     //   transform.verticalFlip ? -1 : 1
     // );
     // paperLayer.rotation = -transform.rotation;
-    if (layerType !== 'Shape') {
+    if (layerType !== 'Shape' && layerType !== 'CompoundShape') {
       paperLayer.scale(
         decomposeLayer.matrix.scaling.x < 0 ? -1 : 1,
         decomposeLayer.matrix.scaling.y < 0 ? -1 : 1
@@ -438,7 +435,7 @@ export const getPaperStyle = ({ style, textStyle, layerFrame, artboardFrame, isL
 export const getPaperLayerIndex = (layerItem: Btwx.Layer, parentItem: Btwx.Artboard | Btwx.Group | Btwx.CompoundShape): number => {
   const layerIndex = parentItem.children.indexOf(layerItem.id);
   const underlyingMaskIndex = (layerItem as Btwx.Text).underlyingMask ? parentItem.children.indexOf((layerItem as Btwx.Text).underlyingMask) : null;
-  return (layerItem as Btwx.Text).masked ? (layerIndex - underlyingMaskIndex) + 1 : layerIndex;
+  return (layerItem as Btwx.Text).masked ? layerIndex - underlyingMaskIndex : layerIndex;
 }
 
 export const getLayerAbsBounds = (layerFrame: Btwx.Frame, artboardFrame: Btwx.Frame): paper.Rectangle => {

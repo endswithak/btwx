@@ -426,6 +426,8 @@ export const SET_LAYERS_BOOL = 'SET_LAYERS_BOOL';
 export const SET_LAYER_FILL_RULE = 'SET_LAYER_FILL_RULE';
 export const SET_LAYERS_FILL_RULE = 'SET_LAYERS_FILL_RULE';
 
+export const UPDATE_COMPOUND_SHAPE_FRAME = 'UPDATE_COMPOUND_SHAPE_FRAME';
+
 // Artboard
 
 export type AddArtboardPayload = {
@@ -1866,7 +1868,6 @@ export interface SetLayersCustomWiggleTweenType {
 export interface SetLayerXPayload {
   id: string;
   x: number;
-  segments?: number[][][];
 }
 
 export interface SetLayerX {
@@ -1877,9 +1878,6 @@ export interface SetLayerX {
 export interface SetLayersXPayload {
   layers: string[];
   x: number;
-  segments?: {
-    [id: string]: number[][][];
-  };
 }
 
 export interface SetLayersX {
@@ -1889,7 +1887,7 @@ export interface SetLayersX {
 
 export interface SetLayerYPayload {
   id: string;
-  segments?: number[][][];
+  y: number;
 }
 
 export interface SetLayerY {
@@ -1900,9 +1898,6 @@ export interface SetLayerY {
 export interface SetLayersYPayload {
   layers: string[];
   y: number;
-  segments?: {
-    [id: string]: number[][][];
-  };
 }
 
 export interface SetLayersY {
@@ -1913,7 +1908,6 @@ export interface SetLayersY {
 export interface SetLayerLeftPayload {
   id: string;
   left: number;
-  segments?: number[][][];
 }
 
 export interface SetLayerLeft {
@@ -1924,9 +1918,6 @@ export interface SetLayerLeft {
 export interface SetLayersLeftPayload {
   layers: string[];
   left: number;
-  segments?: {
-    [id: string]: number[][][];
-  };
 }
 
 export interface SetLayersLeft {
@@ -1937,7 +1928,6 @@ export interface SetLayersLeft {
 export interface SetLayerCenterPayload {
   id: string;
   center: number;
-  segments?: number[][][];
 }
 
 export interface SetLayerCenter {
@@ -1948,9 +1938,6 @@ export interface SetLayerCenter {
 export interface SetLayersCenterPayload {
   layers: string[];
   center: number;
-  segments?: {
-    [id: string]: number[][][];
-  };
 }
 
 export interface SetLayersCenter {
@@ -1961,7 +1948,6 @@ export interface SetLayersCenter {
 export interface SetLayerRightPayload {
   id: string;
   right: number;
-  segments?: number[][][];
 }
 
 export interface SetLayerRight {
@@ -1972,9 +1958,6 @@ export interface SetLayerRight {
 export interface SetLayersRightPayload {
   layers: string[];
   right: number;
-  segments?: {
-    [id: string]: number[][][];
-  };
 }
 
 export interface SetLayersRight {
@@ -1985,7 +1968,6 @@ export interface SetLayersRight {
 export interface SetLayerTopPayload {
   id: string;
   top: number;
-  segments?: number[][][];
 }
 
 export interface SetLayerTop {
@@ -1996,9 +1978,6 @@ export interface SetLayerTop {
 export interface SetLayersTopPayload {
   layers: string[];
   top: number;
-  segments?: {
-    [id: string]: number[][][];
-  };
 }
 
 export interface SetLayersTop {
@@ -2009,7 +1988,6 @@ export interface SetLayersTop {
 export interface SetLayerMiddlePayload {
   id: string;
   middle: number;
-  segments?: number[][][];
 }
 
 export interface SetLayerMiddle {
@@ -2020,9 +1998,6 @@ export interface SetLayerMiddle {
 export interface SetLayersMiddlePayload {
   layers: string[];
   middle: number;
-  segments?: {
-    [id: string]: number[][][];
-  };
 }
 
 export interface SetLayersMiddle {
@@ -2033,7 +2008,6 @@ export interface SetLayersMiddle {
 export interface SetLayerBottomPayload {
   id: string;
   bottom: number;
-  segments?: number[][][];
 }
 
 export interface SetLayerBottom {
@@ -2044,9 +2018,6 @@ export interface SetLayerBottom {
 export interface SetLayersBottomPayload {
   layers: string[];
   bottom: number;
-  segments?: {
-    [id: string]: number[][][];
-  };
 }
 
 export interface SetLayersBottom {
@@ -4484,6 +4455,18 @@ export interface SetLayersFillRule {
   payload: SetLayersFillRulePayload;
 }
 
+export type UpdateCompoundShapeFramePayload = {
+  id: string;
+  frame: {
+    [P in keyof Btwx.Frame]?: Btwx.Frame[P];
+  };
+}
+
+export interface UpdateCompoundShapeFrame {
+  type: typeof UPDATE_COMPOUND_SHAPE_FRAME;
+  payload: UpdateCompoundShapeFramePayload;
+}
+
 export type LayerTypes = AddArtboard |
                          AddGroup |
                          AddShape |
@@ -4852,4 +4835,5 @@ export type LayerTypes = AddArtboard |
                          SetLayerBool |
                          SetLayersBool |
                          SetLayerFillRule |
-                         SetLayersFillRule;
+                         SetLayersFillRule |
+                         UpdateCompoundShapeFrame;

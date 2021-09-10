@@ -496,6 +496,14 @@ declare namespace Btwx {
   interface CompoundShape extends LayerWithChildren, MaskableLayer, PathLayer {
     type: 'CompoundShape';
     fillRule: FillRule;
+    // boolFrame: {
+    //   x: number;
+    //   y: number;
+    //   width: number;
+    //   height: number;
+    //   innerWidth: number;
+    //   innerHeight: number;
+    // };
   }
 
   interface Polygon extends Shape {
