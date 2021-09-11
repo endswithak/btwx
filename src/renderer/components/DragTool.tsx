@@ -2,124 +2,231 @@
 import React, { useEffect, ReactElement, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getLayerProjectIndex, getPaperLayer, getPaperLayersBounds, getSelectedProjectIndices, getSingleLineSelected } from '../store/selectors/layer';
+import { getPaperLayersBounds, getLayerDescendants } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
-import { paperRectToRawRect, getShapeItemPathItem, getShapeItemMaskPathItem } from '../utils';
+import { paperRectToRawRect, getShapeItemPathItem, getShapeItemMaskPathItem, getTopCompoundShape, getCompoundShapeBoolPath } from '../utils';
 import { setCanvasDragging } from '../store/actions/canvasSettings';
 import { moveLayersBy, duplicateLayers } from '../store/actions/layer';
 import { setSelectionToolBounds } from '../store/actions/selectionTool';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
-import { clearSelectionFrame } from './SelectionFrame';
 
 const DragTool = (props: PaperToolProps): ReactElement => {
   const { tool, downEvent, dragEvent, upEvent, keyDownEvent, keyUpEvent } = props;
   const blacklistedLayers = useSelector((state: RootState) => state.layer.present.selected.some(id => state.layer.present.allArtboardIds.includes(id)) ? state.layer.present.selected : [...state.layer.present.allArtboardIds.filter(id => id !== state.layer.present.activeArtboard), ...state.layer.present.selected]);
   const hover = useSelector((state: RootState) => state.layer.present.hover);
+  const layersById = useSelector((state: RootState) => state.layer.present.byId);
   const selected = useSelector((state: RootState) => state.layer.present.selected);
   const isEnabled = useSelector((state: RootState) => state.canvasSettings.activeTool === 'Drag');
   const dragging = useSelector((state: RootState) => state.canvasSettings.dragging);
-  const selectedProjectIndices = useSelector((state: RootState) => getSelectedProjectIndices(state));
-  const hoverPaperScope = useSelector((state: RootState) => hover ? getLayerProjectIndex(state.layer.present, state.layer.present.hover) : null);
-  const [originalSelection, setOriginalSelection] = useState<{id: string; projectIndex: number}[]>(null);
+  const [allIds, setAllIds] = useState(null);
+  const [byId, setById] = useState(null);
+  const [paperLayerById, setPaperLayerById] = useState(null);
+  const [positionById, setPositionById] = useState(null);
+  const [descendentsById, setDescendentsById] = useState(null);
+  const [symbolGroup, setSymbolGroup] = useState(null);
   const [fromBounds, setFromBounds] = useState<paper.Rectangle>(null);
   const [toBounds, setToBounds] = useState<paper.Rectangle>(null);
   const [snapBounds, setSnapBounds] = useState<paper.Rectangle>(null);
-  const [originalPaperSelection, setOriginalPaperSelection] = useState<paper.Item[]>(null);
-  const [selectionOutlines, setSelectionOutlines] = useState<paper.SymbolDefinition>(null);
   const dispatch = useDispatch();
 
   const resetState = (): void => {
     const drawingPreview = paperMain.projects[0].getItem({ data: { id: 'drawingPreview' } });
     drawingPreview.removeChildren();
-    setOriginalSelection(null);
+    setAllIds(null);
+    setById(null);
+    setPaperLayerById(null);
+    setPositionById(null);
+    setDescendentsById(null);
+    setSymbolGroup(null);
     setFromBounds(null);
     setToBounds(null);
     setSnapBounds(null);
-    setOriginalPaperSelection(null);
-    setSelectionOutlines(null);
     if (dragging) {
       dispatch(setCanvasDragging({dragging: false}));
     }
   }
 
-  const updateDuplicatePreview = (altModifier: boolean): void => {
+  const renderDuplicatePreview = (): void => {
     const drawingPreview = paperMain.projects[0].getItem({ data: { id: 'drawingPreview' } });
     drawingPreview.removeChildren();
-    if (altModifier && selectionOutlines) {
-      const newPreview = selectionOutlines.place();
+    if (symbolGroup) {
+      const newPreview = symbolGroup.place();
       newPreview.position = toBounds.center;
       drawingPreview.addChild(newPreview);
     }
   }
 
-  const translateLayers = (altModifier: boolean): void => {
-    const vector = toBounds.center.subtract(fromBounds.center);
-    if (altModifier) {
-      updateDuplicatePreview(altModifier);
-    } else {
-      selected.forEach((id, index) => {
-        const paperLayer = getPaperLayer(id, selectedProjectIndices[id]);
-        const ogLayer = originalPaperSelection[index];
-        if (paperLayer && ogLayer) {
-          if (paperLayer.data.layerType === 'Shape' || paperLayer.data.layerType === 'CompoundShape') {
-            const pathItem = getShapeItemPathItem(paperLayer as paper.Group);
-            const ogPathItem = getShapeItemPathItem(originalPaperSelection[index] as paper.Group);
-            const absPosition = ogPathItem.position;
-            pathItem.position.x = absPosition.x + vector.x;
-            pathItem.position.y = absPosition.y + vector.y;
-            const maskPathItem = getShapeItemMaskPathItem(paperLayer as paper.Group);
-            if (maskPathItem) {
-              maskPathItem.position.x = absPosition.x + vector.x;
-              maskPathItem.position.y = absPosition.y + vector.y;
-            }
-          } else {
-            const absPosition = ogLayer.position;
-            paperLayer.position.x = absPosition.x + vector.x;
-            paperLayer.position.y = absPosition.y + vector.y;
-          }
-        }
-      });
-      dispatch(setSelectionToolBounds({
-        bounds: paperRectToRawRect(toBounds)
-      }));
+  const clearDuplicatePreview = (): void => {
+    const drawingPreview = paperMain.projects[0].getItem({ data: { id: 'drawingPreview' } });
+    drawingPreview.removeChildren();
+  }
+
+  const translateShapeItem = ({
+    id,
+    includeOffset,
+    vector,
+    updateBool = true
+  }) => {
+    const layerItem = byId[id];
+    const parentItem = layersById[layerItem.parent];
+    const artboardItem = layersById[layerItem.artboard] as Btwx.Artboard;
+    const paperLayer = paperLayerById[id];
+    const originalPosition = positionById[id];
+    const compoundShapeParent = parentItem.type === 'CompoundShape';
+    const topCompoundShape = compoundShapeParent ? getTopCompoundShape(id, layersById) : null;
+    const topCompoundShapePaperLayer = compoundShapeParent ? paperMain.projects[artboardItem.projectIndex].getItem({data: {id: topCompoundShape}}) : null;
+    const pathItem = getShapeItemPathItem(paperLayer as paper.Group);
+    pathItem.position.x = originalPosition[0] + (includeOffset ? vector.x : 0);
+    pathItem.position.y = originalPosition[1] + (includeOffset ? vector.y : 0);
+    if (layerItem.mask) {
+      const maskPathItem = getShapeItemMaskPathItem(paperLayer as paper.Group);
+      maskPathItem.position.x = originalPosition[0] + (includeOffset ? vector.x : 0);
+      maskPathItem.position.y = originalPosition[1] + (includeOffset ? vector.y : 0);
     }
+    if (compoundShapeParent && updateBool) {
+      const compoundShapeParentPathItem = getShapeItemPathItem(topCompoundShapePaperLayer as paper.Group);
+      const boolResult = getCompoundShapeBoolPath({
+        id: topCompoundShape,
+        layersById,
+        useExistingPaths: true
+      });
+      const data = compoundShapeParentPathItem.data;
+      const style = compoundShapeParentPathItem.style;
+      boolResult.data = data;
+      boolResult.style = style;
+      compoundShapeParentPathItem.replaceWith(boolResult);
+    }
+  }
+
+  const translateLayers = ({
+    includeOffset = true
+  } : {
+    includeOffset?: boolean
+  }): void => {
+    const vector = toBounds.center.subtract(fromBounds.center);
+    allIds.forEach((id) => {
+      const layerItem = byId[id];
+      const paperLayer = paperLayerById[id];
+      const originalPosition = positionById[id];
+      switch(layerItem.type) {
+        case 'Shape': {
+          translateShapeItem({id, includeOffset, vector});
+          break;
+        }
+        case 'CompoundShape': {
+          [id, ...descendentsById[id]].forEach((did, index) => {
+            translateShapeItem({
+              id: did,
+              includeOffset,
+              vector,
+              updateBool: index === [id, ...descendentsById[id]].length - 1
+            });
+          });
+          break;
+        }
+        default: {
+          paperLayer.position.x = originalPosition[0] + (includeOffset ? vector.x : 0);
+          paperLayer.position.y = originalPosition[1] + (includeOffset ? vector.y : 0);
+        }
+      }
+    });
+    dispatch(setSelectionToolBounds({
+      bounds: paperRectToRawRect(toBounds)
+    }));
   }
 
   // tool mousedown will fire before selected is updated...
   // so we need to determine next selection on mousedown
-  const getDragLayers = (e: paper.ToolEvent): {id: string; projectIndex: number}[] => {
-    const isHoverSelected = hover && selected.includes(hover);
-    const selectedWithPaperScopes = selected.reduce((result, current) => {
-      result = [...result, {id: current, projectIndex: selectedProjectIndices[current]}];
-      return result;
-    }, []) as {id: string; projectIndex: number}[];
+  const getDragLayers = (e: paper.ToolEvent): {
+    allIds: string[];
+    byId: {
+      [id: string]: Btwx.Layer;
+    };
+    paperLayerById: {
+      [id: string]: paper.Item;
+    };
+    positionById: {
+      [id: string]: number[];
+    };
+    descendntsById: {
+      [id: string]: string[];
+    };
+  } => {
+    let allIds = [...selected, ...(hover && !selected.includes(hover) ? [hover] : [])];
     if (e.modifiers.shift) {
-      if (isHoverSelected) {
-        return selectedWithPaperScopes.reduce((result, current) => {
-          if (current.id !== hover) {
-            result = [...result, current];
-          }
-          return result;
-        }, []);
-      } else {
-        if (hover) {
-          return [...selectedWithPaperScopes, {id: hover, projectIndex: hoverPaperScope}];
-        } else {
-          return selectedWithPaperScopes;
-        }
+      if (hover && selected.includes(hover)) {
+        allIds = [...selected];
       }
     } else {
-      if (isHoverSelected) {
-        return selectedWithPaperScopes;
-      } else {
-        if (hover) {
-          return [{id: hover, projectIndex: hoverPaperScope}];
-        } else {
-          return selectedWithPaperScopes;
-        }
+      if (hover && !selected.includes(hover)) {
+        allIds = [hover];
       }
     }
+    return allIds.reduce((result, current) =>  {
+      const layerItem = layersById[current] as Btwx.Layer;
+      const artboardItem = layersById[layerItem.artboard] as Btwx.Artboard;
+      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id: current}});
+      if (layerItem.type === 'CompoundShape') {
+        const descendents = getLayerDescendants({byId: layersById}, current);
+        result = {
+          ...result,
+          descendntsById: {
+            ...result.descendntsById,
+            [current]: descendents
+          }
+        }
+        result = descendents.reduce((r, c) => {
+          const li = layersById[c] as Btwx.Layer;
+          const pl = paperMain.projects[artboardItem.projectIndex].getItem({data: {id: c}});
+          r = {
+            ...r,
+            byId: {
+              ...r.byId,
+              [c]: li
+            },
+            paperLayerById: {
+              ...r.paperLayerById,
+              [c]: pl
+            },
+            positionById: {
+              ...r.positionById,
+              [c]: [pl.position.x, pl.position.y]
+            }
+          }
+          return r;
+        }, result);
+      }
+      return {
+        ...result,
+        byId: {
+          ...result.byId,
+          [current]: layerItem
+        },
+        paperLayerById: {
+          ...result.paperLayerById,
+          [current]: paperLayer
+        },
+        positionById: {
+          ...result.positionById,
+          [current]: [paperLayer.position.x, paperLayer.position.y]
+        }
+      }
+    }, { allIds: allIds, byId: {}, paperLayerById: {}, positionById: {}, descendntsById: {} } as {
+      allIds: string[];
+      byId: {
+        [id: string]: Btwx.Layer;
+      };
+      paperLayerById: {
+        [id: string]: paper.Item;
+      };
+      positionById: {
+        [id: string]: number[];
+      };
+      descendntsById: {
+        [id: string]: string[];
+      };
+    });
   }
 
   const handleSnapToolUpdate = (snapToolBounds: paper.Rectangle, xSnapPoint: Btwx.SnapPoint, ySnapPoint: Btwx.SnapPoint): void => {
@@ -128,37 +235,11 @@ const DragTool = (props: PaperToolProps): ReactElement => {
 
   useEffect(() => {
     try {
-      if (keyDownEvent && isEnabled && originalSelection && dragging && toBounds) {
+      if (keyDownEvent && isEnabled && allIds && dragging && toBounds) {
         if (keyDownEvent.key === 'alt') {
-          updateDuplicatePreview(true);
-          clearSelectionFrame();
-          originalSelection.forEach((item, index) => {
-            const paperLayer = getPaperLayer(item.id, item.projectIndex);
-            const ogLayer = originalPaperSelection[index];
-            if (paperLayer && ogLayer) {
-              if (paperLayer.data.layerType === 'Shape' || paperLayer.data.layerType === 'CompoundShape') {
-                const pathItem = getShapeItemPathItem(paperLayer as paper.Group);
-                const ogPathItem = getShapeItemPathItem(originalPaperSelection[index] as paper.Group);
-                const absPosition = ogPathItem.position;
-                pathItem.position.x = absPosition.x;
-                pathItem.position.y = absPosition.y;
-                const maskPathItem = getShapeItemMaskPathItem(paperLayer as paper.Group);
-                if (maskPathItem) {
-                  maskPathItem.position.x = absPosition.x;
-                  maskPathItem.position.y = absPosition.y;
-                }
-              } else {
-                const absPosition = ogLayer.position;
-                paperLayer.position.x = absPosition.x;
-                paperLayer.position.y = absPosition.y;
-              }
-              // const absPosition = ogLayer.position;
-              // paperLayer.position.x = absPosition.x;
-              // paperLayer.position.y = absPosition.y;
-              // if (paperLayer.data.layerType === 'Shape' && paperLayer.parent.data.id === 'maskGroup' && paperLayer.index === 1) {
-              //   paperLayer.parent.children[0].position = paperLayer.position;
-              // }
-            }
+          renderDuplicatePreview();
+          translateLayers({
+            includeOffset: false
           });
         }
       }
@@ -170,10 +251,12 @@ const DragTool = (props: PaperToolProps): ReactElement => {
 
   useEffect(() => {
     try {
-      if (keyUpEvent && isEnabled && originalSelection && dragging && toBounds) {
+      if (keyUpEvent && isEnabled && allIds && dragging && toBounds) {
         if (keyUpEvent.key === 'alt') {
-          updateDuplicatePreview(false);
-          translateLayers(false);
+          clearDuplicatePreview();
+          translateLayers({
+            includeOffset: true
+          });
         }
       }
     } catch(err) {
@@ -189,19 +272,20 @@ const DragTool = (props: PaperToolProps): ReactElement => {
           paperMain.projects[0].activate();
         }
         const dragLayers = getDragLayers(downEvent);
-        const dragOutlines = new paperMain.Group({ insert: false });
-        const dragPaperLayers: paper.Item[] = [];
-        dragLayers.forEach((layer) => {
-          const paperLayer = getPaperLayer(layer.id, layer.projectIndex);
-          dragPaperLayers.push(paperLayer.clone({ insert: false }));
-          dragOutlines.addChild(paperLayer.clone({ insert: false }));
-        });
-        const outlinesSymbol = new paperMain.SymbolDefinition(dragOutlines, true);
-        const nextFromBounds = getPaperLayersBounds(dragPaperLayers);
+        const symbolGroupDefinition = new paperMain.SymbolDefinition(new paperMain.Group({
+          insert: false,
+          children: dragLayers.allIds.map((id) => dragLayers.paperLayerById[id].clone({insert: false}))
+        }), true);
+        const nextFromBounds = getPaperLayersBounds(
+          dragLayers.allIds.map((id) => dragLayers.paperLayerById[id])
+        );
+        setPaperLayerById(dragLayers.paperLayerById);
+        setById(dragLayers.byId);
+        setAllIds(dragLayers.allIds);
+        setDescendentsById(dragLayers.descendntsById);
+        setPositionById(dragLayers.positionById);
+        setSymbolGroup(symbolGroupDefinition);
         setFromBounds(nextFromBounds);
-        setOriginalSelection(dragLayers);
-        setOriginalPaperSelection(dragPaperLayers);
-        setSelectionOutlines(outlinesSymbol);
       }
     } catch(err) {
       console.error(`Drag Tool Error -- On Mouse Down -- ${err}`);
@@ -256,7 +340,13 @@ const DragTool = (props: PaperToolProps): ReactElement => {
 
   useEffect(() => {
     if (toBounds && isEnabled && dragEvent) {
-      translateLayers(dragEvent.modifiers.alt);
+      if (dragEvent.modifiers.alt) {
+        renderDuplicatePreview();
+      } else {
+        translateLayers({
+          includeOffset: true
+        });
+      }
     }
   }, [toBounds]);
 

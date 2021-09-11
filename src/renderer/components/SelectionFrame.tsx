@@ -1,4 +1,5 @@
-import React, { ReactElement, useEffect } from 'react';
+import React, { ReactElement, useEffect, useCallback } from 'react';
+import debounce from 'lodash.debounce';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
@@ -266,8 +267,20 @@ const SelectionFrame = (): ReactElement => {
   const selectedPaperScopes = useSelector((state: RootState) => getSelectedProjectIndices(state));
   const zoom = useSelector((state: RootState) => state.documentSettings.zoom);
 
-  useEffect(() => {
+  const debounceUpdateSelectionFrame = useCallback(debounce(({bounds, handle, lineHandles}) => {
     updateSelectionFrame({
+      bounds,
+      handle,
+      lineHandles,
+    });
+  }, 125, {
+    'leading': false,
+    'trailing': true
+  }), []);
+
+  useEffect(() => {
+    debounceUpdateSelectionFrame.cancel();
+    debounceUpdateSelectionFrame({
       bounds: selectionBounds && rawRectToPaperRect(selectionBounds),
       handle: selectionHandle,
       lineHandles: {
@@ -275,7 +288,16 @@ const SelectionFrame = (): ReactElement => {
         to: selectionLineToPoint && rawPointToPaperPoint(selectionLineToPoint)
       }
     });
+    // updateSelectionFrame({
+    //   bounds: selectionBounds && rawRectToPaperRect(selectionBounds),
+    //   handle: selectionHandle,
+    //   lineHandles: {
+    //     from: selectionLineFromPoint && rawPointToPaperPoint(selectionLineFromPoint),
+    //     to: selectionLineToPoint && rawPointToPaperPoint(selectionLineToPoint)
+    //   }
+    // });
     return () => {
+      debounceUpdateSelectionFrame.cancel();
       clearSelectionFrame();
     }
   }, [selectionBounds, selectionHandle, selectionLineFromPoint, selectionLineToPoint, zoom, selectedPaperScopes]);

@@ -449,15 +449,61 @@ export const getShapeItemMaskPathItem = (shapeItem: paper.Group): paper.PathItem
 export const getShapeItemRawPathSegments = (shapeItem: paper.Group): number[][][] =>
   getRawPathItemSegments(getShapeItemPathItem(shapeItem));
 
-export const getCompoundShapeBoolPath = (id: string, layersById: any): any => {
-  const handleCompoundShape = (cid: string, layersById: any, composite: paper.PathItem = new paperMain.CompoundPath({insert: false})) => {
-    const layerItem = layersById[cid];
+export const getTopCompoundShape = (id: string, layersById: any): string => {
+  const layerItem = layersById[id];
+  let currentCompountShape = null;
+  for (let i = 0; i < layerItem.scope.length; i++) {
+    const scopeId = layerItem.scope[i];
+    const scopeItem = layersById[scopeId];
+    if (scopeItem.type === 'CompoundShape') {
+      currentCompountShape = scopeId;
+      break;
+    }
+  }
+  return currentCompountShape;
+}
+
+export const getCompoundShapeBoolPath = ({
+  id,
+  layersById,
+  useExistingPaths = false
+} : {
+  id: string;
+  layersById: {
+    [id: string]: Btwx.Layer
+  };
+  useExistingPaths?: boolean;
+}): any => {
+  const handleCompoundShape = ({
+    id,
+    layersById,
+    useExistingPaths = false
+  } : {
+    id: string;
+    layersById: {
+      [id: string]: Btwx.Layer;
+    };
+    useExistingPaths?: boolean;
+  }) => {
+    const layerItem = layersById[id] as Btwx.CompoundShape;
+    const composite = new paperMain.CompoundPath({
+      fillColor: 'black',
+      insert: false,
+      closed: layerItem.closed
+    });
     for (let i = 0; i < layerItem.children.length; i++) {
-      const childItem = layersById[id];
+      const childItem = layersById[layerItem.children[i]] as Btwx.CompoundShape | Btwx.Shape;
       const artboardItem = layersById[childItem.artboard] as Btwx.Artboard;
-      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
-      const pathLayer = getShapeItemPathItem(paperLayer as paper.Group).clone({insert: false});
+      const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id: layerItem.children[i]}});
       if (childItem.type !== 'CompoundShape') {
+        const pathLayer = useExistingPaths ? getShapeItemPathItem(paperLayer as paper.Group).clone({insert: false}) : new paperMain.Path({
+          fillColor: 'black',
+          segments: childItem.segments.map((segment) =>
+            rawSegToPaperSeg(segment)
+          ),
+          closed: (childItem as Btwx.Shape).closed,
+          insert: false
+        });
         if (childItem.bool === 'none' || i === 0) {
           composite.addChild(pathLayer);
         } else {
@@ -466,7 +512,11 @@ export const getCompoundShapeBoolPath = (id: string, layersById: any): any => {
           boolWith.replaceWith(newBool);
         }
       } else {
-        const newComposite = handleCompoundShape(layerItem.children[i], layersById, composite);
+        const newComposite = handleCompoundShape({
+          id: layerItem.children[i],
+          layersById,
+          useExistingPaths
+        });
         if (childItem.bool === 'none' || i === 0) {
           composite.addChild(newComposite);
         } else {
@@ -478,5 +528,9 @@ export const getCompoundShapeBoolPath = (id: string, layersById: any): any => {
     }
     return composite;
   }
-  return handleCompoundShape(id, layersById);
+  return handleCompoundShape({
+    id,
+    layersById,
+    useExistingPaths
+  });
 }

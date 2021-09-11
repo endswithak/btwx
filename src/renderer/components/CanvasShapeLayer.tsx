@@ -318,30 +318,16 @@ const CanvasShapeLayer = ({
       getPaperLayerIndex(layerItem, parentItem),
       createShapeGroup()
     );
-    const shapePath = createShapePath();
-    if (parentItem.type === 'CompoundShape') {
-      if (layerItem.bool !== 'none') {
-        const boolWith = parentCompoundShapePath.children[parentCompoundShapePath.children.length - 1];
-        const newComposite = boolWith[layerItem.bool](shapePath);
-        boolWith.replaceWith(newComposite);
-        if (parentItem.mask) {
-          const maskBoolWith = parentMask.children[parentMask.children.length - 1];
-          const newMaskComposite = maskBoolWith[layerItem.bool](shapePath);
-          maskBoolWith.replaceWith(newMaskComposite);
-        }
-      } else {
-        parentCompoundShapePath.addChild(shapePath);
-        if (parentItem.mask) {
-          parentMask.addChild(shapePath);
-        }
-      }
-    }
     setRendered(true);
+    const { shapePath } = getPaperLayer();
     dispatch(setPathData({
       id: id,
       pathData: shapePath.pathData,
       icon: getShapeIconPathData(shapePath.pathData)
     }));
+    if (parentItem.type === 'CompoundShape') {
+      setNestedBoolFlag(uuidv4());
+    }
     return (): void => {
       const {
         paperLayer,
@@ -364,12 +350,6 @@ const CanvasShapeLayer = ({
     }
   }, []);
 
-  useEffect(() => {
-    if (rendered && id === deepestSubPath) {
-      setNestedSubPathFlag(uuidv4());
-    }
-  }, [rendered]);
-
   ///////////////////////////////////////////////////////
   // INDEX & MASK & SCOPE
   ///////////////////////////////////////////////////////
@@ -383,23 +363,22 @@ const CanvasShapeLayer = ({
 
   useEffect(() => {
     if (rendered) {
+      const { paperLayer, maskedLayers } = getPaperLayer();
+      const { underlyingMaskGroupMaskedLayers } = getUnderlyingMaskPaperLayer();
+      // unmask currently masked layers
+      if (layerItem.mask) {
+        paperLayer.parent.insertChildren(layerIndex, maskedLayers.children);
+      }
+      // if masked, add to underlyingMaskGroupMaskedLayers
+      if (layerItem.masked) {
+        underlyingMaskGroupMaskedLayers.insertChild(maskedIndex, paperLayer);
+      }
+      // if not masked, add to parent
+      if (!layerItem.masked) {
+        paperLayer.parent.insertChild(layerIndex, paperLayer);
+      }
       if (parentItem.type === 'CompoundShape') {
         setNestedBoolFlag(uuidv4());
-      } else {
-        const { paperLayer, maskedLayers } = getPaperLayer();
-        const { underlyingMaskGroupMaskedLayers } = getUnderlyingMaskPaperLayer();
-        // unmask currently masked layers
-        if (layerItem.mask) {
-          paperLayer.parent.insertChildren(layerIndex, maskedLayers.children);
-        }
-        // if masked, add to underlyingMaskGroupMaskedLayers
-        if (layerItem.masked) {
-          underlyingMaskGroupMaskedLayers.insertChild(maskedIndex, paperLayer);
-        }
-        // if not masked, add to parent
-        if (!layerItem.masked) {
-          paperLayer.parent.insertChild(layerIndex, paperLayer);
-        }
       }
     }
   }, [layerIndex]);
@@ -463,29 +442,27 @@ const CanvasShapeLayer = ({
 
   useEffect(() => {
     if (rendered) {
+      const { shapePath, mask } = getPaperLayer();
+      const absPosition = getLayerAbsPosition(layerItem.frame, artboardItem.frame);
+      const nextSegments = layerItem.segments.map((segment) =>
+        rawSegToPaperSeg(segment)
+      );
+      shapePath.segments = nextSegments;
+      shapePath.closed = layerItem.closed;
+      shapePath.position = absPosition;
+      if (layerItem.mask) {
+        mask.segments = nextSegments;
+        mask.closed = layerItem.closed;
+        mask.position = shapePath.position;
+      }
+      dispatch(setPathData({
+        id: id,
+        pathData: shapePath.pathData,
+        icon: getShapeIconPathData(shapePath.pathData)
+      }));
       if (parentItem.type === 'CompoundShape') {
         setNestedBoolFlag(uuidv4());
-      } else {
-        const { shapePath, mask } = getPaperLayer();
-        const absPosition = getLayerAbsPosition(layerItem.frame, artboardItem.frame);
-        const nextSegments = layerItem.segments.map((segment) =>
-          rawSegToPaperSeg(segment)
-        );
-        shapePath.segments = nextSegments;
-        shapePath.closed = layerItem.closed;
-        shapePath.position = absPosition;
-        if (layerItem.mask) {
-          mask.segments = nextSegments;
-          mask.closed = layerItem.closed;
-          mask.position = shapePath.position;
-        }
-        dispatch(setPathData({
-          id: id,
-          pathData: shapePath.pathData,
-          icon: getShapeIconPathData(shapePath.pathData)
-        }));
       }
-
     }
   }, [layerItem.segments]);
 
@@ -495,15 +472,14 @@ const CanvasShapeLayer = ({
 
   useEffect(() => {
     if (rendered) {
+      const { shapePath, mask } = getPaperLayer();
+      const absPosition = getLayerAbsPosition(layerItem.frame, artboardItem.frame);
+      shapePath.position = absPosition;
+      if (layerItem.mask) {
+        mask.position = shapePath.position;
+      }
       if (parentItem.type === 'CompoundShape') {
         setNestedBoolFlag(uuidv4());
-      } else {
-        const { shapePath, mask } = getPaperLayer();
-        const absPosition = getLayerAbsPosition(layerItem.frame, artboardItem.frame);
-        shapePath.position = absPosition;
-        if (layerItem.mask) {
-          mask.position = shapePath.position;
-        }
       }
     }
   }, [layerItem.frame.x, layerItem.frame.y, artboardItem.frame.innerWidth, artboardItem.frame.innerHeight]);

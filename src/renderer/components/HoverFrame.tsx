@@ -1,5 +1,6 @@
-import React, { ReactElement, useEffect } from 'react';
+import React, { ReactElement, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
+import debounce from 'lodash.debounce';
 import { RootState } from '../store/reducers';
 import { getHoverBounds } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
@@ -141,14 +142,28 @@ const HoverFrame = (): ReactElement => {
   const zoom = useSelector((state: RootState) => state.documentSettings.zoom);
   const pathData = useSelector((state: RootState) => hoverItem && (hoverItem.type === 'Shape' || hoverItem.type === 'CompoundShape') && state.pathData.byId[hoverItem.id] && state.pathData.byId[hoverItem.id].pathData);
 
-  useEffect(() => {
+  const debounceUpdateHoverFrame = useCallback(debounce(({hoverItem, artboardItem, themeName, pathData}) => {
     updateHoverFrame({
       hoverItem,
       artboardItem,
       themeName,
       pathData
     });
+  }, 125, {
+    'leading': false,
+    'trailing': true
+  }), []);
+
+  useEffect(() => {
+    debounceUpdateHoverFrame.cancel();
+    debounceUpdateHoverFrame({
+      hoverItem,
+      artboardItem,
+      themeName,
+      pathData
+    });
     return (): void => {
+      debounceUpdateHoverFrame.cancel();
       clearHoverFrame();
     }
   }, [hover, hoverItem, zoom, hoverBounds, themeName, pathData]);
