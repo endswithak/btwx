@@ -315,11 +315,20 @@ export const isBetween = (x: number, min: number, max: number): boolean => {
   }
 };
 
-export const rawRectToPaperRect = (rect: number[]): paper.Rectangle =>
+export const rawRectangleToPaperRectangle = (rect: number[]): paper.Rectangle =>
   new paperMain.Rectangle(rect[0], rect[1], rect[2], rect[3]);
 
-export const paperRectToRawRect = (rect: paper.Rectangle): number[] =>
+export const paperRectangleToRawRectangle = (rect: paper.Rectangle): number[] =>
   [rect.x, rect.y, rect.width, rect.height];
+
+export const paperRectangleToRelativeRawRectangle = ({
+  rect,
+  point
+}:{
+  rect: paper.Rectangle;
+  point: number[];
+}): number[] =>
+  [rect.x - point[0], rect.y - point[1], rect.width, rect.height];
 
 export const rawPointToPaperPoint = (point: number[]): paper.Point =>
   new paperMain.Point(point[0], point[1]);
@@ -327,25 +336,91 @@ export const rawPointToPaperPoint = (point: number[]): paper.Point =>
 export const paperPointToRawPoint = (point: paper.Point): number[] =>
   [point.x, point.y];
 
-export const rawSegToPaperSeg = (seg: number[][]): paper.Segment =>
+export const rawSegmentToPaperSegment = (seg: number[][]): paper.Segment =>
   new paperMain.Segment({
     point: seg[0],
     handleIn: seg[1] ? seg[1] : null,
     handleOut: seg[2] ? seg[2] : null
   });
 
-export const paperSegToRawSeg = (seg: paper.Segment): number[][] =>
+export const paperSegmentToRawSegment = (segment): number[][] =>
   [
-    paperPointToRawPoint(seg.point),
-    ...(seg.handleIn ? [paperPointToRawPoint(seg.handleIn)] : []),
-    ...(seg.handleOut ? [paperPointToRawPoint(seg.handleOut)] : [])
+    paperPointToRawPoint(segment.point),
+    ...(segment.handleIn ? [paperPointToRawPoint(segment.handleIn)] : []),
+    ...(segment.handleOut ? [paperPointToRawPoint(segment.handleOut)] : [])
   ];
 
+export const paperSegmentToRelativeRawSegment = ({
+  segment,
+  point
+}:{
+  segment: paper.Segment;
+  point: number[];
+}): number[][] =>
+  paperSegmentToRawSegment(segment).map((segmentPoint, index) =>
+    index === 0 ? [segmentPoint[0] - point[0], segmentPoint[1] - point[1]] : segmentPoint
+  )
+
+export const paperSegmentsToRelativeRawSegments = ({
+  segments,
+  point
+}:{
+  segments: paper.Segment[];
+  point: number[];
+}): number[][][] =>
+  segments.map((segment) =>
+    paperSegmentToRelativeRawSegment({segment, point})
+  )
+
+export const relativeRawSegmentToAbsoluteRawSegment = ({
+  segment,
+  point
+}:{
+  segment: number[][];
+  point: number[];
+}): number[][] =>
+  [
+    [segment[0][0] + point[0], segment[0][1] + point[1]],
+    ...(segment[1] ? [segment[1]] : []),
+    ...(segment[2] ? [segment[2]] : []),
+  ]
+
+export const relativeRawSegmentsToAbsoluteRawSegments = ({
+  segments,
+  point
+}:{
+  segments: number[][][];
+  point?: number[];
+}): number[][][] =>
+  segments.map((segment) =>
+    relativeRawSegmentToAbsoluteRawSegment({segment, point})
+  )
+
+export const relativeRawSegmentToAbsolutePaperSegment = ({
+  segment,
+  point
+}:{
+  segment: number[][];
+  point: number[];
+}): paper.Segment =>
+  rawSegmentToPaperSegment(relativeRawSegmentToAbsoluteRawSegment({segment, point}));
+
+export const relativeRawSegmentsToAbsolutePaperSegments = ({
+  segments,
+  point
+}:{
+  segments: number[][][];
+  point: number[];
+}): paper.Segment[] =>
+  segments.map((segment) =>
+    relativeRawSegmentToAbsolutePaperSegment({segment, point})
+  )
+
 export const rawCurveToPaperCurve = (curve: number[][][]): paper.Curve =>
-  new paperMain.Curve(rawSegToPaperSeg(curve[0]), rawSegToPaperSeg(curve[1]));
+  new paperMain.Curve(rawSegmentToPaperSegment(curve[0]), rawSegmentToPaperSegment(curve[1]));
 
 export const paperCurveToRawCurve = (seg: paper.Curve): number[][][] =>
-  [paperSegToRawSeg(seg.segment1),paperSegToRawSeg(seg.segment2)];
+  [paperSegmentToRawSegment(seg.segment1),paperSegmentToRawSegment(seg.segment2)];
 
 export const rawCurveLocToPaperCurveLoc = (curveLoc: (number[][][]|number[]|number)[]): paper.CurveLocation =>
   new paperMain.CurveLocation(
@@ -390,7 +465,7 @@ export const getPathItemSegments = (pathItem: paper.PathItem): paper.Segment[] =
 }
 
 export const getRawPathItemSegments = (pathItem: paper.PathItem): number[][][] =>
-  getPathItemSegments(pathItem).map((seg) => paperSegToRawSeg(seg));
+  getPathItemSegments(pathItem).map((seg) => paperSegmentToRawSegment(seg));
 
 export const getShapePath = (shape: paper.Group): paper.Path => {
   const maskGroup = shape.getItem({
@@ -446,8 +521,24 @@ export const getShapeItemMaskPathItem = (shapeItem: paper.Group): paper.PathItem
     : null;
 }
 
-export const getShapeItemRawPathSegments = (shapeItem: paper.Group): number[][][] =>
-  getRawPathItemSegments(getShapeItemPathItem(shapeItem));
+export const getShapeItemRelativeRawSegments = ({
+  id,
+  layersById
+}:{
+  id: string;
+  layersById: {
+    [id: string]: Btwx.Layer;
+  };
+}): number[][][] => {
+  const layerItem = layersById[id] as Btwx.Shape;
+  const artboardItem = layersById[layerItem.artboard] as Btwx.Artboard;
+  const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}}) as paper.Group;
+  const pathItem = getShapePath(paperLayer);
+  return paperSegmentsToRelativeRawSegments({
+    segments: pathItem.segments,
+    point: [artboardItem.frame.x, artboardItem.frame.y]
+  });
+};
 
 export const getTopCompoundShape = (id: string, layersById: any): string => {
   const layerItem = layersById[id];
@@ -473,7 +564,7 @@ export const getCompoundShapeBoolPath = ({
     [id: string]: Btwx.Layer
   };
   useExistingPaths?: boolean;
-}): any => {
+}): paper.CompoundPath => {
   const handleCompoundShape = ({
     id,
     layersById,
@@ -498,9 +589,10 @@ export const getCompoundShapeBoolPath = ({
       if (childItem.type !== 'CompoundShape') {
         const pathLayer = useExistingPaths ? getShapeItemPathItem(paperLayer as paper.Group).clone({insert: false}) : new paperMain.Path({
           fillColor: 'black',
-          segments: childItem.segments.map((segment) =>
-            rawSegToPaperSeg(segment)
-          ),
+          segments: relativeRawSegmentsToAbsolutePaperSegments({
+            segments: childItem.segments,
+            point: [artboardItem.frame.x, artboardItem.frame.y]
+          }),
           closed: (childItem as Btwx.Shape).closed,
           insert: false
         });
@@ -533,4 +625,102 @@ export const getCompoundShapeBoolPath = ({
     layersById,
     useExistingPaths
   });
+}
+
+export const getShapeItemPathData = ({
+  id,
+  layersById,
+  icon = false,
+  useExistingPaths = false
+}:{
+  id: string;
+  layersById: {
+    [id: string]: Btwx.Layer;
+  };
+  icon?: boolean;
+  useExistingPaths?: boolean;
+}) => {
+  const layerItem = layersById[id] as Btwx.Shape | Btwx.CompoundShape;
+  const artboardItem = layersById[layerItem.artboard] as Btwx.Artboard;
+  const paperLayer = paperMain.projects[artboardItem.projectIndex].getItem({data: {id}});
+  let pathData;
+  switch(layerItem.type) {
+    case 'Shape': {
+      if (useExistingPaths) {
+        pathData = getShapeItemPathItem(paperLayer as paper.Group).pathData;
+      } else {
+        pathData = new paperMain.Path({
+          fillColor: 'black',
+          segments: relativeRawSegmentsToAbsolutePaperSegments({
+            segments: layerItem.segments,
+            point: [artboardItem.frame.x, artboardItem.frame.y]
+          }),
+          closed: (layerItem as Btwx.Shape).closed,
+          insert: false
+        }).pathData;
+      }
+      break;
+    }
+    case 'CompoundShape': {
+      pathData = getCompoundShapeBoolPath({
+        id,
+        layersById,
+        useExistingPaths
+      }).pathData;
+      break;
+    }
+  }
+  if (icon) {
+    const layerIcon = new paperMain.CompoundPath({
+      insert: false,
+      pathData: pathData
+    });
+    layerIcon.fitBounds(new paperMain.Rectangle({
+      point: new paperMain.Point(0,0),
+      size: new paperMain.Size(24,24)
+    }));
+    return layerIcon.pathData;
+  } else {
+    return pathData;
+  }
+}
+
+export const getCompoundShapeBounds = ({
+  id,
+  layersById,
+  useExistingPaths = false
+} : {
+  id: string;
+  layersById: {
+    [id: string]: Btwx.Layer
+  };
+  useExistingPaths?: boolean;
+}): Btwx.Frame => {
+  const layerItem = layersById[id];
+  const artboardItem = layersById[layerItem.artboard];
+  const compoundShapeBoolPath = getCompoundShapeBoolPath({
+    id,
+    layersById,
+    useExistingPaths
+  });
+  const clone = compoundShapeBoolPath.clone({insert: false});
+  const x = clone.position.x - artboardItem.frame.x;
+  const y = clone.position.y - artboardItem.frame.y;
+  const width = clone.bounds.width;
+  const height = clone.bounds.height;
+  clone.scale(
+    layerItem.transform.horizontalFlip ? -1 : 1,
+    layerItem.transform.verticalFlip ? -1 : 1
+  );
+  clone.rotation = -layerItem.transform.rotation;
+  const innerWidth = clone.bounds.width;
+  const innerHeight = clone.bounds.height;
+  return {
+    x,
+    y,
+    width,
+    height,
+    innerWidth,
+    innerHeight
+  }
 }

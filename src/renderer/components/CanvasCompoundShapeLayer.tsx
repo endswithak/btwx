@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { useSelector, useDispatch } from 'react-redux';
 import { createSelector } from 'reselect';
 import { RootState } from '../store/reducers';
-import { setPathData, removePathData } from '../store/actions/pathData';
 import { updateCompoundShapeFrame } from '../store/actions/layer';
 import { getPaperStyle, getLayerAbsPosition, getPaperLayerIndex, getPaperFillColor, getPaperStrokeColor, clearLayerTransforms, applyLayerTransforms } from '../store/utils/paper';
 import { paperMain, paperPreview } from '../canvas';
@@ -348,12 +347,6 @@ const CanvasCompoundShapeLayer = ({
       createCompoundShapeGroup()
     );
     setRendered(true);
-    const { compoundShapePath } = getPaperLayer();
-    dispatch(setPathData({
-      id: id,
-      pathData: compoundShapePath.pathData,
-      icon: getShapeIconPathData(compoundShapePath.pathData)
-    }));
     if (parentItem.type === 'CompoundShape') {
       setNestedBoolFlag(uuidv4());
     }
@@ -388,38 +381,9 @@ const CanvasCompoundShapeLayer = ({
       } = getPaperLayer();
       const newCompoundShapePath = createCompoundShapePath();
       compoundShapePath.replaceWith(newCompoundShapePath);
-      // if (layerItem.mask) {
-      //   mask.removeChildren();
-      //   mask.addChild(nextBool.clone());
-      // }
-      const clone = newCompoundShapePath.clone({insert: false});
-      const x = clone.position.x - artboardItem.frame.x;
-      const y = clone.position.y - artboardItem.frame.y;
-      const width = clone.bounds.width;
-      const height = clone.bounds.height;
-      clone.scale(
-        layerItem.transform.horizontalFlip ? -1 : 1,
-        layerItem.transform.verticalFlip ? -1 : 1
-      );
-      clone.rotation = -layerItem.transform.rotation;
-      const innerWidth = clone.bounds.width;
-      const innerHeight = clone.bounds.height;
-      dispatch(setPathData({
-        id: id,
-        pathData: newCompoundShapePath.pathData,
-        icon: getShapeIconPathData(newCompoundShapePath.pathData)
-      }));
-      dispatch(updateCompoundShapeFrame({
-        id,
-        frame: {
-          x,
-          y,
-          innerWidth,
-          innerHeight,
-          width,
-          height
-        }
-      }));
+      if (layerItem.mask) {
+        mask.pathData = newCompoundShapePath.pathData;
+      }
     }
   }, [boolFlag, nestedBoolFlag]);
 

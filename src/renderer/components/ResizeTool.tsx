@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getPaperLayer, getSelectedBounds, getSelectedInnerBounds, getLayerDescendants, getSelectedRotation } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
-import { paperRectToRawRect } from '../utils';
+import { paperRectangleToRawRectangle } from '../utils';
 import { setCanvasResizing, setCanvasCursor, setCanvasActiveTool, setCanvasResizeHandle } from '../store/actions/canvasSettings';
 import { scaleLayersThunk } from '../store/actions/layer';
 import { positionTextContent } from '../store/utils/paper';
@@ -703,7 +703,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
         setHandle(initialHandle);
         // setPivotHandle(getPivotHandle(initialHandle));
         dispatch(setSelectionToolBounds({
-          bounds: paperRectToRawRect(nextFromBounds)
+          bounds: paperRectangleToRawRectangle(nextFromBounds)
         }));
         if (downEvent.modifiers.shift && !shiftModifier) {
           setShiftModifier(true);
@@ -926,7 +926,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
           clearLayerPivots();
           if (selected.length > 0) {
             dispatch(setSelectionToolBounds({
-              bounds: paperRectToRawRect(fromBounds)
+              bounds: paperRectangleToRawRectangle(fromBounds)
             }));
           }
           resetState();
@@ -972,7 +972,7 @@ const ResizeTool = (props: PaperToolProps): ReactElement => {
     if (toBounds && isEnabled && dragEvent) {
       resizeLayers();
       dispatch(setSelectionToolBounds({
-        bounds: paperRectToRawRect(toBounds)
+        bounds: paperRectangleToRawRectangle(toBounds)
       }));
     }
   }, [toBounds]);

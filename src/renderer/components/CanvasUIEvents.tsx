@@ -1,7 +1,7 @@
 import React, { useEffect, ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { paperSegToRawSeg } from '../utils';
+import { paperSegmentToRawSegment } from '../utils';
 import { setCanvasActiveTool, setCanvasCursor } from '../store/actions/canvasSettings';
 import { setLayerHover, setLayerActiveGradientStop, selectLayers, deselectLayers, setLayerTreeScroll, deselectLayerEvents, selectLayerEvents } from '../store/actions/layer';
 import { getAllArtboardItems } from '../store/selectors/layer';

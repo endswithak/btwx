@@ -5,7 +5,7 @@ import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
 import { activateUI } from './CanvasUI';
 import { getSelectedProjectIndices } from '../store/selectors/layer';
-import { rawRectToPaperRect, rawPointToPaperPoint } from '../utils';
+import { rawRectangleToPaperRectangle, rawPointToPaperPoint } from '../utils';
 
 export const selectionFrameId = 'selectionFrame';
 
@@ -273,7 +273,7 @@ const SelectionFrame = (): ReactElement => {
       handle,
       lineHandles,
     });
-  }, 125, {
+  }, 75, {
     'leading': false,
     'trailing': true
   }), []);
@@ -281,21 +281,13 @@ const SelectionFrame = (): ReactElement => {
   useEffect(() => {
     debounceUpdateSelectionFrame.cancel();
     debounceUpdateSelectionFrame({
-      bounds: selectionBounds && rawRectToPaperRect(selectionBounds),
+      bounds: selectionBounds && rawRectangleToPaperRectangle(selectionBounds),
       handle: selectionHandle,
       lineHandles: {
         from: selectionLineFromPoint && rawPointToPaperPoint(selectionLineFromPoint),
         to: selectionLineToPoint && rawPointToPaperPoint(selectionLineToPoint)
       }
     });
-    // updateSelectionFrame({
-    //   bounds: selectionBounds && rawRectToPaperRect(selectionBounds),
-    //   handle: selectionHandle,
-    //   lineHandles: {
-    //     from: selectionLineFromPoint && rawPointToPaperPoint(selectionLineFromPoint),
-    //     to: selectionLineToPoint && rawPointToPaperPoint(selectionLineToPoint)
-    //   }
-    // });
     return () => {
       debounceUpdateSelectionFrame.cancel();
       clearSelectionFrame();

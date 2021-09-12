@@ -4,6 +4,7 @@ import debounce from 'lodash.debounce';
 import { RootState } from '../store/reducers';
 import { getHoverBounds } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
+import { getShapeItemPathData } from '../utils';
 import getTheme from '../theme';
 import { activateUI } from './CanvasUI';
 
@@ -140,30 +141,30 @@ const HoverFrame = (): ReactElement => {
   const hoverItem = useSelector((state: RootState) => state.layer.present.hover && state.layer.present.byId[state.layer.present.hover] ? state.layer.present.byId[state.layer.present.hover] : null);
   const artboardItem = useSelector((state: RootState) => state.layer.present.hover && state.layer.present.byId[state.layer.present.hover] && state.layer.present.byId[state.layer.present.hover].type !== 'Artboard' ? state.layer.present.byId[state.layer.present.byId[state.layer.present.hover].artboard] : null) as Btwx.Artboard;
   const zoom = useSelector((state: RootState) => state.documentSettings.zoom);
-  const pathData = useSelector((state: RootState) => hoverItem && (hoverItem.type === 'Shape' || hoverItem.type === 'CompoundShape') && state.pathData.byId[hoverItem.id] && state.pathData.byId[hoverItem.id].pathData);
+  const pathData = useSelector((state: RootState) => hoverItem && (hoverItem.type === 'Shape' || hoverItem.type === 'CompoundShape') && getShapeItemPathData({id: hover, layersById: state.layer.present.byId}));
 
-  const debounceUpdateHoverFrame = useCallback(debounce(({hoverItem, artboardItem, themeName, pathData}) => {
+  // const debounceUpdateHoverFrame = useCallback(debounce(({hoverItem, artboardItem, themeName, pathData}) => {
+  //   updateHoverFrame({
+  //     hoverItem,
+  //     artboardItem,
+  //     themeName,
+  //     pathData
+  //   });
+  // }, 75, {
+  //   'leading': false,
+  //   'trailing': true
+  // }), []);
+
+  useEffect(() => {
+    // debounceUpdateHoverFrame.cancel();
     updateHoverFrame({
       hoverItem,
       artboardItem,
       themeName,
       pathData
     });
-  }, 125, {
-    'leading': false,
-    'trailing': true
-  }), []);
-
-  useEffect(() => {
-    debounceUpdateHoverFrame.cancel();
-    debounceUpdateHoverFrame({
-      hoverItem,
-      artboardItem,
-      themeName,
-      pathData
-    });
     return (): void => {
-      debounceUpdateHoverFrame.cancel();
+      // debounceUpdateHoverFrame.cancel();
       clearHoverFrame();
     }
   }, [hover, hoverItem, zoom, hoverBounds, themeName, pathData]);

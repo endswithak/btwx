@@ -2,14 +2,15 @@
 import React, { useEffect, ReactElement, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { getPaperLayersBounds, getLayerDescendants } from '../store/selectors/layer';
+import { getLayerProjectIndex, getPaperLayer, getPaperLayersBounds, getSelectedProjectIndices, getSingleLineSelected, getLayerAndDescendants, getLayerDescendants } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
-import { paperRectToRawRect, getShapeItemPathItem, getShapeItemMaskPathItem, getTopCompoundShape, getCompoundShapeBoolPath } from '../utils';
+import { paperRectangleToRawRectangle, getShapeItemPathItem, getShapeItemMaskPathItem, getTopCompoundShape, getCompoundShapeBoolPath } from '../utils';
 import { setCanvasDragging } from '../store/actions/canvasSettings';
 import { moveLayersBy, duplicateLayers } from '../store/actions/layer';
 import { setSelectionToolBounds } from '../store/actions/selectionTool';
 import SnapTool from './SnapTool';
 import PaperTool, { PaperToolProps } from './PaperTool';
+import { clearSelectionFrame } from './SelectionFrame';
 
 const DragTool = (props: PaperToolProps): ReactElement => {
   const { tool, downEvent, dragEvent, upEvent, keyDownEvent, keyUpEvent } = props;
@@ -132,7 +133,7 @@ const DragTool = (props: PaperToolProps): ReactElement => {
       }
     });
     dispatch(setSelectionToolBounds({
-      bounds: paperRectToRawRect(toBounds)
+      bounds: paperRectangleToRawRectangle(toBounds)
     }));
   }
 
@@ -237,6 +238,7 @@ const DragTool = (props: PaperToolProps): ReactElement => {
     try {
       if (keyDownEvent && isEnabled && allIds && dragging && toBounds) {
         if (keyDownEvent.key === 'alt') {
+          clearSelectionFrame();
           renderDuplicatePreview();
           translateLayers({
             includeOffset: false
@@ -253,6 +255,7 @@ const DragTool = (props: PaperToolProps): ReactElement => {
     try {
       if (keyUpEvent && isEnabled && allIds && dragging && toBounds) {
         if (keyUpEvent.key === 'alt') {
+          clearSelectionFrame();
           clearDuplicatePreview();
           translateLayers({
             includeOffset: true

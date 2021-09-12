@@ -5,6 +5,7 @@ import { LayerState } from '../reducers/layer';
 import * as layerActions from '../actions/layer';
 import { addItem, removeItem, insertItem, moveItemAbove, moveItemBelow } from './general';
 import { paperMain } from '../../canvas';
+import { getCompoundShapeBounds } from '../../utils';
 import { ARTBOARDS_PER_PROJECT, TWEEN_PROPS_MAP, DEFAULT_TWEEN_EASE, getDefaultTweenProps } from '../../constants';
 
 import {
@@ -100,96 +101,114 @@ export const updateGroupParentBounds = (state: LayerState, groupParents: string[
   if (groupParents.length > 0) {
     return groupParents.reduce((result, current) => {
       const groupItem = result.byId[current];
-      if (groupItem.children.length > 0) {
-        const layersBounds = getLayersRelativeBounds(result, groupItem.children);
+      if (groupItem.type === 'CompoundShape') {
+        const bounds = getCompoundShapeBounds({
+          id: current,
+          layersById: result.byId
+        });
         result = {
           ...result,
           byId: {
             ...result.byId,
             [current]: {
               ...result.byId[current],
-              frame: {
-                ...result.byId[current].frame,
-                x: layersBounds.center.x,
-                y: layersBounds.center.y,
-                width: layersBounds.width,
-                height: layersBounds.height,
-                innerWidth: layersBounds.width,
-                innerHeight: layersBounds.height
-              }
+              frame: bounds
             }
           }
         }
-        if (groupItem.type === 'Group' && (groupItem as Btwx.Group).scroll.frame.x !== 'auto') {
-          const scrollFrameBounds = getLayerRelativeScrollBounds(result, current);
-          const topLeft = paperMain.Point.min(scrollFrameBounds.topLeft, layersBounds.topLeft);
-          const bottomRight = paperMain.Point.max(scrollFrameBounds.bottomRight, layersBounds.bottomRight);
-          const scrollBounds = new paperMain.Rectangle({
-            from: topLeft,
-            to: bottomRight
-          });
-          result = {
-            ...result,
-            byId: {
-              ...result.byId,
-              [current]: {
-                ...(result.byId[current] as Btwx.Group),
-                scroll: {
-                  ...(result.byId[current] as Btwx.Group).scroll,
-                  frame: {
-                    x: scrollFrameBounds.topLeft.x - layersBounds.topLeft.x,
-                    y: scrollFrameBounds.topLeft.y - layersBounds.topLeft.y,
-                    width: scrollFrameBounds.width,
-                    height: scrollFrameBounds.height
-                  },
-                  scrollWidth: scrollBounds.width,
-                  scrollHeight: scrollBounds.height,
-                  scrollLeft: layersBounds.left - scrollFrameBounds.left,
-                  scrollTop: layersBounds.top - scrollFrameBounds.top
-                }
-              } as Btwx.Group
-            }
-          }
-        }
+        return result;
       } else {
-        result = {
-          ...result,
-          byId: {
-            ...result.byId,
-            [current]: {
-              ...result.byId[current],
-              frame: {
-                ...result.byId[current].frame,
-                x: result.byId[current].frame.x,
-                y: result.byId[current].frame.y,
-                width: 0,
-                height: 0,
-                innerWidth: 0,
-                innerHeight: 0
-              }
-            }
-          }
-        }
-        if (groupItem.type === 'Group' && (groupItem as Btwx.Group).scroll.frame.x !== 'auto') {
+        if (groupItem.children.length > 0) {
+          const layersBounds = getLayersRelativeBounds(result, groupItem.children);
           result = {
             ...result,
             byId: {
               ...result.byId,
               [current]: {
-                ...(result.byId[current] as Btwx.Group),
-                scroll: {
-                  ...(result.byId[current] as Btwx.Group).scroll,
-                  scrollWidth: 0,
-                  scrollHeight: 0,
-                  scrollLeft: 0,
-                  scrollTop: 0
+                ...result.byId[current],
+                frame: {
+                  ...result.byId[current].frame,
+                  x: layersBounds.center.x,
+                  y: layersBounds.center.y,
+                  width: layersBounds.width,
+                  height: layersBounds.height,
+                  innerWidth: layersBounds.width,
+                  innerHeight: layersBounds.height
                 }
-              } as Btwx.Group
+              }
+            }
+          }
+          if (groupItem.type === 'Group' && (groupItem as Btwx.Group).scroll.frame.x !== 'auto') {
+            const scrollFrameBounds = getLayerRelativeScrollBounds(result, current);
+            const topLeft = paperMain.Point.min(scrollFrameBounds.topLeft, layersBounds.topLeft);
+            const bottomRight = paperMain.Point.max(scrollFrameBounds.bottomRight, layersBounds.bottomRight);
+            const scrollBounds = new paperMain.Rectangle({
+              from: topLeft,
+              to: bottomRight
+            });
+            result = {
+              ...result,
+              byId: {
+                ...result.byId,
+                [current]: {
+                  ...(result.byId[current] as Btwx.Group),
+                  scroll: {
+                    ...(result.byId[current] as Btwx.Group).scroll,
+                    frame: {
+                      x: scrollFrameBounds.topLeft.x - layersBounds.topLeft.x,
+                      y: scrollFrameBounds.topLeft.y - layersBounds.topLeft.y,
+                      width: scrollFrameBounds.width,
+                      height: scrollFrameBounds.height
+                    },
+                    scrollWidth: scrollBounds.width,
+                    scrollHeight: scrollBounds.height,
+                    scrollLeft: layersBounds.left - scrollFrameBounds.left,
+                    scrollTop: layersBounds.top - scrollFrameBounds.top
+                  }
+                } as Btwx.Group
+              }
+            }
+          }
+        } else {
+          result = {
+            ...result,
+            byId: {
+              ...result.byId,
+              [current]: {
+                ...result.byId[current],
+                frame: {
+                  ...result.byId[current].frame,
+                  x: result.byId[current].frame.x,
+                  y: result.byId[current].frame.y,
+                  width: 0,
+                  height: 0,
+                  innerWidth: 0,
+                  innerHeight: 0
+                }
+              }
+            }
+          }
+          if (groupItem.type === 'Group' && (groupItem as Btwx.Group).scroll.frame.x !== 'auto') {
+            result = {
+              ...result,
+              byId: {
+                ...result.byId,
+                [current]: {
+                  ...(result.byId[current] as Btwx.Group),
+                  scroll: {
+                    ...(result.byId[current] as Btwx.Group).scroll,
+                    scrollWidth: 0,
+                    scrollHeight: 0,
+                    scrollLeft: 0,
+                    scrollTop: 0
+                  }
+                } as Btwx.Group
+              }
             }
           }
         }
+        return result;
       }
-      return result;
     }, currentState);
   } else {
     return currentState;
@@ -13082,6 +13101,8 @@ export const addGroupWiggles = (state: LayerState, action: AddGroupsWiggles): La
 
 export const setLayerSegments = (state: LayerState, action: SetLayerSegments): LayerState => {
   let currentState = state;
+  const layerItem = state.byId[action.payload.id];
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
   currentState = {
     ...currentState,
     byId: {
@@ -13092,12 +13113,14 @@ export const setLayerSegments = (state: LayerState, action: SetLayerSegments): L
       } as Btwx.Shape
     }
   }
+  currentState = updateGroupParentBounds(currentState, groupParents);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Segments',
-      undoable: true
+      undoable: true,
+      treeEdit: false
     }
   }) as SetLayerEdit);
   return currentState;
@@ -13105,6 +13128,8 @@ export const setLayerSegments = (state: LayerState, action: SetLayerSegments): L
 
 export const setLayerBool = (state: LayerState, action: SetLayerBool): LayerState => {
   let currentState = state;
+  const layerItem = state.byId[action.payload.id];
+  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
   currentState = {
     ...currentState,
     byId: {
@@ -13115,12 +13140,14 @@ export const setLayerBool = (state: LayerState, action: SetLayerBool): LayerStat
       } as Btwx.Shape | Btwx.CompoundShape
     }
   }
+  currentState = updateGroupParentBounds(currentState, groupParents);
   currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
     edit: {
       actionType: action.type,
       payload: action.payload,
       detail: 'Set Layer Boolean Operation',
-      undoable: true
+      undoable: true,
+      treeEdit: false
     }
   }) as SetLayerEdit);
   return currentState;

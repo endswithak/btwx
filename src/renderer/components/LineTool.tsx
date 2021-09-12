@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useEffect, ReactElement, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { isBetween, paperRectToRawRect, paperPointToRawPoint } from '../utils';
+import { isBetween, paperRectangleToRawRectangle, paperPointToRawPoint } from '../utils';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
@@ -61,7 +61,7 @@ const LineTool = (props: PaperToolProps): ReactElement => {
         setHandle(initialHandle as Btwx.LineHandle);
         setOriginalPaperSelection(selectedPaperLayer.children[0] as paper.Path);
         dispatch(setSelectionTool({
-          bounds: paperRectToRawRect(selectedPaperLayer.bounds),
+          bounds: paperRectangleToRawRectangle(selectedPaperLayer.bounds),
           lineFromPoint: paperPointToRawPoint(fromHandle.position),
           lineToPoint: paperPointToRawPoint(toHandle.position)
         }));
@@ -233,7 +233,7 @@ const LineTool = (props: PaperToolProps): ReactElement => {
         }
       }
       dispatch(setSelectionTool({
-        bounds: paperRectToRawRect(selectedPaperLayer.bounds),
+        bounds: paperRectangleToRawRectangle(selectedPaperLayer.bounds),
         lineFromPoint: paperPointToRawPoint(lineHandles.from),
         lineToPoint: paperPointToRawPoint(lineHandles.to)
       }));

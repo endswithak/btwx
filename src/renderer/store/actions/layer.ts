@@ -21,7 +21,7 @@ import {
   getLayerStyle, getLayerTransform, getLayerShapeOpts, getLayerFrame, getLayerPathData, getLayerTextStyle,
   getLayerMasked, getLayerUnderlyingMask
 } from '../utils/actions';
-import { bufferToBase64, rawPointToPaperPoint, getShapeItemRawPathSegments, getShapeItemPathItem, getCompoundShapeBoolPath } from '../../utils';
+import { bufferToBase64, rawPointToPaperPoint, getShapeItemRelativeRawSegments, getShapeItemPathItem, getCompoundShapeBoolPath, paperSegmentsToRelativeRawSegments } from '../../utils';
 // import { addDocumentImage, removeDocumentImage, removeDocumentImages } from './documentSettings';
 import { addSessionImage } from './session';
 import { setEventDrawerEventThunk } from './eventDrawer';
@@ -2411,7 +2411,10 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
           if (descendentItem.type === 'Shape') {
             segments = {
               ...segments,
-              [descendentId]: getShapeItemRawPathSegments(descendentPaperLayer as paper.Group)
+              [descendentId]: paperSegmentsToRelativeRawSegments({
+                segments: (pathItem as paper.Path).segments,
+                point: [artboardItem.frame.x, artboardItem.frame.y]
+              })
             }
           }
           bounds = {
@@ -2455,7 +2458,10 @@ export const setLayersWidthThunk = (payload: SetLayersWidthPayload) => {
         if (layerItem.type === 'Shape') {
           segments = {
             ...segments,
-            [id]: getShapeItemRawPathSegments(clone as paper.Group)
+            [id]: paperSegmentsToRelativeRawSegments({
+              segments: (getShapeItemPathItem(clone as paper.Group) as paper.Path).segments,
+              point: [artboardItem.frame.x, artboardItem.frame.y]
+            })
           }
         }
         bounds = {
@@ -2630,7 +2636,10 @@ export const setLayersHeightThunk = (payload: SetLayersHeightPayload) => {
           if (descendentItem.type === 'Shape') {
             segments = {
               ...segments,
-              [descendentId]: getShapeItemRawPathSegments(descendentPaperLayer as paper.Group)
+              [descendentId]: paperSegmentsToRelativeRawSegments({
+                segments: (getShapeItemPathItem(clone as paper.Group) as paper.Path).segments,
+                point: [artboardItem.frame.x, artboardItem.frame.y]
+              })
             }
           }
           bounds = {
@@ -2674,7 +2683,10 @@ export const setLayersHeightThunk = (payload: SetLayersHeightPayload) => {
         if (layerItem.type === 'Shape') {
           segments = {
             ...segments,
-            [id]: getShapeItemRawPathSegments(clone as paper.Group)
+            [id]: paperSegmentsToRelativeRawSegments({
+              segments: (getShapeItemPathItem(clone as paper.Group) as paper.Path).segments,
+              point: [artboardItem.frame.x, artboardItem.frame.y]
+            })
           }
         }
         bounds = {
@@ -2980,7 +2992,10 @@ export const setLayersRotationThunk = (payload: SetLayersRotationPayload) => {
       if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') {
         segments = {
           ...segments,
-          [id]: getShapeItemRawPathSegments(clone as paper.Group)
+          [id]: paperSegmentsToRelativeRawSegments({
+            segments: (getShapeItemPathItem(clone as paper.Group) as paper.Path).segments,
+            point: [artboardItem.frame.x, artboardItem.frame.y]
+          })
         }
       }
       if (layerItem.type === 'Text') {
@@ -3098,7 +3113,10 @@ export const setLayersHorizontalFlipThunk = (payload: (EnableLayersHorizontalFli
         if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') {
           segments = {
             ...segments,
-            [id]: getShapeItemRawPathSegments(clone as paper.Group)
+            [id]: paperSegmentsToRelativeRawSegments({
+              segments: (getShapeItemPathItem(clone as paper.Group) as paper.Path).segments,
+              point: [artboardItem.frame.x, artboardItem.frame.y]
+            })
           }
         }
         if (layerItem.type === 'Text') {
@@ -3202,7 +3220,10 @@ export const setLayersVerticalFlipThunk = (payload: (EnableLayersVerticalFlipPay
         if (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') {
           segments = {
             ...segments,
-            [id]: getShapeItemRawPathSegments(clone as paper.Group)
+            [id]: paperSegmentsToRelativeRawSegments({
+              segments: (getShapeItemPathItem(clone as paper.Group) as paper.Path).segments,
+              point: [artboardItem.frame.x, artboardItem.frame.y]
+            })
           }
         }
         if (layerItem.type === 'Text') {
@@ -5684,7 +5705,10 @@ export const setRoundedRadiiThunk = (payload: SetRoundedRadiiPayload) => {
       paperLayerPath.pathData = newShape.pathData;
       segments = {
         ...segments,
-        [id]: getShapeItemRawPathSegments(clone as paper.Group)
+        [id]: paperSegmentsToRelativeRawSegments({
+          segments: (getShapeItemPathItem(clone as paper.Group) as paper.Path).segments,
+          point: [artboardItem.frame.x, artboardItem.frame.y]
+        })
       }
       bounds = {
         ...bounds,
@@ -5748,7 +5772,10 @@ export const setPolygonsSidesThunk = (payload: SetPolygonsSidesPayload) => {
       paperLayerPath.pathData = newShape.pathData;
       segments = {
         ...segments,
-        [id]: getShapeItemRawPathSegments(clone as paper.Group)
+        [id]: paperSegmentsToRelativeRawSegments({
+          segments: (getShapeItemPathItem(clone as paper.Group) as paper.Path).segments,
+          point: [artboardItem.frame.x, artboardItem.frame.y]
+        })
       }
       bounds = {
         ...bounds,
@@ -5814,7 +5841,10 @@ export const setStarsPointsThunk = (payload: SetStarsPointsPayload) => {
       paperLayerPath.pathData = newShape.pathData;
       segments = {
         ...segments,
-        [id]: getShapeItemRawPathSegments(clone as paper.Group)
+        [id]: paperSegmentsToRelativeRawSegments({
+          segments: (getShapeItemPathItem(clone as paper.Group) as paper.Path).segments,
+          point: [artboardItem.frame.x, artboardItem.frame.y]
+        })
       }
       bounds = {
         ...bounds,
@@ -5880,7 +5910,10 @@ export const setStarsRadiusThunk = (payload: SetStarsRadiusPayload) => {
       paperLayerPath.pathData = newShape.pathData;
       segments = {
         ...segments,
-        [id]: getShapeItemRawPathSegments(clone as paper.Group)
+        [id]: paperSegmentsToRelativeRawSegments({
+          segments: (getShapeItemPathItem(clone as paper.Group) as paper.Path).segments,
+          point: [artboardItem.frame.x, artboardItem.frame.y]
+        })
       }
       bounds = {
         ...bounds,
@@ -5932,7 +5965,10 @@ export const setLinesFromXThunk = (payload: SetLinesFromXPayload) => {
       }
       segments = {
         ...segments,
-        [id]: getShapeItemRawPathSegments(clone as paper.Group)
+        [id]: paperSegmentsToRelativeRawSegments({
+          segments: (getShapeItemPathItem(clone as paper.Group) as paper.Path).segments,
+          point: [artboardItem.frame.x, artboardItem.frame.y]
+        })
       }
       bounds = {
         ...bounds,
@@ -5989,7 +6025,10 @@ export const setLinesFromYThunk = (payload: SetLinesFromYPayload) => {
       }
       segments = {
         ...segments,
-        [id]: getShapeItemRawPathSegments(clone as paper.Group)
+        [id]: paperSegmentsToRelativeRawSegments({
+          segments: (getShapeItemPathItem(clone as paper.Group) as paper.Path).segments,
+          point: [artboardItem.frame.x, artboardItem.frame.y]
+        })
       }
       bounds = {
         ...bounds,
@@ -6043,7 +6082,10 @@ export const setLineFromThunk = (payload: SetLineFromPayload) => {
     dispatch(
       setLineFrom({
         ...payload,
-        segments: getShapeItemRawPathSegments(paperLayer as paper.Group),
+        segments: paperSegmentsToRelativeRawSegments({
+          segments: (getShapeItemPathItem(paperLayer as paper.Group) as paper.Path).segments,
+          point: [artboardItem.frame.x, artboardItem.frame.y]
+        }),
         bounds,
         rotation
       })
@@ -6082,7 +6124,10 @@ export const setLinesToXThunk = (payload: SetLinesToXPayload) => {
       }
       segments = {
         ...segments,
-        [id]: getShapeItemRawPathSegments(clone as paper.Group)
+        [id]: paperSegmentsToRelativeRawSegments({
+          segments: (getShapeItemPathItem(clone as paper.Group) as paper.Path).segments,
+          point: [artboardItem.frame.x, artboardItem.frame.y]
+        })
       }
       bounds = {
         ...bounds,
@@ -6139,7 +6184,10 @@ export const setLinesToYThunk = (payload: SetLinesToYPayload) => {
       }
       segments = {
         ...segments,
-        [id]: getShapeItemRawPathSegments(clone as paper.Group)
+        [id]: paperSegmentsToRelativeRawSegments({
+          segments: (getShapeItemPathItem(clone as paper.Group) as paper.Path).segments,
+          point: [artboardItem.frame.x, artboardItem.frame.y]
+        })
       }
       bounds = {
         ...bounds,
@@ -6193,7 +6241,10 @@ export const setLineToThunk = (payload: SetLineToPayload) => {
     dispatch(
       setLineTo({
         ...payload,
-        segments: getShapeItemRawPathSegments(paperLayer as paper.Group),
+        segments: paperSegmentsToRelativeRawSegments({
+          segments: (getShapeItemPathItem(paperLayer as paper.Group) as paper.Path).segments,
+          point: [artboardItem.frame.x, artboardItem.frame.y]
+        }),
         bounds,
         rotation
       })

@@ -18,12 +18,8 @@ interface CanvasLayerProps {
   nestedScrollLeft?: number;
   nestedScrollTop?: number;
   wheelEvent?: any;
-  nestedSubPathFlag?: string;
   nestedBoolFlag?: string;
-  // deepestSubPath?: string;
-  // setNestedSubPathFlag?(subPathFlag: string): void;
   setNestedBoolFlag?(boolFlag: string): void;
-  // setNestedSubCompoundPathFlag?(nestedSubCompoundPathFlag: string): void;
 }
 
 const getLayerByIdSelector = () => getLayerById;

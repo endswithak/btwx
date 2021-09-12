@@ -2,7 +2,7 @@ import { getPaperLayer } from '../selectors/layer';
 import { paperMain } from '../../canvas';
 import { RootState } from '../reducers';
 import { setCanvasActiveTool } from './canvasSettings';
-import { getPathItemSegments, paperSegToRawSeg } from '../../utils';
+import { getPathItemSegments, paperSegmentToRawSegment } from '../../utils';
 
 import {
   ENABLE_VECTOR_EDIT_TOOL,
@@ -38,7 +38,7 @@ export const enableVectorEditToolThunk = (id: string, projectIndex: number) => {
   return (dispatch: any, getState: any) => {
     const paperLayer = getPaperLayer(id, projectIndex) as paper.PathItem;
     const segments = getPathItemSegments(paperLayer).map((segment) =>
-      paperSegToRawSeg(segment)
+      paperSegmentToRawSegment({segment})
     );
     dispatch(enableVectorEditTool({
       layerId: id,

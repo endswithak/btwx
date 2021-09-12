@@ -3,7 +3,7 @@ import paper from 'paper';
 import tinyColor from 'tinycolor2';
 import { DEFAULT_ROUNDED_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_RADIUS, DEFAULT_STAR_POINTS, DEFAULT_LINE_FROM, DEFAULT_LINE_TO } from '../../constants';
 import { paperMain, paperPreview } from '../../canvas';
-import { rawSegToPaperSeg, getShapeItemPathItem } from '../../utils';
+import { rawSegmentToPaperSegment, getShapeItemPathItem } from '../../utils';
 import { getLeading } from '../../components/CanvasTextLayer';
 
 export const getShapeIconPathData = (pathData: string): string => {

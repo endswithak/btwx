@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { rawRectToPaperRect, paperRectToRawRect, rawPointToPaperPoint, paperPointToRawPoint } from '../utils';
+import { rawRectangleToPaperRectangle, paperRectangleToRawRectangle, rawPointToPaperPoint, paperPointToRawPoint } from '../utils';
 import { setSelectionToolBounds, setSelectionToolHandle, setSelectionToolLineFromPoint, setSelectionToolLineToPoint } from '../store/actions/selectionTool';
 import { getSelectedBounds, getSelectedInnerBounds, getSingleLineSelected, getSelectedLineAbsFromPoint, getSelectedLineAbsToPoint } from '../store/selectors/layer';
 
@@ -22,10 +22,10 @@ const SelectionTool = (): ReactElement => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const selectionBoundsRectangle = selectionBounds && rawRectToPaperRect(selectionBounds);
+    const selectionBoundsRectangle = selectionBounds && rawRectangleToPaperRectangle(selectionBounds);
     if ((selectionBoundsRectangle && selectedBounds && !selectionBoundsRectangle.equals(selectedBounds)) || (selectedBounds && !selectionBounds)) {
       dispatch(setSelectionToolBounds({
-        bounds: paperRectToRawRect(selectedBounds)
+        bounds: paperRectangleToRawRectangle(selectedBounds)
       }));
     }
   }, [selectedBounds, selectedInnerBounds]);

@@ -28,7 +28,6 @@ import scrollFrameTool from './scrollFrameTool';
 import vectorEditTool from './vectorEditTool';
 import measureTool from './measureTool';
 import selectionTool from './selectionTool';
-import pathData from './pathData';
 
 export const reducers = {
   layer,
@@ -57,8 +56,7 @@ export const reducers = {
   scrollFrameTool,
   vectorEditTool,
   measureTool,
-  selectionTool,
-  pathData
+  selectionTool
 };
 
 const appReducer = combineReducers(reducers);

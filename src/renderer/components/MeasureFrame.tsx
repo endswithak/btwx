@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
-import { rawRectToPaperRect } from '../utils';
+import { rawRectangleToPaperRectangle } from '../utils';
 import getTheme from '../theme';
 import { activateUI } from './CanvasUI';
 
@@ -305,13 +305,13 @@ const MeasureFrame = (): ReactElement => {
 
   useEffect(() => {
     updateMeasureFrame({
-      bounds: rawRectToPaperRect(measureFrameBounds),
+      bounds: rawRectangleToPaperRectangle(measureFrameBounds),
       measureTo: {
-        top: measureFrameMeasureTo.top && rawRectToPaperRect(measureFrameMeasureTo.top),
-        bottom: measureFrameMeasureTo.bottom && rawRectToPaperRect(measureFrameMeasureTo.bottom),
-        left: measureFrameMeasureTo.left && rawRectToPaperRect(measureFrameMeasureTo.left),
-        right: measureFrameMeasureTo.right && rawRectToPaperRect(measureFrameMeasureTo.right),
-        all: measureFrameMeasureTo.all && rawRectToPaperRect(measureFrameMeasureTo.all)
+        top: measureFrameMeasureTo.top && rawRectangleToPaperRectangle(measureFrameMeasureTo.top),
+        bottom: measureFrameMeasureTo.bottom && rawRectangleToPaperRectangle(measureFrameMeasureTo.bottom),
+        left: measureFrameMeasureTo.left && rawRectangleToPaperRectangle(measureFrameMeasureTo.left),
+        right: measureFrameMeasureTo.right && rawRectangleToPaperRectangle(measureFrameMeasureTo.right),
+        all: measureFrameMeasureTo.all && rawRectangleToPaperRectangle(measureFrameMeasureTo.all)
       },
       themeName
     });

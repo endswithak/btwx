@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import getTheme from '../theme';
 import { paperMain } from '../canvas';
-import { rawSegToPaperSeg, rawCurveLocToPaperCurveLoc } from '../utils';
+import { rawSegmentToPaperSegment, rawCurveLocToPaperCurveLoc } from '../utils';
 import { activateUI } from './CanvasUI';
 
 export const vectorEditFrameId = 'vectorEditFrame';
@@ -233,10 +233,10 @@ const VectorEditFrame = (): ReactElement => {
 
   useEffect(() => {
     const paperSegments = segments && segments.map((arr) =>
-      rawSegToPaperSeg(arr)
+      rawSegmentToPaperSegment(arr)
     );
     const paperCurveHover = curveHover && rawCurveLocToPaperCurveLoc(curveHover);
-    const paperSelectedSegment = selectedSegment && rawSegToPaperSeg(selectedSegment);
+    const paperSelectedSegment = selectedSegment && rawSegmentToPaperSegment(selectedSegment);
     updateVectorEditFrame({
       layerId,
       themeName,

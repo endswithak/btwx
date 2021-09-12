@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, useEffect, ReactElement, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { isBetween, paperSegToRawSeg } from '../utils';
+import { isBetween, paperSegmentToRawSegment, paperSegmentsToRelativeRawSegments } from '../utils';
 import { RootState } from '../store/reducers';
 import { DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_POINTS, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
 import Tooltip from '../canvas/tooltip';
@@ -21,6 +21,8 @@ const ShapeTool = (props: PaperToolProps): ReactElement => {
   const shapeType = useSelector((state: RootState) => state.shapeTool.shapeType);
   // const scope = useSelector((state: RootState) => state.layer.present.scope);
   // const activeProjectIndex = useSelector((state: RootState) => state.layer.present.activeProjectIndex);
+  const layersById = useSelector((state: RootState) => state.layer.present.byId);
+  const globalScope = useSelector((state: RootState) => state.layer.present.scope);
   const drawing = useSelector((state: RootState) => state.canvasSettings.drawing);
   const layerProjectIndices = useSelector((state: RootState) => getLayerProjectIndices(state));
   const activeArtboard = useSelector((state: RootState) => state.layer.present.activeArtboard);
@@ -330,35 +332,40 @@ const ShapeTool = (props: PaperToolProps): ReactElement => {
         const lineFromPoint = (paperLayer as paper.Path).firstSegment.point;
         const lineToPoint = (paperLayer as paper.Path).lastSegment.point;
         const lineVector = lineToPoint.subtract(lineFromPoint);
-        const parentItem = layerProjectIndices.reduce((result, current, index) => {
-          const projectIndex = paperMain.projects[current];
-          if (projectIndex) {
-            const hitTest = projectIndex.getItem({
-              data: (data: any) => {
-                return data.id === 'artboardBackground';
-              },
-              overlapping: paperLayer.bounds
-            });
-            return hitTest ? {
-              id: hitTest.parent.data.id,
-              projectIndex: index + 1,
-              paperLayer: hitTest.parent
-            } : result;
-          } else {
-            return result;
-          }
-        }, {
-          id: activeArtboard,
-          projectIndex: activeArtboardPaperScope,
-          paperLayer: paperMain.projects[activeArtboardPaperScope].getItem({ data: { id: activeArtboard } })
-        });
+        const parent = globalScope[globalScope.length - 1] === 'root' ? activeArtboard : globalScope[globalScope.length - 1];
+        const parentItem = layersById[parent];
+        const parentArtboard = parentItem.type === 'Artboard' ? parent : parentItem.artboard;
+        const artboardItem = layersById[parentArtboard];
+        // const parentItem = layerProjectIndices.reduce((result, current, index) => {
+        //   const projectIndex = paperMain.projects[current];
+        //   if (projectIndex) {
+        //     const hitTest = projectIndex.getItem({
+        //       data: (data: any) => {
+        //         return data.id === 'artboardBackground';
+        //       },
+        //       overlapping: paperLayer.bounds
+        //     });
+        //     return hitTest ? {
+        //       id: hitTest.parent.data.id,
+        //       projectIndex: index + 1,
+        //       paperLayer: hitTest.parent
+        //     } : result;
+        //   } else {
+        //     return result;
+        //   }
+        // }, {
+        //   id: activeArtboard,
+        //   projectIndex: activeArtboardPaperScope,
+        //   paperLayer: paperMain.projects[activeArtboardPaperScope].getItem({ data: { id: activeArtboard } })
+        // });
         dispatch(addShapeThunk({
           layer: {
-            parent: parentItem.id,
+            parent: parent,
             name: shapeType,
+            artboard: parentArtboard,
             frame: {
-              x: paperLayer.position.x - parentItem.paperLayer.position.x,
-              y: paperLayer.position.y - parentItem.paperLayer.position.y,
+              x: paperLayer.position.x - artboardItem.frame.x,
+              y: paperLayer.position.y - artboardItem.frame.y,
               width: paperLayer.bounds.width,
               height: paperLayer.bounds.height,
               innerWidth: shapeType === 'Line' ? lineVector.length : paperLayer.bounds.width,
@@ -377,7 +384,10 @@ const ShapeTool = (props: PaperToolProps): ReactElement => {
               rotation: shapeType === 'Line' ? lineVector.angle : DEFAULT_TRANSFORM.rotation
             },
             closed: shapeType !== 'Line',
-            segments: paperLayer.segments.map((seg) => paperSegToRawSeg(seg)),
+            segments: paperSegmentsToRelativeRawSegments({
+              segments: paperLayer.segments,
+              point: [artboardItem.frame.x, artboardItem.frame.y]
+            }),
             ...(() => {
               switch(shapeType) {
                 case 'Ellipse':
@@ -396,18 +406,6 @@ const ShapeTool = (props: PaperToolProps): ReactElement => {
                   return {
                     sides: DEFAULT_STAR_POINTS
                   }
-                case 'Line': {
-                  return {
-                    from: {
-                      x: lineFromPoint.x - parentItem.paperLayer.position.x,
-                      y: lineFromPoint.y - parentItem.paperLayer.position.y
-                    },
-                    to: {
-                      x: lineToPoint.x - parentItem.paperLayer.position.x,
-                      y: lineToPoint.y - parentItem.paperLayer.position.y
-                    }
-                  }
-                }
                 default:
                   return {};
               }

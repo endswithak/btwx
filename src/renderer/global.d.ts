@@ -362,10 +362,10 @@ declare namespace Btwx {
     name: string;
     artboard: string;
     parent: string;
-    // children: string[];
+    children: string[];
     scope: string[];
     frame: Frame;
-    // showChildren: boolean;
+    showChildren: boolean;
     selected: boolean;
     hover: boolean;
     events: string[];

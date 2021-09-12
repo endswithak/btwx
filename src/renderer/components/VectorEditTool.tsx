@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useEffect, ReactElement, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { isBetween, getPathItemSegments, paperSegToRawSeg } from '../utils';
+import { isBetween, getPathItemSegments, paperSegmentToRawSegment } from '../utils';
 import { RootState } from '../store/reducers';
 import { paperMain } from '../canvas';
 import { setCanvasResizing } from '../store/actions/canvasSettings';
@@ -90,7 +90,7 @@ const VectorEditTool = (props: PaperToolProps): ReactElement => {
             paperSegment.point = dragEvent.point;
             break;
         }
-        const nextSelectedSegment = paperSegToRawSeg(paperSegment);
+        const nextSelectedSegment = paperSegmentToRawSegment(paperSegment);
         dispatch(setVectorEditTool({
           segments: segments.map((current, index) => {
             if (index === segmentIndex) {

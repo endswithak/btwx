@@ -4,8 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getPaperStyle, getLayerAbsPosition, getPaperLayerIndex, getPaperFillColor, getPaperStrokeColor } from '../store/utils/paper';
 import { paperMain, paperPreview } from '../canvas';
-import { setPathData, removePathData } from '../store/actions/pathData';
-import { applyLayerTimelines, rawSegToPaperSeg, getShapeIconPathData } from '../utils';
+import { applyLayerTimelines, relativeRawSegmentsToAbsolutePaperSegments } from '../utils';
 import CanvasPreviewEventLayerTimeline from './CanvasPreviewEventLayerTimeline';
 
 interface CanvasShapeLayerProps {
@@ -16,8 +15,6 @@ interface CanvasShapeLayerProps {
   };
   nestedScrollLeft?: number;
   nestedScrollTop?: number;
-  deepestSubPath?: string;
-  setNestedSubPathFlag?(subPathFlag: string): void;
   setNestedBoolFlag?(boolFlag: string): void;
 }
 
@@ -27,8 +24,6 @@ const CanvasShapeLayer = ({
   eventTimelines,
   nestedScrollLeft,
   nestedScrollTop,
-  deepestSubPath,
-  setNestedSubPathFlag,
   setNestedBoolFlag
 }: CanvasShapeLayerProps): ReactElement => {
   const layerItem: Btwx.Shape = useSelector((state: RootState) => state.layer.present.byId[id] as Btwx.Shape);
@@ -52,7 +47,10 @@ const CanvasShapeLayer = ({
   const createShapePath = () => {
     return new paperLayerScope.Path({
       name: `shapePath-${layerItem.name}`,
-      segments: layerItem.segments,
+      segments: relativeRawSegmentsToAbsolutePaperSegments({
+        segments: layerItem.segments,
+        point: [artboardItem.frame.x, artboardItem.frame.y]
+      }),
       closed: layerItem.closed,
       position: getLayerAbsPosition(layerItem.frame, artboardItem.frame),
       insert: false,
@@ -85,7 +83,10 @@ const CanvasShapeLayer = ({
       children: [
         new paperLayerScope.Path({
           name: 'mask',
-          segments: layerItem.segments,
+          segments: relativeRawSegmentsToAbsolutePaperSegments({
+            segments: layerItem.segments,
+            point: [artboardItem.frame.x, artboardItem.frame.y]
+          }),
           closed: layerItem.closed,
           position: shapePath.position,
           fillColor: 'black',
@@ -319,12 +320,6 @@ const CanvasShapeLayer = ({
       createShapeGroup()
     );
     setRendered(true);
-    const { shapePath } = getPaperLayer();
-    dispatch(setPathData({
-      id: id,
-      pathData: shapePath.pathData,
-      icon: getShapeIconPathData(shapePath.pathData)
-    }));
     if (parentItem.type === 'CompoundShape') {
       setNestedBoolFlag(uuidv4());
     }
@@ -444,9 +439,10 @@ const CanvasShapeLayer = ({
     if (rendered) {
       const { shapePath, mask } = getPaperLayer();
       const absPosition = getLayerAbsPosition(layerItem.frame, artboardItem.frame);
-      const nextSegments = layerItem.segments.map((segment) =>
-        rawSegToPaperSeg(segment)
-      );
+      const nextSegments = relativeRawSegmentsToAbsolutePaperSegments({
+        segments: layerItem.segments,
+        point: [artboardItem.frame.x, artboardItem.frame.y]
+      });
       shapePath.segments = nextSegments;
       shapePath.closed = layerItem.closed;
       shapePath.position = absPosition;
@@ -455,11 +451,6 @@ const CanvasShapeLayer = ({
         mask.closed = layerItem.closed;
         mask.position = shapePath.position;
       }
-      dispatch(setPathData({
-        id: id,
-        pathData: shapePath.pathData,
-        icon: getShapeIconPathData(shapePath.pathData)
-      }));
       if (parentItem.type === 'CompoundShape') {
         setNestedBoolFlag(uuidv4());
       }
