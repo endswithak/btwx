@@ -362,7 +362,6 @@ import {
   SET_LAYERS_BOOL,
   SET_LAYER_FILL_RULE,
   SET_LAYERS_FILL_RULE,
-  UPDATE_COMPOUND_SHAPE_FRAME,
   LayerTypes
 } from '../actionTypes/layer';
 
@@ -727,8 +726,7 @@ import {
   setLayerBool,
   setLayersBool,
   setLayerFillRule,
-  setLayersFillRule,
-  updateCompoundShapeFrame
+  setLayersFillRule
 } from '../utils/layer';
 
 export interface LayerState {
@@ -1557,8 +1555,6 @@ export const baseReducer = (state = initialState, action: LayerTypes): LayerStat
       return setLayerFillRule(state, action);
     case SET_LAYERS_FILL_RULE:
       return setLayersFillRule(state, action);
-    case UPDATE_COMPOUND_SHAPE_FRAME:
-      return updateCompoundShapeFrame(state, action);
     case HYDRATE_LAYERS:
       return {
         ...state,

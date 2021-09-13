@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { getPaperStyle, getLayerAbsPosition, getPaperLayerIndex, getPaperFillColor, getPaperStrokeColor } from '../store/utils/paper';
 import { paperMain, paperPreview } from '../canvas';
@@ -38,7 +38,6 @@ const CanvasShapeLayer = ({
   const [paperProject, setPaperProject] = useState(paperScope === 'main' ? paperMain.projects[projectIndex] : paperPreview.project);
   const [rendered, setRendered] = useState<boolean>(false);
   const [layerTimelines, setLayerTimelines] = useState(null);
-  const dispatch = useDispatch();
 
   ///////////////////////////////////////////////////////
   // HELPER FUNCTIONS
@@ -51,6 +50,7 @@ const CanvasShapeLayer = ({
         segments: layerItem.segments,
         point: [artboardItem.frame.x, artboardItem.frame.y]
       }),
+      fillRule: layerItem.fillRule,
       closed: layerItem.closed,
       position: getLayerAbsPosition(layerItem.frame, artboardItem.frame),
       insert: false,
@@ -87,6 +87,7 @@ const CanvasShapeLayer = ({
             segments: layerItem.segments,
             point: [artboardItem.frame.x, artboardItem.frame.y]
           }),
+          fillRule: layerItem.fillRule,
           closed: layerItem.closed,
           position: shapePath.position,
           fillColor: 'black',
@@ -604,6 +605,20 @@ const CanvasShapeLayer = ({
       shapePath.dashOffset = layerItem.style.strokeOptions.dashOffset;
     }
   }, [layerItem.style.strokeOptions.dashOffset]);
+
+  ///////////////////////////////////////////////////////
+  // FILL RULE
+  ///////////////////////////////////////////////////////
+
+  useEffect(() => {
+    if (rendered) {
+      const { shapePath, mask } = getPaperLayer();
+      shapePath.fillRule = layerItem.fillRule;
+      if (layerItem.mask) {
+        mask.fillRule = layerItem.fillRule;
+      }
+    }
+  }, [layerItem.fillRule]);
 
   ///////////////////////////////////////////////////////
   // EVENTS

@@ -1,15 +1,12 @@
-import React, { ReactElement, useEffect, useState, useMemo } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { useSelector, useDispatch } from 'react-redux';
-import { createSelector } from 'reselect';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { updateCompoundShapeFrame } from '../store/actions/layer';
-import { getPaperStyle, getLayerAbsPosition, getPaperLayerIndex, getPaperFillColor, getPaperStrokeColor, clearLayerTransforms, applyLayerTransforms } from '../store/utils/paper';
+import { getPaperStyle, getPaperLayerIndex, getPaperFillColor, getPaperStrokeColor } from '../store/utils/paper';
 import { paperMain, paperPreview } from '../canvas';
-import { applyLayerTimelines, getShapeIconPathData, getCompoundShapeBoolPath } from '../utils';
+import { applyLayerTimelines, getCompoundShapeBoolPath } from '../utils';
 import CanvasPreviewEventLayerTimeline from './CanvasPreviewEventLayerTimeline';
 import CanvasLayer from './CanvasLayer';
-import { getLayerDescendants } from '../store/selectors/layer';
 
 interface CanvasCompoundShapeLayerProps {
   id: string;
@@ -47,7 +44,6 @@ const CanvasCompoundShapeLayer = ({
   const [layerTimelines, setLayerTimelines] = useState(null);
   // triggered whenever any subpath geometry or index changes
   const [boolFlag, setBoolFlag] = useState(uuidv4());
-  const dispatch = useDispatch();
 
   ///////////////////////////////////////////////////////
   // HELPER FUNCTIONS
@@ -96,6 +92,7 @@ const CanvasCompoundShapeLayer = ({
           name: 'mask',
           closed: layerItem.closed,
           position: compoundShapePath.position,
+          fillRule: layerItem.fillRule,
           fillColor: 'black',
           clipMask: true,
           data: {
@@ -602,6 +599,20 @@ const CanvasCompoundShapeLayer = ({
       compoundShapePath.dashOffset = layerItem.style.strokeOptions.dashOffset;
     }
   }, [layerItem.style.strokeOptions.dashOffset]);
+
+  ///////////////////////////////////////////////////////
+  // FILL RULE
+  ///////////////////////////////////////////////////////
+
+  useEffect(() => {
+    if (rendered) {
+      const { compoundShapePath, mask } = getPaperLayer();
+      compoundShapePath.fillRule = layerItem.fillRule;
+      if (layerItem.mask) {
+        mask.fillRule = layerItem.fillRule;
+      }
+    }
+  }, [layerItem.fillRule]);
 
   ///////////////////////////////////////////////////////
   // EVENTS

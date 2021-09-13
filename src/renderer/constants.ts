@@ -484,6 +484,9 @@ export const DEFAULT_TEXT_STYLE: Btwx.TextStyle = {
   textResize: DEFAULT_TEXT_RESIZE
 }
 
+export const DEFAULT_FILL_RULES: Btwx.FillRule[] = ['nonzero', 'evenodd'];
+export const DEFAULT_FILL_RULE: Btwx.FillRule = 'nonzero';
+
 export const APPLE_IPHONE_DEVICES: Btwx.Device[] = [
   {
     id: 'iphone8',

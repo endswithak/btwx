@@ -1,0 +1,29 @@
+.c-fill-rule-selector
+  @include background-blur
+  @include themed()
+    background: theme-prop(glass-background)
+    box-shadow: 0 0 0 1px theme-prop(modal-border), $glass-shadow
+  transform-origin: left top
+  position: absolute
+  width: 248px
+  display: flex
+  flex-direction: column
+  border-radius: $unit
+  z-index: 5
+  left: $unit * 2
+
+.c-fill-rule-selector__input
+  padding: $unit
+
+.c-fill-rule-selector__info
+  @include themed()
+    box-shadow: 0 -1px 0 0 theme-prop(modal-border)
+  margin-top: $unit * 2
+  padding: $unit * 2
+
+  p
+    @include themed()
+      color: theme-prop(text-lighter)
+    font-size: $font-size-small
+    line-height: 14px
+    padding-bottom: $unit * 2

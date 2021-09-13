@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/reducers';
-import { expandStrokeStyles, collapseStrokeStyles, expandStrokeOptionsStyles, collapseStrokeOptionsStyles } from '../store/actions/rightSidebar';
+import { expandStrokeStyles, collapseStrokeStyles } from '../store/actions/rightSidebar';
 import SidebarCollapseSection from './SidebarCollapseSection';
 import StrokeInput from './StrokeInput';
 import SidebarStrokeOptionsStyle from './SidebarStrokeOptionsStyle';
@@ -23,14 +23,6 @@ const SidebarStrokeStyles = (): ReactElement => {
     }
   }
 
-  const handleOptionsClick = () => {
-    if (strokeOptionsStylesCollapsed) {
-      dispatch(expandStrokeOptionsStyles());
-    } else {
-      dispatch(collapseStrokeOptionsStyles());
-    }
-  }
-
   return (
     validFillSelection
     ? <SidebarCollapseSection
@@ -39,10 +31,9 @@ const SidebarStrokeStyles = (): ReactElement => {
         header='stroke'
         actions={[
           <StrokeOptionsToggle
-            showOptions={strokeOptionsStylesCollapsed}
-            onClick={handleOptionsClick}
             key='strokeOptions' />,
-          <StrokeToggle key='strokeToggle' />
+          <StrokeToggle
+            key='strokeToggle' />
         ]}>
         <StrokeInput />
         <StrokeParamsInput />

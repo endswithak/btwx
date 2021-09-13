@@ -491,20 +491,15 @@ declare namespace Btwx {
     type: 'Shape';
     shapeType: ShapeType;
     segments: number[][][];
+    fillRule: FillRule;
   }
 
   interface CompoundShape extends LayerWithChildren, MaskableLayer, PathLayer {
     type: 'CompoundShape';
     fillRule: FillRule;
-    // boolFrame: {
-    //   x: number;
-    //   y: number;
-    //   width: number;
-    //   height: number;
-    //   innerWidth: number;
-    //   innerHeight: number;
-    // };
   }
+
+  type ShapeItem = Shape | CompoundShape;
 
   interface Polygon extends Shape {
     sides: number;

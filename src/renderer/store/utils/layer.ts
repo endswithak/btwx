@@ -13213,33 +13213,3 @@ export const setLayersFillRule = (state: LayerState, action: SetLayersFillRule):
   }) as SetLayerEdit);
   return currentState;
 };
-
-export const updateCompoundShapeFrame = (state: LayerState, action: UpdateCompoundShapeFrame): LayerState => {
-  let currentState = state;
-  const layerItem = currentState.byId[action.payload.id];
-  const groupParents = layerItem.scope.filter((id, index) => index !== 0 && index !== 1).reverse();
-  currentState = {
-    ...currentState,
-    byId: {
-      ...currentState.byId,
-      [action.payload.id]: {
-        ...currentState.byId[action.payload.id],
-        frame: {
-          ...currentState.byId[action.payload.id].frame,
-          ...action.payload.frame
-        }
-      } as Btwx.CompoundShape
-    }
-  }
-  currentState = updateGroupParentBounds(currentState, groupParents);
-  currentState = updateLayerTweensByProps(currentState, action.payload.id, ['width', 'height', 'x', 'y']);
-  currentState = setLayerEdit(currentState, layerActions.setLayerEdit({
-    edit: {
-      actionType: action.type,
-      payload: action.payload,
-      detail: 'Update Compound Shape Frame',
-      undoable: true
-    }
-  }) as SetLayerEdit);
-  return currentState;
-};

@@ -5,6 +5,7 @@ import { expandFillStyles, collapseFillStyles } from '../store/actions/rightSide
 import SidebarCollapseSection from './SidebarCollapseSection';
 import FillInput from './FillInput';
 import FillToggle from './FillToggle';
+import FillRuleToggle from './FillRuleToggle';
 
 const SidebarFillStyles = (): ReactElement => {
   const validFillSelection = useSelector((state: RootState) => state.layer.present.selected.every((id) => state.layer.present.byId[id] && state.layer.present.byId[id].type !== 'Group' && state.layer.present.byId[id].type !== 'Image' && !(state.layer.present.byId[id].type === 'Shape' && (state.layer.present.byId[id] as Btwx.Shape).shapeType === 'Line')));
@@ -26,7 +27,10 @@ const SidebarFillStyles = (): ReactElement => {
         collapsed={fillStylesCollapsed}
         header='fill'
         actions={[
-          <FillToggle key='fillToggle' />
+          <FillRuleToggle
+            key='fillRule' />,
+          <FillToggle
+            key='fillToggle' />
         ]}>
         <FillInput />
       </SidebarCollapseSection>

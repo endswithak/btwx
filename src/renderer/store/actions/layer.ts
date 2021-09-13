@@ -5,7 +5,7 @@ import { ActionCreators } from 'redux-undo';
 import { paperMain } from '../../canvas';
 import {
   ARTBOARDS_PER_PROJECT, DEFAULT_TRANSFORM, DEFAULT_TEXT_VALUE,
-  TWEEN_PROPS_MAP, DEFAULT_SCROLL
+  TWEEN_PROPS_MAP, DEFAULT_SCROLL, DEFAULT_FILL_RULE
 } from '../../constants';
 import {
   clearLayerTransforms, applyLayerTransforms, getTextLines, positionTextContent, getTextInnerBounds,
@@ -402,7 +402,6 @@ import {
   SET_LAYERS_BOOL,
   SET_LAYER_FILL_RULE,
   SET_LAYERS_FILL_RULE,
-  UPDATE_COMPOUND_SHAPE_FRAME,
   EnableGroupGroupEventTweensPayload,
   EnableGroupsGroupEventTweensPayload,
   DisableGroupGroupEventTweensPayload,
@@ -907,6 +906,7 @@ export const addShapeThunk = (payload: AddShapePayload) => {
     const artboardItem = state.layer.present.byId[artboard] as Btwx.Artboard;
     const bool = payload.layer.bool ? payload.layer.bool : 'none';
     const segments = payload.layer.segments ? payload.layer.segments : null;
+    const fillRule = payload.layer.fillRule ? payload.layer.fillRule : DEFAULT_FILL_RULE;
     const shapeType = payload.layer.shapeType ? payload.layer.shapeType : 'Rectangle';
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
@@ -954,6 +954,7 @@ export const addShapeThunk = (payload: AddShapePayload) => {
       mask: mask,
       shapeType: shapeType,
       segments: segments,
+      fillRule: fillRule,
       bool: bool,
       ...shapeOpts
     } as Btwx.Shape;
@@ -983,6 +984,7 @@ export const addCompoundShapeThunk = (payload: AddCompoundShapePayload) => {
     const artboard = scope[1];
     const artboardItem = state.layer.present.byId[artboard] as Btwx.Artboard;
     const bool = payload.layer.bool ? payload.layer.bool : 'none';
+    const fillRule = payload.layer.fillRule ? payload.layer.fillRule : DEFAULT_FILL_RULE;
     const masked = Object.prototype.hasOwnProperty.call(payload.layer, 'masked') ? payload.layer.masked : getLayerMasked(state.layer.present, payload);
     const underlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'underlyingMask') ? payload.layer.underlyingMask : getLayerUnderlyingMask(state.layer.present, payload);
     const ignoreUnderlyingMask = Object.prototype.hasOwnProperty.call(payload.layer, 'ignoreUnderlyingMask') ? payload.layer.ignoreUnderlyingMask : false;
@@ -1026,6 +1028,7 @@ export const addCompoundShapeThunk = (payload: AddCompoundShapePayload) => {
       transform: transform,
       style: style,
       mask: mask,
+      fillRule: fillRule,
       bool: bool
     } as Btwx.CompoundShape;
     dispatch(addCompoundShape({
@@ -7576,10 +7579,5 @@ export const setLayerFillRule = (payload: SetLayerFillRulePayload): LayerTypes =
 
 export const setLayersFillRule = (payload: SetLayersFillRulePayload): LayerTypes => ({
   type: SET_LAYERS_FILL_RULE,
-  payload
-});
-
-export const updateCompoundShapeFrame = (payload: UpdateCompoundShapeFramePayload): LayerTypes => ({
-  type: UPDATE_COMPOUND_SHAPE_FRAME,
   payload
 });

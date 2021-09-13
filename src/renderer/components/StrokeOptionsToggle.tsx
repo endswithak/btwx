@@ -1,21 +1,28 @@
 import React, { ReactElement } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../store/reducers';
+import { expandStrokeOptionsStyles, collapseStrokeOptionsStyles } from '../store/actions/rightSidebar';
 import ToggleIconButton from './ToggleIconButton';
 
-interface StrokeOptionsToggleProps {
-  showOptions: boolean;
-  onClick(): void;
-}
+const StrokeOptionsToggle = (): ReactElement => {
+  const strokeOptionsStylesCollapsed = useSelector((state: RootState) => state.rightSidebar.strokeOptionsStylesCollapsed);
+  const dispatch = useDispatch();
 
-const StrokeOptionsToggle = (props: StrokeOptionsToggleProps): ReactElement => {
-  const { showOptions, onClick } = props;
+  const handleOptionsClick = () => {
+    if (strokeOptionsStylesCollapsed) {
+      dispatch(expandStrokeOptionsStyles());
+    } else {
+      dispatch(collapseStrokeOptionsStyles());
+    }
+  }
 
   return (
     <ToggleIconButton
-      value={showOptions}
+      value={strokeOptionsStylesCollapsed}
       type='checkbox'
-      onChange={onClick}
+      onChange={handleOptionsClick}
       iconName='more'
-      checked={showOptions}
+      checked={strokeOptionsStylesCollapsed}
       label='stroke options'
       size='small' />
   );

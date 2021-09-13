@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useContext, useEffect, ReactElement, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { isBetween, paperSegmentToRawSegment, paperSegmentsToRelativeRawSegments } from '../utils';
+import { isBetween, paperSegmentsToRelativeRawSegments } from '../utils';
 import { RootState } from '../store/reducers';
-import { DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_POINTS, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
+import { DEFAULT_FILL_RULE, DEFAULT_ROUNDED_RADIUS, DEFAULT_STAR_RADIUS, DEFAULT_POLYGON_SIDES, DEFAULT_STAR_POINTS, DEFAULT_STYLE, DEFAULT_TRANSFORM } from '../constants';
 import Tooltip from '../canvas/tooltip';
 import { getLayerProjectIndices } from '../store/selectors/layer';
 import { paperMain } from '../canvas';
@@ -388,6 +388,7 @@ const ShapeTool = (props: PaperToolProps): ReactElement => {
               segments: paperLayer.segments,
               point: [artboardItem.frame.x, artboardItem.frame.y]
             }),
+            fillRule: DEFAULT_FILL_RULE,
             ...(() => {
               switch(shapeType) {
                 case 'Ellipse':

@@ -12,6 +12,7 @@ import AlignDistribute from './AlignDistribute';
 import SwatchEditor from './SwatchEditor';
 import SidebarShapeStyles from './SidebarShapeStyles';
 import FontFamilySelectorWrap from './FontFamilySelectorWrap';
+import FillRuleSelectorWrap from './FillRuleSelectorWrap';
 
 const SidebarLayerStyles = (): ReactElement => {
   return (
@@ -31,6 +32,7 @@ const SidebarLayerStyles = (): ReactElement => {
       {/* abs items */}
       <SwatchEditor />
       <FontFamilySelectorWrap />
+      <FillRuleSelectorWrap />
     </>
   );
 }

@@ -580,7 +580,8 @@ export const getCompoundShapeBoolPath = ({
     const composite = new paperMain.CompoundPath({
       fillColor: 'black',
       insert: false,
-      closed: layerItem.closed
+      closed: layerItem.closed,
+      fillRule: layerItem.fillRule
     });
     for (let i = 0; i < layerItem.children.length; i++) {
       const childItem = layersById[layerItem.children[i]] as Btwx.CompoundShape | Btwx.Shape;
@@ -594,7 +595,8 @@ export const getCompoundShapeBoolPath = ({
             point: [artboardItem.frame.x, artboardItem.frame.y]
           }),
           closed: (childItem as Btwx.Shape).closed,
-          insert: false
+          insert: false,
+          fillRule: childItem.fillRule
         });
         if (childItem.bool === 'none' || i === 0) {
           composite.addChild(pathLayer);
@@ -656,7 +658,8 @@ export const getShapeItemPathData = ({
             point: [artboardItem.frame.x, artboardItem.frame.y]
           }),
           closed: (layerItem as Btwx.Shape).closed,
-          insert: false
+          insert: false,
+          fillRule: layerItem.fillRule
         }).pathData;
       }
       break;

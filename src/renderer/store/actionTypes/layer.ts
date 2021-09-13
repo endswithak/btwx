@@ -426,8 +426,6 @@ export const SET_LAYERS_BOOL = 'SET_LAYERS_BOOL';
 export const SET_LAYER_FILL_RULE = 'SET_LAYER_FILL_RULE';
 export const SET_LAYERS_FILL_RULE = 'SET_LAYERS_FILL_RULE';
 
-export const UPDATE_COMPOUND_SHAPE_FRAME = 'UPDATE_COMPOUND_SHAPE_FRAME';
-
 // Artboard
 
 export type AddArtboardPayload = {
@@ -4462,11 +4460,6 @@ export type UpdateCompoundShapeFramePayload = {
   };
 }
 
-export interface UpdateCompoundShapeFrame {
-  type: typeof UPDATE_COMPOUND_SHAPE_FRAME;
-  payload: UpdateCompoundShapeFramePayload;
-}
-
 export type LayerTypes = AddArtboard |
                          AddGroup |
                          AddShape |
@@ -4835,5 +4828,4 @@ export type LayerTypes = AddArtboard |
                          SetLayerBool |
                          SetLayersBool |
                          SetLayerFillRule |
-                         SetLayersFillRule |
-                         UpdateCompoundShapeFrame;
+                         SetLayersFillRule;

@@ -1851,7 +1851,7 @@ export const canToggleSelectedFillOrStroke = createSelector(
     const keys = Object.keys(selectedById);
     return keys.length > 0 && keys.every((id: string) => {
       const layerItem = selectedById[id];
-      return layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Artboard';
+      return layerItem.type !== 'Image' && layerItem.type !== 'Root' && layerItem.type !== 'Group';
     });
   }
 );
@@ -1897,7 +1897,7 @@ export const canToggleSelectedShadow = createSelector(
     const keys = Object.keys(selectedById);
     return keys.length > 0 && keys.every((id: string) => {
       const layerItem = selectedById[id];
-      return layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
+      return layerItem.type !== 'Artboard' && layerItem.type !== 'Root' && layerItem.type !== 'Group';
     });
   }
 );
@@ -1949,12 +1949,12 @@ export const selectedVerticalFlipEnabled = createSelector(
 );
 
 export const canToggleSelectedUseAsMask = createSelector(
-  [ getSelectedById ],
-  (selectedById) => {
+  [ getSelectedById, getLayersById ],
+  (selectedById, layersById) => {
     const keys = Object.keys(selectedById);
     return keys.length > 0 && keys.every((id: string) => {
       const layerItem = selectedById[id];
-      return layerItem.type === 'Shape';
+      return (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') && layersById[layerItem.parent].type !== 'CompoundShape';
     });
   }
 );
@@ -3100,6 +3100,22 @@ export const getSelectedBlendMode = createSelector(
   }
 );
 
+export const getSelectedFillRule = createSelector(
+  [ getSelectedById ],
+  (selectedById) => {
+    return Object.keys(selectedById).reduce((result: Btwx.FillRule | 'multi', current: string) => {
+      const layerItem = selectedById[current] as Btwx.ShapeItem;
+      if (!result) {
+        result = layerItem.fillRule;
+      }
+      if (result && layerItem.fillRule !== result) {
+        result = 'multi';
+      }
+      return result;
+    }, null) as Btwx.FillRule | 'multi';
+  }
+);
+
 export const getSelectedShadowXOffset = createSelector(
   [ getSelectedById ],
   (selectedById) => {
@@ -4058,7 +4074,7 @@ export const getPositionInArtboard = (layer: Btwx.Layer, artboard: Btwx.Artboard
 };
 
 export const hasShapeTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = layerItem.type === 'Shape';
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'CompoundShape';
   const bothLines = validType && (layerItem as Btwx.Shape).shapeType === 'Line' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Line';
   const bothPolygons = validType && (layerItem as Btwx.Shape).shapeType === 'Polygon' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Polygon';
   const bothStars = validType && (layerItem as Btwx.Shape).shapeType === 'Star' && (equivalentLayerItem as Btwx.Shape).shapeType === 'Star';
@@ -4087,7 +4103,7 @@ export const hasShapeTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.L
 };
 
 export const hasFillTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Artboard';
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'CompoundShape' || layerItem.type === 'Text' || layerItem.type === 'Artboard';
   const oneEnabled = layerItem.style.fill.enabled || equivalentLayerItem.style.fill.enabled;
   const enabledMatch = layerItem.style.fill.enabled === equivalentLayerItem.style.fill.enabled;
   const fillTypeMatch = layerItem.style.fill.fillType === equivalentLayerItem.style.fill.fillType;
@@ -4128,7 +4144,7 @@ export const hasFillGradientDestinationYTween = (layerItem: Btwx.Layer, equivale
 
 export const hasXTween = (state: any, layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const inScrollGroup = layerItem.scope.some((id) => state.byId[id] && state.byId[id].type === 'Group' && (state.byId[id] as Btwx.Group).scroll.enabled && (state.byId[id] as Btwx.Group).scroll.direction.horizontal);
-  const validType = layerItem.type === 'Shape' || layerItem.type === 'Image' || layerItem.type === 'Text';
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'CompoundShape' || layerItem.type === 'Image' || layerItem.type === 'Text';
   const xMatch = layerItem.frame.x.toFixed(2) === equivalentLayerItem.frame.x.toFixed(2);
   if (inScrollGroup) {
     return true;
@@ -4143,7 +4159,7 @@ export const hasXTween = (state: any, layerItem: Btwx.Layer, equivalentLayerItem
 
 export const hasYTween = (state: any, layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
   const inScrollGroup = layerItem.scope.some((id) => state.byId[id] && state.byId[id].type === 'Group' && (state.byId[id] as Btwx.Group).scroll.enabled && (state.byId[id] as Btwx.Group).scroll.direction.vertical);
-  const validType = layerItem.type === 'Shape' || layerItem.type === 'Image' || layerItem.type === 'Text';
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'CompoundShape' || layerItem.type === 'Image' || layerItem.type === 'Text';
   const yMatch = layerItem.frame.y.toFixed(2) === equivalentLayerItem.frame.y.toFixed(2);
   if (inScrollGroup) {
     return true;
@@ -4157,7 +4173,7 @@ export const hasYTween = (state: any, layerItem: Btwx.Layer, equivalentLayerItem
 };
 
 export const hasRotationTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = layerItem.type === 'Shape' || layerItem.type === 'Image' || layerItem.type === 'Text';
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'CompoundShape' || layerItem.type === 'Image' || layerItem.type === 'Text';
   const rotationMatch = layerItem.transform.rotation.toFixed(2) === equivalentLayerItem.transform.rotation.toFixed(2);
   return validType && !rotationMatch;
 };
@@ -4169,7 +4185,7 @@ export const hasWidthTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.L
     const eitherFixedOrAutoHeight = (layerItem as Btwx.Text).textStyle.textResize === 'fixed' || (equivalentLayerItem as Btwx.Text).textStyle.textResize === 'fixed' || (layerItem as Btwx.Text).textStyle.textResize === 'autoHeight' || (equivalentLayerItem as Btwx.Text).textStyle.textResize === 'autoHeight';
     return eitherFixedOrAutoHeight && !innerWidthMatch;
   } else {
-    const validType = layerItem.type === 'Shape' || layerItem.type === 'Image';
+    const validType = layerItem.type === 'Shape' || layerItem.type === 'CompoundShape' || layerItem.type === 'Image';
     return validType && !innerWidthMatch;
   }
 };
@@ -4181,13 +4197,13 @@ export const hasHeightTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.
     const eitherFixed = (layerItem as Btwx.Text).textStyle.textResize === 'fixed' || (equivalentLayerItem as Btwx.Text).textStyle.textResize === 'fixed';
     return eitherFixed && !innerHeightMatch;
   } else {
-    const validType = (layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image';
+    const validType = ((layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') && (layerItem as Btwx.Shape).shapeType !== 'Line') || layerItem.type === 'Image';
     return validType && !innerHeightMatch;
   }
 };
 
 export const hasStrokeTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'CompoundShape' || layerItem.type === 'Text' || layerItem.type === 'Image';
   const oneEnabled = layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled;
   const enabledMatch = layerItem.style.stroke.enabled === equivalentLayerItem.style.stroke.enabled;
   const fillTypeMatch = layerItem.style.stroke.fillType === equivalentLayerItem.style.stroke.fillType;
@@ -4227,56 +4243,56 @@ export const hasStrokeGradientDestinationYTween = (layerItem: Btwx.Layer, equiva
 };
 
 export const hasDashOffsetTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'CompoundShape' || layerItem.type === 'Text' || layerItem.type === 'Image';
   const oneEnabled = validType && (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled);
   const dashOffsetMatch = validType && layerItem.style.strokeOptions.dashOffset === equivalentLayerItem.style.strokeOptions.dashOffset;
   return validType && oneEnabled && !dashOffsetMatch;
 };
 
 export const hasDashArrayWidthTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'CompoundShape' || layerItem.type === 'Text' || layerItem.type === 'Image';
   const oneEnabled = validType && (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled);
   const dashArrayWidthMatch = validType && layerItem.style.strokeOptions.dashArray[0] === equivalentLayerItem.style.strokeOptions.dashArray[0];
   return validType && oneEnabled && !dashArrayWidthMatch;
 };
 
 export const hasDashArrayGapTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'CompoundShape' || layerItem.type === 'Text' || layerItem.type === 'Image';
   const oneEnabled = validType && (layerItem.style.stroke.enabled || equivalentLayerItem.style.stroke.enabled);
   const dashArrayGapMatch = validType && layerItem.style.strokeOptions.dashArray[1] === equivalentLayerItem.style.strokeOptions.dashArray[1];
   return validType && oneEnabled && !dashArrayGapMatch;
 };
 
 export const hasStrokeWidthTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'CompoundShape' || layerItem.type === 'Text' || layerItem.type === 'Image';
   const enabledMatch = validType && (layerItem.style.stroke.enabled === equivalentLayerItem.style.stroke.enabled);
   const strokeWidthMatch = validType && layerItem.style.stroke.width === equivalentLayerItem.style.stroke.width;
   return validType && (!enabledMatch || !strokeWidthMatch);
 };
 
 export const hasShadowColorTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'CompoundShape' || layerItem.type === 'Text' || layerItem.type === 'Image';
   const enabledMatch = validType && (layerItem.style.shadow.enabled === equivalentLayerItem.style.shadow.enabled);
   const colorMatch = validType && colorsMatch(layerItem.style.shadow.color, equivalentLayerItem.style.shadow.color);
   return validType && (!enabledMatch || !colorMatch);
 };
 
 export const hasShadowOffsetXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'CompoundShape' || layerItem.type === 'Text' || layerItem.type === 'Image';
   const enabledMatch = validType && (layerItem.style.shadow.enabled === equivalentLayerItem.style.shadow.enabled);
   const xOffsetMatch = validType && layerItem.style.shadow.offset.x === equivalentLayerItem.style.shadow.offset.x;
   return validType && (!enabledMatch || !xOffsetMatch);
 };
 
 export const hasShadowOffsetYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'CompoundShape' || layerItem.type === 'Text' || layerItem.type === 'Image';
   const enabledMatch = validType && (layerItem.style.shadow.enabled === equivalentLayerItem.style.shadow.enabled);
   const yOffsetMatch = validType && layerItem.style.shadow.offset.y === equivalentLayerItem.style.shadow.offset.y;
   return validType && (!enabledMatch || !yOffsetMatch);
 };
 
 export const hasShadowBlurTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = layerItem.type === 'Shape' || layerItem.type === 'Text' || layerItem.type === 'Image';
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'CompoundShape' || layerItem.type === 'Text' || layerItem.type === 'Image';
   const enabledMatch = validType && (layerItem.style.shadow.enabled === equivalentLayerItem.style.shadow.enabled);
   const blurMatch = validType && layerItem.style.shadow.blur === equivalentLayerItem.style.shadow.blur;
   return validType && (!enabledMatch || !blurMatch);
@@ -4331,13 +4347,13 @@ export const hasTextTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.La
 };
 
 export const hasScaleXTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = layerItem.type === 'Shape' || layerItem.type === 'Image' || layerItem.type === 'Text';
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'CompoundShape' || layerItem.type === 'Image' || layerItem.type === 'Text';
   const horizontalFlipMatch = validType && ((layerItem.transform.horizontalFlip && equivalentLayerItem.transform.horizontalFlip) || (!layerItem.transform.horizontalFlip && !equivalentLayerItem.transform.horizontalFlip));
   return validType && !horizontalFlipMatch;
 };
 
 export const hasScaleYTween = (layerItem: Btwx.Layer, equivalentLayerItem: Btwx.Layer): boolean => {
-  const validType = layerItem.type === 'Shape' || layerItem.type === 'Image' || layerItem.type === 'Text';
+  const validType = layerItem.type === 'Shape' || layerItem.type === 'CompoundShape' || layerItem.type === 'Image' || layerItem.type === 'Text';
   const verticalFlipMatch = validType && ((layerItem.transform.verticalFlip && equivalentLayerItem.transform.verticalFlip) || (!layerItem.transform.verticalFlip && !equivalentLayerItem.transform.verticalFlip));
   return validType && !verticalFlipMatch;
 };
@@ -4707,7 +4723,7 @@ export const getAbsolutePosition = (store: LayerState, id: string): paper.Point 
 
 export const getGradientOrigin = (store: LayerState, id: string, originPoint: Btwx.Point): paper.Point => {
   const layerItem = store.byId[id];
-  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
+  const isLine = (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') && (layerItem as Btwx.Shape).shapeType === 'Line';
   const layerPosition = getAbsolutePosition(store, id);
   const originPaperPoint = new paperMain.Point(originPoint.x, originPoint.y);
   const rel = originPaperPoint.subtract(layerPosition);
@@ -4718,14 +4734,14 @@ export const getGradientOriginPoint = (store: LayerState, id: string, prop: 'fil
   const layerItem = store.byId[id];
   const gradient = layerItem.style[prop].gradient;
   const origin = gradient.origin;
-  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
+  const isLine = (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') && (layerItem as Btwx.Shape).shapeType === 'Line';
   const layerPosition = getAbsolutePosition(store, id);
   return new paperMain.Point((origin.x * (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)) + layerPosition.x, (origin.y * (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)) + layerPosition.y);
 };
 
 export const getGradientDestination = (store: LayerState, id: string, destinationPoint: Btwx.Point): paper.Point => {
   const layerItem = store.byId[id];
-  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
+  const isLine = (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') && (layerItem as Btwx.Shape).shapeType === 'Line';
   const layerPosition = getAbsolutePosition(store, id);
   const destinationPaperPoint = new paperMain.Point(destinationPoint.x, destinationPoint.y);
   const rel = destinationPaperPoint.subtract(layerPosition);
@@ -4736,7 +4752,7 @@ export const getGradientDestinationPoint = (store: LayerState, id: string, prop:
   const layerItem = store.byId[id];
   const gradient = layerItem.style[prop].gradient;
   const destination = gradient.destination;
-  const isLine = layerItem.type === 'Shape' && (layerItem as Btwx.Shape).shapeType === 'Line';
+  const isLine = (layerItem.type === 'Shape' || layerItem.type === 'CompoundShape') && (layerItem as Btwx.Shape).shapeType === 'Line';
   const layerPosition = getAbsolutePosition(store, id);
   return new paperMain.Point((destination.x * (isLine ? layerItem.frame.width : layerItem.frame.innerWidth)) + layerPosition.x, (destination.y * (isLine ? layerItem.frame.height : layerItem.frame.innerHeight)) + layerPosition.y);
 };
