@@ -4,11 +4,11 @@
 
 Product Designer animation and prototyping tool.
 
-## How it works
+## How It Works
 
 Events and tweens are the bread and butter of btwx. Events can be added to any layer aside from groups and have four main properties: trigger layer, event listener, origin, and destination. When the event listener (e.g. click, double click, drag) is initiated on the trigger layer, any layers with the same name and type shared between the origin and destination will animate from the origin layer state to the destination layer state.
 
-Comprising each event are layer property tweens (e.g. x, y, width, height), which are automatically added when any origin layer property does not match its’ corresponding destination layer property. Tweens can be customized in a multitude of ways depending on the property. The most basic options include duration, delay, ease, repeat, and repeat yoyo. When layer properties match, wiggle tweens can be added. Wiggle tweens work just like regular tweens but with an added strength option. In general, the larger the strength, the stronger the wiggle.
+Comprising each event are layer property tweens (e.g. x, y, width, height), which are automatically added when any origin layer property does not match its’ corresponding destination layer property. Tweens can be customized in a multitude of ways depending on the property. The most basic options include duration, delay, ease, repeat, and repeat yoyo. When layer properties match, wiggle tweens can be added. Wiggle tweens work just like regular tweens but with an added strength option. In general, the larger the difference between the property and the strength, the stronger the wiggle.
 
 ![Adding Event](screenshots/btwx-0.png)
 
